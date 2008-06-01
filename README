@@ -1,0 +1,24 @@
+========
+pyunit3k
+========
+
+pyunit3k is a set of extensions to the Python standard library's unit testing
+framework.
+
+These extensions have been derived from years of experience with unit testing
+in Python and come from many different sources.
+
+
+Licensing
+---------
+
+NOTE: It is intended that this code be released under a Free Software license.
+However, for the interim all rights to the code and text herein are reserved.
+
+Copyright (c) 2008 Jonathan M. Lange -- All rights reserved.
+
+
+Dependencies
+------------
+
+ * Python 2.4+
