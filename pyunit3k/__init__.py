@@ -1,4 +1,4 @@
-# See README for copyright and licensing details.
+# Copyright (c) 2008 Jonathan M. Lange. See LICENSE for details.
 
 """Extensions to the standard Python unittest library."""
 

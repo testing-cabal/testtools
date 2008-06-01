@@ -12,10 +12,8 @@ in Python and come from many different sources.
 Licensing
 ---------
 
-NOTE: It is intended that this code be released under a Free Software license.
-However, for the interim all rights to the code and text herein are reserved.
-
-Copyright (c) 2008 Jonathan M. Lange -- All rights reserved.
+This project is distributed under the MIT license and copyright is owned by
+Jonathan M. Lange. See LICENSE for details.
 
 
 Dependencies
