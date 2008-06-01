@@ -8,7 +8,6 @@ framework.
 These extensions have been derived from years of experience with unit testing
 in Python and come from many different sources.
 
-
 Licensing
 ---------
 
@@ -20,3 +19,12 @@ Dependencies
 ------------
 
  * Python 2.4+
+
+
+Thanks
+------
+
+ * Canonical Ltd
+ * Bazaar
+ * Twisted Matrix Labs
+ * Robert Collins
