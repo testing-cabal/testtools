@@ -13,28 +13,9 @@ __all__ = [
 from copy import deepcopy
 import unittest
 
-from zope.interface import implements, Interface
+from zope.interface import implements
 
-
-class ITestResult(Interface):
-
-    def startTest(test):
-        """test has started."""
-
-    def stopTest(test):
-        """test has stopped."""
-
-    def addError(test, error):
-        """got error in test."""
-
-    def addFailure(test, failure):
-        """got assertion failure in test."""
-
-    def addSuccess(test):
-        """test succeeded."""
-
-    def done():
-        """whole run is done."""
+from pyunit3k.interfaces import ITestResult
 
 
 class TestResult(unittest.TestResult):
