@@ -2,35 +2,20 @@
 
 """Tests for extensions to the base test library."""
 
-from pyunit3k import TestCase, TestResult
+from pyunit3k import TestCase
+from pyunit3k.tests.helpers import LoggingResult
 
 
-class LoggingResult(TestResult):
-    """TestResult that logs its event to a list."""
+class TestEquality(TestCase):
+    """Test `TestCase`'s equality implementation."""
 
-    def __init__(self, log):
-        self._events = log
-        super(LoggingResult, self).__init__()
+    def test_identicalIsEqual(self):
+        # TestCase's are equal if they are identical.
+        self.assertEqual(self, self)
 
-    def startTest(self, test):
-        self._events.append('startTest')
-        super(LoggingResult, self).startTest(test)
-
-    def stopTest(self, test):
-        self._events.append('stopTest')
-        super(LoggingResult, self).stopTest(test)
-
-    def addFailure(self, *args):
-        self._events.append('addFailure')
-        super(LoggingResult, self).addFailure(*args)
-
-    def addError(self, *args):
-        self._events.append('addError')
-        super(LoggingResult, self).addError(*args)
-
-    def addSuccess(self, *args):
-        self._events.append('addSuccess')
-        super(LoggingResult, self).addSuccess(*args)
+    def test_nonIdenticalInUnequal(self):
+        # TestCase's are not equal if they are not identical.
+        self.assertNotEqual(self, TestCase())
 
 
 class TestAssertions(TestCase):
@@ -228,7 +213,10 @@ class TestAddCleanup(TestCase):
         self.test = TestAddCleanup.LoggingTest('runTest')
         self.logging_result = LoggingResult(self._result_calls)
 
-    def assertLogEqual(self, messages):
+    def assertErrorLogEqual(self, messages):
+        self.assertEqual(messages, list(zip(*self._result_calls)[0]))
+
+    def assertTestLogEqual(self, messages):
         """Assert that the call log equals `messages`."""
         self.assertEqual(messages, self.test._calls)
 
@@ -247,14 +235,14 @@ class TestAddCleanup(TestCase):
         # This test doesn't test addCleanup itself, it just sanity checks the
         # fixture.
         self.test.run(self.logging_result)
-        self.assertLogEqual(['setUp', 'runTest', 'tearDown'])
+        self.assertTestLogEqual(['setUp', 'runTest', 'tearDown'])
 
     def test_cleanup_run_before_tearDown(self):
         # Cleanup functions added with 'addCleanup' are called before tearDown
         # runs.
         self.test.addCleanup(self.logAppender, 'cleanup')
         self.test.run(self.logging_result)
-        self.assertLogEqual(['setUp', 'runTest', 'cleanup', 'tearDown'])
+        self.assertTestLogEqual(['setUp', 'runTest', 'cleanup', 'tearDown'])
 
     def test_add_cleanup_called_if_setUp_fails(self):
         # Cleanup functions added with 'addCleanup' are called even if setUp
@@ -263,7 +251,7 @@ class TestAddCleanup(TestCase):
         self.test.setUp = self.test.brokenSetUp
         self.test.addCleanup(self.logAppender, 'cleanup')
         self.test.run(self.logging_result)
-        self.assertLogEqual(['brokenSetUp', 'cleanup'])
+        self.assertTestLogEqual(['brokenSetUp', 'cleanup'])
 
     def test_addCleanup_called_in_reverse_order(self):
         # Cleanup functions added with 'addCleanup' are called in reverse
@@ -280,14 +268,14 @@ class TestAddCleanup(TestCase):
         self.test.addCleanup(self.logAppender, 'first')
         self.test.addCleanup(self.logAppender, 'second')
         self.test.run(self.logging_result)
-        self.assertLogEqual(
+        self.assertTestLogEqual(
             ['setUp', 'runTest', 'second', 'first', 'tearDown'])
 
     def test_tearDown_runs_after_cleanup_failure(self):
         # tearDown runs even if a cleanup function fails.
         self.test.addCleanup(lambda: 1/0)
         self.test.run(self.logging_result)
-        self.assertLogEqual(['setUp', 'runTest', 'tearDown'])
+        self.assertTestLogEqual(['setUp', 'runTest', 'tearDown'])
 
     def test_cleanups_continue_running_after_error(self):
         # All cleanups are always run, even if one or two of them fail.
@@ -295,7 +283,7 @@ class TestAddCleanup(TestCase):
         self.test.addCleanup(lambda: 1/0)
         self.test.addCleanup(self.logAppender, 'second')
         self.test.run(self.logging_result)
-        self.assertLogEqual(
+        self.assertTestLogEqual(
             ['setUp', 'runTest', 'second', 'first', 'tearDown'])
 
     def test_error_in_cleanups_are_captured(self):
@@ -303,8 +291,7 @@ class TestAddCleanup(TestCase):
         # test, even though we go on to run other cleanups.
         self.test.addCleanup(lambda: 1/0)
         self.test.run(self.logging_result)
-        self.assertEqual(
-            ['startTest', 'addError', 'stopTest'], self._result_calls)
+        self.assertErrorLogEqual(['startTest', 'addError', 'stopTest'])
 
     def test_keyboard_interrupt_not_caught(self):
         # If a cleanup raises KeyboardInterrupt, it gets reraised.
@@ -319,9 +306,8 @@ class TestAddCleanup(TestCase):
         self.test.addCleanup(lambda: 1/0)
         self.test.addCleanup(lambda: 1/0)
         self.test.run(self.logging_result)
-        self.assertEqual(
-            ['startTest', 'addError', 'addError', 'stopTest'],
-            self._result_calls)
+        self.assertErrorLogEqual(
+            ['startTest', 'addError', 'addError', 'stopTest'])
 
 
 class TestUniqueFactories(TestCase):
