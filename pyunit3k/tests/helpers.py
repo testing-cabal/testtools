@@ -36,3 +36,7 @@ class LoggingResult(TestResult):
     def addSuccess(self, test):
         self._events.append(('addSuccess', test))
         super(LoggingResult, self).addSuccess(test)
+
+    def done(self):
+        self._events.append('done')
+        super(LoggingResult, self).done()
