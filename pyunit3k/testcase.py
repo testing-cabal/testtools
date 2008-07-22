@@ -144,6 +144,6 @@ class TestCase(unittest.TestCase):
 
 
 def change_test_id(test, new_id):
-    new_test = deepcopy(test)
-    new_test.id = lambda: new_id
-    return new_test
+    """Change a TestCase's id."""
+    test.id = lambda: new_id
+

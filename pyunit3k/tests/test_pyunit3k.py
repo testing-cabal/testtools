@@ -2,7 +2,7 @@
 
 """Tests for extensions to the base test library."""
 
-from pyunit3k import TestCase, TestResult
+from pyunit3k import TestCase, TestResult, change_test_id
 
 
 class LoggingResult(TestResult):
@@ -342,6 +342,19 @@ class TestUniqueFactories(TestCase):
         self.assertEqual('%s-%d' % (self._testMethodName, 1), name_one)
         name_two = self.getUniqueString()
         self.assertEqual('%s-%d' % (self._testMethodName, 2), name_two)
+
+
+class TestChangeTestId(TestCase):
+    """Tests for change_test_id."""
+
+    def test_change_id(self):
+        class FooTestCase(TestCase):
+            def test_foo(self):
+                pass
+        testCase = FooTestCase('test_foo')
+        newName = self.getUniqueString()
+        change_test_id(testCase, newName)
+        self.assertEqual(newName, testCase.id())
 
 
 def test_suite():
