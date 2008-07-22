@@ -143,7 +143,9 @@ class TestCase(unittest.TestCase):
             result.stopTest(self)
 
 
-def change_test_id(test, new_id):
-    new_test = deepcopy(test)
-    new_test.id = lambda: new_id
-    return new_test
+def clone_test_with_new_id(test, new_id):
+    """Copy a TestCase, and give the copied test a new id."""
+    newTest = deepcopy(test)
+    newTest.id = lambda: new_id
+    return newTest
+
