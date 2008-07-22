@@ -4,7 +4,8 @@
 
 __metaclass__ = type
 
-from pyunit3k import ITestResult, TestCase, TestResult
+from pyunit3k import ITestResult, MultiTestResult, TestCase, TestResult
+from pyunit3k.tests.helpers import LoggingResult
 
 
 class TestTestResult(TestCase):
@@ -23,6 +24,28 @@ class TestTestResult(TestCase):
         self.assertTrue(
             ITestResult.providedBy(self.makeResult()),
             'ITestResult not provided by TestResult')
+
+
+class TestMultiTestResult(TestCase):
+    """Tests for `MultiTestResult`."""
+
+    def setUp(self):
+        self.result1 = LoggingResult([])
+        self.result2 = LoggingResult([])
+        self.multiResult = MultiTestResult(self.result1, self.result2)
+
+    def test_empty(self):
+        # Initializing a `MultiTestResult` doesn't do anything to its
+        # `TestResult`s.
+        self.assertEqual([], self.result1._events)
+        self.assertEqual([], self.result2._events)
+
+    def test_startTest(self):
+        # Calling `startTest` on a `MultiTestResult` calls `startTest` on all
+        # its `TestResult`s.
+        self.multiResult.startTest(self)
+        self.assertEqual([('startTest', self)], self.result1._events)
+        self.assertEqual([('startTest', self)], self.result2._events)
 
 
 def test_suite():
