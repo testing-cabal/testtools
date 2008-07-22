@@ -2,7 +2,7 @@
 
 """Tests for extensions to the base test library."""
 
-from pyunit3k import TestCase, TestResult, change_test_id
+from pyunit3k import TestCase, TestResult, clone_test_with_new_id
 
 
 class LoggingResult(TestResult):
@@ -344,17 +344,20 @@ class TestUniqueFactories(TestCase):
         self.assertEqual('%s-%d' % (self._testMethodName, 2), name_two)
 
 
-class TestChangeTestId(TestCase):
-    """Tests for change_test_id."""
+class TestCloneTestWithNewId(TestCase):
+    """Tests for clone_test_with_new_id."""
 
-    def test_change_id(self):
+    def test_clone_test_with_new_id(self):
         class FooTestCase(TestCase):
             def test_foo(self):
                 pass
-        testCase = FooTestCase('test_foo')
+        test = FooTestCase('test_foo')
+        oldName = test.id()
         newName = self.getUniqueString()
-        change_test_id(testCase, newName)
-        self.assertEqual(newName, testCase.id())
+        newTest = clone_test_with_new_id(test, newName)
+        self.assertEqual(newName, newTest.id())
+        self.assertEqual(oldName, test.id(),
+            "the original test instance should be unchanged.")
 
 
 def test_suite():
