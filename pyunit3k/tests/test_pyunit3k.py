@@ -15,7 +15,7 @@ class TestEquality(TestCase):
 
     def test_nonIdenticalInUnequal(self):
         # TestCase's are not equal if they are not identical.
-        self.assertNotEqual(self, TestCase())
+        self.assertNotEqual(TestCase(), TestCase())
 
 
 class TestAssertions(TestCase):
@@ -214,7 +214,7 @@ class TestAddCleanup(TestCase):
         self.logging_result = LoggingResult(self._result_calls)
 
     def assertErrorLogEqual(self, messages):
-        self.assertEqual(messages, list(zip(*self._result_calls)[0]))
+        self.assertEqual(messages, [call[0] for call in self._result_calls])
 
     def assertTestLogEqual(self, messages):
         """Assert that the call log equals `messages`."""
