@@ -58,6 +58,9 @@ class TestCase(unittest.TestCase):
         If a function added with addCleanup raises an exception, the error
         will be recorded as a test error, and the next cleanup will then be
         run.
+
+        Cleanup functions are always called before a test finishes running,
+        even if setUp is aborted by an exception.
         """
         self._cleanups.append((function, arguments, keywordArguments))
 

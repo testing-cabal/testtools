@@ -1,0 +1,63 @@
+======
+Manual
+======
+
+Introduction
+------------
+
+This document provides overview of the features provided by pyunit3k.  Refer
+to the API docs (i.e. docstrings) for full details on a particular feature.
+
+Extensions to TestCase
+----------------------
+
+TestCase.addCleanup
+~~~~~~~~~~~~~~~~~~~
+
+addCleanup is a robust way to arrange for a cleanup function to be called
+before tearDown.  This is a powerful and simple alternative to putting cleanup
+logic in a try/finally block or tearDown method.  e.g.::
+
+    def test_foo(self):
+        foo.lock()
+        self.addCleanup(foo.unlock)
+        ...
+
+
+New assertion methods
+~~~~~~~~~~~~~~~~~~~~~
+
+pyunit3k adds several assertion methods:
+
+ * assertIn
+ * assertNotIn
+ * assertIsInstance
+
+
+Improved assertRaises
+~~~~~~~~~~~~~~~~~~~~~
+
+TestCase.assertRaises returns the caught exception.  This is useful for
+asserting more things about the exception than just the type::
+
+        error = self.assertRaises(UnauthorisedError, thing.frobnicate)
+        self.assertEqual('bob', error.username)
+        self.assertEqual('User bob cannot frobnicate', str(error))
+
+
+Creation methods
+~~~~~~~~~~~~~~~~
+
+pyunit3k.TestCase implements creation methods called ``getUniqueString`` and
+``getUniqueInteger``.  See pages 419-423 of *xUnit Test Patterns* by Meszaros
+for a detailed discussion of creation methods.
+
+
+Test renaming
+~~~~~~~~~~~~~
+
+``pyunit3k.clone_test_with_new_id`` is a function to copy a test case instance
+to one with a new name.  This is helpful for implementing test
+paramterisation.
+
+
