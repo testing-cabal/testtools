@@ -1,0 +1,51 @@
+==================================
+Notes for contributing to pyunit3k
+==================================
+
+Coding style
+------------
+
+In general, follow PEP 8 <http://www.python.org/dev/peps/pep-0008/>.
+
+For consistency with the standard library's ``unittest`` module, method names
+are generally ``camelCase``.
+
+pyunit3k supports Python 2.4 and later, so avoid any 2.5-only features like
+the ``with`` statement.
+
+
+Copyright assignment
+--------------------
+
+Currently all code in pyunit3k is copyright Jonathan M. Lange.  For the sake
+of licensing simplicity, copyright of contributed code needs to be assigned to
+Jonathan M. Lange otherwise it cannot be accepted.  Please include an
+appropriate statement of copyright assignment with contributions.
+
+
+Testing
+-------
+
+Please write tests for every feature.  This project ought to be a model
+example of well-tested Python code!
+
+Take particular care to make sure the *intent* of each test is clear.
+
+You can run tests with ``make check``, or by running ``./run-tests`` directly.
+
+
+Source layout
+-------------
+
+The top-level directory contains the ``pyunit3k/`` package directory, and
+miscellaneous files like README and setup.py.
+
+The ``pyunit3k/`` directory is the Python package itself.  It is separated
+into submodules for internal clarity, but all public APIs should be “promoted”
+into the top-level package by importing them in ``pyunit3k/__init__.py``.
+Users of pyunit3k should never import a submodule, they are just
+implementation details.
+
+Tests belong in ``pyunit3k/tests/``.
+
+
