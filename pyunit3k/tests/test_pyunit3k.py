@@ -187,6 +187,35 @@ class TestAssertions(TestCase):
             '42 is not an instance of %s' % self._formatTypes([Foo, Bar]),
             self.assertIsInstance, 42, (Foo, Bar))
 
+    def test_assertIs(self):
+        # assertIs asserts that an object is identical to another object.
+        self.assertIs(None, None)
+        some_list = [42]
+        self.assertIs(some_list, some_list)
+        some_object = object()
+        self.assertIs(some_object, some_object)
+
+    def test_assertIs_fails(self):
+        # assertIs raises assertion errors if one object is not identical to
+        # another.
+        self.assertFails('None is not 42', self.assertIs, None, 42)
+        self.assertFails('[42] is not [42]', self.assertIs, [42], [42])
+
+    def test_assertIsNot(self):
+        # assertIsNot asserts that an object is not identical to another
+        # object.
+        self.assertIsNot(None, 42)
+        self.assertIsNot([42], [42])
+        self.assertIsNot(object(), object())
+
+    def test_assertIsNot_fails(self):
+        # assertIsNot raises assertion errors if one object is identical to
+        # another.
+        self.assertFails('None is None', self.assertIsNot, None, None)
+        some_list = [42]
+        self.assertFails(
+            '[42] is [42]', self.assertIsNot, some_list, some_list)
+
 
 class TestAddCleanup(TestCase):
     """Tests for TestCase.addCleanup."""
