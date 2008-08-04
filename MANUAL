@@ -31,6 +31,8 @@ pyunit3k adds several assertion methods:
 
  * assertIn
  * assertNotIn
+ * assertIs
+ * assertIsNot
  * assertIsInstance
 
 
