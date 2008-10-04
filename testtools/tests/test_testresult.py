@@ -6,8 +6,8 @@ __metaclass__ = type
 
 import sys
 
-from pyunit3k import ITestResult, MultiTestResult, TestCase, TestResult
-from pyunit3k.tests.helpers import LoggingResult
+from testtools import ITestResult, MultiTestResult, TestCase, TestResult
+from testtools.tests.helpers import LoggingResult
 
 
 class TestTestResult(TestCase):
@@ -22,7 +22,7 @@ class TestTestResult(TestCase):
         self.makeResult().done()
 
     def test_interface(self):
-        # pyunit3k's `TestResult` implements `ITestResult`.
+        # testtools's `TestResult` implements `ITestResult`.
         self.assertTrue(
             ITestResult.providedBy(self.makeResult()),
             'ITestResult not provided by TestResult')

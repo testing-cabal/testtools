@@ -7,7 +7,7 @@ __all__ = [
     'LoggingResult',
     ]
 
-from pyunit3k import TestResult
+from testtools import TestResult
 
 
 class LoggingResult(TestResult):

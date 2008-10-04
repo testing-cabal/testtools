@@ -2,8 +2,8 @@
 
 """Tests for extensions to the base test library."""
 
-from pyunit3k import TestCase, clone_test_with_new_id
-from pyunit3k.tests.helpers import LoggingResult
+from testtools import TestCase, clone_test_with_new_id
+from testtools.tests.helpers import LoggingResult
 
 
 class TestEquality(TestCase):

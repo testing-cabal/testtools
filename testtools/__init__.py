@@ -11,7 +11,7 @@ __all__ = [
     'TestResult',
     ]
 
-from pyunit3k.interfaces import ITestResult
-from pyunit3k.testcase import TestCase, clone_test_with_new_id
-from pyunit3k.testresult import MultiTestResult, TestResult
-from pyunit3k.utils import iterate_tests
+from testtools.interfaces import ITestResult
+from testtools.testcase import TestCase, clone_test_with_new_id
+from testtools.testresult import MultiTestResult, TestResult
+from testtools.utils import iterate_tests
