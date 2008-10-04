@@ -1,12 +1,12 @@
-"""Distutils installer for pyunit3k."""
+"""Distutils installer for testtools."""
 
 from distutils.core import setup
 
-setup(name='pyunit3k',
+setup(name='testtools',
       author='Jonathan M. Lange',
-      author_email='jml+pyunit3k@mumak.net',
-      url='https://launchpad.net/pyunit3k',
+      author_email='jml+testtools@mumak.net',
+      url='https://launchpad.net/testtools',
       description=('Extensions to the Python standard library unit testing '
                    'framework'),
       version='0.0.1',
-      packages=['pyunit3k'])
+      packages=['testtools'])

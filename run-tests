@@ -3,7 +3,7 @@
 
 import unittest
 
-from pyunit3k.tests import test_suite
+from testtools.tests import test_suite
 
 
 unittest.TextTestRunner().run(test_suite())

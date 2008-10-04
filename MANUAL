@@ -5,7 +5,7 @@ Manual
 Introduction
 ------------
 
-This document provides overview of the features provided by pyunit3k.  Refer
+This document provides overview of the features provided by testtools.  Refer
 to the API docs (i.e. docstrings) for full details on a particular feature.
 
 Extensions to TestCase
@@ -27,7 +27,7 @@ logic in a try/finally block or tearDown method.  e.g.::
 New assertion methods
 ~~~~~~~~~~~~~~~~~~~~~
 
-pyunit3k adds several assertion methods:
+testtools adds several assertion methods:
 
  * assertIn
  * assertNotIn
@@ -50,7 +50,7 @@ asserting more things about the exception than just the type::
 Creation methods
 ~~~~~~~~~~~~~~~~
 
-pyunit3k.TestCase implements creation methods called ``getUniqueString`` and
+testtools.TestCase implements creation methods called ``getUniqueString`` and
 ``getUniqueInteger``.  See pages 419-423 of *xUnit Test Patterns* by Meszaros
 for a detailed discussion of creation methods.
 
@@ -58,8 +58,8 @@ for a detailed discussion of creation methods.
 Test renaming
 ~~~~~~~~~~~~~
 
-``pyunit3k.clone_test_with_new_id`` is a function to copy a test case instance
-to one with a new name.  This is helpful for implementing test
+``testtools.clone_test_with_new_id`` is a function to copy a test case
+instance to one with a new name.  This is helpful for implementing test
 paramterisation.
 
 

@@ -4,13 +4,13 @@ check:
 	./run-tests
 
 TAGS:
-	ctags -e -R pyunit3k/
+	ctags -e -R testtools/
 
 tags:
-	ctags -R pyunit3k/
+	ctags -R testtools/
 
 clean:
-	rm -f TAGS tags pyunit3k/*.pyc pyunit3k/tests/*.pyc
+	rm -f TAGS tags testtools/*.pyc testtools/tests/*.pyc
 
 
 .PHONY: tags TAGS check clean

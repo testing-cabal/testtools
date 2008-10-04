@@ -12,7 +12,7 @@ import unittest
 
 from zope.interface import implements
 
-from pyunit3k.interfaces import ITestResult
+from testtools.interfaces import ITestResult
 
 
 class TestResult(unittest.TestResult):
