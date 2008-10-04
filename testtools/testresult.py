@@ -10,14 +10,8 @@ __all__ = [
 
 import unittest
 
-from zope.interface import implements
-
-from testtools.interfaces import ITestResult
-
 
 class TestResult(unittest.TestResult):
-
-    implements(ITestResult)
 
     def done(self):
         """Called when the test runner is done."""

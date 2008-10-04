@@ -6,7 +6,7 @@ __metaclass__ = type
 
 import sys
 
-from testtools import ITestResult, MultiTestResult, TestCase, TestResult
+from testtools import MultiTestResult, TestCase, TestResult
 from testtools.tests.helpers import LoggingResult
 
 
@@ -20,12 +20,6 @@ class TestTestResult(TestCase):
     def test_done(self):
         # `TestResult` has a `done` method that, by default, does nothing.
         self.makeResult().done()
-
-    def test_interface(self):
-        # testtools's `TestResult` implements `ITestResult`.
-        self.assertTrue(
-            ITestResult.providedBy(self.makeResult()),
-            'ITestResult not provided by TestResult')
 
 
 class TestMultiTestResult(TestCase):

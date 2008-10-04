@@ -5,13 +5,11 @@
 __all__ = [
     'clone_test_with_new_id',
     'iterate_tests',
-    'ITestResult',
     'MultiTestResult',
     'TestCase',
     'TestResult',
     ]
 
-from testtools.interfaces import ITestResult
 from testtools.testcase import TestCase, clone_test_with_new_id
 from testtools.testresult import MultiTestResult, TestResult
 from testtools.utils import iterate_tests
