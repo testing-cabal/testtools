@@ -24,6 +24,21 @@ logic in a try/finally block or tearDown method.  e.g.::
         ...
 
 
+TestCase.skip
+~~~~~~~~~~~~~
+
+``skip`` is a simple way to have a test stop running and be reported as a
+skipped test, rather than a success/error/failure. This is an altnerative to
+convoluted logic during test loading, permitting later and more localised
+decisions about the appropriateness of running a test. Many reasons exist to
+skip a test - for instance when a dependency is missing, or if the test is
+expensive and should not be run while on laptop battery power, or if the test
+is testing an incomplete feature (this is sometimes called a TODO). Using this
+feature when running your test suite with a TestResult object that is missing
+the ``addSkip`` method will result in the ``addError`` method being invoked
+instead.
+
+
 New assertion methods
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -60,6 +75,15 @@ Test renaming
 
 ``testtools.clone_test_with_new_id`` is a function to copy a test case
 instance to one with a new name.  This is helpful for implementing test
-paramterisation.
+parameterisation.
 
 
+Extensions to TestResult
+------------------------
+
+TestResult.addSkip
+~~~~~~~~~~~~~~~~~~
+
+This method is called on result objects when a test skips. The
+``testtools.TestResult`` class records skips in its ``skip_reasons`` instance
+dict. The can be reported on in much the same way as succesful tests.

@@ -12,8 +12,14 @@ from copy import deepcopy
 import unittest
 
 
+class TestSkipped(Exception):
+    """Raised within TestCase.run() when a test is skipped."""
+
+
 class TestCase(unittest.TestCase):
     """Extensions to the basic TestCase."""
+
+    skipException = TestSkipped
 
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)
@@ -22,6 +28,19 @@ class TestCase(unittest.TestCase):
 
     def shortDescription(self):
         return self.id()
+
+    def skip(self, reason):
+        """Cause this test to be skipped.
+
+        This raises self.skipException(reason). skipException is raised
+        to permit a skip to be triggered at any point(during setUp or the
+        testMethod itself). The run() method catches skipException and
+        translates that into a call to the result objects addSkip method.
+
+        :param reason: The reason why the test is being skipped. This must
+            support being cast into a unicode string for reporting.
+        """
+        raise self.skipException(reason)
 
     def _formatTypes(self, classOrIterable):
         """Format a class or a bunch of classes for display in an error."""
@@ -116,6 +135,18 @@ class TestCase(unittest.TestCase):
     def runTest(self):
         """Define this so we can construct a null test object."""
 
+    def _handle_skip(self, result, reason):
+        """Pass a skip to result.
+
+        If result has an addSkip method, this is called. If not, addError is
+        called instead.
+        """
+        addSkip = getattr(result, 'addSkip', None)
+        if not callable(addSkip):
+            result.addError(self, self._exc_info())
+        else:
+            addSkip(self, reason)
+
     def run(self, result=None):
         if result is None:
             result = self.defaultTestResult()
@@ -126,6 +157,10 @@ class TestCase(unittest.TestCase):
                 self.setUp()
             except KeyboardInterrupt:
                 raise
+            except self.skipException, e:
+                self._handle_skip(result, e.args[0])
+                self._runCleanups(result)
+                return
             except:
                 result.addError(self, self._exc_info())
                 self._runCleanups(result)
@@ -135,6 +170,8 @@ class TestCase(unittest.TestCase):
             try:
                 testMethod()
                 ok = True
+            except self.skipException, e:
+                self._handle_skip(result, e.args[0])
             except self.failureException:
                 result.addFailure(self, self._exc_info())
             except KeyboardInterrupt:
