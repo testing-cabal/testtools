@@ -33,6 +33,10 @@ class LoggingResult(TestResult):
         self._events.append(('addError', test, error))
         super(LoggingResult, self).addError(test, error)
 
+    def addSkip(self, test, reason):
+        self._events.append(('addSkip', test, reason))
+        super(LoggingResult, self).addSkip(test, reason)
+
     def addSuccess(self, test):
         self._events.append(('addSuccess', test))
         super(LoggingResult, self).addSuccess(test)

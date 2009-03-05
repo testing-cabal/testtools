@@ -2,6 +2,7 @@
 
 """Tests for extensions to the base test library."""
 
+import unittest
 from testtools import TestCase, clone_test_with_new_id
 from testtools.tests.helpers import LoggingResult
 
@@ -373,6 +374,59 @@ class TestCloneTestWithNewId(TestCase):
         self.assertEqual(newName, newTest.id())
         self.assertEqual(oldName, test.id(),
             "the original test instance should be unchanged.")
+
+
+class TestSkipping(TestCase):
+    """Tests for skipping of tests functionality."""
+
+    def test_skip_causes_skipException(self):
+        self.assertRaises(self.skipException, self.skip, "Skip this test")
+
+    def test_skipException_in_setup_calls_result_addSkip(self):
+        class TestThatRaisesInSetUp(TestCase):
+            def setUp(self):
+                self.skip("skipping this test")
+            def test_that_passes(self):
+                pass
+        calls = []
+        result = LoggingResult(calls)
+        test = TestThatRaisesInSetUp("test_that_passes")
+        test.run(result)
+        self.assertEqual([('startTest', test),
+            ('addSkip', test, "skipping this test"), ('stopTest', test)],
+            calls)
+
+    def test_skipException_in_test_method_calls_result_addSkip(self):
+        class SkippingTest(TestCase):
+            def test_that_raises_skipException(self):
+                self.skip("skipping this test")
+        calls = []
+        result = LoggingResult(calls)
+        test = SkippingTest("test_that_raises_skipException")
+        test.run(result)
+        self.assertEqual([('startTest', test),
+            ('addSkip', test, "skipping this test"), ('stopTest', test)],
+            calls)
+
+    def test_skip__in_setup_with_old_result_object_calls_addError(self):
+        class SkippingTest(TestCase):
+            def setUp(self):
+                raise self.skipException("skipping this test")
+            def test_that_raises_skipException(self):
+                pass
+        result = unittest.TestResult()
+        test = SkippingTest("test_that_raises_skipException")
+        test.run(result)
+        self.assertEqual(1, len(result.errors))
+
+    def test_skip_with_old_result_object_calls_addError(self):
+        class SkippingTest(TestCase):
+            def test_that_raises_skipException(self):
+                raise self.skipException("skipping this test")
+        result = unittest.TestResult()
+        test = SkippingTest("test_that_raises_skipException")
+        test.run(result)
+        self.assertEqual(1, len(result.errors))
 
 
 def test_suite():

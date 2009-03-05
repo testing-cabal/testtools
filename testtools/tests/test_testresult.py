@@ -10,12 +10,48 @@ from testtools import MultiTestResult, TestCase, TestResult
 from testtools.tests.helpers import LoggingResult
 
 
+class TestTestResultContract(TestCase):
+    """Tests for the contract of TestResults."""
+
+    def test_addSkipped(self):
+        # Calling addSkip(test, reason) completes ok.
+        result = self.makeResult()
+        result.addSkip(self, u"Skipped for some reason")
+
+
+class TestTestResultContract(TestTestResultContract):
+
+    def makeResult(self):
+        return TestResult()
+
+
+class TestMultiTestresultContract(TestTestResultContract):
+
+    def makeResult(self):
+        return MultiTestResult(TestResult(), TestResult())
+
+
 class TestTestResult(TestCase):
     """Tests for `TestResult`."""
 
     def makeResult(self):
         """Make an arbitrary result for testing."""
         return TestResult()
+
+    def test_addSkipped(self):
+        # Calling addSkip on a TestResult records the test that was skipped in
+        # its skip_reasons dict.
+        result = self.makeResult()
+        result.addSkip(self, u"Skipped for some reason")
+        self.assertEqual({u"Skipped for some reason":[self]},
+            result.skip_reasons)
+        result.addSkip(self, u"Skipped for some reason")
+        self.assertEqual({u"Skipped for some reason":[self, self]},
+            result.skip_reasons)
+        result.addSkip(self, u"Skipped for another reason")
+        self.assertEqual({u"Skipped for some reason":[self, self],
+            u"Skipped for another reason":[self]},
+            result.skip_reasons)
 
     def test_done(self):
         # `TestResult` has a `done` method that, by default, does nothing.
@@ -57,6 +93,13 @@ class TestMultiTestResult(TestCase):
         # its `TestResult`s.
         self.multiResult.stopTest(self)
         self.assertResultLogsEqual([('stopTest', self)])
+
+    def test_addSkipped(self):
+        # Calling `addSkip` on a `MultiTestResult` calls addSkip on its
+        # results.
+        reason = u"Skipped for some reason"
+        self.multiResult.addSkip(self, reason)
+        self.assertResultLogsEqual([('addSkip', self, reason)])
 
     def test_addSuccess(self):
         # Calling `addSuccess` on a `MultiTestResult` calls `addSuccess` on
