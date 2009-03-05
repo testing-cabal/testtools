@@ -11,7 +11,7 @@ from testtools.tests.helpers import LoggingResult
 
 
 class TestTestResultContract(TestCase):
-    """Tests for the contract of TestResult's."""
+    """Tests for the contract of TestResults."""
 
     def test_addSkipped(self):
         # Calling addSkip(test, reason) completes ok.

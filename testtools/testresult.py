@@ -25,9 +25,10 @@ class TestResult(unittest.TestResult):
         """Called when a test has been skipped rather than running.
 
         Like with addSuccess and addError, testStopped should still be called.
-        addSkip is a separate method to addError for clarity, and to keep
-        separate the internal details of how a given TestCase signals a skip,
-        from how unexpected exceptions and failures are signalled.
+
+        This must be called by the TestCase. 'addError' and 'addFailure' will
+        not call addSkip, since they have no assumptions about the kind of
+        errors that a test can raise.
 
         :param test: The test that has been skipped.
         :param reason: The reason for the test being skipped. For instance,

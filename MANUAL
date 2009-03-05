@@ -28,8 +28,8 @@ TestCase.skip
 ~~~~~~~~~~~~~
 
 ``skip`` is a simple way to have a test stop running and be reported as a
-skipped test, rather than a success/error/failure. This is an altnerative to
-convoluted logic during test loading, permitting later and more localised
+skipped test, rather than a success/error/failure. This is an alternative to
+convoluted logic during test loading, permitting later and more localized
 decisions about the appropriateness of running a test. Many reasons exist to
 skip a test - for instance when a dependency is missing, or if the test is
 expensive and should not be run while on laptop battery power, or if the test
@@ -75,7 +75,7 @@ Test renaming
 
 ``testtools.clone_test_with_new_id`` is a function to copy a test case
 instance to one with a new name.  This is helpful for implementing test
-parameterisation.
+parameterization.
 
 
 Extensions to TestResult

@@ -33,7 +33,7 @@ class TestCase(unittest.TestCase):
         """Cause this test to be skipped.
 
         This raises self.skipException(reason). skipException is raised
-        to permit a skip to be triggered at any point(during setUp or the
+        to permit a skip to be triggered at any point (during setUp or the
         testMethod itself). The run() method catches skipException and
         translates that into a call to the result objects addSkip method.
 
