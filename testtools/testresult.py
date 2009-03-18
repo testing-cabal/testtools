@@ -6,6 +6,7 @@ __metaclass__ = type
 __all__ = [
     'MultiTestResult',
     'TestResult',
+    'ThreadsafeForwardingResult',
     ]
 
 import unittest
@@ -73,3 +74,75 @@ class MultiTestResult(TestResult):
 
     def done(self):
         self._dispatch('done')
+
+
+class ThreadsafeForwardingResult(TestResult):
+    """A TestResult which ensures the target does not receive mixed up calls.
+    
+    This is used when recieving test results from multiple sources, and batches
+    up all the activity for a single test into a thread-safe batch where all
+    other ThreadsafeForwardingResult objects sharing the same semaphore will be
+    locked out.
+
+    Typically this is used by passing a single ThreadsafeForwardingResult to
+    each source of test results as the result class to use, and then a single
+    TestResult object is used to perform logging / UI or other activities.
+
+    Note that target.done() will be called once for each
+    ThreadsafeForwardingResult forwarding to done, when done is called on that
+    result. If the target's done() takes special action, care should be taken
+    to accomodate this.
+    """
+
+    def __init__(self, target, semaphore):
+        """Create a ThreadsafeForwardingResult forwarding to target.
+
+        :param target: A TestResult.
+        :param semaphore: A threading.Semaphore with limit 1.
+        """
+        TestResult.__init__(self)
+        self.result = target
+        self.semaphore = semaphore
+
+    def addError(self, test, err):
+        self.semaphore.acquire()
+        try:
+            self.result.startTest(test)
+            self.result.addError(test, err)
+            self.result.stopTest(test)
+        finally:
+            self.semaphore.release()
+
+    def addFailure(self, test, err):
+        self.semaphore.acquire()
+        try:
+            self.result.startTest(test)
+            self.result.addFailure(test, err)
+            self.result.stopTest(test)
+        finally:
+            self.semaphore.release()
+
+    def addSkip(self, test, reason):
+        self.semaphore.acquire()
+        try:
+            self.result.startTest(test)
+            self.result.addSkip(test, reason)
+            self.result.stopTest(test)
+        finally:
+            self.semaphore.release()
+
+    def addSuccess(self, test):
+        self.semaphore.acquire()
+        try:
+            self.result.startTest(test)
+            self.result.addSuccess(test)
+            self.result.stopTest(test)
+        finally:
+            self.semaphore.release()
+
+    def done(self):
+        self.semaphore.acquire()
+        try:
+            self.result.done()
+        finally:
+            self.semaphore.release()

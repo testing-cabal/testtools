@@ -8,8 +8,13 @@ __all__ = [
     'MultiTestResult',
     'TestCase',
     'TestResult',
+    'ThreadsafeForwardingResult',
     ]
 
 from testtools.testcase import TestCase, clone_test_with_new_id
-from testtools.testresult import MultiTestResult, TestResult
+from testtools.testresult import (
+    MultiTestResult,
+    TestResult,
+    ThreadsafeForwardingResult,
+    )
 from testtools.utils import iterate_tests
