@@ -4,6 +4,7 @@
 
 __all__ = [
     'clone_test_with_new_id',
+    'ConcurrentTestSuite',
     'iterate_tests',
     'MultiTestResult',
     'TestCase',
@@ -16,5 +17,8 @@ from testtools.testresult import (
     MultiTestResult,
     TestResult,
     ThreadsafeForwardingResult,
+    )
+from testtools.testsuite import (
+    ConcurrentTestSuite,
     )
 from testtools.utils import iterate_tests
