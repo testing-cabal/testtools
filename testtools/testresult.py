@@ -79,19 +79,19 @@ class MultiTestResult(TestResult):
 class ThreadsafeForwardingResult(TestResult):
     """A TestResult which ensures the target does not receive mixed up calls.
     
-    This is used when recieving test results from multiple sources, and batches
+    This is used when receiving test results from multiple sources, and batches
     up all the activity for a single test into a thread-safe batch where all
     other ThreadsafeForwardingResult objects sharing the same semaphore will be
     locked out.
 
-    Typically this is used by passing a single ThreadsafeForwardingResult to
-    each source of test results as the result class to use, and then a single
-    TestResult object is used to perform logging / UI or other activities.
+    Typical use of ThreadsafeForwardingResult involves creating one
+    ThreadsafeForwardingResult per thread in a ConcurrentTestSuite. These
+    forward to the TestResult that the ConcurrentTestSuite run method was
+    called with.
 
-    Note that target.done() will be called once for each
-    ThreadsafeForwardingResult forwarding to done, when done is called on that
-    result. If the target's done() takes special action, care should be taken
-    to accomodate this.
+    target.done() is called once for each ThreadsafeForwardingResult that
+    forwards to the same target. If the target's done() takes special action,
+    care should be taken to accommodate this.
     """
 
     def __init__(self, target, semaphore):
