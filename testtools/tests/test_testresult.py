@@ -5,8 +5,14 @@
 __metaclass__ = type
 
 import sys
+import threading
 
-from testtools import MultiTestResult, TestCase, TestResult
+from testtools import (
+    MultiTestResult,
+    TestCase,
+    TestResult,
+    ThreadsafeForwardingResult,
+    )
 from testtools.tests.helpers import LoggingResult
 
 
@@ -29,6 +35,14 @@ class TestMultiTestresultContract(TestTestResultContract):
 
     def makeResult(self):
         return MultiTestResult(TestResult(), TestResult())
+
+
+class TestThreadSafeForwardingResultContract(TestTestResultContract):
+
+    def makeResult(self):
+        result_semaphore = threading.Semaphore(1)
+        target = TestResult()
+        return ThreadsafeForwardingResult(target, result_semaphore)
 
 
 class TestTestResult(TestCase):
@@ -58,7 +72,16 @@ class TestTestResult(TestCase):
         self.makeResult().done()
 
 
-class TestMultiTestResult(TestCase):
+class TestWithFakeExceptions(TestCase):
+
+    def makeExceptionInfo(self, exceptionFactory, *args, **kwargs):
+        try:
+            raise exceptionFactory(*args, **kwargs)
+        except:
+            return sys.exc_info()
+
+
+class TestMultiTestResult(TestWithFakeExceptions):
     """Tests for `MultiTestResult`."""
 
     def setUp(self):
@@ -70,12 +93,6 @@ class TestMultiTestResult(TestCase):
         """Assert that our test results have received the expected events."""
         self.assertEqual(expectedEvents, self.result1._events)
         self.assertEqual(expectedEvents, self.result2._events)
-
-    def makeExceptionInfo(self, exceptionFactory, *args, **kwargs):
-        try:
-            raise exceptionFactory(*args, **kwargs)
-        except:
-            return sys.exc_info()
 
     def test_empty(self):
         # Initializing a `MultiTestResult` doesn't do anything to its
@@ -126,6 +143,53 @@ class TestMultiTestResult(TestCase):
         exc_info = self.makeExceptionInfo(RuntimeError, 'error')
         self.multiResult.addError(self, exc_info)
         self.assertResultLogsEqual([('addError', self, exc_info)])
+
+
+class TestThreadSafeForwardingResult(TestWithFakeExceptions):
+    """Tests for `MultiTestResult`."""
+
+    def setUp(self):
+        self.result_semaphore = threading.Semaphore(1)
+        self.target = LoggingResult([])
+        self.result1 = ThreadsafeForwardingResult(self.target,
+            self.result_semaphore)
+
+    def test_nonforwarding_methods(self):
+        # startTest and stopTest are not forwarded because they need to be
+        # batched.
+        self.result1.startTest(self)
+        self.result1.stopTest(self)
+        self.assertEqual([], self.target._events)
+
+    def test_done(self):
+        self.result1.done()
+        self.result2 = ThreadsafeForwardingResult(self.target,
+            self.result_semaphore)
+        self.result2.done()
+        self.assertEqual(["done", "done"], self.target._events)
+
+    def test_forwarding_methods(self):
+        # error, failure, skip and success are forwarded.
+        exc_info1 = self.makeExceptionInfo(RuntimeError, 'error')
+        self.result1.addError(self, exc_info1)
+        exc_info2 = self.makeExceptionInfo(AssertionError, 'failure')
+        self.result1.addFailure(self, exc_info2)
+        reason = u"Skipped for some reason"
+        self.result1.addSkip(self, reason)
+        self.result1.addSuccess(self)
+        self.assertEqual([('startTest', self),
+            ('addError', self, exc_info1),
+            ('stopTest', self),
+            ('startTest', self),
+            ('addFailure', self, exc_info2),
+            ('stopTest', self),
+            ('startTest', self),
+            ('addSkip', self, reason),
+            ('stopTest', self),
+            ('startTest', self),
+            ('addSuccess', self),
+            ('stopTest', self),
+            ], self.target._events)
 
 
 def test_suite():
