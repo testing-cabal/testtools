@@ -87,3 +87,35 @@ TestResult.addSkip
 This method is called on result objects when a test skips. The
 ``testtools.TestResult`` class records skips in its ``skip_reasons`` instance
 dict. The can be reported on in much the same way as succesful tests.
+
+TestResult.done
+~~~~~~~~~~~~~~~
+
+This method is called on result objects by testtools tests when the attribute
+exists. It is used as a hook point to allow clean disconnection of network
+resources and similar concerns.
+
+ThreadsafeForwardingResult
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A TestResult which forwards activity to another test result, but synchronises
+on a semaphore to ensure that all the activity for a single test arrives in a
+batch. This allows simple TestResults which do not expect concurrent test
+reporting to be fed the activity from multiple test threads, or processes.
+
+Note that when you provide multiple errors for a single test, the target sees
+each error as a distinct complete test.
+
+Extensions to TestSuite
+-----------------------
+
+ConcurrentTestSuite
+~~~~~~~~~~~~~~~~~~~
+
+A TestSuite for parallel testing. This is used in conjuction with a helper that
+runs a single suite in some parallel fashion (for instance, forking, handing
+off to a subprocess, to a compute cloud, or simple threads).
+ConcurrentTestSuite uses the helper to get a number of separate runnable
+objects with a run(result), runs them all in threads using the
+ThreadsafeForwardingResult to coalesce their activity.
+

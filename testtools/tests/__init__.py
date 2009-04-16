@@ -1,9 +1,10 @@
 # See README for copyright and licensing details.
 
 import unittest
-from testtools.tests import test_testtools, test_testresult
+from testtools.tests import test_testtools, test_testresult, test_testsuite
 
 
 def test_suite():
     return unittest.TestSuite(
-        [test_testtools.test_suite(), test_testresult.test_suite()])
+        [test_testtools.test_suite(), test_testresult.test_suite(),
+        test_testsuite.test_suite()])
