@@ -3,8 +3,13 @@
 """Tests for extensions to the base test library."""
 
 import unittest
-from testtools import (TestCase, clone_test_with_new_id,
-    skip, skipIf, skipUnless)
+from testtools import (
+    TestCase,
+    clone_test_with_new_id,
+    skip,
+    skipIf,
+    skipUnless,
+    )
 from testtools.tests.helpers import LoggingResult
 
 
