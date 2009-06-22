@@ -3,7 +3,13 @@
 """Tests for extensions to the base test library."""
 
 import unittest
-from testtools import TestCase, clone_test_with_new_id
+from testtools import (
+    TestCase,
+    clone_test_with_new_id,
+    skip,
+    skipIf,
+    skipUnless,
+    )
 from testtools.tests.helpers import LoggingResult
 
 
@@ -425,6 +431,38 @@ class TestSkipping(TestCase):
                 raise self.skipException("skipping this test")
         result = unittest.TestResult()
         test = SkippingTest("test_that_raises_skipException")
+        test.run(result)
+        self.assertEqual(1, len(result.errors))
+
+    def test_skip_decorator(self):
+        class SkippingTest(TestCase):
+            @skip("skipping this test")
+            def test_that_is_decorated_with_skip(self):
+                self.fail()
+        result = unittest.TestResult()
+        test = SkippingTest("test_that_is_decorated_with_skip")
+        test.run(result)
+        self.assertEqual(1, len(result.errors))
+
+
+    def test_skipIf_decorator(self):
+        class SkippingTest(TestCase):
+            @skipIf(True, "skipping this test")
+            def test_that_is_decorated_with_skipIf(self):
+                self.fail()
+        result = unittest.TestResult()
+        test = SkippingTest("test_that_is_decorated_with_skipIf")
+        test.run(result)
+        self.assertEqual(1, len(result.errors))
+
+
+    def test_skipUnless_decorator(self):
+        class SkippingTest(TestCase):
+            @skipUnless(False, "skipping this test")
+            def test_that_is_decorated_with_skipUnless(self):
+                self.fail()
+        result = unittest.TestResult()
+        test = SkippingTest("test_that_is_decorated_with_skipUnless")
         test.run(result)
         self.assertEqual(1, len(result.errors))
 

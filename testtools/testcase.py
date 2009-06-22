@@ -6,9 +6,13 @@ __metaclass__ = type
 __all__ = [
     'change_test_id',
     'TestCase',
+    'skip',
+    'skipIf',
+    'skipUnless',
     ]
 
 from copy import deepcopy
+import functools
 import unittest
 
 
@@ -198,4 +202,36 @@ def clone_test_with_new_id(test, new_id):
     newTest = deepcopy(test)
     newTest.id = lambda: new_id
     return newTest
+
+def skip(reason):
+    """A decorator to skip unit tests.
+
+    This is just syntactic sugar so users don't have to change any of their
+    unit tests in order to migrate to python 2.7, which provides the
+    @unittest.skip decorator.
+    """
+    def decorator(test_item):
+        @functools.wraps(test_item)
+        def skip_wrapper(*args, **kwargs):
+            raise TestCase.skipException(reason)
+        return skip_wrapper
+    return decorator
+
+
+def skipIf(condition, reason):
+    """Skip a test if the condition is true."""
+    if condition:
+        return skip(reason)
+    def _id(obj):
+        return obj
+    return _id
+
+
+def skipUnless(condition, reason):
+    """Skip a test unless the condition is true."""
+    if not condition:
+        return skip(reason)
+    def _id(obj):
+        return obj
+    return _id
 
