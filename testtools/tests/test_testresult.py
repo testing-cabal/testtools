@@ -24,6 +24,12 @@ class TestTestResultContract(TestCase):
         result = self.makeResult()
         result.addSkip(self, u"Skipped for some reason")
 
+    def test_startStopTestRun(self):
+        # Calling startTestRun completes ok.
+        result = self.makeResult()
+        result.startTestRun()
+        result.stopTestRun()
+
 
 class TestTestResultContract(TestTestResultContract):
 
@@ -144,6 +150,18 @@ class TestMultiTestResult(TestWithFakeExceptions):
         self.multiResult.addError(self, exc_info)
         self.assertResultLogsEqual([('addError', self, exc_info)])
 
+    def test_startTestRun(self):
+        # Calling `startTestRun` on a `MultiTestResult` forwards to all its
+        # `TestResult`s.
+        self.multiResult.startTestRun()
+        self.assertResultLogsEqual([('startTestRun')])
+
+    def test_stopTestRun(self):
+        # Calling `stopTestRun` on a `MultiTestResult` forwards to all its
+        # `TestResult`s.
+        self.multiResult.stopTestRun()
+        self.assertResultLogsEqual([('stopTestRun')])
+
 
 class TestThreadSafeForwardingResult(TestWithFakeExceptions):
     """Tests for `MultiTestResult`."""
@@ -161,6 +179,20 @@ class TestThreadSafeForwardingResult(TestWithFakeExceptions):
         self.result1.stopTest(self)
         self.assertEqual([], self.target._events)
 
+    def test_startTestRun(self):
+        self.result1.startTestRun()
+        self.result2 = ThreadsafeForwardingResult(self.target,
+            self.result_semaphore)
+        self.result2.startTestRun()
+        self.assertEqual(["startTestRun", "startTestRun"], self.target._events)
+
+    def test_stopTestRun(self):
+        self.result1.stopTestRun()
+        self.result2 = ThreadsafeForwardingResult(self.target,
+            self.result_semaphore)
+        self.result2.stopTestRun()
+        self.assertEqual(["stopTestRun", "stopTestRun"], self.target._events)
+
     def test_done(self):
         self.result1.done()
         self.result2 = ThreadsafeForwardingResult(self.target,
@@ -169,7 +201,7 @@ class TestThreadSafeForwardingResult(TestWithFakeExceptions):
         self.assertEqual(["done", "done"], self.target._events)
 
     def test_forwarding_methods(self):
-        # error, failure, skip and success are forwarded.
+        # error, failure, skip and success are forwarded in batches.
         exc_info1 = self.makeExceptionInfo(RuntimeError, 'error')
         self.result1.addError(self, exc_info1)
         exc_info2 = self.makeExceptionInfo(AssertionError, 'failure')

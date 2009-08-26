@@ -39,8 +39,23 @@ class TestResult(unittest.TestResult):
         skip_list = self.skip_reasons.setdefault(reason, [])
         skip_list.append(test)
 
+    def startTestRun(self):
+        """Called before a test run starts.
+
+        New in python 2.7
+        """
+
+    def stopTestRun(self):
+        """Called after a test run completes
+
+        New in python 2.7
+        """
+
     def done(self):
-        """Called when the test runner is done."""
+        """Called when the test runner is done.
+        
+        deprecated in favour of stopTestRun.
+        """
 
 
 class MultiTestResult(TestResult):
@@ -71,6 +86,12 @@ class MultiTestResult(TestResult):
 
     def addSuccess(self, test):
         self._dispatch('addSuccess', test)
+
+    def startTestRun(self):
+        self._dispatch('startTestRun')
+
+    def stopTestRun(self):
+        self._dispatch('stopTestRun')
 
     def done(self):
         self._dispatch('done')
@@ -137,6 +158,20 @@ class ThreadsafeForwardingResult(TestResult):
             self.result.startTest(test)
             self.result.addSuccess(test)
             self.result.stopTest(test)
+        finally:
+            self.semaphore.release()
+
+    def startTestRun(self):
+        self.semaphore.acquire()
+        try:
+            self.result.startTestRun()
+        finally:
+            self.semaphore.release()
+
+    def stopTestRun(self):
+        self.semaphore.acquire()
+        try:
+            self.result.stopTestRun()
         finally:
             self.semaphore.release()
 
