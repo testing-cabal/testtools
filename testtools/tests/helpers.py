@@ -41,6 +41,14 @@ class LoggingResult(TestResult):
         self._events.append(('addSuccess', test))
         super(LoggingResult, self).addSuccess(test)
 
+    def startTestRun(self):
+        self._events.append('startTestRun')
+        super(LoggingResult, self).startTestRun()
+        
+    def stopTestRun(self):
+        self._events.append('stopTestRun')
+        super(LoggingResult, self).stopTestRun()
+        
     def done(self):
         self._events.append('done')
         super(LoggingResult, self).done()
