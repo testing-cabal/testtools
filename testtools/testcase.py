@@ -30,6 +30,12 @@ class TestCase(unittest.TestCase):
         self._cleanups = []
         self._last_unique_id = 0
 
+    def __eq__(self, other):
+        eq = getattr(unittest.TestCase, '__eq__', None)
+        if eq is not None and not unittest.TestCase.__eq__(self, other):
+            return False
+        return self.__dict__ == other.__dict__
+
     def shortDescription(self):
         return self.id()
 
