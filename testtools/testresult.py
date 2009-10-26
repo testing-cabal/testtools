@@ -21,6 +21,23 @@ class TestResult(unittest.TestResult):
     def __init__(self):
         super(TestResult, self).__init__()
         self.skip_reasons = {}
+        # -- Start: As per python 2.7 --
+        self.expectedFailures = []
+        self.unexpectedSuccesses = []
+        # -- End:   As per python 2.7 --
+
+    def addExpectedFailure(self, test, err):
+        """Called when a test has failed in an expected manner.
+
+        Like with addSuccess and addError, testStopped should still be called.
+
+        :param test: The test that has been skipped.
+        :param err: The exc_info of the error that was raised.
+        :return: None
+        """
+        # This is the python 2.7 implementation
+        self.expectedFailures.append(
+            (test, self._exc_info_to_string(err, test)))
 
     def addSkip(self, test, reason):
         """Called when a test has been skipped rather than running.
@@ -38,6 +55,10 @@ class TestResult(unittest.TestResult):
         """
         skip_list = self.skip_reasons.setdefault(reason, [])
         skip_list.append(test)
+
+    def addUnexpectedSuccess(self, test):
+        """Called when a test was expected to fail, but succeed."""
+        self.unexpectedSuccesses.append(test)
 
     def startTestRun(self):
         """Called before a test run starts.
@@ -78,6 +99,9 @@ class MultiTestResult(TestResult):
     def addError(self, test, error):
         self._dispatch('addError', test, error)
 
+    def addExpectedFailure(self, test, err):
+        self._dispatch('addExpectedFailure', test, err)
+
     def addFailure(self, test, failure):
         self._dispatch('addFailure', test, failure)
 
@@ -86,6 +110,9 @@ class MultiTestResult(TestResult):
 
     def addSuccess(self, test):
         self._dispatch('addSuccess', test)
+
+    def addUnexpectedSuccess(self, test):
+        self._dispatch('addUnexpectedSuccess', test)
 
     def startTestRun(self):
         self._dispatch('startTestRun')
@@ -134,6 +161,15 @@ class ThreadsafeForwardingResult(TestResult):
         finally:
             self.semaphore.release()
 
+    def addExpectedFailure(self, test, err):
+        self.semaphore.acquire()
+        try:
+            self.result.startTest(test)
+            self.result.addExpectedFailure(test, err)
+            self.result.stopTest(test)
+        finally:
+            self.semaphore.release()
+
     def addFailure(self, test, err):
         self.semaphore.acquire()
         try:
@@ -157,6 +193,15 @@ class ThreadsafeForwardingResult(TestResult):
         try:
             self.result.startTest(test)
             self.result.addSuccess(test)
+            self.result.stopTest(test)
+        finally:
+            self.semaphore.release()
+
+    def addUnexpectedSuccess(self, test):
+        self.semaphore.acquire()
+        try:
+            self.result.startTest(test)
+            self.result.addUnexpectedSuccess(test)
             self.result.stopTest(test)
         finally:
             self.semaphore.release()
