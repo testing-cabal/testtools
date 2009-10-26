@@ -91,6 +91,7 @@ class TestMultiTestResult(TestWithFakeExceptions):
     """Tests for `MultiTestResult`."""
 
     def setUp(self):
+        TestWithFakeExceptions.setUp(self)
         self.result1 = LoggingResult([])
         self.result2 = LoggingResult([])
         self.multiResult = MultiTestResult(self.result1, self.result2)
@@ -167,6 +168,7 @@ class TestThreadSafeForwardingResult(TestWithFakeExceptions):
     """Tests for `MultiTestResult`."""
 
     def setUp(self):
+        TestWithFakeExceptions.setUp(self)
         self.result_semaphore = threading.Semaphore(1)
         self.target = LoggingResult([])
         self.result1 = ThreadsafeForwardingResult(self.target,
