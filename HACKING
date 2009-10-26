@@ -49,3 +49,35 @@ implementation details.
 Tests belong in ``testtools/tests/``.
 
 
+Commiting to trunk
+------------------
+
+Testtools is maintained using bzr, with its trunk at lp:testtools. This gives
+every contributor the ability to commit their work to their own branches.
+However permission must be granted to allow contributors to commit to the trunk
+branch. 
+
+Commit access to trunk is obtained by joining the testtools-devs Launchpad
+team. Membership in this team is contingent on obeying the testtools
+contribution policy, including assigning copyright of all the work one creates
+and places in trunk to Jonathan Lange.
+
+
+Code Review
+-----------
+
+All code must be reviewed before landing on trunk. The process is to create a
+branch in launchpad, and submit it for merging to lp:testtools. It will then
+be reviewed before it can be merged to trunk. It will be reviewed by someone:
+ * not the author
+ * a committer (member of the testtools-devs team)
+
+As a special exception, while the testtools committers team is small and prone
+to blocking, a merge request from a committer that has not been reviewed after
+24 hours may be merged by that committer. When the team is larger this policy
+will be revisited.
+
+Code reviewers should look for the quality of what is being submitted,
+including conformance with this HACKING file.
+
+Changes which all users should be made aware of should be documented in NEWS.
