@@ -7,4 +7,6 @@ testtools NEWS
 Improvements
 ------------
 
-* Compatible with Python 2.6
+* Supports the Python 2.7/3.1 addUnexpectedSuccess and addExpectedFailure
+  TestResult methods.
+* Compatible with Python 2.6 and Python 2.7

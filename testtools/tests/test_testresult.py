@@ -19,6 +19,11 @@ from testtools.tests.helpers import LoggingResult
 class TestTestResultContract(TestCase):
     """Tests for the contract of TestResults."""
 
+    def test_addExpectedFailure(self):
+        # Calling addExpectedFailure(test, exc_info) completes ok.
+        result = self.makeResult()
+        result.addExpectedFailure(self, sys.exc_info())
+
     def test_addSkipped(self):
         # Calling addSkip(test, reason) completes ok.
         result = self.makeResult()
@@ -29,6 +34,11 @@ class TestTestResultContract(TestCase):
         result = self.makeResult()
         result.startTestRun()
         result.stopTestRun()
+
+    def test_addUnexpectedSuccess(self):
+        # Calling addUnexpectedSuccess(test) completes ok.
+        result = self.makeResult()
+        result.addUnexpectedSuccess(self)
 
 
 class TestTestResultContract(TestTestResultContract):

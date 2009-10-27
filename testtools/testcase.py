@@ -13,6 +13,7 @@ __all__ = [
 
 from copy import deepcopy
 import functools
+import sys
 import unittest
 
 
@@ -74,7 +75,7 @@ class TestCase(unittest.TestCase):
             except KeyboardInterrupt:
                 raise
             except:
-                result.addError(self, self._exc_info())
+                result.addError(self, sys.exc_info())
                 ok = False
         return ok
 
@@ -153,7 +154,7 @@ class TestCase(unittest.TestCase):
         """
         addSkip = getattr(result, 'addSkip', None)
         if not callable(addSkip):
-            result.addError(self, self._exc_info())
+            result.addError(self, sys.exc_info())
         else:
             addSkip(self, reason)
 
@@ -172,7 +173,7 @@ class TestCase(unittest.TestCase):
                 self._runCleanups(result)
                 return
             except:
-                result.addError(self, self._exc_info())
+                result.addError(self, sys.exc_info())
                 self._runCleanups(result)
                 return
 
@@ -183,11 +184,11 @@ class TestCase(unittest.TestCase):
             except self.skipException, e:
                 self._handle_skip(result, e.args[0])
             except self.failureException:
-                result.addFailure(self, self._exc_info())
+                result.addFailure(self, sys.exc_info())
             except KeyboardInterrupt:
                 raise
             except:
-                result.addError(self, self._exc_info())
+                result.addError(self, sys.exc_info())
 
             cleanupsOk = self._runCleanups(result)
             try:
@@ -195,7 +196,7 @@ class TestCase(unittest.TestCase):
             except KeyboardInterrupt:
                 raise
             except:
-                result.addError(self, self._exc_info())
+                result.addError(self, sys.exc_info())
                 ok = False
             if ok and cleanupsOk:
                 result.addSuccess(self)

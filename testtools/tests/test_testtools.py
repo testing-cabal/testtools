@@ -10,7 +10,11 @@ from testtools import (
     skipIf,
     skipUnless,
     )
-from testtools.tests.helpers import LoggingResult
+from testtools.tests.helpers import (
+    LoggingResult,
+    Python26TestResult,
+    Python27TestResult,
+    )
 
 
 class TestEquality(TestCase):
@@ -406,13 +410,12 @@ class TestSkipping(TestCase):
         class SkippingTest(TestCase):
             def test_that_raises_skipException(self):
                 self.skip("skipping this test")
-        calls = []
-        result = LoggingResult(calls)
+        result = Python27TestResult()
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
         self.assertEqual([('startTest', test),
             ('addSkip', test, "skipping this test"), ('stopTest', test)],
-            calls)
+            result._events)
 
     def test_skip__in_setup_with_old_result_object_calls_addError(self):
         class SkippingTest(TestCase):
@@ -420,51 +423,49 @@ class TestSkipping(TestCase):
                 raise self.skipException("skipping this test")
             def test_that_raises_skipException(self):
                 pass
-        result = unittest.TestResult()
+        result = Python26TestResult()
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
-        self.assertEqual(1, len(result.errors))
+        self.assertEqual('addError', result._events[1][0])
 
     def test_skip_with_old_result_object_calls_addError(self):
         class SkippingTest(TestCase):
             def test_that_raises_skipException(self):
                 raise self.skipException("skipping this test")
-        result = unittest.TestResult()
+        result = Python26TestResult()
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
-        self.assertEqual(1, len(result.errors))
+        self.assertEqual('addError', result._events[1][0])
 
     def test_skip_decorator(self):
         class SkippingTest(TestCase):
             @skip("skipping this test")
             def test_that_is_decorated_with_skip(self):
                 self.fail()
-        result = unittest.TestResult()
+        result = Python26TestResult()
         test = SkippingTest("test_that_is_decorated_with_skip")
         test.run(result)
-        self.assertEqual(1, len(result.errors))
-
+        self.assertEqual('addError', result._events[1][0])
 
     def test_skipIf_decorator(self):
         class SkippingTest(TestCase):
             @skipIf(True, "skipping this test")
             def test_that_is_decorated_with_skipIf(self):
                 self.fail()
-        result = unittest.TestResult()
+        result = Python26TestResult()
         test = SkippingTest("test_that_is_decorated_with_skipIf")
         test.run(result)
-        self.assertEqual(1, len(result.errors))
-
+        self.assertEqual('addError', result._events[1][0])
 
     def test_skipUnless_decorator(self):
         class SkippingTest(TestCase):
             @skipUnless(False, "skipping this test")
             def test_that_is_decorated_with_skipUnless(self):
                 self.fail()
-        result = unittest.TestResult()
+        result = Python26TestResult()
         test = SkippingTest("test_that_is_decorated_with_skipUnless")
         test.run(result)
-        self.assertEqual(1, len(result.errors))
+        self.assertEqual('addError', result._events[1][0])
 
 
 def test_suite():
