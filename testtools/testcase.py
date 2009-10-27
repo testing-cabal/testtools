@@ -30,6 +30,8 @@ class TestCase(unittest.TestCase):
         unittest.TestCase.__init__(self, *args, **kwargs)
         self._cleanups = []
         self._last_unique_id = 0
+        self.__setup_called = False
+        self.__teardown_callled = False
 
     def __eq__(self, other):
         eq = getattr(unittest.TestCase, '__eq__', None)
@@ -166,6 +168,8 @@ class TestCase(unittest.TestCase):
         try:
             try:
                 self.setUp()
+                if not self.__setup_called:
+                    raise ValueError("setup was not called")
             except KeyboardInterrupt:
                 raise
             except self.skipException, e:
@@ -193,6 +197,8 @@ class TestCase(unittest.TestCase):
             cleanupsOk = self._runCleanups(result)
             try:
                 self.tearDown()
+                if not self.__teardown_callled:
+                    raise ValueError("teardown was not called")
             except KeyboardInterrupt:
                 raise
             except:
@@ -202,6 +208,14 @@ class TestCase(unittest.TestCase):
                 result.addSuccess(self)
         finally:
             result.stopTest(self)
+
+    def setUp(self):
+        unittest.TestCase.setUp(self)
+        self.__setup_called = True
+
+    def tearDown(self):
+        unittest.TestCase.tearDown(self)
+        self.__teardown_callled = True
 
 
 def clone_test_with_new_id(test, new_id):

@@ -235,6 +235,7 @@ class TestAddCleanup(TestCase):
         """A test that logs calls to setUp, runTest and tearDown."""
 
         def setUp(self):
+            TestCase.setUp(self)
             self._calls = ['setUp']
 
         def brokenSetUp(self):
@@ -247,8 +248,10 @@ class TestAddCleanup(TestCase):
 
         def tearDown(self):
             self._calls.append('tearDown')
+            TestCase.tearDown(self)
 
     def setUp(self):
+        TestCase.setUp(self)
         self._result_calls = []
         self.test = TestAddCleanup.LoggingTest('runTest')
         self.logging_result = LoggingResult(self._result_calls)
@@ -386,6 +389,29 @@ class TestCloneTestWithNewId(TestCase):
             "the original test instance should be unchanged.")
 
 
+class TestSetupTearDown(TestCase):
+
+    def test_setUpNotCalled(self):
+        class DoesnotcallsetUp(TestCase):
+            def setUp(self):
+                pass
+            def test_method(self):
+                pass
+        result = unittest.TestResult()
+        DoesnotcallsetUp('test_method').run(result)
+        self.assertEqual(1, len(result.errors))
+
+    def test_tearDownNotCalled(self):
+        class DoesnotcalltearDown(TestCase):
+            def test_method(self):
+                pass
+            def tearDown(self):
+                pass
+        result = unittest.TestResult()
+        DoesnotcalltearDown('test_method').run(result)
+        self.assertEqual(1, len(result.errors))
+
+
 class TestSkipping(TestCase):
     """Tests for skipping of tests functionality."""
 
@@ -395,6 +421,7 @@ class TestSkipping(TestCase):
     def test_skipException_in_setup_calls_result_addSkip(self):
         class TestThatRaisesInSetUp(TestCase):
             def setUp(self):
+                TestCase.setUp(self)
                 self.skip("skipping this test")
             def test_that_passes(self):
                 pass
@@ -420,6 +447,7 @@ class TestSkipping(TestCase):
     def test_skip__in_setup_with_old_result_object_calls_addError(self):
         class SkippingTest(TestCase):
             def setUp(self):
+                TestCase.setUp(self)
                 raise self.skipException("skipping this test")
             def test_that_raises_skipException(self):
                 pass
