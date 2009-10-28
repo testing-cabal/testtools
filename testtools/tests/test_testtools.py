@@ -26,7 +26,8 @@ class TestEquality(TestCase):
 
     def test_nonIdenticalInUnequal(self):
         # TestCase's are not equal if they are not identical.
-        self.assertNotEqual(TestCase(), TestCase(methodName='skip'))
+        self.assertNotEqual(TestCase(methodName='run'),
+            TestCase(methodName='skip'))
 
 
 class TestAssertions(TestCase):
