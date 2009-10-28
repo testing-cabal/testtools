@@ -26,7 +26,8 @@ class TestCase(unittest.TestCase):
 
     skipException = TestSkipped
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, methodName='_default_case', *args, **kwargs):
+        kwargs['methodName'] = methodName
         unittest.TestCase.__init__(self, *args, **kwargs)
         self._cleanups = []
         self._last_unique_id = 0
@@ -145,8 +146,8 @@ class TestCase(unittest.TestCase):
     def getUniqueString(self):
         return '%s-%d' % (self._testMethodName, self.getUniqueInteger())
 
-    def runTest(self):
-        """Define this so we can construct a null test object."""
+    def _default_case(self):
+        """We define this so we can construct a null test object."""
 
     def _handle_skip(self, result, reason):
         """Pass a skip to result.

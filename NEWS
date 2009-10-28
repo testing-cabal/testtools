@@ -11,6 +11,8 @@ Improvements
   While the base methods do nothing, failing to upcall is usually a problem
   in deeper hierarchies, and checking that the root method is called is a 
   simple way to catch this common bug.
+* Nose will no longer find 'runTest' tests in classes derived from
+   testtools.testcase.TestCase (bug #312257).
 * Supports the Python 2.7/3.1 addUnexpectedSuccess and addExpectedFailure
   TestResult methods.
 * Compatible with Python 2.6 and Python 2.7
