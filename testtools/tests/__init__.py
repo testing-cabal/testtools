@@ -1,10 +1,24 @@
 # See README for copyright and licensing details.
 
 import unittest
-from testtools.tests import test_testtools, test_testresult, test_testsuite
+from testtools.tests import (
+    test_content,
+    test_content_type,
+    test_testtools,
+    test_testresult,
+    test_testsuite,
+    )
 
 
 def test_suite():
-    return unittest.TestSuite(
-        [test_testtools.test_suite(), test_testresult.test_suite(),
-        test_testsuite.test_suite()])
+    suites = []
+    modules = [
+        test_content,
+        test_content_type,
+        test_testresult,
+        test_testsuite,
+        test_testtools,
+        ]
+    for module in modules:
+        suites.append(getattr(module, 'test_suite')())
+    return unittest.TestSuite(suites)
