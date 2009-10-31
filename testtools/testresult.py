@@ -16,6 +16,17 @@ import unittest
 class TestResult(unittest.TestResult):
     """Subclass of unittest.TestResult extending the protocol for flexability.
 
+    This test result supports an experimental protocol for providing additional
+    data to in test outcomes. All the outcome methods take an optional dict
+    'details'. If supplied any other detail parameters like 'err' or 'reason'
+    should not be provided. The details dict is a mapping from names to
+    MIME content objects (see testtools.content). This permits attaching
+    tracebacks, log files, or even large objects like databases that were
+    part of the test fixture. Until this API is accepted into upstream
+    Python it is considered experimental: it may be replaced at any point
+    by a newer version more in line with upstream Python. Compatibility would
+    be aimed for in this case, but may not be possible.
+
     :ivar skip_reasons: A dict of skip-reasons -> list of tests. See addSkip.
     """
 
@@ -27,7 +38,7 @@ class TestResult(unittest.TestResult):
         self.unexpectedSuccesses = []
         # -- End:   As per python 2.7 --
 
-    def addExpectedFailure(self, test, err):
+    def addExpectedFailure(self, test, err=None, details=None):
         """Called when a test has failed in an expected manner.
 
         Like with addSuccess and addError, testStopped should still be called.
@@ -38,9 +49,29 @@ class TestResult(unittest.TestResult):
         """
         # This is the python 2.7 implementation
         self.expectedFailures.append(
-            (test, self._exc_info_to_string(err, test)))
+            (test, self._err_details_to_string(test, err, details)))
 
-    def addSkip(self, test, reason):
+    def addError(self, test, err=None, details=None):
+        """Called when an error has occurred. 'err' is a tuple of values as
+        returned by sys.exc_info().
+
+        :param details: Alternative way to supply details about the outcome.
+            see the class docstring for more information.
+        """
+        self.errors.append((test,
+            self._err_details_to_string(test, err, details)))
+
+    def addFailure(self, test, err=None, details=None):
+        """Called when an error has occurred. 'err' is a tuple of values as
+        returned by sys.exc_info().
+
+        :param details: Alternative way to supply details about the outcome.
+            see the class docstring for more information.
+        """
+        self.failures.append((test,
+            self._err_details_to_string(test, err, details)))
+
+    def addSkip(self, test, reason=None, details=None):
         """Called when a test has been skipped rather than running.
 
         Like with addSuccess and addError, testStopped should still be called.
@@ -52,14 +83,31 @@ class TestResult(unittest.TestResult):
         :param test: The test that has been skipped.
         :param reason: The reason for the test being skipped. For instance,
             u"pyGL is not available".
+        :param details: Alternative way to supply details about the outcome.
+            see the class docstring for more information.
         :return: None
         """
+        if reason is None:
+            reason = details.get('reason')
+            if reason is None:
+                reason = 'No reason given'
+            else:
+                reason = ''.join(reason.iter_bytes())
         skip_list = self.skip_reasons.setdefault(reason, [])
         skip_list.append(test)
 
-    def addUnexpectedSuccess(self, test):
+    def addSuccess(self, test, details=None):
+        """Called when a test succeeded."""
+
+    def addUnexpectedSuccess(self, test, details=None):
         """Called when a test was expected to fail, but succeed."""
         self.unexpectedSuccesses.append(test)
+
+    def _err_details_to_string(self, test, err=None, details=None):
+        """Convert an error in exc_info form or a contents dict to a string."""
+        if err is not None:
+            return self._exc_info_to_string(err, test)
+        return _details_to_str(details)
 
     def startTestRun(self):
         """Called before a test run starts.
@@ -85,7 +133,7 @@ class MultiTestResult(TestResult):
 
     def __init__(self, *results):
         TestResult.__init__(self)
-        self._results = list(results)
+        self._results = map(ExtendedToOriginalDecorator, results)
 
     def _dispatch(self, message, *args, **kwargs):
         for result in self._results:
@@ -97,23 +145,23 @@ class MultiTestResult(TestResult):
     def stopTest(self, test):
         self._dispatch('stopTest', test)
 
-    def addError(self, test, error):
-        self._dispatch('addError', test, error)
+    def addError(self, test, error=None, details=None):
+        self._dispatch('addError', test, error, details=details)
 
-    def addExpectedFailure(self, test, err):
-        self._dispatch('addExpectedFailure', test, err)
+    def addExpectedFailure(self, test, err=None, details=None):
+        self._dispatch('addExpectedFailure', test, err, details=details)
 
-    def addFailure(self, test, failure):
-        self._dispatch('addFailure', test, failure)
+    def addFailure(self, test, err=None, details=None):
+        self._dispatch('addFailure', test, err, details=details)
 
-    def addSkip(self, test, reason):
-        self._dispatch('addSkip', test, reason)
+    def addSkip(self, test, reason=None, details=None):
+        self._dispatch('addSkip', test, reason, details=details)
 
-    def addSuccess(self, test):
-        self._dispatch('addSuccess', test)
+    def addSuccess(self, test, details=None):
+        self._dispatch('addSuccess', test, details=details)
 
-    def addUnexpectedSuccess(self, test):
-        self._dispatch('addUnexpectedSuccess', test)
+    def addUnexpectedSuccess(self, test, details=None):
+        self._dispatch('addUnexpectedSuccess', test, details=details)
 
     def startTestRun(self):
         self._dispatch('startTestRun')
@@ -150,59 +198,59 @@ class ThreadsafeForwardingResult(TestResult):
         :param semaphore: A threading.Semaphore with limit 1.
         """
         TestResult.__init__(self)
-        self.result = target
+        self.result = ExtendedToOriginalDecorator(target)
         self.semaphore = semaphore
 
-    def addError(self, test, err):
+    def addError(self, test, err=None, details=None):
         self.semaphore.acquire()
         try:
             self.result.startTest(test)
-            self.result.addError(test, err)
+            self.result.addError(test, err, details=details)
             self.result.stopTest(test)
         finally:
             self.semaphore.release()
 
-    def addExpectedFailure(self, test, err):
+    def addExpectedFailure(self, test, err=None, details=None):
         self.semaphore.acquire()
         try:
             self.result.startTest(test)
-            self.result.addExpectedFailure(test, err)
+            self.result.addExpectedFailure(test, err, details=details)
             self.result.stopTest(test)
         finally:
             self.semaphore.release()
 
-    def addFailure(self, test, err):
+    def addFailure(self, test, err=None, details=None):
         self.semaphore.acquire()
         try:
             self.result.startTest(test)
-            self.result.addFailure(test, err)
+            self.result.addFailure(test, err, details=details)
             self.result.stopTest(test)
         finally:
             self.semaphore.release()
 
-    def addSkip(self, test, reason):
+    def addSkip(self, test, reason=None, details=None):
         self.semaphore.acquire()
         try:
             self.result.startTest(test)
-            self.result.addSkip(test, reason)
+            self.result.addSkip(test, reason, details=details)
             self.result.stopTest(test)
         finally:
             self.semaphore.release()
 
-    def addSuccess(self, test):
+    def addSuccess(self, test, details=None):
         self.semaphore.acquire()
         try:
             self.result.startTest(test)
-            self.result.addSuccess(test)
+            self.result.addSuccess(test, details=details)
             self.result.stopTest(test)
         finally:
             self.semaphore.release()
 
-    def addUnexpectedSuccess(self, test):
+    def addUnexpectedSuccess(self, test, details=None):
         self.semaphore.acquire()
         try:
             self.result.startTest(test)
-            self.result.addUnexpectedSuccess(test)
+            self.result.addUnexpectedSuccess(test, details=details)
             self.result.stopTest(test)
         finally:
             self.semaphore.release()
@@ -285,7 +333,7 @@ class ExtendedToOriginalDecorator(object):
                 return addSkip(test, details=details)
             except TypeError, e:
                 # have to convert
-                reason = self._details_to_str(details)
+                reason = _details_to_str(details)
         return addSkip(test, reason)
 
     def addUnexpectedSuccess(self, test, details=None):
@@ -320,24 +368,13 @@ class ExtendedToOriginalDecorator(object):
     def _details_to_exc_info(self, details):
         """Convert a details dict to an exc_info tuple."""
         return (_StringException,
-            _StringException(self._details_to_str(details)), None)
+            _StringException(_details_to_str(details)), None)
 
-    def _details_to_str(self, details):
-        """Convert a details dict to a string."""
-        lines = []
-        # sorted is for testing, may want to remove that and use a dict
-        # subclass with defined order for iteritems instead.
-        for key, content in sorted(details.iteritems()):
-            if content.content_type.type != 'text':
-                lines.append('Binary content: %s\n' % key)
-                continue
-            lines.append('Text attachment: %s\n' % key)
-            lines.append('------------\n')
-            lines.extend(content.iter_bytes())
-            if not lines[-1].endswith('\n'):
-                lines.append('\n')
-            lines.append('------------\n')
-        return ''.join(lines)
+    def done(self):
+        try:
+            return self.decorated.done()
+        except AttributeError:
+            return
 
     def progress(self, offset, whence):
         method = getattr(self.decorated, 'progress', None)
@@ -394,4 +431,22 @@ class _StringException(Exception):
             return self.args == other.args
         except AttributeError:
             return False
+
+
+def _details_to_str(details):
+    """Convert a details dict to a string."""
+    lines = []
+    # sorted is for testing, may want to remove that and use a dict
+    # subclass with defined order for iteritems instead.
+    for key, content in sorted(details.iteritems()):
+        if content.content_type.type != 'text':
+            lines.append('Binary content: %s\n' % key)
+            continue
+        lines.append('Text attachment: %s\n' % key)
+        lines.append('------------\n')
+        lines.extend(content.iter_bytes())
+        if not lines[-1].endswith('\n'):
+            lines.append('\n')
+        lines.append('------------\n')
+    return ''.join(lines)
 
