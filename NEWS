@@ -7,12 +7,26 @@ testtools NEWS
 Improvements
 ------------
 
+* Compatible with Python 2.6 and Python 2.7
+
 * Failing to upcall in setUp or tearDown will now cause a test failure.
   While the base methods do nothing, failing to upcall is usually a problem
   in deeper hierarchies, and checking that the root method is called is a 
   simple way to catch this common bug.
+
+* New TestResult decorator ExtendedToOriginalDecorator which handles
+  downgrading extended API calls like addSkip to older result objects that
+  do not support them. This is used internally to make testtools simpler but
+  can also be used to simplify other code built on or for use with testtools.
+
 * Nose will no longer find 'runTest' tests in classes derived from
    testtools.testcase.TestCase (bug #312257).
+
 * Supports the Python 2.7/3.1 addUnexpectedSuccess and addExpectedFailure
   TestResult methods.
-* Compatible with Python 2.6 and Python 2.7
+
+* When using the skip feature with TestResult objects that do not support it
+  a test success will now be reported. Previously an error was reported but
+  production experience has shown that this is too disruptive for projects that
+  are using skips: they cannot get a clean run on down-level result objects.
+

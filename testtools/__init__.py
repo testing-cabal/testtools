@@ -5,6 +5,7 @@
 __all__ = [
     'clone_test_with_new_id',
     'ConcurrentTestSuite',
+    'ExtendedToOriginalDecorator',
     'iterate_tests',
     'MultiTestResult',
     'TestCase',
@@ -23,6 +24,7 @@ from testtools.testcase import (
     skipUnless,
     )
 from testtools.testresult import (
+    ExtendedToOriginalDecorator,
     MultiTestResult,
     TestResult,
     ThreadsafeForwardingResult,

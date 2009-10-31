@@ -16,6 +16,8 @@ import functools
 import sys
 import unittest
 
+from testtools.testresult import ExtendedToOriginalDecorator
+
 
 class TestSkipped(Exception):
     """Raised within TestCase.run() when a test is skipped."""
@@ -145,21 +147,10 @@ class TestCase(unittest.TestCase):
     def getUniqueString(self):
         return '%s-%d' % (self._testMethodName, self.getUniqueInteger())
 
-    def _handle_skip(self, result, reason):
-        """Pass a skip to result.
-
-        If result has an addSkip method, this is called. If not, addError is
-        called instead.
-        """
-        addSkip = getattr(result, 'addSkip', None)
-        if not callable(addSkip):
-            result.addError(self, sys.exc_info())
-        else:
-            addSkip(self, reason)
-
     def run(self, result=None):
         if result is None:
             result = self.defaultTestResult()
+        result = ExtendedToOriginalDecorator(result)
         result.startTest(self)
         testMethod = getattr(self, self._testMethodName)
         try:
@@ -170,7 +161,7 @@ class TestCase(unittest.TestCase):
             except KeyboardInterrupt:
                 raise
             except self.skipException, e:
-                self._handle_skip(result, e.args[0])
+                result.addSkip(self, e.args[0])
                 self._runCleanups(result)
                 return
             except:
@@ -183,7 +174,7 @@ class TestCase(unittest.TestCase):
                 testMethod()
                 ok = True
             except self.skipException, e:
-                self._handle_skip(result, e.args[0])
+                result.addSkip(self, e.args[0])
             except self.failureException:
                 result.addFailure(self, sys.exc_info())
             except KeyboardInterrupt:
