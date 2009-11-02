@@ -31,21 +31,51 @@ class TestTestResultContract(TestCase):
         result = self.makeResult()
         result.addExpectedFailure(self, sys.exc_info())
 
+    def test_addExpectedFailure_details(self):
+        # Calling addExpectedFailure(test, details=xxx) completes ok.
+        result = self.makeResult()
+        result.addExpectedFailure(self, details={})
+
+    def test_addError_details(self):
+        # Calling addError(test, details=xxx) completes ok.
+        result = self.makeResult()
+        result.addError(self, details={})
+
+    def test_addFailure_details(self):
+        # Calling addFailure(test, details=xxx) completes ok.
+        result = self.makeResult()
+        result.addFailure(self, details={})
+
     def test_addSkipped(self):
         # Calling addSkip(test, reason) completes ok.
         result = self.makeResult()
         result.addSkip(self, u"Skipped for some reason")
+
+    def test_addSkipped_details(self):
+        # Calling addSkip(test, reason) completes ok.
+        result = self.makeResult()
+        result.addSkip(self, details={})
+
+    def test_addUnexpectedSuccess(self):
+        # Calling addUnexpectedSuccess(test) completes ok.
+        result = self.makeResult()
+        result.addUnexpectedSuccess(self)
+
+    def test_addUnexpectedSuccess_details(self):
+        # Calling addUnexpectedSuccess(test) completes ok.
+        result = self.makeResult()
+        result.addUnexpectedSuccess(self, details={})
+
+    def test_addSuccess_details(self):
+        # Calling addSuccess(test) completes ok.
+        result = self.makeResult()
+        result.addSuccess(self, details={})
 
     def test_startStopTestRun(self):
         # Calling startTestRun completes ok.
         result = self.makeResult()
         result.startTestRun()
         result.stopTestRun()
-
-    def test_addUnexpectedSuccess(self):
-        # Calling addUnexpectedSuccess(test) completes ok.
-        result = self.makeResult()
-        result.addUnexpectedSuccess(self)
 
 
 class TestTestResultContract(TestTestResultContract):
@@ -89,10 +119,6 @@ class TestTestResult(TestCase):
         self.assertEqual({u"Skipped for some reason":[self, self],
             u"Skipped for another reason":[self]},
             result.skip_reasons)
-
-    def test_done(self):
-        # `TestResult` has a `done` method that, by default, does nothing.
-        self.makeResult().done()
 
 
 class TestWithFakeExceptions(TestCase):
@@ -211,13 +237,6 @@ class TestThreadSafeForwardingResult(TestWithFakeExceptions):
             self.result_semaphore)
         self.result2.stopTestRun()
         self.assertEqual(["stopTestRun", "stopTestRun"], self.target._events)
-
-    def test_done(self):
-        self.result1.done()
-        self.result2 = ThreadsafeForwardingResult(self.target,
-            self.result_semaphore)
-        self.result2.done()
-        self.assertEqual(["done", "done"], self.target._events)
 
     def test_forwarding_methods(self):
         # error, failure, skip and success are forwarded in batches.
