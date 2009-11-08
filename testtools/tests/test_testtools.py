@@ -12,6 +12,7 @@ from testtools import (
     skip,
     skipIf,
     skipUnless,
+    testcase,
     )
 from testtools.tests.helpers import (
     LoggingResult,
@@ -358,6 +359,38 @@ class TestAddCleanup(TestCase):
             ['startTest', 'addError', 'addError', 'stopTest'])
 
 
+class TestExpectedFailure(TestCase):
+    """Tests for expected failures and unexpected successess."""
+
+    def make_case(self):
+        class Case(TestCase):
+            def test(self):
+                raise testcase._UnexpectedSuccess
+        case = Case('test')
+        return case
+
+    def test_raising__UnexpectedSuccess_py27(self):
+        case = self.make_case()
+        result = Python27TestResult()
+        case.run(result)
+        self.assertEqual([
+            ('startTest', case),
+            ('addUnexpectedSuccess', case),
+            ('stopTest', case),
+            ], result._events)
+
+    def test_raising__UnexpectedSuccess_extended(self):
+        case = self.make_case()
+        result = ExtendedTestResult()
+        case.run(result)
+        self.assertEqual([
+            ('startTest', case),
+            ('addUnexpectedSuccess', case, {}),
+            ('stopTest', case),
+            ], result._events)
+
+
+
 class TestUniqueFactories(TestCase):
     """Tests for getUniqueString and getUniqueInteger."""
 
@@ -461,7 +494,12 @@ class TestDetails(TestCase):
             ["foo"])
 
     def test_addUnexpectedSuccess(self):
-        self.skip('cannot trigger UnexpectedSuccess from client code yet.')
+        class Case(TestCase):
+            def test(this):
+                this.addDetail("foo", self.get_content())
+                raise testcase._UnexpectedSuccess()
+        self.assertDetailsProvided(Case("test"), "addUnexpectedSuccess",
+            ["foo"])
 
     def test_add_expectedFailure(self):
         self.skip('cannot trigger xfail from client code yet.')

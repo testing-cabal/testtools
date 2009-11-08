@@ -24,6 +24,13 @@ class TestSkipped(Exception):
     """Raised within TestCase.run() when a test is skipped."""
 
 
+class _UnexpectedSuccess(Exception):
+    """An unexpected success was raised.
+
+    Note that this exception is private plumbing in testtools' testcase module.
+    """
+
+
 class TestCase(unittest.TestCase):
     """Extensions to the basic TestCase."""
 
@@ -200,6 +207,10 @@ class TestCase(unittest.TestCase):
                 self._report_skip(result, e.args[0])
                 self._runCleanups(result)
                 return
+            except _UnexpectedSuccess:
+                result.addUnexpectedSuccess(self, self.getDetails())
+                self._runCleanups(result)
+                return
             except:
                 self._report_error(result)
                 self._runCleanups(result)
@@ -211,6 +222,8 @@ class TestCase(unittest.TestCase):
                 ok = True
             except self.skipException, e:
                 self._report_skip(result, e.args[0])
+            except _UnexpectedSuccess:
+                result.addUnexpectedSuccess(self, self.getDetails())
             except self.failureException:
                 self._report_failure(result)
             except KeyboardInterrupt:
@@ -223,6 +236,9 @@ class TestCase(unittest.TestCase):
                 self.tearDown()
                 if not self.__teardown_callled:
                     raise ValueError("teardown was not called")
+            except _UnexpectedSuccess:
+                result.addUnexpectedSuccess(self, self.getDetails())
+                ok = False
             except KeyboardInterrupt:
                 raise
             except:
