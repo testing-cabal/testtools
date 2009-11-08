@@ -34,12 +34,29 @@ class TestCase(unittest.TestCase):
         self._last_unique_id = 0
         self.__setup_called = False
         self.__teardown_callled = False
+        self.__details = {}
 
     def __eq__(self, other):
         eq = getattr(unittest.TestCase, '__eq__', None)
         if eq is not None and not unittest.TestCase.__eq__(self, other):
             return False
         return self.__dict__ == other.__dict__
+
+    def addDetail(self, name, content_object):
+        """Add a detail to be reported with this test's outcome.
+
+        :param name: The name to give this detail.
+        :param content_object: The content object for this detail. See
+            testtools.content for more detail.
+        """
+        self.__details[name] = content_object
+
+    def getDetails(self):
+        """Get the details dict that will be reported with this test's outcome.
+
+        For more detials see pydoc testtools.TestResult.
+        """
+        return self.__details
 
     def shortDescription(self):
         return self.id()

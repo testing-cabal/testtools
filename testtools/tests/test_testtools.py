@@ -6,6 +6,7 @@ import unittest
 from testtools import (
     TestCase,
     clone_test_with_new_id,
+    content,
     skip,
     skipIf,
     skipUnless,
@@ -388,6 +389,19 @@ class TestCloneTestWithNewId(TestCase):
         self.assertEqual(newName, newTest.id())
         self.assertEqual(oldName, test.id(),
             "the original test instance should be unchanged.")
+
+
+class TestDetails(TestCase):
+
+    def test_addDetail(self):
+        def Case(TestCase):
+            def test(self):
+                pass
+        mycontent = content.Content(
+            content.ContentType("text", "foo"), lambda:['foo'])
+        self.addDetail("foo", mycontent)
+        details = self.getDetails()
+        self.assertEqual({"foo": mycontent}, details)
 
 
 class TestSetupTearDown(TestCase):
