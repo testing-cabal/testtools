@@ -10,7 +10,7 @@ Improvements
 * A new TestResult API has been added for attaching details to test outcomes.
   This API is currently experimental, but is being prepared with the intent
   of becoming an upstream Python API. For more details see pydoc
-  testtools.TestResult.
+  testtools.TestResult and the TestCase addDetail / getDetails methods.
 
 * Compatible with Python 2.6 and Python 2.7
 

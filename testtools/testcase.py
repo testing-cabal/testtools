@@ -16,6 +16,7 @@ import functools
 import sys
 import unittest
 
+from testtools import content
 from testtools.testresult import ExtendedToOriginalDecorator
 
 
@@ -96,7 +97,7 @@ class TestCase(unittest.TestCase):
             except KeyboardInterrupt:
                 raise
             except:
-                result.addError(self, sys.exc_info())
+                self._report_error(result)
                 ok = False
         return ok
 
@@ -164,6 +165,24 @@ class TestCase(unittest.TestCase):
     def getUniqueString(self):
         return '%s-%d' % (self._testMethodName, self.getUniqueInteger())
 
+    def _report_error(self, result):
+        self._report_traceback()
+        result.addError(self, details=self.getDetails())
+
+    def _report_failure(self, result):
+        self._report_traceback()
+        result.addFailure(self, details=self.getDetails())
+
+    def _report_skip(self, result, reason):
+        self.addDetail('reason', content.Content(
+            content.ContentType('text', 'plain'),
+            lambda:[reason.encode('utf8')]))
+        result.addSkip(self, details=self.getDetails())
+
+    def _report_traceback(self):
+        self.addDetail('traceback',
+            content.TracebackContent(sys.exc_info(), self))
+
     def run(self, result=None):
         if result is None:
             result = self.defaultTestResult()
@@ -178,11 +197,11 @@ class TestCase(unittest.TestCase):
             except KeyboardInterrupt:
                 raise
             except self.skipException, e:
-                result.addSkip(self, e.args[0])
+                self._report_skip(result, e.args[0])
                 self._runCleanups(result)
                 return
             except:
-                result.addError(self, sys.exc_info())
+                self._report_error(result)
                 self._runCleanups(result)
                 return
 
@@ -191,13 +210,13 @@ class TestCase(unittest.TestCase):
                 testMethod()
                 ok = True
             except self.skipException, e:
-                result.addSkip(self, e.args[0])
+                self._report_skip(result, e.args[0])
             except self.failureException:
-                result.addFailure(self, sys.exc_info())
+                self._report_failure(result)
             except KeyboardInterrupt:
                 raise
             except:
-                result.addError(self, sys.exc_info())
+                self._report_error(result)
 
             cleanupsOk = self._runCleanups(result)
             try:
@@ -207,10 +226,10 @@ class TestCase(unittest.TestCase):
             except KeyboardInterrupt:
                 raise
             except:
-                result.addError(self, sys.exc_info())
+                self._report_error(result)
                 ok = False
             if ok and cleanupsOk:
-                result.addSuccess(self)
+                result.addSuccess(self, details=self.getDetails())
         finally:
             result.stopTest(self)
 

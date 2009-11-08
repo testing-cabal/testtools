@@ -2,7 +2,9 @@
 
 """Tests for extensions to the base test library."""
 
+import sys
 import unittest
+
 from testtools import (
     TestCase,
     clone_test_with_new_id,
@@ -15,6 +17,7 @@ from testtools.tests.helpers import (
     LoggingResult,
     Python26TestResult,
     Python27TestResult,
+    ExtendedTestResult,
     )
 
 
@@ -393,15 +396,75 @@ class TestCloneTestWithNewId(TestCase):
 
 class TestDetails(TestCase):
 
-    def test_addDetail(self):
-        def Case(TestCase):
-            def test(self):
-                pass
-        mycontent = content.Content(
+    def get_content(self):
+        return content.Content(
             content.ContentType("text", "foo"), lambda:['foo'])
+
+    def test_addDetail(self):
+        mycontent = self.get_content()
         self.addDetail("foo", mycontent)
         details = self.getDetails()
         self.assertEqual({"foo": mycontent}, details)
+
+    def assertDetailsProvided(self, case, expected_outcome, expected_keys):
+        """Assert that when case is run, details are provided to the result.
+
+        :param case: A TestCase to run.
+        :param expected_outcome: The call that should be made.
+        :param expected_keys: The keys to look for.
+        """
+        result = ExtendedTestResult()
+        case.run(result)
+        expected = [
+            ('startTest', case),
+            (expected_outcome, case),
+            ('stopTest', case),
+            ]
+        self.assertEqual(3, len(result._events))
+        self.assertEqual(expected[0], result._events[0])
+        # Checking the TB is right is rather tricky. doctest line matching
+        # would help, but 'meh'.
+        self.assertEqual(sorted(expected_keys),
+            sorted(result._events[1][2].keys()))
+        self.assertEqual(expected[1], result._events[1][0:2])
+        self.assertEqual(expected[-1], result._events[-1])
+
+    def test_addError(self):
+        class Case(TestCase):
+            def test(this):
+                this.addDetail("foo", self.get_content())
+                1/0
+        self.assertDetailsProvided(Case("test"), "addError",
+            ["foo", "traceback"])
+
+    def test_addFailure(self):
+        class Case(TestCase):
+            def test(this):
+                this.addDetail("foo", self.get_content())
+                self.fail('yo')
+        self.assertDetailsProvided(Case("test"), "addFailure",
+            ["foo", "traceback"])
+
+    def test_addSkip(self):
+        class Case(TestCase):
+            def test(this):
+                this.addDetail("foo", self.get_content())
+                self.skip('yo')
+        self.assertDetailsProvided(Case("test"), "addSkip",
+            ["foo", "reason"])
+
+    def test_addSucccess(self):
+        class Case(TestCase):
+            def test(this):
+                this.addDetail("foo", self.get_content())
+        self.assertDetailsProvided(Case("test"), "addSuccess",
+            ["foo"])
+
+    def test_addUnexpectedSuccess(self):
+        self.skip('cannot trigger UnexpectedSuccess from client code yet.')
+
+    def test_add_expectedFailure(self):
+        self.skip('cannot trigger xfail from client code yet.')
 
 
 class TestSetupTearDown(TestCase):
@@ -445,7 +508,8 @@ class TestSkipping(TestCase):
         test = TestThatRaisesInSetUp("test_that_passes")
         test.run(result)
         self.assertEqual([('startTest', test),
-            ('addSkip', test, "skipping this test"), ('stopTest', test)],
+            ('addSkip', test, "Text attachment: reason\n------------\n"
+             "skipping this test\n------------\n"), ('stopTest', test)],
             calls)
 
     def test_skipException_in_test_method_calls_result_addSkip(self):
@@ -456,7 +520,8 @@ class TestSkipping(TestCase):
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
         self.assertEqual([('startTest', test),
-            ('addSkip', test, "skipping this test"), ('stopTest', test)],
+            ('addSkip', test, "Text attachment: reason\n------------\n"
+             "skipping this test\n------------\n"), ('stopTest', test)],
             result._events)
 
     def test_skip__in_setup_with_old_result_object_calls_addSuccess(self):
