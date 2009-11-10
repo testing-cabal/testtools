@@ -28,7 +28,8 @@ Improvements
    testtools.testcase.TestCase (bug #312257).
 
 * Supports the Python 2.7/3.1 addUnexpectedSuccess and addExpectedFailure
-  TestResult methods.
+  TestResult methods, with a support function 'knownFailure' to let tests
+  trigger these outcomes.
 
 * When using the skip feature with TestResult objects that do not support it
   a test success will now be reported. Previously an error was reported but

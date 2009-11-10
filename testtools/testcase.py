@@ -24,12 +24,22 @@ class TestSkipped(Exception):
     """Raised within TestCase.run() when a test is skipped."""
 
 
-class _UnexpectedSuccess(Exception):
-    """An unexpected success was raised.
+try:
+    from unittest.case import _ExpectedFailure, _UnexpectedSuccess
+except ImportError:
+    class _UnexpectedSuccess(Exception):
+        """An unexpected success was raised.
 
-    Note that this exception is private plumbing in testtools' testcase module.
-    """
+        Note that this exception is private plumbing in testtools' testcase
+        module.
+        """
 
+    class _ExpectedFailure(Exception):
+        """An expected failure occured.
+
+        Note that this exception is private plumbing in testtools' testcase
+        module.
+        """
 
 class TestCase(unittest.TestCase):
     """Extensions to the basic TestCase."""
@@ -123,6 +133,11 @@ class TestCase(unittest.TestCase):
         """
         self._cleanups.append((function, arguments, keywordArguments))
 
+    def _add_reason(self, reason):
+        self.addDetail('reason', content.Content(
+            content.ContentType('text', 'plain'),
+            lambda:[reason.encode('utf8')]))
+
     def assertIn(self, needle, haystack):
         """Assert that needle is in haystack."""
         self.assertTrue(
@@ -165,6 +180,33 @@ class TestCase(unittest.TestCase):
             self.fail("%s not raised, %r returned instead." % (excName, ret))
     failUnlessRaises = assertRaises
 
+    def expectFailure(self, reason, predicate, *args, **kwargs):
+        """Check that a test fails in a particular way.
+
+        If the test fails in the expected way, a KnownFailure is caused. If it
+        succeeds an UnexpectedSuccess is caused.
+
+        The expected use of expectFailure is as a barrier at the point in a
+        test where the test would fail. For example:
+        >>> def test_foo(self):
+        >>>    self.expectFailure("1 should be 0", self.assertNotEqual, 1, 0)
+        >>>    self.assertEqual(1, 0)
+
+        If in the future 1 were to equal 0, the expectFailure call can simply
+        be removed. This separation preserves the original intent of the test
+        while it is in the expectFailure mode.
+        """
+        self._add_reason(reason)
+        try:
+            predicate(*args, **kwargs)
+        except self.failureException:
+            exc_info = sys.exc_info()
+            self.addDetail('traceback',
+                content.TracebackContent(exc_info, self))
+            raise _ExpectedFailure(exc_info)
+        else:
+            raise _UnexpectedSuccess(reason)
+
     def getUniqueInteger(self):
         self._last_unique_id += 1
         return self._last_unique_id
@@ -181,9 +223,7 @@ class TestCase(unittest.TestCase):
         result.addFailure(self, details=self.getDetails())
 
     def _report_skip(self, result, reason):
-        self.addDetail('reason', content.Content(
-            content.ContentType('text', 'plain'),
-            lambda:[reason.encode('utf8')]))
+        self._add_reason(reason)
         result.addSkip(self, details=self.getDetails())
 
     def _report_traceback(self):
@@ -207,8 +247,12 @@ class TestCase(unittest.TestCase):
                 self._report_skip(result, e.args[0])
                 self._runCleanups(result)
                 return
+            except _ExpectedFailure:
+                result.addExpectedFailure(self, details=self.getDetails())
+                self._runCleanups(result)
+                return
             except _UnexpectedSuccess:
-                result.addUnexpectedSuccess(self, self.getDetails())
+                result.addUnexpectedSuccess(self, details=self.getDetails())
                 self._runCleanups(result)
                 return
             except:
@@ -222,8 +266,10 @@ class TestCase(unittest.TestCase):
                 ok = True
             except self.skipException, e:
                 self._report_skip(result, e.args[0])
+            except _ExpectedFailure:
+                result.addExpectedFailure(self, details=self.getDetails())
             except _UnexpectedSuccess:
-                result.addUnexpectedSuccess(self, self.getDetails())
+                result.addUnexpectedSuccess(self, details=self.getDetails())
             except self.failureException:
                 self._report_failure(result)
             except KeyboardInterrupt:
@@ -236,8 +282,11 @@ class TestCase(unittest.TestCase):
                 self.tearDown()
                 if not self.__teardown_callled:
                     raise ValueError("teardown was not called")
+            except _ExpectedFailure:
+                result.addExpectedFailure(self, details=self.getDetails())
+                ok = False
             except _UnexpectedSuccess:
-                result.addUnexpectedSuccess(self, self.getDetails())
+                result.addUnexpectedSuccess(self, details=self.getDetails())
                 ok = False
             except KeyboardInterrupt:
                 raise
