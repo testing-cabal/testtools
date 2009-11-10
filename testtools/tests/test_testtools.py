@@ -533,9 +533,6 @@ class TestDetailsProvided(TestWithDetails):
         self.assertDetailsProvided(Case("test"), "addUnexpectedSuccess",
             ["foo"])
 
-    def test_add_expectedFailure(self):
-        self.skip('cannot trigger xfail from client code yet.')
-
 
 class TestSetupTearDown(TestCase):
 
