@@ -25,8 +25,10 @@ class TestSkipped(Exception):
 
 
 try:
+    # Try to use the same exceptions python 2.7 does.
     from unittest.case import _ExpectedFailure, _UnexpectedSuccess
 except ImportError:
+    # Oops, not available, make our own.
     class _UnexpectedSuccess(Exception):
         """An unexpected success was raised.
 
@@ -63,6 +65,8 @@ class TestCase(unittest.TestCase):
     def addDetail(self, name, content_object):
         """Add a detail to be reported with this test's outcome.
 
+        For more details see pydoc testtools.TestResult.
+
         :param name: The name to give this detail.
         :param content_object: The content object for this detail. See
             testtools.content for more detail.
@@ -72,7 +76,7 @@ class TestCase(unittest.TestCase):
     def getDetails(self):
         """Get the details dict that will be reported with this test's outcome.
 
-        For more detials see pydoc testtools.TestResult.
+        For more details see pydoc testtools.TestResult.
         """
         return self.__details
 
