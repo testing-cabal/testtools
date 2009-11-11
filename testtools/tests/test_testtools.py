@@ -2,18 +2,23 @@
 
 """Tests for extensions to the base test library."""
 
+import sys
 import unittest
+
 from testtools import (
     TestCase,
     clone_test_with_new_id,
+    content,
     skip,
     skipIf,
     skipUnless,
+    testcase,
     )
 from testtools.tests.helpers import (
     LoggingResult,
     Python26TestResult,
     Python27TestResult,
+    ExtendedTestResult,
     )
 
 
@@ -354,6 +359,97 @@ class TestAddCleanup(TestCase):
             ['startTest', 'addError', 'addError', 'stopTest'])
 
 
+class TestWithDetails(TestCase):
+
+    def assertDetailsProvided(self, case, expected_outcome, expected_keys):
+        """Assert that when case is run, details are provided to the result.
+
+        :param case: A TestCase to run.
+        :param expected_outcome: The call that should be made.
+        :param expected_keys: The keys to look for.
+        """
+        result = ExtendedTestResult()
+        case.run(result)
+        expected = [
+            ('startTest', case),
+            (expected_outcome, case),
+            ('stopTest', case),
+            ]
+        self.assertEqual(3, len(result._events))
+        self.assertEqual(expected[0], result._events[0])
+        self.assertEqual(expected[1], result._events[1][0:2])
+        # Checking the TB is right is rather tricky. doctest line matching
+        # would help, but 'meh'.
+        self.assertEqual(sorted(expected_keys),
+            sorted(result._events[1][2].keys()))
+        self.assertEqual(expected[-1], result._events[-1])
+
+    def get_content(self):
+        return content.Content(
+            content.ContentType("text", "foo"), lambda:['foo'])
+
+
+class TestExpectedFailure(TestWithDetails):
+    """Tests for expected failures and unexpected successess."""
+
+    def make_unexpected_case(self):
+        class Case(TestCase):
+            def test(self):
+                raise testcase._UnexpectedSuccess
+        case = Case('test')
+        return case
+
+    def test_raising__UnexpectedSuccess_py27(self):
+        case = self.make_unexpected_case()
+        result = Python27TestResult()
+        case.run(result)
+        self.assertEqual([
+            ('startTest', case),
+            ('addUnexpectedSuccess', case),
+            ('stopTest', case),
+            ], result._events)
+
+    def test_raising__UnexpectedSuccess_extended(self):
+        case = self.make_unexpected_case()
+        result = ExtendedTestResult()
+        case.run(result)
+        self.assertEqual([
+            ('startTest', case),
+            ('addUnexpectedSuccess', case, {}),
+            ('stopTest', case),
+            ], result._events)
+
+    def make_xfail_case_xfails(self):
+        content = self.get_content()
+        class Case(TestCase):
+            def test(self):
+                self.addDetail("foo", content)
+                self.expectFailure("we are sad", self.assertEqual,
+                    1, 0)
+        case = Case('test')
+        return case
+
+    def make_xfail_case_succeeds(self):
+        content = self.get_content()
+        class Case(TestCase):
+            def test(self):
+                self.addDetail("foo", content)
+                self.expectFailure("we are sad", self.assertEqual,
+                    1, 1)
+        case = Case('test')
+        return case
+
+    def test_expectFailure_KnownFailure_extended(self):
+        case = self.make_xfail_case_xfails()
+        self.assertDetailsProvided(case, "addExpectedFailure",
+            ["foo", "traceback", "reason"])
+
+    def test_expectFailure_KnownFailure_unexpected_success(self):
+        case = self.make_xfail_case_succeeds()
+        self.assertDetailsProvided(case, "addUnexpectedSuccess",
+            ["foo", "reason"])
+
+
 class TestUniqueFactories(TestCase):
     """Tests for getUniqueString and getUniqueInteger."""
 
@@ -388,6 +484,54 @@ class TestCloneTestWithNewId(TestCase):
         self.assertEqual(newName, newTest.id())
         self.assertEqual(oldName, test.id(),
             "the original test instance should be unchanged.")
+
+
+class TestDetailsProvided(TestWithDetails):
+
+    def test_addDetail(self):
+        mycontent = self.get_content()
+        self.addDetail("foo", mycontent)
+        details = self.getDetails()
+        self.assertEqual({"foo": mycontent}, details)
+
+    def test_addError(self):
+        class Case(TestCase):
+            def test(this):
+                this.addDetail("foo", self.get_content())
+                1/0
+        self.assertDetailsProvided(Case("test"), "addError",
+            ["foo", "traceback"])
+
+    def test_addFailure(self):
+        class Case(TestCase):
+            def test(this):
+                this.addDetail("foo", self.get_content())
+                self.fail('yo')
+        self.assertDetailsProvided(Case("test"), "addFailure",
+            ["foo", "traceback"])
+
+    def test_addSkip(self):
+        class Case(TestCase):
+            def test(this):
+                this.addDetail("foo", self.get_content())
+                self.skip('yo')
+        self.assertDetailsProvided(Case("test"), "addSkip",
+            ["foo", "reason"])
+
+    def test_addSucccess(self):
+        class Case(TestCase):
+            def test(this):
+                this.addDetail("foo", self.get_content())
+        self.assertDetailsProvided(Case("test"), "addSuccess",
+            ["foo"])
+
+    def test_addUnexpectedSuccess(self):
+        class Case(TestCase):
+            def test(this):
+                this.addDetail("foo", self.get_content())
+                raise testcase._UnexpectedSuccess()
+        self.assertDetailsProvided(Case("test"), "addUnexpectedSuccess",
+            ["foo"])
 
 
 class TestSetupTearDown(TestCase):
@@ -431,7 +575,8 @@ class TestSkipping(TestCase):
         test = TestThatRaisesInSetUp("test_that_passes")
         test.run(result)
         self.assertEqual([('startTest', test),
-            ('addSkip', test, "skipping this test"), ('stopTest', test)],
+            ('addSkip', test, "Text attachment: reason\n------------\n"
+             "skipping this test\n------------\n"), ('stopTest', test)],
             calls)
 
     def test_skipException_in_test_method_calls_result_addSkip(self):
@@ -442,7 +587,8 @@ class TestSkipping(TestCase):
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
         self.assertEqual([('startTest', test),
-            ('addSkip', test, "skipping this test"), ('stopTest', test)],
+            ('addSkip', test, "Text attachment: reason\n------------\n"
+             "skipping this test\n------------\n"), ('stopTest', test)],
             result._events)
 
     def test_skip__in_setup_with_old_result_object_calls_addSuccess(self):

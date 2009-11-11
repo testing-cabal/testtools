@@ -16,12 +16,32 @@ import functools
 import sys
 import unittest
 
+from testtools import content
 from testtools.testresult import ExtendedToOriginalDecorator
 
 
 class TestSkipped(Exception):
     """Raised within TestCase.run() when a test is skipped."""
 
+
+try:
+    # Try to use the same exceptions python 2.7 does.
+    from unittest.case import _ExpectedFailure, _UnexpectedSuccess
+except ImportError:
+    # Oops, not available, make our own.
+    class _UnexpectedSuccess(Exception):
+        """An unexpected success was raised.
+
+        Note that this exception is private plumbing in testtools' testcase
+        module.
+        """
+
+    class _ExpectedFailure(Exception):
+        """An expected failure occured.
+
+        Note that this exception is private plumbing in testtools' testcase
+        module.
+        """
 
 class TestCase(unittest.TestCase):
     """Extensions to the basic TestCase."""
@@ -34,12 +54,31 @@ class TestCase(unittest.TestCase):
         self._last_unique_id = 0
         self.__setup_called = False
         self.__teardown_callled = False
+        self.__details = {}
 
     def __eq__(self, other):
         eq = getattr(unittest.TestCase, '__eq__', None)
         if eq is not None and not unittest.TestCase.__eq__(self, other):
             return False
         return self.__dict__ == other.__dict__
+
+    def addDetail(self, name, content_object):
+        """Add a detail to be reported with this test's outcome.
+
+        For more details see pydoc testtools.TestResult.
+
+        :param name: The name to give this detail.
+        :param content_object: The content object for this detail. See
+            testtools.content for more detail.
+        """
+        self.__details[name] = content_object
+
+    def getDetails(self):
+        """Get the details dict that will be reported with this test's outcome.
+
+        For more details see pydoc testtools.TestResult.
+        """
+        return self.__details
 
     def shortDescription(self):
         return self.id()
@@ -79,7 +118,7 @@ class TestCase(unittest.TestCase):
             except KeyboardInterrupt:
                 raise
             except:
-                result.addError(self, sys.exc_info())
+                self._report_error(result)
                 ok = False
         return ok
 
@@ -97,6 +136,11 @@ class TestCase(unittest.TestCase):
         even if setUp is aborted by an exception.
         """
         self._cleanups.append((function, arguments, keywordArguments))
+
+    def _add_reason(self, reason):
+        self.addDetail('reason', content.Content(
+            content.ContentType('text', 'plain'),
+            lambda:[reason.encode('utf8')]))
 
     def assertIn(self, needle, haystack):
         """Assert that needle is in haystack."""
@@ -140,12 +184,55 @@ class TestCase(unittest.TestCase):
             self.fail("%s not raised, %r returned instead." % (excName, ret))
     failUnlessRaises = assertRaises
 
+    def expectFailure(self, reason, predicate, *args, **kwargs):
+        """Check that a test fails in a particular way.
+
+        If the test fails in the expected way, a KnownFailure is caused. If it
+        succeeds an UnexpectedSuccess is caused.
+
+        The expected use of expectFailure is as a barrier at the point in a
+        test where the test would fail. For example:
+        >>> def test_foo(self):
+        >>>    self.expectFailure("1 should be 0", self.assertNotEqual, 1, 0)
+        >>>    self.assertEqual(1, 0)
+
+        If in the future 1 were to equal 0, the expectFailure call can simply
+        be removed. This separation preserves the original intent of the test
+        while it is in the expectFailure mode.
+        """
+        self._add_reason(reason)
+        try:
+            predicate(*args, **kwargs)
+        except self.failureException:
+            exc_info = sys.exc_info()
+            self.addDetail('traceback',
+                content.TracebackContent(exc_info, self))
+            raise _ExpectedFailure(exc_info)
+        else:
+            raise _UnexpectedSuccess(reason)
+
     def getUniqueInteger(self):
         self._last_unique_id += 1
         return self._last_unique_id
 
     def getUniqueString(self):
         return '%s-%d' % (self._testMethodName, self.getUniqueInteger())
+
+    def _report_error(self, result):
+        self._report_traceback()
+        result.addError(self, details=self.getDetails())
+
+    def _report_failure(self, result):
+        self._report_traceback()
+        result.addFailure(self, details=self.getDetails())
+
+    def _report_skip(self, result, reason):
+        self._add_reason(reason)
+        result.addSkip(self, details=self.getDetails())
+
+    def _report_traceback(self):
+        self.addDetail('traceback',
+            content.TracebackContent(sys.exc_info(), self))
 
     def run(self, result=None):
         if result is None:
@@ -161,11 +248,19 @@ class TestCase(unittest.TestCase):
             except KeyboardInterrupt:
                 raise
             except self.skipException, e:
-                result.addSkip(self, e.args[0])
+                self._report_skip(result, e.args[0])
+                self._runCleanups(result)
+                return
+            except _ExpectedFailure:
+                result.addExpectedFailure(self, details=self.getDetails())
+                self._runCleanups(result)
+                return
+            except _UnexpectedSuccess:
+                result.addUnexpectedSuccess(self, details=self.getDetails())
                 self._runCleanups(result)
                 return
             except:
-                result.addError(self, sys.exc_info())
+                self._report_error(result)
                 self._runCleanups(result)
                 return
 
@@ -174,26 +269,36 @@ class TestCase(unittest.TestCase):
                 testMethod()
                 ok = True
             except self.skipException, e:
-                result.addSkip(self, e.args[0])
+                self._report_skip(result, e.args[0])
+            except _ExpectedFailure:
+                result.addExpectedFailure(self, details=self.getDetails())
+            except _UnexpectedSuccess:
+                result.addUnexpectedSuccess(self, details=self.getDetails())
             except self.failureException:
-                result.addFailure(self, sys.exc_info())
+                self._report_failure(result)
             except KeyboardInterrupt:
                 raise
             except:
-                result.addError(self, sys.exc_info())
+                self._report_error(result)
 
             cleanupsOk = self._runCleanups(result)
             try:
                 self.tearDown()
                 if not self.__teardown_callled:
                     raise ValueError("teardown was not called")
+            except _ExpectedFailure:
+                result.addExpectedFailure(self, details=self.getDetails())
+                ok = False
+            except _UnexpectedSuccess:
+                result.addUnexpectedSuccess(self, details=self.getDetails())
+                ok = False
             except KeyboardInterrupt:
                 raise
             except:
-                result.addError(self, sys.exc_info())
+                self._report_error(result)
                 ok = False
             if ok and cleanupsOk:
-                result.addSuccess(self)
+                result.addSuccess(self, details=self.getDetails())
         finally:
             result.stopTest(self)
 

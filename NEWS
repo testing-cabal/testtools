@@ -10,7 +10,7 @@ Improvements
 * A new TestResult API has been added for attaching details to test outcomes.
   This API is currently experimental, but is being prepared with the intent
   of becoming an upstream Python API. For more details see pydoc
-  testtools.TestResult.
+  testtools.TestResult and the TestCase addDetail / getDetails methods.
 
 * Compatible with Python 2.6 and Python 2.7
 
@@ -28,7 +28,8 @@ Improvements
    testtools.testcase.TestCase (bug #312257).
 
 * Supports the Python 2.7/3.1 addUnexpectedSuccess and addExpectedFailure
-  TestResult methods.
+  TestResult methods, with a support function 'knownFailure' to let tests
+  trigger these outcomes.
 
 * When using the skip feature with TestResult objects that do not support it
   a test success will now be reported. Previously an error was reported but

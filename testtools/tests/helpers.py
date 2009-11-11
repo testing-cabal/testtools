@@ -129,7 +129,7 @@ class ExtendedTestResult(Python27TestResult):
             self._events.append(('addSuccess', test))
 
     def addUnexpectedSuccess(self, test, details=None):
-        if details:
+        if details is not None:
             self._events.append(('addUnexpectedSuccess', test, details))
         else:
             self._events.append(('addUnexpectedSuccess', test))
