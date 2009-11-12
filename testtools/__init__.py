@@ -10,12 +10,16 @@ __all__ = [
     'MultiTestResult',
     'TestCase',
     'TestResult',
+    'RunTest',
     'skip',
     'skipIf',
     'skipUnless',
     'ThreadsafeForwardingResult',
     ]
 
+from testtools.runtest import (
+    RunTest,
+    )
 from testtools.testcase import (
     TestCase,
     clone_test_with_new_id,

@@ -31,6 +31,10 @@ Improvements
   TestResult methods, with a support function 'knownFailure' to let tests
   trigger these outcomes.
 
+* Test execution now uses a separate class, testtools.RunTest to run single
+  tests. This can be customised and extended in a more consistent fashion than
+  the previous run method idiom. See pydoc for more information.
+
 * When using the skip feature with TestResult objects that do not support it
   a test success will now be reported. Previously an error was reported but
   production experience has shown that this is too disruptive for projects that

@@ -4,6 +4,7 @@ import unittest
 from testtools.tests import (
     test_content,
     test_content_type,
+    test_runtest,
     test_testtools,
     test_testresult,
     test_testsuite,
@@ -15,6 +16,7 @@ def test_suite():
     modules = [
         test_content,
         test_content_type,
+        test_runtest,
         test_testresult,
         test_testsuite,
         test_testtools,

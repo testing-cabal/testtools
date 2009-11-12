@@ -18,6 +18,7 @@ import unittest
 
 from testtools import content
 from testtools.testresult import ExtendedToOriginalDecorator
+from testtools.runtest import RunTest
 
 
 class TestSkipped(Exception):
@@ -43,18 +44,27 @@ except ImportError:
         module.
         """
 
+
 class TestCase(unittest.TestCase):
     """Extensions to the basic TestCase."""
 
     skipException = TestSkipped
 
     def __init__(self, *args, **kwargs):
+        """Construct a TestCase.
+
+        :param testMethod: The name of the method to run.
+        :param runTest: Optional class to use to execute the test. If not
+            supplied testtools.runtest.RunTest is used. The instance to be
+            used is created when run() is invoked, so will be fresh each time.
+        """
         unittest.TestCase.__init__(self, *args, **kwargs)
         self._cleanups = []
         self._last_unique_id = 0
         self.__setup_called = False
         self.__teardown_callled = False
         self.__details = {}
+        self._RunTest = kwargs.get('runTest', RunTest)
 
     def __eq__(self, other):
         eq = getattr(unittest.TestCase, '__eq__', None)
@@ -235,6 +245,9 @@ class TestCase(unittest.TestCase):
             content.TracebackContent(sys.exc_info(), self))
 
     def run(self, result=None):
+        return self._RunTest(self, self._run)(result)
+
+    def _run(self, result=None):
         if result is None:
             result = self.defaultTestResult()
         result = ExtendedToOriginalDecorator(result)
