@@ -250,11 +250,20 @@ class TestCase(unittest.TestCase):
     def run(self, result=None):
         return self._RunTest(self, self._run)(result)
 
-    def _run(self, result=None):
+    def _run_setup(self, result):
+        """Run the setup function for this test.
+
+        :param result: A testtools.TestResult to report activity to.
+        :raises ValueError: If the base class setup is not called, a
+            ValueError is raised.
+        """
+        self.setUp()
+        if not self.__setup_called:
+            raise ValueError("setup was not called")
+
+    def _run(self, result):
         try:
-            self.setUp()
-            if not self.__setup_called:
-                raise ValueError("setup was not called")
+            self._run_setup(result)
         except KeyboardInterrupt:
             raise
         except self.skipException, e:

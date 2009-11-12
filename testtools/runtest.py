@@ -24,6 +24,7 @@ class RunTest:
         specific code has completed.  This ivar is a transitional measure that
         will be removed once all the code has migrated.
     :ivar case: The test case that is to be run.
+    :ivar result: The result object a case is reporting to.
     """
 
     def __init__(self, case, original_run):
@@ -69,8 +70,13 @@ class RunTest:
         :return: The result object the test was run against.
         """
         result.startTest(self.case)
+        self.result = result
         try:
-            self.wrapped(result)
+            self._run_core()
         finally:
             result.stopTest(self.case)
         return result
+
+    def _run_core(self):
+        """Run the user supplied test code."""
+        self.wrapped(self.result)

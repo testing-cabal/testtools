@@ -55,6 +55,14 @@ class TestRunTest(TestCase):
         self.assertEqual([result], log)
         self.assertIsInstance(log[0].decorated, TestResult)
 
+    def test__run_core_called(self):
+        case = self.make_case()
+        log = []
+        run = RunTest(case, lambda x:x)
+        run._run_core = lambda:log.append('foo')
+        run()
+        self.assertEqual(['foo'], log)
+
     def test__run_one_decorates_result(self):
         log = []
         class Run(RunTest):
@@ -80,15 +88,15 @@ class TestRunTest(TestCase):
     def test__run_prepared_result_calls_stop_test_always(self):
         result = ExtendedTestResult()
         case = self.make_case()
-        def inner(result):
-            raise Exception("foo")
-            return result
-        run = RunTest(case, inner)
+        def inner(): raise Exception("foo")
+        run = RunTest(case, lambda x:x)
+        run._run_core = inner
         self.assertRaises(Exception, run, result)
         self.assertEqual([
             ('startTest', case),
             ('stopTest', case),
             ], result._events)
+
 
 def test_suite():
     from unittest import TestLoader
