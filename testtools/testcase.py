@@ -251,79 +251,69 @@ class TestCase(unittest.TestCase):
         return self._RunTest(self, self._run)(result)
 
     def _run_setup(self, result):
-        """Run the setup function for this test.
+        """Run the setUp function for this test.
 
         :param result: A testtools.TestResult to report activity to.
-        :raises ValueError: If the base class setup is not called, a
+        :raises ValueError: If the base class setUp is not called, a
             ValueError is raised.
         """
         self.setUp()
         if not self.__setup_called:
-            raise ValueError("setup was not called")
+            raise ValueError("setUp was not called")
+    
+    def _run_teardown(self, result):
+        """Run the tearDown function for this test.
 
-    def _run(self, result):
+        :param result: A testtools.TestResult to report activity to.
+        :raises ValueError: If the base class tearDown is not called, a
+            ValueError is raised.
+        """
+        self.tearDown()
+        if not self.__teardown_callled:
+            raise ValueError("teardown was not called")
+
+    def _run_test_method(self, result):
+        """Run the test method for this test.
+
+        :param result: A testtools.TestResult to report activity to.
+        :return: None.
+        """
+        absent_object = object()
+        # Python 2.5+
+        method_name = getattr(self, '_testMethodName', absent_object)
+        if method_name is absent_object:
+            # Python 2.4
+            method_name = getattr(self, '_TestCase__testMethodName')
+        testMethod = getattr(self, method_name)
+        testMethod()
+
+    def _run_user_function(self, function, result):
         try:
-            self._run_setup(result)
+            function(result)
+            return True
         except KeyboardInterrupt:
             raise
         except self.skipException, e:
             self._report_skip(result, e.args[0])
-            self._runCleanups(result)
-            return
-        except _ExpectedFailure:
-            result.addExpectedFailure(self, details=self.getDetails())
-            self._runCleanups(result)
-            return
-        except _UnexpectedSuccess:
-            result.addUnexpectedSuccess(self, details=self.getDetails())
-            self._runCleanups(result)
-            return
-        except:
-            self._report_error(result)
-            self._runCleanups(result)
-            return
-
-        ok = False
-        try:
-            absent_object = object()
-            # Python 2.5+
-            method_name = getattr(self, '_testMethodName', absent_object)
-            if method_name is absent_object:
-                # Python 2.4
-                method_name = getattr(self, '_TestCase__testMethodName')
-            testMethod = getattr(self, method_name)
-            testMethod()
-            ok = True
-        except self.skipException, e:
-            self._report_skip(result, e.args[0])
-        except _ExpectedFailure:
-            result.addExpectedFailure(self, details=self.getDetails())
-        except _UnexpectedSuccess:
-            result.addUnexpectedSuccess(self, details=self.getDetails())
         except self.failureException:
             self._report_failure(result)
-        except KeyboardInterrupt:
-            raise
-        except:
-            self._report_error(result)
-
-        cleanupsOk = self._runCleanups(result)
-        try:
-            self.tearDown()
-            if not self.__teardown_callled:
-                raise ValueError("teardown was not called")
         except _ExpectedFailure:
             result.addExpectedFailure(self, details=self.getDetails())
-            ok = False
         except _UnexpectedSuccess:
             result.addUnexpectedSuccess(self, details=self.getDetails())
-            ok = False
-        except KeyboardInterrupt:
-            raise
         except:
             self._report_error(result)
-            ok = False
-        if ok and cleanupsOk:
+        return False
+
+    def _run(self, result):
+        if not self._run_user_function(self._run_setup, result):
+            self._runCleanups(result)
+            return
+        # TODO: Should this run cleanups on ctrl-C?
+        ok = self._run_user_function(self._run_test_method, result)
+        cleanupsOk = self._runCleanups(result)
+        tearDownOk = self._run_user_function(self._run_teardown, result)
+        if ok and cleanupsOk and tearDownOk:
             result.addSuccess(self, details=self.getDetails())
 
     def setUp(self):

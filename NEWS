@@ -7,6 +7,8 @@ testtools NEWS
 Improvements
 ------------
 
+* A failure in setUp and tearDown now report as failures not as errors.
+
 * A new TestResult API has been added for attaching details to test outcomes.
   This API is currently experimental, but is being prepared with the intent
   of becoming an upstream Python API. For more details see pydoc
