@@ -57,7 +57,7 @@ class TestRunTest(TestCase):
     def test__run_one_decorates_result(self):
         log = []
         class Run(RunTest):
-            def _run_decorated_result(self, result):
+            def _run_prepared_result(self, result):
                 log.append(result)
                 return result
         run = Run(self.make_case(), lambda x:x)

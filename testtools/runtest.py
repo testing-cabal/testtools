@@ -60,9 +60,9 @@ class RunTest:
             confidence by client code.
         :return: The result object the test was run against.
         """
-        return self._run_decorated_result(ExtendedToOriginalDecorator(result))
+        return self._run_prepared_result(ExtendedToOriginalDecorator(result))
 
-    def _run_decorated_result(self, result):
+    def _run_prepared_result(self, result):
         """Run one test reporting to result.
 
         :param result: A testtools.TestResult to report activity to.
