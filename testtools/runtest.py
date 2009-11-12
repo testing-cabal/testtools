@@ -7,6 +7,7 @@ __all__ = [
     'RunTest',
     ]
 
+from testtools.testresult import ExtendedToOriginalDecorator
 
 class RunTest:
     """An object to run a test.
@@ -45,15 +46,26 @@ class RunTest:
         else:
             actual_result = result
         try:
-            return self.run_one(actual_result)
+            return self._run_one(actual_result)
         finally:
             if result is None:
                 actual_result.stopTestRun()
 
-    def run_one(self, result):
+    def _run_one(self, result):
         """Run one test reporting to result.
 
-        :param result: testtools.TestResult to report activity to.
+        :param result: A testtools.TestResult to report activity to.
+            This result object is decorated with an ExtendedToOriginalDecorator
+            to ensure that the latest TestResult API can be used with
+            confidence by client code.
+        :return: The result object the test was run against.
+        """
+        return self._run_decorated_result(ExtendedToOriginalDecorator(result))
+
+    def _run_decorated_result(self, result):
+        """Run one test reporting to result.
+
+        :param result: A testtools.TestResult to report activity to.
         :return: The result object the test was run against.
         """
         return self.wrapped(result)

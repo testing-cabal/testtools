@@ -251,7 +251,6 @@ class TestCase(unittest.TestCase):
         return self._RunTest(self, self._run)(result)
 
     def _run(self, result=None):
-        result = ExtendedToOriginalDecorator(result)
         result.startTest(self)
         testMethod = getattr(self, self._testMethodName)
         try:
