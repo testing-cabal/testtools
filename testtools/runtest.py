@@ -39,4 +39,21 @@ class RunTest:
         :param result: Optional testtools.TestResult to report activity to.
         :return: The result object the test was run against.
         """
+        if result is None:
+            actual_result = self.case.defaultTestResult()
+            actual_result.startTestRun()
+        else:
+            actual_result = result
+        try:
+            return self.run_one(actual_result)
+        finally:
+            if result is None:
+                actual_result.stopTestRun()
+
+    def run_one(self, result):
+        """Run one test reporting to result.
+
+        :param result: testtools.TestResult to report activity to.
+        :return: The result object the test was run against.
+        """
         return self.wrapped(result)

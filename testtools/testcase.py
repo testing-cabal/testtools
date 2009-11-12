@@ -17,7 +17,7 @@ import sys
 import unittest
 
 from testtools import content
-from testtools.testresult import ExtendedToOriginalDecorator
+from testtools.testresult import ExtendedToOriginalDecorator, TestResult
 from testtools.runtest import RunTest
 
 
@@ -194,6 +194,9 @@ class TestCase(unittest.TestCase):
             self.fail("%s not raised, %r returned instead." % (excName, ret))
     failUnlessRaises = assertRaises
 
+    def defaultTestResult(self):
+        return TestResult()
+
     def expectFailure(self, reason, predicate, *args, **kwargs):
         """Check that a test fails in a particular way.
 
@@ -248,8 +251,6 @@ class TestCase(unittest.TestCase):
         return self._RunTest(self, self._run)(result)
 
     def _run(self, result=None):
-        if result is None:
-            result = self.defaultTestResult()
         result = ExtendedToOriginalDecorator(result)
         result.startTest(self)
         testMethod = getattr(self, self._testMethodName)
@@ -263,19 +264,19 @@ class TestCase(unittest.TestCase):
             except self.skipException, e:
                 self._report_skip(result, e.args[0])
                 self._runCleanups(result)
-                return
+                return result
             except _ExpectedFailure:
                 result.addExpectedFailure(self, details=self.getDetails())
                 self._runCleanups(result)
-                return
+                return result
             except _UnexpectedSuccess:
                 result.addUnexpectedSuccess(self, details=self.getDetails())
                 self._runCleanups(result)
-                return
+                return result
             except:
                 self._report_error(result)
                 self._runCleanups(result)
-                return
+                return result
 
             ok = False
             try:
@@ -314,6 +315,7 @@ class TestCase(unittest.TestCase):
                 result.addSuccess(self, details=self.getDetails())
         finally:
             result.stopTest(self)
+        return result
 
     def setUp(self):
         unittest.TestCase.setUp(self)

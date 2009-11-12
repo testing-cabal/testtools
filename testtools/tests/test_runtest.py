@@ -7,6 +7,7 @@ import unittest
 from testtools import (
     RunTest,
     TestCase,
+    TestResult,
     )
 from testtools.tests.helpers import (
     LoggingResult,
@@ -27,7 +28,7 @@ class TestRunTest(TestCase):
     def test___call__(self):
         # run() invokes wrapped
         log = []
-        run = RunTest("bar", lambda x:log.append('foo'))
+        run = RunTest(self, lambda x:log.append('foo'))
         run()
         self.assertEqual(['foo'], log)
 
@@ -37,6 +38,14 @@ class TestRunTest(TestCase):
         run = RunTest("bar", lambda x:log.append(x))
         run('foo')
         self.assertEqual(['foo'], log)
+
+    def test___call___no_result_manages_new_result(self):
+        log = []
+        run = RunTest(self, lambda x:log.append(x) or x)
+        result = run()
+        self.assertEqual(1, len(log))
+        self.assertIsInstance(log[0], TestResult)
+        self.assertEqual(result, log[0])
 
 
 def test_suite():
