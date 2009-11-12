@@ -251,69 +251,65 @@ class TestCase(unittest.TestCase):
         return self._RunTest(self, self._run)(result)
 
     def _run(self, result=None):
-        result.startTest(self)
         testMethod = getattr(self, self._testMethodName)
         try:
-            try:
-                self.setUp()
-                if not self.__setup_called:
-                    raise ValueError("setup was not called")
-            except KeyboardInterrupt:
-                raise
-            except self.skipException, e:
-                self._report_skip(result, e.args[0])
-                self._runCleanups(result)
-                return result
-            except _ExpectedFailure:
-                result.addExpectedFailure(self, details=self.getDetails())
-                self._runCleanups(result)
-                return result
-            except _UnexpectedSuccess:
-                result.addUnexpectedSuccess(self, details=self.getDetails())
-                self._runCleanups(result)
-                return result
-            except:
-                self._report_error(result)
-                self._runCleanups(result)
-                return result
+            self.setUp()
+            if not self.__setup_called:
+                raise ValueError("setup was not called")
+        except KeyboardInterrupt:
+            raise
+        except self.skipException, e:
+            self._report_skip(result, e.args[0])
+            self._runCleanups(result)
+            return result
+        except _ExpectedFailure:
+            result.addExpectedFailure(self, details=self.getDetails())
+            self._runCleanups(result)
+            return result
+        except _UnexpectedSuccess:
+            result.addUnexpectedSuccess(self, details=self.getDetails())
+            self._runCleanups(result)
+            return result
+        except:
+            self._report_error(result)
+            self._runCleanups(result)
+            return result
 
+        ok = False
+        try:
+            testMethod()
+            ok = True
+        except self.skipException, e:
+            self._report_skip(result, e.args[0])
+        except _ExpectedFailure:
+            result.addExpectedFailure(self, details=self.getDetails())
+        except _UnexpectedSuccess:
+            result.addUnexpectedSuccess(self, details=self.getDetails())
+        except self.failureException:
+            self._report_failure(result)
+        except KeyboardInterrupt:
+            raise
+        except:
+            self._report_error(result)
+
+        cleanupsOk = self._runCleanups(result)
+        try:
+            self.tearDown()
+            if not self.__teardown_callled:
+                raise ValueError("teardown was not called")
+        except _ExpectedFailure:
+            result.addExpectedFailure(self, details=self.getDetails())
             ok = False
-            try:
-                testMethod()
-                ok = True
-            except self.skipException, e:
-                self._report_skip(result, e.args[0])
-            except _ExpectedFailure:
-                result.addExpectedFailure(self, details=self.getDetails())
-            except _UnexpectedSuccess:
-                result.addUnexpectedSuccess(self, details=self.getDetails())
-            except self.failureException:
-                self._report_failure(result)
-            except KeyboardInterrupt:
-                raise
-            except:
-                self._report_error(result)
-
-            cleanupsOk = self._runCleanups(result)
-            try:
-                self.tearDown()
-                if not self.__teardown_callled:
-                    raise ValueError("teardown was not called")
-            except _ExpectedFailure:
-                result.addExpectedFailure(self, details=self.getDetails())
-                ok = False
-            except _UnexpectedSuccess:
-                result.addUnexpectedSuccess(self, details=self.getDetails())
-                ok = False
-            except KeyboardInterrupt:
-                raise
-            except:
-                self._report_error(result)
-                ok = False
-            if ok and cleanupsOk:
-                result.addSuccess(self, details=self.getDetails())
-        finally:
-            result.stopTest(self)
+        except _UnexpectedSuccess:
+            result.addUnexpectedSuccess(self, details=self.getDetails())
+            ok = False
+        except KeyboardInterrupt:
+            raise
+        except:
+            self._report_error(result)
+            ok = False
+        if ok and cleanupsOk:
+            result.addSuccess(self, details=self.getDetails())
         return result
 
     def setUp(self):

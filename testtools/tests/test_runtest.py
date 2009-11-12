@@ -43,9 +43,10 @@ class TestRunTest(TestCase):
         # run() invokes wrapped
         log = []
         run = RunTest("bar", lambda x:log.append(x))
-        run('foo')
+        result = TestResult()
+        run(result)
         self.assertEqual(1, len(log))
-        self.assertEqual('foo', log[0].decorated)
+        self.assertEqual(result, log[0].decorated)
 
     def test___call___no_result_manages_new_result(self):
         log = []
@@ -66,6 +67,28 @@ class TestRunTest(TestCase):
         self.assertIsInstance(log[0], ExtendedToOriginalDecorator)
         self.assertEqual('foo', result.decorated)
 
+    def test__run_prepared_result_calls_start_and_stop_test(self):
+        result = ExtendedTestResult()
+        case = self.make_case()
+        run = RunTest(case, lambda x:x)
+        run(result)
+        self.assertEqual([
+            ('startTest', case),
+            ('stopTest', case),
+            ], result._events)
+
+    def test__run_prepared_result_calls_stop_test_always(self):
+        result = ExtendedTestResult()
+        case = self.make_case()
+        def inner(result):
+            raise Exception("foo")
+            return result
+        run = RunTest(case, inner)
+        self.assertRaises(Exception, run, result)
+        self.assertEqual([
+            ('startTest', case),
+            ('stopTest', case),
+            ], result._events)
 
 def test_suite():
     from unittest import TestLoader

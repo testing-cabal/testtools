@@ -68,4 +68,9 @@ class RunTest:
         :param result: A testtools.TestResult to report activity to.
         :return: The result object the test was run against.
         """
-        return self.wrapped(result)
+        result.startTest(self.case)
+        try:
+            self.wrapped(result)
+        finally:
+            result.stopTest(self.case)
+        return result
