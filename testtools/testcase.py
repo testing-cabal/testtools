@@ -251,7 +251,6 @@ class TestCase(unittest.TestCase):
         return self._RunTest(self, self._run)(result)
 
     def _run(self, result=None):
-        testMethod = getattr(self, self._testMethodName)
         try:
             self.setUp()
             if not self.__setup_called:
@@ -261,22 +260,29 @@ class TestCase(unittest.TestCase):
         except self.skipException, e:
             self._report_skip(result, e.args[0])
             self._runCleanups(result)
-            return result
+            return
         except _ExpectedFailure:
             result.addExpectedFailure(self, details=self.getDetails())
             self._runCleanups(result)
-            return result
+            return
         except _UnexpectedSuccess:
             result.addUnexpectedSuccess(self, details=self.getDetails())
             self._runCleanups(result)
-            return result
+            return
         except:
             self._report_error(result)
             self._runCleanups(result)
-            return result
+            return
 
         ok = False
         try:
+            absent_object = object()
+            # Python 2.5+
+            method_name = getattr(self, '_testMethodName', absent_object)
+            if method_name is absent_object:
+                # Python 2.4
+                method_name = getattr(self, '_TestCase__testMethodName')
+            testMethod = getattr(self, method_name)
             testMethod()
             ok = True
         except self.skipException, e:
@@ -310,7 +316,6 @@ class TestCase(unittest.TestCase):
             ok = False
         if ok and cleanupsOk:
             result.addSuccess(self, details=self.getDetails())
-        return result
 
     def setUp(self):
         unittest.TestCase.setUp(self)
