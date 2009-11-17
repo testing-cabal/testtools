@@ -37,6 +37,23 @@ class TestContent(unittest.TestCase):
         self.assertNotEqual(content1, content4)
         self.assertNotEqual(content1, content5)
 
+    def test_iter_text_not_text_errors(self):
+        content_type = ContentType("foo", "bar")
+        content = Content(content_type, lambda:["bytes"])
+        self.assertRaises(ValueError, content.iter_text)
+
+    def test_iter_text_decodes(self):
+        content_type = ContentType("text", "strange", {"charset":"utf8"})
+        content = Content(content_type, lambda:[u"bytes\xea".encode("utf8")])
+        self.assertEqual([u"bytes\xea"], list(content.iter_text()))
+
+    def test_iter_text_default_charset_iso_8859_1(self):
+        content_type = ContentType("text", "strange")
+        text = u"bytes\xea"
+        iso_version = text.encode("ISO-8859-1")
+        content = Content(content_type, lambda:[iso_version])
+        self.assertEqual([text], list(content.iter_text()))
+
 
 class TestTracebackContent(unittest.TestCase):
 

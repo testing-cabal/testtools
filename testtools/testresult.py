@@ -92,7 +92,7 @@ class TestResult(unittest.TestResult):
             if reason is None:
                 reason = 'No reason given'
             else:
-                reason = ''.join(reason.iter_bytes())
+                reason = ''.join(reason.iter_text())
         skip_list = self.skip_reasons.setdefault(reason, [])
         skip_list.append(test)
 
@@ -444,7 +444,7 @@ def _details_to_str(details):
             continue
         chars.append('Text attachment: %s\n' % key)
         chars.append('------------\n')
-        chars.extend(content.iter_bytes())
+        chars.extend(content.iter_text())
         if not chars[-1].endswith('\n'):
             chars.append('\n')
         chars.append('------------\n')
