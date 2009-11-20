@@ -116,6 +116,14 @@ This method is called on result objects by testtools tests when the attribute
 exists. It is used as a hook point to allow clean disconnection of network
 resources and similar concerns.
 
+TestResult.time
+~~~~~~~~~~~~~~~
+
+This method controls the time used by a TestResult, permitting accurate
+timing of test results gathered on different machines or in different threads.
+See pydoc testtools.TestResult.time for more details.
+
+
 ThreadsafeForwardingResult
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 

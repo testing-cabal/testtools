@@ -10,6 +10,7 @@ __all__ = [
     'ThreadsafeForwardingResult',
     ]
 
+import datetime
 import unittest
 
 
@@ -33,6 +34,7 @@ class TestResult(unittest.TestResult):
     def __init__(self):
         super(TestResult, self).__init__()
         self.skip_reasons = {}
+        self.__now = None
         # -- Start: As per python 2.7 --
         self.expectedFailures = []
         self.unexpectedSuccesses = []
@@ -109,6 +111,18 @@ class TestResult(unittest.TestResult):
             return self._exc_info_to_string(err, test)
         return _details_to_str(details)
 
+    def _now(self):
+        """Return the current 'test time'.
+        
+        If the time() method has not been called, this is equivalent to
+        datetime.now(), otherwise its the last supplied datestamp given to the
+        time() method.
+        """
+        if self.__now is None:
+            return datetime.datetime.now()
+        else:
+            return self.__now
+
     def startTestRun(self):
         """Called before a test run starts.
 
@@ -120,6 +134,21 @@ class TestResult(unittest.TestResult):
 
         New in python 2.7
         """
+
+    def time(self, a_datetime):
+        """Provide a timestamp to represent the current time.
+
+        This is useful when test activity is time delayed, or happening
+        concurrently and getting the system time between API calls will not
+        accurately represent the duration of tests (or the whole run).
+
+        Calling time() sets the datetime used by the TestResult object. 
+        Time is permitted to go backwards when using this call.
+
+        :param a_datetime: A datetime.datetime object with TZ information or
+            None to reset the TestResult to gathering time from the system.
+        """
+        self.__now = a_datetime
 
     def done(self):
         """Called when the test runner is done.

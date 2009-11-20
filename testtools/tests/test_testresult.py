@@ -4,6 +4,7 @@
 
 __metaclass__ = type
 
+import datetime
 import sys
 import threading
 
@@ -13,6 +14,7 @@ from testtools import (
     TestCase,
     TestResult,
     ThreadsafeForwardingResult,
+    testresult,
     )
 from testtools.content import Content, ContentType
 from testtools.tests.helpers import (
@@ -119,6 +121,32 @@ class TestTestResult(TestCase):
         self.assertEqual({u"Skipped for some reason":[self, self],
             u"Skipped for another reason":[self]},
             result.skip_reasons)
+
+    def test_now_datetime_now(self):
+        result = self.makeResult()
+        olddatetime = testresult.datetime
+        def restore():
+            testresult.datetime = olddatetime
+        self.addCleanup(restore)
+        class Module:
+            pass
+        now = datetime.datetime.now()
+        stubdatetime = Module()
+        stubdatetime.datetime = Module()
+        stubdatetime.datetime.now = lambda:now
+        testresult.datetime = stubdatetime
+        self.assertEqual(now, result._now())
+        # Set an explicit datetime, then go back to looking it up.
+        result.time(datetime.datetime.now())
+        self.assertNotEqual(now, result._now())
+        result.time(None)
+        self.assertEqual(now, result._now())
+
+    def test_now_datetime_time(self):
+        result = self.makeResult()
+        now = datetime.datetime.now()
+        result.time(now)
+        self.assertEqual(now, result._now())
 
 
 class TestWithFakeExceptions(TestCase):
