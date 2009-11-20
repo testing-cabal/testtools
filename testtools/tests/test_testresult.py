@@ -5,6 +5,8 @@
 __metaclass__ = type
 
 import datetime
+from cStringIO import StringIO
+import doctest
 import sys
 import threading
 
@@ -13,10 +15,12 @@ from testtools import (
     MultiTestResult,
     TestCase,
     TestResult,
+    TextTestResult,
     ThreadsafeForwardingResult,
     testresult,
     )
 from testtools.content import Content, ContentType
+from testtools.matchers import DocTestMatches
 from testtools.tests.helpers import (
     LoggingResult,
     Python26TestResult,
@@ -90,6 +94,12 @@ class TestMultiTestresultContract(TestTestResultContract):
 
     def makeResult(self):
         return MultiTestResult(TestResult(), TestResult())
+
+
+class TestTextTestResultContract(TestTestResultContract):
+
+    def makeResult(self):
+        return TextTestResult(StringIO())
 
 
 class TestThreadSafeForwardingResultContract(TestTestResultContract):
@@ -233,6 +243,146 @@ class TestMultiTestResult(TestWithFakeExceptions):
         # `TestResult`s.
         self.multiResult.stopTestRun()
         self.assertResultLogsEqual([('stopTestRun')])
+
+
+class TestTextTestResult(TestWithFakeExceptions):
+    """Tests for `TextTestResult`."""
+
+    def setUp(self):
+        super(TestTextTestResult, self).setUp()
+        self.result = TextTestResult(StringIO())
+
+    def make_erroring_test(self):
+        class Test(TestCase):
+            def error(self):
+                1/0
+        return Test("error")
+
+    def make_failing_test(self):
+        class Test(TestCase):
+            def fail(self):
+                self.fail("yo!")
+        return Test("fail")
+
+    def make_test(self):
+        class Test(TestCase):
+            def test(self):
+                pass
+        return Test("test")
+
+    def getvalue(self):
+        return self.result.stream.getvalue()
+
+    def test__init_sets_stream(self):
+        result = TextTestResult("fp")
+        self.assertEqual("fp", result.stream)
+
+    def reset_output(self):
+        self.result.stream.reset()
+        self.result.stream.truncate()
+
+    def test_startTestRun(self):
+        self.result.startTestRun()
+        self.assertEqual("Tests running...\n", self.getvalue())
+
+    def test_stopTestRun_count_many(self):
+        test = self.make_test()
+        self.result.startTestRun()
+        self.result.startTest(test)
+        self.result.stopTest(test)
+        self.result.startTest(test)
+        self.result.stopTest(test)
+        self.result.stream.reset()
+        self.result.stream.truncate()
+        self.result.stopTestRun()
+        self.assertThat(self.getvalue(),
+            DocTestMatches("Ran 2 tests in ...s\n...", doctest.ELLIPSIS))
+
+    def test_stopTestRun_count_single(self):
+        test = self.make_test()
+        self.result.startTestRun()
+        self.result.startTest(test)
+        self.result.stopTest(test)
+        self.reset_output()
+        self.result.stopTestRun()
+        self.assertThat(self.getvalue(),
+            DocTestMatches("Ran 1 test in ...s\n\nOK\n", doctest.ELLIPSIS))
+
+    def test_stopTestRun_count_zero(self):
+        self.result.startTestRun()
+        self.reset_output()
+        self.result.stopTestRun()
+        self.assertThat(self.getvalue(),
+            DocTestMatches("Ran 0 tests in ...s\n\nOK\n", doctest.ELLIPSIS))
+
+    def test_stopTestRun_current_time(self):
+        test = self.make_test()
+        now = datetime.datetime.now()
+        self.result.time(now)
+        self.result.startTestRun()
+        self.result.startTest(test)
+        now = now + datetime.timedelta(0, 0, 0, 1)
+        self.result.time(now)
+        self.result.stopTest(test)
+        self.reset_output()
+        self.result.stopTestRun()
+        self.assertThat(self.getvalue(),
+            DocTestMatches("... in 0.001s\n...", doctest.ELLIPSIS))
+
+    def test_stopTestRun_successful(self):
+        self.result.startTestRun()
+        self.result.stopTestRun()
+        self.assertThat(self.getvalue(),
+            DocTestMatches("...\n\nOK\n", doctest.ELLIPSIS))
+
+    def test_stopTestRun_not_successful_failure(self):
+        test = self.make_failing_test()
+        self.result.startTestRun()
+        test.run(self.result)
+        self.result.stopTestRun()
+        self.assertThat(self.getvalue(),
+            DocTestMatches("...\n\nFAILED (failures=1)\n", doctest.ELLIPSIS))
+
+    def test_stopTestRun_not_successful_error(self):
+        test = self.make_erroring_test()
+        self.result.startTestRun()
+        test.run(self.result)
+        self.result.stopTestRun()
+        self.assertThat(self.getvalue(),
+            DocTestMatches("...\n\nFAILED (failures=1)\n", doctest.ELLIPSIS))
+
+    def test_stopTestRun_shows_details(self):
+        self.result.startTestRun()
+        self.make_erroring_test().run(self.result)
+        self.make_failing_test().run(self.result)
+        self.reset_output()
+        self.result.stopTestRun()
+        self.assertThat(self.getvalue(),
+            DocTestMatches("""...======================================================================
+ERROR: testtools.tests.test_testresult.Test.error
+----------------------------------------------------------------------
+Text attachment: traceback
+------------
+Traceback (most recent call last):
+  File "...testtools/testcase.py", line ..., in run
+    testMethod()
+  File "...testtools/tests/test_testresult.py", line ..., in error
+    1/0
+ZeroDivisionError: integer division or modulo by zero
+------------
+======================================================================
+ERROR: testtools.tests.test_testresult.Test.fail
+----------------------------------------------------------------------
+Text attachment: traceback
+------------
+Traceback (most recent call last):
+  File "...testtools/testcase.py", line ..., in run
+    testMethod()
+  File "...testtools/tests/test_testresult.py", line ..., in fail
+    self.fail("yo!")
+TypeError: fail() takes exactly 1 argument (2 given)
+------------
+...""", doctest.ELLIPSIS))
 
 
 class TestThreadSafeForwardingResult(TestWithFakeExceptions):

@@ -29,6 +29,8 @@ Improvements
   do not support them. This is used internally to make testtools simpler but
   can also be used to simplify other code built on or for use with testtools.
 
+* New TextTestResult supporting the extended APIs that testtools provides.
+
 * Nose will no longer find 'runTest' tests in classes derived from
    testtools.testcase.TestCase (bug #312257).
 

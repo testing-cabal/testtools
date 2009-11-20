@@ -135,6 +135,18 @@ reporting to be fed the activity from multiple test threads, or processes.
 Note that when you provide multiple errors for a single test, the target sees
 each error as a distinct complete test.
 
+
+TextTestResult
+~~~~~~~~~~~~~~
+
+A TestResult that provides a text UI very similar to the python standard
+library UI. Key differences are that its supports the extended outcomes and
+details API, and is completely encapsulated into the result object, permitting
+it to be used without a 'TestRunner' object. Not all the python 2.7 outcomes
+are displayed (yet). It is also a 'quiet' result with no dots or verbose mode.
+These limitations will be corrected soon.
+
+
 Extensions to TestSuite
 -----------------------
 
