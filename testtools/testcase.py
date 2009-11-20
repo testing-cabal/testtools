@@ -193,8 +193,8 @@ class TestCase(unittest.TestCase):
         """
         if matcher.matches(matchee):
             return
-        self.fail("Match failed. Matchee: %s\nMatcher: %s\nDifference: %s\n" %
-            (matchee, matcher, matcher.describe_difference(matchee)))
+        self.fail('Match failed. Matchee: "%s"\nMatcher: %s\nDifference: %s\n'
+            % (matchee, matcher, matcher.describe_difference(matchee)))
 
     def expectFailure(self, reason, predicate, *args, **kwargs):
         """Check that a test fails in a particular way.
