@@ -49,6 +49,7 @@ testtools adds several assertion methods:
  * assertIs
  * assertIsNot
  * assertIsInstance
+ * assertThat
 
 
 Improved assertRaises
@@ -60,6 +61,26 @@ asserting more things about the exception than just the type::
         error = self.assertRaises(UnauthorisedError, thing.frobnicate)
         self.assertEqual('bob', error.username)
         self.assertEqual('User bob cannot frobnicate', str(error))
+
+
+TestCase.assertThat
+~~~~~~~~~~~~~~~~~~~
+
+assertThat is a clean way to write complex assertions without tying them to
+the TestCase inheritance hierarchy (and thus making them easier to reuse).
+
+assertThat takes an object to be matched, and a matcher, and fails if the
+matcher does not match the matchee.
+
+See pydoc testtools.Matcher for the protocol that matchers need to implement.
+
+testtools includes some matchers in testtools.matchers.
+
+An example using the DocTestMatches matcher which uses doctests example
+matching logic::
+
+    def test_foo(self):
+        self.assertThat([1,2,3,4], DocTestMatches('[1, 2, 3, 4]'))
 
 
 Creation methods
