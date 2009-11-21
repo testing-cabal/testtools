@@ -12,11 +12,16 @@ Improvements
   of becoming an upstream Python API. For more details see pydoc
   testtools.TestResult and the TestCase addDetail / getDetails methods.
 
+* assertThat has been added to TestCase. This new assertion supports
+  a hamcrest-inspired matching protocol. See pydoc testtools.Matcher for
+  details about writing matchers, and testtools.matchers for the included
+  matchers. See http://code.google.com/p/hamcrest/.
+
 * Compatible with Python 2.6 and Python 2.7
 
 * Failing to upcall in setUp or tearDown will now cause a test failure.
   While the base methods do nothing, failing to upcall is usually a problem
-  in deeper hierarchies, and checking that the root method is called is a 
+  in deeper hierarchies, and checking that the root method is called is a
   simple way to catch this common bug.
 
 * New TestResult decorator ExtendedToOriginalDecorator which handles

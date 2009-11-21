@@ -16,6 +16,9 @@ __all__ = [
     'ThreadsafeForwardingResult',
     ]
 
+from testtools.matchers import (
+    Matcher,
+    )
 from testtools.testcase import (
     TestCase,
     clone_test_with_new_id,
