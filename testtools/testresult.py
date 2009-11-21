@@ -10,6 +10,7 @@ __all__ = [
     'ThreadsafeForwardingResult',
     ]
 
+import datetime
 import unittest
 
 
@@ -33,6 +34,7 @@ class TestResult(unittest.TestResult):
     def __init__(self):
         super(TestResult, self).__init__()
         self.skip_reasons = {}
+        self.__now = None
         # -- Start: As per python 2.7 --
         self.expectedFailures = []
         self.unexpectedSuccesses = []
@@ -92,7 +94,7 @@ class TestResult(unittest.TestResult):
             if reason is None:
                 reason = 'No reason given'
             else:
-                reason = ''.join(reason.iter_bytes())
+                reason = ''.join(reason.iter_text())
         skip_list = self.skip_reasons.setdefault(reason, [])
         skip_list.append(test)
 
@@ -109,6 +111,18 @@ class TestResult(unittest.TestResult):
             return self._exc_info_to_string(err, test)
         return _details_to_str(details)
 
+    def _now(self):
+        """Return the current 'test time'.
+        
+        If the time() method has not been called, this is equivalent to
+        datetime.now(), otherwise its the last supplied datestamp given to the
+        time() method.
+        """
+        if self.__now is None:
+            return datetime.datetime.now()
+        else:
+            return self.__now
+
     def startTestRun(self):
         """Called before a test run starts.
 
@@ -120,6 +134,21 @@ class TestResult(unittest.TestResult):
 
         New in python 2.7
         """
+
+    def time(self, a_datetime):
+        """Provide a timestamp to represent the current time.
+
+        This is useful when test activity is time delayed, or happening
+        concurrently and getting the system time between API calls will not
+        accurately represent the duration of tests (or the whole run).
+
+        Calling time() sets the datetime used by the TestResult object. 
+        Time is permitted to go backwards when using this call.
+
+        :param a_datetime: A datetime.datetime object with TZ information or
+            None to reset the TestResult to gathering time from the system.
+        """
+        self.__now = a_datetime
 
     def done(self):
         """Called when the test runner is done.
@@ -171,6 +200,55 @@ class MultiTestResult(TestResult):
 
     def done(self):
         self._dispatch('done')
+
+
+class TextTestResult(TestResult):
+    """A TestResult which outputs activity to a text stream."""
+
+    def __init__(self, stream):
+        """Construct a TextTestResult writing to stream."""
+        self.__super = super(TextTestResult, self)
+        self.__super.__init__()
+        self.stream = stream
+        self.sep1 = '=' * 70 + '\n'
+        self.sep2 = '-' * 70 + '\n'
+
+    def _delta_to_float(self, a_timedelta):
+        return (a_timedelta.days * 86400.0 + a_timedelta.seconds +
+            a_timedelta.microseconds / 1000000.0)
+
+    def _show_list(self, label, error_list):
+        for test, output in error_list:
+            self.stream.write(self.sep1)
+            self.stream.write("%s: %s\n" % (label, test.id()))
+            self.stream.write(self.sep2)
+            self.stream.write(output)
+
+    def startTestRun(self):
+        self.__super.startTestRun()
+        self.__start = self._now()
+        self.stream.write("Tests running...\n")
+
+    def stopTestRun(self):
+        if self.testsRun != 1:
+            plural = 's'
+        else:
+            plural = ''
+        stop = self._now()
+        self._show_list('ERROR', self.errors)
+        self._show_list('FAIL', self.failures)
+        self.stream.write("Ran %d test%s in %.3fs\n\n" %
+            (self.testsRun, plural, self._delta_to_float(stop-self.__start)))
+        if self.wasSuccessful():
+            self.stream.write("OK\n")
+        else:
+            self.stream.write("FAILED (")
+            details = []
+            details.append("failures=%d" % (
+                len(self.failures) + len(self.errors)))
+            self.stream.write(", ".join(details))
+            self.stream.write(")\n")
+        self.__super.stopTestRun()
 
 
 class ThreadsafeForwardingResult(TestResult):
@@ -444,7 +522,7 @@ def _details_to_str(details):
             continue
         chars.append('Text attachment: %s\n' % key)
         chars.append('------------\n')
-        chars.extend(content.iter_bytes())
+        chars.extend(content.iter_text())
         if not chars[-1].endswith('\n'):
             chars.append('\n')
         chars.append('------------\n')

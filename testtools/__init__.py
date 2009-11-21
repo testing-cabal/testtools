@@ -10,6 +10,7 @@ __all__ = [
     'MultiTestResult',
     'TestCase',
     'TestResult',
+    'TextTestResult',
     'RunTest',
     'skip',
     'skipIf',
@@ -17,6 +18,9 @@ __all__ = [
     'ThreadsafeForwardingResult',
     ]
 
+from testtools.matchers import (
+    Matcher,
+    )
 from testtools.runtest import (
     RunTest,
     )
@@ -31,6 +35,7 @@ from testtools.testresult import (
     ExtendedToOriginalDecorator,
     MultiTestResult,
     TestResult,
+    TextTestResult,
     ThreadsafeForwardingResult,
     )
 from testtools.testsuite import (

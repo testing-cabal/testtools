@@ -194,6 +194,18 @@ class TestCase(unittest.TestCase):
             self.fail("%s not raised, %r returned instead." % (excName, ret))
     failUnlessRaises = assertRaises
 
+    def assertThat(self, matchee, matcher):
+        """Assert that matchee is matched by matcher.
+
+        :param matchee: An object to match with matcher.
+        :param matcher: An object meeting the testtools.Matcher protocol.
+        :raises self.failureException: When matcher does not match thing.
+        """
+        if matcher.matches(matchee):
+            return
+        self.fail('Match failed. Matchee: "%s"\nMatcher: %s\nDifference: %s\n'
+            % (matchee, matcher, matcher.describe_difference(matchee)))
+
     def defaultTestResult(self):
         return TestResult()
 

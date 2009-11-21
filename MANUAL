@@ -49,6 +49,7 @@ testtools adds several assertion methods:
  * assertIs
  * assertIsNot
  * assertIsInstance
+ * assertThat
 
 
 Improved assertRaises
@@ -60,6 +61,26 @@ asserting more things about the exception than just the type::
         error = self.assertRaises(UnauthorisedError, thing.frobnicate)
         self.assertEqual('bob', error.username)
         self.assertEqual('User bob cannot frobnicate', str(error))
+
+
+TestCase.assertThat
+~~~~~~~~~~~~~~~~~~~
+
+assertThat is a clean way to write complex assertions without tying them to
+the TestCase inheritance hierarchy (and thus making them easier to reuse).
+
+assertThat takes an object to be matched, and a matcher, and fails if the
+matcher does not match the matchee.
+
+See pydoc testtools.Matcher for the protocol that matchers need to implement.
+
+testtools includes some matchers in testtools.matchers.
+
+An example using the DocTestMatches matcher which uses doctests example
+matching logic::
+
+    def test_foo(self):
+        self.assertThat([1,2,3,4], DocTestMatches('[1, 2, 3, 4]'))
 
 
 Creation methods
@@ -95,6 +116,14 @@ This method is called on result objects by testtools tests when the attribute
 exists. It is used as a hook point to allow clean disconnection of network
 resources and similar concerns.
 
+TestResult.time
+~~~~~~~~~~~~~~~
+
+This method controls the time used by a TestResult, permitting accurate
+timing of test results gathered on different machines or in different threads.
+See pydoc testtools.TestResult.time for more details.
+
+
 ThreadsafeForwardingResult
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -105,6 +134,18 @@ reporting to be fed the activity from multiple test threads, or processes.
 
 Note that when you provide multiple errors for a single test, the target sees
 each error as a distinct complete test.
+
+
+TextTestResult
+~~~~~~~~~~~~~~
+
+A TestResult that provides a text UI very similar to the python standard
+library UI. Key differences are that its supports the extended outcomes and
+details API, and is completely encapsulated into the result object, permitting
+it to be used without a 'TestRunner' object. Not all the python 2.7 outcomes
+are displayed (yet). It is also a 'quiet' result with no dots or verbose mode.
+These limitations will be corrected soon.
+
 
 Extensions to TestSuite
 -----------------------

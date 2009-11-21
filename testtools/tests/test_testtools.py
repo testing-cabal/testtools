@@ -233,6 +233,35 @@ class TestAssertions(TestCase):
         self.assertFails(
             '[42] is [42]', self.assertIsNot, some_list, some_list)
 
+    def test_assertThat_matches_clean(self):
+        class Matcher:
+            def matches(self, foo):
+                return True
+        self.assertThat("foo", Matcher())
+
+    def test_assertThat_mismatch_raises_description(self):
+        calls = []
+        class Matcher:
+            def matches(self, thing):
+                calls.append(('match', thing))
+                return False
+            def __str__(self):
+                calls.append(('__str__',))
+                return "a description"
+            def describe_difference(self, thing):
+                calls.append(('describe_diff', thing))
+                return "object is not a thing"
+        class Test(TestCase):
+            def test(self):
+                self.assertThat("foo", Matcher())
+        result = Test("test").run()
+        self.assertEqual([
+            ('match', "foo"),
+            ('describe_diff', "foo"),
+            ('__str__',),
+            ], calls)
+        self.assertFalse(result.wasSuccessful())
+
 
 class TestAddCleanup(TestCase):
     """Tests for TestCase.addCleanup."""

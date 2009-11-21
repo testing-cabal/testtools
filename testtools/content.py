@@ -2,6 +2,7 @@
 
 """Content - a MIME-like Content object."""
 
+import codecs
 from unittest import TestResult
 
 from testtools.content_type import ContentType
@@ -34,6 +35,35 @@ class Content(object):
     def iter_bytes(self):
         """Iterate over bytestrings of the serialised content."""
         return self._get_bytes()
+
+    def iter_text(self):
+        """Iterate over the text of the serialised content.
+
+        This is only valid for text MIME types, and will use ISO-8859-1 if
+        no charset parameter is present in the MIME type. (This is somewhat
+        arbitrary, but consistent with RFC2617 3.7.1).
+
+        :raises: ValueError If the content type is not text/*.
+        """
+        if self.content_type.type != "text":
+            raise ValueError("Not a text type %r" % self.content_type)
+        return self._iter_text()
+
+    def _iter_text(self):
+        """Worker for iter_text - does the decoding."""
+        encoding = self.content_type.parameters.get('charset', 'ISO-8859-1')
+        try:
+            # 2.5+
+            decoder = codecs.getincrementaldecoder(encoding)()
+            for bytes in self.iter_bytes():
+                yield decoder.decode(bytes)
+            final = decoder.decode('', True)
+            if final:
+                yield final
+        except AttributeError:
+            # < 2.5
+            bytes = ''.join(self.iter_bytes())
+            yield bytes.decode(encoding)
 
     def __repr__(self):
         return "<Content type=%r, value=%r>" % (

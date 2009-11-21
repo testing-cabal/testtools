@@ -1,9 +1,14 @@
 #!/usr/bin/python
 # See README for copyright and licensing details.
 
-import unittest
+import sys
 
 from testtools.tests import test_suite
+from testtools import TextTestResult
 
-
-unittest.TextTestRunner().run(test_suite())
+result = TextTestResult(sys.stdout)
+result.startTestRun()
+try:
+    test_suite().run(result)
+finally:
+    result.stopTestRun()
