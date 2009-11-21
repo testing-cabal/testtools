@@ -1,13 +1,24 @@
 testtools NEWS
 ==============
 
-0.0.2 (In development)
+0.9.1 (In development)
 ~~~~~~~~~~~~~~~~~~~~~~
 
 Improvements
 ------------
 
 * A failure in setUp and tearDown now report as failures not as errors.
+
+* Test execution now uses a separate class, testtools.RunTest to run single
+  tests. This can be customised and extended in a more consistent fashion than
+  the previous run method idiom. See pydoc for more information.
+
+
+0.9.0 (In development)
+~~~~~~~~~~~~~~~~~~~~~~
+
+Improvements
+------------
 
 * A new TestResult API has been added for attaching details to test outcomes.
   This API is currently experimental, but is being prepared with the intent
@@ -39,10 +50,6 @@ Improvements
 * Supports the Python 2.7/3.1 addUnexpectedSuccess and addExpectedFailure
   TestResult methods, with a support function 'knownFailure' to let tests
   trigger these outcomes.
-
-* Test execution now uses a separate class, testtools.RunTest to run single
-  tests. This can be customised and extended in a more consistent fashion than
-  the previous run method idiom. See pydoc for more information.
 
 * When using the skip feature with TestResult objects that do not support it
   a test success will now be reported. Previously an error was reported but

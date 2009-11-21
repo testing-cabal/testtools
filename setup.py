@@ -8,5 +8,5 @@ setup(name='testtools',
       url='https://launchpad.net/testtools',
       description=('Extensions to the Python standard library unit testing '
                    'framework'),
-      version='0.0.2dev0',
+      version='0.9.0',
       packages=['testtools'])
