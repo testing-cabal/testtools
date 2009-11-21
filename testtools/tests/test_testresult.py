@@ -260,9 +260,9 @@ class TestTextTestResult(TestWithFakeExceptions):
 
     def make_failing_test(self):
         class Test(TestCase):
-            def fail(self):
+            def failed(self):
                 self.fail("yo!")
-        return Test("fail")
+        return Test("failed")
 
     def make_test(self):
         class Test(TestCase):
@@ -371,16 +371,16 @@ Traceback (most recent call last):
 ZeroDivisionError: integer division or modulo by zero
 ------------
 ======================================================================
-ERROR: testtools.tests.test_testresult.Test.fail
+FAIL: testtools.tests.test_testresult.Test.failed
 ----------------------------------------------------------------------
 Text attachment: traceback
 ------------
 Traceback (most recent call last):
   File "...testtools/testcase.py", line ..., in run
     testMethod()
-  File "...testtools/tests/test_testresult.py", line ..., in fail
+  File "...testtools/tests/test_testresult.py", line ..., in failed
     self.fail("yo!")
-TypeError: fail() takes exactly 1 argument (2 given)
+AssertionError: yo!
 ------------
 ...""", doctest.ELLIPSIS))
 
