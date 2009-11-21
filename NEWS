@@ -1,8 +1,22 @@
 testtools NEWS
 ==============
 
-0.9.0 (In development)
-~~~~~~~~~~~~~~~~~~~~
+0.9.0
+~~~~~
+
+This release of testtools is perhaps the most interesting and exciting one
+it's ever had. We've continued in bringing together the best practices of unit
+testing from across a raft of different Python projects, but we've also
+extended our mission to incorporating unit testing concepts from other
+languages and from our own research, led by Robert Collins.
+
+We now support skipping and expected failures. We'll make sure that you
+up-call setUp and tearDown, avoiding unexpected testing weirdnesses. We're
+now compatible with Python 2.5, 2.6 and 2.7 unittest library.
+
+All in all, if you are serious about unit testing and want to get the best
+thinking from the whole Python community, you should get this release.
+
 
 Improvements
 ------------
