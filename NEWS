@@ -15,7 +15,7 @@ Improvements
 * assertThat has been added to TestCase. This new assertion supports
   a hamcrest-inspired matching protocol. See pydoc testtools.Matcher for
   details about writing matchers, and testtools.matchers for the included
-  matchers.
+  matchers. See http://code.google.com/p/hamcrest/.
 
 * Compatible with Python 2.6 and Python 2.7
 
