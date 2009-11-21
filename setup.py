@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Distutils installer for testtools."""
 
 from distutils.core import setup
