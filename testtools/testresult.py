@@ -202,6 +202,55 @@ class MultiTestResult(TestResult):
         self._dispatch('done')
 
 
+class TextTestResult(TestResult):
+    """A TestResult which outputs activity to a text stream."""
+
+    def __init__(self, stream):
+        """Construct a TextTestResult writing to stream."""
+        self.__super = super(TextTestResult, self)
+        self.__super.__init__()
+        self.stream = stream
+        self.sep1 = '=' * 70 + '\n'
+        self.sep2 = '-' * 70 + '\n'
+
+    def _delta_to_float(self, a_timedelta):
+        return (a_timedelta.days * 86400.0 + a_timedelta.seconds +
+            a_timedelta.microseconds / 1000000.0)
+
+    def _show_list(self, label, error_list):
+        for test, output in error_list:
+            self.stream.write(self.sep1)
+            self.stream.write("%s: %s\n" % (label, test.id()))
+            self.stream.write(self.sep2)
+            self.stream.write(output)
+
+    def startTestRun(self):
+        self.__super.startTestRun()
+        self.__start = self._now()
+        self.stream.write("Tests running...\n")
+
+    def stopTestRun(self):
+        if self.testsRun != 1:
+            plural = 's'
+        else:
+            plural = ''
+        stop = self._now()
+        self._show_list('ERROR', self.errors)
+        self._show_list('FAIL', self.failures)
+        self.stream.write("Ran %d test%s in %.3fs\n\n" %
+            (self.testsRun, plural, self._delta_to_float(stop-self.__start)))
+        if self.wasSuccessful():
+            self.stream.write("OK\n")
+        else:
+            self.stream.write("FAILED (")
+            details = []
+            details.append("failures=%d" % (
+                len(self.failures) + len(self.errors)))
+            self.stream.write(", ".join(details))
+            self.stream.write(")\n")
+        self.__super.stopTestRun()
+
+
 class ThreadsafeForwardingResult(TestResult):
     """A TestResult which ensures the target does not receive mixed up calls.
     

@@ -10,6 +10,7 @@ __all__ = [
     'MultiTestResult',
     'TestCase',
     'TestResult',
+    'TextTestResult',
     'skip',
     'skipIf',
     'skipUnless',
@@ -30,6 +31,7 @@ from testtools.testresult import (
     ExtendedToOriginalDecorator,
     MultiTestResult,
     TestResult,
+    TextTestResult,
     ThreadsafeForwardingResult,
     )
 from testtools.testsuite import (
