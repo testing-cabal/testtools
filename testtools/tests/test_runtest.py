@@ -29,12 +29,12 @@ class TestRunTest(TestCase):
     def test___init___short(self):
         run = RunTest("bar", "foo")
         self.assertEqual("bar", run.case)
-        self.assertEqual({}, run.handlers)
+        self.assertEqual([], run.handlers)
         # to transition code we pass the existing run logic into RunTest.
         self.assertEqual(run.wrapped, "foo")
 
     def test__init____handlers(self):
-        handlers = {"quux": "baz"}
+        handlers = [("quux", "baz")]
         run = RunTest("bar", "foo", handlers)
         self.assertEqual(handlers, run.handlers)
 
@@ -77,6 +77,34 @@ class TestRunTest(TestCase):
         run.result = ExtendedTestResult()
         self.assertRaises(KeyboardInterrupt, run._run_core)
         self.assertEqual([], run.result._events)
+
+    def test__run_core_can_catch_Exception(self):
+        case = self.make_case()
+        e = Exception('Yo')
+        def raises(result):
+            raise e
+        log = []
+        def log_exc(err):
+            log.append(err)
+        run = RunTest(case, raises, [(Exception, log_exc)])
+        run.result = ExtendedTestResult()
+        run._run_core()
+        self.assertEqual([], run.result._events)
+        self.assertEqual([e], log)
+
+    def test__run_core_uncaught_Exception_raised(self):
+        case = self.make_case()
+        e = KeyError('Yo')
+        def raises(result):
+            raise e
+        log = []
+        def log_exc(err):
+            log.append(err)
+        run = RunTest(case, raises, [(ValueError, log_exc)])
+        run.result = ExtendedTestResult()
+        self.assertRaises(KeyError, run._run_core)
+        self.assertEqual([], run.result._events)
+        self.assertEqual([], log)
 
     def test__run_one_decorates_result(self):
         log = []

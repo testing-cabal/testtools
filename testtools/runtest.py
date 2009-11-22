@@ -25,7 +25,7 @@ class RunTest:
         will be removed once all the code has migrated.
     :ivar case: The test case that is to be run.
     :ivar result: The result object a case is reporting to.
-    :ivar handlers: A dict of ExceptionClass->handler code for exceptions
+    :ivar handlers: A list of (ExceptionClass->handler code) for exceptions
         that should be caught if raised from the user code.
     """
 
@@ -33,10 +33,12 @@ class RunTest:
         """Create a RunTest to run case that will hand off to original_run.
         
         :param case: A testtools.TestCase test case object.
+        :param handlers: Exception handlers for this RunTest. These are stored
+            in self.handlers and can be modified later if needed.
         """
         self.wrapped = original_run
         self.case = case
-        self.handlers = handlers or {}
+        self.handlers = handlers or []
 
     def __call__(self, result=None):
         """Run self.case reporting activity to result.
@@ -82,4 +84,13 @@ class RunTest:
 
     def _run_core(self):
         """Run the user supplied test code."""
-        self.wrapped(self.result)
+        try:
+            self.wrapped(self.result)
+        except KeyboardInterrupt:
+            raise
+        except Exception, e:
+            for exc_class, handler in self.handlers:
+                if isinstance(e, exc_class):
+                    handler(e)
+                    return
+            raise e
