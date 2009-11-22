@@ -36,7 +36,7 @@ class RunTest:
         """
         self.wrapped = original_run
         self.case = case
-        self.handlers = handlers or None
+        self.handlers = handlers or {}
 
     def __call__(self, result=None):
         """Run self.case reporting activity to result.

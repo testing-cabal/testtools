@@ -28,14 +28,15 @@ class TestRunTest(TestCase):
 
     def test___init___short(self):
         run = RunTest("bar", "foo")
-        self.assertEqual(run.case, "bar")
+        self.assertEqual("bar", run.case)
+        self.assertEqual({}, run.handlers)
         # to transition code we pass the existing run logic into RunTest.
         self.assertEqual(run.wrapped, "foo")
 
     def test__init____handlers(self):
         handlers = {"quux": "baz"}
         run = RunTest("bar", "foo", handlers)
-        self.assertEqual(run.handlers, handlers)
+        self.assertEqual(handlers, run.handlers)
 
     def test___call__(self):
         # run() invokes wrapped
@@ -67,6 +68,15 @@ class TestRunTest(TestCase):
         run._run_core = lambda:log.append('foo')
         run()
         self.assertEqual(['foo'], log)
+
+    def test__run_core_does_not_catch_keyboard(self):
+        case = self.make_case()
+        def raises(result):
+            raise KeyboardInterrupt("yo")
+        run = RunTest(case, raises)
+        run.result = ExtendedTestResult()
+        self.assertRaises(KeyboardInterrupt, run._run_core)
+        self.assertEqual([], run.result._events)
 
     def test__run_one_decorates_result(self):
         log = []
