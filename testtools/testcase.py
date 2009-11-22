@@ -128,7 +128,7 @@ class TestCase(unittest.TestCase):
             except KeyboardInterrupt:
                 raise
             except:
-                self._report_error(result)
+                self._report_error(result, None)
                 ok = False
         return ok
 
@@ -243,15 +243,19 @@ class TestCase(unittest.TestCase):
     def getUniqueString(self):
         return '%s-%d' % (self._testMethodName, self.getUniqueInteger())
 
-    def _report_error(self, result):
+    def _report_error(self, result, err):
         self._report_traceback()
         result.addError(self, details=self.getDetails())
 
-    def _report_failure(self, result):
+    def _report_expected_failure(self, result, err):
+        result.addExpectedFailure(self, details=self.getDetails())
+
+    def _report_failure(self, result, err):
         self._report_traceback()
         result.addFailure(self, details=self.getDetails())
 
-    def _report_skip(self, result, reason):
+    def _report_skip(self, result, err):
+        reason = err.args[0]
         self._add_reason(reason)
         result.addSkip(self, details=self.getDetails())
 
@@ -259,8 +263,17 @@ class TestCase(unittest.TestCase):
         self.addDetail('traceback',
             content.TracebackContent(sys.exc_info(), self))
 
+    def _report_unexpected_success(self, result, err):
+        result.addUnexpectedSuccess(self, details=self.getDetails())
+
     def run(self, result=None):
-        return self._RunTest(self, self._run)(result)
+        handlers = [(self.skipException, self._report_skip),
+            (self.failureException, self._report_failure),
+            (_ExpectedFailure, self._report_expected_failure),
+            (_UnexpectedSuccess, self._report_unexpected_success),
+            (Exception, self._report_error),
+            ]
+        return self._RunTest(self, self._run, handlers)(result)
 
     def _run_setup(self, result):
         """Run the setUp function for this test.
@@ -306,15 +319,15 @@ class TestCase(unittest.TestCase):
         except KeyboardInterrupt:
             raise
         except self.skipException, e:
-            self._report_skip(result, e.args[0])
-        except self.failureException:
-            self._report_failure(result)
-        except _ExpectedFailure:
-            result.addExpectedFailure(self, details=self.getDetails())
-        except _UnexpectedSuccess:
-            result.addUnexpectedSuccess(self, details=self.getDetails())
+            self._report_skip(result, e)
+        except self.failureException, e:
+            self._report_failure(result, e)
+        except _ExpectedFailure, e:
+            self._report_expected_failure(result, e)
+        except _UnexpectedSuccess, e:
+            self._report_unexpected_success(result, e)
         except:
-            self._report_error(result)
+            self._report_error(result, None)
         return False
 
     def _run(self, result):

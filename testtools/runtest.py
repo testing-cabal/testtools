@@ -89,8 +89,10 @@ class RunTest:
         except KeyboardInterrupt:
             raise
         except Exception, e:
+            # Note that bare exceptions are not caught, so raised strings will
+            # escape: but they are deprecated anyway.
             for exc_class, handler in self.handlers:
                 if isinstance(e, exc_class):
-                    handler(e)
+                    handler(self.result, e)
                     return
             raise e

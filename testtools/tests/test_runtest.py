@@ -84,13 +84,13 @@ class TestRunTest(TestCase):
         def raises(result):
             raise e
         log = []
-        def log_exc(err):
-            log.append(err)
+        def log_exc(result, err):
+            log.append((result, err))
         run = RunTest(case, raises, [(Exception, log_exc)])
         run.result = ExtendedTestResult()
         run._run_core()
         self.assertEqual([], run.result._events)
-        self.assertEqual([e], log)
+        self.assertEqual([(run.result, e)], log)
 
     def test__run_core_uncaught_Exception_raised(self):
         case = self.make_case()
