@@ -26,11 +26,16 @@ class TestRunTest(TestCase):
                 pass
         return Case('test')
 
-    def test___init__(self):
+    def test___init___short(self):
         run = RunTest("bar", "foo")
         self.assertEqual(run.case, "bar")
         # to transition code we pass the existing run logic into RunTest.
         self.assertEqual(run.wrapped, "foo")
+
+    def test__init____handlers(self):
+        handlers = {"quux": "baz"}
+        run = RunTest("bar", "foo", handlers)
+        self.assertEqual(run.handlers, handlers)
 
     def test___call__(self):
         # run() invokes wrapped

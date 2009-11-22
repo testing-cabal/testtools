@@ -25,15 +25,18 @@ class RunTest:
         will be removed once all the code has migrated.
     :ivar case: The test case that is to be run.
     :ivar result: The result object a case is reporting to.
+    :ivar handlers: A dict of ExceptionClass->handler code for exceptions
+        that should be caught if raised from the user code.
     """
 
-    def __init__(self, case, original_run):
+    def __init__(self, case, original_run, handlers=None):
         """Create a RunTest to run case that will hand off to original_run.
         
         :param case: A testtools.TestCase test case object.
         """
         self.wrapped = original_run
         self.case = case
+        self.handlers = handlers or None
 
     def __call__(self, result=None):
         """Run self.case reporting activity to result.
