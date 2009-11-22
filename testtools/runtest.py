@@ -27,6 +27,8 @@ class RunTest:
     :ivar result: The result object a case is reporting to.
     :ivar handlers: A list of (ExceptionClass->handler code) for exceptions
         that should be caught if raised from the user code.
+    :ivar exception_caught: An object returned when _run_core catches an
+        exception.
     """
 
     def __init__(self, case, original_run, handlers=None):
@@ -39,6 +41,7 @@ class RunTest:
         self.wrapped = original_run
         self.case = case
         self.handlers = handlers or []
+        self.exception_caught = object()
 
     def __call__(self, result=None):
         """Run self.case reporting activity to result.
@@ -83,9 +86,9 @@ class RunTest:
         return result
 
     def _run_core(self):
-        """Run the user supplied test code."""
+        """Run user supplied test code."""
         try:
-            self.wrapped(self.result)
+            return self.wrapped(self.result)
         except KeyboardInterrupt:
             raise
         except Exception, e:
@@ -94,5 +97,5 @@ class RunTest:
             for exc_class, handler in self.handlers:
                 if isinstance(e, exc_class):
                     handler(self.result, e)
-                    return
+                    return self.exception_caught
             raise e

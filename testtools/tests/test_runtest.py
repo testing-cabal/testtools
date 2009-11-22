@@ -88,7 +88,8 @@ class TestRunTest(TestCase):
             log.append((result, err))
         run = RunTest(case, raises, [(Exception, log_exc)])
         run.result = ExtendedTestResult()
-        run._run_core()
+        status = run._run_core()
+        self.assertEqual(run.exception_caught, status)
         self.assertEqual([], run.result._events)
         self.assertEqual([(run.result, e)], log)
 
@@ -105,6 +106,15 @@ class TestRunTest(TestCase):
         self.assertRaises(KeyError, run._run_core)
         self.assertEqual([], run.result._events)
         self.assertEqual([], log)
+
+    def test__run_core_returns_result(self):
+        case = self.make_case()
+        def returns(result):
+            return 1
+        run = RunTest(case, returns)
+        run.result = ExtendedTestResult()
+        self.assertEqual(1, run._run_core())
+        self.assertEqual([], run.result._events)
 
     def test__run_one_decorates_result(self):
         log = []
