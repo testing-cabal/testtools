@@ -320,7 +320,7 @@ class TestAddCleanup(TestCase):
         # runs.
         self.test.addCleanup(self.logAppender, 'cleanup')
         self.test.run(self.logging_result)
-        self.assertTestLogEqual(['setUp', 'runTest', 'cleanup', 'tearDown'])
+        self.assertTestLogEqual(['setUp', 'runTest', 'tearDown', 'cleanup'])
 
     def test_add_cleanup_called_if_setUp_fails(self):
         # Cleanup functions added with 'addCleanup' are called even if setUp
@@ -347,7 +347,7 @@ class TestAddCleanup(TestCase):
         self.test.addCleanup(self.logAppender, 'second')
         self.test.run(self.logging_result)
         self.assertTestLogEqual(
-            ['setUp', 'runTest', 'second', 'first', 'tearDown'])
+            ['setUp', 'runTest', 'tearDown', 'second', 'first'])
 
     def test_tearDown_runs_after_cleanup_failure(self):
         # tearDown runs even if a cleanup function fails.
@@ -362,7 +362,7 @@ class TestAddCleanup(TestCase):
         self.test.addCleanup(self.logAppender, 'second')
         self.test.run(self.logging_result)
         self.assertTestLogEqual(
-            ['setUp', 'runTest', 'second', 'first', 'tearDown'])
+            ['setUp', 'runTest', 'tearDown', 'second', 'first'])
 
     def test_error_in_cleanups_are_captured(self):
         # If a cleanup raises an error, we want to record it and fail the the

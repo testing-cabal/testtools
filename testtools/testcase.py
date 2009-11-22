@@ -64,7 +64,7 @@ class TestCase(unittest.TestCase):
         self.__setup_called = False
         self.__teardown_callled = False
         self.__details = {}
-        self._RunTest = kwargs.get('runTest', RunTest)
+        self.__RunTest = kwargs.get('runTest', RunTest)
 
     def __eq__(self, other):
         eq = getattr(unittest.TestCase, '__eq__', None)
@@ -273,7 +273,7 @@ class TestCase(unittest.TestCase):
             (_UnexpectedSuccess, self._report_unexpected_success),
             (Exception, self._report_error),
             ]
-        return self._RunTest(self, self._run, handlers)(result)
+        return self.__RunTest(self, handlers)(result)
 
     def _run_setup(self, result):
         """Run the setUp function for this test.
@@ -311,35 +311,6 @@ class TestCase(unittest.TestCase):
             method_name = getattr(self, '_TestCase__testMethodName')
         testMethod = getattr(self, method_name)
         testMethod()
-
-    def _run_user_function(self, function, result):
-        try:
-            function(result)
-            return True
-        except KeyboardInterrupt:
-            raise
-        except self.skipException, e:
-            self._report_skip(result, e)
-        except self.failureException, e:
-            self._report_failure(result, e)
-        except _ExpectedFailure, e:
-            self._report_expected_failure(result, e)
-        except _UnexpectedSuccess, e:
-            self._report_unexpected_success(result, e)
-        except:
-            self._report_error(result, None)
-        return False
-
-    def _run(self, result):
-        if not self._run_user_function(self._run_setup, result):
-            self._runCleanups(result)
-            return
-        # TODO: Should this run cleanups on ctrl-C?
-        ok = self._run_user_function(self._run_test_method, result)
-        cleanupsOk = self._runCleanups(result)
-        tearDownOk = self._run_user_function(self._run_teardown, result)
-        if ok and cleanupsOk and tearDownOk:
-            result.addSuccess(self, details=self.getDetails())
 
     def setUp(self):
         unittest.TestCase.setUp(self)

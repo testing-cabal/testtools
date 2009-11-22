@@ -20,9 +20,6 @@ class RunTest:
     Subclassing or replacing RunTest can be useful to add functionality to the
     way that tests are run in a given project.
 
-    :ivar wrapped: The original run method that is invoked once RunTest 
-        specific code has completed.  This ivar is a transitional measure that
-        will be removed once all the code has migrated.
     :ivar case: The test case that is to be run.
     :ivar result: The result object a case is reporting to.
     :ivar handlers: A list of (ExceptionClass->handler code) for exceptions
@@ -31,14 +28,13 @@ class RunTest:
         exception.
     """
 
-    def __init__(self, case, original_run, handlers=None):
+    def __init__(self, case, handlers=None):
         """Create a RunTest to run case that will hand off to original_run.
         
         :param case: A testtools.TestCase test case object.
         :param handlers: Exception handlers for this RunTest. These are stored
             in self.handlers and can be modified later if needed.
         """
-        self.wrapped = original_run
         self.case = case
         self.handlers = handlers or []
         self.exception_caught = object()
@@ -86,9 +82,41 @@ class RunTest:
         return result
 
     def _run_core(self):
-        """Run user supplied test code."""
+        """Run the user supplied test code."""
+        if self.exception_caught == self._run_user(self.case._run_setup,
+            self.result):
+            # Don't run the test method if we failed getting here.
+            self.case._runCleanups(self.result)
+            return
+        # Run everything from here on in. If any of the methods raise an
+        # exception we'll have failed.
+        failed = False
         try:
-            return self.wrapped(self.result)
+            if self.exception_caught == self._run_user(
+                self.case._run_test_method, self.result):
+                failed = True
+        finally:
+            try:
+                if self.exception_caught == self._run_user(
+                    self.case._run_teardown, self.result):
+                    failed = True
+            finally:
+                try:
+                    if not self._run_user(
+                        self.case._runCleanups, self.result):
+                        failed = True
+                finally:
+                    if not failed:
+                        self.result.addSuccess(self.case,
+                            details=self.case.getDetails())
+
+    def _run_user(self, fn, *args):
+        """Run a user supplied function.
+        
+        Exceptions are processed by self.handlers.
+        """
+        try:
+            return fn(*args)
         except KeyboardInterrupt:
             raise
         except Exception, e:
