@@ -124,6 +124,6 @@ class RunTest:
             # escape: but they are deprecated anyway.
             for exc_class, handler in self.handlers:
                 if isinstance(e, exc_class):
-                    handler(self.result, e)
+                    handler(self.case, self.result, e)
                     return self.exception_caught
             raise e

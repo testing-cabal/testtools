@@ -9,6 +9,9 @@ Improvements
 
 * A failure in setUp and tearDown now report as failures not as errors.
 
+* TestCase has a new attribute exception_handlers that provides a way to add
+  new exceptions to be caught by code executing setUp/tearDown/runTest.
+
 * Test execution now uses a separate class, testtools.RunTest to run single
   tests. This can be customised and extended in a more consistent fashion than
   the previous run method idiom. See pydoc for more information.

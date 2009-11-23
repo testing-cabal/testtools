@@ -78,7 +78,7 @@ class TestRunTest(TestCase):
         def raises():
             raise e
         log = []
-        def log_exc(result, err):
+        def log_exc(self, result, err):
             log.append((result, err))
         run = RunTest(case, [(Exception, log_exc)])
         run.result = ExtendedTestResult()

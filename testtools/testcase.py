@@ -46,7 +46,12 @@ except ImportError:
 
 
 class TestCase(unittest.TestCase):
-    """Extensions to the basic TestCase."""
+    """Extensions to the basic TestCase.
+    
+    :ivar exception_handlers: Exceptions to catch from setUp, runTest and
+        tearDown. This list is able to be modified at any time and consists of
+        (exception_class, handler(case, result, exception_value)) pairs.
+    """
 
     skipException = TestSkipped
 
@@ -65,6 +70,13 @@ class TestCase(unittest.TestCase):
         self.__teardown_callled = False
         self.__details = {}
         self.__RunTest = kwargs.get('runTest', RunTest)
+        self.exception_handlers = [
+            (self.skipException, self._report_skip),
+            (self.failureException, self._report_failure),
+            (_ExpectedFailure, self._report_expected_failure),
+            (_UnexpectedSuccess, self._report_unexpected_success),
+            (Exception, self._report_error),
+            ]
 
     def __eq__(self, other):
         eq = getattr(unittest.TestCase, '__eq__', None)
@@ -128,7 +140,7 @@ class TestCase(unittest.TestCase):
             except KeyboardInterrupt:
                 raise
             except:
-                self._report_error(result, None)
+                self._report_error(self, result, None)
                 ok = False
         return ok
 
@@ -243,17 +255,21 @@ class TestCase(unittest.TestCase):
     def getUniqueString(self):
         return '%s-%d' % (self._testMethodName, self.getUniqueInteger())
 
+    @staticmethod
     def _report_error(self, result, err):
         self._report_traceback()
         result.addError(self, details=self.getDetails())
 
+    @staticmethod
     def _report_expected_failure(self, result, err):
         result.addExpectedFailure(self, details=self.getDetails())
 
+    @staticmethod
     def _report_failure(self, result, err):
         self._report_traceback()
         result.addFailure(self, details=self.getDetails())
 
+    @staticmethod
     def _report_skip(self, result, err):
         reason = err.args[0]
         self._add_reason(reason)
@@ -263,17 +279,12 @@ class TestCase(unittest.TestCase):
         self.addDetail('traceback',
             content.TracebackContent(sys.exc_info(), self))
 
+    @staticmethod
     def _report_unexpected_success(self, result, err):
         result.addUnexpectedSuccess(self, details=self.getDetails())
 
     def run(self, result=None):
-        handlers = [(self.skipException, self._report_skip),
-            (self.failureException, self._report_failure),
-            (_ExpectedFailure, self._report_expected_failure),
-            (_UnexpectedSuccess, self._report_unexpected_success),
-            (Exception, self._report_error),
-            ]
-        return self.__RunTest(self, handlers)(result)
+        return self.__RunTest(self, self.exception_handlers)(result)
 
     def _run_setup(self, result):
         """Run the setUp function for this test.
