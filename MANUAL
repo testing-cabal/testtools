@@ -24,7 +24,8 @@ raised exception.
 Secondly, by overriding __init__ to pass in runTest=RunTestFactory the whole
 execution of the test can be altered. The default is testtools.runtest.RunTest
 and calls  case._run_setup, case._run_test_method and finally
-case._run_teardown. 
+case._run_teardown. Other methods to control what RunTest is used may be
+added in future.
 
 
 TestCase.addCleanup
