@@ -90,13 +90,13 @@ class DocTestMatches:
         with_nl = self._with_nl(actual)
         if self._checker.check_output(self.want, with_nl, self.flags):
             return None
-        return DocTestMisMatch(self, with_nl)
+        return DocTestMismatch(self, with_nl)
 
     def _describe_difference(self, with_nl):
         return self._checker.output_difference(self, with_nl, self.flags)
 
 
-class DocTestMisMatch:
+class DocTestMismatch:
     """Mismatch object for DocTestMatches."""
     
     def __init__(self, matcher, with_nl):

@@ -191,11 +191,11 @@ class TestCase(unittest.TestCase):
         :param matcher: An object meeting the testtools.Matcher protocol.
         :raises self.failureException: When matcher does not match thing.
         """
-        match = matcher.match(matchee)
-        if not match:
+        mismatch = matcher.match(matchee)
+        if not mismatch:
             return
         self.fail('Match failed. Matchee: "%s"\nMatcher: %s\nDifference: %s\n'
-            % (matchee, matcher, match.describe()))
+            % (matchee, matcher, mismatch.describe()))
 
     def expectFailure(self, reason, predicate, *args, **kwargs):
         """Check that a test fails in a particular way.
