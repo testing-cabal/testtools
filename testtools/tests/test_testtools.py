@@ -302,7 +302,7 @@ class TestAddCleanup(TestCase):
         self.assertEqual(messages, self.test._calls)
 
     def logAppender(self, message):
-        """Return a cleanup that appends `message` to the tests log.
+        """A cleanup that appends `message` to the tests log.
 
         Cleanups are callables that are added to a test by addCleanup. To
         verify that our cleanups run in the right order, we add strings to a
