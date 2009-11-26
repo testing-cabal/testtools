@@ -213,10 +213,11 @@ class TestCase(unittest.TestCase):
         :param matcher: An object meeting the testtools.Matcher protocol.
         :raises self.failureException: When matcher does not match thing.
         """
-        if matcher.matches(matchee):
+        mismatch = matcher.match(matchee)
+        if not mismatch:
             return
         self.fail('Match failed. Matchee: "%s"\nMatcher: %s\nDifference: %s\n'
-            % (matchee, matcher, matcher.describe_difference(matchee)))
+            % (matchee, matcher, mismatch.describe()))
 
     def defaultTestResult(self):
         return TestResult()

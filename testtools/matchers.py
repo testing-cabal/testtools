@@ -21,8 +21,9 @@ import doctest
 class Matcher:
     """A pattern matcher.
 
-    A Matcher must implement matches, __str__ and describe_difference to be
-    used by testtools.TestCase.assertThat.
+    A Matcher must implement match and __str__ to be used by
+    testtools.TestCase.assertThat. Matcher.match(thing) returns None when
+    thing is completely matched, and a Mismatch object otherwise.
 
     Matchers can be useful outside of test cases, as they are simply a 
     pattern matching language expressed as objects.
@@ -31,9 +32,10 @@ class Matcher:
     a Java transcription.
     """
 
-    def matches(self, something):
-        """Returns True if this matcher matches something, False otherwise."""
-        raise NotImplementedError(self.matches)
+    def match(self, something):
+        """Return None if this matcher matches something, a Mismatch otherwise.
+        """
+        raise NotImplementedError(self.match)
 
     def __str__(self):
         """Get a sensible human representation of the matcher.
@@ -43,10 +45,14 @@ class Matcher:
         """
         raise NotImplementedError(self.__str__)
 
-    def describe_difference(self, something):
-        """Describe why something did not match.
+
+class Mismatch:
+    """An object describing a mismatch detected by a Matcher."""
+
+    def describe(self):
+        """Describe the mismatch.
         
-        This should be either human readable or castable to a string.
+        This should be either a human readable string or castable to a string.
         """
         raise NotImplementedError(self.describe_difference)
 
@@ -80,10 +86,22 @@ class DocTestMatches:
             result += '\n'
         return result
 
-    def matches(self, actual):
-        return self._checker.check_output(self.want, self._with_nl(actual),
-            self.flags)
+    def match(self, actual):
+        with_nl = self._with_nl(actual)
+        if self._checker.check_output(self.want, with_nl, self.flags):
+            return None
+        return DocTestMismatch(self, with_nl)
 
-    def describe_difference(self, actual):
-        return self._checker.output_difference(self, self._with_nl(actual),
-            self.flags)
+    def _describe_difference(self, with_nl):
+        return self._checker.output_difference(self, with_nl, self.flags)
+
+
+class DocTestMismatch:
+    """Mismatch object for DocTestMatches."""
+    
+    def __init__(self, matcher, with_nl):
+        self.matcher = matcher
+        self.with_nl = with_nl
+
+    def describe(self):
+        return self.matcher._describe_difference(self.with_nl)
