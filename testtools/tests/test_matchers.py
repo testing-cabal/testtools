@@ -15,14 +15,16 @@ from testtools.matchers import (
 
 class TestDocTestMatchesInterface(TestCase):
 
-    def test_matches_matches(self):
+    def test_matches_match(self):
         matcher = DocTestMatches("Ran 1 test in ...s", doctest.ELLIPSIS)
         matches = ["Ran 1 test in 0.000s", "Ran 1 test in 1.234s"]
         mismatches = ["Ran 1 tests in 0.000s", "Ran 2 test in 0.000s"]
         for candidate in matches:
-            self.assertTrue(matcher.matches(candidate))
+            self.assertEqual(None, matcher.match(candidate))
         for candidate in mismatches:
-            self.assertFalse(matcher.matches(candidate))
+            mismatch = matcher.match(candidate)
+            self.assertNotEqual(None, mismatch)
+            self.assertNotEqual(None, getattr(mismatch, 'describe', None))
 
     def test__str__(self):
         # [(expected, object to __str__)].
@@ -35,11 +37,12 @@ class TestDocTestMatchesInterface(TestCase):
 
     def test_describe_difference(self):
         # [(expected, matchee, matcher), ...]
-        examples = [('Expected:\n    Ran 1 test in ...s\nGot:\n'
+        examples = [('Expected:\n    Ran 1 tests in ...s\nGot:\n'
             '    Ran 1 test in 0.123s\n', "Ran 1 test in 0.123s",
-            DocTestMatches("Ran 1 test in ...s", doctest.ELLIPSIS))]
+            DocTestMatches("Ran 1 tests in ...s", doctest.ELLIPSIS))]
         for difference, matchee, matcher in examples:
-            self.assertEqual(difference, matcher.describe_difference(matchee))
+            mismatch = matcher.match(matchee)
+            self.assertEqual(difference, mismatch.describe())
 
 
 class TestDocTestMatchesSpecific(TestCase):
