@@ -12,7 +12,10 @@ __all__ = [
     ]
 
 from copy import deepcopy
-import functools
+try:
+    from functools import wraps
+except ImportError:
+    wraps = None
 import sys
 import unittest
 
@@ -228,7 +231,7 @@ class TestCase(unittest.TestCase):
         return self._last_unique_id
 
     def getUniqueString(self):
-        return '%s-%d' % (self._testMethodName, self.getUniqueInteger())
+        return '%s-%d' % (self.id(), self.getUniqueInteger())
 
     def _report_error(self, result):
         self._report_traceback()
@@ -251,7 +254,13 @@ class TestCase(unittest.TestCase):
             result = self.defaultTestResult()
         result = ExtendedToOriginalDecorator(result)
         result.startTest(self)
-        testMethod = getattr(self, self._testMethodName)
+        absent_attr = object()
+        # Python 2.5
+        method_name = getattr(self, '_testMethodName', absent_attr)
+        if method_name is absent_attr:
+            # Python 2.4
+            method_name = getattr(self, '_TestCase__testMethodName')
+        testMethod = getattr(self, method_name)
         try:
             try:
                 self.setUp()
@@ -338,9 +347,13 @@ def skip(reason):
     @unittest.skip decorator.
     """
     def decorator(test_item):
-        @functools.wraps(test_item)
-        def skip_wrapper(*args, **kwargs):
-            raise TestCase.skipException(reason)
+        if wraps is not None:
+            @wraps(test_item)
+            def skip_wrapper(*args, **kwargs):
+                raise TestCase.skipException(reason)
+        else:
+            def skip_wrapper(test_item):
+                test_item.skip(reason)
         return skip_wrapper
     return decorator
 

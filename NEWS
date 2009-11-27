@@ -1,6 +1,21 @@
 testtools NEWS
 ==============
 
+NEXT
+~~~~
+
+Changes
+-------
+
+* TestCase.getUniqueString now uses the test id, not the test method name,
+  which works nicer with parameterised tests.
+
+Improvements
+------------
+
+* Python2.4 is now supported again.
+
+
 0.9.0
 ~~~~~
 
