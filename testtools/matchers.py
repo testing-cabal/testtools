@@ -13,6 +13,7 @@ $ python -c 'import testtools.matchers; print testtools.matchers.__all__'
 __metaclass__ = type
 __all__ = [
     'DocTestMatches',
+    'MatchesAny',
     ]
 
 import doctest
@@ -105,3 +106,37 @@ class DocTestMismatch:
 
     def describe(self):
         return self.matcher._describe_difference(self.with_nl)
+
+
+class MatchesAny:
+    """Matches if any of the matchers it is created with match."""
+
+    def __init__(self, *matchers):
+        self.matchers = matchers
+
+    def match(self, matchee):
+        results = []
+        for matcher in self.matchers:
+            mismatch = matcher.match(matchee)
+            if mismatch is None:
+                return None
+            results.append(mismatch)
+        return MismatchesAll(results)
+
+    def __str__(self):
+        return "MatchesAny(%s)" % ', '.join([
+            str(matcher) for matcher in self.matchers])
+
+
+class MismatchesAll:
+    """A mismatch with many child mismatches."""
+
+    def __init__(self, mismatches):
+        self.mismatches = mismatches
+
+    def describe(self):
+        descriptions = ["Differences: ["]
+        for mismatch in self.mismatches:
+            descriptions.append(mismatch.describe())
+        descriptions.append("]\n")
+        return '\n'.join(descriptions)

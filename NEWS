@@ -1,5 +1,14 @@
 testtools NEWS
-==============
+++++++++++++++
+
+NEXT
+~~~~
+
+Improvements
+------------
+
+* New matcher MatchesAny which looks for a match of any of its arguments.
+
 
 0.9.1
 ~~~~~
