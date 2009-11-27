@@ -491,12 +491,12 @@ class TestUniqueFactories(TestCase):
         self.assertEqual(2, two)
 
     def test_getUniqueString(self):
-        # getUniqueString returns the current test name followed by a unique
+        # getUniqueString returns the current test id followed by a unique
         # integer.
         name_one = self.getUniqueString()
-        self.assertEqual('%s-%d' % (self._testMethodName, 1), name_one)
+        self.assertEqual('%s-%d' % (self.id(), 1), name_one)
         name_two = self.getUniqueString()
-        self.assertEqual('%s-%d' % (self._testMethodName, 2), name_two)
+        self.assertEqual('%s-%d' % (self.id(), 2), name_two)
 
 
 class TestCloneTestWithNewId(TestCase):
