@@ -25,7 +25,7 @@ class Matcher:
     testtools.TestCase.assertThat. Matcher.match(thing) returns None when
     thing is completely matched, and a Mismatch object otherwise.
 
-    Matchers can be useful outside of test cases, as they are simply a 
+    Matchers can be useful outside of test cases, as they are simply a
     pattern matching language expressed as objects.
 
     testtools.matchers is inspired by hamcrest, but is pythonic rather than
@@ -39,7 +39,7 @@ class Matcher:
 
     def __str__(self):
         """Get a sensible human representation of the matcher.
-        
+
         This should include the parameters given to the matcher and any
         state that would affect the matches operation.
         """
@@ -51,8 +51,8 @@ class Mismatch:
 
     def describe(self):
         """Describe the mismatch.
-        
-        This should be either a human readable string or castable to a string.
+
+        This should be either a human-readable string or castable to a string.
         """
         raise NotImplementedError(self.describe_difference)
 
@@ -98,7 +98,7 @@ class DocTestMatches:
 
 class DocTestMismatch:
     """Mismatch object for DocTestMatches."""
-    
+
     def __init__(self, matcher, with_nl):
         self.matcher = matcher
         self.with_nl = with_nl

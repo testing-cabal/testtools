@@ -5,14 +5,16 @@ testtools NEWS
 ~~~~~
 
 The new matcher API introduced in 0.9.0 had a small flaw where the matchee
-would be evaluated twice to get a description of the mismatch. This could
-lead to bugs if the act of matching caused side effects to occur in the
-matchee. While having such sideffects isn't desirable, as we could change the
-API to make it robust even in the presence of such side effects, we have done
-so now before the API has become widespread.
+would be evaluated twice to get a description of the mismatch. This could lead
+to bugs if the act of matching caused side effects to occur in the matchee.
+Since having such side effects isn't desirable, we have changed the API now
+before it has become widespread.
 
 Changes
 -------
+
+* Matcher API changed to avoid evaluating matchee twice. Please consult
+  the API documentation.
 
 * TestCase.getUniqueString now uses the test id, not the test method name,
   which works nicer with parameterised tests.
