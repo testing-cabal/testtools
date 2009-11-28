@@ -207,8 +207,7 @@ class TextTestResult(TestResult):
 
     def __init__(self, stream):
         """Construct a TextTestResult writing to stream."""
-        self.__super = super(TextTestResult, self)
-        self.__super.__init__()
+        super(TextTestResult, self).__init__()
         self.stream = stream
         self.sep1 = '=' * 70 + '\n'
         self.sep2 = '-' * 70 + '\n'
@@ -225,7 +224,7 @@ class TextTestResult(TestResult):
             self.stream.write(output)
 
     def startTestRun(self):
-        self.__super.startTestRun()
+        super(TextTestResult, self).startTestRun()
         self.__start = self._now()
         self.stream.write("Tests running...\n")
 
@@ -248,7 +247,7 @@ class TextTestResult(TestResult):
                 len(self.failures) + len(self.errors)))
             self.stream.write(", ".join(details))
             self.stream.write(")\n")
-        self.__super.stopTestRun()
+        super(TextTestResult, self).stopTestRun()
 
 
 class ThreadsafeForwardingResult(TestResult):
