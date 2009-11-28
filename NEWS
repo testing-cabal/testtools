@@ -1,6 +1,16 @@
 testtools NEWS
 ==============
 
+NEXT
+~~~~
+
+Improvements
+------------
+
+* ExtendedToOriginalDecorator now passes unrecognised attributes through
+  to the decorated result object, permitting other extensions to the 
+  TestCase -> TestResult protocol to work.
+
 0.9.1
 ~~~~~
 
