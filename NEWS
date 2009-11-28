@@ -1,17 +1,6 @@
 testtools NEWS
 ++++++++++++++
 
-NEXT
-~~~~
-
-Improvements
-------------
-
-* New matcher Equals which perform a simple equality test.
-
-* New matcher MatchesAny which looks for a match of any of its arguments.
-
-
 NEXT (In development)
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -20,8 +9,21 @@ Improvements
 
 * A failure in setUp and tearDown now report as failures not as errors.
 
+* New matcher Equals which perform a simple equality test.
+
+* New matcher MatchesAny which looks for a match of any of its arguments.
+
 * TestCase has a new attribute exception_handlers that provides a way to add
   new exceptions to be caught by code executing setUp/tearDown/runTest.
+
+* TestCase.run now clones test cases before they are run and runs the clone.
+  This reduces memory footprint in large test runs - state accumulated on
+  test objects during their setup and execution gets freed when test case
+  has finished running unless the TestResult object keeps a reference.
+  NOTE: As test cloning uses deepcopy, this can potentially interfere if
+  a test suite has shared state (such as the testscenarios or testresources
+  projects use).  Use the __deepcopy__ hook to control the copying of such
+  objects so that the shared references stay shared.
 
 * Test execution now uses a separate class, testtools.RunTest to run single
   tests. This can be customised and extended in a more consistent fashion than

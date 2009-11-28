@@ -11,12 +11,13 @@ __all__ = [
     'skipUnless',
     ]
 
-from copy import deepcopy
+import copy
 try:
     from functools import wraps
 except ImportError:
     wraps = None
 import sys
+import types
 import unittest
 
 from testtools import content
@@ -86,6 +87,10 @@ class TestCase(unittest.TestCase):
         if eq is not None and not unittest.TestCase.__eq__(self, other):
             return False
         return self.__dict__ == other.__dict__
+
+    def __repr__(self):
+        # We add id to the repr because it makes testing testtools easier.
+        return "<%s id=0x%0x>" % (self.id(), id(self))
 
     def addDetail(self, name, content_object):
         """Add a detail to be reported with this test's outcome.
@@ -288,6 +293,9 @@ class TestCase(unittest.TestCase):
         result.addUnexpectedSuccess(self, details=self.getDetails())
 
     def run(self, result=None):
+        RunTest = self.__RunTest
+        case = clone_test_with_new_id(self, self.id())
+        return RunTest(case, case.exception_handlers)(result)
         return self.__RunTest(self, self.exception_handlers)(result)
 
     def _run_setup(self, result):
@@ -335,10 +343,14 @@ class TestCase(unittest.TestCase):
         unittest.TestCase.tearDown(self)
         self.__teardown_callled = True
 
+if types.MethodType not in copy._deepcopy_dispatch:
+    def _deepcopy_method(x, memo): # Copy instance methods
+        return type(x)(x.im_func, copy.deepcopy(x.im_self, memo), x.im_class)
+    copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
 
 def clone_test_with_new_id(test, new_id):
     """Copy a TestCase, and give the copied test a new id."""
-    newTest = deepcopy(test)
+    newTest = copy.deepcopy(test)
     newTest.id = lambda: new_id
     return newTest
 

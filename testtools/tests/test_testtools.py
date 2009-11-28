@@ -299,7 +299,8 @@ class TestAddCleanup(TestCase):
 
     def assertTestLogEqual(self, messages):
         """Assert that the call log equals `messages`."""
-        self.assertEqual(messages, self.test._calls)
+        case = self._result_calls[0][1]
+        self.assertEqual(messages, case._calls)
 
     def logAppender(self, message):
         """A cleanup that appends `message` to the tests log.
@@ -402,6 +403,7 @@ class TestWithDetails(TestCase):
         """
         result = ExtendedTestResult()
         case.run(result)
+        case = result._events[0][1]
         expected = [
             ('startTest', case),
             (expected_outcome, case),
@@ -435,6 +437,7 @@ class TestExpectedFailure(TestWithDetails):
         case = self.make_unexpected_case()
         result = Python27TestResult()
         case.run(result)
+        case = result._events[0][1]
         self.assertEqual([
             ('startTest', case),
             ('addUnexpectedSuccess', case),
@@ -445,6 +448,7 @@ class TestExpectedFailure(TestWithDetails):
         case = self.make_unexpected_case()
         result = ExtendedTestResult()
         case.run(result)
+        case = result._events[0][1]
         self.assertEqual([
             ('startTest', case),
             ('addUnexpectedSuccess', case, {}),
@@ -606,9 +610,10 @@ class TestSkipping(TestCase):
         result = LoggingResult(calls)
         test = TestThatRaisesInSetUp("test_that_passes")
         test.run(result)
-        self.assertEqual([('startTest', test),
-            ('addSkip', test, "Text attachment: reason\n------------\n"
-             "skipping this test\n------------\n"), ('stopTest', test)],
+        case = result._events[0][1]
+        self.assertEqual([('startTest', case),
+            ('addSkip', case, "Text attachment: reason\n------------\n"
+             "skipping this test\n------------\n"), ('stopTest', case)],
             calls)
 
     def test_skipException_in_test_method_calls_result_addSkip(self):
@@ -618,9 +623,10 @@ class TestSkipping(TestCase):
         result = Python27TestResult()
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
-        self.assertEqual([('startTest', test),
-            ('addSkip', test, "Text attachment: reason\n------------\n"
-             "skipping this test\n------------\n"), ('stopTest', test)],
+        case = result._events[0][1]
+        self.assertEqual([('startTest', case),
+            ('addSkip', case, "Text attachment: reason\n------------\n"
+             "skipping this test\n------------\n"), ('stopTest', case)],
             result._events)
 
     def test_skip__in_setup_with_old_result_object_calls_addSuccess(self):

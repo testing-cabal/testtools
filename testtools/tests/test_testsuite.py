@@ -24,20 +24,25 @@ class TestConcurrentTestSuiteRun(TestCase):
         log = []
         result = LoggingResult(log)
         class Sample(TestCase):
-            def test_method(self):
+            def test_method1(self):
                 pass
-        test1 = Sample('test_method')
-        test2 = Sample('test_method')
+            def test_method2(self):
+                pass
+        test1 = Sample('test_method1')
+        test2 = Sample('test_method2')
         original_suite = unittest.TestSuite([test1, test2])
         suite = ConcurrentTestSuite(original_suite, self.split_suite)
         suite.run(result)
-        log1first = [('startTest', test1), ('addSuccess', test1),
+        test1 = log[0][1]
+        test2 = log[-1][1]
+        self.assertIsInstance(test1, Sample)
+        self.assertIsInstance(test2, Sample)
+        self.assertNotEqual(test1.id(), test2.id())
+        # We expect the start/outcome/stop to be grouped
+        expected = [('startTest', test1), ('addSuccess', test1),
             ('stopTest', test1), ('startTest', test2), ('addSuccess', test2),
             ('stopTest', test2)]
-        log2first = [('startTest', test2), ('addSuccess', test2),
-            ('stopTest', test2), ('startTest', test1), ('addSuccess', test1),
-            ('stopTest', test1)]
-        self.assertThat(log, MatchesAny(Equals(log1first), Equals(log2first)))
+        self.assertThat(log, Equals(expected))
 
     def split_suite(self, suite):
         tests = list(iterate_tests(suite))
