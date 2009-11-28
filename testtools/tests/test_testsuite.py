@@ -11,6 +11,10 @@ from testtools import (
     iterate_tests,
     TestCase,
     )
+from testtools.matchers import (
+    Equals,
+    MatchesAny,
+    )
 from testtools.tests.helpers import LoggingResult
 
 
@@ -27,12 +31,13 @@ class TestConcurrentTestSuiteRun(TestCase):
         original_suite = unittest.TestSuite([test1, test2])
         suite = ConcurrentTestSuite(original_suite, self.split_suite)
         suite.run(result)
-        try:
-            self.assertEqual([('startTest', test1), ('addSuccess', test1), ('stopTest', test1),
-                ('startTest', test2), ('addSuccess', test2), ('stopTest', test2)], log)
-        except AssertionError:
-            self.assertEqual([('startTest', test2), ('addSuccess', test2), ('stopTest', test2),
-                ('startTest', test1), ('addSuccess', test1), ('stopTest', test1)], log)
+        log1first = [('startTest', test1), ('addSuccess', test1),
+            ('stopTest', test1), ('startTest', test2), ('addSuccess', test2),
+            ('stopTest', test2)]
+        log2first = [('startTest', test2), ('addSuccess', test2),
+            ('stopTest', test2), ('startTest', test1), ('addSuccess', test1),
+            ('stopTest', test1)]
+        self.assertThat(log, MatchesAny(Equals(log1first), Equals(log2first)))
 
     def split_suite(self, suite):
         tests = list(iterate_tests(suite))
