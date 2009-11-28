@@ -13,6 +13,7 @@ $ python -c 'import testtools.matchers; print testtools.matchers.__all__'
 __metaclass__ = type
 __all__ = [
     'DocTestMatches',
+    'Equals',
     'MatchesAny',
     ]
 
@@ -106,6 +107,32 @@ class DocTestMismatch:
 
     def describe(self):
         return self.matcher._describe_difference(self.with_nl)
+
+
+class Equals:
+    """Matches if the items are equal."""
+
+    def __init__(self, expected):
+        self.expected = expected
+
+    def match(self, other):
+        if self.expected == other:
+            return None
+        return EqualsMismatch(self.expected, other)
+
+    def __str__(self):
+        return "Equals(%r)" % self.expected
+
+
+class EqualsMismatch:
+    """Two things differed."""
+
+    def __init__(self, expected, other):
+        self.expected = expected
+        self.other = other
+
+    def describe(self):
+        return "%r != %r" % (self.expected, self.other)
 
 
 class MatchesAny:

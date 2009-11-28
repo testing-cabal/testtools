@@ -7,6 +7,8 @@ NEXT
 Improvements
 ------------
 
+* New matcher Equals which perform a simple equality test.
+
 * New matcher MatchesAny which looks for a match of any of its arguments.
 
 

@@ -9,6 +9,7 @@ from testtools import (
     TestCase,
     )
 from testtools.matchers import (
+    Equals,
     DocTestMatches,
     MatchesAny,
     )
@@ -69,7 +70,18 @@ class TestDocTestMatchesSpecific(TestCase):
         self.assertEqual(doctest.ELLIPSIS, matcher.flags)
 
 
-class TestMatchersInterface(TestCase, TestMatchersInterface):
+class TestEqualsInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = Equals(1)
+    matches_matches = [1]
+    matches_mismatches = [2]
+
+    str_examples = [("Equals(1)", Equals(1)), ("Equals('1')", Equals('1'))]
+
+    describe_examples = [("1 != 2", 2, Equals(1))]
+
+
+class TestMatchersAnyInterface(TestCase, TestMatchersInterface):
 
     matches_matcher = MatchesAny(DocTestMatches("1"), DocTestMatches("2"))
     matches_matches = ["1", "2"]
