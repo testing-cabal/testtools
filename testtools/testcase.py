@@ -71,7 +71,7 @@ class TestCase(unittest.TestCase):
         self._cleanups = []
         self._last_unique_id = 0
         self.__setup_called = False
-        self.__teardown_callled = False
+        self.__teardown_called = False
         self.__details = {}
         self.__RunTest = kwargs.get('runTest', RunTest)
         self.exception_handlers = [
@@ -317,7 +317,7 @@ class TestCase(unittest.TestCase):
             ValueError is raised.
         """
         self.tearDown()
-        if not self.__teardown_callled:
+        if not self.__teardown_called:
             raise ValueError("teardown was not called")
 
     def _run_test_method(self, result):
@@ -341,7 +341,7 @@ class TestCase(unittest.TestCase):
 
     def tearDown(self):
         unittest.TestCase.tearDown(self)
-        self.__teardown_callled = True
+        self.__teardown_called = True
 
 if types.MethodType not in copy._deepcopy_dispatch:
     def _deepcopy_method(x, memo): # Copy instance methods
