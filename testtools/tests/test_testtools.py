@@ -66,8 +66,9 @@ class TestAssertions(TestCase):
         ret = ('orange', 42)
         try:
             self.assertRaises(RuntimeError, lambda: ret)
-        except self.failureException, e:
+        except self.failureException:
             # We expected assertRaises to raise this exception.
+            e = sys.exc_info()[1]
             self.assertEqual(
                 '%s not raised, %r returned instead.'
                 % (self._formatTypes(RuntimeError), ret), str(e))
