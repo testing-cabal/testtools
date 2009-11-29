@@ -24,7 +24,7 @@ from testtools import (
     )
 from testtools.content import Content, ContentType
 from testtools.matchers import DocTestMatches
-from testtools.utils import _u
+from testtools.utils import _u, _b
 from testtools.tests.helpers import (
     LoggingResult,
     Python26TestResult,
@@ -470,9 +470,9 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
 
     def get_details_and_string(self):
         """Get a details dict and expected string."""
-        text1 = lambda:["1\n2\n"]
-        text2 = lambda:["3\n4\n"]
-        bin1 = lambda:["5\n"]
+        text1 = lambda:[_b("1\n2\n")]
+        text2 = lambda:[_b("3\n4\n")]
+        bin1 = lambda:[_b("5\n")]
         details = {'text 1': Content(ContentType('text', 'plain'), text1),
             'text 2': Content(ContentType('text', 'strange'), text2),
             'bin 1': Content(ContentType('application', 'binary'), bin1)}
