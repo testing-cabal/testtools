@@ -180,8 +180,8 @@ class TestCase(unittest.TestCase):
         """
         try:
             ret = callableObj(*args, **kwargs)
-        except excClass, excObject:
-            return excObject
+        except excClass:
+            return sys.exc_info()[1]
         else:
             excName = self._formatTypes(excClass)
             self.fail("%s not raised, %r returned instead." % (excName, ret))
@@ -269,7 +269,8 @@ class TestCase(unittest.TestCase):
                     raise ValueError("setup was not called")
             except KeyboardInterrupt:
                 raise
-            except self.skipException, e:
+            except self.skipException:
+                e = sys.exc_info()[1]
                 self._report_skip(result, e.args[0])
                 self._runCleanups(result)
                 return
@@ -290,7 +291,8 @@ class TestCase(unittest.TestCase):
             try:
                 testMethod()
                 ok = True
-            except self.skipException, e:
+            except self.skipException:
+                e = sys.exc_info()[1]
                 self._report_skip(result, e.args[0])
             except _ExpectedFailure:
                 result.addExpectedFailure(self, details=self.getDetails())
