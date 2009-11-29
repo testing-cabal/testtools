@@ -5,7 +5,10 @@
 __metaclass__ = type
 
 import datetime
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 import doctest
 import sys
 import threading
