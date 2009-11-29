@@ -515,8 +515,8 @@ def _details_to_str(details):
     """Convert a details dict to a string."""
     chars = []
     # sorted is for testing, may want to remove that and use a dict
-    # subclass with defined order for iteritems instead.
-    for key, content in sorted(details.iteritems()):
+    # subclass with defined order for items instead.
+    for key, content in sorted(details.items()):
         if content.content_type.type != 'text':
             chars.append('Binary content: %s\n' % key)
             continue
