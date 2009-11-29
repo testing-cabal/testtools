@@ -86,6 +86,6 @@ class TracebackContent(Content):
         content_type = ContentType('text', 'x-traceback',
             {"language": "python", "charset" : "utf-8"})
         self._result = TestResult()
-        self._value = self._result._exc_info_to_string(err, test)
+        value = self._result._exc_info_to_string(err, test)
         super(TracebackContent, self).__init__(content_type,
-            lambda:[self._value.encode("utf-8")])
+            lambda:[value.encode("utf-8")])
