@@ -504,6 +504,9 @@ class ExtendedToOriginalDecorator(object):
 class _StringException(Exception):
     """An exception made from an arbitrary string."""
 
+    def __hash__(self):
+        return id(self)
+
     def __eq__(self, other):
         try:
             return self.args == other.args
