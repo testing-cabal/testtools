@@ -2,10 +2,22 @@
 
 """Utilities for dealing with stuff in unittest."""
 
+
+import sys
+
 __metaclass__ = type
 __all__ = [
     'iterate_tests',
     ]
+
+
+if sys.version_info > (3, 0):
+    def _u(s):
+        """Replacement for u'some string' in Python 3."""
+        return s
+else:
+    def _u(s):
+        return unicode(s)
 
 
 def iterate_tests(test_suite_or_case):

@@ -21,6 +21,7 @@ from testtools import (
     )
 from testtools.content import Content, ContentType
 from testtools.matchers import DocTestMatches
+from testtools.utils import _u
 from testtools.tests.helpers import (
     LoggingResult,
     Python26TestResult,
@@ -55,7 +56,7 @@ class TestTestResultContract(TestCase):
     def test_addSkipped(self):
         # Calling addSkip(test, reason) completes ok.
         result = self.makeResult()
-        result.addSkip(self, u"Skipped for some reason")
+        result.addSkip(self, _u("Skipped for some reason"))
 
     def test_addSkipped_details(self):
         # Calling addSkip(test, reason) completes ok.
@@ -121,15 +122,15 @@ class TestTestResult(TestCase):
         # Calling addSkip on a TestResult records the test that was skipped in
         # its skip_reasons dict.
         result = self.makeResult()
-        result.addSkip(self, u"Skipped for some reason")
-        self.assertEqual({u"Skipped for some reason":[self]},
+        result.addSkip(self, _u("Skipped for some reason"))
+        self.assertEqual({_u("Skipped for some reason"):[self]},
             result.skip_reasons)
-        result.addSkip(self, u"Skipped for some reason")
-        self.assertEqual({u"Skipped for some reason":[self, self]},
+        result.addSkip(self, _u("Skipped for some reason"))
+        self.assertEqual({_u("Skipped for some reason"):[self, self]},
             result.skip_reasons)
-        result.addSkip(self, u"Skipped for another reason")
-        self.assertEqual({u"Skipped for some reason":[self, self],
-            u"Skipped for another reason":[self]},
+        result.addSkip(self, _u("Skipped for another reason"))
+        self.assertEqual({_u("Skipped for some reason"):[self, self],
+            _u("Skipped for another reason"):[self]},
             result.skip_reasons)
 
     def test_now_datetime_now(self):
@@ -202,7 +203,7 @@ class TestMultiTestResult(TestWithFakeExceptions):
     def test_addSkipped(self):
         # Calling `addSkip` on a `MultiTestResult` calls addSkip on its
         # results.
-        reason = u"Skipped for some reason"
+        reason = _u("Skipped for some reason")
         self.multiResult.addSkip(self, reason)
         self.assertResultLogsEqual([('addSkip', self, reason)])
 
@@ -422,7 +423,7 @@ class TestThreadSafeForwardingResult(TestWithFakeExceptions):
         self.result1.addError(self, exc_info1)
         exc_info2 = self.makeExceptionInfo(AssertionError, 'failure')
         self.result1.addFailure(self, exc_info2)
-        reason = u"Skipped for some reason"
+        reason = _u("Skipped for some reason")
         self.result1.addSkip(self, reason)
         self.result1.addSuccess(self)
         self.assertEqual([('startTest', self),

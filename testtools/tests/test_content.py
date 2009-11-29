@@ -4,6 +4,7 @@ import sys
 import unittest
 from testtools.content import Content, TracebackContent
 from testtools.content_type import ContentType
+from testtools.utils import _u
 
 
 def test_suite():
@@ -44,12 +45,12 @@ class TestContent(unittest.TestCase):
 
     def test_iter_text_decodes(self):
         content_type = ContentType("text", "strange", {"charset":"utf8"})
-        content = Content(content_type, lambda:[u"bytes\xea".encode("utf8")])
-        self.assertEqual([u"bytes\xea"], list(content.iter_text()))
+        content = Content(content_type, lambda:[_u("bytes\xea").encode("utf8")])
+        self.assertEqual([_u("bytes\xea")], list(content.iter_text()))
 
     def test_iter_text_default_charset_iso_8859_1(self):
         content_type = ContentType("text", "strange")
-        text = u"bytes\xea"
+        text = _u("bytes\xea")
         iso_version = text.encode("ISO-8859-1")
         content = Content(content_type, lambda:[iso_version])
         self.assertEqual([text], list(content.iter_text()))
