@@ -371,7 +371,7 @@ Traceback (most recent call last):
     testMethod()
   File "...testtools/tests/test_testresult.py", line ..., in error
     1/0
-ZeroDivisionError: integer division or modulo by zero
+ZeroDivisionError: int... division or modulo by zero
 ------------
 ======================================================================
 FAIL: testtools.tests.test_testresult.Test.failed
