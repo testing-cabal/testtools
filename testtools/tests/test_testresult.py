@@ -30,6 +30,7 @@ from testtools.tests.helpers import (
     Python26TestResult,
     Python27TestResult,
     ExtendedTestResult,
+    an_exc_info
     )
 
 
@@ -39,7 +40,7 @@ class TestTestResultContract(TestCase):
     def test_addExpectedFailure(self):
         # Calling addExpectedFailure(test, exc_info) completes ok.
         result = self.makeResult()
-        result.addExpectedFailure(self, sys.exc_info())
+        result.addExpectedFailure(self, an_exc_info)
 
     def test_addExpectedFailure_details(self):
         # Calling addExpectedFailure(test, details=xxx) completes ok.
