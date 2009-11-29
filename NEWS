@@ -4,6 +4,12 @@ testtools NEWS
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* TestCase no longer breaks if a TestSkipped exception is raised with no
+  parameters.
+
 
 0.9.1
 ~~~~~
