@@ -781,6 +781,20 @@ class TestExtendedToOriginalAddUnexpectedSuccess(
     outcome = 'addUnexpectedSuccess'
 
 
+class TestExtendedToOriginalResultOtherAttributes(
+    TestExtendedToOriginalResultDecoratorBase):
+
+    def test_other_attribute(self):
+        class OtherExtendedResult:
+            def foo(self):
+                return 2
+            bar = 1
+        self.result = OtherExtendedResult()
+        self.make_converter()
+        self.assertEqual(1, self.converter.bar)
+        self.assertEqual(2, self.converter.foo())
+    
+
 def test_suite():
     from unittest import TestLoader
     return TestLoader().loadTestsFromName(__name__)

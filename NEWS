@@ -9,6 +9,10 @@ Improvements
 
 * A failure in setUp and tearDown now report as failures not as errors.
 
+* ExtendedToOriginalDecorator now passes unrecognised attributes through
+  to the decorated result object, permitting other extensions to the 
+  TestCase -> TestResult protocol to work.
+
 * New matcher Equals which perform a simple equality test.
 
 * New matcher MatchesAny which looks for a match of any of its arguments.

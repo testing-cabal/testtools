@@ -367,6 +367,9 @@ class ExtendedToOriginalDecorator(object):
     def __init__(self, decorated):
         self.decorated = decorated
 
+    def __getattr__(self, name):
+        return getattr(self.decorated, name)
+
     def addError(self, test, err=None, details=None):
         self._check_args(err, details)
         if details is not None:
