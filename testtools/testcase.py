@@ -280,7 +280,10 @@ class TestCase(unittest.TestCase):
 
     @staticmethod
     def _report_skip(self, result, err):
-        reason = err.args[0]
+        if err.args:
+            reason = err.args[0]
+        else:
+            reason = "no reason given."
         self._add_reason(reason)
         result.addSkip(self, details=self.getDetails())
 
@@ -353,6 +356,7 @@ def clone_test_with_new_id(test, new_id):
     newTest = copy.deepcopy(test)
     newTest.id = lambda: new_id
     return newTest
+
 
 def skip(reason):
     """A decorator to skip unit tests.

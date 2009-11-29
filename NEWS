@@ -1,8 +1,8 @@
 testtools NEWS
 ++++++++++++++
 
-NEXT (In development)
-~~~~~~~~~~~~~~~~~~~~~
+NEXT
+~~~~
 
 Improvements
 ------------
@@ -16,6 +16,9 @@ Improvements
 * TestCase has a new attribute exception_handlers that provides a way to add
   new exceptions to be caught by code executing setUp/tearDown/runTest.
 
+* TestCase no longer breaks if a TestSkipped exception is raised with no
+  parameters.
+
 * TestCase.run now clones test cases before they are run and runs the clone.
   This reduces memory footprint in large test runs - state accumulated on
   test objects during their setup and execution gets freed when test case
@@ -28,6 +31,7 @@ Improvements
 * Test execution now uses a separate class, testtools.RunTest to run single
   tests. This can be customised and extended in a more consistent fashion than
   the previous run method idiom. See pydoc for more information.
+
 
 0.9.1
 ~~~~~

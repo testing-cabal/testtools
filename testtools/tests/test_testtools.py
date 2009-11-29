@@ -599,6 +599,17 @@ class TestSkipping(TestCase):
     def test_skip_causes_skipException(self):
         self.assertRaises(self.skipException, self.skip, "Skip this test")
 
+    def test_skip_without_reason_works(self):
+        class Test(TestCase):
+            def test(self):
+                raise self.skipException()
+        case = Test("test")
+        result = ExtendedTestResult()
+        case.run(result)
+        self.assertEqual('addSkip', result._events[1][0])
+        self.assertEqual('no reason given.',
+            ''.join(result._events[1][2]['reason'].iter_text()))
+
     def test_skipException_in_setup_calls_result_addSkip(self):
         class TestThatRaisesInSetUp(TestCase):
             def setUp(self):
