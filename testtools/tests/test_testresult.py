@@ -282,8 +282,7 @@ class TestTextTestResult(TestWithFakeExceptions):
         self.assertEqual("fp", result.stream)
 
     def reset_output(self):
-        self.result.stream.reset()
-        self.result.stream.truncate()
+        self.result.stream = StringIO()
 
     def test_startTestRun(self):
         self.result.startTestRun()
