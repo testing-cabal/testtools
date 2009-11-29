@@ -296,8 +296,7 @@ class TestTextTestResult(TestWithFakeExceptions):
         self.result.stopTest(test)
         self.result.startTest(test)
         self.result.stopTest(test)
-        self.result.stream.reset()
-        self.result.stream.truncate()
+        self.result.stream = StringIO()
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
             DocTestMatches("Ran 2 tests in ...s\n...", doctest.ELLIPSIS))
