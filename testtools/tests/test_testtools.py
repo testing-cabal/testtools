@@ -92,8 +92,8 @@ class TestAssertions(TestCase):
         def raiseError():
             try:
                 raise RuntimeError('Deliberate error')
-            except RuntimeError, e:
-                raisedExceptions.append(e)
+            except RuntimeError:
+                raisedExceptions.append(sys.exc_info()[1])
                 raise
 
         exception = self.assertRaises(RuntimeError, raiseError)
