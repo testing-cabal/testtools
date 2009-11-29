@@ -373,7 +373,7 @@ class ExtendedToOriginalDecorator(object):
         if details is not None:
             try:
                 return self.decorated.addError(test, details=details)
-            except TypeError, e:
+            except TypeError:
                 # have to convert
                 err = self._details_to_exc_info(details)
         return self.decorated.addError(test, err)
@@ -386,7 +386,7 @@ class ExtendedToOriginalDecorator(object):
         if details is not None:
             try:
                 return addExpectedFailure(test, details=details)
-            except TypeError, e:
+            except TypeError:
                 # have to convert
                 err = self._details_to_exc_info(details)
         return addExpectedFailure(test, err)
@@ -396,7 +396,7 @@ class ExtendedToOriginalDecorator(object):
         if details is not None:
             try:
                 return self.decorated.addFailure(test, details=details)
-            except TypeError, e:
+            except TypeError:
                 # have to convert
                 err = self._details_to_exc_info(details)
         return self.decorated.addFailure(test, err)
@@ -409,7 +409,7 @@ class ExtendedToOriginalDecorator(object):
         if details is not None:
             try:
                 return addSkip(test, details=details)
-            except TypeError, e:
+            except TypeError:
                 # have to convert
                 reason = _details_to_str(details)
         return addSkip(test, reason)
@@ -421,7 +421,7 @@ class ExtendedToOriginalDecorator(object):
         if details is not None:
             try:
                 return outcome(test, details=details)
-            except TypeError, e:
+            except TypeError:
                 pass
         return outcome(test)
 
@@ -429,7 +429,7 @@ class ExtendedToOriginalDecorator(object):
         if details is not None:
             try:
                 return self.decorated.addSuccess(test, details=details)
-            except TypeError, e:
+            except TypeError:
                 pass
         return self.decorated.addSuccess(test)
 
