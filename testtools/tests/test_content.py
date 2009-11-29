@@ -4,7 +4,7 @@ import sys
 import unittest
 from testtools.content import Content, TracebackContent
 from testtools.content_type import ContentType
-from testtools.utils import _u
+from testtools.utils import _u, _b
 
 
 def test_suite():
@@ -62,11 +62,14 @@ class TestTracebackContent(unittest.TestCase):
         self.assertRaises(ValueError, TracebackContent, None, None)
 
     def test___init___sets_ivars(self):
-        exc_info = sys.exc_info()
+        try:
+            raise Exception
+        except Exception:
+            exc_info = sys.exc_info()
         content = TracebackContent(exc_info, self)
         content_type = ContentType("text", "x-traceback",
-            {"language":"python"})
+            {"language":"python", "charset" : "utf-8"})
         self.assertEqual(content_type, content.content_type)
         result = unittest.TestResult()
         expected = result._exc_info_to_string(exc_info, self)
-        self.assertEqual(expected, ''.join(list(content.iter_bytes())))
+        self.assertEqual(expected, ''.join(list(content.iter_text())))
