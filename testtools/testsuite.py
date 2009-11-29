@@ -7,7 +7,10 @@ __all__ = [
   'ConcurrentTestSuite',
   ]
 
-import Queue
+try:
+    import Queue
+except ImportError:
+    import queue as Queue
 import threading
 import unittest
 
