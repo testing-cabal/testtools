@@ -64,7 +64,7 @@ class TestTracebackContent(unittest.TestCase):
         exc_info = sys.exc_info()
         content = TracebackContent(exc_info, self)
         content_type = ContentType("text", "x-traceback",
-            {"language":"python"})
+            {"language":"python", "charset": "utf8"})
         self.assertEqual(content_type, content.content_type)
         result = unittest.TestResult()
         expected = result._exc_info_to_string(exc_info, self)

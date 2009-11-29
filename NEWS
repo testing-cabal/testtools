@@ -4,6 +4,11 @@ testtools NEWS
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* TracebackContent now sets utf8 as the charset encoding, rather than not
+  setting one and encoding with the default encoder.
 
 0.9.1
 ~~~~~
