@@ -11,6 +11,9 @@ Improvements
   to the decorated result object, permitting other extensions to the 
   TestCase -> TestResult protocol to work.
 
+* TestCase no longer breaks if a TestSkipped exception is raised with no
+  parameters.
+
 Changes
 -------
 

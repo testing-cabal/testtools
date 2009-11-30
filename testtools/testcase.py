@@ -242,7 +242,11 @@ class TestCase(unittest.TestCase):
         self._report_traceback()
         result.addFailure(self, details=self.getDetails())
 
-    def _report_skip(self, result, reason):
+    def _report_skip(self, result, err):
+        if err.args:
+            reason = err.args[0]
+        else:
+            reason = "no reason given."
         self._add_reason(reason)
         result.addSkip(self, details=self.getDetails())
 
@@ -270,7 +274,7 @@ class TestCase(unittest.TestCase):
             except KeyboardInterrupt:
                 raise
             except self.skipException, e:
-                self._report_skip(result, e.args[0])
+                self._report_skip(result, e)
                 self._runCleanups(result)
                 return
             except _ExpectedFailure:
@@ -291,7 +295,7 @@ class TestCase(unittest.TestCase):
                 testMethod()
                 ok = True
             except self.skipException, e:
-                self._report_skip(result, e.args[0])
+                self._report_skip(result, e)
             except _ExpectedFailure:
                 result.addExpectedFailure(self, details=self.getDetails())
             except _UnexpectedSuccess:
@@ -339,6 +343,7 @@ def clone_test_with_new_id(test, new_id):
     newTest = deepcopy(test)
     newTest.id = lambda: new_id
     return newTest
+
 
 def skip(reason):
     """A decorator to skip unit tests.
