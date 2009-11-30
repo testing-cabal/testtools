@@ -81,3 +81,42 @@ Code reviewers should look for the quality of what is being submitted,
 including conformance with this HACKING file.
 
 Changes which all users should be made aware of should be documented in NEWS.
+
+
+NEWS management
+---------------
+
+The file NEWS is structured as a sorted list of releases. Each release can have
+a free form description and more or more sections with bullet point items.
+Sections in use today are 'Improvements' and 'Changes'. To ease merging between
+branches, the bullet points are kept alphabetically sorted. The release NEXT is
+permanently present at the top of the list.
+
+
+Release tasks
+-------------
+
+In no particular order:
+
+* Choose a version number.
+
+* Ensure setup.py has that version.
+
+* Add a version number to NEWS immediately below NEXT.
+
+* Possibly write a blurb into NEWS.
+
+* Replace any additional references to NEXT with the version being released.
+
+* Create a source distribution and upload to pypi ('make release').
+
+* Upload to Launchpad as well.
+
+* If a new series has been created (e.g. 0.10.0), make the series on Launchpad.
+
+* Merge or push the release branch to trunk.
+
+* Make a new milestone for the *next release*. We don't really know how we want
+  to handle these yet, so this is a suggestion not actual practice:
+   - during release we rename NEXT to $version.
+   - we call new milestones NEXT.

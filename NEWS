@@ -1,5 +1,5 @@
 testtools NEWS
-==============
+++++++++++++++
 
 NEXT
 ~~~~
@@ -9,6 +9,7 @@ Changes
 
 * TestCase.getUniqueInteger is now implemented using itertools.count. Thanks
   to Benjamin Peterson for the patch. (bug #490111)
+
 
 0.9.1
 ~~~~~

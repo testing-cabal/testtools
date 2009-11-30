@@ -12,5 +12,7 @@ tags:
 clean:
 	rm -f TAGS tags testtools/*.pyc testtools/tests/*.pyc
 
+release:
+	./setup.py sdist upload --sign
 
 .PHONY: tags TAGS check clean
