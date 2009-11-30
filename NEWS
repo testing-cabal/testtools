@@ -11,6 +11,10 @@ Improvements
   to the decorated result object, permitting other extensions to the 
   TestCase -> TestResult protocol to work.
 
+* New matcher Equals which performs a simple equality test.
+
+* New matcher MatchesAny which looks for a match of any of its arguments.
+
 * TestCase no longer breaks if a TestSkipped exception is raised with no
   parameters.
 
