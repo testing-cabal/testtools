@@ -15,6 +15,10 @@ Improvements
 
 * New matcher MatchesAny which looks for a match of any of its arguments.
 
+* With python2.7 testtools.TestSkipped will be the unittest.case.SkipTest
+  exception class making skips compatible with code that manually raises the
+  standard library exception. (bug #490109)
+
 * TestCase no longer breaks if a TestSkipped exception is raised with no
   parameters.
 

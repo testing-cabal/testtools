@@ -24,8 +24,12 @@ from testtools import content
 from testtools.testresult import ExtendedToOriginalDecorator
 
 
-class TestSkipped(Exception):
-    """Raised within TestCase.run() when a test is skipped."""
+try:
+    # Try to use the python2.7 SkipTest exception for signalling skips.
+    from unittest.case import SkipTest as TestSkipped
+except ImportError:
+    class TestSkipped(Exception):
+        """Raised within TestCase.run() when a test is skipped."""
 
 
 try:
