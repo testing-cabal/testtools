@@ -83,7 +83,7 @@ class TracebackContent(Content):
         if err is None:
             raise ValueError("err may not be None")
         content_type = ContentType('text', 'x-traceback',
-            {"language": "python"})
+            {"language": "python", "charset": "utf8"})
         self._result = TestResult()
         super(TracebackContent, self).__init__(content_type,
-            lambda:[self._result._exc_info_to_string(err, test)])
+            lambda:[self._result._exc_info_to_string(err, test).encode('utf8')])

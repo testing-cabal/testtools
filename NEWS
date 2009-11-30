@@ -18,6 +18,9 @@ Improvements
 * TestCase no longer breaks if a TestSkipped exception is raised with no
   parameters.
 
+* TracebackContent now sets utf8 as the charset encoding, rather than not
+  setting one and encoding with the default encoder.
+
 Changes
 -------
 
