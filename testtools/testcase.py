@@ -16,6 +16,7 @@ try:
     from functools import wraps
 except ImportError:
     wraps = None
+import itertools
 import sys
 import unittest
 
@@ -54,7 +55,7 @@ class TestCase(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)
         self._cleanups = []
-        self._last_unique_id = 0
+        self._unique_id_gen = itertools.count(1)
         self.__setup_called = False
         self.__teardown_callled = False
         self.__details = {}
@@ -228,8 +229,7 @@ class TestCase(unittest.TestCase):
             raise _UnexpectedSuccess(reason)
 
     def getUniqueInteger(self):
-        self._last_unique_id += 1
-        return self._last_unique_id
+        return self._unique_id_gen.next()
 
     def getUniqueString(self):
         return '%s-%d' % (self.id(), self.getUniqueInteger())
