@@ -115,3 +115,8 @@ In no particular order:
 * If a new series has been created (e.g. 0.10.0), make the series on Launchpad.
 
 * Merge or push the release branch to trunk.
+
+* Make a new milestone for the *next release*. We don't really know how we want
+  to handle these yet, so this is a suggestion not actual practice:
+   - during release we rename NEXT to $version.
+   - we call new milestones NEXT.
