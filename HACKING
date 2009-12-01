@@ -17,10 +17,22 @@ the ``with`` statement.
 Copyright assignment
 --------------------
 
-Currently all code in testtools is copyright Jonathan M. Lange.  For the sake
-of licensing simplicity, copyright of contributed code needs to be assigned to
-Jonathan M. Lange otherwise it cannot be accepted.  Please include an
-appropriate statement of copyright assignment with contributions.
+Part of testtools raison d'etre is to provide Python with improvements to the
+testing code it ships. For that reason we require all contributions (that are
+non-trivial) to meet one of the following rules:
+ - be inapplicable for inclusion in Python.
+ - be able to be included in Python without further contact with the
+   contributor.
+ - be copyright assigned to Jonathan M. Lange.
+Please pick one of these and specify it when contributing code to testtools.
+
+
+Licensing
+---------
+
+All code that is not copyright assigned to Jonathan M. Lange (see Copyright
+Assignment above) needs to be licensed under the MIT license that testtools
+ uses, so that testtools can ship it.
 
 
 Testing
