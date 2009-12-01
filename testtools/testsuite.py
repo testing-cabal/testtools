@@ -7,7 +7,10 @@ __all__ = [
   'ConcurrentTestSuite',
   ]
 
-import Queue
+try:
+    import Queue
+except ImportError:
+    import queue as Queue
 import threading
 import unittest
 
@@ -60,7 +63,7 @@ class ConcurrentTestSuite(unittest.TestSuite):
                 threads[finished_test][0].join()
                 del threads[finished_test]
         except:
-            for thread, process_result in threads.itervalues():
+            for thread, process_result in threads.values():
                 process_result.stop()
             raise
         

@@ -6,6 +6,7 @@ import codecs
 from unittest import TestResult
 
 from testtools.content_type import ContentType
+from testtools.utils import _b
 
 
 class Content(object):
@@ -57,7 +58,7 @@ class Content(object):
             decoder = codecs.getincrementaldecoder(encoding)()
             for bytes in self.iter_bytes():
                 yield decoder.decode(bytes)
-            final = decoder.decode('', True)
+            final = decoder.decode(_b(''), True)
             if final:
                 yield final
         except AttributeError:
@@ -85,5 +86,6 @@ class TracebackContent(Content):
         content_type = ContentType('text', 'x-traceback',
             {"language": "python", "charset": "utf8"})
         self._result = TestResult()
+        value = self._result._exc_info_to_string(err, test)
         super(TracebackContent, self).__init__(content_type,
-            lambda:[self._result._exc_info_to_string(err, test).encode('utf8')])
+            lambda:[value.encode("utf8")])

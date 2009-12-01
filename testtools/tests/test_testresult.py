@@ -5,7 +5,10 @@
 __metaclass__ = type
 
 import datetime
-from cStringIO import StringIO
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 import doctest
 import sys
 import threading
@@ -21,11 +24,13 @@ from testtools import (
     )
 from testtools.content import Content, ContentType
 from testtools.matchers import DocTestMatches
+from testtools.utils import _u, _b
 from testtools.tests.helpers import (
     LoggingResult,
     Python26TestResult,
     Python27TestResult,
     ExtendedTestResult,
+    an_exc_info
     )
 
 
@@ -35,7 +40,7 @@ class TestTestResultContract(TestCase):
     def test_addExpectedFailure(self):
         # Calling addExpectedFailure(test, exc_info) completes ok.
         result = self.makeResult()
-        result.addExpectedFailure(self, sys.exc_info())
+        result.addExpectedFailure(self, an_exc_info)
 
     def test_addExpectedFailure_details(self):
         # Calling addExpectedFailure(test, details=xxx) completes ok.
@@ -55,7 +60,7 @@ class TestTestResultContract(TestCase):
     def test_addSkipped(self):
         # Calling addSkip(test, reason) completes ok.
         result = self.makeResult()
-        result.addSkip(self, u"Skipped for some reason")
+        result.addSkip(self, _u("Skipped for some reason"))
 
     def test_addSkipped_details(self):
         # Calling addSkip(test, reason) completes ok.
@@ -121,15 +126,15 @@ class TestTestResult(TestCase):
         # Calling addSkip on a TestResult records the test that was skipped in
         # its skip_reasons dict.
         result = self.makeResult()
-        result.addSkip(self, u"Skipped for some reason")
-        self.assertEqual({u"Skipped for some reason":[self]},
+        result.addSkip(self, _u("Skipped for some reason"))
+        self.assertEqual({_u("Skipped for some reason"):[self]},
             result.skip_reasons)
-        result.addSkip(self, u"Skipped for some reason")
-        self.assertEqual({u"Skipped for some reason":[self, self]},
+        result.addSkip(self, _u("Skipped for some reason"))
+        self.assertEqual({_u("Skipped for some reason"):[self, self]},
             result.skip_reasons)
-        result.addSkip(self, u"Skipped for another reason")
-        self.assertEqual({u"Skipped for some reason":[self, self],
-            u"Skipped for another reason":[self]},
+        result.addSkip(self, _u("Skipped for another reason"))
+        self.assertEqual({_u("Skipped for some reason"):[self, self],
+            _u("Skipped for another reason"):[self]},
             result.skip_reasons)
 
     def test_now_datetime_now(self):
@@ -202,7 +207,7 @@ class TestMultiTestResult(TestWithFakeExceptions):
     def test_addSkipped(self):
         # Calling `addSkip` on a `MultiTestResult` calls addSkip on its
         # results.
-        reason = u"Skipped for some reason"
+        reason = _u("Skipped for some reason")
         self.multiResult.addSkip(self, reason)
         self.assertResultLogsEqual([('addSkip', self, reason)])
 
@@ -278,8 +283,7 @@ class TestTextTestResult(TestWithFakeExceptions):
         self.assertEqual("fp", result.stream)
 
     def reset_output(self):
-        self.result.stream.reset()
-        self.result.stream.truncate()
+        self.result.stream = StringIO()
 
     def test_startTestRun(self):
         self.result.startTestRun()
@@ -292,8 +296,7 @@ class TestTextTestResult(TestWithFakeExceptions):
         self.result.stopTest(test)
         self.result.startTest(test)
         self.result.stopTest(test)
-        self.result.stream.reset()
-        self.result.stream.truncate()
+        self.result.stream = StringIO()
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
             DocTestMatches("Ran 2 tests in ...s\n...", doctest.ELLIPSIS))
@@ -368,7 +371,7 @@ Traceback (most recent call last):
     testMethod()
   File "...testtools/tests/test_testresult.py", line ..., in error
     1/0
-ZeroDivisionError: integer division or modulo by zero
+ZeroDivisionError: int... division or modulo by zero
 ------------
 ======================================================================
 FAIL: testtools.tests.test_testresult.Test.failed
@@ -422,7 +425,7 @@ class TestThreadSafeForwardingResult(TestWithFakeExceptions):
         self.result1.addError(self, exc_info1)
         exc_info2 = self.makeExceptionInfo(AssertionError, 'failure')
         self.result1.addFailure(self, exc_info2)
-        reason = u"Skipped for some reason"
+        reason = _u("Skipped for some reason")
         self.result1.addSkip(self, reason)
         self.result1.addSuccess(self)
         self.assertEqual([('startTest', self),
@@ -467,9 +470,9 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
 
     def get_details_and_string(self):
         """Get a details dict and expected string."""
-        text1 = lambda:["1\n2\n"]
-        text2 = lambda:["3\n4\n"]
-        bin1 = lambda:["5\n"]
+        text1 = lambda:[_b("1\n2\n")]
+        text2 = lambda:[_b("3\n4\n")]
+        bin1 = lambda:[_b("5\n")]
         details = {'text 1': Content(ContentType('text', 'plain'), text1),
             'text 2': Content(ContentType('text', 'strange'), text2),
             'bin 1': Content(ContentType('application', 'binary'), bin1)}

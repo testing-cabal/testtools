@@ -24,6 +24,10 @@ class TestConcurrentTestSuiteRun(TestCase):
         log = []
         result = LoggingResult(log)
         class Sample(TestCase):
+
+            def __hash__(self):
+                return id(self)
+
             def test_method(self):
                 pass
         test1 = Sample('test_method')

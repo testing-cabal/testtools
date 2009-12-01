@@ -25,6 +25,8 @@ Improvements
 * Testtools now accepts contributions without copyright assignment under some
   circumstances. See HACKING for details.
 
+* Testtools now works on Python 3, thanks to Benjamin Peterson.
+
 * TracebackContent now sets utf8 as the charset encoding, rather than not
   setting one and encoding with the default encoder.
 

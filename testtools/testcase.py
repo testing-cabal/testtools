@@ -21,6 +21,7 @@ import sys
 import unittest
 
 from testtools import content
+from testtools.utils import advance_iterator
 from testtools.testresult import ExtendedToOriginalDecorator
 
 
@@ -185,8 +186,8 @@ class TestCase(unittest.TestCase):
         """
         try:
             ret = callableObj(*args, **kwargs)
-        except excClass, excObject:
-            return excObject
+        except excClass:
+            return sys.exc_info()[1]
         else:
             excName = self._formatTypes(excClass)
             self.fail("%s not raised, %r returned instead." % (excName, ret))
@@ -233,7 +234,7 @@ class TestCase(unittest.TestCase):
             raise _UnexpectedSuccess(reason)
 
     def getUniqueInteger(self):
-        return self._unique_id_gen.next()
+        return advance_iterator(self._unique_id_gen)
 
     def getUniqueString(self):
         return '%s-%d' % (self.id(), self.getUniqueInteger())
@@ -277,7 +278,8 @@ class TestCase(unittest.TestCase):
                     raise ValueError("setup was not called")
             except KeyboardInterrupt:
                 raise
-            except self.skipException, e:
+            except self.skipException:
+                e = sys.exc_info()[1]
                 self._report_skip(result, e)
                 self._runCleanups(result)
                 return
@@ -298,7 +300,8 @@ class TestCase(unittest.TestCase):
             try:
                 testMethod()
                 ok = True
-            except self.skipException, e:
+            except self.skipException:
+                e = sys.exc_info()[1]
                 self._report_skip(result, e)
             except _ExpectedFailure:
                 result.addExpectedFailure(self, details=self.getDetails())
