@@ -18,7 +18,7 @@ Jonathan M. Lange. See LICENSE for details.
 Dependencies
 ------------
 
- * Python 2.4+
+ * Python 2.4+ or 3.0+
 
 
 Bug reports and patches
@@ -51,4 +51,4 @@ Thanks
  * Twisted Matrix Labs
  * Robert Collins
  * Andrew Bennetts
-
+ * Benjamin Peterson

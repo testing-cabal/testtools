@@ -2,6 +2,8 @@
 
 """Helpers for tests."""
 
+import sys
+
 __metaclass__ = type
 __all__ = [
     'LoggingResult',
@@ -9,6 +11,11 @@ __all__ = [
 
 from testtools import TestResult
 
+
+try:
+    raise Exception
+except Exception:
+    an_exc_info = sys.exc_info()
 
 # Deprecated: This classes attributes are somewhat non deterministic which
 # leads to hard to predict tests (because Python upstream are changing things.

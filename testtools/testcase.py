@@ -16,17 +16,23 @@ try:
     from functools import wraps
 except ImportError:
     wraps = None
+import itertools
 import sys
 import types
 import unittest
 
 from testtools import content
-from testtools.testresult import ExtendedToOriginalDecorator, TestResult
 from testtools.runtest import RunTest
+from testtools.testresult import ExtendedToOriginalDecorator, TestResult
+from testtools.utils import advance_iterator
 
 
-class TestSkipped(Exception):
-    """Raised within TestCase.run() when a test is skipped."""
+try:
+    # Try to use the python2.7 SkipTest exception for signalling skips.
+    from unittest.case import SkipTest as TestSkipped
+except ImportError:
+    class TestSkipped(Exception):
+        """Raised within TestCase.run() when a test is skipped."""
 
 
 try:
@@ -69,7 +75,7 @@ class TestCase(unittest.TestCase):
         """
         unittest.TestCase.__init__(self, *args, **kwargs)
         self._cleanups = []
-        self._last_unique_id = 0
+        self._unique_id_gen = itertools.count(1)
         self.__setup_called = False
         self.__teardown_called = False
         self.__details = {}
@@ -207,8 +213,8 @@ class TestCase(unittest.TestCase):
         """
         try:
             ret = callableObj(*args, **kwargs)
-        except excClass, excObject:
-            return excObject
+        except excClass:
+            return sys.exc_info()[1]
         else:
             excName = self._formatTypes(excClass)
             self.fail("%s not raised, %r returned instead." % (excName, ret))
@@ -258,8 +264,7 @@ class TestCase(unittest.TestCase):
             raise _UnexpectedSuccess(reason)
 
     def getUniqueInteger(self):
-        self._last_unique_id += 1
-        return self._last_unique_id
+        return advance_iterator(self._unique_id_gen)
 
     def getUniqueString(self):
         return '%s-%d' % (self.id(), self.getUniqueInteger())
@@ -346,10 +351,12 @@ class TestCase(unittest.TestCase):
         unittest.TestCase.tearDown(self)
         self.__teardown_called = True
 
+
 if types.MethodType not in copy._deepcopy_dispatch:
     def _deepcopy_method(x, memo): # Copy instance methods
         return type(x)(x.im_func, copy.deepcopy(x.im_self, memo), x.im_class)
     copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
+
 
 def clone_test_with_new_id(test, new_id):
     """Copy a TestCase, and give the copied test a new id."""

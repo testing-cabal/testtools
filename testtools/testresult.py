@@ -375,7 +375,7 @@ class ExtendedToOriginalDecorator(object):
         if details is not None:
             try:
                 return self.decorated.addError(test, details=details)
-            except TypeError, e:
+            except TypeError:
                 # have to convert
                 err = self._details_to_exc_info(details)
         return self.decorated.addError(test, err)
@@ -388,7 +388,7 @@ class ExtendedToOriginalDecorator(object):
         if details is not None:
             try:
                 return addExpectedFailure(test, details=details)
-            except TypeError, e:
+            except TypeError:
                 # have to convert
                 err = self._details_to_exc_info(details)
         return addExpectedFailure(test, err)
@@ -398,7 +398,7 @@ class ExtendedToOriginalDecorator(object):
         if details is not None:
             try:
                 return self.decorated.addFailure(test, details=details)
-            except TypeError, e:
+            except TypeError:
                 # have to convert
                 err = self._details_to_exc_info(details)
         return self.decorated.addFailure(test, err)
@@ -411,7 +411,7 @@ class ExtendedToOriginalDecorator(object):
         if details is not None:
             try:
                 return addSkip(test, details=details)
-            except TypeError, e:
+            except TypeError:
                 # have to convert
                 reason = _details_to_str(details)
         return addSkip(test, reason)
@@ -423,7 +423,7 @@ class ExtendedToOriginalDecorator(object):
         if details is not None:
             try:
                 return outcome(test, details=details)
-            except TypeError, e:
+            except TypeError:
                 pass
         return outcome(test)
 
@@ -431,7 +431,7 @@ class ExtendedToOriginalDecorator(object):
         if details is not None:
             try:
                 return self.decorated.addSuccess(test, details=details)
-            except TypeError, e:
+            except TypeError:
                 pass
         return self.decorated.addSuccess(test)
 
@@ -506,6 +506,9 @@ class ExtendedToOriginalDecorator(object):
 class _StringException(Exception):
     """An exception made from an arbitrary string."""
 
+    def __hash__(self):
+        return id(self)
+
     def __eq__(self, other):
         try:
             return self.args == other.args
@@ -517,8 +520,8 @@ def _details_to_str(details):
     """Convert a details dict to a string."""
     chars = []
     # sorted is for testing, may want to remove that and use a dict
-    # subclass with defined order for iteritems instead.
-    for key, content in sorted(details.iteritems()):
+    # subclass with defined order for items instead.
+    for key, content in sorted(details.items()):
         if content.content_type.type != 'text':
             chars.append('Binary content: %s\n' % key)
             continue
