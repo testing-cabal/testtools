@@ -301,9 +301,6 @@ class TestCase(unittest.TestCase):
         result.addUnexpectedSuccess(self, details=self.getDetails())
 
     def run(self, result=None):
-        RunTest = self.__RunTest
-        case = clone_test_with_new_id(self, self.id())
-        return RunTest(case, case.exception_handlers)(result)
         return self.__RunTest(self, self.exception_handlers)(result)
 
     def _run_setup(self, result):
