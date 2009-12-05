@@ -7,6 +7,8 @@ __all__ = [
     'RunTest',
     ]
 
+import sys
+
 from testtools.testresult import ExtendedToOriginalDecorator
 
 class RunTest:
@@ -119,9 +121,10 @@ class RunTest:
             return fn(*args)
         except KeyboardInterrupt:
             raise
-        except Exception, e:
+        except Exception:
             # Note that bare exceptions are not caught, so raised strings will
             # escape: but they are deprecated anyway.
+            e = sys.exc_info()[1]
             for exc_class, handler in self.handlers:
                 if isinstance(e, exc_class):
                     handler(self.case, self.result, e)
