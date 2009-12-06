@@ -421,7 +421,7 @@ class TestWithDetails(TestCase):
 
     def get_content(self):
         return content.Content(
-            content.ContentType("text", "foo"), lambda:['foo'])
+            content.ContentType("text", "foo"), lambda: ['foo'])
 
 
 class TestExpectedFailure(TestWithDetails):

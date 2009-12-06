@@ -10,6 +10,9 @@ Improvements
 +++ runStrategy branch
 * A failure in setUp and tearDown now report as failures not as errors.
 
+* Cleanups now run after tearDown to be consistent with Python 2.7's cleanup
+  feature.
+
 * TestCase.run now clones test cases before they are run and runs the clone.
   This reduces memory footprint in large test runs - state accumulated on
   test objects during their setup and execution gets freed when test case

@@ -300,7 +300,7 @@ class TestCase(unittest.TestCase):
         result.addUnexpectedSuccess(self, details=self.getDetails())
 
     def run(self, result=None):
-        return self.__RunTest(self, self.exception_handlers)(result)
+        return self.__RunTest(self, self.exception_handlers).run(result)
 
     def _run_setup(self, result):
         """Run the setUp function for this test.

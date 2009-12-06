@@ -25,13 +25,20 @@ class RunTest:
     :ivar case: The test case that is to be run.
     :ivar result: The result object a case is reporting to.
     :ivar handlers: A list of (ExceptionClass->handler code) for exceptions
-        that should be caught if raised from the user code.
-    :ivar exception_caught: An object returned when _run_core catches an
+        that should be caught if raised from the user code. Exceptions that
+        are caught are checked against this list in first to last order.
+        There is a catchall of Exception at the end of the list, so to add
+        a new exception to the list, insert it at the front (which ensures that
+        it will be checked before any existing base classes in the list. If you
+        add multiple exceptions some of which are subclasses of each other, add
+        the most specific exceptions last (so they come before their parent
+        classes in the list).
+    :ivar exception_caught: An object returned when _run_user catches an
         exception.
     """
 
     def __init__(self, case, handlers=None):
-        """Create a RunTest to run case that will hand off to original_run.
+        """Create a RunTest to run a case.
         
         :param case: A testtools.TestCase test case object.
         :param handlers: Exception handlers for this RunTest. These are stored
@@ -41,7 +48,7 @@ class RunTest:
         self.handlers = handlers or []
         self.exception_caught = object()
 
-    def __call__(self, result=None):
+    def run(self, result=None):
         """Run self.case reporting activity to result.
 
         :param result: Optional testtools.TestResult to report activity to.

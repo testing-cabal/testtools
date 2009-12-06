@@ -36,31 +36,31 @@ class TestRunTest(TestCase):
         run = RunTest("bar", handlers)
         self.assertEqual(handlers, run.handlers)
 
-    def test___call___with_result(self):
-        # result is passed down.
+    def test_run_with_result(self):
+        # test.run passes result down to _run_test_method.
         log = []
         class Case(TestCase):
             def _run_test_method(self, result):
                 log.append(result)
         case = Case('_run_test_method')
-        run = RunTest(case, lambda x:log.append(x))
+        run = RunTest(case, lambda x: log.append(x))
         result = TestResult()
-        run(result)
+        run.run(result)
         self.assertEqual(1, len(log))
         self.assertEqual(result, log[0].decorated)
 
-    def test___call___no_result_manages_new_result(self):
+    def test_run_no_result_manages_new_result(self):
         log = []
-        run = RunTest(self.make_case(), lambda x:log.append(x) or x)
-        result = run()
+        run = RunTest(self.make_case(), lambda x: log.append(x) or x)
+        result = run.run()
         self.assertIsInstance(result.decorated, TestResult)
 
     def test__run_core_called(self):
         case = self.make_case()
         log = []
-        run = RunTest(case, lambda x:x)
-        run._run_core = lambda:log.append('foo')
-        run()
+        run = RunTest(case, lambda x: x)
+        run._run_core = lambda: log.append('foo')
+        run.run()
         self.assertEqual(['foo'], log)
 
     def test__run_user_does_not_catch_keyboard(self):
@@ -116,7 +116,7 @@ class TestRunTest(TestCase):
             def _run_prepared_result(self, result):
                 log.append(result)
                 return result
-        run = Run(self.make_case(), lambda x:x)
+        run = Run(self.make_case(), lambda x: x)
         result = run._run_one('foo')
         self.assertEqual([result], log)
         self.assertIsInstance(log[0], ExtendedToOriginalDecorator)
@@ -125,8 +125,8 @@ class TestRunTest(TestCase):
     def test__run_prepared_result_calls_start_and_stop_test(self):
         result = ExtendedTestResult()
         case = self.make_case()
-        run = RunTest(case, lambda x:x)
-        run(result)
+        run = RunTest(case, lambda x: x)
+        run.run(result)
         self.assertEqual([
             ('startTest', case),
             ('addSuccess', case),
@@ -136,10 +136,11 @@ class TestRunTest(TestCase):
     def test__run_prepared_result_calls_stop_test_always(self):
         result = ExtendedTestResult()
         case = self.make_case()
-        def inner(): raise Exception("foo")
-        run = RunTest(case, lambda x:x)
+        def inner():
+            raise Exception("foo")
+        run = RunTest(case, lambda x: x)
         run._run_core = inner
-        self.assertRaises(Exception, run, result)
+        self.assertRaises(Exception, run.run, result)
         self.assertEqual([
             ('startTest', case),
             ('stopTest', case),
