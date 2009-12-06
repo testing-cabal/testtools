@@ -509,6 +509,10 @@ class _StringException(Exception):
     def __hash__(self):
         return id(self)
 
+    def __str__(self):
+        """Stringify better than 2.x's default behaviourof ascii encoding."""
+        return self.args[0]
+
     def __eq__(self, other):
         try:
             return self.args == other.args
