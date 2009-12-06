@@ -18,7 +18,6 @@ except ImportError:
     wraps = None
 import itertools
 import sys
-import types
 import unittest
 
 from testtools import content
@@ -347,12 +346,6 @@ class TestCase(unittest.TestCase):
     def tearDown(self):
         unittest.TestCase.tearDown(self)
         self.__teardown_called = True
-
-
-if types.MethodType not in copy._deepcopy_dispatch:
-    def _deepcopy_method(x, memo): # Copy instance methods
-        return type(x)(x.im_func, copy.deepcopy(x.im_self, memo), x.im_class)
-    copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
 
 
 def clone_test_with_new_id(test, new_id):

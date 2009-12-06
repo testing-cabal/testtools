@@ -510,7 +510,7 @@ class _StringException(Exception):
         return id(self)
 
     def __str__(self):
-        """Stringify better than 2.x's default behaviourof ascii encoding."""
+        """Stringify better than 2.x's default behaviour of ascii encoding."""
         return self.args[0]
 
     def __eq__(self, other):
