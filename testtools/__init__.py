@@ -11,6 +11,7 @@ __all__ = [
     'TestCase',
     'TestResult',
     'TextTestResult',
+    'RunTest',
     'skip',
     'skipIf',
     'skipUnless',
@@ -19,6 +20,9 @@ __all__ = [
 
 from testtools.matchers import (
     Matcher,
+    )
+from testtools.runtest import (
+    RunTest,
     )
 from testtools.testcase import (
     TestCase,

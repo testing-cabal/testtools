@@ -7,6 +7,11 @@ NEXT
 Improvements
 ------------
 
+* A failure in setUp and tearDown now report as failures not as errors.
+
+* Cleanups now run after tearDown to be consistent with Python 2.7's cleanup
+  feature.
+
 * ExtendedToOriginalDecorator now passes unrecognised attributes through
   to the decorated result object, permitting other extensions to the 
   TestCase -> TestResult protocol to work.
@@ -15,20 +20,33 @@ Improvements
 
 * New matcher MatchesAny which looks for a match of any of its arguments.
 
-* With python2.7 testtools.TestSkipped will be the unittest.case.SkipTest
-  exception class making skips compatible with code that manually raises the
-  standard library exception. (bug #490109)
-
 * TestCase no longer breaks if a TestSkipped exception is raised with no
   parameters.
+
+* TestCase.run now clones test cases before they are run and runs the clone.
+  This reduces memory footprint in large test runs - state accumulated on
+  test objects during their setup and execution gets freed when test case
+  has finished running unless the TestResult object keeps a reference.
+  NOTE: As test cloning uses deepcopy, this can potentially interfere if
+  a test suite has shared state (such as the testscenarios or testresources
+  projects use).  Use the __deepcopy__ hook to control the copying of such
+  objects so that the shared references stay shared.
 
 * Testtools now accepts contributions without copyright assignment under some
   circumstances. See HACKING for details.
 
 * Testtools now works on Python 3, thanks to Benjamin Peterson.
 
+* Test execution now uses a separate class, testtools.RunTest to run single
+  tests. This can be customised and extended in a more consistent fashion than
+  the previous run method idiom. See pydoc for more information.
+
 * TracebackContent now sets utf8 as the charset encoding, rather than not
   setting one and encoding with the default encoder.
+
+* With python2.7 testtools.TestSkipped will be the unittest.case.SkipTest
+  exception class making skips compatible with code that manually raises the
+  standard library exception. (bug #490109)
 
 Changes
 -------
@@ -76,7 +94,6 @@ now compatible with Python 2.5, 2.6 and 2.7 unittest library.
 
 All in all, if you are serious about unit testing and want to get the best
 thinking from the whole Python community, you should get this release.
-
 
 Improvements
 ------------

@@ -11,7 +11,7 @@ __all__ = [
     'skipUnless',
     ]
 
-from copy import deepcopy
+import copy
 try:
     from functools import wraps
 except ImportError:
@@ -21,8 +21,9 @@ import sys
 import unittest
 
 from testtools import content
+from testtools.runtest import RunTest
+from testtools.testresult import ExtendedToOriginalDecorator, TestResult
 from testtools.utils import advance_iterator
-from testtools.testresult import ExtendedToOriginalDecorator
 
 
 try:
@@ -52,24 +53,49 @@ except ImportError:
         module.
         """
 
+
 class TestCase(unittest.TestCase):
-    """Extensions to the basic TestCase."""
+    """Extensions to the basic TestCase.
+    
+    :ivar exception_handlers: Exceptions to catch from setUp, runTest and
+        tearDown. This list is able to be modified at any time and consists of
+        (exception_class, handler(case, result, exception_value)) pairs.
+    """
 
     skipException = TestSkipped
 
     def __init__(self, *args, **kwargs):
+        """Construct a TestCase.
+
+        :param testMethod: The name of the method to run.
+        :param runTest: Optional class to use to execute the test. If not
+            supplied testtools.runtest.RunTest is used. The instance to be
+            used is created when run() is invoked, so will be fresh each time.
+        """
         unittest.TestCase.__init__(self, *args, **kwargs)
         self._cleanups = []
         self._unique_id_gen = itertools.count(1)
         self.__setup_called = False
-        self.__teardown_callled = False
+        self.__teardown_called = False
         self.__details = {}
+        self.__RunTest = kwargs.get('runTest', RunTest)
+        self.exception_handlers = [
+            (self.skipException, self._report_skip),
+            (self.failureException, self._report_failure),
+            (_ExpectedFailure, self._report_expected_failure),
+            (_UnexpectedSuccess, self._report_unexpected_success),
+            (Exception, self._report_error),
+            ]
 
     def __eq__(self, other):
         eq = getattr(unittest.TestCase, '__eq__', None)
         if eq is not None and not unittest.TestCase.__eq__(self, other):
             return False
         return self.__dict__ == other.__dict__
+
+    def __repr__(self):
+        # We add id to the repr because it makes testing testtools easier.
+        return "<%s id=0x%0x>" % (self.id(), id(self))
 
     def addDetail(self, name, content_object):
         """Add a detail to be reported with this test's outcome.
@@ -127,7 +153,7 @@ class TestCase(unittest.TestCase):
             except KeyboardInterrupt:
                 raise
             except:
-                self._report_error(result)
+                self._report_error(self, result, None)
                 ok = False
         return ok
 
@@ -206,6 +232,9 @@ class TestCase(unittest.TestCase):
         self.fail('Match failed. Matchee: "%s"\nMatcher: %s\nDifference: %s\n'
             % (matchee, matcher, mismatch.describe()))
 
+    def defaultTestResult(self):
+        return TestResult()
+
     def expectFailure(self, reason, predicate, *args, **kwargs):
         """Check that a test fails in a particular way.
 
@@ -239,14 +268,21 @@ class TestCase(unittest.TestCase):
     def getUniqueString(self):
         return '%s-%d' % (self.id(), self.getUniqueInteger())
 
-    def _report_error(self, result):
+    @staticmethod
+    def _report_error(self, result, err):
         self._report_traceback()
         result.addError(self, details=self.getDetails())
 
-    def _report_failure(self, result):
+    @staticmethod
+    def _report_expected_failure(self, result, err):
+        result.addExpectedFailure(self, details=self.getDetails())
+
+    @staticmethod
+    def _report_failure(self, result, err):
         self._report_traceback()
         result.addFailure(self, details=self.getDetails())
 
+    @staticmethod
     def _report_skip(self, result, err):
         if err.args:
             reason = err.args[0]
@@ -259,82 +295,49 @@ class TestCase(unittest.TestCase):
         self.addDetail('traceback',
             content.TracebackContent(sys.exc_info(), self))
 
+    @staticmethod
+    def _report_unexpected_success(self, result, err):
+        result.addUnexpectedSuccess(self, details=self.getDetails())
+
     def run(self, result=None):
-        if result is None:
-            result = self.defaultTestResult()
-        result = ExtendedToOriginalDecorator(result)
-        result.startTest(self)
+        return self.__RunTest(self, self.exception_handlers).run(result)
+
+    def _run_setup(self, result):
+        """Run the setUp function for this test.
+
+        :param result: A testtools.TestResult to report activity to.
+        :raises ValueError: If the base class setUp is not called, a
+            ValueError is raised.
+        """
+        self.setUp()
+        if not self.__setup_called:
+            raise ValueError("setUp was not called")
+    
+    def _run_teardown(self, result):
+        """Run the tearDown function for this test.
+
+        :param result: A testtools.TestResult to report activity to.
+        :raises ValueError: If the base class tearDown is not called, a
+            ValueError is raised.
+        """
+        self.tearDown()
+        if not self.__teardown_called:
+            raise ValueError("teardown was not called")
+
+    def _run_test_method(self, result):
+        """Run the test method for this test.
+
+        :param result: A testtools.TestResult to report activity to.
+        :return: None.
+        """
         absent_attr = object()
-        # Python 2.5
+        # Python 2.5+
         method_name = getattr(self, '_testMethodName', absent_attr)
         if method_name is absent_attr:
             # Python 2.4
             method_name = getattr(self, '_TestCase__testMethodName')
         testMethod = getattr(self, method_name)
-        try:
-            try:
-                self.setUp()
-                if not self.__setup_called:
-                    raise ValueError("setup was not called")
-            except KeyboardInterrupt:
-                raise
-            except self.skipException:
-                e = sys.exc_info()[1]
-                self._report_skip(result, e)
-                self._runCleanups(result)
-                return
-            except _ExpectedFailure:
-                result.addExpectedFailure(self, details=self.getDetails())
-                self._runCleanups(result)
-                return
-            except _UnexpectedSuccess:
-                result.addUnexpectedSuccess(self, details=self.getDetails())
-                self._runCleanups(result)
-                return
-            except:
-                self._report_error(result)
-                self._runCleanups(result)
-                return
-
-            ok = False
-            try:
-                testMethod()
-                ok = True
-            except self.skipException:
-                e = sys.exc_info()[1]
-                self._report_skip(result, e)
-            except _ExpectedFailure:
-                result.addExpectedFailure(self, details=self.getDetails())
-            except _UnexpectedSuccess:
-                result.addUnexpectedSuccess(self, details=self.getDetails())
-            except self.failureException:
-                self._report_failure(result)
-            except KeyboardInterrupt:
-                raise
-            except:
-                self._report_error(result)
-
-            cleanupsOk = self._runCleanups(result)
-            try:
-                self.tearDown()
-                if not self.__teardown_callled:
-                    raise ValueError("teardown was not called")
-            except _ExpectedFailure:
-                result.addExpectedFailure(self, details=self.getDetails())
-                ok = False
-            except _UnexpectedSuccess:
-                result.addUnexpectedSuccess(self, details=self.getDetails())
-                ok = False
-            except KeyboardInterrupt:
-                raise
-            except:
-                self._report_error(result)
-                ok = False
-            if ok and cleanupsOk:
-                result.addSuccess(self, details=self.getDetails())
-        finally:
-            result.stopTest(self)
-        return result
+        testMethod()
 
     def setUp(self):
         unittest.TestCase.setUp(self)
@@ -342,12 +345,12 @@ class TestCase(unittest.TestCase):
 
     def tearDown(self):
         unittest.TestCase.tearDown(self)
-        self.__teardown_callled = True
+        self.__teardown_called = True
 
 
 def clone_test_with_new_id(test, new_id):
     """Copy a TestCase, and give the copied test a new id."""
-    newTest = deepcopy(test)
+    newTest = copy.deepcopy(test)
     newTest.id = lambda: new_id
     return newTest
 

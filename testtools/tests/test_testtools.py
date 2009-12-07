@@ -300,10 +300,11 @@ class TestAddCleanup(TestCase):
 
     def assertTestLogEqual(self, messages):
         """Assert that the call log equals `messages`."""
-        self.assertEqual(messages, self.test._calls)
+        case = self._result_calls[0][1]
+        self.assertEqual(messages, case._calls)
 
     def logAppender(self, message):
-        """Return a cleanup that appends `message` to the tests log.
+        """A cleanup that appends `message` to the tests log.
 
         Cleanups are callables that are added to a test by addCleanup. To
         verify that our cleanups run in the right order, we add strings to a
@@ -324,7 +325,7 @@ class TestAddCleanup(TestCase):
         # runs.
         self.test.addCleanup(self.logAppender, 'cleanup')
         self.test.run(self.logging_result)
-        self.assertTestLogEqual(['setUp', 'runTest', 'cleanup', 'tearDown'])
+        self.assertTestLogEqual(['setUp', 'runTest', 'tearDown', 'cleanup'])
 
     def test_add_cleanup_called_if_setUp_fails(self):
         # Cleanup functions added with 'addCleanup' are called even if setUp
@@ -351,7 +352,7 @@ class TestAddCleanup(TestCase):
         self.test.addCleanup(self.logAppender, 'second')
         self.test.run(self.logging_result)
         self.assertTestLogEqual(
-            ['setUp', 'runTest', 'second', 'first', 'tearDown'])
+            ['setUp', 'runTest', 'tearDown', 'second', 'first'])
 
     def test_tearDown_runs_after_cleanup_failure(self):
         # tearDown runs even if a cleanup function fails.
@@ -366,7 +367,7 @@ class TestAddCleanup(TestCase):
         self.test.addCleanup(self.logAppender, 'second')
         self.test.run(self.logging_result)
         self.assertTestLogEqual(
-            ['setUp', 'runTest', 'second', 'first', 'tearDown'])
+            ['setUp', 'runTest', 'tearDown', 'second', 'first'])
 
     def test_error_in_cleanups_are_captured(self):
         # If a cleanup raises an error, we want to record it and fail the the
@@ -403,6 +404,7 @@ class TestWithDetails(TestCase):
         """
         result = ExtendedTestResult()
         case.run(result)
+        case = result._events[0][1]
         expected = [
             ('startTest', case),
             (expected_outcome, case),
@@ -419,7 +421,7 @@ class TestWithDetails(TestCase):
 
     def get_content(self):
         return content.Content(
-            content.ContentType("text", "foo"), lambda:['foo'])
+            content.ContentType("text", "foo"), lambda: ['foo'])
 
 
 class TestExpectedFailure(TestWithDetails):
@@ -436,6 +438,7 @@ class TestExpectedFailure(TestWithDetails):
         case = self.make_unexpected_case()
         result = Python27TestResult()
         case.run(result)
+        case = result._events[0][1]
         self.assertEqual([
             ('startTest', case),
             ('addUnexpectedSuccess', case),
@@ -446,6 +449,7 @@ class TestExpectedFailure(TestWithDetails):
         case = self.make_unexpected_case()
         result = ExtendedTestResult()
         case.run(result)
+        case = result._events[0][1]
         self.assertEqual([
             ('startTest', case),
             ('addUnexpectedSuccess', case, {}),
@@ -618,9 +622,10 @@ class TestSkipping(TestCase):
         result = LoggingResult(calls)
         test = TestThatRaisesInSetUp("test_that_passes")
         test.run(result)
-        self.assertEqual([('startTest', test),
-            ('addSkip', test, "Text attachment: reason\n------------\n"
-             "skipping this test\n------------\n"), ('stopTest', test)],
+        case = result._events[0][1]
+        self.assertEqual([('startTest', case),
+            ('addSkip', case, "Text attachment: reason\n------------\n"
+             "skipping this test\n------------\n"), ('stopTest', case)],
             calls)
 
     def test_skipException_in_test_method_calls_result_addSkip(self):
@@ -630,9 +635,10 @@ class TestSkipping(TestCase):
         result = Python27TestResult()
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
-        self.assertEqual([('startTest', test),
-            ('addSkip', test, "Text attachment: reason\n------------\n"
-             "skipping this test\n------------\n"), ('stopTest', test)],
+        case = result._events[0][1]
+        self.assertEqual([('startTest', case),
+            ('addSkip', case, "Text attachment: reason\n------------\n"
+             "skipping this test\n------------\n"), ('stopTest', case)],
             result._events)
 
     def test_skip__in_setup_with_old_result_object_calls_addSuccess(self):

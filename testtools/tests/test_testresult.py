@@ -148,7 +148,7 @@ class TestTestResult(TestCase):
         now = datetime.datetime.now()
         stubdatetime = Module()
         stubdatetime.datetime = Module()
-        stubdatetime.datetime.now = lambda:now
+        stubdatetime.datetime.now = lambda: now
         testresult.datetime = stubdatetime
         self.assertEqual(now, result._now())
         # Set an explicit datetime, then go back to looking it up.
@@ -367,7 +367,9 @@ ERROR: testtools.tests.test_testresult.Test.error
 Text attachment: traceback
 ------------
 Traceback (most recent call last):
-  File "...testtools/testcase.py", line ..., in run
+  File "...testtools/runtest.py", line ..., in _run_user...
+    return fn(*args)
+  File "...testtools/testcase.py", line ..., in _run_test_method
     testMethod()
   File "...testtools/tests/test_testresult.py", line ..., in error
     1/0
@@ -379,7 +381,9 @@ FAIL: testtools.tests.test_testresult.Test.failed
 Text attachment: traceback
 ------------
 Traceback (most recent call last):
-  File "...testtools/testcase.py", line ..., in run
+  File "...testtools/runtest.py", line ..., in _run_user...
+    return fn(*args)
+  File "...testtools/testcase.py", line ..., in _run_test_method
     testMethod()
   File "...testtools/tests/test_testresult.py", line ..., in failed
     self.fail("yo!")
@@ -470,9 +474,9 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
 
     def get_details_and_string(self):
         """Get a details dict and expected string."""
-        text1 = lambda:[_b("1\n2\n")]
-        text2 = lambda:[_b("3\n4\n")]
-        bin1 = lambda:[_b("5\n")]
+        text1 = lambda: [_b("1\n2\n")]
+        text2 = lambda: [_b("3\n4\n")]
+        bin1 = lambda: [_b("5\n")]
         details = {'text 1': Content(ContentType('text', 'plain'), text1),
             'text 2': Content(ContentType('text', 'strange'), text2),
             'bin 1': Content(ContentType('application', 'binary'), bin1)}

@@ -11,6 +11,23 @@ to the API docs (i.e. docstrings) for full details on a particular feature.
 Extensions to TestCase
 ----------------------
 
+Controlling test execution
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Testtools supports two ways to control how tests are executed. The simplest
+is to add a new exception to self.exception_handlers:
+ >>> self.exception_handlers.insert(-1, (ExceptionClass, handler)).
+Having done this, if any of setUp, tearDown, or the test method raise
+ExceptionClass, handler will be called with the test case, test result and the
+raised exception.
+
+Secondly, by overriding __init__ to pass in runTest=RunTestFactory the whole
+execution of the test can be altered. The default is testtools.runtest.RunTest
+and calls  case._run_setup, case._run_test_method and finally
+case._run_teardown. Other methods to control what RunTest is used may be
+added in future.
+
+
 TestCase.addCleanup
 ~~~~~~~~~~~~~~~~~~~
 
