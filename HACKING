@@ -112,7 +112,7 @@ In no particular order:
 
 * Choose a version number.
 
-* Ensure setup.py has that version.
+* Ensure __init__ has that version.
 
 * Add a version number to NEWS immediately below NEXT.
 
