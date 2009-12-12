@@ -139,9 +139,9 @@ class TestTestResult(TestCase):
 
     def test_now_datetime_now(self):
         result = self.makeResult()
-        olddatetime = testresult.datetime
+        olddatetime = testresult.real.datetime
         def restore():
-            testresult.datetime = olddatetime
+            testresult.real.datetime = olddatetime
         self.addCleanup(restore)
         class Module:
             pass
@@ -149,7 +149,7 @@ class TestTestResult(TestCase):
         stubdatetime = Module()
         stubdatetime.datetime = Module()
         stubdatetime.datetime.now = lambda: now
-        testresult.datetime = stubdatetime
+        testresult.real.datetime = stubdatetime
         self.assertEqual(now, result._now())
         # Set an explicit datetime, then go back to looking it up.
         result.time(datetime.datetime.now())
