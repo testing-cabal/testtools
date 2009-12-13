@@ -22,4 +22,4 @@ setup(name='testtools',
       description=('Extensions to the Python standard library unit testing '
                    'framework'),
       version=version,
-      packages=['testtools'])
+      packages=['testtools', 'testtools.testresult', 'testtools.tests'])
