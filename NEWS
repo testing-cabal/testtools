@@ -41,6 +41,9 @@ Improvements
   tests. This can be customised and extended in a more consistent fashion than
   the previous run method idiom. See pydoc for more information.
 
+* The test doubles that testtools itself uses are now available as part of
+  the testtools API in testtols.testresult.doubles.
+
 * TracebackContent now sets utf8 as the charset encoding, rather than not
   setting one and encoding with the default encoder.
 
