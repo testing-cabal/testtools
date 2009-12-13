@@ -72,6 +72,27 @@ class TestRunTest(TestCase):
         self.assertRaises(KeyboardInterrupt, run._run_user, raises)
         self.assertEqual([], run.result._events)
 
+    def test__run_user_calls_onException(self):
+        case = self.make_case()
+        log = []
+        def handler(exc_info):
+            log.append("got it")
+            self.assertEqual(3, len(exc_info))
+            self.assertIsInstance(exc_info[1], KeyError)
+            self.assertIs(KeyError, exc_info[0])
+        case.addOnException(handler)
+        e = KeyError('Yo')
+        def raises():
+            raise e
+        def log_exc(self, result, err):
+            log.append((result, err))
+        run = RunTest(case, [(KeyError, log_exc)])
+        run.result = ExtendedTestResult()
+        status = run._run_user(raises)
+        self.assertEqual(run.exception_caught, status)
+        self.assertEqual([], run.result._events)
+        self.assertEqual(["got it", (run.result, e)], log)
+
     def test__run_user_can_catch_Exception(self):
         case = self.make_case()
         e = Exception('Yo')
@@ -93,11 +114,30 @@ class TestRunTest(TestCase):
         def raises():
             raise e
         log = []
-        def log_exc(err):
-            log.append(err)
+        def log_exc(self, result, err):
+            log.append((result, err))
         run = RunTest(case, [(ValueError, log_exc)])
         run.result = ExtendedTestResult()
         self.assertRaises(KeyError, run._run_user, raises)
+        self.assertEqual([], run.result._events)
+        self.assertEqual([], log)
+
+    def test__run_user_uncaught_Exception_from_exception_handler_raised(self):
+        case = self.make_case()
+        def broken_handler(exc_info):
+            # ValueError because thats what we know how to catch - and must
+            # not.
+            raise ValueError('boo')
+        case.addOnException(broken_handler)
+        e = KeyError('Yo')
+        def raises():
+            raise e
+        log = []
+        def log_exc(self, result, err):
+            log.append((result, err))
+        run = RunTest(case, [(ValueError, log_exc)])
+        run.result = ExtendedTestResult()
+        self.assertRaises(ValueError, run._run_user, raises)
         self.assertEqual([], run.result._events)
         self.assertEqual([], log)
 

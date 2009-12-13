@@ -41,6 +41,15 @@ logic in a try/finally block or tearDown method.  e.g.::
         ...
 
 
+TestCase.addOnException
+~~~~~~~~~~~~~~~~~~~~~~~
+
+addOnException adds an exception handler that will be called from the test
+framework when it detects an exception from your test code. The handler is
+given the exc_info for the exception, and can use this opportunity to attach
+more data (via the addDetails API) and potentially other uses.
+
+
 TestCase.skip
 ~~~~~~~~~~~~~
 

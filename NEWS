@@ -16,6 +16,10 @@ Improvements
   to the decorated result object, permitting other extensions to the 
   TestCase -> TestResult protocol to work.
 
+* It is now possible to trigger code just-in-time after an exception causes
+  a test outcome such as failure or skip. See the testtools MANUAL or
+  ``pydoc testtools.TestCase.addOnException``. (bug #469092)
+
 * New matcher Equals which performs a simple equality test.
 
 * New matcher MatchesAny which looks for a match of any of its arguments.
