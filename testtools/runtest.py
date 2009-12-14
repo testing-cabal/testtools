@@ -131,8 +131,10 @@ class RunTest:
         except Exception:
             # Note that bare exceptions are not caught, so raised strings will
             # escape: but they are deprecated anyway.
-            e = sys.exc_info()[1]
+            exc_info = sys.exc_info()
+            e = exc_info[1]
             for exc_class, handler in self.handlers:
+                self.case.onException(exc_info)
                 if isinstance(e, exc_class):
                     handler(self.case, self.result, e)
                     return self.exception_caught

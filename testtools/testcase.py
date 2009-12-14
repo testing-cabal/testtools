@@ -79,6 +79,7 @@ class TestCase(unittest.TestCase):
         self.__teardown_called = False
         self.__details = {}
         self.__RunTest = kwargs.get('runTest', RunTest)
+        self.__exception_handlers = []
         self.exception_handlers = [
             (self.skipException, self._report_skip),
             (self.failureException, self._report_failure),
@@ -171,6 +172,25 @@ class TestCase(unittest.TestCase):
         even if setUp is aborted by an exception.
         """
         self._cleanups.append((function, arguments, keywordArguments))
+
+    def addOnException(self, handler):
+        """Add a handler to be called when an exception occurs in test code.
+
+        This handler cannot affect what result methods are called, and is
+        called before any outcome is called on the result object. An example
+        use for it is to add some diagnostic state to the test details dict
+        which is expensive to calculate and not interesting for reporting in
+        the success case.
+
+        Handlers are called before the outcome (such as addFailure) that 
+        the exception has caused.
+
+        Handlers are called in first-added, first-called order, and if they
+        raise an exception, that will propogate out of the test running
+        machinery, halting test processing. As a result, do not call code that
+        may unreasonably fail.
+        """
+        self.__exception_handlers.append(handler)
 
     def _add_reason(self, reason):
         self.addDetail('reason', content.Content(
@@ -267,6 +287,14 @@ class TestCase(unittest.TestCase):
 
     def getUniqueString(self):
         return '%s-%d' % (self.id(), self.getUniqueInteger())
+
+    def onException(self, exc_info):
+        """Called when an exception propogates from test code.
+
+        :seealso addOnException:
+        """
+        for handler in self.__exception_handlers:
+            handler(exc_info)
 
     @staticmethod
     def _report_error(self, result, err):

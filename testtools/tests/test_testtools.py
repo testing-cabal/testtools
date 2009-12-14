@@ -14,7 +14,11 @@ from testtools import (
     skipUnless,
     testcase,
     )
+from testtools.matchers import (
+    Equals,
+    )
 from testtools.tests.helpers import (
+    an_exc_info,
     LoggingResult,
     Python26TestResult,
     Python27TestResult,
@@ -691,6 +695,39 @@ class TestSkipping(TestCase):
         test = SkippingTest("test_that_is_decorated_with_skipUnless")
         test.run(result)
         self.assertEqual('addSuccess', result._events[1][0])
+
+
+class TestOnException(TestCase):
+
+    def test_default_works(self):
+        events = []
+        class Case(TestCase):
+            def method(self):
+                self.onException(an_exc_info)
+                events.append(True)
+        case = Case("method")
+        case.run()
+        self.assertThat(events, Equals([True]))
+
+    def test_added_handler_works(self):
+        events = []
+        class Case(TestCase):
+            def method(self):
+                self.addOnException(events.append)
+                self.onException(an_exc_info)
+        case = Case("method")
+        case.run()
+        self.assertThat(events, Equals([an_exc_info]))
+
+    def test_handler_that_raises_is_not_caught(self):
+        events = []
+        class Case(TestCase):
+            def method(self):
+                self.addOnException(events.index)
+                self.assertRaises(ValueError, self.onException, an_exc_info)
+        case = Case("method")
+        case.run()
+        self.assertThat(events, Equals([]))
 
 
 def test_suite():
