@@ -10,8 +10,11 @@ you'd think that would be enough for a point release. Well, we here on the
 testtools project think that you deserve more.
 
 We've added a hook so that user code can be called just-in-time whenever there
-is an exception, and factored out the "run" logic of test cases so that new
-outcomes can be added without fiddling with the actual flow of logic.
+is an exception, and we've also factored out the "run" logic of test cases so
+that new outcomes can be added without fiddling with the actual flow of logic.
+
+It might sound like small potatoes, but it's changes like these that will
+bring about the end of test frameworks.
 
 
 Improvements
