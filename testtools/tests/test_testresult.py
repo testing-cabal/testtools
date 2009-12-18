@@ -150,10 +150,14 @@ class TestTestResult(TestCase):
         stubdatetime.datetime = Module()
         stubdatetime.datetime.now = lambda: now
         testresult.real.datetime = stubdatetime
+        # Calling _now() looks up the time.
         self.assertEqual(now, result._now())
-        # Set an explicit datetime, then go back to looking it up.
-        result.time(datetime.datetime.now())
+        then = now + datetime.timedelta(0, 1)
+        # Set an explicit datetime, which gets returned from then on.
+        result.time(then)
         self.assertNotEqual(now, result._now())
+        self.assertEqual(then, result._now())
+        # go back to looking it up.
         result.time(None)
         self.assertEqual(now, result._now())
 

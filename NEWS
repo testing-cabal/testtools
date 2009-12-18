@@ -1,6 +1,13 @@
 testtools NEWS
 ++++++++++++++
 
+NEXT
+~~~~
+
+Improvements
+------------
+
+* On windows the test 'test_now_datetime_now' should now work reliably.
 
 0.9.2
 ~~~~~
