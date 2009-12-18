@@ -18,6 +18,7 @@ except ImportError:
     wraps = None
 import itertools
 import sys
+import types
 import unittest
 
 from testtools import content
@@ -375,6 +376,10 @@ class TestCase(unittest.TestCase):
         unittest.TestCase.tearDown(self)
         self.__teardown_called = True
 
+
+# Python 2.4 did not know how to deep copy functions.
+if types.FunctionType not in copy._deepcopy_dispatch:
+    copy._deepcopy_dispatch[types.FunctionType] = copy._deepcopy_atomic
 
 def clone_test_with_new_id(test, new_id):
     """Copy a TestCase, and give the copied test a new id."""
