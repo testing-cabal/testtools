@@ -15,6 +15,10 @@ Improvements
 
 * On windows the test 'test_now_datetime_now' should now work reliably.
 
+* testtools.testcase.clone_test_with_new_id now uses copy.copy, rather than
+  copy.deepcopy. Tests that need a deeper copy should use the copy protocol to
+  control how they are copied. Bug #498869.
+
 * The backtrace test result output tests should now pass on windows and other
   systems where os.sep is not '/'.
 

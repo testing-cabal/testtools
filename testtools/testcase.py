@@ -377,13 +377,18 @@ class TestCase(unittest.TestCase):
         self.__teardown_called = True
 
 
-# Python 2.4 did not know how to deep copy functions.
-if types.FunctionType not in copy._deepcopy_dispatch:
-    copy._deepcopy_dispatch[types.FunctionType] = copy._deepcopy_atomic
+# Python 2.4 did not know how to copy functions.
+if types.FunctionType not in copy._copy_dispatch:
+    copy._copy_dispatch[types.FunctionType] = copy._copy_immutable
+
 
 def clone_test_with_new_id(test, new_id):
-    """Copy a TestCase, and give the copied test a new id."""
-    newTest = copy.deepcopy(test)
+    """Copy a TestCase, and give the copied test a new id.
+    
+    This is only expected to be used on tests that have been constructed but
+    not executed.
+    """
+    newTest = copy.copy(test)
     newTest.id = lambda: new_id
     return newTest
 
