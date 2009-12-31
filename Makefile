@@ -19,4 +19,4 @@ clean:
 release:
 	./setup.py sdist upload --sign
 
-.PHONY: check clean
+.PHONY: check clean release
