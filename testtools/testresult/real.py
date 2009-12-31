@@ -237,7 +237,8 @@ class TextTestResult(TestResult):
         self._show_list('ERROR', self.errors)
         self._show_list('FAIL', self.failures)
         self.stream.write("Ran %d test%s in %.3fs\n\n" %
-            (self.testsRun, plural, self._delta_to_float(stop-self.__start)))
+            (self.testsRun, plural,
+             self._delta_to_float(stop - self.__start)))
         if self.wasSuccessful():
             self.stream.write("OK\n")
         else:
@@ -382,7 +383,8 @@ class ExtendedToOriginalDecorator(object):
 
     def addExpectedFailure(self, test, err=None, details=None):
         self._check_args(err, details)
-        addExpectedFailure = getattr(self.decorated, 'addExpectedFailure', None)
+        addExpectedFailure = getattr(
+            self.decorated, 'addExpectedFailure', None)
         if addExpectedFailure is None:
             return self.addSuccess(test)
         if details is not None:

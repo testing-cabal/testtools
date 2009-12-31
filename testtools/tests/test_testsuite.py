@@ -13,7 +13,6 @@ from testtools import (
     )
 from testtools.matchers import (
     Equals,
-    MatchesAny,
     )
 from testtools.tests.helpers import LoggingResult
 

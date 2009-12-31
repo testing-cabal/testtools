@@ -1,4 +1,4 @@
-# Copyright (c) 2008 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2008, 2009 Jonathan M. Lange. See LICENSE for details.
 
 """Content - a MIME-like Content object."""
 
@@ -87,5 +87,5 @@ class TracebackContent(Content):
             {"language": "python", "charset": "utf8"})
         self._result = TestResult()
         value = self._result._exc_info_to_string(err, test)
-        super(TracebackContent, self).__init__(content_type,
-            lambda:[value.encode("utf8")])
+        super(TracebackContent, self).__init__(
+            content_type, lambda: [value.encode("utf8")])

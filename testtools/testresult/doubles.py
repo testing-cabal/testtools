@@ -8,6 +8,7 @@ __all__ = [
     'ExtendedTestResult',
     ]
 
+
 class LoggingBase(object):
     """Basic support for logging of results."""
 

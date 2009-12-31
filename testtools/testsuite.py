@@ -54,8 +54,8 @@ class ConcurrentTestSuite(unittest.TestSuite):
             for test in tests:
                 process_result = testtools.ThreadsafeForwardingResult(result,
                     result_semaphore)
-                reader_thread = threading.Thread(target=self._run_test, args=(test,
-                    process_result, queue))
+                reader_thread = threading.Thread(
+                    target=self._run_test, args=(test, process_result, queue))
                 threads[test] = reader_thread, process_result
                 reader_thread.start()
             while threads:

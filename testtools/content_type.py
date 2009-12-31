@@ -1,6 +1,7 @@
-# Copyright (c) 2008 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2008, 2009 Jonathan M. Lange. See LICENSE for details.
 
 """ContentType - a MIME Content Type."""
+
 
 class ContentType(object):
     """A content type from http://www.iana.org/assignments/media-types/

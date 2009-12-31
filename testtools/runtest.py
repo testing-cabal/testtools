@@ -11,6 +11,7 @@ import sys
 
 from testtools.testresult import ExtendedToOriginalDecorator
 
+
 class RunTest:
     """An object to run a test.
 

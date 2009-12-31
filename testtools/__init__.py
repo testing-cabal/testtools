@@ -1,4 +1,4 @@
-# Copyright (c) 2008 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2008, 2009 Jonathan M. Lange. See LICENSE for details.
 
 """Extensions to the standard Python unittest library."""
 
@@ -7,6 +7,7 @@ __all__ = [
     'ConcurrentTestSuite',
     'ExtendedToOriginalDecorator',
     'iterate_tests',
+    'Matcher',
     'MultiTestResult',
     'TestCase',
     'TestResult',

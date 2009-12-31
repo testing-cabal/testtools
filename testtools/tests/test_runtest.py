@@ -2,24 +2,17 @@
 
 """Tests for the RunTest single test execution logic."""
 
-import unittest
-
 from testtools import (
     ExtendedToOriginalDecorator,
     RunTest,
     TestCase,
     TestResult,
     )
-from testtools.tests.helpers import (
-    LoggingResult,
-    Python26TestResult,
-    Python27TestResult,
-    ExtendedTestResult,
-    )
+from testtools.tests.helpers import ExtendedTestResult
 
 
 class TestRunTest(TestCase):
-    
+
     def make_case(self):
         class Case(TestCase):
             def test(self):

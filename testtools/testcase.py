@@ -4,7 +4,7 @@
 
 __metaclass__ = type
 __all__ = [
-    'change_test_id',
+    'clone_test_with_new_id',
     'TestCase',
     'skip',
     'skipIf',
@@ -23,7 +23,7 @@ import unittest
 
 from testtools import content
 from testtools.runtest import RunTest
-from testtools.testresult import ExtendedToOriginalDecorator, TestResult
+from testtools.testresult import TestResult
 from testtools.utils import advance_iterator
 
 
@@ -196,7 +196,7 @@ class TestCase(unittest.TestCase):
     def _add_reason(self, reason):
         self.addDetail('reason', content.Content(
             content.ContentType('text', 'plain'),
-            lambda:[reason.encode('utf8')]))
+            lambda: [reason.encode('utf8')]))
 
     def assertIn(self, needle, haystack):
         """Assert that needle is in haystack."""
@@ -380,6 +380,7 @@ class TestCase(unittest.TestCase):
 # Python 2.4 did not know how to deep copy functions.
 if types.FunctionType not in copy._deepcopy_dispatch:
     copy._deepcopy_dispatch[types.FunctionType] = copy._deepcopy_atomic
+
 
 def clone_test_with_new_id(test, new_id):
     """Copy a TestCase, and give the copied test a new id."""
