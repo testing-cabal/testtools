@@ -11,13 +11,13 @@ from testtools.utils import _b
 
 class Content(object):
     """A MIME-like Content object.
-    
+
     Content objects can be serialised to bytes using the iter_bytes method.
-    If the Content-Type is recognised by other code, they are welcome to 
+    If the Content-Type is recognised by other code, they are welcome to
     look for richer contents that mere byte serialisation - for example in
     memory object graphs etc. However, such code MUST be prepared to receive
     a generic Content object that has been reconstructed from a byte stream.
-    
+
     :ivar content_type: The content type of this Content.
     """
 

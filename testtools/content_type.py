@@ -4,7 +4,7 @@
 
 class ContentType(object):
     """A content type from http://www.iana.org/assignments/media-types/
-    
+
     :ivar type: The primary type, e.g. "text" or "application"
     :ivar subtype: The subtype, e.g. "plain" or "octet-stream"
     :ivar parameters: A dict of additional parameters specific to the

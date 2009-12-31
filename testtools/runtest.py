@@ -39,7 +39,7 @@ class RunTest:
 
     def __init__(self, case, handlers=None):
         """Create a RunTest to run a case.
-        
+
         :param case: A testtools.TestCase test case object.
         :param handlers: Exception handlers for this RunTest. These are stored
             in self.handlers and can be modified later if needed.
@@ -121,7 +121,7 @@ class RunTest:
 
     def _run_user(self, fn, *args):
         """Run a user supplied function.
-        
+
         Exceptions are processed by self.handlers.
         """
         try:

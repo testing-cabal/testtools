@@ -113,7 +113,7 @@ class TestResult(unittest.TestResult):
 
     def _now(self):
         """Return the current 'test time'.
-        
+
         If the time() method has not been called, this is equivalent to
         datetime.now(), otherwise its the last supplied datestamp given to the
         time() method.
@@ -142,7 +142,7 @@ class TestResult(unittest.TestResult):
         concurrently and getting the system time between API calls will not
         accurately represent the duration of tests (or the whole run).
 
-        Calling time() sets the datetime used by the TestResult object. 
+        Calling time() sets the datetime used by the TestResult object.
         Time is permitted to go backwards when using this call.
 
         :param a_datetime: A datetime.datetime object with TZ information or
@@ -152,7 +152,7 @@ class TestResult(unittest.TestResult):
 
     def done(self):
         """Called when the test runner is done.
-        
+
         deprecated in favour of stopTestRun.
         """
 
@@ -252,7 +252,7 @@ class TextTestResult(TestResult):
 
 class ThreadsafeForwardingResult(TestResult):
     """A TestResult which ensures the target does not receive mixed up calls.
-    
+
     This is used when receiving test results from multiple sources, and batches
     up all the activity for a single test into a thread-safe batch where all
     other ThreadsafeForwardingResult objects sharing the same semaphore will be
@@ -536,4 +536,3 @@ def _details_to_str(details):
             chars.append('\n')
         chars.append('------------\n')
     return ''.join(chars)
-

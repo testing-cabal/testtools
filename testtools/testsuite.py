@@ -18,11 +18,11 @@ import testtools
 
 
 class ConcurrentTestSuite(unittest.TestSuite):
-    """A TestSuite whose run() calls out to a concurrency strategy.""" 
+    """A TestSuite whose run() calls out to a concurrency strategy."""
 
     def __init__(self, suite, make_tests):
         """Create a ConcurrentTestSuite to execute suite.
-        
+
         :param suite: A suite to run concurrently.
         :param make_tests: A helper function to split the tests in the
             ConcurrentTestSuite into some number of concurrently executing
@@ -66,11 +66,9 @@ class ConcurrentTestSuite(unittest.TestSuite):
             for thread, process_result in threads.values():
                 process_result.stop()
             raise
-        
+
     def _run_test(self, test, process_result, queue):
         try:
             test.run(process_result)
         finally:
             queue.put(test)
-
-

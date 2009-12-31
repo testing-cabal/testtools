@@ -10,7 +10,7 @@ __all__ = [
 
 class LoggingBase(object):
     """Basic support for logging of results."""
-    
+
     def __init__(self):
         self._events = []
         self.shouldStop = False

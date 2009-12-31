@@ -67,7 +67,7 @@ Commiting to trunk
 Testtools is maintained using bzr, with its trunk at lp:testtools. This gives
 every contributor the ability to commit their work to their own branches.
 However permission must be granted to allow contributors to commit to the trunk
-branch. 
+branch.
 
 Commit access to trunk is obtained by joining the testtools-devs Launchpad
 team. Membership in this team is contingent on obeying the testtools
