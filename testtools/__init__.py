@@ -7,7 +7,6 @@ __all__ = [
     'ConcurrentTestSuite',
     'ExtendedToOriginalDecorator',
     'iterate_tests',
-    'Matcher',
     'MultiTestResult',
     'TestCase',
     'TestResult',
