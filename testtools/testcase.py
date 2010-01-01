@@ -1,10 +1,10 @@
-# Copyright (c) 2008 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2008, 2009 Jonathan M. Lange. See LICENSE for details.
 
 """Test case related stuff."""
 
 __metaclass__ = type
 __all__ = [
-    'change_test_id',
+    'clone_test_with_new_id',
     'TestCase',
     'skip',
     'skipIf',
@@ -23,7 +23,7 @@ import unittest
 
 from testtools import content
 from testtools.runtest import RunTest
-from testtools.testresult import ExtendedToOriginalDecorator, TestResult
+from testtools.testresult import TestResult
 from testtools.utils import advance_iterator
 
 
@@ -57,7 +57,7 @@ except ImportError:
 
 class TestCase(unittest.TestCase):
     """Extensions to the basic TestCase.
-    
+
     :ivar exception_handlers: Exceptions to catch from setUp, runTest and
         tearDown. This list is able to be modified at any time and consists of
         (exception_class, handler(case, result, exception_value)) pairs.
@@ -183,7 +183,7 @@ class TestCase(unittest.TestCase):
         which is expensive to calculate and not interesting for reporting in
         the success case.
 
-        Handlers are called before the outcome (such as addFailure) that 
+        Handlers are called before the outcome (such as addFailure) that
         the exception has caused.
 
         Handlers are called in first-added, first-called order, and if they
@@ -196,7 +196,7 @@ class TestCase(unittest.TestCase):
     def _add_reason(self, reason):
         self.addDetail('reason', content.Content(
             content.ContentType('text', 'plain'),
-            lambda:[reason.encode('utf8')]))
+            lambda: [reason.encode('utf8')]))
 
     def assertIn(self, needle, haystack):
         """Assert that needle is in haystack."""
@@ -341,7 +341,7 @@ class TestCase(unittest.TestCase):
         self.setUp()
         if not self.__setup_called:
             raise ValueError("setUp was not called")
-    
+
     def _run_teardown(self, result):
         """Run the tearDown function for this test.
 
@@ -380,6 +380,7 @@ class TestCase(unittest.TestCase):
 # Python 2.4 did not know how to deep copy functions.
 if types.FunctionType not in copy._deepcopy_dispatch:
     copy._deepcopy_dispatch[types.FunctionType] = copy._deepcopy_atomic
+
 
 def clone_test_with_new_id(test, new_id):
     """Copy a TestCase, and give the copied test a new id."""
@@ -423,4 +424,3 @@ def skipUnless(condition, reason):
     def _id(obj):
         return obj
     return _id
-
