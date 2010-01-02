@@ -286,8 +286,10 @@ class TestCase(unittest.TestCase):
     def getUniqueInteger(self):
         return advance_iterator(self._unique_id_gen)
 
-    def getUniqueString(self):
-        return '%s-%d' % (self.id(), self.getUniqueInteger())
+    def getUniqueString(self, prefix=None):
+        if prefix is None:
+            prefix = self.id()
+        return '%s-%d' % (prefix, self.getUniqueInteger())
 
     def onException(self, exc_info):
         """Called when an exception propogates from test code.
