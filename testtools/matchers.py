@@ -167,3 +167,31 @@ class MismatchesAll:
             descriptions.append(mismatch.describe())
         descriptions.append("]\n")
         return '\n'.join(descriptions)
+
+
+class Not:
+    """Inverts a matcher."""
+
+    def __init__(self, matcher):
+        self.matcher = matcher
+
+    def __str__(self):
+        return 'Not(%s)' % (self.matcher,)
+
+    def match(self, other):
+        mismatch = self.matcher.match(other)
+        if mismatch is None:
+            return MatchedUnexpectedly(self.matcher, other)
+        else:
+            return None
+
+
+class MatchedUnexpectedly:
+    """A thing matched when it wasn't supposed to."""
+
+    def __init__(self, matcher, other):
+        self.matcher = matcher
+        self.other = other
+
+    def describe(self):
+        return "%r matches %s" % (self.other, self.matcher)

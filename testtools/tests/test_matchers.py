@@ -12,6 +12,7 @@ from testtools.matchers import (
     Equals,
     DocTestMatches,
     MatchesAny,
+    Not,
     )
 
 
@@ -79,6 +80,19 @@ class TestEqualsInterface(TestCase, TestMatchersInterface):
     str_examples = [("Equals(1)", Equals(1)), ("Equals('1')", Equals('1'))]
 
     describe_examples = [("1 != 2", 2, Equals(1))]
+
+
+class TestNotInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = Not(Equals(1))
+    matches_matches = [2]
+    matches_mismatches = [1]
+
+    str_examples = [
+        ("Not(Equals(1))", Not(Equals(1))),
+        ("Not(Equals('1'))", Not(Equals('1')))]
+
+    describe_examples = [('1 matches Equals(1)', 1, Not(Equals(1)))]
 
 
 class TestMatchersAnyInterface(TestCase, TestMatchersInterface):
