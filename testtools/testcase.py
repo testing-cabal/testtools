@@ -160,7 +160,7 @@ class TestCase(unittest.TestCase):
         return ok
 
     def addCleanup(self, function, *arguments, **keywordArguments):
-        """Add a cleanup function to be called before tearDown.
+        """Add a cleanup function to be called after tearDown.
 
         Functions added with addCleanup will be called in reverse order of
         adding after the test method and before tearDown.
