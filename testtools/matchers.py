@@ -14,7 +14,9 @@ __metaclass__ = type
 __all__ = [
     'DocTestMatches',
     'Equals',
+    'MatchesAll',
     'MatchesAny',
+    'NotEquals',
     ]
 
 import doctest
@@ -179,6 +181,27 @@ class MatchesAny:
     def __str__(self):
         return "MatchesAny(%s)" % ', '.join([
             str(matcher) for matcher in self.matchers])
+
+
+class MatchesAll:
+    """Matches if all of the matchers it is created with match."""
+
+    def __init__(self, *matchers):
+        self.matchers = matchers
+
+    def __str__(self):
+        return 'MatchesAll(%s)' % ', '.join(map(str, self.matchers))
+
+    def match(self, matchee):
+        results = []
+        for matcher in self.matchers:
+            mismatch = matcher.match(matchee)
+            if mismatch is not None:
+                results.append(mismatch)
+        if results:
+            return MismatchesAll(results)
+        else:
+            return None
 
 
 class MismatchesAll:

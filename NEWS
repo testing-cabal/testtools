@@ -7,7 +7,8 @@ NEXT
 Improvements
 ------------
 
-* New matcher "Not" that will invert another matcher.
+* New matchers "Not" and "MatchesAll". "Not" will invert another matcher, and
+  "MatchesAll" that needs a successful match for all of its arguments.
 
 * On Python 2.4, where types.FunctionType cannot be deepcopied, testtools will
   now monkeypatch copy._deepcopy_dispatch using the same trivial patch that
