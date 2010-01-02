@@ -135,6 +135,32 @@ class EqualsMismatch:
         return "%r != %r" % (self.expected, self.other)
 
 
+class NotEquals:
+    """Matches if the items are not equal."""
+
+    def __init__(self, expected):
+        self.expected = expected
+
+    def __str__(self):
+        return 'NotEquals(%r)' % (self.expected,)
+
+    def match(self, other):
+        if self.expected != other:
+            return None
+        return NotEqualsMismatch(self.expected, other)
+
+
+class NotEqualsMismatch:
+    """Two things are the same."""
+
+    def __init__(self, expected, other):
+        self.expected = expected
+        self.other = other
+
+    def describe(self):
+        return '%r == %r' % (self.expected, self.other)
+
+
 class MatchesAny:
     """Matches if any of the matchers it is created with match."""
 
