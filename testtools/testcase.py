@@ -287,8 +287,8 @@ class TestCase(unittest.TestCase):
         """Get an integer unique to this test.
 
         Returns an integer that is guaranteed to be unique to this instance.
-        Use this when you need an arbitrary integer in your test, or to make
-        your own anonymous factory methods.
+        Use this when you need an arbitrary integer in your test, or as a
+        helper for custom anonymous factory methods.
         """
         return advance_iterator(self._unique_id_gen)
 
@@ -296,8 +296,8 @@ class TestCase(unittest.TestCase):
         """Get a string unique to this test.
 
         Returns a string that is guaranteed to be unique to this instance. Use
-        this when you need an arbitrary string in your test, or to make your
-        own anonymous factory methods.
+        this when you need an arbitrary string in your test, or as a helper
+        for custom anonymous factory methods.
 
         :param prefix: The prefix of the string. If not provided, defaults
             to the id of the tests.
