@@ -510,6 +510,14 @@ class TestUniqueFactories(TestCase):
         name_two = self.getUniqueString()
         self.assertEqual('%s-%d' % (self.id(), 2), name_two)
 
+    def test_getUniqueString_prefix(self):
+        # If getUniqueString is given an argument, it uses that argument as
+        # the prefix of the unique string, rather than the test id.
+        name_one = self.getUniqueString('foo')
+        self.assertThat(name_one, Equals('foo-1'))
+        name_two = self.getUniqueString('bar')
+        self.assertThat(name_two, Equals('bar-2'))
+
 
 class TestCloneTestWithNewId(TestCase):
     """Tests for clone_test_with_new_id."""
