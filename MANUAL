@@ -137,12 +137,6 @@ This method is called on result objects when a test skips. The
 ``testtools.TestResult`` class records skips in its ``skip_reasons`` instance
 dict. The can be reported on in much the same way as succesful tests.
 
-TestResult.done
-~~~~~~~~~~~~~~~
-
-This method is called on result objects by testtools tests when the attribute
-exists. It is used as a hook point to allow clean disconnection of network
-resources and similar concerns.
 
 TestResult.time
 ~~~~~~~~~~~~~~~
@@ -174,6 +168,7 @@ it to be used without a 'TestRunner' object. Not all the Python 2.7 outcomes
 are displayed (yet). It is also a 'quiet' result with no dots or verbose mode.
 These limitations will be corrected soon.
 
+
 Test Doubles
 ~~~~~~~~~~~~
 
@@ -182,6 +177,17 @@ uses for its own testing: Python26TestResult, Python27TestResult,
 ExtendedTestResult. These TestResult objects implement a single variation of
 the TestResult API each, and log activity to a list self._events. These are
 made available for the convenience of people writing their own extensions.
+
+
+startTestRun and stopTestRun
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Python 2.7 added hooks 'startTestRun' and 'stopTestRun' which are called
+before and after the entire test run. 'stopTestRun' is particularly useful for
+test results that wish to produce summary output.
+
+testtools.TestResult provides empty startTestRun and stopTestRun methods, and
+the default testtools runner will call these methods appropriately.
 
 
 Extensions to TestSuite
@@ -196,6 +202,7 @@ off to a subprocess, to a compute cloud, or simple threads).
 ConcurrentTestSuite uses the helper to get a number of separate runnable
 objects with a run(result), runs them all in threads using the
 ThreadsafeForwardingResult to coalesce their activity.
+
 
 Running tests
 -------------
