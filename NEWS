@@ -15,8 +15,14 @@ Improvements
 
 * On windows the test 'test_now_datetime_now' should now work reliably.
 
+* TestCase.getUniqueInteger and TestCase.getUniqueString now have docstrings.
+
+* TestCase.getUniqueString now takes an optional prefix parameter, so you can
+  now use it in circumstances that forbid strings with '.'s, and such like.
+
 * The backtrace test result output tests should now pass on windows and other
   systems where os.sep is not '/'.
+
 
 0.9.2
 ~~~~~
