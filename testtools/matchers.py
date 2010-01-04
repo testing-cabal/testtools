@@ -17,6 +17,7 @@ __all__ = [
     'MatchesAll',
     'MatchesAny',
     'NotEquals',
+    'Not',
     ]
 
 import doctest
@@ -138,7 +139,11 @@ class EqualsMismatch:
 
 
 class NotEquals:
-    """Matches if the items are not equal."""
+    """Matches if the items are not equal.
+
+    In most cases, this is equivalent to `Not(Equals(foo))`. The difference
+    only matters when testing `__ne__` implementations.
+    """
 
     def __init__(self, expected):
         self.expected = expected
