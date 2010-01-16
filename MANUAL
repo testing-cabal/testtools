@@ -15,8 +15,10 @@ Controlling test execution
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Testtools supports two ways to control how tests are executed. The simplest
-is to add a new exception to self.exception_handlers:
- >>> self.exception_handlers.insert(-1, (ExceptionClass, handler)).
+is to add a new exception to self.exception_handlers::
+
+    >>> self.exception_handlers.insert(-1, (ExceptionClass, handler)).
+
 Having done this, if any of setUp, tearDown, or the test method raise
 ExceptionClass, handler will be called with the test case, test result and the
 raised exception.

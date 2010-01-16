@@ -20,10 +20,12 @@ Copyright assignment
 Part of testtools raison d'etre is to provide Python with improvements to the
 testing code it ships. For that reason we require all contributions (that are
 non-trivial) to meet one of the following rules:
+
  - be inapplicable for inclusion in Python.
  - be able to be included in Python without further contact with the
    contributor.
  - be copyright assigned to Jonathan M. Lange.
+
 Please pick one of these and specify it when contributing code to testtools.
 
 
@@ -32,7 +34,7 @@ Licensing
 
 All code that is not copyright assigned to Jonathan M. Lange (see Copyright
 Assignment above) needs to be licensed under the MIT license that testtools
- uses, so that testtools can ship it.
+uses, so that testtools can ship it.
 
 
 Testing
@@ -81,6 +83,7 @@ Code Review
 All code must be reviewed before landing on trunk. The process is to create a
 branch in launchpad, and submit it for merging to lp:testtools. It will then
 be reviewed before it can be merged to trunk. It will be reviewed by someone:
+
  * not the author
  * a committer (member of the testtools-devs team)
 
@@ -130,5 +133,7 @@ In no particular order:
 
 * Make a new milestone for the *next release*. We don't really know how we want
   to handle these yet, so this is a suggestion not actual practice:
-   - during release we rename NEXT to $version.
-   - we call new milestones NEXT.
+
+  * during release we rename NEXT to $version.
+
+  * we call new milestones NEXT.
