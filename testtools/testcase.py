@@ -203,15 +203,26 @@ class TestCase(unittest.TestCase):
         self.assertTrue(
             needle in haystack, '%r not in %r' % (needle, haystack))
 
-    def assertIs(self, expected, observed):
-        """Assert that 'expected' is 'observed'."""
-        self.assertTrue(
-            expected is observed, '%r is not %r' % (expected, observed))
+    def assertIs(self, expected, observed, message=''):
+        """Assert that 'expected' is 'observed'.
 
-    def assertIsNot(self, expected, observed):
-        """Assert that 'expected' is not 'observed'."""
+        :param expected: The expected value.
+        :param observed: The observed value.
+        :param message: An optional message describing the error.
+        """
+        if message:
+            message = ': ' + message
         self.assertTrue(
-            expected is not observed, '%r is %r' % (expected, observed))
+            expected is observed,
+            '%r is not %r%s' % (expected, observed, message))
+
+    def assertIsNot(self, expected, observed, message=''):
+        """Assert that 'expected' is not 'observed'."""
+        if message:
+            message = ': ' + message
+        self.assertTrue(
+            expected is not observed,
+            '%r is %r%s' % (expected, observed, message))
 
     def assertNotIn(self, needle, haystack):
         """Assert that needle is not in haystack."""
