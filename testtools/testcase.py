@@ -358,7 +358,10 @@ class TestCase(unittest.TestCase):
         """
         self.setUp()
         if not self.__setup_called:
-            raise ValueError("setUp was not called")
+            raise ValueError(
+                "TestCase.setUp was not called. Have you upcalled from your "
+                "setUp? Call super(%s, self).setUp() from your setUp()."
+                % self.__class__.__name__)
 
     def _run_teardown(self, result):
         """Run the tearDown function for this test.
@@ -369,7 +372,10 @@ class TestCase(unittest.TestCase):
         """
         self.tearDown()
         if not self.__teardown_called:
-            raise ValueError("teardown was not called")
+            raise ValueError(
+                "TestCase.tearDown was not called. Have you upcalled from "
+                "your tearDown? Call super(%s, self).tearDown() from your "
+                "tearDown()." % self.__class__.__name__)
 
     def _run_test_method(self, result):
         """Run the test method for this test.
