@@ -19,4 +19,10 @@ clean:
 release:
 	./setup.py sdist upload --sign
 
-.PHONY: check clean release
+apidocs:
+	pydoctor --make-html --add-package testtools \
+		--docformat=restructuredtext --project-name=testtools \
+		--project-url=https://launchpad.net/testtools
+
+
+.PHONY: check clean release apidocs
