@@ -303,12 +303,12 @@ class TestAddCleanup(TestCase):
         self.assertEqual(messages, [call[0] for call in self._result_calls])
 
     def assertTestLogEqual(self, messages):
-        """Assert that the call log equals `messages`."""
+        """Assert that the call log equals 'messages'."""
         case = self._result_calls[0][1]
         self.assertEqual(messages, case._calls)
 
     def logAppender(self, message):
-        """A cleanup that appends `message` to the tests log.
+        """A cleanup that appends 'message' to the tests log.
 
         Cleanups are callables that are added to a test by addCleanup. To
         verify that our cleanups run in the right order, we add strings to a
