@@ -27,7 +27,7 @@ import doctest
 class Matcher:
     """A pattern matcher.
 
-    A Matcher must implement match and __str__ to be used by
+    A Matcher must implement match and __repr__ to be used by
     testtools.TestCase.assertThat. Matcher.match(thing) returns None when
     thing is completely matched, and a Mismatch object otherwise.
 
@@ -43,13 +43,13 @@ class Matcher:
         """
         raise NotImplementedError(self.match)
 
-    def __str__(self):
+    def __repr__(self):
         """Get a sensible human representation of the matcher.
 
         This should include the parameters given to the matcher and any
         state that would affect the matches operation.
         """
-        raise NotImplementedError(self.__str__)
+        raise NotImplementedError(self.__repr__)
 
 
 class Mismatch:
@@ -79,7 +79,7 @@ class DocTestMatches:
         self.flags = flags
         self._checker = doctest.OutputChecker()
 
-    def __str__(self):
+    def __repr__(self):
         if self.flags:
             flagstr = ", flags=%d" % self.flags
         else:
@@ -124,7 +124,7 @@ class Equals:
             return None
         return EqualsMismatch(self.expected, other)
 
-    def __str__(self):
+    def __repr__(self):
         return "Equals(%r)" % self.expected
 
 
@@ -149,7 +149,7 @@ class NotEquals:
     def __init__(self, expected):
         self.expected = expected
 
-    def __str__(self):
+    def __repr__(self):
         return 'NotEquals(%r)' % (self.expected,)
 
     def match(self, other):
@@ -184,9 +184,9 @@ class MatchesAny:
             results.append(mismatch)
         return MismatchesAll(results)
 
-    def __str__(self):
+    def __repr__(self):
         return "MatchesAny(%s)" % ', '.join([
-            str(matcher) for matcher in self.matchers])
+            repr(matcher) for matcher in self.matchers])
 
 
 class MatchesAll:
@@ -195,8 +195,8 @@ class MatchesAll:
     def __init__(self, *matchers):
         self.matchers = matchers
 
-    def __str__(self):
-        return 'MatchesAll(%s)' % ', '.join(map(str, self.matchers))
+    def __repr__(self):
+        return 'MatchesAll(%s)' % ', '.join(map(repr, self.matchers))
 
     def match(self, matchee):
         results = []
@@ -230,8 +230,8 @@ class Not:
     def __init__(self, matcher):
         self.matcher = matcher
 
-    def __str__(self):
-        return 'Not(%s)' % (self.matcher,)
+    def __repr__(self):
+        return 'Not(%r)' % (self.matcher,)
 
     def match(self, other):
         mismatch = self.matcher.match(other)
@@ -249,7 +249,7 @@ class MatchedUnexpectedly:
         self.other = other
 
     def describe(self):
-        return "%r matches %s" % (self.other, self.matcher)
+        return "%r matches %r" % (self.other, self.matcher)
 
 
 class Annotate:
@@ -262,8 +262,8 @@ class Annotate:
         self.annotation = annotation
         self.matcher = matcher
 
-    def __str__(self):
-        return 'Annotate(%r, %s)' % (self.annotation, self.matcher)
+    def __repr__(self):
+        return 'Annotate(%r, %r)' % (self.annotation, self.matcher)
 
     def match(self, other):
         mismatch = self.matcher.match(other)
