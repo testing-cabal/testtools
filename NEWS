@@ -34,12 +34,6 @@ Improvements
 * The backtrace test result output tests should now pass on windows and other
   systems where os.sep is not '/'.
 
-Changes
--------
-
-* Matchers must implement __repr__ to describe themselves, rather than
-  __str__.
-
 
 0.9.2
 ~~~~~
