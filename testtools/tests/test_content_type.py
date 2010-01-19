@@ -1,7 +1,8 @@
 # Copyright (c) 2008 Jonathan M. Lange. See LICENSE for details.
 
 from testtools import TestCase
-from testtools.content_type import ContentType
+from testtools.matchers import Equals
+from testtools.content_type import ContentType, PLAIN_TEXT
 
 
 class TestContentType(TestCase):
@@ -27,6 +28,15 @@ class TestContentType(TestCase):
         content_type3 = ContentType("foo", "bar", {"quux": "thing2"})
         self.assertTrue(content_type1.__eq__(content_type2))
         self.assertFalse(content_type1.__eq__(content_type3))
+
+
+class TestBuiltinContentTypes(TestCase):
+
+    def test_plain_text(self):
+        # The PLAIN_TEXT content type represents UTF-8 encoded text/plain.
+        self.assertThat(PLAIN_TEXT.type, Equals('text'))
+        self.assertThat(PLAIN_TEXT.subtype, Equals('plain'))
+        self.assertThat(PLAIN_TEXT.parameters, Equals({'charset': 'utf8'}))
 
 
 def test_suite():
