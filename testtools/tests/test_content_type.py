@@ -1,15 +1,10 @@
 # Copyright (c) 2008 Jonathan M. Lange. See LICENSE for details.
 
-import unittest
+from testtools import TestCase
 from testtools.content_type import ContentType
 
 
-def test_suite():
-    from unittest import TestLoader
-    return TestLoader().loadTestsFromName(__name__)
-
-
-class TestContentType(unittest.TestCase):
+class TestContentType(TestCase):
 
     def test___init___None_errors(self):
         self.assertRaises(ValueError, ContentType, None, None)
@@ -23,12 +18,17 @@ class TestContentType(unittest.TestCase):
         self.assertEqual({}, content_type.parameters)
 
     def test___init___with_parameters(self):
-        content_type = ContentType("foo", "bar", {"quux":"thing"})
-        self.assertEqual({"quux":"thing"}, content_type.parameters)
+        content_type = ContentType("foo", "bar", {"quux": "thing"})
+        self.assertEqual({"quux": "thing"}, content_type.parameters)
 
     def test___eq__(self):
-        content_type1 = ContentType("foo", "bar", {"quux":"thing"})
-        content_type2 = ContentType("foo", "bar", {"quux":"thing"})
-        content_type3 = ContentType("foo", "bar", {"quux":"thing2"})
+        content_type1 = ContentType("foo", "bar", {"quux": "thing"})
+        content_type2 = ContentType("foo", "bar", {"quux": "thing"})
+        content_type3 = ContentType("foo", "bar", {"quux": "thing2"})
         self.assertTrue(content_type1.__eq__(content_type2))
         self.assertFalse(content_type1.__eq__(content_type3))
+
+
+def test_suite():
+    from unittest import TestLoader
+    return TestLoader().loadTestsFromName(__name__)
