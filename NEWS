@@ -7,6 +7,10 @@ NEXT
 Improvements
 ------------
 
+* New matcher "Annotate" that adds a simple string message to another matcher,
+  much like the option 'message' parameter to standard library assertFoo
+  methods.
+
 * New matchers "Not" and "MatchesAll". "Not" will invert another matcher, and
   "MatchesAll" that needs a successful match for all of its arguments.
 
