@@ -301,6 +301,9 @@ class TestAddCleanup(TestCase):
         def runTest(self):
             self._calls.append('runTest')
 
+        def brokenTest(self):
+            raise RuntimeError('Deliberate broken test')
+
         def tearDown(self):
             self._calls.append('tearDown')
             TestCase.tearDown(self)
@@ -400,13 +403,29 @@ class TestAddCleanup(TestCase):
         self.assertRaises(
             KeyboardInterrupt, self.test.run, self.logging_result)
 
-    def test_multipleErrorsReported(self):
-        # Errors from all failing cleanups are reported.
+    def test_multipleCleanupErrorsReported(self):
+        # Errors from all failing cleanups are reported as separate backtraces.
         self.test.addCleanup(lambda: 1/0)
         self.test.addCleanup(lambda: 1/0)
+        self.logging_result = ExtendedTestResult()
         self.test.run(self.logging_result)
-        self.assertErrorLogEqual(
-            ['startTest', 'addError', 'addError', 'stopTest'])
+        self.assertEqual(['startTest', 'addError', 'stopTest'],
+            [event[0] for event in self.logging_result._events])
+        self.assertEqual(set(['traceback', 'traceback-1']),
+            set(self.logging_result._events[1][2].keys()))
+
+    def test_multipleErrorsCoreAndCleanupReported(self):
+        # Errors from all failing cleanups are reported, with stopTest,
+        # startTest inserted.
+        self.test = TestAddCleanup.LoggingTest('brokenTest')
+        self.test.addCleanup(lambda: 1/0)
+        self.test.addCleanup(lambda: 1/0)
+        self.logging_result = ExtendedTestResult()
+        self.test.run(self.logging_result)
+        self.assertEqual(['startTest', 'addError', 'stopTest'],
+            [event[0] for event in self.logging_result._events])
+        self.assertEqual(set(['traceback', 'traceback-1', 'traceback-2']),
+            set(self.logging_result._events[1][2].keys()))
 
 
 class TestWithDetails(TestCase):

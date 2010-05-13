@@ -76,6 +76,7 @@ class TestCase(unittest.TestCase):
         unittest.TestCase.__init__(self, *args, **kwargs)
         self._cleanups = []
         self._unique_id_gen = itertools.count(1)
+        self._traceback_id_gen = itertools.count(0)
         self.__setup_called = False
         self.__teardown_called = False
         self.__details = {}
@@ -145,9 +146,10 @@ class TestCase(unittest.TestCase):
 
         See the docstring for addCleanup for more information.
 
-        Returns True if all cleanups ran without error, False otherwise.
+        :return: None if all cleanups ran without error, the most recently
+            raised exception from the cleanups otherwise.
         """
-        ok = True
+        last_exception = None
         while self._cleanups:
             function, arguments, keywordArguments = self._cleanups.pop()
             try:
@@ -155,9 +157,10 @@ class TestCase(unittest.TestCase):
             except KeyboardInterrupt:
                 raise
             except:
-                self._report_error(self, result, None)
-                ok = False
-        return ok
+                exc_info = sys.exc_info()
+                self._report_traceback(exc_info)
+                last_exception = exc_info[1]
+        return last_exception
 
     def addCleanup(self, function, *arguments, **keywordArguments):
         """Add a cleanup function to be called after tearDown.
@@ -288,8 +291,7 @@ class TestCase(unittest.TestCase):
             predicate(*args, **kwargs)
         except self.failureException:
             exc_info = sys.exc_info()
-            self.addDetail('traceback',
-                content.TracebackContent(exc_info, self))
+            self._report_traceback(exc_info)
             raise _ExpectedFailure(exc_info)
         else:
             raise _UnexpectedSuccess(reason)
@@ -323,12 +325,14 @@ class TestCase(unittest.TestCase):
 
         :seealso addOnException:
         """
+        if exc_info[0] not in [
+            TestSkipped, _UnexpectedSuccess, _ExpectedFailure]:
+            self._report_traceback(exc_info)
         for handler in self.__exception_handlers:
             handler(exc_info)
 
     @staticmethod
     def _report_error(self, result, err):
-        self._report_traceback()
         result.addError(self, details=self.getDetails())
 
     @staticmethod
@@ -337,7 +341,6 @@ class TestCase(unittest.TestCase):
 
     @staticmethod
     def _report_failure(self, result, err):
-        self._report_traceback()
         result.addFailure(self, details=self.getDetails())
 
     @staticmethod
@@ -349,9 +352,13 @@ class TestCase(unittest.TestCase):
         self._add_reason(reason)
         result.addSkip(self, details=self.getDetails())
 
-    def _report_traceback(self):
-        self.addDetail('traceback',
-            content.TracebackContent(sys.exc_info(), self))
+    def _report_traceback(self, exc_info):
+        tb_id = advance_iterator(self._traceback_id_gen)
+        if tb_id:
+            tb_label = 'traceback-%d' % tb_id
+        else:
+            tb_label = 'traceback'
+        self.addDetail(tb_label, content.TracebackContent(exc_info, self))
 
     @staticmethod
     def _report_unexpected_success(self, result, err):
