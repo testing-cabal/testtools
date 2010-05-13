@@ -55,4 +55,4 @@ from testtools.utils import iterate_tests
 # If the releaselevel is 'final', then the tarball will be major.minor.micro.
 # Otherwise it is major.minor.micro~$(revno).
 
-__version__ = (0, 9, 2, 'final', 0)
+__version__ = (0, 9, 3, 'final', 0)

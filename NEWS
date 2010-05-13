@@ -4,6 +4,13 @@ testtools NEWS
 NEXT
 ~~~~
 
+0.9.3
+~~~~~
+
+More matchers, Python 2.4 support, faster test cloning by switching to copy
+rather than deepcopy and better output when exceptions occur in cleanups are
+the defining characteristics of this release.
+
 Improvements
 ------------
 
