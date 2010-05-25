@@ -4,6 +4,7 @@
 
 __metaclass__ = type
 
+import codecs
 import datetime
 try:
     from cStringIO import StringIO
@@ -14,6 +15,7 @@ import os
 import sys
 import tempfile
 import threading
+import warnings
 
 from testtools import (
     ExtendedToOriginalDecorator,
@@ -827,7 +829,8 @@ class TestNonAsciiResults(TestCase):
         )
 
     def _run(self, stream, test):
-        result = TextTestResult(unicode_output_stream(stream, "UTF-8"))
+        """Run the test, the same as in testtools.run but not to stdout"""
+        result = TextTestResult(codecs.getwriter("UTF-8")(stream))
         result.startTestRun()
         try:
             return test.run(result)
@@ -835,46 +838,50 @@ class TestNonAsciiResults(TestCase):
             result.stopTestRun()
 
     def _run_external_case(self, testline, coding="ascii", modulelevel="",
-            name=None, prefix="TestNonAscii"):
+            name=None, prefix="TestNonAscii", additional_setup=None):
         """Create and run a test case in a seperate module"""
         if name is None:
             name = self.id().rsplit(".", 1)[1]
-        program_as_text = (
-            "# coding: %s\n"
-            "import testtools\n"
-            "%s\n"
-            "class Test(testtools.TestCase):\n"
-            "    def runTest(self):\n"
-            "        %s\n") % (coding, modulelevel, testline)
+        program_as_text = 
+        self.dir = tempfile.mkdtemp(prefix=prefix)
+        self.addCleanup(self._rmtempdir)
+        filename = os.path.join(self.dir, name + ".py")
         try:
-            program_as_bytes = program_as_text.encode(coding)
+            f = codecs.open(filename, "w", encoding=coding)
         except LookupError:
-            print "S",
             self.skip("Encoding unsupported by implementation: %r" % coding)
-        dir = tempfile.mkdtemp(prefix=prefix)
-        self.addCleanup(self._rmtempdir, dir)
-        filename = os.path.join(dir, name + ".py")
-        f = file(filename, "w")
         try:
-            # Does Python 3 let you write bytes to a text file like this?
-            f.write(program_as_bytes)
+            f.write(
+                "# coding: %s\n"
+                "import testtools\n"
+                "%s\n"
+                "class Test(testtools.TestCase):\n"
+                "    def runTest(self):\n"
+                "        %s\n") % (coding, modulelevel, testline))
         finally:
             f.close()
-        sys.path.insert(0, dir)
-        self.addCleanup(sys.path.remove, dir)
+        sys.path.insert(0, self.dir)
+        self.addCleanup(sys.path.remove, self.dir)
         module = __import__(name)
+        if additional_setup is not None:
+            additional_setup()
         stream = StringIO()
         self._run(stream, module.Test())
         return stream.getvalue()
 
-    def _rmtempdir(self, dir):
+    def _rmtempdir(self):
         """Like shutil.rmtree but... whatever"""
-        for root, dirs, files in os.walk(dir, topdown=False):
+        for root, dirs, files in os.walk(self.dir, topdown=False):
             for d in dirs:
                 os.rmdir(os.path.join(root, d))
             for f in files:
                 os.remove(os.path.join(root, f))
         os.rmdir(root)
+    
+    def _silence_deprecation_warnings(self):
+        """Shut up DeprecationWarning for this test only"""
+        warnings.simplefilter("ignore", DeprecationWarning)
+        self.addCleanup(warnings.filters.remove, warnings.filters[0])
 
     def _get_sample_text(self, encoding):
         if sys.version_info > (3, 0) or sys.platform == "cli":
@@ -946,7 +953,7 @@ class TestNonAsciiResults(TestCase):
         self.assertIn(self._as_output("\u1234"), textoutput)
 
     def test_unprintable_exception(self):
-        """Even totally useless exception instances should format somehow"""
+        """A totally useless exception instance still prints something"""
         execption_class = (
             "class UnprintableError(Exception):\n"
             "    def __str__(self):\n"
@@ -959,6 +966,16 @@ class TestNonAsciiResults(TestCase):
         self.assertIn(self._as_output(
             "\nUnprintableError: <unprintable UnprintableError object>\n"),
             textoutput)
+
+    # GZ 2010-05-25: Seems this breaks testtools internals.
+    def _disabled_test_string_exception(self):
+        """Raise a string rather than an exception instance if supported"""
+        if sys.version_info > (2, 6):
+            self.skip("No string exceptions in Python 2.6 or later")
+        elif sys.version_info > (2, 5):
+            self._silence_deprecation_warnings()
+        textoutput = self._run_external_case(testline="raise 'plain str'")
+        self.assertIn(self._as_output("\nplain str\n"), textoutput)
 
     def test_non_ascii_dirname(self):
         """Script paths in the traceback can be non-ascii"""
@@ -974,9 +991,26 @@ class TestNonAsciiResults(TestCase):
         self.assertIn(self._as_output(
             '  File "<string>", line 1\n'
             '    f(a, b c)\n'
+            # GZ 2010-05-25: The next line makes this test fail on Jython as
+            #                the caret points at the space not the identifier
             '           ^\n'
             'SyntaxError: '
             ), textoutput)
+
+    def test_syntax_error_import_binary(self):
+        """Importing a binary file shouldn't break SyntaxError formatting"""
+        if sys.version_info < (2, 5):
+            # Python 2.4 assumes the file is latin-1 and tells you off
+            self._silence_deprecation_warnings()
+        def _put_fake_module():
+            f = file(os.path.join(self.dir, "bad.py"), "wb")
+            try:
+                f.write(_b("x\x9c\xcb*\xcd\xcb\x06\x00\x04R\x01\xb9"))
+            finally:
+                f.close()
+        textoutput = self._run_external_case("import bad",
+            additional_setup=_put_fake_module)
+        self.assertIn(self._as_output("\nSyntaxError: "), textoutput)
 
 
 class TestNonAsciiResultsWithUnittest(TestNonAsciiResults):

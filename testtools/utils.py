@@ -44,7 +44,7 @@ def iterate_tests(test_suite_or_case):
             for subtest in iterate_tests(test):
                 yield subtest
 
-def unicode_output_stream(stream, default_encoding="ascii"):
+def unicode_output_stream(stream):
     """
     Return wrapper for given stream that correctly writes arbitrary unicode
 
@@ -64,7 +64,7 @@ def unicode_output_stream(stream, default_encoding="ascii"):
             return codecs.getwriter(encoding)(stream, "replace")
         except LookupError:
             pass
-    return codecs.getwriter(default_encoding)(stream, "replace")
+    return codecs.getwriter("ascii")(stream, "replace")
 
 
 # The default source encoding is actually "iso-8859-1" until Python 2.5 but
@@ -97,7 +97,7 @@ def _detect_encoding(lines):
     try:
         "".decode(encoding, "replace")
     except LookupError:
-        # Some encodings raise something other than LookupError if they don't
+        # Some codecs raise something other than LookupError if they don't
         # support the given error handler, but not the text ones that could
         # actually be used for Python source code
         return _default_source_encoding
@@ -145,12 +145,6 @@ def _exception_to_text(evalue):
         raise
     except:
         pass
-    try:
-        return repr(evalue).replace("\\n", "\n").decode("ascii", "replace")
-    except KeyboardInterrupt:
-        raise
-    except:
-        pass
     # Okay, out of ideas, let higher level handle it
     return None
 
@@ -180,8 +174,8 @@ def _format_exc_info(eclass, evalue, tb, limit=None):
         list = []
     if evalue is None:
         # Is a (deprecated) string exception
-        list.append("str exception: %r\n" % sclass)
-    elif isinstance(evalue, SyntaxError):
+        list.append(sclass.decode("ascii", "replace"))
+    elif isinstance(evalue, SyntaxError) and len(evalue.args) > 1:
         # Avoid duplicating the special formatting for SyntaxError here,
         # instead create a new instance with unicode filename and line
         # Potentially gives duff spacing, but that's a pre-existing issue
@@ -193,16 +187,7 @@ def _format_exc_info(eclass, evalue, tb, limit=None):
         evalue = eclass(evalue.args[0], (filename, lineno, offset, line))
         list.extend(traceback.format_exception_only(eclass, evalue))
     else:
-        smodule = eclass.__module__
-        if smodule in ("exceptions", "__main__"):
-            # Is a builtin exception or in script, module is uninteresting
-            sclass = eclass.__name__
-        elif True:
-            sclass = eclass.__name__
-            # GZ 2010-05-24: Would be nice to do the below instead, but let's
-            #                not change behaviours for the moment
-        else:
-            sclass = "%s.%s" % (smodule, eclass.__name__)
+        sclass = eclass.__name__
         svalue = _exception_to_text(evalue)
         if svalue:
             list.append("%s: %s\n" % (sclass, svalue))
