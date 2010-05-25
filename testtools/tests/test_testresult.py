@@ -10,7 +10,9 @@ try:
 except ImportError:
     from io import StringIO
 import doctest
+import os
 import sys
+import tempfile
 import threading
 
 from testtools import (
@@ -24,7 +26,12 @@ from testtools import (
     )
 from testtools.content import Content, ContentType
 from testtools.matchers import DocTestMatches
-from testtools.utils import _u, _b
+from testtools.utils import (
+    _b,
+    _get_exception_encoding,
+    _u,
+    unicode_output_stream,
+    )
 from testtools.tests.helpers import (
     LoggingResult,
     Python26TestResult,
@@ -801,6 +808,190 @@ class TestExtendedToOriginalResultOtherAttributes(
         self.assertEqual(1, self.converter.bar)
         self.assertEqual(2, self.converter.foo())
     
+
+class TestNonAsciiResults(TestCase):
+    """
+    Test all kinds of tracebacks are cleanly interpreted as unicode
+
+    May need some work to get all these tests meaning the right thing on
+    Python 3, but the basic sense should be correct.
+
+    Currently only uses weak "contains" assertions, would be good to be much
+    stricter about the expected output. This would add a few failures for the
+    current release of IronPython for instance, which gets some traceback
+    lines muddled.
+    """
+
+    _sample_texts = (u"\u5357\u7121",
+        # TODO: add some other scripts here
+        )
+
+    def _run(self, stream, test):
+        result = TextTestResult(unicode_output_stream(stream, "UTF-8"))
+        result.startTestRun()
+        try:
+            return test.run(result)
+        finally:
+            result.stopTestRun()
+
+    def _run_external_case(self, testline, coding="ascii", modulelevel="",
+            name=None, prefix="TestNonAscii"):
+        """Create and run a test case in a seperate module"""
+        if name is None:
+            name = self.id().rsplit(".", 1)[1]
+        program_as_text = (
+            "# coding: %s\n"
+            "import testtools\n"
+            "%s\n"
+            "class Test(testtools.TestCase):\n"
+            "    def runTest(self):\n"
+            "        %s\n") % (coding, modulelevel, testline)
+        try:
+            program_as_bytes = program_as_text.encode(coding)
+        except LookupError:
+            print "S",
+            self.skip("Encoding unsupported by implementation: %r" % coding)
+        dir = tempfile.mkdtemp(prefix=prefix)
+        self.addCleanup(self._rmtempdir, dir)
+        filename = os.path.join(dir, name + ".py")
+        f = file(filename, "w")
+        try:
+            # Does Python 3 let you write bytes to a text file like this?
+            f.write(program_as_bytes)
+        finally:
+            f.close()
+        sys.path.insert(0, dir)
+        self.addCleanup(sys.path.remove, dir)
+        module = __import__(name)
+        stream = StringIO()
+        self._run(stream, module.Test())
+        return stream.getvalue()
+
+    def _rmtempdir(self, dir):
+        """Like shutil.rmtree but... whatever"""
+        for root, dirs, files in os.walk(dir, topdown=False):
+            for d in dirs:
+                os.rmdir(os.path.join(root, d))
+            for f in files:
+                os.remove(os.path.join(root, f))
+        os.rmdir(root)
+
+    def _get_sample_text(self, encoding):
+        if sys.version_info > (3, 0) or sys.platform == "cli":
+            return 2 * [self._sample_texts[0]]
+        for u in self._sample_texts:
+            try:
+                b = u.encode(encoding)
+                if u == b.decode(encoding):
+                    return u, b
+            except (LookupError, UnicodeError):
+                pass
+        self.skip("Could not find a sample text for encoding: %r" % encoding)
+
+    def _as_output(self, text):
+        if sys.version_info > (3, 0) or sys.platform == "cli":
+            return text
+        return text.encode("UTF-8")
+
+    def test_non_ascii_failure_string(self):
+        """Assertion contents can be non-ascii and should get decoded"""
+        text, raw = self._get_sample_text(_get_exception_encoding())
+        textoutput = self._run_external_case("self.fail(%r)" % raw)
+        self.assertIn(self._as_output(text), textoutput)
+
+    def test_control_characters_in_failure_string(self):
+        """Control characters in assertions should be escaped"""
+        text, raw = self._get_sample_text(_get_exception_encoding())
+        textoutput = self._run_external_case("self.fail('\\a\\a\\a')")
+        self.expectFailure("Defense against the beeping horror unimplemented",
+            self.assertNotIn, self._as_output(u"\a\a\a"), textoutput)
+        self.assertIn(self._as_output(u"\uFFFD\uFFFD\uFFFD"), textoutput)
+
+    def test_os_error(self):
+        """Locale error messages from the OS shouldn't break anything"""
+        textoutput = self._run_external_case(
+            modulelevel="import os",
+            testline="os.mkdir('/')")
+        if os.name != "nt" or sys.version_info < (2, 5):
+            self.assertIn(self._as_output("OSError: "), textoutput)
+        else:
+            self.assertIn(self._as_output("WindowsError: "), textoutput)
+
+    def test_assertion_text_shift_jis(self):
+        """A terminal raw backslash in an encoded string is weird but fine"""
+        example_text = u"\u5341"
+        textoutput = self._run_external_case(
+            coding="shift_jis",
+            testline="self.fail('%s')" % example_text)
+        self.assertIn(self._as_output("AssertionError: %s" % example_text),
+            textoutput)
+
+    def test_file_comment_iso2022_jp(self):
+        """Control character escapes must be preserved if valid encoding"""
+        example_text = u"\u5357\u7121"
+        textoutput = self._run_external_case(
+            coding="iso2022_jp",
+            testline="self.fail('Simple') # %s" % example_text)
+        self.assertIn(self._as_output(example_text), textoutput)
+
+    def test_unicode_exception(self):
+        """Exceptions that can be formated losslessly as unicode should be"""
+        execption_class = (
+            "class FancyError(Exception):\n"
+            "    def __unicode__(self):\n"
+            "        return self.args[0]\n")
+        textoutput = self._run_external_case(
+            modulelevel=execption_class,
+            testline="raise FancyError('\u1234')")
+        self.assertIn(self._as_output("\u1234"), textoutput)
+
+    def test_unprintable_exception(self):
+        """Even totally useless exception instances should format somehow"""
+        execption_class = (
+            "class UnprintableError(Exception):\n"
+            "    def __str__(self):\n"
+            "        raise RuntimeError\n"
+            "    def __repr__(self):\n"
+            "        raise RuntimeError\n")
+        textoutput = self._run_external_case(
+            modulelevel=execption_class,
+            testline="raise UnprintableError")
+        self.assertIn(self._as_output(
+            "\nUnprintableError: <unprintable UnprintableError object>\n"),
+            textoutput)
+
+    def test_non_ascii_dirname(self):
+        """Script paths in the traceback can be non-ascii"""
+        text, raw = self._get_sample_text(sys.getfilesystemencoding())
+        textoutput = self._run_external_case(
+            testline="self.fail('Simple')",
+            prefix="TestNonAscii"+raw)
+        self.assertIn(self._as_output("TestNonAscii"+text), textoutput)
+
+    def test_syntax_error(self):
+        """Syntax errors should still have fancy special-case formatting"""
+        textoutput = self._run_external_case("exec 'f(a, b c)'")
+        self.assertIn(self._as_output(
+            '  File "<string>", line 1\n'
+            '    f(a, b c)\n'
+            '           ^\n'
+            'SyntaxError: '
+            ), textoutput)
+
+
+class TestNonAsciiResultsWithUnittest(TestNonAsciiResults):
+    """Test that running under unittest produces clean ascii strings"""
+
+    from unittest import TextTestRunner as _Runner
+
+    def _run(self, stream, test):
+        return self._Runner(stream).run(test)
+
+    def _as_output(self, text):
+        if sys.version_info > (3, 0) or sys.platform == "cli":
+            return text.encode("ascii", "replace").decode()
+        return text.encode("ascii", "replace")
+
 
 def test_suite():
     from unittest import TestLoader

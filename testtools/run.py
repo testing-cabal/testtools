@@ -11,6 +11,7 @@ For instance, to run the testtools test suite.
 import sys
 
 from testtools.tests import test_suite
+from testtools.utils import unicode_output_stream
 from testtools import TextTestResult
 
 
@@ -19,7 +20,7 @@ class TestToolsTestRunner(object):
 
     def run(self, test):
         "Run the given test case or test suite."
-        result = TextTestResult(sys.stdout)
+        result = TextTestResult(unicode_output_stream(sys.stdout))
         result.startTestRun()
         try:
             return test.run(result)

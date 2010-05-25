@@ -3,8 +3,8 @@
 """Content - a MIME-like Content object."""
 
 import codecs
-from unittest import TestResult
 
+from testtools.testresult import TestResult
 from testtools.content_type import ContentType
 from testtools.utils import _b
 
@@ -86,6 +86,6 @@ class TracebackContent(Content):
         content_type = ContentType('text', 'x-traceback',
             {"language": "python", "charset": "utf8"})
         self._result = TestResult()
-        value = self._result._exc_info_to_string(err, test)
+        value = self._result._exc_info_to_unicode(err, test)
         super(TracebackContent, self).__init__(
             content_type, lambda: [value.encode("utf8")])

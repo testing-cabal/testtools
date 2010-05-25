@@ -11,6 +11,7 @@ from testtools.tests import (
     test_testtools,
     test_testresult,
     test_testsuite,
+    test_utils,
     )
 
 
@@ -24,6 +25,7 @@ def test_suite():
         test_testresult,
         test_testsuite,
         test_testtools,
+        test_utils,
         ]
     for module in modules:
         suites.append(getattr(module, 'test_suite')())

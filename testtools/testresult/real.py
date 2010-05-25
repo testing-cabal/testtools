@@ -11,7 +11,10 @@ __all__ = [
     ]
 
 import datetime
+import sys
 import unittest
+
+from testtools.utils import _format_exc_info
 
 
 class TestResult(unittest.TestResult):
@@ -105,10 +108,27 @@ class TestResult(unittest.TestResult):
         """Called when a test was expected to fail, but succeed."""
         self.unexpectedSuccesses.append(test)
 
+    if sys.version_info > (3, 0) or sys.platform == "cli":
+        # Python 3 and IronPython strings are unicode, use parent class method
+        _exc_info_to_unicode = unittest.TestResult._exc_info_to_string
+    else:
+        # For Python 2, need to decode components of traceback according to
+        # their source, so can't use traceback.format_exception
+        # Here follows a little deep magic to copy the existing method and
+        # replace the formatter with one that returns unicode instead
+        from types import FunctionType as __F, ModuleType as __M
+        __f = unittest.TestResult._exc_info_to_string.im_func
+        __g = dict(__f.func_globals)
+        __m = __M("__fake_traceback")
+        __m.format_exception = _format_exc_info
+        __g["traceback"] = __m
+        _exc_info_to_unicode = __F(__f.func_code, __g, "_exc_info_to_unicode")
+        del __F, __M, __f, __g, __m
+
     def _err_details_to_string(self, test, err=None, details=None):
         """Convert an error in exc_info form or a contents dict to a string."""
         if err is not None:
-            return self._exc_info_to_string(err, test)
+            return self._exc_info_to_unicode(err, test)
         return _details_to_str(details)
 
     def _now(self):
@@ -511,9 +531,12 @@ class _StringException(Exception):
     def __hash__(self):
         return id(self)
 
-    def __str__(self):
-        """Stringify better than 2.x's default behaviour of ascii encoding."""
-        return self.args[0]
+    if sys.version_info < (3, 0):
+        def __str__(self):
+            return self.args[0].encode("ascii", "replace")
+
+        def __unicode__(self):
+            return self.args[0]
 
     def __eq__(self, other):
         try:
