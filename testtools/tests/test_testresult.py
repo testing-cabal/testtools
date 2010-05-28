@@ -254,7 +254,7 @@ class TestMultiTestResult(TestWithFakeExceptions):
         self.assertResultLogsEqual([('stopTestRun')])
 
 
-class TestTextTestResult(TestWithFakeExceptions):
+class TestTextTestResult(TestCase):
     """Tests for `TextTestResult`."""
 
     def setUp(self):
@@ -377,7 +377,7 @@ Traceback (most recent call last):
     testMethod()
   File "...testtools...tests...test_testresult.py", line ..., in error
     1/0
-ZeroDivisionError: int... division or modulo by zero
+ZeroDivisionError: ... divi... by zero...
 ------------
 ======================================================================
 FAIL: testtools.tests.test_testresult.Test.failed
