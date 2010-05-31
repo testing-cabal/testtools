@@ -4,6 +4,11 @@ testtools NEWS
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* Tests work on IronPython patch from Martin[gz] applied.
+
 0.9.3
 ~~~~~
 
