@@ -7,6 +7,8 @@ NEXT
 Improvements
 ------------
 
+* TestCase.addCleanup has had its docstring corrected about when cleanups run.
+
 * Tests work on IronPython patch from Martin[gz] applied.
 
 0.9.3

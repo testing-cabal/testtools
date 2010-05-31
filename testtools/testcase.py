@@ -166,7 +166,7 @@ class TestCase(unittest.TestCase):
         """Add a cleanup function to be called after tearDown.
 
         Functions added with addCleanup will be called in reverse order of
-        adding after the test method and before tearDown.
+        adding after tearDown, or after setUp if setUp raises an exception.
 
         If a function added with addCleanup raises an exception, the error
         will be recorded as a test error, and the next cleanup will then be
