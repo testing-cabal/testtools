@@ -8,7 +8,6 @@ import sys
 import tempfile
 import traceback
 
-
 import testtools
 
 from testtools.utils import (
@@ -29,8 +28,7 @@ class TestDetectEncoding(testtools.TestCase):
                 (expected, encoding, lines))
 
     def test_examples_from_pep(self):
-        """
-        Check the examples given in PEP 263 all work as specified
+        """Check the examples given in PEP 263 all work as specified
 
         See 'Examples' section of <http://www.python.org/dev/peps/pep-0263/>
         """

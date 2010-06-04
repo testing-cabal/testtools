@@ -45,8 +45,7 @@ def iterate_tests(test_suite_or_case):
                 yield subtest
 
 def unicode_output_stream(stream):
-    """
-    Return wrapper for given stream that correctly writes arbitrary unicode
+    """Get wrapper for given stream that correctly writes arbitrary unicode
 
     Characters that can't be coerced to the encoding of the stream, or 'ascii'
     if valid encoding is not found, will be replaced.
@@ -76,8 +75,7 @@ _default_source_encoding = "ascii"
 _cookie_search=re.compile("coding[:=]\s*([-\w.]+)").search
 
 def _detect_encoding(lines):
-    """
-    Return the encoding of a Python source file given a list of lines as bytes
+    """Get the encoding of a Python source file from a list of lines as bytes
 
     This function does less than tokenize.detect_encoding added in Python 3 as
     it does not attempt to raise a SyntaxError when the interpreter would, it
@@ -151,8 +149,7 @@ def _exception_to_text(evalue):
 # GZ 2010-05-23: This function is huge and horrible and I welcome suggestions
 #                on the best way to break it up
 def _format_exc_info(eclass, evalue, tb, limit=None):
-    """
-    Format a stack trace and the exception information as unicode
+    """Format a stack trace and the exception information as unicode
 
     Compatibility function for Python 2 which ensures each component of a
     traceback is correctly decoded according to its origins.

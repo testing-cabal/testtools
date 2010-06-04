@@ -812,8 +812,7 @@ class TestExtendedToOriginalResultOtherAttributes(
     
 
 class TestNonAsciiResults(TestCase):
-    """
-    Test all kinds of tracebacks are cleanly interpreted as unicode
+    """Test all kinds of tracebacks are cleanly interpreted as unicode
 
     May need some work to get all these tests meaning the right thing on
     Python 3, but the basic sense should be correct.
