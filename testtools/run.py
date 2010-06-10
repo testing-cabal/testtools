@@ -47,6 +47,11 @@ class TestToolsTestRunner(object):
 ####################
 # Taken from python 2.7 and slightly modified for compatibility with
 # older versions. Delete when 2.7 is the oldest supported version.
+# Modifications:
+#  - Use have_discover to raise an error if the user tries to use
+#    discovery on an old version and doesn't have discover installed.
+#  - If --catch is given check that installHandler is available, as
+#    it won't be on old python versions.
 
 FAILFAST     = "  -f, --failfast   Stop on first failure\n"
 CATCHBREAK   = "  -c, --catch      Catch control-C and display results\n"
