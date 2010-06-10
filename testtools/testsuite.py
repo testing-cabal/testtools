@@ -8,9 +8,9 @@ __all__ = [
   ]
 
 try:
-    import Queue
+    from Queue import Queue
 except ImportError:
-    import queue as Queue
+    from queue import Queue
 import threading
 import unittest
 
@@ -49,7 +49,7 @@ class ConcurrentTestSuite(unittest.TestSuite):
         tests = self.make_tests(self)
         try:
             threads = {}
-            queue = Queue.Queue()
+            queue = Queue()
             result_semaphore = threading.Semaphore(1)
             for test in tests:
                 process_result = testtools.ThreadsafeForwardingResult(result,
