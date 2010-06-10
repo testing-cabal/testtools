@@ -11,6 +11,10 @@ Improvements
 
 * Tests work on IronPython patch from Martin[gz] applied.
 
+* James Westby has supplied test discovery support using the Python 2.7
+  TestRunner in testtools.run. This requires the 'discover' module. This
+  closes bug #250764.
+
 0.9.3
 ~~~~~
 
