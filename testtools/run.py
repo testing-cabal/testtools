@@ -22,9 +22,9 @@ defaultTestLoaderCls = unittest.TestLoader
 if getattr(defaultTestLoader, 'discover', None) is None:
     try:
         import discover
-        have_discover = True
         defaultTestLoader = discover.DiscoveringTestLoader()
         defaultTestLoaderCls = discover.DiscoveringTestLoader
+        have_discover = True
     except ImportError:
         have_discover = False
 else:
