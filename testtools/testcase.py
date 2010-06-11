@@ -264,6 +264,10 @@ class TestCase(unittest.TestCase):
         mismatch = matcher.match(matchee)
         if not mismatch:
             return
+        getDetails = getattr(mismatch, "getDetails", None)
+        if getDetails is not None:
+            for (name, content) in getDetails():
+                self.addDetail(name, content)
         self.fail('Match failed. Matchee: "%s"\nMatcher: %s\nDifference: %s\n'
             % (matchee, matcher, mismatch.describe()))
 

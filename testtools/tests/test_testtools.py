@@ -613,6 +613,57 @@ class TestDetailsProvided(TestWithDetails):
         self.assertDetailsProvided(Case("test"), "addUnexpectedSuccess",
             ["foo"])
 
+    def test_addDetails_from_Mismatch(self):
+        content = self.get_content()
+        class Mismatch:
+            def describe(self):
+                return "Mismatch"
+            def getDetails(self):
+                return [("foo", content)]
+        class Matcher:
+            def match(self, thing):
+                return Mismatch()
+            def __str__(self):
+                return "a description"
+        class Case(TestCase):
+            def test(self):
+                self.assertThat("foo", Matcher())
+        self.assertDetailsProvided(Case("test"), "addFailure",
+            ["foo", "traceback"])
+
+    def test_multiple_addDetails_from_Mismatch(self):
+        content = self.get_content()
+        class Mismatch:
+            def describe(self):
+                return "Mismatch"
+            def getDetails(self):
+                return [("foo", content), ("bar", content)]
+        class Matcher:
+            def match(self, thing):
+                return Mismatch()
+            def __str__(self):
+                return "a description"
+        class Case(TestCase):
+            def test(self):
+                self.assertThat("foo", Matcher())
+        self.assertDetailsProvided(Case("test"), "addFailure",
+            ["bar", "foo", "traceback"])
+
+    def test_empty_addDetails_from_Mismatch(self):
+        content = self.get_content()
+        class Mismatch:
+            def describe(self):
+                return "Mismatch"
+        class Matcher:
+            def match(self, thing):
+                return Mismatch()
+            def __str__(self):
+                return "a description"
+        class Case(TestCase):
+            def test(self):
+                self.assertThat("foo", Matcher())
+        self.assertDetailsProvided(Case("test"), "addFailure", ["traceback"])
+
 
 class TestSetupTearDown(TestCase):
 
