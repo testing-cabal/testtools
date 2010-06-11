@@ -643,6 +643,9 @@ class TestSkipping(TestCase):
     def test_skip_causes_skipException(self):
         self.assertRaises(self.skipException, self.skip, "Skip this test")
 
+    def test_can_use_skipTest(self):
+        self.assertRaises(self.skipException, self.skipTest, "Skip this test")
+
     def test_skip_without_reason_works(self):
         class Test(TestCase):
             def test(self):

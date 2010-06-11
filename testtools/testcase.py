@@ -121,7 +121,7 @@ class TestCase(unittest.TestCase):
     def shortDescription(self):
         return self.id()
 
-    def skip(self, reason):
+    def skipTest(self, reason):
         """Cause this test to be skipped.
 
         This raises self.skipException(reason). skipException is raised
@@ -133,6 +133,10 @@ class TestCase(unittest.TestCase):
             support being cast into a unicode string for reporting.
         """
         raise self.skipException(reason)
+
+    # skipTest is how python2.7 spells this. Sometime in the future 
+    # This should be given a deprecation decorator - RBC 20100611.
+    skip = skipTest
 
     def _formatTypes(self, classOrIterable):
         """Format a class or a bunch of classes for display in an error."""

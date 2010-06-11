@@ -16,6 +16,9 @@ Improvements
 
 * TestCase.addCleanup has had its docstring corrected about when cleanups run.
 
+* TestCase.skip is now deprecated in favour of TestCase.skipTest, which is the
+  Python2.7 spelling for skip. This closes bug #560436.
+
 * Tests work on IronPython patch from Martin[gz] applied.
 
 0.9.3

@@ -52,10 +52,10 @@ given the exc_info for the exception, and can use this opportunity to attach
 more data (via the addDetails API) and potentially other uses.
 
 
-TestCase.skip
-~~~~~~~~~~~~~
+TestCase.skipTest
+~~~~~~~~~~~~~~~~~
 
-``skip`` is a simple way to have a test stop running and be reported as a
+``skipTest`` is a simple way to have a test stop running and be reported as a
 skipped test, rather than a success/error/failure. This is an alternative to
 convoluted logic during test loading, permitting later and more localized
 decisions about the appropriateness of running a test. Many reasons exist to
@@ -64,7 +64,9 @@ expensive and should not be run while on laptop battery power, or if the test
 is testing an incomplete feature (this is sometimes called a TODO). Using this
 feature when running your test suite with a TestResult object that is missing
 the ``addSkip`` method will result in the ``addError`` method being invoked
-instead.
+instead. ``skipTest`` was previously known as ``skip`` but as Python2.7 adds
+``skipTest`` support, the ``skip`` name is now deprecated (but no warning
+is emitted yet - some time in the future we may do so).
 
 
 New assertion methods
