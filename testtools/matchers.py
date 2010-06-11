@@ -62,6 +62,19 @@ class Mismatch:
         """
         raise NotImplementedError(self.describe_difference)
 
+    def getDetails(self):
+        """Get extra details about the mismatch.
+
+        This allows the mismatch to provide extra information in the result
+        without having to include it in the return value of describe.
+
+        :return: an iterable of tuples of (name, content_object), where name
+            is the name to give to that detaill, and content_object is
+            the Content instance to add to the test result. See
+            testtools.content for more detail.
+        """
+        return []
+
 
 class DocTestMatches:
     """See if a string matches a doctest example."""
