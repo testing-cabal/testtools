@@ -829,7 +829,9 @@ class TestNonAsciiResults(TestCase):
 
     def _run(self, stream, test):
         """Run the test, the same as in testtools.run but not to stdout"""
-        result = TextTestResult(codecs.getwriter("UTF-8")(stream))
+        if not (sys.version_info > (3, 0) or sys.platform == "cli"):
+            stream = codecs.getwriter("UTF-8")(stream)
+        result = TextTestResult(stream)
         result.startTestRun()
         try:
             return test.run(result)
@@ -841,14 +843,16 @@ class TestNonAsciiResults(TestCase):
         """Create and run a test case in a seperate module"""
         if name is None:
             name = self.id().rsplit(".", 1)[1]
-        program_as_text = 
         self.dir = tempfile.mkdtemp(prefix=prefix)
         self.addCleanup(self._rmtempdir)
         filename = os.path.join(self.dir, name + ".py")
         try:
-            f = codecs.open(filename, "w", encoding=coding)
+            # Need to pre-check that the coding is valid or codecs.open drops
+            # the file without closing it which breaks non-refcounted pythons
+            codecs.lookup(coding)
         except LookupError:
             self.skip("Encoding unsupported by implementation: %r" % coding)
+        f = codecs.open(filename, "w", encoding=coding)
         try:
             f.write(
                 "# coding: %s\n"
@@ -856,7 +860,7 @@ class TestNonAsciiResults(TestCase):
                 "%s\n"
                 "class Test(testtools.TestCase):\n"
                 "    def runTest(self):\n"
-                "        %s\n") % (coding, modulelevel, testline))
+                "        %s\n" % (coding, modulelevel, testline))
         finally:
             f.close()
         sys.path.insert(0, self.dir)
@@ -875,7 +879,7 @@ class TestNonAsciiResults(TestCase):
                 os.rmdir(os.path.join(root, d))
             for f in files:
                 os.remove(os.path.join(root, f))
-        os.rmdir(root)
+        os.rmdir(self.dir)
     
     def _silence_deprecation_warnings(self):
         """Shut up DeprecationWarning for this test only"""
@@ -907,7 +911,6 @@ class TestNonAsciiResults(TestCase):
 
     def test_control_characters_in_failure_string(self):
         """Control characters in assertions should be escaped"""
-        text, raw = self._get_sample_text(_get_exception_encoding())
         textoutput = self._run_external_case("self.fail('\\a\\a\\a')")
         self.expectFailure("Defense against the beeping horror unimplemented",
             self.assertNotIn, self._as_output(u"\a\a\a"), textoutput)
@@ -942,14 +945,14 @@ class TestNonAsciiResults(TestCase):
 
     def test_unicode_exception(self):
         """Exceptions that can be formated losslessly as unicode should be"""
-        execption_class = (
+        exception_class = (
             "class FancyError(Exception):\n"
             "    def __unicode__(self):\n"
             "        return self.args[0]\n")
         textoutput = self._run_external_case(
-            modulelevel=execption_class,
-            testline="raise FancyError('\u1234')")
-        self.assertIn(self._as_output("\u1234"), textoutput)
+            modulelevel=exception_class,
+            testline="raise FancyError(u'\u1234')")
+        self.assertIn(self._as_output(u"\u1234"), textoutput)
 
     def test_unprintable_exception(self):
         """A totally useless exception instance still prints something"""
