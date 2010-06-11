@@ -21,6 +21,11 @@ Improvements
 
 * Tests work on IronPython patch from Martin[gz] applied.
 
+* testtools.testresults.real._StringException will now answer __str__ if its
+  value is unicode by encoding with UTF8, and vice versa to answer __unicode__.
+  This permits subunit decoded exceptions to contain unicode and still format
+  correctly.
+
 0.9.3
 ~~~~~
 

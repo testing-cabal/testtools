@@ -513,6 +513,13 @@ class _StringException(Exception):
 
     def __str__(self):
         """Stringify better than 2.x's default behaviour of ascii encoding."""
+        if type(self.args[0]) is str:
+            return self.args[0]
+        return self.args[0].encode('utf8')
+
+    def __unicode__(self):
+        if type(self.args[0]) is str:
+            return self.args[0].decode('utf8')
         return self.args[0]
 
     def __eq__(self, other):
