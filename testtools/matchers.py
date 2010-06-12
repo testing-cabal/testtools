@@ -68,12 +68,11 @@ class Mismatch:
         This allows the mismatch to provide extra information in the result
         without having to include it in the return value of describe.
 
-        :return: an iterable of tuples of (name, content_object), where name
-            is the name to give to that detail, and content_object is
-            the Content instance to add to the test result. See
-            testtools.content for more detail.
+        :return: an dict of names to Content objects. name is a string to
+            name the detail, and the Content object is the detail to add
+            to the result. See testtools.content for more detail.
         """
-        return []
+        return {}
 
 
 class DocTestMatches:
