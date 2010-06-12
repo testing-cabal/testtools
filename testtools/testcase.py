@@ -264,8 +264,14 @@ class TestCase(unittest.TestCase):
         mismatch = matcher.match(matchee)
         if not mismatch:
             return
+        existing_details = set(self.getDetails().keys())
         for (name, content) in mismatch.get_details().iteritems():
-            self.addDetail(name, content)
+            full_name = name
+            suffix = 1
+            while full_name in existing_details:
+                full_name = "%s-%d" % (name, suffix)
+                suffix += 1
+            self.addDetail(full_name, content)
         self.fail('Match failed. Matchee: "%s"\nMatcher: %s\nDifference: %s\n'
             % (matchee, matcher, mismatch.describe()))
 
