@@ -62,6 +62,24 @@ class Mismatch:
         """
         raise NotImplementedError(self.describe_difference)
 
+    def get_details(self):
+        """Get extra details about the mismatch.
+
+        This allows the mismatch to provide extra information beyond the basic
+        description, including large text or binary files, or debugging internals
+        without having to force it to fit in the output of 'describe'.
+
+        The testtools assertion assertThat will query get_details and attach
+        all its values to the test, permitting them to be reported in whatever
+        manner the test environment chooses.
+
+        :return: a dict mapping names to Content objects. name is a string to
+            name the detail, and the Content object is the detail to add
+            to the result. For more information see the API to which items from
+            this dict are passed testtools.TestCase.addDetail.
+        """
+        return {}
+
 
 class DocTestMatches:
     """See if a string matches a doctest example."""

@@ -21,6 +21,13 @@ Improvements
 
 * Tests work on IronPython patch from Martin[gz] applied.
 
+* Thanks to a patch from James Westby testtools.matchers.Mismatch can now
+  supply a get_details method, which assertThat will query to provide
+  additional attachments. This can be used to provide additional detail
+  about the mismatch that doesn't suite being included in describe(). For
+  instance, if the match process was complex, a log of the process could be
+  included, permitting debugging.
+
 * testtools.testresults.real._StringException will now answer __str__ if its
   value is unicode by encoding with UTF8, and vice versa to answer __unicode__.
   This permits subunit decoded exceptions to contain unicode and still format

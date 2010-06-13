@@ -264,6 +264,8 @@ class TestAssertions(TestCase):
             def describe(self):
                 calls.append(('describe_diff', self.thing))
                 return "object is not a thing"
+            def get_details(self):
+                return {}
         class Matcher:
             def match(self, thing):
                 calls.append(('match', thing))
@@ -612,6 +614,61 @@ class TestDetailsProvided(TestWithDetails):
                 raise testcase._UnexpectedSuccess()
         self.assertDetailsProvided(Case("test"), "addUnexpectedSuccess",
             ["foo"])
+
+    def test_addDetails_from_Mismatch(self):
+        content = self.get_content()
+        class Mismatch:
+            def describe(self):
+                return "Mismatch"
+            def get_details(self):
+                return {"foo": content}
+        class Matcher:
+            def match(self, thing):
+                return Mismatch()
+            def __str__(self):
+                return "a description"
+        class Case(TestCase):
+            def test(self):
+                self.assertThat("foo", Matcher())
+        self.assertDetailsProvided(Case("test"), "addFailure",
+            ["foo", "traceback"])
+
+    def test_multiple_addDetails_from_Mismatch(self):
+        content = self.get_content()
+        class Mismatch:
+            def describe(self):
+                return "Mismatch"
+            def get_details(self):
+                return {"foo": content, "bar": content}
+        class Matcher:
+            def match(self, thing):
+                return Mismatch()
+            def __str__(self):
+                return "a description"
+        class Case(TestCase):
+            def test(self):
+                self.assertThat("foo", Matcher())
+        self.assertDetailsProvided(Case("test"), "addFailure",
+            ["bar", "foo", "traceback"])
+
+    def test_addDetails_with_same_name_as_key_from_get_details(self):
+        content = self.get_content()
+        class Mismatch:
+            def describe(self):
+                return "Mismatch"
+            def get_details(self):
+                return {"foo": content}
+        class Matcher:
+            def match(self, thing):
+                return Mismatch()
+            def __str__(self):
+                return "a description"
+        class Case(TestCase):
+            def test(self):
+                self.addDetail("foo", content)
+                self.assertThat("foo", Matcher())
+        self.assertDetailsProvided(Case("test"), "addFailure",
+            ["foo", "foo-1", "traceback"])
 
 
 class TestSetupTearDown(TestCase):
