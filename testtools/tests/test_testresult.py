@@ -862,7 +862,9 @@ class TestNonAsciiResults(TestCase):
         f = codecs.open(filename, "w", encoding=coding)
         try:
             f.write(
-                "# coding: %s\n"
+                # Put the encoding declaration in a docstring not a comment to
+                # avoid bug: <http://ironpython.codeplex.com/workitem/26940>
+                "'coding: %s'\n"
                 "import testtools\n"
                 "%s\n"
                 "class Test(testtools.TestCase):\n"
@@ -995,12 +997,13 @@ class TestNonAsciiResults(TestCase):
     def test_syntax_error(self):
         """Syntax errors should still have fancy special-case formatting"""
         textoutput = self._test_external_case("exec ('f(a, b c)')")
+        # Everything but Jython indicates the final identifier as the problem
+        error_on_identifier = os.name != "java"
         self.assertIn(self._as_output(
             '  File "<string>", line 1\n'
             '    f(a, b c)\n'
-            # GZ 2010-05-25: The next line makes this test fail on Jython as
-            #                the caret points at the space not the identifier
-            '           ^\n'
+            + ' ' * error_on_identifier +
+            '          ^\n'
             'SyntaxError: '
             ), textoutput)
 
