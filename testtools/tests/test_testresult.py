@@ -12,6 +12,7 @@ except ImportError:
     from io import StringIO
 import doctest
 import os
+import shutil
 import sys
 import tempfile
 import threading
@@ -839,20 +840,24 @@ class TestNonAsciiResults(TestCase):
         finally:
             result.stopTestRun()
 
-    def _run_external_case(self, testline, coding="ascii", modulelevel="",
-            name=None, prefix="TestNonAscii", additional_setup=None):
+    def _test_external_case(self, testline, coding="ascii", modulelevel="",
+            suffix=""):
         """Create and run a test case in a seperate module"""
-        if name is None:
-            name = self.id().rsplit(".", 1)[1]
-        self.dir = tempfile.mkdtemp(prefix=prefix)
-        self.addCleanup(self._rmtempdir)
-        filename = os.path.join(self.dir, name + ".py")
+        self._setup_external_case(testline, coding, modulelevel, suffix)
+        return self._run_external_case()
+
+    def _setup_external_case(self, testline, coding, modulelevel, suffix):
+        """Create a test case in a seperate module"""
+        _, prefix, self.modname = self.id().rsplit(".", 2)
+        self.dir = tempfile.mkdtemp(prefix=prefix, suffix=suffix)
+        self.addCleanup(shutil.rmtree, self.dir)
         try:
             # Need to pre-check that the coding is valid or codecs.open drops
             # the file without closing it which breaks non-refcounted pythons
             codecs.lookup(coding)
         except LookupError:
             self.skip("Encoding unsupported by implementation: %r" % coding)
+        filename = os.path.join(self.dir, self.modname + ".py")
         f = codecs.open(filename, "w", encoding=coding)
         try:
             f.write(
@@ -864,25 +869,17 @@ class TestNonAsciiResults(TestCase):
                 "        %s\n" % (coding, modulelevel, testline))
         finally:
             f.close()
+        
+    def _run_external_case(self):
+        """Run the prepared test case in a seperate module"""
         sys.path.insert(0, self.dir)
         self.addCleanup(sys.path.remove, self.dir)
-        module = __import__(name)
-        self.addCleanup(sys.modules.pop, name)
-        if additional_setup is not None:
-            additional_setup()
+        module = __import__(self.modname)
+        self.addCleanup(sys.modules.pop, self.modname)
         stream = StringIO()
         self._run(stream, module.Test())
         return stream.getvalue()
 
-    def _rmtempdir(self):
-        """Like shutil.rmtree but... whatever"""
-        for root, dirs, files in os.walk(self.dir, topdown=False):
-            for d in dirs:
-                os.rmdir(os.path.join(root, d))
-            for f in files:
-                os.remove(os.path.join(root, f))
-        os.rmdir(self.dir)
-    
     def _silence_deprecation_warnings(self):
         """Shut up DeprecationWarning for this test only"""
         warnings.simplefilter("ignore", DeprecationWarning)
@@ -908,19 +905,19 @@ class TestNonAsciiResults(TestCase):
     def test_non_ascii_failure_string(self):
         """Assertion contents can be non-ascii and should get decoded"""
         text, raw = self._get_sample_text(_get_exception_encoding())
-        textoutput = self._run_external_case("self.fail(%s)" % _r(raw))
+        textoutput = self._test_external_case("self.fail(%s)" % _r(raw))
         self.assertIn(self._as_output(text), textoutput)
 
     def test_control_characters_in_failure_string(self):
         """Control characters in assertions should be escaped"""
-        textoutput = self._run_external_case("self.fail('\\a\\a\\a')")
+        textoutput = self._test_external_case("self.fail('\\a\\a\\a')")
         self.expectFailure("Defense against the beeping horror unimplemented",
             self.assertNotIn, self._as_output("\a\a\a"), textoutput)
         self.assertIn(self._as_output(_u("\uFFFD\uFFFD\uFFFD")), textoutput)
 
     def test_os_error(self):
         """Locale error messages from the OS shouldn't break anything"""
-        textoutput = self._run_external_case(
+        textoutput = self._test_external_case(
             modulelevel="import os",
             testline="os.mkdir('/')")
         if os.name != "nt" or sys.version_info < (2, 5):
@@ -931,7 +928,7 @@ class TestNonAsciiResults(TestCase):
     def test_assertion_text_shift_jis(self):
         """A terminal raw backslash in an encoded string is weird but fine"""
         example_text = _u("\u5341")
-        textoutput = self._run_external_case(
+        textoutput = self._test_external_case(
             coding="shift_jis",
             testline="self.fail('%s')" % example_text)
         self.assertIn(self._as_output("AssertionError: %s" % example_text),
@@ -940,7 +937,7 @@ class TestNonAsciiResults(TestCase):
     def test_file_comment_iso2022_jp(self):
         """Control character escapes must be preserved if valid encoding"""
         example_text = _u("\u5357\u7121")
-        textoutput = self._run_external_case(
+        textoutput = self._test_external_case(
             coding="iso2022_jp",
             testline="self.fail('Simple') # %s" % example_text)
         self.assertIn(self._as_output(example_text), textoutput)
@@ -953,7 +950,7 @@ class TestNonAsciiResults(TestCase):
             # A __unicode__ method does nothing on py3k but the default works
             "    def __unicode__(self):\n"
             "        return self.args[0]\n")
-        textoutput = self._run_external_case(
+        textoutput = self._test_external_case(
             modulelevel=exception_class,
             testline="raise FancyError(%s)" % _r(example_text))
         self.assertIn(self._as_output(example_text), textoutput)
@@ -966,7 +963,7 @@ class TestNonAsciiResults(TestCase):
             "        raise RuntimeError\n"
             "    def __repr__(self):\n"
             "        raise RuntimeError\n")
-        textoutput = self._run_external_case(
+        textoutput = self._test_external_case(
             modulelevel=execption_class,
             testline="raise UnprintableError")
         self.assertIn(self._as_output(
@@ -980,23 +977,23 @@ class TestNonAsciiResults(TestCase):
             self.skip("No string exceptions in Python 2.6 or later")
         elif sys.version_info > (2, 5):
             self._silence_deprecation_warnings()
-        textoutput = self._run_external_case(testline="raise 'plain str'")
+        textoutput = self._test_external_case(testline="raise 'plain str'")
         self.assertIn(self._as_output("\nplain str\n"), textoutput)
 
     def test_non_ascii_dirname(self):
         """Script paths in the traceback can be non-ascii"""
         text, raw = self._get_sample_text(sys.getfilesystemencoding())
-        textoutput = self._run_external_case(
+        textoutput = self._test_external_case(
             # Avoid bug in Python 3 by giving a unicode source encoding rather
             # than just ascii which raises a SyntaxError with no other details
             coding="utf-8",
             testline="self.fail('Simple')",
-            prefix="TestNonAscii"+raw)
-        self.assertIn(self._as_output("TestNonAscii"+text), textoutput)
+            suffix=raw)
+        self.assertIn(self._as_output(text), textoutput)
 
     def test_syntax_error(self):
         """Syntax errors should still have fancy special-case formatting"""
-        textoutput = self._run_external_case("exec ('f(a, b c)')")
+        textoutput = self._test_external_case("exec ('f(a, b c)')")
         self.assertIn(self._as_output(
             '  File "<string>", line 1\n'
             '    f(a, b c)\n'
@@ -1011,14 +1008,13 @@ class TestNonAsciiResults(TestCase):
         if sys.version_info < (2, 5):
             # Python 2.4 assumes the file is latin-1 and tells you off
             self._silence_deprecation_warnings()
-        def _put_fake_module():
-            f = open(os.path.join(self.dir, "bad.py"), "wb")
-            try:
-                f.write(_b("x\x9c\xcb*\xcd\xcb\x06\x00\x04R\x01\xb9"))
-            finally:
-                f.close()
-        textoutput = self._run_external_case("import bad",
-            additional_setup=_put_fake_module)
+        self._setup_external_case("import bad", "ascii", "", "")
+        f = open(os.path.join(self.dir, "bad.py"), "wb")
+        try:
+            f.write(_b("x\x9c\xcb*\xcd\xcb\x06\x00\x04R\x01\xb9"))
+        finally:
+            f.close()
+        textoutput = self._run_external_case()
         self.assertIn(self._as_output("\nSyntaxError: "), textoutput)
 
 
