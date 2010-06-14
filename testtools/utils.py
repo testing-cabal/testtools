@@ -32,6 +32,7 @@ if sys.version_info > (3, 0):
         return isinstance(x, str)
     def classtypes():
         return (type,)
+    str_is_unicode = True
 else:
     def _u(s):
         """Use _u('\u1234') over u'\u1234' to avoid Python 3 syntax error"""        
@@ -46,6 +47,7 @@ else:
     def classtypes():
         import types
         return (type, types.ClassType)
+    str_is_unicode = sys.platform == "cli"
 
 
 def iterate_tests(test_suite_or_case):

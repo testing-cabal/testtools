@@ -14,7 +14,7 @@ import datetime
 import sys
 import unittest
 
-from testtools.utils import _format_exc_info
+from testtools.utils import _format_exc_info, str_is_unicode
 
 
 class TestResult(unittest.TestResult):
@@ -108,7 +108,7 @@ class TestResult(unittest.TestResult):
         """Called when a test was expected to fail, but succeed."""
         self.unexpectedSuccesses.append(test)
 
-    if sys.version_info > (3, 0) or sys.platform == "cli":
+    if str_is_unicode:
         # Python 3 and IronPython strings are unicode, use parent class method
         _exc_info_to_unicode = unittest.TestResult._exc_info_to_string
     else:
@@ -531,7 +531,7 @@ class _StringException(Exception):
     def __hash__(self):
         return id(self)
 
-    if sys.version_info < (3, 0) and sys.platform != "cli":
+    if not str_is_unicode:
         def __str__(self):
             return self.args[0].encode("ascii", "replace")
 

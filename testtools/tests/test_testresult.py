@@ -34,6 +34,7 @@ from testtools.utils import (
     _get_exception_encoding,
     _r,
     _u,
+    str_is_unicode,
     unicode_output_stream,
     )
 from testtools.tests.helpers import (
@@ -831,7 +832,7 @@ class TestNonAsciiResults(TestCase):
 
     def _run(self, stream, test):
         """Run the test, the same as in testtools.run but not to stdout"""
-        if not (sys.version_info > (3, 0) or sys.platform == "cli"):
+        if not str_is_unicode:
             stream = codecs.getwriter("UTF-8")(stream)
         result = TextTestResult(stream)
         result.startTestRun()
@@ -886,7 +887,7 @@ class TestNonAsciiResults(TestCase):
         self.addCleanup(warnings.filters.remove, warnings.filters[0])
 
     def _get_sample_text(self, encoding):
-        if sys.version_info > (3, 0) or sys.platform == "cli":
+        if str_is_unicode:
             return 2 * [self._sample_texts[0]]
         for u in self._sample_texts:
             try:
@@ -898,7 +899,7 @@ class TestNonAsciiResults(TestCase):
         self.skip("Could not find a sample text for encoding: %r" % encoding)
 
     def _as_output(self, text):
-        if sys.version_info > (3, 0) or sys.platform == "cli":
+        if str_is_unicode:
             return text
         return text.encode("UTF-8")
 
@@ -1027,7 +1028,7 @@ class TestNonAsciiResultsWithUnittest(TestNonAsciiResults):
         return self._Runner(stream).run(test)
 
     def _as_output(self, text):
-        if sys.version_info > (3, 0) or sys.platform == "cli":
+        if str_is_unicode:
             return text
         return text.encode("ascii", "replace")
 
