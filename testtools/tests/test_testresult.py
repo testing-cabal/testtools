@@ -985,10 +985,11 @@ class TestNonAsciiResults(TestCase):
 
     def test_non_ascii_dirname(self):
         """Script paths in the traceback can be non-ascii"""
-        if sys.version_info > (3, 0):
-            self.skip("Should just work in Python 3 but seem to hit a bug")
         text, raw = self._get_sample_text(sys.getfilesystemencoding())
         textoutput = self._run_external_case(
+            # Avoid bug in Python 3 by giving a unicode source encoding rather
+            # than just ascii which raises a SyntaxError with no other details
+            coding="utf-8",
             testline="self.fail('Simple')",
             prefix="TestNonAscii"+raw)
         self.assertIn(self._as_output("TestNonAscii"+text), textoutput)
