@@ -11,6 +11,7 @@ import traceback
 import testtools
 
 from testtools.utils import (
+    _b,
     _detect_encoding,
     _get_source_encoding,
     )
@@ -21,7 +22,7 @@ class TestDetectEncoding(testtools.TestCase):
 
     def _check_encoding(self, expected, lines):
         """Check lines are valid Python and encoding is as expected"""
-        compile("".join(lines), "<str>", "exec")
+        compile(_b("".join(lines)), "<str>", "exec")
         encoding = _detect_encoding(lines)
         self.assertEqual(expected, encoding,
             "Encoding %r expected but got %r from lines %r" %
@@ -125,7 +126,7 @@ class TestGetSourceEncoding(testtools.TestCase):
         self._written = False
 
     def put_source(self, text):
-        f = file(self.filename, "w")
+        f = open(self.filename, "w")
         try:
             f.write(text)
         finally:
@@ -142,28 +143,28 @@ class TestGetSourceEncoding(testtools.TestCase):
     def test_encoding_is_cached(self):
         """The encoding should stay the same if the cache isn't invalidated"""
         self.put_source(
+            "# coding: iso-8859-13\n"
+            "import os\n")
+        self.assertEquals("iso-8859-13", _get_source_encoding(self.filename))
+        self.put_source(
             "# coding: rot-13\n"
             "vzcbeg bf\n")
-        self.assertEquals("rot-13", _get_source_encoding(self.filename))
-        self.put_source(
-            "# coding: ascii\n"
-            "import os\n")
-        self.assertEquals("rot-13", _get_source_encoding(self.filename))
+        self.assertEquals("iso-8859-13", _get_source_encoding(self.filename))
 
     def test_traceback_rechecks_encoding(self):
         """A traceback function checks the cache and resets the encoding"""
         self.put_source(
-            "# coding: rot-13\n"
-            "envfr EhagvzrReebe\n")
-        self.assertEquals("rot-13", _get_source_encoding(self.filename))
+            "# coding: iso-8859-8\n"
+            "raise RuntimeError\n")
+        self.assertEquals("iso-8859-8", _get_source_encoding(self.filename))
         self.put_source(
             "# coding: utf-8\n"
             "raise RuntimeError\n")
         try:
-            execfile(self.filename)
+            exec (compile("", self.filename, "exec"))
         except RuntimeError:
             traceback.extract_tb(sys.exc_info()[2])
-        self.assertEquals("utf-8", _get_source_encoding(self.filename))
+        self.assertEquals("iso-8859-8", _get_source_encoding(self.filename))
 
 
 def test_suite():

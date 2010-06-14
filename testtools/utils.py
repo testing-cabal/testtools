@@ -21,6 +21,9 @@ if sys.version_info > (3, 0):
     def _u(s):
         """Replacement for u'some string' in Python 3."""
         return s
+    def _r(s):
+        """Like repr but safe to use as ascii"""
+        return repr(s.encode("unicode-escape").decode()).replace("\\\\", "\\")
     def _b(s):
         """A byte literal."""
         return s.encode("latin-1")
@@ -31,7 +34,10 @@ if sys.version_info > (3, 0):
         return (type,)
 else:
     def _u(s):
-        return unicode(s, "latin-1")
+        """Use _u('\u1234') over u'\u1234' to avoid Python 3 syntax error"""        
+        return (s.replace("\\", "\\\\").replace("\\\\u", "\\u")
+            .replace("\\\\U", "\\U").decode("unicode-escape"))
+    _r = repr
     def _b(s):
         return s
     advance_iterator = lambda it: it.next()
@@ -63,9 +69,12 @@ def unicode_output_stream(stream):
     which is a good thing to ensure sanity and sanitation.
     """
     # TODO: Don't bother using 'replace' for UTF-* encodings?
-    # TODO: Work out what wrapping, if any, Python 3 streams need.
-    if sys.version_info > (3, 0) or sys.platform == "cli":
+    if sys.platform == "cli":
         return stream
+    if sys.version_info > (3, 0):
+         # GZ 2010-06-11: This is wrong, by py3k doesn't seem to have a right
+         return stream.__class__(stream.buffer, stream.encoding, "replace",
+             stream.newlines, stream.line_buffering)
     encoding = getattr(stream, "encoding", None)
     if encoding is not None:
         try:
@@ -102,7 +111,7 @@ def _detect_encoding(lines):
         return _default_source_encoding
     encoding = magic.group(1)
     try:
-        "".decode(encoding, "replace")
+        codecs.lookup(encoding)
     except LookupError:
         # Some codecs raise something other than LookupError if they don't
         # support the given error handler, but not the text ones that could

@@ -531,7 +531,7 @@ class _StringException(Exception):
     def __hash__(self):
         return id(self)
 
-    if sys.version_info < (3, 0):
+    if sys.version_info < (3, 0) and sys.platform != "cli":
         def __str__(self):
             return self.args[0].encode("ascii", "replace")
 
