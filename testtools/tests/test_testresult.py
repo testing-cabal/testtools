@@ -817,17 +817,16 @@ class TestExtendedToOriginalResultOtherAttributes(
 class TestNonAsciiResults(TestCase):
     """Test all kinds of tracebacks are cleanly interpreted as unicode
 
-    May need some work to get all these tests meaning the right thing on
-    Python 3, but the basic sense should be correct.
-
     Currently only uses weak "contains" assertions, would be good to be much
     stricter about the expected output. This would add a few failures for the
     current release of IronPython for instance, which gets some traceback
     lines muddled.
     """
 
-    _sample_texts = (_u("\u5357\u7121"),
-        # TODO: add some other scripts here
+    _sample_texts = (
+        _u("pa\u026a\u03b8\u0259n"), # Unicode encodings only
+        _u("\u5357\u7121"), # In ISO 2022 encodings
+        _u("\xa7\xa7\xa7"), # In ISO 8859 encodings
         )
 
     def _run(self, stream, test):
@@ -889,14 +888,14 @@ class TestNonAsciiResults(TestCase):
         warnings.simplefilter("ignore", DeprecationWarning)
         self.addCleanup(warnings.filters.remove, warnings.filters[0])
 
-    def _get_sample_text(self, encoding):
-        if str_is_unicode:
-            return 2 * [self._sample_texts[0]]
+    def _get_sample_text(self, encoding="unicode_internal"):
         for u in self._sample_texts:
             try:
                 b = u.encode(encoding)
                 if u == b.decode(encoding):
-                    return u, b
+                   if str_is_unicode:
+                       return u, u
+                   return u, b
             except (LookupError, UnicodeError):
                 pass
         self.skip("Could not find a sample text for encoding: %r" % encoding)
@@ -940,7 +939,7 @@ class TestNonAsciiResults(TestCase):
 
     def test_file_comment_iso2022_jp(self):
         """Control character escapes must be preserved if valid encoding"""
-        example_text = _u("\u5357\u7121")
+        example_text, _ = self._get_sample_text("iso2022_jp")
         textoutput = self._test_external_case(
             coding="iso2022_jp",
             testline="self.fail('Simple') # %s" % example_text)
@@ -948,7 +947,7 @@ class TestNonAsciiResults(TestCase):
 
     def test_unicode_exception(self):
         """Exceptions that can be formated losslessly as unicode should be"""
-        example_text = _u("\u1234")
+        example_text, _ = self._get_sample_text()
         exception_class = (
             "class FancyError(Exception):\n"
             # A __unicode__ method does nothing on py3k but the default works
@@ -961,14 +960,14 @@ class TestNonAsciiResults(TestCase):
 
     def test_unprintable_exception(self):
         """A totally useless exception instance still prints something"""
-        execption_class = (
+        exception_class = (
             "class UnprintableError(Exception):\n"
             "    def __str__(self):\n"
             "        raise RuntimeError\n"
             "    def __repr__(self):\n"
             "        raise RuntimeError\n")
         textoutput = self._test_external_case(
-            modulelevel=execption_class,
+            modulelevel=exception_class,
             testline="raise UnprintableError")
         self.assertIn(self._as_output(
             "UnprintableError: <unprintable UnprintableError object>\n"),
