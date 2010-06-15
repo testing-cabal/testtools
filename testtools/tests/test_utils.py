@@ -155,16 +155,18 @@ class TestGetSourceEncoding(testtools.TestCase):
         """A traceback function checks the cache and resets the encoding"""
         self.put_source(
             "# coding: iso-8859-8\n"
-            "raise RuntimeError\n")
+            "import os\n")
         self.assertEquals("iso-8859-8", _get_source_encoding(self.filename))
         self.put_source(
             "# coding: utf-8\n"
-            "raise RuntimeError\n")
+            "import os\n")
         try:
-            exec (compile("", self.filename, "exec"))
+            exec (compile("raise RuntimeError\n", self.filename, "exec"))
         except RuntimeError:
             traceback.extract_tb(sys.exc_info()[2])
-        self.assertEquals("iso-8859-8", _get_source_encoding(self.filename))
+        else:
+            self.fail("RuntimeError not raised")
+        self.assertEquals("utf-8", _get_source_encoding(self.filename))
 
 
 def test_suite():
