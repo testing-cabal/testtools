@@ -862,9 +862,10 @@ class TestNonAsciiResults(TestCase):
         f = codecs.open(filename, "w", encoding=coding)
         try:
             f.write(
-                # Put the encoding declaration in a docstring not a comment to
+                # Older Python 2 versions don't see a coding declaration in a
+                # docstring so it has to be in a comment, but then we can't
                 # avoid bug: <http://ironpython.codeplex.com/workitem/26940>
-                "'coding: %s'\n"
+                "# coding: %s\n"
                 "import testtools\n"
                 "%s\n"
                 "class Test(testtools.TestCase):\n"
