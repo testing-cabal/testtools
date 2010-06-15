@@ -888,7 +888,9 @@ class TestNonAsciiResults(TestCase):
         warnings.simplefilter("ignore", DeprecationWarning)
         self.addCleanup(warnings.filters.remove, warnings.filters[0])
 
-    def _get_sample_text(self, encoding="unicode_internal"):
+    def _get_sample_text(self, encoding=None):
+        if encoding is None:
+            encoding = "unicode_internal"
         for u in self._sample_texts:
             try:
                 b = u.encode(encoding)
