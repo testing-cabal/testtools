@@ -21,9 +21,7 @@ if sys.version_info > (3, 0):
     def _u(s):
         """Replacement for u'some string' in Python 3."""
         return s
-    def _r(s):
-        """Like repr but safe to use as ascii"""
-        return repr(s.encode("unicode-escape").decode()).replace("\\\\", "\\")
+    _r = ascii
     def _b(s):
         """A byte literal."""
         return s.encode("latin-1")
