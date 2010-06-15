@@ -64,7 +64,7 @@ expensive and should not be run while on laptop battery power, or if the test
 is testing an incomplete feature (this is sometimes called a TODO). Using this
 feature when running your test suite with a TestResult object that is missing
 the ``addSkip`` method will result in the ``addError`` method being invoked
-instead. ``skipTest`` was previously known as ``skip`` but as Python2.7 adds
+instead. ``skipTest`` was previously known as ``skip`` but as Python 2.7 adds
 ``skipTest`` support, the ``skip`` name is now deprecated (but no warning
 is emitted yet - some time in the future we may do so).
 
@@ -217,12 +217,12 @@ result object: python -m testtools.run testspec [testspec...].
 Test discovery
 --------------
 
-Testtools includes a backported version of the Python2.7 glue for using the
-discover test discovery module. If you either have python 2.7/3.1 or newer, or
+Testtools includes a backported version of the Python 2.7 glue for using the
+discover test discovery module. If you either have Python 2.7/3.1 or newer, or
 install the 'discover' module, then you can invoke discovery::
 
     python -m testtools.run discover [path]
 
-For more information see the Python2.7 unittest documentation, or::
+For more information see the Python 2.7 unittest documentation, or::
 
     python -m testtools.run --help
