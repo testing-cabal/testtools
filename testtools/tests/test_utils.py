@@ -14,6 +14,8 @@ from testtools.utils import (
     _b,
     _detect_encoding,
     _get_source_encoding,
+    _u,
+    unicode_output_stream,
     )
 
 
@@ -167,6 +169,69 @@ class TestGetSourceEncoding(testtools.TestCase):
         else:
             self.fail("RuntimeError not raised")
         self.assertEquals("utf-8", _get_source_encoding(self.filename))
+
+
+class _FakeOutputStream(object):
+    """A simple file-like object for testing"""
+    def __init__(self):
+        self.writelog = []
+    def write(self, obj):
+        self.writelog.append(obj)
+
+
+class TestUnicodeOutputStream(testtools.TestCase):
+    """Test wrapping output streams so they work with arbitrary unicode"""
+    uni = _u("pa\u026a\u03b8\u0259n")
+    def setUp(self):
+        super(TestUnicodeOutputStream, self).setUp()
+        if sys.platform == "cli":
+            self.skip("IronPython shouldn't wrap streams to do encoding")
+    def test_no_encoding_becomes_ascii(self):
+        """A stream with no encoding attribute gets ascii/replace strings"""
+        sout = _FakeOutputStream()
+        unicode_output_stream(sout).write(self.uni)
+        self.assertEqual([_b("pa???n")], sout.writelog)
+    def test_encoding_as_none_becomes_ascii(self):
+        """A stream with encoding value of None gets ascii/replace strings"""
+        sout = _FakeOutputStream()
+        sout.encoding = None
+        unicode_output_stream(sout).write(self.uni)
+        self.assertEqual([_b("pa???n")], sout.writelog)
+    def test_bogus_encoding_becomes_ascii(self):
+        """A stream with a bogus encoding gets ascii/replace strings"""
+        sout = _FakeOutputStream()
+        sout.encoding = "bogus"
+        unicode_output_stream(sout).write(self.uni)
+        self.assertEqual([_b("pa???n")], sout.writelog)
+    def test_partial_encoding_replace(self):
+        """A string which can be partly encoded correctly should be"""
+        sout = _FakeOutputStream()
+        sout.encoding = "iso-8859-7"
+        unicode_output_stream(sout).write(self.uni)
+        self.assertEqual([_b("pa?\xe8?n")], sout.writelog)
+    def test_unicode_encodings_not_wrapped(self):
+        """A unicode encoding is left unwrapped as needs no error handler"""
+        sout = _FakeOutputStream()
+        sout.encoding = "utf-8"
+        self.assertIs(unicode_output_stream(sout), sout)
+        sout = _FakeOutputStream()
+        sout.encoding = "utf-16-be"
+        self.assertIs(unicode_output_stream(sout), sout)
+    def test_stringio(self):
+        """A StringIO object should maybe get an ascii native str type"""
+        try:
+            from cStringIO import StringIO
+            newio = False
+        except ImportError:
+            from io import StringIO
+            newio = True
+        sout = StringIO()
+        soutwrapper = unicode_output_stream(sout)
+        if newio:
+            self.expectFailure("Python 3 StringIO expects bytes",
+                self.assertRaises, TypeError, soutwrapper.write, self.uni)
+        soutwrapper.write(self.uni)
+        self.assertEqual("pa???n", sout.getvalue())
 
 
 def test_suite():

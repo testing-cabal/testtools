@@ -60,28 +60,35 @@ def iterate_tests(test_suite_or_case):
                 yield subtest
 
 def unicode_output_stream(stream):
-    """Get wrapper for given stream that correctly writes arbitrary unicode
+    """Get wrapper for given stream that writes any unicode without exception
 
     Characters that can't be coerced to the encoding of the stream, or 'ascii'
-    if valid encoding is not found, will be replaced.
+    if valid encoding is not found, will be replaced. The original stream may
+    be returned in situations where a wrapper is determined unneeded.
 
     The wrapper only allows unicode to be written, not non-ascii bytestrings,
     which is a good thing to ensure sanity and sanitation.
     """
-    # TODO: Don't bother using 'replace' for UTF-* encodings?
     if sys.platform == "cli":
+        # Best to never encode before writing in IronPython
+        return stream
+    try:
+        writer = codecs.getwriter(stream.encoding or "")
+    except (AttributeError, LookupError):
+        # GZ 2010-06-16: Python 3 StringIO ends up here, but probably needs
+        #                different handling as it doesn't want bytestrings
+        return codecs.getwriter("ascii")(stream, "replace")
+    if writer.__module__.rsplit(".", 1)[1].startswith("utf"):
+        # The current stream has a unicode encoding so no error handler is needed
         return stream
     if sys.version_info > (3, 0):
-         # GZ 2010-06-11: This is wrong, by py3k doesn't seem to have a right
-         return stream.__class__(stream.buffer, stream.encoding, "replace",
-             stream.newlines, stream.line_buffering)
-    encoding = getattr(stream, "encoding", None)
-    if encoding is not None:
+        # Python 3 doesn't seem to make this easy, handle a common case
         try:
-            return codecs.getwriter(encoding)(stream, "replace")
-        except LookupError:
+            return stream.__class__(stream.buffer, stream.encoding, "replace",
+                stream.newlines, stream.line_buffering)
+        except AttributeError:
             pass
-    return codecs.getwriter("ascii")(stream, "replace")
+    return writer(stream, "replace")    
 
 
 # The default source encoding is actually "iso-8859-1" until Python 2.5 but
