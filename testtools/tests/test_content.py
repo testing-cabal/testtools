@@ -1,9 +1,9 @@
 # Copyright (c) 2008 Jonathan M. Lange. See LICENSE for details.
 
 import unittest
+from testtools.compat import _u
 from testtools.content import Content, TracebackContent
 from testtools.content_type import ContentType
-from testtools.utils import _u
 from testtools.tests.helpers import an_exc_info
 
 

@@ -12,8 +12,8 @@ import os
 import unittest
 import sys
 
-from testtools.utils import classtypes, istext, unicode_output_stream
 from testtools import TextTestResult
+from testtools.compat import classtypes, istext, unicode_output_stream
 
 
 defaultTestLoader = unittest.defaultTestLoader

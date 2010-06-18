@@ -4,6 +4,7 @@
 
 import unittest
 from testtools.tests import (
+    test_compat,
     test_content,
     test_content_type,
     test_matchers,
@@ -11,13 +12,13 @@ from testtools.tests import (
     test_testtools,
     test_testresult,
     test_testsuite,
-    test_utils,
     )
 
 
 def test_suite():
     suites = []
     modules = [
+        test_compat,
         test_content,
         test_content_type,
         test_matchers,
@@ -25,7 +26,6 @@ def test_suite():
         test_testresult,
         test_testsuite,
         test_testtools,
-        test_utils,
         ]
     for module in modules:
         suites.append(getattr(module, 'test_suite')())

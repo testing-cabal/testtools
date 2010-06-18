@@ -27,9 +27,7 @@ from testtools import (
     ThreadsafeForwardingResult,
     testresult,
     )
-from testtools.content import Content, ContentType
-from testtools.matchers import DocTestMatches
-from testtools.utils import (
+from testtools.compat import (
     _b,
     _get_exception_encoding,
     _r,
@@ -37,6 +35,8 @@ from testtools.utils import (
     str_is_unicode,
     unicode_output_stream,
     )
+from testtools.content import Content, ContentType
+from testtools.matchers import DocTestMatches
 from testtools.tests.helpers import (
     LoggingResult,
     Python26TestResult,

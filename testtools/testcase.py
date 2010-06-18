@@ -22,9 +22,9 @@ import types
 import unittest
 
 from testtools import content
+from testtools.compat import advance_iterator
 from testtools.runtest import RunTest
 from testtools.testresult import TestResult
-from testtools.utils import advance_iterator
 
 
 try:

@@ -1,4 +1,4 @@
-# Copyright (c) 2008 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2008-2010 testtools developers. See LICENSE for details.
 
 """Utilities for dealing with stuff in unittest."""
 
@@ -13,7 +13,9 @@ import traceback
 
 __metaclass__ = type
 __all__ = [
-    'iterate_tests',
+    'advance_iterator',
+    'str_is_unicode',
+    'unicode_output_stream',
     ]
 
 
@@ -47,17 +49,6 @@ else:
         return (type, types.ClassType)
     str_is_unicode = sys.platform == "cli"
 
-
-def iterate_tests(test_suite_or_case):
-    """Iterate through all of the test cases in 'test_suite_or_case'."""
-    try:
-        suite = iter(test_suite_or_case)
-    except TypeError:
-        yield test_suite_or_case
-    else:
-        for test in suite:
-            for subtest in iterate_tests(test):
-                yield subtest
 
 def unicode_output_stream(stream):
     """Get wrapper for given stream that writes any unicode without exception

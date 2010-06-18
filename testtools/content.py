@@ -5,8 +5,8 @@
 import codecs
 
 from testtools.testresult import TestResult
+from testtools.compat import _b
 from testtools.content_type import ContentType
-from testtools.utils import _b
 
 
 class Content(object):

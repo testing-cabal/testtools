@@ -14,7 +14,7 @@ import datetime
 import sys
 import unittest
 
-from testtools.utils import _format_exc_info, str_is_unicode
+from testtools.compat import _format_exc_info, str_is_unicode
 
 
 class TestResult(unittest.TestResult):

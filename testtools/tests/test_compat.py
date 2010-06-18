@@ -10,7 +10,7 @@ import traceback
 
 import testtools
 
-from testtools.utils import (
+from testtools.compat import (
     _b,
     _detect_encoding,
     _get_source_encoding,
