@@ -828,6 +828,8 @@ class TestNonAsciiResults(TestCase):
         _u("\u5357\u7121"), # In ISO 2022 encodings
         _u("\xa7\xa7\xa7"), # In ISO 8859 encodings
         )
+    # Everything but Jython shows syntax errors on the current character
+    _error_on_character = os.name != "java"
 
     def _run(self, stream, test):
         """Run the test, the same as in testtools.run but not to stdout"""
@@ -840,13 +842,22 @@ class TestNonAsciiResults(TestCase):
         finally:
             result.stopTestRun()
 
+    def _write_module(self, name, encoding, contents):
+        """Create Python module on disk with contents in given encoding"""
+        f = codecs.open(os.path.join(self.dir, name + ".py"), "w", encoding)
+        try:
+            f.write(contents)
+        finally:
+            f.close()
+
     def _test_external_case(self, testline, coding="ascii", modulelevel="",
             suffix=""):
         """Create and run a test case in a seperate module"""
         self._setup_external_case(testline, coding, modulelevel, suffix)
         return self._run_external_case()
 
-    def _setup_external_case(self, testline, coding, modulelevel, suffix):
+    def _setup_external_case(self, testline, coding="ascii", modulelevel="",
+            suffix=""):
         """Create a test case in a seperate module"""
         _, prefix, self.modname = self.id().rsplit(".", 2)
         self.dir = tempfile.mkdtemp(prefix=prefix, suffix=suffix)
@@ -857,22 +868,17 @@ class TestNonAsciiResults(TestCase):
             codecs.lookup(coding)
         except LookupError:
             self.skip("Encoding unsupported by implementation: %r" % coding)
-        filename = os.path.join(self.dir, self.modname + ".py")
-        f = codecs.open(filename, "w", encoding=coding)
-        try:
-            f.write(
-                # Older Python 2 versions don't see a coding declaration in a
-                # docstring so it has to be in a comment, but then we can't
-                # avoid bug: <http://ironpython.codeplex.com/workitem/26940>
-                "# coding: %s\n"
-                "import testtools\n"
-                "%s\n"
-                "class Test(testtools.TestCase):\n"
-                "    def runTest(self):\n"
-                "        %s\n" % (coding, modulelevel, testline))
-        finally:
-            f.close()
-        
+        self._write_module(self.modname, coding,
+            # Older Python 2 versions don't see a coding declaration in a
+            # docstring so it has to be in a comment, but then we can't
+            # workaround bug: <http://ironpython.codeplex.com/workitem/26940>
+            "# coding: %s\n"
+            "import testtools\n"
+            "%s\n"
+            "class Test(testtools.TestCase):\n"
+            "    def runTest(self):\n"
+            "        %s\n" % (coding, modulelevel, testline))
+
     def _run_external_case(self):
         """Run the prepared test case in a seperate module"""
         sys.path.insert(0, self.dir)
@@ -999,12 +1005,10 @@ class TestNonAsciiResults(TestCase):
     def test_syntax_error(self):
         """Syntax errors should still have fancy special-case formatting"""
         textoutput = self._test_external_case("exec ('f(a, b c)')")
-        # Everything but Jython indicates the final identifier as the problem
-        error_on_identifier = os.name != "java"
         self.assertIn(self._as_output(
             '  File "<string>", line 1\n'
             '    f(a, b c)\n'
-            + ' ' * error_on_identifier +
+            + ' ' * self._error_on_character +
             '          ^\n'
             'SyntaxError: '
             ), textoutput)
@@ -1014,7 +1018,7 @@ class TestNonAsciiResults(TestCase):
         if sys.version_info < (2, 5):
             # Python 2.4 assumes the file is latin-1 and tells you off
             self._silence_deprecation_warnings()
-        self._setup_external_case("import bad", "ascii", "", "")
+        self._setup_external_case("import bad")
         f = open(os.path.join(self.dir, "bad.py"), "wb")
         try:
             f.write(_b("x\x9c\xcb*\xcd\xcb\x06\x00\x04R\x01\xb9"))
@@ -1022,6 +1026,50 @@ class TestNonAsciiResults(TestCase):
             f.close()
         textoutput = self._run_external_case()
         self.assertIn(self._as_output("\nSyntaxError: "), textoutput)
+
+    def test_syntax_error_line_iso_8859_1(self):
+        """Syntax error on a latin-1 line shows the line decoded"""
+        text, raw = self._get_sample_text("iso-8859-1")
+        textoutput = self._setup_external_case("import bad")
+        self._write_module("bad", "iso-8859-1",
+            "# coding: iso-8859-1\n$ = 0 # %s\n" % text)
+        textoutput = self._run_external_case()
+        self.assertIn(self._as_output(_u(
+            #'bad.py", line 2\n'
+            '    $ = 0 # %s\n'
+            + ' ' * self._error_on_character +
+            '   ^\n'
+            'SyntaxError: ') %
+            (text,)), textoutput)
+
+    def test_syntax_error_line_iso_8859_7(self):
+        """Syntax error on a iso-8859-7 line shows the line decoded"""
+        text, raw = self._get_sample_text("iso-8859-7")
+        textoutput = self._setup_external_case("import bad")
+        self._write_module("bad", "iso-8859-7",
+            "# coding: iso-8859-7\n%% = 0 # %s\n" % text)
+        textoutput = self._run_external_case()
+        self.assertIn(self._as_output(_u(
+            #'bad.py", line 2\n'
+            '    %% = 0 # %s\n'
+            + ' ' * self._error_on_character +
+            '   ^\n'
+            'SyntaxError: ') %
+            (text,)), textoutput)
+
+    def test_syntax_error_line_utf_8(self):
+        """Syntax error on a utf-8 line shows the line decoded"""
+        text, raw = self._get_sample_text("utf-8")
+        textoutput = self._setup_external_case("import bad")
+        self._write_module("bad", "utf-8", _u("\ufeff^ = 0 # %s\n") % text)
+        textoutput = self._run_external_case()
+        self.assertIn(self._as_output(_u(
+            'bad.py", line 1\n'
+            '    ^ = 0 # %s\n'
+            + ' ' * self._error_on_character +
+            '   ^\n'
+            'SyntaxError: ') %
+            text), textoutput)
 
 
 class TestNonAsciiResultsWithUnittest(TestNonAsciiResults):

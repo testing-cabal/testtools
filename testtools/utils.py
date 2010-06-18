@@ -205,7 +205,13 @@ def _format_exc_info(eclass, evalue, tb, limit=None):
         if filename:
             filename = filename.decode(fs_enc, "replace")
         if line:
-            line = line.decode(_get_source_encoding(filename), "replace")
+            # Errors during parsing give the line from buffer encoded as
+            # latin-1 if the given coding or utf-8 for all other codings
+            # Can't know which was used, so just try utf-8 first
+            try:
+                line = line.decode("utf-8")
+            except UnicodeDecodeError:
+                line = line.decode("latin-1")
         evalue = eclass(evalue.args[0], (filename, lineno, offset, line))
         list.extend(traceback.format_exception_only(eclass, evalue))
     else:
