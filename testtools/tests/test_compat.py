@@ -228,7 +228,7 @@ class TestUnicodeOutputStream(testtools.TestCase):
         sout = StringIO()
         soutwrapper = unicode_output_stream(sout)
         if newio:
-            self.expectFailure("Python 3 StringIO expects bytes",
+            self.expectFailure("Python 3 StringIO expects text not bytes",
                 self.assertRaises, TypeError, soutwrapper.write, self.uni)
         soutwrapper.write(self.uni)
         self.assertEqual("pa???n", sout.getvalue())

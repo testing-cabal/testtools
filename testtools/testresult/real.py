@@ -11,7 +11,6 @@ __all__ = [
     ]
 
 import datetime
-import sys
 import unittest
 
 from testtools.compat import _format_exc_info, str_is_unicode
