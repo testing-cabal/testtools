@@ -22,9 +22,10 @@ from testtools.compat import (
 class TestDetectEncoding(testtools.TestCase):
     """Test detection of Python source encodings"""
 
-    def _check_encoding(self, expected, lines):
+    def _check_encoding(self, expected, lines, possibly_invalid=False):
         """Check lines are valid Python and encoding is as expected"""
-        compile(_b("".join(lines)), "<str>", "exec")
+        if not possibly_invalid:
+            compile(_b("".join(lines)), "<str>", "exec")
         encoding = _detect_encoding(lines)
         self.assertEqual(expected, encoding,
             "Encoding %r expected but got %r from lines %r" %
@@ -75,12 +76,11 @@ class TestDetectEncoding(testtools.TestCase):
             "# -*- coding: latin-1 -*-\n",
             "import os, sys\n"))
         #   Unsupported encoding:
-        #     Correct behaviour is a SyntaxError, which we aren't testing for
-        #     and fails instead with MemoryError on Python 2.4
-        # self._check_encoding("ascii", (
-        #     "#!/usr/local/bin/python\n",
-        #     "# -*- coding: utf-42 -*-\n",
-        #     "import os, sys\n"))
+        self._check_encoding("ascii", (
+            "#!/usr/local/bin/python\n",
+            "# -*- coding: utf-42 -*-\n",
+            "import os, sys\n"),
+            possibly_invalid=True)
 
     def test_bom(self):
         """Test the UTF-8 BOM counts as an encoding declaration"""
@@ -104,14 +104,16 @@ class TestDetectEncoding(testtools.TestCase):
         """Test only the first of multiple coding declarations counts"""
         self._check_encoding("iso-8859-1", (
             "# Is the coding: iso-8859-1\n",
-            "# Or is it coding: iso-8859-2\n"))
+            "# Or is it coding: iso-8859-2\n"),
+            possibly_invalid=True)
         self._check_encoding("iso-8859-1", (
             "#!/usr/bin/python\n",
             "# Is the coding: iso-8859-1\n",
             "# Or is it coding: iso-8859-2\n"))
         self._check_encoding("iso-8859-1", (
             "# Is the coding: iso-8859-1 or coding: iso-8859-2\n",
-            "# Or coding: iso-8859-3 or coding: iso-8859-4\n"))
+            "# Or coding: iso-8859-3 or coding: iso-8859-4\n"),
+            possibly_invalid=True)
         self._check_encoding("iso-8859-2", (
             "# Is the coding iso-8859-1 or coding: iso-8859-2\n",
             "# Spot the missing colon above\n"))
