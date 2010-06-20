@@ -143,7 +143,7 @@ def _get_exception_encoding():
     # GZ 2010-05-23: We need this call to be after initialisation, but there's
     #                no benefit in asking more than once as it's a global
     #                setting that can change after the message is formatted.
-    return locale.getlocale(locale.LC_MESSAGES)[1]
+    return locale.getlocale(locale.LC_MESSAGES)[1] or "ascii"
 
 def _exception_to_text(evalue):
     """Try hard to get a sensible text value out of an exception instance"""
