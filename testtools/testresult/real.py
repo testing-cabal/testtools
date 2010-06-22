@@ -532,9 +532,13 @@ class _StringException(Exception):
 
     if not str_is_unicode:
         def __str__(self):
+            if type(self.args[0]) is str:
+                return self.args[0]
             return self.args[0].encode("utf-8")
 
         def __unicode__(self):
+            if type(self.args[0]) is str:
+                return self.args[0].decode('utf8')
             return self.args[0]
 
     def __eq__(self, other):

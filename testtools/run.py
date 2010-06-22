@@ -54,6 +54,10 @@ class TestToolsTestRunner(object):
 #    it won't be on old python versions.
 #  - print calls have been been made single-source python3 compatibile.
 #  - exception handling likewise.
+#  - The default help has been changed to USAGE_AS_MAIN and USAGE_FROM_MODULE
+#    removed.
+#  - A tweak has been added to detect 'python -m testtools.run' and use a
+#    better progName in that case.
 
 FAILFAST     = "  -f, --failfast   Stop on first failure\n"
 CATCHBREAK   = "  -c, --catch      Catch control-C and display results\n"
@@ -88,28 +92,12 @@ For test discovery all test modules must be importable from the top
 level directory of the project.
 """
 
-USAGE_FROM_MODULE = """\
-Usage: %(progName)s [options] [test] [...]
-
-Options:
-  -h, --help       Show this message
-  -v, --verbose    Verbose output
-  -q, --quiet      Minimal output
-%(failfast)s%(catchbreak)s%(buffer)s
-Examples:
-  %(progName)s                               - run default set of tests
-  %(progName)s MyTestSuite                   - run suite 'MyTestSuite'
-  %(progName)s MyTestCase.testSomething      - run MyTestCase.testSomething
-  %(progName)s MyTestCase                    - run all 'test*' test methods
-                                               in MyTestCase
-"""
-
 
 class TestProgram(object):
     """A command-line program that runs a set of tests; this is primarily
        for making test modules conveniently executable.
     """
-    USAGE = USAGE_FROM_MODULE
+    USAGE = USAGE_AS_MAIN
 
     # defaults for testing
     failfast = catchbreak = buffer = progName = None
@@ -135,7 +123,12 @@ class TestProgram(object):
         self.defaultTest = defaultTest
         self.testRunner = testRunner
         self.testLoader = testLoader
-        self.progName = os.path.basename(argv[0])
+        progName = argv[0]
+        if progName.endswith('testtools%srun.py' % os.path.sep):
+            progName = 'testtools.run'
+        else:
+            progName = os.path.basename(argv[0])
+        self.progName = progName
         self.parseArgs(argv)
         self.runTests()
 
