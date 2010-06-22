@@ -1043,12 +1043,12 @@ class TestNonAsciiResults(TestCase):
             'SyntaxError: ') %
             (text,)), textoutput)
 
-    def test_syntax_error_line_iso_8859_7(self):
-        """Syntax error on a iso-8859-7 line shows the line decoded"""
-        text, raw = self._get_sample_text("iso-8859-7")
+    def test_syntax_error_line_iso_8859_5(self):
+        """Syntax error on a iso-8859-5 line shows the line decoded"""
+        text, raw = self._get_sample_text("iso-8859-5")
         textoutput = self._setup_external_case("import bad")
-        self._write_module("bad", "iso-8859-7",
-            "# coding: iso-8859-7\n%% = 0 # %s\n" % text)
+        self._write_module("bad", "iso-8859-5",
+            "# coding: iso-8859-5\n%% = 0 # %s\n" % text)
         textoutput = self._run_external_case()
         self.assertIn(self._as_output(_u(
             #'bad.py", line 2\n'
