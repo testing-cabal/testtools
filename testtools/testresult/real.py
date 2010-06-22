@@ -527,19 +527,21 @@ class ExtendedToOriginalDecorator(object):
 class _StringException(Exception):
     """An exception made from an arbitrary string."""
 
-    def __hash__(self):
-        return id(self)
-
     if not str_is_unicode:
+        def __init__(self, string):
+            if type(string) is not unicode:
+                raise TypeError("_StringException expects unicode, got %r" %
+                    (string,))
+            Exception.__init__(self, string)
+
         def __str__(self):
-            if type(self.args[0]) is str:
-                return self.args[0]
             return self.args[0].encode("utf-8")
 
         def __unicode__(self):
-            if type(self.args[0]) is str:
-                return self.args[0].decode('utf8')
             return self.args[0]
+
+    def __hash__(self):
+        return id(self)
 
     def __eq__(self, other):
         try:
