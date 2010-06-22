@@ -532,7 +532,7 @@ class _StringException(Exception):
 
     if not str_is_unicode:
         def __str__(self):
-            return self.args[0].encode("ascii", "replace")
+            return self.args[0].encode("utf-8")
 
         def __unicode__(self):
             return self.args[0]

@@ -1095,7 +1095,7 @@ class TestNonAsciiResultsWithUnittest(TestNonAsciiResults):
     def _as_output(self, text):
         if str_is_unicode:
             return text
-        return text.encode("ascii", "replace")
+        return text.encode("utf-8")
 
 
 def test_suite():
