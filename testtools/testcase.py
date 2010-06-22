@@ -269,7 +269,7 @@ class TestCase(unittest.TestCase):
         if not mismatch:
             return
         existing_details = self.getDetails()
-        for (name, content) in mismatch.get_details().iteritems():
+        for (name, content) in mismatch.get_details().items():
             full_name = name
             suffix = 1
             while full_name in existing_details:
