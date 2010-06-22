@@ -33,6 +33,10 @@ Improvements
   This permits subunit decoded exceptions to contain unicode and still format
   correctly.
 
+* Add machinery for Python 2 to create unicode tracebacks like those used by
+  Python 3. This means testtools no longer throws on encountering non-ascii
+  filenames, source lines, or exception strings when displaying test results.
+
 0.9.3
 ~~~~~
 
