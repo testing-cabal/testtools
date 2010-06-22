@@ -830,10 +830,6 @@ class TestNonAsciiResults(TestCase):
         )
     # Everything but Jython shows syntax errors on the current character
     _error_on_character = os.name != "java"
-    # CPython 2 releases from 2.5.2 have a syntax error line encoding change
-    # See: <http://bugs.python.org/issue1031213>
-    _has_patch_1031213 = (getattr(sys, "api_version", 0) # ie, is CPython
-        and (2, 5, 2) <= sys.version_info < (3, 0))
 
     def _run(self, stream, test):
         """Run the test, the same as in testtools.run but not to stdout"""
@@ -1040,11 +1036,6 @@ class TestNonAsciiResults(TestCase):
         self._write_module("bad", "iso-8859-1",
             "# coding: iso-8859-1\n! = 0 # %s\n" % text)
         textoutput = self._run_external_case()
-        if self._has_patch_1031213:
-            self.expectFailure("CPython with patch #1031213 mangles the line",
-                self.assertNotIn, self._as_output(
-                "    ! = 0 # %s\n" % raw.decode("utf-8", "replace")),
-                textoutput)
         self.assertIn(self._as_output(_u(
             #'bad.py", line 2\n'
             '    ! = 0 # %s\n'
@@ -1074,11 +1065,6 @@ class TestNonAsciiResults(TestCase):
         self._write_module("bad", "euc_jp",
             "# coding: euc_jp\n$ = 0 # %s\n" % text)
         textoutput = self._run_external_case()
-        if self._has_patch_1031213:
-            self.expectFailure("CPython with patch #1031213 recodes the line",
-                self.assertNotIn, self._as_output(
-                "    $ = 0 # %s\n" % raw.decode("latin-1")),
-                textoutput)
         self.assertIn(self._as_output(_u(
             #'bad.py", line 2\n'
             '    $ = 0 # %s\n'

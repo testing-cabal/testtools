@@ -193,16 +193,21 @@ def _format_exc_info(eclass, evalue, tb, limit=None):
         # instead create a new instance with unicode filename and line
         # Potentially gives duff spacing, but that's a pre-existing issue
         filename, lineno, offset, line = evalue.args[1]
-        if filename:
-            filename = filename.decode(fs_enc, "replace")
         if line:
             # Errors during parsing give the line from buffer encoded as
-            # latin-1 if the given coding or utf-8 for all other codings
-            # Can't know which was used, so just try utf-8 first
-            try:
-                line = line.decode("utf-8")
-            except UnicodeDecodeError:
-                line = line.decode("latin-1")
+            # latin-1 or utf-8 or the encoding of the file depending on the
+            # coding and whether the patch for issue #1031213 is applied, so
+            # give up on trying to decode it and just read the file again
+            bytes = linecache.getline(filename, lineno)
+            if bytes:
+                if lineno == 1 and bytes.startswith("\xef\xbb\xbf"):
+                    bytes = bytes[3:]
+                line = bytes.decode(_get_source_encoding(filename), "replace")
+                del linecache.cache[filename]
+            else:
+                line = line.decode("ascii", "replace")
+        if filename:
+            filename = filename.decode(fs_enc, "replace")
         evalue = eclass(evalue.args[0], (filename, lineno, offset, line))
         list.extend(traceback.format_exception_only(eclass, evalue))
     else:
