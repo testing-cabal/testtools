@@ -7,7 +7,7 @@ __metaclass__ = type
 import codecs
 import datetime
 try:
-    from cStringIO import StringIO
+    from StringIO import StringIO
 except ImportError:
     from io import StringIO
 import doctest
@@ -833,8 +833,6 @@ class TestNonAsciiResults(TestCase):
 
     def _run(self, stream, test):
         """Run the test, the same as in testtools.run but not to stdout"""
-        if not str_is_unicode:
-            stream = codecs.getwriter("UTF-8")(stream)
         result = TextTestResult(stream)
         result.startTestRun()
         try:
@@ -909,9 +907,7 @@ class TestNonAsciiResults(TestCase):
         self.skip("Could not find a sample text for encoding: %r" % encoding)
 
     def _as_output(self, text):
-        if str_is_unicode:
-            return text
-        return text.encode("UTF-8")
+        return text
 
     def test_non_ascii_failure_string(self):
         """Assertion contents can be non-ascii and should get decoded"""
