@@ -938,9 +938,12 @@ class TestNonAsciiResults(TestCase):
         textoutput = self._test_external_case(
             coding="shift_jis",
             testline="self.fail('%s')" % example_text)
-        self.assertIn(self._as_output("AssertionError: %s" %
-            example_text.encode("shift_jis")
-                .decode(_get_exception_encoding(), "replace")),
+        if str_is_unicode:
+            output_text = example_text
+        else:
+            output_text = example_text.encode("shift_jis").decode(
+                _get_exception_encoding(), "replace")
+        self.assertIn(self._as_output("AssertionError: %s" % output_text),
             textoutput)
 
     def test_file_comment_iso2022_jp(self):
