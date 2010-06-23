@@ -13,7 +13,7 @@ import unittest
 import sys
 
 from testtools import TextTestResult
-from testtools.utils import classtypes, istext
+from testtools.compat import classtypes, istext, unicode_output_stream
 
 
 defaultTestLoader = unittest.defaultTestLoader
@@ -36,7 +36,7 @@ class TestToolsTestRunner(object):
 
     def run(self, test):
         "Run the given test case or test suite."
-        result = TextTestResult(sys.stdout)
+        result = TextTestResult(unicode_output_stream(sys.stdout))
         result.startTestRun()
         try:
             return test.run(result)

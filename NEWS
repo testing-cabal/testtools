@@ -4,15 +4,26 @@ testtools NEWS
 NEXT
 ~~~~
 
+Changes
+-------
+
+* testtools.utils has been renamed to testtools.compat. Importing
+  testtools.utils will now generate a deprecation warning.
+
 Improvements
 ------------
 
-* Python 3.1 is now supported, thanks to Martin[gz] for a partial patch.
-  This fixes bug #592375.
+* Add machinery for Python 2 to create unicode tracebacks like those used by
+  Python 3. This means testtools no longer throws on encountering non-ascii
+  filenames, source lines, or exception strings when displaying test results.
+  Largely contributed by Martin[gz] with some tweaks from Robert Collins.
 
 * James Westby has supplied test discovery support using the Python 2.7
   TestRunner in testtools.run. This requires the 'discover' module. This
   closes bug #250764.
+
+* Python 3.1 is now supported, thanks to Martin[gz] for a partial patch.
+  This fixes bug #592375.
 
 * TestCase.addCleanup has had its docstring corrected about when cleanups run.
 
