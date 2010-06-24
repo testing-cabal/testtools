@@ -27,7 +27,7 @@ class MonkeyPatcherTest(TestCase):
         self.monkey_patcher = MonkeyPatcher()
 
     def test_empty(self):
-        # A monkey patcher without patches shouldn't change a thing.
+        # A monkey patcher without patches doesn't change a thing.
         self.monkey_patcher.patch()
 
         # We can't assert that all state is unchanged, but at least we can
@@ -37,8 +37,8 @@ class MonkeyPatcherTest(TestCase):
         self.assertEquals(self.original_object.baz, self.test_object.baz)
 
     def test_constructWithPatches(self):
-        # Constructing a 'MonkeyPatcher' with patches should add all of the
-        # given patches to the patch list.
+        # Constructing a 'MonkeyPatcher' with patches adds all of the given
+        # patches to the patch list.
         patcher = MonkeyPatcher((self.test_object, 'foo', 'haha'),
                                 (self.test_object, 'bar', 'hehe'))
         patcher.patch()
@@ -79,9 +79,8 @@ class MonkeyPatcherTest(TestCase):
         self.assertEquals(self.test_object.foo, self.original_object.foo)
 
     def test_runWithPatchesDecoration(self):
-        # runWithPatches should run the given callable, passing in all
-        # arguments and keyword arguments, and return the return value of the
-        # callable.
+        # runWithPatches runs the given callable, passing in all arguments and
+        # keyword arguments, and returns the return value of the callable.
         log = []
 
         def f(a, b, c=None):
@@ -93,8 +92,8 @@ class MonkeyPatcherTest(TestCase):
         self.assertEquals([(1, 2, 10)], log)
 
     def test_repeatedRunWithPatches(self):
-        # We should be able to call the same function with runWithPatches more
-        # than once. All patches should apply for each call.
+        # We can call the same function with runWithPatches more than
+        # once. All patches apply for each call.
         def f():
             return (self.test_object.foo, self.test_object.bar,
                     self.test_object.baz)
@@ -110,16 +109,16 @@ class MonkeyPatcherTest(TestCase):
             result)
 
     def test_runWithPatchesRestores(self):
-        # runWithPatches should restore the original values after the
-        # function has executed.
+        # runWithPatches restores the original values after the function has
+        # executed.
         self.monkey_patcher.addPatch(self.test_object, 'foo', 'haha')
         self.assertEquals(self.original_object.foo, self.test_object.foo)
         self.monkey_patcher.runWithPatches(lambda: None)
         self.assertEquals(self.original_object.foo, self.test_object.foo)
 
     def test_runWithPatchesRestoresOnException(self):
-        # Test runWithPatches restores the original values even when the
-        # function raises an exception.
+        # runWithPatches restores the original values even when the function
+        # raises an exception.
         def _():
             self.assertEquals(self.test_object.foo, 'haha')
             self.assertEquals(self.test_object.bar, 'blahblah')
