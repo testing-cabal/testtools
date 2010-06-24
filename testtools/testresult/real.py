@@ -566,4 +566,4 @@ def _details_to_str(details):
         if not chars[-1].endswith('\n'):
             chars.append('\n')
         chars.append('------------\n')
-    return ''.join(chars)
+    return u''.join(chars)
