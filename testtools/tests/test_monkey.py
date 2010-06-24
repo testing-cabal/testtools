@@ -36,7 +36,7 @@ class MonkeyPatcherTest(TestCase):
         self.assertEquals(self.original_object.bar, self.test_object.bar)
         self.assertEquals(self.original_object.baz, self.test_object.baz)
 
-    def test_constructWithPatches(self):
+    def test_construct_with_patches(self):
         # Constructing a 'MonkeyPatcher' with patches adds all of the given
         # patches to the patch list.
         patcher = MonkeyPatcher((self.test_object, 'foo', 'haha'),
@@ -46,88 +46,89 @@ class MonkeyPatcherTest(TestCase):
         self.assertEquals('hehe', self.test_object.bar)
         self.assertEquals(self.original_object.baz, self.test_object.baz)
 
-    def test_patchExisting(self):
+    def test_patch_existing(self):
         # Patching an attribute that exists sets it to the value defined in the
         # patch.
-        self.monkey_patcher.addPatch(self.test_object, 'foo', 'haha')
+        self.monkey_patcher.add_patch(self.test_object, 'foo', 'haha')
         self.monkey_patcher.patch()
         self.assertEquals(self.test_object.foo, 'haha')
 
     def test_patchNonExisting(self):
         # Patching a non-existing attribute fails with an AttributeError.
-        self.monkey_patcher.addPatch(self.test_object, 'nowhere',
+        self.monkey_patcher.add_patch(self.test_object, 'nowhere',
                                     'blow up please')
         self.assertRaises(AttributeError, self.monkey_patcher.patch)
 
-    def test_patchAlreadyPatched(self):
+    def test_patch_already_patched(self):
         # Adding a patch for an object and attribute that already have a patch
         # overrides the existing patch.
-        self.monkey_patcher.addPatch(self.test_object, 'foo', 'blah')
-        self.monkey_patcher.addPatch(self.test_object, 'foo', 'BLAH')
+        self.monkey_patcher.add_patch(self.test_object, 'foo', 'blah')
+        self.monkey_patcher.add_patch(self.test_object, 'foo', 'BLAH')
         self.monkey_patcher.patch()
         self.assertEquals(self.test_object.foo, 'BLAH')
         self.monkey_patcher.restore()
         self.assertEquals(self.test_object.foo, self.original_object.foo)
 
-    def test_restoreTwiceIsANoOp(self):
+    def test_restore_twice_is_a_no_op(self):
         # Restoring an already-restored monkey patch is a no-op.
-        self.monkey_patcher.addPatch(self.test_object, 'foo', 'blah')
+        self.monkey_patcher.add_patch(self.test_object, 'foo', 'blah')
         self.monkey_patcher.patch()
         self.monkey_patcher.restore()
         self.assertEquals(self.test_object.foo, self.original_object.foo)
         self.monkey_patcher.restore()
         self.assertEquals(self.test_object.foo, self.original_object.foo)
 
-    def test_runWithPatchesDecoration(self):
-        # runWithPatches runs the given callable, passing in all arguments and
-        # keyword arguments, and returns the return value of the callable.
+    def test_run_with_patches_decoration(self):
+        # run_with_patches runs the given callable, passing in all arguments
+        # and keyword arguments, and returns the return value of the callable.
         log = []
 
         def f(a, b, c=None):
             log.append((a, b, c))
             return 'foo'
 
-        result = self.monkey_patcher.runWithPatches(f, 1, 2, c=10)
+        result = self.monkey_patcher.run_with_patches(f, 1, 2, c=10)
         self.assertEquals('foo', result)
         self.assertEquals([(1, 2, 10)], log)
 
-    def test_repeatedRunWithPatches(self):
-        # We can call the same function with runWithPatches more than
+    def test_repeated_run_with_patches(self):
+        # We can call the same function with run_with_patches more than
         # once. All patches apply for each call.
         def f():
             return (self.test_object.foo, self.test_object.bar,
                     self.test_object.baz)
 
-        self.monkey_patcher.addPatch(self.test_object, 'foo', 'haha')
-        result = self.monkey_patcher.runWithPatches(f)
+        self.monkey_patcher.add_patch(self.test_object, 'foo', 'haha')
+        result = self.monkey_patcher.run_with_patches(f)
         self.assertEquals(
             ('haha', self.original_object.bar, self.original_object.baz),
             result)
-        result = self.monkey_patcher.runWithPatches(f)
+        result = self.monkey_patcher.run_with_patches(f)
         self.assertEquals(
             ('haha', self.original_object.bar, self.original_object.baz),
             result)
 
-    def test_runWithPatchesRestores(self):
-        # runWithPatches restores the original values after the function has
+    def test_run_with_patches_restores(self):
+        # run_with_patches restores the original values after the function has
         # executed.
-        self.monkey_patcher.addPatch(self.test_object, 'foo', 'haha')
+        self.monkey_patcher.add_patch(self.test_object, 'foo', 'haha')
         self.assertEquals(self.original_object.foo, self.test_object.foo)
-        self.monkey_patcher.runWithPatches(lambda: None)
+        self.monkey_patcher.run_with_patches(lambda: None)
         self.assertEquals(self.original_object.foo, self.test_object.foo)
 
-    def test_runWithPatchesRestoresOnException(self):
-        # runWithPatches restores the original values even when the function
+    def test_run_with_patches_restores_on_exception(self):
+        # run_with_patches restores the original values even when the function
         # raises an exception.
         def _():
             self.assertEquals(self.test_object.foo, 'haha')
             self.assertEquals(self.test_object.bar, 'blahblah')
             raise RuntimeError, "Something went wrong!"
 
-        self.monkey_patcher.addPatch(self.test_object, 'foo', 'haha')
-        self.monkey_patcher.addPatch(self.test_object, 'bar', 'blahblah')
+        self.monkey_patcher.add_patch(self.test_object, 'foo', 'haha')
+        self.monkey_patcher.add_patch(self.test_object, 'bar', 'blahblah')
 
-        self.assertRaises(RuntimeError, self.monkey_patcher.runWithPatches, _)
+        self.assertRaises(
+            RuntimeError, self.monkey_patcher.run_with_patches, _)
         self.assertEquals(self.test_object.foo, self.original_object.foo)
         self.assertEquals(self.test_object.bar, self.original_object.bar)
 
