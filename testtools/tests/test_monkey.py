@@ -54,7 +54,7 @@ class MonkeyPatcherTest(TestCase):
         self.assertEquals(self.test_object.foo, 'haha')
 
     def test_patchNonExisting(self):
-        # Patching a non-existing attribute fails with an C{AttributeError}.
+        # Patching a non-existing attribute fails with an AttributeError.
         self.monkey_patcher.addPatch(self.test_object, 'nowhere',
                                     'blow up please')
         self.assertRaises(AttributeError, self.monkey_patcher.patch)
@@ -110,7 +110,7 @@ class MonkeyPatcherTest(TestCase):
             result)
 
     def test_runWithPatchesRestores(self):
-        # C{runWithPatches} should restore the original values after the
+        # runWithPatches should restore the original values after the
         # function has executed.
         self.monkey_patcher.addPatch(self.test_object, 'foo', 'haha')
         self.assertEquals(self.original_object.foo, self.test_object.foo)
