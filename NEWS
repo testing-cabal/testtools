@@ -4,6 +4,15 @@ testtools NEWS
 NEXT
 ~~~~
 
+0.9.4
+~~~~~
+
+This release overhauls the traceback formatting layer to deal with Python 2
+line numbers and traceback objects often being local user encoded strings
+rather than unicode objects. Test discovery has also been added and Python 3.1
+is also supported. Finally, the Mismatch protocol has been extended to let
+Matchers collaborate with tests in supplying detailed data about failures.
+
 Changes
 -------
 
