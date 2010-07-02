@@ -13,7 +13,7 @@ __all__ = [
 import datetime
 import unittest
 
-from testtools.compat import _format_exc_info, str_is_unicode
+from testtools.compat import _format_exc_info, str_is_unicode, _u
 
 
 class TestResult(unittest.TestResult):
