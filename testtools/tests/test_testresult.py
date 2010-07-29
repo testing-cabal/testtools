@@ -914,6 +914,13 @@ class TestNonAsciiResults(TestCase):
         textoutput = self._test_external_case("self.fail(%s)" % _r(raw))
         self.assertIn(self._as_output(text), textoutput)
 
+    def test_non_ascii_failure_string_via_exec(self):
+        """Assertion via exec can be non-ascii and still gets decoded"""
+        text, raw = self._get_sample_text(_get_exception_encoding())
+        textoutput = self._test_external_case(
+            testline='exec ("self.fail(%s)")' % _r(raw))
+        self.assertIn(self._as_output(text), textoutput)
+
     def test_control_characters_in_failure_string(self):
         """Control characters in assertions should be escaped"""
         textoutput = self._test_external_case("self.fail('\\a\\a\\a')")
