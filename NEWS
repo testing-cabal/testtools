@@ -4,6 +4,12 @@ testtools NEWS
 NEXT
 ~~~~
 
+0.9.5
+~~~~~
+
+This release fixes some obscure traceback formatting issues that probably
+weren't affecting you but were certainly breaking our own test suite.
+
 Changes
 -------
 
