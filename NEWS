@@ -4,6 +4,12 @@ testtools NEWS
 NEXT
 ~~~~
 
+Changes
+-------
+
+* Jamu Kakar has updated classes in testtools.matchers and testtools.runtest
+  to be new-style classes, fixing bug #611273.
+
 Improvements
 ------------
 
