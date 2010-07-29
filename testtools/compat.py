@@ -209,7 +209,7 @@ def _format_exc_info(eclass, evalue, tb, limit=None):
         list = []
     if evalue is None:
         # Is a (deprecated) string exception
-        list.append(sclass.decode("ascii", "replace"))
+        list.append(eclass.decode("ascii", "replace"))
     elif isinstance(evalue, SyntaxError) and len(evalue.args) > 1:
         # Avoid duplicating the special formatting for SyntaxError here,
         # instead create a new instance with unicode filename and line

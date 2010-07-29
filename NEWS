@@ -19,6 +19,10 @@ Improvements
 * Martin[gz] fixed an unicode issue that was causing the tests to fail,
   closing bug #604187.
 
+* testtools now handles string exceptions (although why would you want to use
+  them?) and formats their tracebacks correctly. Thanks to Martin[gz] for
+  fixing bug #592262.
+
 0.9.4
 ~~~~~
 
