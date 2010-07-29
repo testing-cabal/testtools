@@ -990,7 +990,6 @@ class TestNonAsciiResults(TestCase):
 
     def test_string_exception(self):
         """Raise a string rather than an exception instance if supported"""
-        self.skip('# GZ 2010-05-25: Seems this breaks testtools internals.')
         if sys.version_info > (2, 6):
             self.skip("No string exceptions in Python 2.6 or later")
         elif sys.version_info > (2, 5):
