@@ -12,7 +12,7 @@ import sys
 from testtools.testresult import ExtendedToOriginalDecorator
 
 
-class RunTest:
+class RunTest(object):
     """An object to run a test.
 
     RunTest objects are used to implement the internal logic involved in

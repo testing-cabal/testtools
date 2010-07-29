@@ -47,16 +47,16 @@ class TestAssertions(TestCase):
 
     def test_formatTypes_single(self):
         # Given a single class, _formatTypes returns the name.
-        class Foo:
+        class Foo(object):
             pass
         self.assertEqual('Foo', self._formatTypes(Foo))
 
     def test_formatTypes_multiple(self):
         # Given multiple types, _formatTypes returns the names joined by
         # commas.
-        class Foo:
+        class Foo(object):
             pass
-        class Bar:
+        class Bar(object):
             pass
         self.assertEqual('Foo, Bar', self._formatTypes([Foo, Bar]))
 
@@ -164,7 +164,7 @@ class TestAssertions(TestCase):
     def test_assertIsInstance(self):
         # assertIsInstance asserts that an object is an instance of a class.
 
-        class Foo:
+        class Foo(object):
             """Simple class for testing assertIsInstance."""
 
         foo = Foo()
@@ -174,10 +174,10 @@ class TestAssertions(TestCase):
         # assertIsInstance asserts that an object is an instance of one of a
         # group of classes.
 
-        class Foo:
+        class Foo(object):
             """Simple class for testing assertIsInstance."""
 
-        class Bar:
+        class Bar(object):
             """Another simple class for testing assertIsInstance."""
 
         foo = Foo()
@@ -188,7 +188,7 @@ class TestAssertions(TestCase):
         # assertIsInstance(obj, klass) fails the test when obj is not an
         # instance of klass.
 
-        class Foo:
+        class Foo(object):
             """Simple class for testing assertIsInstance."""
 
         self.assertFails(
@@ -199,10 +199,10 @@ class TestAssertions(TestCase):
         # assertIsInstance(obj, (klass1, klass2)) fails the test when obj is
         # not an instance of klass1 or klass2.
 
-        class Foo:
+        class Foo(object):
             """Simple class for testing assertIsInstance."""
 
-        class Bar:
+        class Bar(object):
             """Another simple class for testing assertIsInstance."""
 
         self.assertFails(
@@ -251,14 +251,14 @@ class TestAssertions(TestCase):
             'None is None: foo bar', self.assertIsNot, None, None, "foo bar")
 
     def test_assertThat_matches_clean(self):
-        class Matcher:
+        class Matcher(object):
             def match(self, foo):
                 return None
         self.assertThat("foo", Matcher())
 
     def test_assertThat_mismatch_raises_description(self):
         calls = []
-        class Mismatch:
+        class Mismatch(object):
             def __init__(self, thing):
                 self.thing = thing
             def describe(self):
@@ -266,7 +266,7 @@ class TestAssertions(TestCase):
                 return "object is not a thing"
             def get_details(self):
                 return {}
-        class Matcher:
+        class Matcher(object):
             def match(self, thing):
                 calls.append(('match', thing))
                 return Mismatch(thing)
@@ -617,12 +617,12 @@ class TestDetailsProvided(TestWithDetails):
 
     def test_addDetails_from_Mismatch(self):
         content = self.get_content()
-        class Mismatch:
+        class Mismatch(object):
             def describe(self):
                 return "Mismatch"
             def get_details(self):
                 return {"foo": content}
-        class Matcher:
+        class Matcher(object):
             def match(self, thing):
                 return Mismatch()
             def __str__(self):
@@ -635,12 +635,12 @@ class TestDetailsProvided(TestWithDetails):
 
     def test_multiple_addDetails_from_Mismatch(self):
         content = self.get_content()
-        class Mismatch:
+        class Mismatch(object):
             def describe(self):
                 return "Mismatch"
             def get_details(self):
                 return {"foo": content, "bar": content}
-        class Matcher:
+        class Matcher(object):
             def match(self, thing):
                 return Mismatch()
             def __str__(self):
@@ -653,12 +653,12 @@ class TestDetailsProvided(TestWithDetails):
 
     def test_addDetails_with_same_name_as_key_from_get_details(self):
         content = self.get_content()
-        class Mismatch:
+        class Mismatch(object):
             def describe(self):
                 return "Mismatch"
             def get_details(self):
                 return {"foo": content}
-        class Matcher:
+        class Matcher(object):
             def match(self, thing):
                 return Mismatch()
             def __str__(self):

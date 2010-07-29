@@ -19,7 +19,7 @@ from testtools.matchers import (
     )
 
 
-class TestMatchersInterface:
+class TestMatchersInterface(object):
 
     def test_matches_match(self):
         matcher = self.matches_matcher
