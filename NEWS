@@ -4,6 +4,15 @@ testtools NEWS
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* Martin[gz] fixed traceback handling to handle cases where extract_tb returns
+  a source line of None. Fixes bug #611307.
+
+* Martin[gz] fixed an unicode issue that was causing the tests to fail,
+  closing bug #604187.
+
 0.9.4
 ~~~~~
 

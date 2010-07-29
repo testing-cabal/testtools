@@ -202,7 +202,8 @@ def _format_exc_info(eclass, evalue, tb, limit=None):
                 filename.decode(fs_enc, "replace"),
                 lineno,
                 name.decode("ascii", "replace"),
-                line.decode(_get_source_encoding(filename), "replace")))
+                line and line.decode(
+                    _get_source_encoding(filename), "replace")))
         list.extend(traceback.format_list(extracted_list))
     else:
         list = []
