@@ -47,16 +47,16 @@ class TestAssertions(TestCase):
 
     def test_formatTypes_single(self):
         # Given a single class, _formatTypes returns the name.
-        class Foo:
+        class Foo(object):
             pass
         self.assertEqual('Foo', self._formatTypes(Foo))
 
     def test_formatTypes_multiple(self):
         # Given multiple types, _formatTypes returns the names joined by
         # commas.
-        class Foo:
+        class Foo(object):
             pass
-        class Bar:
+        class Bar(object):
             pass
         self.assertEqual('Foo, Bar', self._formatTypes([Foo, Bar]))
 
@@ -164,7 +164,7 @@ class TestAssertions(TestCase):
     def test_assertIsInstance(self):
         # assertIsInstance asserts that an object is an instance of a class.
 
-        class Foo:
+        class Foo(object):
             """Simple class for testing assertIsInstance."""
 
         foo = Foo()
@@ -174,10 +174,10 @@ class TestAssertions(TestCase):
         # assertIsInstance asserts that an object is an instance of one of a
         # group of classes.
 
-        class Foo:
+        class Foo(object):
             """Simple class for testing assertIsInstance."""
 
-        class Bar:
+        class Bar(object):
             """Another simple class for testing assertIsInstance."""
 
         foo = Foo()
@@ -188,7 +188,7 @@ class TestAssertions(TestCase):
         # assertIsInstance(obj, klass) fails the test when obj is not an
         # instance of klass.
 
-        class Foo:
+        class Foo(object):
             """Simple class for testing assertIsInstance."""
 
         self.assertFails(
@@ -199,10 +199,10 @@ class TestAssertions(TestCase):
         # assertIsInstance(obj, (klass1, klass2)) fails the test when obj is
         # not an instance of klass1 or klass2.
 
-        class Foo:
+        class Foo(object):
             """Simple class for testing assertIsInstance."""
 
-        class Bar:
+        class Bar(object):
             """Another simple class for testing assertIsInstance."""
 
         self.assertFails(
@@ -251,20 +251,22 @@ class TestAssertions(TestCase):
             'None is None: foo bar', self.assertIsNot, None, None, "foo bar")
 
     def test_assertThat_matches_clean(self):
-        class Matcher:
+        class Matcher(object):
             def match(self, foo):
                 return None
         self.assertThat("foo", Matcher())
 
     def test_assertThat_mismatch_raises_description(self):
         calls = []
-        class Mismatch:
+        class Mismatch(object):
             def __init__(self, thing):
                 self.thing = thing
             def describe(self):
                 calls.append(('describe_diff', self.thing))
                 return "object is not a thing"
-        class Matcher:
+            def get_details(self):
+                return {}
+        class Matcher(object):
             def match(self, thing):
                 calls.append(('match', thing))
                 return Mismatch(thing)
@@ -300,6 +302,9 @@ class TestAddCleanup(TestCase):
 
         def runTest(self):
             self._calls.append('runTest')
+
+        def brokenTest(self):
+            raise RuntimeError('Deliberate broken test')
 
         def tearDown(self):
             self._calls.append('tearDown')
@@ -400,13 +405,29 @@ class TestAddCleanup(TestCase):
         self.assertRaises(
             KeyboardInterrupt, self.test.run, self.logging_result)
 
-    def test_multipleErrorsReported(self):
-        # Errors from all failing cleanups are reported.
+    def test_multipleCleanupErrorsReported(self):
+        # Errors from all failing cleanups are reported as separate backtraces.
         self.test.addCleanup(lambda: 1/0)
         self.test.addCleanup(lambda: 1/0)
+        self.logging_result = ExtendedTestResult()
         self.test.run(self.logging_result)
-        self.assertErrorLogEqual(
-            ['startTest', 'addError', 'addError', 'stopTest'])
+        self.assertEqual(['startTest', 'addError', 'stopTest'],
+            [event[0] for event in self.logging_result._events])
+        self.assertEqual(set(['traceback', 'traceback-1']),
+            set(self.logging_result._events[1][2].keys()))
+
+    def test_multipleErrorsCoreAndCleanupReported(self):
+        # Errors from all failing cleanups are reported, with stopTest,
+        # startTest inserted.
+        self.test = TestAddCleanup.LoggingTest('brokenTest')
+        self.test.addCleanup(lambda: 1/0)
+        self.test.addCleanup(lambda: 1/0)
+        self.logging_result = ExtendedTestResult()
+        self.test.run(self.logging_result)
+        self.assertEqual(['startTest', 'addError', 'stopTest'],
+            [event[0] for event in self.logging_result._events])
+        self.assertEqual(set(['traceback', 'traceback-1', 'traceback-2']),
+            set(self.logging_result._events[1][2].keys()))
 
 
 class TestWithDetails(TestCase):
@@ -594,6 +615,61 @@ class TestDetailsProvided(TestWithDetails):
         self.assertDetailsProvided(Case("test"), "addUnexpectedSuccess",
             ["foo"])
 
+    def test_addDetails_from_Mismatch(self):
+        content = self.get_content()
+        class Mismatch(object):
+            def describe(self):
+                return "Mismatch"
+            def get_details(self):
+                return {"foo": content}
+        class Matcher(object):
+            def match(self, thing):
+                return Mismatch()
+            def __str__(self):
+                return "a description"
+        class Case(TestCase):
+            def test(self):
+                self.assertThat("foo", Matcher())
+        self.assertDetailsProvided(Case("test"), "addFailure",
+            ["foo", "traceback"])
+
+    def test_multiple_addDetails_from_Mismatch(self):
+        content = self.get_content()
+        class Mismatch(object):
+            def describe(self):
+                return "Mismatch"
+            def get_details(self):
+                return {"foo": content, "bar": content}
+        class Matcher(object):
+            def match(self, thing):
+                return Mismatch()
+            def __str__(self):
+                return "a description"
+        class Case(TestCase):
+            def test(self):
+                self.assertThat("foo", Matcher())
+        self.assertDetailsProvided(Case("test"), "addFailure",
+            ["bar", "foo", "traceback"])
+
+    def test_addDetails_with_same_name_as_key_from_get_details(self):
+        content = self.get_content()
+        class Mismatch(object):
+            def describe(self):
+                return "Mismatch"
+            def get_details(self):
+                return {"foo": content}
+        class Matcher(object):
+            def match(self, thing):
+                return Mismatch()
+            def __str__(self):
+                return "a description"
+        class Case(TestCase):
+            def test(self):
+                self.addDetail("foo", content)
+                self.assertThat("foo", Matcher())
+        self.assertDetailsProvided(Case("test"), "addFailure",
+            ["foo", "foo-1", "traceback"])
+
 
 class TestSetupTearDown(TestCase):
 
@@ -623,6 +699,9 @@ class TestSkipping(TestCase):
 
     def test_skip_causes_skipException(self):
         self.assertRaises(self.skipException, self.skip, "Skip this test")
+
+    def test_can_use_skipTest(self):
+        self.assertRaises(self.skipException, self.skipTest, "Skip this test")
 
     def test_skip_without_reason_works(self):
         class Test(TestCase):

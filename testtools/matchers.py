@@ -24,7 +24,7 @@ __all__ = [
 import doctest
 
 
-class Matcher:
+class Matcher(object):
     """A pattern matcher.
 
     A Matcher must implement match and __str__ to be used by
@@ -52,7 +52,7 @@ class Matcher:
         raise NotImplementedError(self.__str__)
 
 
-class Mismatch:
+class Mismatch(object):
     """An object describing a mismatch detected by a Matcher."""
 
     def describe(self):
@@ -62,8 +62,26 @@ class Mismatch:
         """
         raise NotImplementedError(self.describe_difference)
 
+    def get_details(self):
+        """Get extra details about the mismatch.
 
-class DocTestMatches:
+        This allows the mismatch to provide extra information beyond the basic
+        description, including large text or binary files, or debugging internals
+        without having to force it to fit in the output of 'describe'.
+
+        The testtools assertion assertThat will query get_details and attach
+        all its values to the test, permitting them to be reported in whatever
+        manner the test environment chooses.
+
+        :return: a dict mapping names to Content objects. name is a string to
+            name the detail, and the Content object is the detail to add
+            to the result. For more information see the API to which items from
+            this dict are passed testtools.TestCase.addDetail.
+        """
+        return {}
+
+
+class DocTestMatches(object):
     """See if a string matches a doctest example."""
 
     def __init__(self, example, flags=0):
@@ -102,7 +120,7 @@ class DocTestMatches:
         return self._checker.output_difference(self, with_nl, self.flags)
 
 
-class DocTestMismatch:
+class DocTestMismatch(object):
     """Mismatch object for DocTestMatches."""
 
     def __init__(self, matcher, with_nl):
@@ -113,7 +131,7 @@ class DocTestMismatch:
         return self.matcher._describe_difference(self.with_nl)
 
 
-class Equals:
+class Equals(object):
     """Matches if the items are equal."""
 
     def __init__(self, expected):
@@ -128,7 +146,7 @@ class Equals:
         return "Equals(%r)" % self.expected
 
 
-class EqualsMismatch:
+class EqualsMismatch(object):
     """Two things differed."""
 
     def __init__(self, expected, other):
@@ -139,7 +157,7 @@ class EqualsMismatch:
         return "%r != %r" % (self.expected, self.other)
 
 
-class NotEquals:
+class NotEquals(object):
     """Matches if the items are not equal.
 
     In most cases, this is equivalent to `Not(Equals(foo))`. The difference
@@ -158,7 +176,7 @@ class NotEquals:
         return NotEqualsMismatch(self.expected, other)
 
 
-class NotEqualsMismatch:
+class NotEqualsMismatch(object):
     """Two things are the same."""
 
     def __init__(self, expected, other):
@@ -169,7 +187,7 @@ class NotEqualsMismatch:
         return '%r == %r' % (self.expected, self.other)
 
 
-class MatchesAny:
+class MatchesAny(object):
     """Matches if any of the matchers it is created with match."""
 
     def __init__(self, *matchers):
@@ -189,7 +207,7 @@ class MatchesAny:
             str(matcher) for matcher in self.matchers])
 
 
-class MatchesAll:
+class MatchesAll(object):
     """Matches if all of the matchers it is created with match."""
 
     def __init__(self, *matchers):
@@ -210,7 +228,7 @@ class MatchesAll:
             return None
 
 
-class MismatchesAll:
+class MismatchesAll(object):
     """A mismatch with many child mismatches."""
 
     def __init__(self, mismatches):
@@ -224,7 +242,7 @@ class MismatchesAll:
         return '\n'.join(descriptions)
 
 
-class Not:
+class Not(object):
     """Inverts a matcher."""
 
     def __init__(self, matcher):
@@ -241,7 +259,7 @@ class Not:
             return None
 
 
-class MatchedUnexpectedly:
+class MatchedUnexpectedly(object):
     """A thing matched when it wasn't supposed to."""
 
     def __init__(self, matcher, other):
@@ -252,7 +270,7 @@ class MatchedUnexpectedly:
         return "%r matches %s" % (self.other, self.matcher)
 
 
-class Annotate:
+class Annotate(object):
     """Annotates a matcher with a descriptive string.
 
     Mismatches are then described as '<mismatch>: <annotation>'.
@@ -271,7 +289,7 @@ class Annotate:
             return AnnotatedMismatch(self.annotation, mismatch)
 
 
-class AnnotatedMismatch:
+class AnnotatedMismatch(object):
     """A mismatch annotated with a descriptive string."""
 
     def __init__(self, annotation, mismatch):
