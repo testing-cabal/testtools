@@ -4,6 +4,12 @@ testtools NEWS
 NEXT
 ~~~~
 
+Improvements
+------------
+
+ * jml added a built-in UTF8_TEXT ContentType to make it slightly easier to
+   add details to test results.
+
 0.9.5
 ~~~~~
 
