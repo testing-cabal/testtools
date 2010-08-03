@@ -13,6 +13,9 @@ Improvements
  * Fix a bug in our built-in matchers where assertThat would blow up if any
    of them failed. All built-in mismatch objects now provide get_details().
 
+ * New 'Is' matcher, which lets you assert that a thing is identical to
+   another thing.
+
 0.9.5
 ~~~~~
 
