@@ -10,6 +10,9 @@ Improvements
  * jml added a built-in UTF8_TEXT ContentType to make it slightly easier to
    add details to test results.
 
+ * TestCase now has a 'patch()' method to make it easier to monkey-patching
+   objects in tests. See the manual for more information. Fixes bug #310770.
+
 0.9.5
 ~~~~~
 
