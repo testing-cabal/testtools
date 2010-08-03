@@ -15,6 +15,7 @@ __all__ = [
     'Annotate',
     'DocTestMatches',
     'Equals',
+    'Is',
     'MatchesAll',
     'MatchesAny',
     'NotEquals',
@@ -178,6 +179,13 @@ class NotEquals(_BinaryComparison):
 
     comparator = operator.ne
     mismatch_string = '=='
+
+
+class Is(_BinaryComparison):
+    """Matches if the items are identical."""
+
+    comparator = operator.is_
+    mismatch_string = 'is not'
 
 
 class MatchesAny(object):
