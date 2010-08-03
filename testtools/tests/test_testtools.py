@@ -829,6 +829,56 @@ class TestOnException(TestCase):
         self.assertThat(events, Equals([]))
 
 
+class TestPatchSupport(TestCase):
+
+    class Case(TestCase):
+        def test(self):
+            pass
+
+    def test_patch(self):
+        # TestCase.patch masks obj.attribute with the new value.
+        self.foo = 'original'
+        test = self.Case('test')
+        test.patch(self, 'foo', 'patched')
+        self.assertEqual('patched', self.foo)
+
+    def test_patch_restored_after_run(self):
+        # TestCase.patch masks obj.attribute with the new value, but restores
+        # the original value after the test is finished.
+        self.foo = 'original'
+        test = self.Case('test')
+        test.patch(self, 'foo', 'patched')
+        test.run()
+        self.assertEqual('original', self.foo)
+
+    def test_patch_returns_original(self):
+        # TestCase.patch returns the current value of the attribute being
+        # patched, just in case you want to do something with it.
+        self.foo = 'original'
+        test = self.Case('test')
+        result = test.patch(self, 'foo', 'patched')
+        self.assertEqual('original', result)
+
+    def test_successive_patches_apply(self):
+        # TestCase.patch can be called multiple times per test. Each time you
+        # call it, it overrides the original value.
+        self.foo = 'original'
+        test = self.Case('test')
+        test.patch(self, 'foo', 'patched')
+        test.patch(self, 'foo', 'second')
+        self.assertEqual('second', self.foo)
+
+    def test_successive_patches_restored_after_run(self):
+        # TestCase.patch restores the original value, no matter how many times
+        # it was called.
+        self.foo = 'original'
+        test = self.Case('test')
+        test.patch(self, 'foo', 'patched')
+        test.patch(self, 'foo', 'second')
+        test.run()
+        self.assertEqual('original', self.foo)
+
+
 def test_suite():
     from unittest import TestLoader
     return TestLoader().loadTestsFromName(__name__)
