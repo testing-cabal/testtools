@@ -18,6 +18,9 @@ from testtools.matchers import (
     NotEquals,
     )
 
+# Silence pyflakes.
+Matcher
+
 
 class TestMatchersInterface(object):
 
