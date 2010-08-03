@@ -22,6 +22,7 @@ __all__ = [
     ]
 
 import doctest
+import operator
 
 
 class Matcher(object):
@@ -131,19 +132,22 @@ class DocTestMismatch(object):
         return self.matcher._describe_difference(self.with_nl)
 
 
-class Equals(object):
-    """Matches if the items are equal."""
+class _BinaryComparison(object):
+    """Matcher that compares an object to another object."""
 
     def __init__(self, expected):
         self.expected = expected
 
-    def match(self, other):
-        if self.expected == other:
-            return None
-        return EqualsMismatch(self.expected, other)
-
     def __str__(self):
-        return "Equals(%r)" % self.expected
+        return "%s(%r)" % (self.__class__.__name__, self.expected)
+
+    def match(self, other):
+        if self.comparator(self.expected, other):
+            return None
+        return self.mismatch_factory(self.expected, other)
+
+    def comparator(self, expected, other):
+        raise NotImplementedError(self.comparator)
 
 
 class EqualsMismatch(object):
@@ -157,23 +161,11 @@ class EqualsMismatch(object):
         return "%r != %r" % (self.expected, self.other)
 
 
-class NotEquals(object):
-    """Matches if the items are not equal.
+class Equals(_BinaryComparison):
+    """Matches if the items are equal."""
 
-    In most cases, this is equivalent to `Not(Equals(foo))`. The difference
-    only matters when testing `__ne__` implementations.
-    """
-
-    def __init__(self, expected):
-        self.expected = expected
-
-    def __str__(self):
-        return 'NotEquals(%r)' % (self.expected,)
-
-    def match(self, other):
-        if self.expected != other:
-            return None
-        return NotEqualsMismatch(self.expected, other)
+    comparator = operator.eq
+    mismatch_factory = EqualsMismatch
 
 
 class NotEqualsMismatch(object):
@@ -185,6 +177,17 @@ class NotEqualsMismatch(object):
 
     def describe(self):
         return '%r == %r' % (self.expected, self.other)
+
+
+class NotEquals(_BinaryComparison):
+    """Matches if the items are not equal.
+
+    In most cases, this is equivalent to `Not(Equals(foo))`. The difference
+    only matters when testing `__ne__` implementations.
+    """
+
+    comparator = operator.ne
+    mismatch_factory = NotEqualsMismatch
 
 
 class MatchesAny(object):
