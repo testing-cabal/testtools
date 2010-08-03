@@ -144,39 +144,29 @@ class _BinaryComparison(object):
     def match(self, other):
         if self.comparator(self.expected, other):
             return None
-        return self.mismatch_factory(self.expected, other)
+        return _BinaryMismatch(self.expected, self.mismatch_string, other)
 
     def comparator(self, expected, other):
         raise NotImplementedError(self.comparator)
 
 
-class EqualsMismatch(object):
-    """Two things differed."""
+class _BinaryMismatch(object):
+    """Two things did not match."""
 
-    def __init__(self, expected, other):
+    def __init__(self, expected, mismatch_string, other):
         self.expected = expected
+        self._mismatch_string = mismatch_string
         self.other = other
 
     def describe(self):
-        return "%r != %r" % (self.expected, self.other)
+        return "%r %s %r" % (self.expected, self._mismatch_string, self.other)
 
 
 class Equals(_BinaryComparison):
     """Matches if the items are equal."""
 
     comparator = operator.eq
-    mismatch_factory = EqualsMismatch
-
-
-class NotEqualsMismatch(object):
-    """Two things are the same."""
-
-    def __init__(self, expected, other):
-        self.expected = expected
-        self.other = other
-
-    def describe(self):
-        return '%r == %r' % (self.expected, self.other)
+    mismatch_string = '!='
 
 
 class NotEquals(_BinaryComparison):
@@ -187,7 +177,7 @@ class NotEquals(_BinaryComparison):
     """
 
     comparator = operator.ne
-    mismatch_factory = NotEqualsMismatch
+    mismatch_string = '=='
 
 
 class MatchesAny(object):
