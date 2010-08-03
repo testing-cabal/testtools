@@ -12,7 +12,7 @@ import sys
 from testtools.testresult import ExtendedToOriginalDecorator
 
 
-class RunTest:
+class RunTest(object):
     """An object to run a test.
 
     RunTest objects are used to implement the internal logic involved in
@@ -144,9 +144,7 @@ class RunTest:
             return fn(*args)
         except KeyboardInterrupt:
             raise
-        except Exception:
-            # Note that bare exceptions are not caught, so raised strings will
-            # escape: but they are deprecated anyway.
+        except:
             exc_info = sys.exc_info()
             e = exc_info[1]
             self.case.onException(exc_info)

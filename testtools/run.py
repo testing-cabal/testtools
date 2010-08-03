@@ -56,7 +56,7 @@ class TestToolsTestRunner(object):
 #  - exception handling likewise.
 #  - The default help has been changed to USAGE_AS_MAIN and USAGE_FROM_MODULE
 #    removed.
-#  - A tweak has been added to detect 'python -m testtools.run' and use a
+#  - A tweak has been added to detect 'python -m *.run' and use a
 #    better progName in that case.
 
 FAILFAST     = "  -f, --failfast   Stop on first failure\n"
@@ -124,8 +124,9 @@ class TestProgram(object):
         self.testRunner = testRunner
         self.testLoader = testLoader
         progName = argv[0]
-        if progName.endswith('testtools%srun.py' % os.path.sep):
-            progName = 'testtools.run'
+        if progName.endswith('%srun.py' % os.path.sep):
+            elements = progName.split(os.path.sep)
+            progName = '%s.run' % elements[-2]
         else:
             progName = os.path.basename(argv[0])
         self.progName = progName

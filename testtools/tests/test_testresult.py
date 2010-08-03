@@ -33,7 +33,6 @@ from testtools.compat import (
     _r,
     _u,
     str_is_unicode,
-    unicode_output_stream,
     )
 from testtools.content import Content, ContentType
 from testtools.matchers import DocTestMatches
@@ -590,7 +589,7 @@ class TestExtendedToOriginalResultDecorator(
         self.make_26_result()
         self.converter.startTest(self)
         self.assertEqual([('startTest', self)], self.result._events)
-    
+
     def test_startTest_py27(self):
         self.make_27_result()
         self.converter.startTest(self)
@@ -605,7 +604,7 @@ class TestExtendedToOriginalResultDecorator(
         self.make_26_result()
         self.converter.startTestRun()
         self.assertEqual([], self.result._events)
-    
+
     def test_startTestRun_py27(self):
         self.make_27_result()
         self.converter.startTestRun()
@@ -620,7 +619,7 @@ class TestExtendedToOriginalResultDecorator(
         self.make_26_result()
         self.converter.stopTest(self)
         self.assertEqual([('stopTest', self)], self.result._events)
-    
+
     def test_stopTest_py27(self):
         self.make_27_result()
         self.converter.stopTest(self)
@@ -635,7 +634,7 @@ class TestExtendedToOriginalResultDecorator(
         self.make_26_result()
         self.converter.stopTestRun()
         self.assertEqual([], self.result._events)
-    
+
     def test_stopTestRun_py27(self):
         self.make_27_result()
         self.converter.stopTestRun()
@@ -680,7 +679,7 @@ class TestExtendedToOriginalAddError(TestExtendedToOriginalResultDecoratorBase):
     def test_outcome_Original_py26(self):
         self.make_26_result()
         self.check_outcome_exc_info(self.outcome)
-    
+
     def test_outcome_Original_py27(self):
         self.make_27_result()
         self.check_outcome_exc_info(self.outcome)
@@ -692,7 +691,7 @@ class TestExtendedToOriginalAddError(TestExtendedToOriginalResultDecoratorBase):
     def test_outcome_Extended_py26(self):
         self.make_26_result()
         self.check_outcome_details_to_exec_info(self.outcome)
-    
+
     def test_outcome_Extended_py27(self):
         self.make_27_result()
         self.check_outcome_details_to_exec_info(self.outcome)
@@ -721,11 +720,11 @@ class TestExtendedToOriginalAddExpectedFailure(
     def test_outcome_Original_py26(self):
         self.make_26_result()
         self.check_outcome_exc_info_to_nothing(self.outcome, 'addSuccess')
-    
+
     def test_outcome_Extended_py26(self):
         self.make_26_result()
         self.check_outcome_details_to_nothing(self.outcome, 'addSuccess')
-    
+
 
 
 class TestExtendedToOriginalAddSkip(
@@ -736,7 +735,7 @@ class TestExtendedToOriginalAddSkip(
     def test_outcome_Original_py26(self):
         self.make_26_result()
         self.check_outcome_string_nothing(self.outcome, 'addSuccess')
-    
+
     def test_outcome_Original_py27(self):
         self.make_27_result()
         self.check_outcome_string(self.outcome)
@@ -748,7 +747,7 @@ class TestExtendedToOriginalAddSkip(
     def test_outcome_Extended_py26(self):
         self.make_26_result()
         self.check_outcome_string_nothing(self.outcome, 'addSuccess')
-    
+
     def test_outcome_Extended_py27(self):
         self.make_27_result()
         self.check_outcome_details_to_string(self.outcome)
@@ -772,7 +771,7 @@ class TestExtendedToOriginalAddSuccess(
     def test_outcome_Original_py26(self):
         self.make_26_result()
         self.check_outcome_nothing(self.outcome, self.expected)
-    
+
     def test_outcome_Original_py27(self):
         self.make_27_result()
         self.check_outcome_nothing(self.outcome)
@@ -784,7 +783,7 @@ class TestExtendedToOriginalAddSuccess(
     def test_outcome_Extended_py26(self):
         self.make_26_result()
         self.check_outcome_details_to_nothing(self.outcome, self.expected)
-    
+
     def test_outcome_Extended_py27(self):
         self.make_27_result()
         self.check_outcome_details_to_nothing(self.outcome)
@@ -812,7 +811,7 @@ class TestExtendedToOriginalResultOtherAttributes(
         self.make_converter()
         self.assertEqual(1, self.converter.bar)
         self.assertEqual(2, self.converter.foo())
-    
+
 
 class TestNonAsciiResults(TestCase):
     """Test all kinds of tracebacks are cleanly interpreted as unicode
@@ -915,6 +914,13 @@ class TestNonAsciiResults(TestCase):
         textoutput = self._test_external_case("self.fail(%s)" % _r(raw))
         self.assertIn(self._as_output(text), textoutput)
 
+    def test_non_ascii_failure_string_via_exec(self):
+        """Assertion via exec can be non-ascii and still gets decoded"""
+        text, raw = self._get_sample_text(_get_exception_encoding())
+        textoutput = self._test_external_case(
+            testline='exec ("self.fail(%s)")' % _r(raw))
+        self.assertIn(self._as_output(text), textoutput)
+
     def test_control_characters_in_failure_string(self):
         """Control characters in assertions should be escaped"""
         textoutput = self._test_external_case("self.fail('\\a\\a\\a')")
@@ -984,7 +990,6 @@ class TestNonAsciiResults(TestCase):
 
     def test_string_exception(self):
         """Raise a string rather than an exception instance if supported"""
-        self.skip('# GZ 2010-05-25: Seems this breaks testtools internals.')
         if sys.version_info > (2, 6):
             self.skip("No string exceptions in Python 2.6 or later")
         elif sys.version_info > (2, 5):
@@ -1090,10 +1095,9 @@ class TestNonAsciiResults(TestCase):
 class TestNonAsciiResultsWithUnittest(TestNonAsciiResults):
     """Test that running under unittest produces clean ascii strings"""
 
-    from unittest import TextTestRunner as _Runner
-
     def _run(self, stream, test):
-        return self._Runner(stream).run(test)
+        from unittest import TextTestRunner as _Runner
+        return _Runner(stream).run(test)
 
     def _as_output(self, text):
         if str_is_unicode:

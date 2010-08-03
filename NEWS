@@ -4,6 +4,46 @@ testtools NEWS
 NEXT
 ~~~~
 
+Improvements
+------------
+
+ * jml added a built-in UTF8_TEXT ContentType to make it slightly easier to
+   add details to test results.
+
+0.9.5
+~~~~~
+
+This release fixes some obscure traceback formatting issues that probably
+weren't affecting you but were certainly breaking our own test suite.
+
+Changes
+-------
+
+* Jamu Kakar has updated classes in testtools.matchers and testtools.runtest
+  to be new-style classes, fixing bug #611273.
+
+Improvements
+------------
+
+* Martin[gz] fixed traceback handling to handle cases where extract_tb returns
+  a source line of None. Fixes bug #611307.
+
+* Martin[gz] fixed an unicode issue that was causing the tests to fail,
+  closing bug #604187.
+
+* testtools now handles string exceptions (although why would you want to use
+  them?) and formats their tracebacks correctly. Thanks to Martin[gz] for
+  fixing bug #592262.
+
+0.9.4
+~~~~~
+
+This release overhauls the traceback formatting layer to deal with Python 2
+line numbers and traceback objects often being local user encoded strings
+rather than unicode objects. Test discovery has also been added and Python 3.1
+is also supported. Finally, the Mismatch protocol has been extended to let
+Matchers collaborate with tests in supplying detailed data about failures.
+
 Changes
 -------
 
