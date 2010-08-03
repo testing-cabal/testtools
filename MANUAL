@@ -52,6 +52,24 @@ given the exc_info for the exception, and can use this opportunity to attach
 more data (via the addDetails API) and potentially other uses.
 
 
+TestCase.patch
+~~~~~~~~~~~~~~
+
+``patch`` is a convenient way to monkey-patch a Python object for the duration
+of your test.  It's especially useful for testing legacy code.  e.g.::
+
+    def test_foo(self):
+        my_stream = StringIO()
+        self.patch(sys, 'stderr', my_stream)
+        run_some_code_that_prints_to_stderr()
+        self.assertEqual('', my_stream.getvalue())
+
+The call to ``patch`` above masks sys.stderr with 'my_stream' so that anything
+printed to stderr will be captured in a StringIO variable that can be actually
+tested. Once the test is done, the real sys.stderr is restored to its rightful
+place.
+
+
 TestCase.skipTest
 ~~~~~~~~~~~~~~~~~
 
