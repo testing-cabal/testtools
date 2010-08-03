@@ -49,6 +49,15 @@ class TestMatchersInterface(object):
             mismatch = matcher.match(matchee)
             self.assertEqual(difference, mismatch.describe())
 
+    def test_mismatch_details(self):
+        # The mismatch object must provide get_details, which must return a
+        # dictionary mapping names to Content objects.
+        examples = self.describe_examples
+        for difference, matchee, matcher in examples:
+            mismatch = matcher.match(matchee)
+            details = mismatch.get_details()
+            self.assertEqual(dict(details), details)
+
 
 class TestDocTestMatchesInterface(TestCase, TestMatchersInterface):
 

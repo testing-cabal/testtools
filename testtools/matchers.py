@@ -122,7 +122,7 @@ class DocTestMatches(object):
         return self._checker.output_difference(self, with_nl, self.flags)
 
 
-class DocTestMismatch(object):
+class DocTestMismatch(Mismatch):
     """Mismatch object for DocTestMatches."""
 
     def __init__(self, matcher, with_nl):
@@ -151,7 +151,7 @@ class _BinaryComparison(object):
         raise NotImplementedError(self.comparator)
 
 
-class _BinaryMismatch(object):
+class _BinaryMismatch(Mismatch):
     """Two things did not match."""
 
     def __init__(self, expected, mismatch_string, other):
@@ -229,7 +229,7 @@ class MatchesAll(object):
             return None
 
 
-class MismatchesAll(object):
+class MismatchesAll(Mismatch):
     """A mismatch with many child mismatches."""
 
     def __init__(self, mismatches):
@@ -260,7 +260,7 @@ class Not(object):
             return None
 
 
-class MatchedUnexpectedly(object):
+class MatchedUnexpectedly(Mismatch):
     """A thing matched when it wasn't supposed to."""
 
     def __init__(self, matcher, other):
@@ -290,7 +290,7 @@ class Annotate(object):
             return AnnotatedMismatch(self.annotation, mismatch)
 
 
-class AnnotatedMismatch(object):
+class AnnotatedMismatch(Mismatch):
     """A mismatch annotated with a descriptive string."""
 
     def __init__(self, annotation, mismatch):

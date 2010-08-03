@@ -10,6 +10,9 @@ Improvements
  * jml added a built-in UTF8_TEXT ContentType to make it slightly easier to
    add details to test results.
 
+ * Fix a bug in our built-in matchers where assertThat would blow up if any
+   of them failed. All built-in mismatch objects now provide get_details().
+
 0.9.5
 ~~~~~
 
