@@ -1,4 +1,4 @@
-# Copyright (c) 2008, 2009 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2008-2010 Jonathan M. Lange. See LICENSE for details.
 
 """Test case related stuff."""
 
