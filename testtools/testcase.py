@@ -134,7 +134,7 @@ class TestCase(unittest.TestCase):
         """
         raise self.skipException(reason)
 
-    # skipTest is how python2.7 spells this. Sometime in the future 
+    # skipTest is how python2.7 spells this. Sometime in the future
     # This should be given a deprecation decorator - RBC 20100611.
     skip = skipTest
 
@@ -441,7 +441,7 @@ if types.FunctionType not in copy._copy_dispatch:
 
 def clone_test_with_new_id(test, new_id):
     """Copy a TestCase, and give the copied test a new id.
-    
+
     This is only expected to be used on tests that have been constructed but
     not executed.
     """
