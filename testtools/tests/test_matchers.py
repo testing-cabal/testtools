@@ -12,11 +12,15 @@ from testtools.matchers import (
     Annotate,
     Equals,
     DocTestMatches,
+    Is,
     MatchesAny,
     MatchesAll,
     Not,
     NotEquals,
     )
+
+# Silence pyflakes.
+Matcher
 
 
 class TestMatchersInterface(object):
@@ -44,6 +48,15 @@ class TestMatchersInterface(object):
         for difference, matchee, matcher in examples:
             mismatch = matcher.match(matchee)
             self.assertEqual(difference, mismatch.describe())
+
+    def test_mismatch_details(self):
+        # The mismatch object must provide get_details, which must return a
+        # dictionary mapping names to Content objects.
+        examples = self.describe_examples
+        for difference, matchee, matcher in examples:
+            mismatch = matcher.match(matchee)
+            details = mismatch.get_details()
+            self.assertEqual(dict(details), details)
 
 
 class TestDocTestMatchesInterface(TestCase, TestMatchersInterface):
@@ -95,6 +108,20 @@ class TestNotEqualsInterface(TestCase, TestMatchersInterface):
         ("NotEquals(1)", NotEquals(1)), ("NotEquals('1')", NotEquals('1'))]
 
     describe_examples = [("1 == 1", 1, NotEquals(1))]
+
+
+class TestIsInterface(TestCase, TestMatchersInterface):
+
+    foo = object()
+    bar = object()
+
+    matches_matcher = Is(foo)
+    matches_matches = [foo]
+    matches_mismatches = [bar, 1]
+
+    str_examples = [("Is(2)", Is(2))]
+
+    describe_examples = [("1 is not 2", 2, Is(1))]
 
 
 class TestNotInterface(TestCase, TestMatchersInterface):

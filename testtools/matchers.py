@@ -15,6 +15,7 @@ __all__ = [
     'Annotate',
     'DocTestMatches',
     'Equals',
+    'Is',
     'MatchesAll',
     'MatchesAny',
     'NotEquals',
@@ -22,6 +23,7 @@ __all__ = [
     ]
 
 import doctest
+import operator
 
 
 class Matcher(object):
@@ -120,7 +122,7 @@ class DocTestMatches(object):
         return self._checker.output_difference(self, with_nl, self.flags)
 
 
-class DocTestMismatch(object):
+class DocTestMismatch(Mismatch):
     """Mismatch object for DocTestMatches."""
 
     def __init__(self, matcher, with_nl):
@@ -131,60 +133,59 @@ class DocTestMismatch(object):
         return self.matcher._describe_difference(self.with_nl)
 
 
-class Equals(object):
-    """Matches if the items are equal."""
+class _BinaryComparison(object):
+    """Matcher that compares an object to another object."""
 
     def __init__(self, expected):
         self.expected = expected
 
-    def match(self, other):
-        if self.expected == other:
-            return None
-        return EqualsMismatch(self.expected, other)
-
     def __str__(self):
-        return "Equals(%r)" % self.expected
+        return "%s(%r)" % (self.__class__.__name__, self.expected)
+
+    def match(self, other):
+        if self.comparator(self.expected, other):
+            return None
+        return _BinaryMismatch(self.expected, self.mismatch_string, other)
+
+    def comparator(self, expected, other):
+        raise NotImplementedError(self.comparator)
 
 
-class EqualsMismatch(object):
-    """Two things differed."""
+class _BinaryMismatch(Mismatch):
+    """Two things did not match."""
 
-    def __init__(self, expected, other):
+    def __init__(self, expected, mismatch_string, other):
         self.expected = expected
+        self._mismatch_string = mismatch_string
         self.other = other
 
     def describe(self):
-        return "%r != %r" % (self.expected, self.other)
+        return "%r %s %r" % (self.expected, self._mismatch_string, self.other)
 
 
-class NotEquals(object):
+class Equals(_BinaryComparison):
+    """Matches if the items are equal."""
+
+    comparator = operator.eq
+    mismatch_string = '!='
+
+
+class NotEquals(_BinaryComparison):
     """Matches if the items are not equal.
 
     In most cases, this is equivalent to `Not(Equals(foo))`. The difference
     only matters when testing `__ne__` implementations.
     """
 
-    def __init__(self, expected):
-        self.expected = expected
-
-    def __str__(self):
-        return 'NotEquals(%r)' % (self.expected,)
-
-    def match(self, other):
-        if self.expected != other:
-            return None
-        return NotEqualsMismatch(self.expected, other)
+    comparator = operator.ne
+    mismatch_string = '=='
 
 
-class NotEqualsMismatch(object):
-    """Two things are the same."""
+class Is(_BinaryComparison):
+    """Matches if the items are identical."""
 
-    def __init__(self, expected, other):
-        self.expected = expected
-        self.other = other
-
-    def describe(self):
-        return '%r == %r' % (self.expected, self.other)
+    comparator = operator.is_
+    mismatch_string = 'is not'
 
 
 class MatchesAny(object):
@@ -228,7 +229,7 @@ class MatchesAll(object):
             return None
 
 
-class MismatchesAll(object):
+class MismatchesAll(Mismatch):
     """A mismatch with many child mismatches."""
 
     def __init__(self, mismatches):
@@ -259,7 +260,7 @@ class Not(object):
             return None
 
 
-class MatchedUnexpectedly(object):
+class MatchedUnexpectedly(Mismatch):
     """A thing matched when it wasn't supposed to."""
 
     def __init__(self, matcher, other):
@@ -289,7 +290,7 @@ class Annotate(object):
             return AnnotatedMismatch(self.annotation, mismatch)
 
 
-class AnnotatedMismatch(object):
+class AnnotatedMismatch(Mismatch):
     """A mismatch annotated with a descriptive string."""
 
     def __init__(self, annotation, mismatch):
