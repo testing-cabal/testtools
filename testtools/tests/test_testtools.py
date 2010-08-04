@@ -851,14 +851,6 @@ class TestPatchSupport(TestCase):
         test.run()
         self.assertEqual('original', self.foo)
 
-    def test_patch_returns_original(self):
-        # TestCase.patch returns the current value of the attribute being
-        # patched, just in case you want to do something with it.
-        self.foo = 'original'
-        test = self.Case('test')
-        result = test.patch(self, 'foo', 'patched')
-        self.assertEqual('original', result)
-
     def test_successive_patches_apply(self):
         # TestCase.patch can be called multiple times per test. Each time you
         # call it, it overrides the original value.

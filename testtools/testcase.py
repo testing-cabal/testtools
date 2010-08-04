@@ -23,6 +23,7 @@ import unittest
 
 from testtools import content
 from testtools.compat import advance_iterator
+from testtools.monkey import patch
 from testtools.runtest import RunTest
 from testtools.testresult import TestResult
 
@@ -131,18 +132,8 @@ class TestCase(unittest.TestCase):
         :param obj: The object to patch. Can be anything.
         :param attribute: The attribute on 'obj' to patch.
         :param value: The value to set 'obj.attribute' to.
-        :return: The current value of 'obj.attribute'.
         """
-        DELETED = object()
-        current = getattr(obj, attribute, DELETED)
-        setattr(obj, attribute, value)
-        def restore():
-            if current is DELETED:
-                delattr(obj, attribute)
-            else:
-                setattr(obj, attribute, current)
-        self.addCleanup(restore)
-        return current
+        self.addCleanup(patch(obj, attribute, value))
 
     def shortDescription(self):
         return self.id()
