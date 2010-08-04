@@ -10,6 +10,10 @@ class MonkeyPatcher(object):
     testing difficult code.
     """
 
+    # Marker used to indicate that the patched attribute did not exist on the
+    # object before we patched it.
+    _NO_SUCH_ATTRIBUTE = object()
+
     def __init__(self, *patches):
         """Construct a `MonkeyPatcher`.
 
@@ -48,15 +52,24 @@ class MonkeyPatcher(object):
         Reverse this operation using L{restore}.
         """
         for obj, name, value in self._patches_to_apply:
+            original_value = getattr(obj, name, self._NO_SUCH_ATTRIBUTE)
             if not self._already_patched(obj, name):
-                self._originals.append((obj, name, getattr(obj, name)))
+                self._originals.append((obj, name, original_value))
             setattr(obj, name, value)
 
     def restore(self):
-        """Restore all original values to any patched objects."""
+        """Restore all original values to any patched objects.
+
+        If the patched attribute did not exist on an object before it was
+        patched, `restore` will delete the attribute so as to return the
+        object to its original state.
+        """
         while self._originals:
             obj, name, value = self._originals.pop()
-            setattr(obj, name, value)
+            if value is self._NO_SUCH_ATTRIBUTE:
+                delattr(obj, name)
+            else:
+                setattr(obj, name, value)
 
     def run_with_patches(self, f, *args, **kw):
         """Run 'f' with the given args and kwargs with all patches applied.

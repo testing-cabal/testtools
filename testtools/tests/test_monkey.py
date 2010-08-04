@@ -53,11 +53,21 @@ class MonkeyPatcherTest(TestCase):
         self.monkey_patcher.patch()
         self.assertEquals(self.test_object.foo, 'haha')
 
-    def test_patchNonExisting(self):
-        # Patching a non-existing attribute fails with an AttributeError.
-        self.monkey_patcher.add_patch(self.test_object, 'nowhere',
-                                    'blow up please')
-        self.assertRaises(AttributeError, self.monkey_patcher.patch)
+    def test_patch_non_existing(self):
+        # Patching a non-existing attribute sets it to the value defined in
+        # the patch.
+        self.monkey_patcher.add_patch(self.test_object, 'doesntexist', 'value')
+        self.monkey_patcher.patch()
+        self.assertEquals(self.test_object.doesntexist, 'value')
+
+    def test_restore_non_existing(self):
+        # Restoring a value that didn't exist before the patch deletes the
+        # value.
+        self.monkey_patcher.add_patch(self.test_object, 'doesntexist', 'value')
+        self.monkey_patcher.patch()
+        self.monkey_patcher.restore()
+        marker = object()
+        self.assertIs(marker, getattr(self.test_object, 'doesntexist', marker))
 
     def test_patch_already_patched(self):
         # Adding a patch for an object and attribute that already have a patch
