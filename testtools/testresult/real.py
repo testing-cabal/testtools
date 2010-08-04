@@ -189,37 +189,38 @@ class MultiTestResult(TestResult):
             for result in self._results)
 
     def startTest(self, test):
-        self._dispatch('startTest', test)
+        return self._dispatch('startTest', test)
 
     def stopTest(self, test):
-        self._dispatch('stopTest', test)
+        return self._dispatch('stopTest', test)
 
     def addError(self, test, error=None, details=None):
-        self._dispatch('addError', test, error, details=details)
+        return self._dispatch('addError', test, error, details=details)
 
     def addExpectedFailure(self, test, err=None, details=None):
-        self._dispatch('addExpectedFailure', test, err, details=details)
+        return self._dispatch(
+            'addExpectedFailure', test, err, details=details)
 
     def addFailure(self, test, err=None, details=None):
-        self._dispatch('addFailure', test, err, details=details)
+        return self._dispatch('addFailure', test, err, details=details)
 
     def addSkip(self, test, reason=None, details=None):
-        self._dispatch('addSkip', test, reason, details=details)
+        return self._dispatch('addSkip', test, reason, details=details)
 
     def addSuccess(self, test, details=None):
-        self._dispatch('addSuccess', test, details=details)
+        return self._dispatch('addSuccess', test, details=details)
 
     def addUnexpectedSuccess(self, test, details=None):
-        self._dispatch('addUnexpectedSuccess', test, details=details)
+        return self._dispatch('addUnexpectedSuccess', test, details=details)
 
     def startTestRun(self):
-        self._dispatch('startTestRun')
+        return self._dispatch('startTestRun')
 
     def stopTestRun(self):
         return self._dispatch('stopTestRun')
 
     def done(self):
-        self._dispatch('done')
+        return self._dispatch('done')
 
 
 class TextTestResult(TestResult):
