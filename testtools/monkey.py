@@ -39,13 +39,6 @@ class MonkeyPatcher(object):
         """
         self._patches_to_apply.append((obj, name, value))
 
-    def _already_patched(self, obj, name):
-        """Has 'obj.name' already been patched by this patcher?"""
-        for o, n, v in self._originals:
-            if (o, n) == (obj, name):
-                return True
-        return False
-
     def patch(self):
         """Apply all of the patches that have been specified with `add_patch`.
 
@@ -53,8 +46,7 @@ class MonkeyPatcher(object):
         """
         for obj, name, value in self._patches_to_apply:
             original_value = getattr(obj, name, self._NO_SUCH_ATTRIBUTE)
-            if not self._already_patched(obj, name):
-                self._originals.append((obj, name, original_value))
+            self._originals.append((obj, name, original_value))
             setattr(obj, name, value)
 
     def restore(self):
