@@ -2,6 +2,11 @@
 
 """Helpers for monkey-patching Python code."""
 
+__all__ = [
+    'MonkeyPatcher',
+    'patch',
+    ]
+
 
 class MonkeyPatcher(object):
     """A set of monkey-patches that can be applied and removed all together.
@@ -73,3 +78,20 @@ class MonkeyPatcher(object):
             return f(*args, **kw)
         finally:
             self.restore()
+
+
+def patch(obj, attribute, value):
+    """Set 'obj.attribute' to 'value' and return a callable to restore 'obj'.
+
+    If 'attribute' is not set on 'obj' already, then the returned callable
+    will delete the attribute when called.
+
+    :param obj: An object to monkey-patch.
+    :param attribute: The name of the attribute to patch.
+    :param value: The value to set 'obj.attribute' to.
+    :return: A nullary callable that, when run, will restore 'obj' to its
+        original state.
+    """
+    patcher = MonkeyPatcher((obj, attribute, value))
+    patcher.patch()
+    return patcher.restore

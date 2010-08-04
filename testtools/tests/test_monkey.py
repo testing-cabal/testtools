@@ -4,7 +4,7 @@
 """Tests for testtools.monkey."""
 
 from testtools import TestCase
-from testtools.monkey import MonkeyPatcher
+from testtools.monkey import MonkeyPatcher, patch
 
 
 class TestObj:
@@ -141,6 +141,24 @@ class MonkeyPatcherTest(TestCase):
             RuntimeError, self.monkey_patcher.run_with_patches, _)
         self.assertEquals(self.test_object.foo, self.original_object.foo)
         self.assertEquals(self.test_object.bar, self.original_object.bar)
+
+
+class TestPatchHelper(TestCase):
+
+    def test_patch_patches(self):
+        # patch(obj, name, value) sets obj.name to value.
+        test_object = TestObj()
+        patch(test_object, 'foo', 42)
+        self.assertEqual(42, test_object.foo)
+
+    def test_patch_returns_cleanup(self):
+        # patch(obj, name, value) returns a nullary callable that restores obj
+        # to its original state when run.
+        test_object = TestObj()
+        original = test_object.foo
+        cleanup = patch(test_object, 'foo', 42)
+        cleanup()
+        self.assertEqual(original, test_object.foo)
 
 
 def test_suite():
