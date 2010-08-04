@@ -1,4 +1,4 @@
-# Copyright (c) 2008, 2009 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2008-2010 Jonathan M. Lange. See LICENSE for details.
 
 """Test case related stuff."""
 
@@ -23,6 +23,7 @@ import unittest
 
 from testtools import content
 from testtools.compat import advance_iterator
+from testtools.monkey import patch
 from testtools.runtest import RunTest
 from testtools.testresult import TestResult
 
@@ -121,6 +122,19 @@ class TestCase(unittest.TestCase):
         """
         return self.__details
 
+    def patch(self, obj, attribute, value):
+        """Monkey-patch 'obj.attribute' to 'value' while the test is running.
+
+        If 'obj' has no attribute, then the monkey-patch will still go ahead,
+        and the attribute will be deleted instead of restored to its original
+        value.
+
+        :param obj: The object to patch. Can be anything.
+        :param attribute: The attribute on 'obj' to patch.
+        :param value: The value to set 'obj.attribute' to.
+        """
+        self.addCleanup(patch(obj, attribute, value))
+
     def shortDescription(self):
         return self.id()
 
@@ -137,7 +151,7 @@ class TestCase(unittest.TestCase):
         """
         raise self.skipException(reason)
 
-    # skipTest is how python2.7 spells this. Sometime in the future 
+    # skipTest is how python2.7 spells this. Sometime in the future
     # This should be given a deprecation decorator - RBC 20100611.
     skip = skipTest
 
@@ -444,7 +458,7 @@ if types.FunctionType not in copy._copy_dispatch:
 
 def clone_test_with_new_id(test, new_id):
     """Copy a TestCase, and give the copied test a new id.
-    
+
     This is only expected to be used on tests that have been constructed but
     not executed.
     """

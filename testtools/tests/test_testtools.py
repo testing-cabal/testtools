@@ -829,6 +829,64 @@ class TestOnException(TestCase):
         self.assertThat(events, Equals([]))
 
 
+class TestPatchSupport(TestCase):
+
+    class Case(TestCase):
+        def test(self):
+            pass
+
+    def test_patch(self):
+        # TestCase.patch masks obj.attribute with the new value.
+        self.foo = 'original'
+        test = self.Case('test')
+        test.patch(self, 'foo', 'patched')
+        self.assertEqual('patched', self.foo)
+
+    def test_patch_restored_after_run(self):
+        # TestCase.patch masks obj.attribute with the new value, but restores
+        # the original value after the test is finished.
+        self.foo = 'original'
+        test = self.Case('test')
+        test.patch(self, 'foo', 'patched')
+        test.run()
+        self.assertEqual('original', self.foo)
+
+    def test_successive_patches_apply(self):
+        # TestCase.patch can be called multiple times per test. Each time you
+        # call it, it overrides the original value.
+        self.foo = 'original'
+        test = self.Case('test')
+        test.patch(self, 'foo', 'patched')
+        test.patch(self, 'foo', 'second')
+        self.assertEqual('second', self.foo)
+
+    def test_successive_patches_restored_after_run(self):
+        # TestCase.patch restores the original value, no matter how many times
+        # it was called.
+        self.foo = 'original'
+        test = self.Case('test')
+        test.patch(self, 'foo', 'patched')
+        test.patch(self, 'foo', 'second')
+        test.run()
+        self.assertEqual('original', self.foo)
+
+    def test_patch_nonexistent_attribute(self):
+        # TestCase.patch can be used to patch a non-existent attribute.
+        test = self.Case('test')
+        test.patch(self, 'doesntexist', 'patched')
+        self.assertEqual('patched', self.doesntexist)
+
+    def test_restore_nonexistent_attribute(self):
+        # TestCase.patch can be used to patch a non-existent attribute, after
+        # the test run, the attribute is then removed from the object.
+        test = self.Case('test')
+        test.patch(self, 'doesntexist', 'patched')
+        test.run()
+        marker = object()
+        value = getattr(self, 'doesntexist', marker)
+        self.assertIs(marker, value)
+
+
 def test_suite():
     from unittest import TestLoader
     return TestLoader().loadTestsFromName(__name__)

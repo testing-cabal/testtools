@@ -16,6 +16,9 @@ Improvements
  * New 'Is' matcher, which lets you assert that a thing is identical to
    another thing.
 
+ * TestCase now has a 'patch()' method to make it easier to monkey-patching
+   objects in tests. See the manual for more information. Fixes bug #310770.
+
 0.9.5
 ~~~~~
 
