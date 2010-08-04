@@ -124,14 +124,24 @@ class TestCase(unittest.TestCase):
     def patch(self, obj, attribute, value):
         """Monkey-patch 'obj.attribute' to 'value' while the test is running.
 
+        If 'obj' has no attribute, then the monkey-patch will still go ahead,
+        and the attribute will be deleted instead of restored to its original
+        value.
+
         :param obj: The object to patch. Can be anything.
         :param attribute: The attribute on 'obj' to patch.
         :param value: The value to set 'obj.attribute' to.
         :return: The current value of 'obj.attribute'.
         """
-        current = getattr(obj, attribute)
+        DELETED = object()
+        current = getattr(obj, attribute, DELETED)
         setattr(obj, attribute, value)
-        self.addCleanup(setattr, obj, attribute, current)
+        def restore():
+            if current is DELETED:
+                delattr(obj, attribute)
+            else:
+                setattr(obj, attribute, current)
+        self.addCleanup(restore)
         return current
 
     def shortDescription(self):

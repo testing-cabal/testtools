@@ -878,6 +878,22 @@ class TestPatchSupport(TestCase):
         test.run()
         self.assertEqual('original', self.foo)
 
+    def test_patch_nonexistent_attribute(self):
+        # TestCase.patch can be used to patch a non-existent attribute.
+        test = self.Case('test')
+        test.patch(self, 'doesntexist', 'patched')
+        self.assertEqual('patched', self.doesntexist)
+
+    def test_restore_nonexistent_attribute(self):
+        # TestCase.patch can be used to patch a non-existent attribute, after
+        # the test run, the attribute is then removed from the object.
+        test = self.Case('test')
+        test.patch(self, 'doesntexist', 'patched')
+        test.run()
+        marker = object()
+        value = getattr(self, 'doesntexist', marker)
+        self.assertIs(marker, value)
+
 
 def test_suite():
     from unittest import TestLoader
