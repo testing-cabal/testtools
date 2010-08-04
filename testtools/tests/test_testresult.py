@@ -264,6 +264,17 @@ class TestMultiTestResult(TestWithFakeExceptions):
         self.multiResult.stopTestRun()
         self.assertResultLogsEqual([('stopTestRun')])
 
+    def test_stopTestRun_returns_results(self):
+        # `MultiTestResult.stopTestRun` returns a tuple of all of the return
+        # values the `stopTestRun`s that it forwards to.
+        class Result(LoggingResult):
+            def stopTestRun(self):
+                super(Result, self).stopTestRun()
+                return 'foo'
+        multi_result = MultiTestResult(Result([]), Result([]))
+        result = multi_result.stopTestRun()
+        self.assertEqual(('foo', 'foo'), result)
+
 
 class TestTextTestResult(TestCase):
     """Tests for `TextTestResult`."""

@@ -184,8 +184,9 @@ class MultiTestResult(TestResult):
         self._results = map(ExtendedToOriginalDecorator, results)
 
     def _dispatch(self, message, *args, **kwargs):
-        for result in self._results:
+        return tuple(
             getattr(result, message)(*args, **kwargs)
+            for result in self._results)
 
     def startTest(self, test):
         self._dispatch('startTest', test)
@@ -215,7 +216,7 @@ class MultiTestResult(TestResult):
         self._dispatch('startTestRun')
 
     def stopTestRun(self):
-        self._dispatch('stopTestRun')
+        return self._dispatch('stopTestRun')
 
     def done(self):
         self._dispatch('done')
