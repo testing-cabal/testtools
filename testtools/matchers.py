@@ -16,6 +16,7 @@ __all__ = [
     'DocTestMatches',
     'Equals',
     'Is',
+    'LessThan',
     'MatchesAll',
     'MatchesAny',
     'NotEquals',
@@ -143,7 +144,7 @@ class _BinaryComparison(object):
         return "%s(%r)" % (self.__class__.__name__, self.expected)
 
     def match(self, other):
-        if self.comparator(self.expected, other):
+        if self.comparator(other, self.expected):
             return None
         return _BinaryMismatch(self.expected, self.mismatch_string, other)
 
@@ -186,6 +187,13 @@ class Is(_BinaryComparison):
 
     comparator = operator.is_
     mismatch_string = 'is not'
+
+
+class LessThan(_BinaryComparison):
+    """Matches if the item is less than the matchers reference object."""
+
+    comparator = operator.__lt__
+    mismatch_string = 'is >='
 
 
 class MatchesAny(object):

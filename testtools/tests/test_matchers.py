@@ -13,6 +13,7 @@ from testtools.matchers import (
     Equals,
     DocTestMatches,
     Is,
+    LessThan,
     MatchesAny,
     MatchesAll,
     Not,
@@ -122,6 +123,19 @@ class TestIsInterface(TestCase, TestMatchersInterface):
     str_examples = [("Is(2)", Is(2))]
 
     describe_examples = [("1 is not 2", 2, Is(1))]
+
+
+class TestLessThanInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = LessThan(4)
+    matches_matches = [-5, 3]
+    matches_mismatches = [4, 5, 5000]
+
+    str_examples = [
+        ("LessThan(12)", LessThan(12)),
+        ]
+
+    describe_examples = [('4 is >= 4', 4, LessThan(4))]
 
 
 class TestNotInterface(TestCase, TestMatchersInterface):
