@@ -22,6 +22,9 @@ Improvements
  * TestCase now has a 'patch()' method to make it easier to monkey-patching
    objects in tests. See the manual for more information. Fixes bug #310770.
 
+ * MultiTestResult methods now pass back return values from the results it
+   forwards to.
+
 0.9.5
 ~~~~~
 
