@@ -12,6 +12,7 @@ __all__ = [
 from testtools import TestResult
 
 
+# GZ 2010-08-12: Don't do this, pointlessly creates an exc_info cycle
 try:
     raise Exception
 except Exception:

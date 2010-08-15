@@ -179,8 +179,11 @@ class TestCase(unittest.TestCase):
                 raise
             except:
                 exc_info = sys.exc_info()
-                self._report_traceback(exc_info)
-                last_exception = exc_info[1]
+                try:
+                    self._report_traceback(exc_info)
+                    last_exception = exc_info[1]
+                finally:
+                    del exc_info
         return last_exception
 
     def addCleanup(self, function, *arguments, **keywordArguments):
@@ -319,9 +322,14 @@ class TestCase(unittest.TestCase):
         try:
             predicate(*args, **kwargs)
         except self.failureException:
+            # GZ 2010-08-12: Don't know how to avoid exc_info cycle as the new
+            #                unittest _ExpectedFailure wants old traceback
             exc_info = sys.exc_info()
-            self._report_traceback(exc_info)
-            raise _ExpectedFailure(exc_info)
+            try:
+                self._report_traceback(exc_info)
+                raise _ExpectedFailure(exc_info)
+            finally:
+                del exc_info
         else:
             raise _UnexpectedSuccess(reason)
 
