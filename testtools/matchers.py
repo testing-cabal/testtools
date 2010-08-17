@@ -58,12 +58,29 @@ class Matcher(object):
 class Mismatch(object):
     """An object describing a mismatch detected by a Matcher."""
 
+    def __init__(self, description=None, details=None):
+        """Construct a `Mismatch`.
+
+        :param description: A description to use.  If not provided,
+            `Mismatch.describe` must be implemented.
+        :param details: Extra details about the mismatch.  Defaults
+            to the empty dict.
+        """
+        if description:
+            self._description = description
+        if details is None:
+            details = {}
+        self._details = details
+
     def describe(self):
         """Describe the mismatch.
 
         This should be either a human-readable string or castable to a string.
         """
-        raise NotImplementedError(self.describe_difference)
+        try:
+            return self._description
+        except AttributeError:
+            raise NotImplementedError(self.describe)
 
     def get_details(self):
         """Get extra details about the mismatch.
@@ -81,7 +98,7 @@ class Mismatch(object):
             to the result. For more information see the API to which items from
             this dict are passed testtools.TestCase.addDetail.
         """
-        return {}
+        return getattr(self, '_details', {})
 
 
 class DocTestMatches(object):

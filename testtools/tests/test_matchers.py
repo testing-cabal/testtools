@@ -16,12 +16,26 @@ from testtools.matchers import (
     LessThan,
     MatchesAny,
     MatchesAll,
+    Mismatch,
     Not,
     NotEquals,
     )
 
 # Silence pyflakes.
 Matcher
+
+
+class TestMismatch(TestCase):
+
+    def test_constructor_arguments(self):
+        mismatch = Mismatch("some description", {'detail': "things"})
+        self.assertEqual("some description", mismatch.describe())
+        self.assertEqual({'detail': "things"}, mismatch.get_details())
+
+    def test_constructor_no_arguments(self):
+        mismatch = Mismatch()
+        self.assertRaises(NotImplementedError, mismatch.describe)
+        self.assertEqual({}, mismatch.get_details())
 
 
 class TestMatchersInterface(object):
