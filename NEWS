@@ -7,6 +7,9 @@ NEXT
 Improvements
 ------------
 
+ * 'Mismatch' now takes optional description and details parameters, so
+   custom Matchers aren't compelled to make their own subclass.
+
  * jml added a built-in UTF8_TEXT ContentType to make it slightly easier to
    add details to test results.
 
@@ -16,7 +19,7 @@ Improvements
  * New 'Is' matcher, which lets you assert that a thing is identical to
    another thing.
 
- * New 'LessThan' matcher which lets you assert that a thing is less than 
+ * New 'LessThan' matcher which lets you assert that a thing is less than
    another thing.
 
  * TestCase now has a 'patch()' method to make it easier to monkey-patching
