@@ -5,6 +5,7 @@
 __all__ = [
     'clone_test_with_new_id',
     'ConcurrentTestSuite',
+    'ErrorHolder',
     'ExtendedToOriginalDecorator',
     'iterate_tests',
     'MultiTestResult',
@@ -26,6 +27,7 @@ from testtools.runtest import (
     RunTest,
     )
 from testtools.testcase import (
+    ErrorHolder,
     Placeholder,
     TestCase,
     clone_test_with_new_id,

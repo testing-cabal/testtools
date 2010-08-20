@@ -505,6 +505,39 @@ class Placeholder(object):
             return self._short_description
 
 
+class ErrorHolder(Placeholder):
+    """A placeholder test that will error out when run."""
+
+    failureException = None
+
+    def __init__(self, test_id, error, short_description=None):
+        """Construct an `ErrorHolder`.
+
+        :param test_id: The id of the test.
+        :param error: The exc info tuple that will be used as the test's error.
+        :param short_description: An optional short description of the test.
+        """
+        super(ErrorHolder, self).__init__(
+            test_id, short_description=short_description)
+        self._error = error
+
+    def __repr__(self):
+        internal = [self._test_id, self._error]
+        if self._short_description is not None:
+            internal.append(self._short_description)
+        return "<%s.%s(%s)>" % (
+            self.__class__.__module__,
+            self.__class__.__name__,
+            ", ".join(map(repr, internal)))
+
+    def run(self, result=None):
+        if result is None:
+            result = TestResult()
+        result.startTest(self)
+        result.addError(self, self._error)
+        result.stopTest(self)
+
+
 # Python 2.4 did not know how to copy functions.
 if types.FunctionType not in copy._copy_dispatch:
     copy._copy_dispatch[types.FunctionType] = copy._copy_immutable
