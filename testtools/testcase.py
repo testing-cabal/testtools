@@ -17,6 +17,7 @@ try:
 except ImportError:
     wraps = None
 import itertools
+from pprint import pformat
 import sys
 import types
 import unittest
@@ -221,6 +222,28 @@ class TestCase(unittest.TestCase):
         self.addDetail('reason', content.Content(
             content.ContentType('text', 'plain'),
             lambda: [reason.encode('utf8')]))
+
+    def assertEqual(self, expected, observed, message=''):
+        """Assert that 'expected' is equal to 'observed'.
+
+        :param expected: The expected value.
+        :param observed: The observed value.
+        :param message: An optional message to include in the error.
+        """
+        try:
+            return super(TestCase, self).assertEqual(expected, observed)
+        except self.failureException:
+            lines = []
+            if message:
+                lines.append(message)
+            lines.extend(
+                ["not equal:",
+                 "a = %s" % pformat(expected),
+                 "b = %s" % pformat(observed),
+                 ''])
+            self.fail('\n'.join(lines))
+
+    failUnlessEqual = assertEquals = assertEqual
 
     def assertIn(self, needle, haystack):
         """Assert that needle is in haystack."""

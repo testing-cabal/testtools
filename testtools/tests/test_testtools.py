@@ -1,7 +1,8 @@
-# Copyright (c) 2008 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2008-2010 Jonathan M. Lange. See LICENSE for details.
 
 """Tests for extensions to the base test library."""
 
+from pprint import pformat
 import sys
 import unittest
 
@@ -283,6 +284,23 @@ class TestAssertions(TestCase):
             ('__str__',),
             ], calls)
         self.assertFalse(result.wasSuccessful())
+
+    def test_assertEqual_nice_formatting(self):
+        message = "These things ought not be equal."
+        a = ['apple', 'banana', 'cherry']
+        b = {'Thatcher': 'One who mends roofs of straw',
+             'Major': 'A military officer, ranked below colonel',
+             'Blair': 'To shout loudly',
+             'Brown': 'The colour of healthy human faeces'}
+        expected_error = '\n'.join(
+            [message,
+             'not equal:',
+             'a = %s' % pformat(a),
+             'b = %s' % pformat(b),
+             ''])
+        self.assertFails(expected_error, self.assertEqual, a, b, message)
+        self.assertFails(expected_error, self.assertEquals, a, b, message)
+        self.assertFails(expected_error, self.failUnlessEqual, a, b, message)
 
 
 class TestAddCleanup(TestCase):
