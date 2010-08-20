@@ -450,10 +450,64 @@ class TestCase(unittest.TestCase):
         self.__teardown_called = True
 
 
+class Placeholder(object):
+    """A placeholder test.
+
+    `Placeholder` implements much of the same interface as `TestCase` and is
+    particularly suitable for being added to `TestResult`s.
+    """
+
+    def __init__(self, test_id, short_description=None):
+        """Construct a `Placeholder`.
+
+        :param test_id: The id of the placeholder test.
+        :param short_description: The short description of the place holder
+            test. If not provided, the id will be used instead.
+        """
+        self._test_id = test_id
+        self._short_description = short_description
+
+    def __call__(self, result=None):
+        return self.run(result=result)
+
+    def __repr__(self):
+        internal = [self._test_id]
+        if self._short_description is not None:
+            internal.append(self._short_description)
+        return "<%s.%s(%s)>" % (
+            self.__class__.__module__,
+            self.__class__.__name__,
+            ", ".join(map(repr, internal)))
+
+    def __str__(self):
+        return self.id()
+
+    def countTestCases(self):
+        return 0
+
+    def debug(self):
+        pass
+
+    def id(self):
+        return self._test_id
+
+    def run(self, result=None):
+        if result is None:
+            result = TestResult()
+        result.startTest(self)
+        result.addSuccess(self)
+        result.stopTest(self)
+
+    def shortDescription(self):
+        if self._short_description is None:
+            return self.id()
+        else:
+            return self._short_description
+
+
 # Python 2.4 did not know how to copy functions.
 if types.FunctionType not in copy._copy_dispatch:
     copy._copy_dispatch[types.FunctionType] = copy._copy_immutable
-
 
 
 def clone_test_with_new_id(test, new_id):

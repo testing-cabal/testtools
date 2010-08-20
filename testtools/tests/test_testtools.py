@@ -6,6 +6,7 @@ import sys
 import unittest
 
 from testtools import (
+    Placeholder,
     TestCase,
     clone_test_with_new_id,
     content,
@@ -24,6 +25,76 @@ from testtools.tests.helpers import (
     Python27TestResult,
     ExtendedTestResult,
     )
+
+
+class TestPlaceholder(TestCase):
+
+    def test_counts_as_zero_tests(self):
+        # A placeholder tests counts as zero tests, since it's not really a
+        # test, but rather a way to get an ID into a test stream.
+        test = Placeholder("foo")
+        self.assertEqual(0, test.countTestCases())
+
+    def test_id_comes_from_constructor(self):
+        # The id() of a Placeholder is whatever you pass into the constructor.
+        test = Placeholder("test id")
+        self.assertEqual("test id", test.id())
+
+    def test_shortDescription_is_id(self):
+        # The shortDescription() of a Placeholder is the id, by default.
+        test = Placeholder("test id")
+        self.assertEqual(test.id(), test.shortDescription())
+
+    def test_shortDescription_specified(self):
+        # If a shortDescription is provided to the constructor, then
+        # shortDescription() returns that instead.
+        test = Placeholder("test id", "description")
+        self.assertEqual("description", test.shortDescription())
+
+    def test_str_is_id(self):
+        # str(placeholder) is always the id(). We are not barbarians.
+        test = Placeholder("test id", "description")
+        self.assertEqual(test.id(), str(test))
+
+    def test_repr_just_id(self):
+        # repr(placeholder) shows you how the object was constructed.
+        test = Placeholder("test id")
+        self.assertEqual(
+            "<testtools.testcase.Placeholder('test id')>", repr(test))
+
+    def test_repr_with_description(self):
+        # repr(placeholder) shows you how the object was constructed.
+        test = Placeholder("test id", "description")
+        self.assertEqual(
+            "<testtools.testcase.Placeholder('test id', 'description')>",
+            repr(test))
+
+    def test_runs_as_success(self):
+        # When run, a Placeholder test records a success.
+        test = Placeholder("foo")
+        log = []
+        test.run(LoggingResult(log))
+        self.assertEqual(
+            [('startTest', test), ('addSuccess', test), ('stopTest', test)],
+            log)
+
+    def test_call_is_run(self):
+        # A Placeholder can be called, in which case it behaves like run.
+        test = Placeholder("foo")
+        run_log = []
+        test.run(LoggingResult(run_log))
+        call_log = []
+        test(LoggingResult(call_log))
+        self.assertEqual(run_log, call_log)
+
+    def test_runs_without_result(self):
+        # A Placeholder can be run without a result, in which case there's no
+        # way to actually get at the result.
+        Placeholder("foo").run()
+
+    def test_debug(self):
+        # A Placeholder can be debugged.
+        Placeholder("foo").debug()
 
 
 class TestEquality(TestCase):
