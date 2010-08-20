@@ -7,6 +7,9 @@ NEXT
 Improvements
 ------------
 
+ * Added `PlaceHolder` and `ErrorHolder`, TestCase-like objects that can be
+   used to add results to a `TestResult`.
+
  * 'Mismatch' now takes optional description and details parameters, so
    custom Matchers aren't compelled to make their own subclass.
 
