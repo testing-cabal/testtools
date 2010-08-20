@@ -64,11 +64,10 @@ class TestPlaceholder(TestCase):
                 test.id(), test.shortDescription()),
             repr(test))
 
-    def test_counts_as_zero_tests(self):
-        # A placeholder tests counts as zero tests, since it's not really a
-        # test, but rather a way to get an ID into a test stream.
+    def test_counts_as_one_test(self):
+        # A placeholder test counts as one test.
         test = self.makePlaceholder()
-        self.assertEqual(0, test.countTestCases())
+        self.assertEqual(1, test.countTestCases())
 
     def test_str_is_id(self):
         # str(placeholder) is always the id(). We are not barbarians.
@@ -150,11 +149,10 @@ class TestErrorHolder(TestCase):
                 test.id(), error, test.shortDescription()),
             repr(test))
 
-    def test_counts_as_zero_tests(self):
-        # A placeholder tests counts as zero tests, since it's not really a
-        # test, but rather a way to get an ID into a test stream.
+    def test_counts_as_one_test(self):
+        # A placeholder test counts as one test.
         test = self.makePlaceholder()
-        self.assertEqual(0, test.countTestCases())
+        self.assertEqual(1, test.countTestCases())
 
     def test_str_is_id(self):
         # str(placeholder) is always the id(). We are not barbarians.

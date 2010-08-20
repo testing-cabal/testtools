@@ -483,7 +483,7 @@ class Placeholder(object):
         return self.id()
 
     def countTestCases(self):
-        return 0
+        return 1
 
     def debug(self):
         pass
