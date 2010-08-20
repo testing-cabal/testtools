@@ -302,6 +302,18 @@ class TestAssertions(TestCase):
         self.assertFails(expected_error, self.assertEquals, a, b, message)
         self.assertFails(expected_error, self.failUnlessEqual, a, b, message)
 
+    def test_assertEqual_formatting_no_message(self):
+        a = "cat"
+        b = "dog"
+        expected_error = '\n'.join(
+            ['not equal:',
+             'a = %s' % pformat(a),
+             'b = %s' % pformat(b),
+             ''])
+        self.assertFails(expected_error, self.assertEqual, a, b)
+        self.assertFails(expected_error, self.assertEquals, a, b)
+        self.assertFails(expected_error, self.failUnlessEqual, a, b)
+
 
 class TestAddCleanup(TestCase):
     """Tests for TestCase.addCleanup."""
