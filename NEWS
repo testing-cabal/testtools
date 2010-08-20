@@ -7,6 +7,9 @@ NEXT
 Improvements
 ------------
 
+ * 'TestCase.assertEqual' now formats errors a little more nicely, in the
+   style of bzrlib.
+
  * 'Mismatch' now takes optional description and details parameters, so
    custom Matchers aren't compelled to make their own subclass.
 
