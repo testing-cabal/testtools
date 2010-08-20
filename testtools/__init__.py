@@ -9,7 +9,7 @@ __all__ = [
     'ExtendedToOriginalDecorator',
     'iterate_tests',
     'MultiTestResult',
-    'Placeholder',
+    'PlaceHolder',
     'TestCase',
     'TestResult',
     'TextTestResult',
@@ -28,7 +28,7 @@ from testtools.runtest import (
     )
 from testtools.testcase import (
     ErrorHolder,
-    Placeholder,
+    PlaceHolder,
     TestCase,
     clone_test_with_new_id,
     skip,

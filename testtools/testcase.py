@@ -450,15 +450,15 @@ class TestCase(unittest.TestCase):
         self.__teardown_called = True
 
 
-class Placeholder(object):
+class PlaceHolder(object):
     """A placeholder test.
 
-    `Placeholder` implements much of the same interface as `TestCase` and is
+    `PlaceHolder` implements much of the same interface as `TestCase` and is
     particularly suitable for being added to `TestResult`s.
     """
 
     def __init__(self, test_id, short_description=None):
-        """Construct a `Placeholder`.
+        """Construct a `PlaceHolder`.
 
         :param test_id: The id of the placeholder test.
         :param short_description: The short description of the place holder
@@ -505,7 +505,7 @@ class Placeholder(object):
             return self._short_description
 
 
-class ErrorHolder(Placeholder):
+class ErrorHolder(PlaceHolder):
     """A placeholder test that will error out when run."""
 
     failureException = None
