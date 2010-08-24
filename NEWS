@@ -1,8 +1,15 @@
 testtools NEWS
 ++++++++++++++
 
-NEXT
-~~~~
+0.9.6
+~~~~~
+
+Nothing major in this release, just enough small bits and pieces to make it
+useful enough to upgrade to.
+
+In particular, a serious bug in assertThat() has been fixed, it's easier to
+write Matchers, there's a TestCase.patch() method for those inevitable monkey
+patches and TestCase.assertEqual gives slightly nicer errors.
 
 Improvements
 ------------
@@ -17,7 +24,7 @@ Improvements
    custom Matchers aren't compelled to make their own subclass.
 
  * jml added a built-in UTF8_TEXT ContentType to make it slightly easier to
-   add details to test results.
+   add details to test results. See bug #520044.
 
  * Fix a bug in our built-in matchers where assertThat would blow up if any
    of them failed. All built-in mismatch objects now provide get_details().
