@@ -7,6 +7,8 @@ import sys
 import unittest
 
 from testtools import (
+    ErrorHolder,
+    PlaceHolder,
     TestCase,
     clone_test_with_new_id,
     content,
@@ -25,6 +27,167 @@ from testtools.tests.helpers import (
     Python27TestResult,
     ExtendedTestResult,
     )
+
+
+class TestPlaceHolder(TestCase):
+
+    def makePlaceHolder(self, test_id="foo", short_description=None):
+        return PlaceHolder(test_id, short_description)
+
+    def test_id_comes_from_constructor(self):
+        # The id() of a PlaceHolder is whatever you pass into the constructor.
+        test = PlaceHolder("test id")
+        self.assertEqual("test id", test.id())
+
+    def test_shortDescription_is_id(self):
+        # The shortDescription() of a PlaceHolder is the id, by default.
+        test = PlaceHolder("test id")
+        self.assertEqual(test.id(), test.shortDescription())
+
+    def test_shortDescription_specified(self):
+        # If a shortDescription is provided to the constructor, then
+        # shortDescription() returns that instead.
+        test = PlaceHolder("test id", "description")
+        self.assertEqual("description", test.shortDescription())
+
+    def test_repr_just_id(self):
+        # repr(placeholder) shows you how the object was constructed.
+        test = PlaceHolder("test id")
+        self.assertEqual(
+            "<testtools.testcase.PlaceHolder(%s)>" % repr(test.id()),
+            repr(test))
+
+    def test_repr_with_description(self):
+        # repr(placeholder) shows you how the object was constructed.
+        test = PlaceHolder("test id", "description")
+        self.assertEqual(
+            "<testtools.testcase.PlaceHolder(%r, %r)>" % (
+                test.id(), test.shortDescription()),
+            repr(test))
+
+    def test_counts_as_one_test(self):
+        # A placeholder test counts as one test.
+        test = self.makePlaceHolder()
+        self.assertEqual(1, test.countTestCases())
+
+    def test_str_is_id(self):
+        # str(placeholder) is always the id(). We are not barbarians.
+        test = self.makePlaceHolder()
+        self.assertEqual(test.id(), str(test))
+
+    def test_runs_as_success(self):
+        # When run, a PlaceHolder test records a success.
+        test = self.makePlaceHolder()
+        log = []
+        test.run(LoggingResult(log))
+        self.assertEqual(
+            [('startTest', test), ('addSuccess', test), ('stopTest', test)],
+            log)
+
+    def test_call_is_run(self):
+        # A PlaceHolder can be called, in which case it behaves like run.
+        test = self.makePlaceHolder()
+        run_log = []
+        test.run(LoggingResult(run_log))
+        call_log = []
+        test(LoggingResult(call_log))
+        self.assertEqual(run_log, call_log)
+
+    def test_runs_without_result(self):
+        # A PlaceHolder can be run without a result, in which case there's no
+        # way to actually get at the result.
+        self.makePlaceHolder().run()
+
+    def test_debug(self):
+        # A PlaceHolder can be debugged.
+        self.makePlaceHolder().debug()
+
+
+class TestErrorHolder(TestCase):
+
+    def makeException(self):
+        try:
+            raise RuntimeError("danger danger")
+        except:
+            return sys.exc_info()
+
+    def makePlaceHolder(self, test_id="foo", error=None,
+                        short_description=None):
+        if error is None:
+            error = self.makeException()
+        return ErrorHolder(test_id, error, short_description)
+
+    def test_id_comes_from_constructor(self):
+        # The id() of a PlaceHolder is whatever you pass into the constructor.
+        test = ErrorHolder("test id", self.makeException())
+        self.assertEqual("test id", test.id())
+
+    def test_shortDescription_is_id(self):
+        # The shortDescription() of a PlaceHolder is the id, by default.
+        test = ErrorHolder("test id", self.makeException())
+        self.assertEqual(test.id(), test.shortDescription())
+
+    def test_shortDescription_specified(self):
+        # If a shortDescription is provided to the constructor, then
+        # shortDescription() returns that instead.
+        test = ErrorHolder("test id", self.makeException(), "description")
+        self.assertEqual("description", test.shortDescription())
+
+    def test_repr_just_id(self):
+        # repr(placeholder) shows you how the object was constructed.
+        error = self.makeException()
+        test = ErrorHolder("test id", error)
+        self.assertEqual(
+            "<testtools.testcase.ErrorHolder(%r, %r)>" % (test.id(), error),
+            repr(test))
+
+    def test_repr_with_description(self):
+        # repr(placeholder) shows you how the object was constructed.
+        error = self.makeException()
+        test = ErrorHolder("test id", error, "description")
+        self.assertEqual(
+            "<testtools.testcase.ErrorHolder(%r, %r, %r)>" % (
+                test.id(), error, test.shortDescription()),
+            repr(test))
+
+    def test_counts_as_one_test(self):
+        # A placeholder test counts as one test.
+        test = self.makePlaceHolder()
+        self.assertEqual(1, test.countTestCases())
+
+    def test_str_is_id(self):
+        # str(placeholder) is always the id(). We are not barbarians.
+        test = self.makePlaceHolder()
+        self.assertEqual(test.id(), str(test))
+
+    def test_runs_as_error(self):
+        # When run, a PlaceHolder test records a success.
+        error = self.makeException()
+        test = self.makePlaceHolder(error=error)
+        log = []
+        test.run(LoggingResult(log))
+        self.assertEqual(
+            [('startTest', test),
+             ('addError', test, error),
+             ('stopTest', test)], log)
+
+    def test_call_is_run(self):
+        # A PlaceHolder can be called, in which case it behaves like run.
+        test = self.makePlaceHolder()
+        run_log = []
+        test.run(LoggingResult(run_log))
+        call_log = []
+        test(LoggingResult(call_log))
+        self.assertEqual(run_log, call_log)
+
+    def test_runs_without_result(self):
+        # A PlaceHolder can be run without a result, in which case there's no
+        # way to actually get at the result.
+        self.makePlaceHolder().run()
+
+    def test_debug(self):
+        # A PlaceHolder can be debugged.
+        self.makePlaceHolder().debug()
 
 
 class TestEquality(TestCase):
