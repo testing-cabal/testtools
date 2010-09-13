@@ -461,6 +461,15 @@ class TestAssertions(TestCase):
              'a = %s' % pformat(a),
              'b = %s' % pformat(b),
              ''])
+        expected_error = '\n'.join([
+            'Match failed. Matchee: "%r"' % b,
+            'Matcher: Annotate(%r, Equals(%r))' % (message, a),
+            'Difference: !=:',
+            'reference = %s' % pformat(a),
+            'actual = %s' % pformat(b),
+            ': ' + message,
+            ''
+            ])
         self.assertFails(expected_error, self.assertEqual, a, b, message)
         self.assertFails(expected_error, self.assertEquals, a, b, message)
         self.assertFails(expected_error, self.failUnlessEqual, a, b, message)
@@ -468,11 +477,12 @@ class TestAssertions(TestCase):
     def test_assertEqual_formatting_no_message(self):
         a = "cat"
         b = "dog"
-        expected_error = '\n'.join(
-            ['not equal:',
-             'a = %s' % pformat(a),
-             'b = %s' % pformat(b),
-             ''])
+        expected_error = '\n'.join([
+            'Match failed. Matchee: "dog"',
+            'Matcher: Equals(\'cat\')',
+            'Difference: \'cat\' != \'dog\'',
+            ''
+            ])
         self.assertFails(expected_error, self.assertEqual, a, b)
         self.assertFails(expected_error, self.assertEquals, a, b)
         self.assertFails(expected_error, self.failUnlessEqual, a, b)

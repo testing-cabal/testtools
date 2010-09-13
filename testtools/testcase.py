@@ -17,13 +17,16 @@ try:
 except ImportError:
     wraps = None
 import itertools
-from pprint import pformat
 import sys
 import types
 import unittest
 
 from testtools import content
 from testtools.compat import advance_iterator
+from testtools.matchers import (
+    Annotate,
+    Equals,
+    )
 from testtools.monkey import patch
 from testtools.runtest import RunTest
 from testtools.testresult import TestResult
@@ -230,18 +233,10 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message to include in the error.
         """
-        try:
-            return super(TestCase, self).assertEqual(expected, observed)
-        except self.failureException:
-            lines = []
-            if message:
-                lines.append(message)
-            lines.extend(
-                ["not equal:",
-                 "a = %s" % pformat(expected),
-                 "b = %s" % pformat(observed),
-                 ''])
-            self.fail('\n'.join(lines))
+        matcher = Equals(expected)
+        if message:
+            matcher = Annotate(message, matcher)
+        self.assertThat(observed, matcher)
 
     failUnlessEqual = assertEquals = assertEqual
 
