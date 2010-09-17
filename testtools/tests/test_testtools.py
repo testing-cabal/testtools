@@ -770,6 +770,18 @@ class TestCloneTestWithNewId(TestCase):
         self.assertEqual(oldName, test.id(),
             "the original test instance should be unchanged.")
 
+    def test_cloned_testcase_does_not_share_details(self):
+        """A cloned TestCase does not share the details dict."""
+        class Test(TestCase):
+            def test_foo(self):
+                self.addDetail(
+                    'foo', content.Content('text/plain', lambda: 'foo'))
+        orig_test = Test('test_foo')
+        cloned_test = clone_test_with_new_id(orig_test, self.getUniqueString())
+        orig_test.run(unittest.TestResult())
+        self.assertEqual('foo', orig_test.getDetails()['foo'].iter_bytes())
+        self.assertEqual(None, cloned_test.getDetails().get('foo'))
+
 
 class TestDetailsProvided(TestWithDetails):
 
