@@ -8,7 +8,10 @@ Improvements
 ------------
 
 * Code duplication between assertEqual and the matcher Equals has been removed.
- 
+
+* In normal circumstances, a TestCase will no longer share details with clones
+  of itself. (Andrew Bennetts, bug #637725)
+
 
 0.9.6
 ~~~~~
