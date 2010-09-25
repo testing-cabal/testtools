@@ -2,7 +2,6 @@
 
 """Individual test case execution."""
 
-__metaclass__ = type
 __all__ = [
     'RunTest',
     ]
