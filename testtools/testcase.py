@@ -427,13 +427,14 @@ class TestCase(unittest.TestCase):
         :raises ValueError: If the base class setUp is not called, a
             ValueError is raised.
         """
-        self.setUp()
+        ret = self.setUp()
         if not self.__setup_called:
             raise ValueError(
                 "TestCase.setUp was not called. Have you upcalled all the "
                 "way up the hierarchy from your setUp? e.g. Call "
                 "super(%s, self).setUp() from your setUp()."
                 % self.__class__.__name__)
+        return ret
 
     def _run_teardown(self, result):
         """Run the tearDown function for this test.
@@ -442,13 +443,14 @@ class TestCase(unittest.TestCase):
         :raises ValueError: If the base class tearDown is not called, a
             ValueError is raised.
         """
-        self.tearDown()
+        ret = self.tearDown()
         if not self.__teardown_called:
             raise ValueError(
                 "TestCase.tearDown was not called. Have you upcalled all the "
                 "way up the hierarchy from your tearDown? e.g. Call "
                 "super(%s, self).tearDown() from your tearDown()."
                 % self.__class__.__name__)
+        return ret
 
     def _run_test_method(self, result):
         """Run the test method for this test.
@@ -463,7 +465,7 @@ class TestCase(unittest.TestCase):
             # Python 2.4
             method_name = getattr(self, '_TestCase__testMethodName')
         testMethod = getattr(self, method_name)
-        testMethod()
+        return testMethod()
 
     def setUp(self):
         unittest.TestCase.setUp(self)
