@@ -39,11 +39,7 @@ class DeferredRunTest(RunTest):
     def _run_user(self, function, *args):
         d = defer.maybeDeferred(function, *args)
         def got_exception(failure):
-            if failure.type == KeyboardInterrupt:
-                return failure
             e = failure.value
-            exc_info = failure.type, e, failure.tb
-            self.case.onException(exc_info)
             for exc_class, handler in self.handlers:
                 if isinstance(e, exc_class):
                     self._exceptions.append(e)
