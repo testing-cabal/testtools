@@ -536,6 +536,12 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
         getattr(self.converter, outcome)(self, details=details)
         self.assertEqual([(outcome, self, err_str)], self.result._events)
 
+    def check_outcome_details_to_arg(self, outcome, arg):
+        """Call an outcome with a details dict to have an arg extracted."""
+        details, _ = self.get_details_and_string()
+        getattr(self.converter, outcome)(self, details=details)
+        self.assertEqual([(outcome, self, arg)], self.result._events)
+
     def check_outcome_exc_info(self, outcome, expected=None):
         """Check that calling a legacy outcome still works."""
         # calling some outcome with the legacy exc_info style api (no keyword
@@ -761,7 +767,7 @@ class TestExtendedToOriginalAddSkip(
 
     def test_outcome_Extended_py27(self):
         self.make_27_result()
-        self.check_outcome_details_to_string(self.outcome)
+        self.check_outcome_details_to_arg(self.outcome, 'No reason given')
 
     def test_outcome_Extended_pyextended(self):
         self.make_extended_result()

@@ -964,8 +964,7 @@ class TestSkipping(TestCase):
         test.run(result)
         case = result._events[0][1]
         self.assertEqual([('startTest', case),
-            ('addSkip', case, "Text attachment: reason\n------------\n"
-             "skipping this test\n------------\n"), ('stopTest', case)],
+            ('addSkip', case, "skipping this test"), ('stopTest', case)],
             calls)
 
     def test_skipException_in_test_method_calls_result_addSkip(self):
@@ -977,8 +976,7 @@ class TestSkipping(TestCase):
         test.run(result)
         case = result._events[0][1]
         self.assertEqual([('startTest', case),
-            ('addSkip', case, "Text attachment: reason\n------------\n"
-             "skipping this test\n------------\n"), ('stopTest', case)],
+            ('addSkip', case, "skipping this test"), ('stopTest', case)],
             result._events)
 
     def test_skip__in_setup_with_old_result_object_calls_addSuccess(self):
