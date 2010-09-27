@@ -419,7 +419,7 @@ AssertionError: yo!
 
 
 class TestThreadSafeForwardingResult(TestWithFakeExceptions):
-    """Tests for `MultiTestResult`."""
+    """Tests for `TestThreadSafeForwardingResult`."""
 
     def setUp(self):
         TestWithFakeExceptions.setUp(self)
@@ -470,6 +470,20 @@ class TestThreadSafeForwardingResult(TestWithFakeExceptions):
             ('startTest', self),
             ('addSuccess', self),
             ('stopTest', self),
+            ], self.target._events)
+
+    def test_times(self):
+        starttime = datetime.datetime.utcfromtimestamp(1.489)
+        endtime = datetime.datetime.utcfromtimestamp(51.476)
+        self.result1.time(starttime)
+        self.result1.startTest(self)
+        self.result1.time(endtime)
+        self.result1.addSuccess(self)
+        self.assertEqual([("time", starttime),
+            ("startTest", self),
+            ("time", endtime),
+            ("addSuccess", self),
+            ("stopTest", self),
             ], self.target._events)
 
 

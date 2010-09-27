@@ -62,6 +62,10 @@ class LoggingResult(TestResult):
         self._events.append('done')
         super(LoggingResult, self).done()
 
+    def time(self, a_datetime):
+        self._events.append(('time', a_datetime))
+        super(LoggingResult, self).time(a_datetime)
+
 # Note, the following three classes are different to LoggingResult by
 # being fully defined exact matches rather than supersets.
 from testtools.testresult.doubles import *

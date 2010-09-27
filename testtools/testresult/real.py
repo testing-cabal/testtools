@@ -299,60 +299,45 @@ class ThreadsafeForwardingResult(TestResult):
         TestResult.__init__(self)
         self.result = ExtendedToOriginalDecorator(target)
         self.semaphore = semaphore
+        self._use_timings = False
+
+    def _add_result_with_semaphore(self, method, test, *args, **kwargs):
+        self.semaphore.acquire()
+        try:
+            if self._use_timings:
+                self.result.time(test._testtools_time_of_startTest)
+                self.result.startTest(test)
+                self.result.time(self._now())
+            else:
+                self.result.startTest(test)
+            method(test, *args, **kwargs)
+            self.result.stopTest(test)
+        finally:
+            self.semaphore.release()
 
     def addError(self, test, err=None, details=None):
-        self.semaphore.acquire()
-        try:
-            self.result.startTest(test)
-            self.result.addError(test, err, details=details)
-            self.result.stopTest(test)
-        finally:
-            self.semaphore.release()
+        self._add_result_with_semaphore(self.result.addError,
+            test, err, details=details)
 
     def addExpectedFailure(self, test, err=None, details=None):
-        self.semaphore.acquire()
-        try:
-            self.result.startTest(test)
-            self.result.addExpectedFailure(test, err, details=details)
-            self.result.stopTest(test)
-        finally:
-            self.semaphore.release()
+        self._add_result_with_semaphore(self.result.addExpectedFailure,
+            test, err, details=details)
 
     def addFailure(self, test, err=None, details=None):
-        self.semaphore.acquire()
-        try:
-            self.result.startTest(test)
-            self.result.addFailure(test, err, details=details)
-            self.result.stopTest(test)
-        finally:
-            self.semaphore.release()
+        self._add_result_with_semaphore(self.result.addFailure,
+            test, err, details=details)
 
     def addSkip(self, test, reason=None, details=None):
-        self.semaphore.acquire()
-        try:
-            self.result.startTest(test)
-            self.result.addSkip(test, reason, details=details)
-            self.result.stopTest(test)
-        finally:
-            self.semaphore.release()
+        self._add_result_with_semaphore(self.result.addSkip,
+            test, reason, details=details)
 
     def addSuccess(self, test, details=None):
-        self.semaphore.acquire()
-        try:
-            self.result.startTest(test)
-            self.result.addSuccess(test, details=details)
-            self.result.stopTest(test)
-        finally:
-            self.semaphore.release()
+        self._add_result_with_semaphore(self.result.addSuccess,
+            test, details=details)
 
     def addUnexpectedSuccess(self, test, details=None):
-        self.semaphore.acquire()
-        try:
-            self.result.startTest(test)
-            self.result.addUnexpectedSuccess(test, details=details)
-            self.result.stopTest(test)
-        finally:
-            self.semaphore.release()
+        self._add_result_with_semaphore(self.result.addUnexpectedSuccess,
+            test, details=details)
 
     def startTestRun(self):
         self.semaphore.acquire()
@@ -374,6 +359,15 @@ class ThreadsafeForwardingResult(TestResult):
             self.result.done()
         finally:
             self.semaphore.release()
+
+    def startTest(self, test):
+        test._testtools_time_of_startTest = self._now()
+        super(ThreadsafeForwardingResult, self).startTest(test)
+
+    def time(self, a_datetime):
+        self._use_timings = True
+        self.time = super(ThreadsafeForwardingResult, self).time
+        self.time(a_datetime)
 
 
 class ExtendedToOriginalDecorator(object):
