@@ -147,15 +147,6 @@ class TestAsynchronousDeferredRunTest(TestCase):
         reactor.callLater(2, fire_b)
         reactor.callLater(3, fire_c)
         runner.run(result)
-        # XXX: We aren't actually firing the Deferred's yet, so this test
-        # ought to hang.
-
-        # XXX: We ought to have some kind of timeout for the test case to
-        # handle the times when a Deferred is returned that never fires.
-
-        # XXX: Somehow the reactor ought to be passed into the runner. Perhaps
-        # the clock should be separate. Not sure.
-
         # XXX: We ought to catch unhandled errors in Deferreds.  This means
         # hooking into Twisted's logging system.
         self.assertThat(
@@ -168,8 +159,10 @@ class TestRunInReactor(TestCase):
         from twisted.internet import reactor
         return reactor
 
-    def make_spinner(self):
-        return _Spinner(self.make_reactor())
+    def make_spinner(self, reactor=None):
+        if reactor is None:
+            reactor = self.make_reactor()
+        return _Spinner(reactor)
 
     def make_timeout(self):
         return 0.01
@@ -220,10 +213,38 @@ class TestRunInReactor(TestCase):
         self.assertThat(result, Is(marker))
 
     def test_timeout(self):
+        # If the function takes too long to run, we raise a TimeoutError.
         timeout = self.make_timeout()
         self.assertRaises(
             TimeoutError,
             self.make_spinner().run, timeout, lambda: defer.Deferred())
+
+    def test_clean_do_nothing(self):
+        # If there's nothing going on in the reactor, then clean does nothing
+        # and returns an empty list.
+        spinner = self.make_spinner()
+        result = spinner.clean()
+        self.assertThat(result, Equals([]))
+
+    def test_clean_delayed_call(self):
+        # If there's a delayed call in the reactor, then clean cancels it and
+        # returns an empty list.
+        reactor = self.make_reactor()
+        spinner = self.make_spinner(reactor)
+        call = reactor.callLater(10, lambda: None)
+        results = spinner.clean()
+        self.assertThat(results, Equals([call]))
+        self.assertThat(call.active(), Equals(False))
+
+    def test_clean_delayed_call_cancelled(self):
+        # If there's a delayed call that's just been cancelled, then it's no
+        # longer there.
+        reactor = self.make_reactor()
+        spinner = self.make_spinner(reactor)
+        call = reactor.callLater(10, lambda: None)
+        call.cancel()
+        results = spinner.clean()
+        self.assertThat(results, Equals([]))
 
 
 def test_suite():

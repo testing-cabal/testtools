@@ -134,6 +134,14 @@ class _Spinner(object):
         self._failure = Failure(e)
         self._stop_reactor()
 
+    def clean(self):
+        """Clean up any junk in the reactor."""
+        junk = []
+        for delayed_call in self._reactor.getDelayedCalls():
+            delayed_call.cancel()
+            junk.append(delayed_call)
+        return junk
+
     @not_reentrant
     def run(self, timeout, function, *args, **kwargs):
         """Run 'function' in a reactor.
