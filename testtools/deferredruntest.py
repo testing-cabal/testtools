@@ -95,7 +95,58 @@ class TimeoutError(Exception):
     """Raised when run_in_reactor takes too long to run a function."""
 
 
-@not_reentrant
+class _Spinner(object):
+
+    _UNSET = object()
+
+    def __init__(self, reactor):
+        self._reactor = reactor
+        self._timeout_call = None
+        self._success = self._UNSET
+        self._failure = self._UNSET
+
+    def _cancel_timeout(self):
+        if self._timeout_call:
+            self._timeout_call.cancel()
+
+    def _get_result(self):
+        if self._failure is not self._UNSET:
+            self._failure.raiseException()
+        if self._success is not self._UNSET:
+            return self._success
+        raise AssertionError("Tried to get result when no result is available.")
+
+    def _got_failure(self, result):
+        self._cancel_timeout()
+        self._failure = result
+
+    def _got_success(self, result):
+        self._cancel_timeout()
+        self._success = result
+
+    def _stop_reactor(self, ignored=None):
+        """Stop the reactor!"""
+        self._reactor.crash()
+
+    def _timed_out(self, function, timeout):
+        e = TimeoutError(
+            "%r took longer than %s seconds" % (function, timeout))
+        self._failure = Failure(e)
+        self._stop_reactor()
+
+    @not_reentrant
+    def run(self, timeout, function, *args, **kwargs):
+        self._timeout_call = self._reactor.callLater(
+            timeout, self._timed_out, function, timeout)
+        def run_function():
+            d = defer.maybeDeferred(function, *args, **kwargs)
+            d.addCallbacks(self._got_success, self._got_failure)
+            d.addBoth(self._stop_reactor)
+        self._reactor.callWhenRunning(run_function)
+        self._reactor.run()
+        return self._get_result()
+
+
 def run_in_reactor(reactor, timeout, function, *args, **kwargs):
     """Run 'function' in a reactor.
 
@@ -103,25 +154,4 @@ def run_in_reactor(reactor, timeout, function, *args, **kwargs):
     Deferred fires and its chain completes or until the timeout is reached --
     whichever comes first.
     """
-    results = []
-    timeout_delayed_call = None
-    def got_result(result):
-        if timeout_delayed_call:
-            timeout_delayed_call.cancel()
-        results.append(result)
-    def crash_reactor(ignored=None):
-        reactor.crash()
-    def timeout_error():
-        e = TimeoutError(
-            "%r took longer than %s seconds" % (function, timeout))
-        results.append(Failure(e))
-        crash_reactor()
-    d = defer.maybeDeferred(function, *args, **kwargs)
-    d.addBoth(got_result)
-    d.addBoth(crash_reactor)
-    timeout_delayed_call = reactor.callLater(timeout, timeout_error)
-    reactor.run()
-    result = results[0]
-    if isinstance(result, Failure):
-        result.raiseException()
-    return result
+    return _Spinner(reactor).run(timeout, function, *args, **kwargs)
