@@ -3,7 +3,7 @@
 """Individual test case execution for tests that return Deferreds."""
 
 __all__ = [
-    'DeferredRunTest',
+    'SynchronousDeferredRunTest',
     ]
 
 from testtools.runtest import RunTest
@@ -34,7 +34,7 @@ def extract_result(deferred):
         raise AssertionError("%r has not fired yet." % (deferred,))
 
 
-class DeferredRunTest(RunTest):
+class SynchronousDeferredRunTest(RunTest):
 
     def _run_user(self, function, *args):
         d = defer.maybeDeferred(function, *args)
