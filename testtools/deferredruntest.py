@@ -11,6 +11,7 @@ from testtools.runtest import RunTest
 
 from twisted.internet import defer
 from twisted.python.failure import Failure
+from twisted.python.util import mergeFunctionMetadata
 from twisted.trial.unittest import TestCase
 
 
@@ -68,12 +69,33 @@ class AsynchronousDeferredRunTest(RunTest):
 class ReentryError(Exception):
     """Raised when we try to re-enter a function that forbids it."""
 
+    def __init__(self, function):
+        super(ReentryError, self).__init__(
+            "%r in not re-entrant but was called within a call to itself."
+            % (function,))
+
+
+def not_reentrant(function, _calls={}):
+    """Decorates a function as not being re-entrant.
+
+    The decorated function will raise an error if called from within itself.
+    """
+    def decorated(*args, **kwargs):
+        if _calls.get(function, False):
+            raise ReentryError(function)
+        _calls[function] = True
+        try:
+            return function(*args, **kwargs)
+        finally:
+            _calls[function] = False
+    return mergeFunctionMetadata(function, decorated)
+
 
 class TimeoutError(Exception):
     """Raised when run_in_reactor takes too long to run a function."""
 
-_running = []
 
+@not_reentrant
 def run_in_reactor(reactor, timeout, function, *args, **kwargs):
     """Run 'function' in a reactor.
 
@@ -81,10 +103,6 @@ def run_in_reactor(reactor, timeout, function, *args, **kwargs):
     Deferred fires and its chain completes or until the timeout is reached --
     whichever comes first.
     """
-    # XXX: The re-entrancy guard could probably be extracted into a helper.
-    if _running:
-        raise ReentryError()
-    _running.append(None)
     results = []
     timeout_delayed_call = None
     def got_result(result):
@@ -98,14 +116,11 @@ def run_in_reactor(reactor, timeout, function, *args, **kwargs):
             "%r took longer than %s seconds" % (function, timeout))
         results.append(Failure(e))
         crash_reactor()
-    try:
-        d = defer.maybeDeferred(function, *args, **kwargs)
-        d.addBoth(got_result)
-        d.addBoth(crash_reactor)
-        timeout_delayed_call = reactor.callLater(timeout, timeout_error)
-        reactor.run()
-    finally:
-        _running.pop()
+    d = defer.maybeDeferred(function, *args, **kwargs)
+    d.addBoth(got_result)
+    d.addBoth(crash_reactor)
+    timeout_delayed_call = reactor.callLater(timeout, timeout_error)
+    reactor.run()
     result = results[0]
     if isinstance(result, Failure):
         result.raiseException()
