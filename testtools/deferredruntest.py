@@ -10,6 +10,7 @@ __all__ = [
 from testtools.runtest import RunTest
 
 from twisted.internet import defer
+from twisted.python.failure import Failure
 from twisted.trial.unittest import TestCase
 
 
@@ -62,3 +63,50 @@ class AsynchronousDeferredRunTest(RunTest):
         trial = TestCase()
         d = defer.maybeDeferred(function, *args)
         trial._wait(d)
+
+
+class ReentryError(Exception):
+    """Raised when we try to re-enter a function that forbids it."""
+
+
+class TimeoutError(Exception):
+    """Raised when run_in_reactor takes too long to run a function."""
+
+_running = []
+
+def run_in_reactor(reactor, timeout, function, *args, **kwargs):
+    """Run 'function' in a reactor.
+
+    If 'function' returns a Deferred, the reactor will keep spinning until the
+    Deferred fires and its chain completes or until the timeout is reached --
+    whichever comes first.
+    """
+    # XXX: The re-entrancy guard could probably be extracted into a helper.
+    if _running:
+        raise ReentryError()
+    _running.append(None)
+    results = []
+    timeout_delayed_call = None
+    def got_result(result):
+        if timeout_delayed_call:
+            timeout_delayed_call.cancel()
+        results.append(result)
+    def crash_reactor(ignored=None):
+        reactor.crash()
+    def timeout_error():
+        e = TimeoutError(
+            "%r took longer than %s seconds" % (function, timeout))
+        results.append(Failure(e))
+        crash_reactor()
+    try:
+        d = defer.maybeDeferred(function, *args, **kwargs)
+        d.addBoth(got_result)
+        d.addBoth(crash_reactor)
+        timeout_delayed_call = reactor.callLater(timeout, timeout_error)
+        reactor.run()
+    finally:
+        _running.pop()
+    result = results[0]
+    if isinstance(result, Failure):
+        result.raiseException()
+    return result
