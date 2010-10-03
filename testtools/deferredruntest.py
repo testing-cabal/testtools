@@ -136,6 +136,12 @@ class _Spinner(object):
 
     @not_reentrant
     def run(self, timeout, function, *args, **kwargs):
+        """Run 'function' in a reactor.
+
+        If 'function' returns a Deferred, the reactor will keep spinning until
+        the Deferred fires and its chain completes or until the timeout is
+        reached -- whichever comes first.
+        """
         self._timeout_call = self._reactor.callLater(
             timeout, self._timed_out, function, timeout)
         def run_function():
@@ -145,13 +151,3 @@ class _Spinner(object):
         self._reactor.callWhenRunning(run_function)
         self._reactor.run()
         return self._get_result()
-
-
-def run_in_reactor(reactor, timeout, function, *args, **kwargs):
-    """Run 'function' in a reactor.
-
-    If 'function' returns a Deferred, the reactor will keep spinning until the
-    Deferred fires and its chain completes or until the timeout is reached --
-    whichever comes first.
-    """
-    return _Spinner(reactor).run(timeout, function, *args, **kwargs)
