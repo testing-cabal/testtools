@@ -3,6 +3,7 @@
 """Individual test case execution for tests that return Deferreds."""
 
 __all__ = [
+    'AsynchronousDeferredRunTest',
     'SynchronousDeferredRunTest',
     ]
 
@@ -49,3 +50,8 @@ class SynchronousDeferredRunTest(RunTest):
         # XXX: Cheat!
         result = extract_result(d)
         return result
+
+
+class AsynchronousDeferredRunTest(RunTest):
+
+    pass
