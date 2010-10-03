@@ -10,8 +10,10 @@ __all__ = [
 from testtools.runtest import RunTest
 
 from twisted.internet import defer
+from twisted.trial.unittest import TestCase
 
 
+# XXX: Copied & pasted from somewhere else.  No tests in testtools.
 def extract_result(deferred):
     """Extract the result from a fired deferred.
 
@@ -32,6 +34,8 @@ def extract_result(deferred):
     elif len(successes) == 1:
         return successes[0]
     else:
+        # XXX: AssertionError might be inappropriate.  Perhaps we should have
+        # a custom error message.
         raise AssertionError("%r has not fired yet." % (deferred,))
 
 
@@ -54,4 +58,7 @@ class SynchronousDeferredRunTest(RunTest):
 
 class AsynchronousDeferredRunTest(RunTest):
 
-    pass
+    def _run_user(self, function, *args):
+        trial = TestCase()
+        d = defer.maybeDeferred(function, *args)
+        trial._wait(d)
