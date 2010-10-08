@@ -10,6 +10,7 @@ __all__ = [
 from testtools.runtest import RunTest
 
 from twisted.internet import defer
+from twisted.internet.interfaces import IReactorThreads
 from twisted.python.failure import Failure
 from twisted.python.util import mergeFunctionMetadata
 from twisted.trial.unittest import TestCase
@@ -42,6 +43,7 @@ def extract_result(deferred):
 
 
 class SynchronousDeferredRunTest(RunTest):
+    """Runner for tests that return synchronous Deferreds."""
 
     def _run_user(self, function, *args):
         d = defer.maybeDeferred(function, *args)
@@ -53,14 +55,20 @@ class SynchronousDeferredRunTest(RunTest):
                     return self.exception_caught
             return failure
         d.addErrback(got_exception)
-        # XXX: Cheat!
         result = extract_result(d)
         return result
 
 
 class AsynchronousDeferredRunTest(RunTest):
+    """Runner for tests that return Deferreds that fire asynchronously.
+
+    That is, this test runner assumes that the Deferreds will only fire if the
+    reactor is left to spin for a while.
+    """
 
     def _run_user(self, function, *args):
+        # XXX: This is bogus. It'll start and stop the reactor multiple times
+        # per test. We want to do this only once per test.
         trial = TestCase()
         d = defer.maybeDeferred(function, *args)
         trial._wait(d)
@@ -80,6 +88,7 @@ def not_reentrant(function, _calls={}):
 
     The decorated function will raise an error if called from within itself.
     """
+    # XXX: Test this directly.
     def decorated(*args, **kwargs):
         if _calls.get(function, False):
             raise ReentryError(function)
@@ -96,6 +105,9 @@ class TimeoutError(Exception):
 
 
 class _Spinner(object):
+    # XXX: Docstring.
+
+    # Behaves the same as the reactor spinning logic in twisted.trial.
 
     _UNSET = object()
 
@@ -140,6 +152,13 @@ class _Spinner(object):
         for delayed_call in self._reactor.getDelayedCalls():
             delayed_call.cancel()
             junk.append(delayed_call)
+        for selectable in self._reactor.removeAll():
+            junk.append(selectable)
+        # XXX: Not tested. Not sure that the cost of testing this reliably
+        # outweighs the benefits.
+        if IReactorThreads.providedBy(self._reactor):
+            if self._reactor.threadpool is not None:
+                self._reactor._stopThreadPool()
         return junk
 
     @not_reentrant

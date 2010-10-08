@@ -246,6 +246,19 @@ class TestRunInReactor(TestCase):
         results = spinner.clean()
         self.assertThat(results, Equals([]))
 
+    def test_clean_selectables(self):
+        # If there's still a selectable (e.g. a listening socket), then
+        # clean() removes it from the reactor's registry.
+        #
+        # Note that the socket is left open. This emulates a bug in trial.
+        from twisted.internet.protocol import ServerFactory
+        reactor = self.make_reactor()
+        spinner = self.make_spinner(reactor)
+        port = reactor.listenTCP(0, ServerFactory())
+        spinner.run(self.make_timeout(), lambda: None)
+        results = spinner.clean()
+        self.assertThat(results, Equals([port]))
+
 
 def test_suite():
     from unittest import TestLoader
