@@ -16,7 +16,10 @@ from twisted.python.util import mergeFunctionMetadata
 from twisted.trial.unittest import TestCase
 
 
-# XXX: Copied & pasted from somewhere else.  No tests in testtools.
+class DeferredNotFired(Exception):
+    """Raised when we extract a result from a Deferred that's not fired yet."""
+
+
 def extract_result(deferred):
     """Extract the result from a fired deferred.
 
@@ -37,9 +40,7 @@ def extract_result(deferred):
     elif len(successes) == 1:
         return successes[0]
     else:
-        # XXX: AssertionError might be inappropriate.  Perhaps we should have
-        # a custom error message.
-        raise AssertionError("%r has not fired yet." % (deferred,))
+        raise DeferredNotFired("%r has not fired yet." % (deferred,))
 
 
 class SynchronousDeferredRunTest(RunTest):

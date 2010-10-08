@@ -7,6 +7,8 @@ from testtools import (
     )
 from testtools.deferredruntest import (
     AsynchronousDeferredRunTest,
+    DeferredNotFired,
+    extract_result,
     ReentryError,
     _Spinner,
     SynchronousDeferredRunTest,
@@ -19,6 +21,32 @@ from testtools.matchers import (
     )
 
 from twisted.internet import defer
+from twisted.python.failure import Failure
+
+
+class TestExtractResult(TestCase):
+
+    def test_not_fired(self):
+        # extract_result raises DeferredNotFired if it's given a Deferred that
+        # has not fired.
+        self.assertRaises(DeferredNotFired, extract_result, defer.Deferred())
+
+    def test_success(self):
+        # extract_result returns the value of the Deferred if it has fired
+        # successfully.
+        marker = object()
+        d = defer.succeed(marker)
+        self.assertThat(extract_result(d), Equals(marker))
+
+    def test_failure(self):
+        # extract_result raises the failure's exception if it's given a
+        # Deferred that is failing.
+        try:
+            1/0
+        except ZeroDivisionError:
+            f = Failure()
+        d = defer.fail(f)
+        self.assertRaises(ZeroDivisionError, extract_result, d)
 
 
 class TestSynchronousDeferredRunTest(TestCase):
