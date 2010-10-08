@@ -70,6 +70,9 @@ class AsynchronousDeferredRunTest(RunTest):
     def _run_user(self, function, *args):
         # XXX: This is bogus. It'll start and stop the reactor multiple times
         # per test. We want to do this only once per test.
+
+        # XXX: We also need to rig things so that the test fails if the
+        # reactor is left dirty.
         trial = TestCase()
         d = defer.maybeDeferred(function, *args)
         trial._wait(d)
