@@ -9,6 +9,7 @@ from testtools.deferredruntest import (
     AsynchronousDeferredRunTest,
     DeferredNotFired,
     extract_result,
+    not_reentrant,
     ReentryError,
     _Spinner,
     SynchronousDeferredRunTest,
@@ -47,6 +48,36 @@ class TestExtractResult(TestCase):
             f = Failure()
         d = defer.fail(f)
         self.assertRaises(ZeroDivisionError, extract_result, d)
+
+
+class TestNotReentrant(TestCase):
+
+    def test_not_reentrant(self):
+        # A function decorated as not being re-entrant will raise a
+        # ReentryError if it is called while it is running.
+        calls = []
+        @not_reentrant
+        def log_something():
+            calls.append(None)
+            if len(calls) < 5:
+                log_something()
+        self.assertRaises(ReentryError, log_something)
+        self.assertEqual(1, len(calls))
+
+    def test_deeper_stack(self):
+        calls = []
+        @not_reentrant
+        def g():
+            calls.append(None)
+            if len(calls) < 5:
+                f()
+        @not_reentrant
+        def f():
+            calls.append(None)
+            if len(calls) < 5:
+                g()
+        self.assertRaises(ReentryError, f)
+        self.assertEqual(2, len(calls))
 
 
 class TestSynchronousDeferredRunTest(TestCase):

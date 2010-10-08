@@ -89,7 +89,6 @@ def not_reentrant(function, _calls={}):
 
     The decorated function will raise an error if called from within itself.
     """
-    # XXX: Test this directly.
     def decorated(*args, **kwargs):
         if _calls.get(function, False):
             raise ReentryError(function)
