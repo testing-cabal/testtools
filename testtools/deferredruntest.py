@@ -106,9 +106,13 @@ class TimeoutError(Exception):
 
 
 class _Spinner(object):
-    # XXX: Docstring.
+    """Spin the reactor until a function is done.
 
-    # Behaves the same as the reactor spinning logic in twisted.trial.
+    This class emulates the behaviour of twisted.trial in that it grotesquely
+    and horribly spins the Twisted reactor while a function is running, and
+    then kills the reactor when that function is complete and all the
+    callbacks in its chains are done.
+    """
 
     _UNSET = object()
 
@@ -154,6 +158,9 @@ class _Spinner(object):
             delayed_call.cancel()
             junk.append(delayed_call)
         for selectable in self._reactor.removeAll():
+            # Twisted sends a 'KILL' signal to selectables that provide
+            # IProcessTransport.  Since only _dumbwin32proc processes do this,
+            # we aren't going to bother.
             junk.append(selectable)
         # XXX: Not tested. Not sure that the cost of testing this reliably
         # outweighs the benefits.
