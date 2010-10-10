@@ -107,8 +107,6 @@ class SynchronousDeferredRunTest(RunTest):
         return result
 
 
-# XXX: Still need to demonstrate how this can be hooked up to an actual test.
-
 class AsynchronousDeferredRunTest(RunTest):
     """Runner for tests that return Deferreds that fire asynchronously.
 
@@ -118,6 +116,8 @@ class AsynchronousDeferredRunTest(RunTest):
     Do not rely too heavily on the nuances of the behaviour of this class.
     What it does to the reactor is black magic, and if we can find nicer ways
     of doing it we will gladly break backwards compatibility.
+
+    This is highly experimental code.  Use at your own risk.
     """
 
     def __init__(self, case, handlers=None, reactor=None, timeout=0.005):
