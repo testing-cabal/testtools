@@ -7,6 +7,7 @@ __all__ = [
     'SynchronousDeferredRunTest',
     ]
 
+import signal
 import sys
 
 from testtools.runtest import RunTest
@@ -283,11 +284,19 @@ class _Spinner(object):
 
     _UNSET = object()
 
+    # Signals that we save and restore for each spin.
+    _PRESERVED_SIGNALS = [
+        signal.SIGINT,
+        signal.SIGTERM,
+        signal.SIGCHLD,
+        ]
+
     def __init__(self, reactor):
         self._reactor = reactor
         self._timeout_call = None
         self._success = self._UNSET
         self._failure = self._UNSET
+        self._saved_signals = []
 
     def _cancel_timeout(self):
         if self._timeout_call:
@@ -332,9 +341,19 @@ class _Spinner(object):
         # XXX: Not tested. Not sure that the cost of testing this reliably
         # outweighs the benefits.
         if IReactorThreads.providedBy(self._reactor):
+            self._reactor.suggestThreadPoolSize(0)
             if self._reactor.threadpool is not None:
                 self._reactor._stopThreadPool()
         return junk
+
+    def _save_signals(self):
+        self._saved_signals = [
+            (sig, signal.getsignal(sig)) for sig in self._PRESERVED_SIGNALS]
+
+    def _restore_signals(self):
+        for sig, hdlr in self._saved_signals:
+            signal.signal(sig, hdlr)
+        self._saved_signals = []
 
     @not_reentrant
     def run(self, timeout, function, *args, **kwargs):
@@ -344,6 +363,7 @@ class _Spinner(object):
         the Deferred fires and its chain completes or until the timeout is
         reached -- whichever comes first.
         """
+        self._save_signals()
         self._timeout_call = self._reactor.callLater(
             timeout, self._timed_out, function, timeout)
         def run_function():
@@ -352,4 +372,5 @@ class _Spinner(object):
             d.addBoth(self._stop_reactor)
         self._reactor.callWhenRunning(run_function)
         self._reactor.run()
+        self._restore_signals()
         return self._get_result()

@@ -2,6 +2,8 @@
 
 """Tests for the DeferredRunTest single test execution logic."""
 
+import signal
+
 from testtools import (
     TestCase,
     )
@@ -392,6 +394,17 @@ class TestRunInReactor(TestCase):
         result = self.make_spinner().run(
             self.make_timeout(), lambda: defer.succeed(marker))
         self.assertThat(result, Is(marker))
+
+    def test_preserve_signal_handler(self):
+        signals = [signal.SIGINT, signal.SIGTERM, signal.SIGCHLD]
+        for sig in signals:
+            self.addCleanup(signal.signal, sig, signal.getsignal(sig))
+        new_hdlrs = [lambda *a: None, lambda *a: None, lambda *a: None]
+        for sig, hdlr in zip(signals, new_hdlrs):
+            signal.signal(sig, hdlr)
+        spinner = self.make_spinner()
+        spinner.run(self.make_timeout(), lambda: None)
+        self.assertEqual(new_hdlrs, map(signal.getsignal, signals))
 
     def test_timeout(self):
         # If the function takes too long to run, we raise a TimeoutError.
