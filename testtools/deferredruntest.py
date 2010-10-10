@@ -7,6 +7,8 @@ __all__ = [
     'SynchronousDeferredRunTest',
     ]
 
+import sys
+
 from testtools.runtest import RunTest
 
 from twisted.internet import defer
@@ -76,6 +78,12 @@ class AsynchronousDeferredRunTest(RunTest):
         from twisted.internet import reactor
         spinner = _Spinner(reactor)
         spinner.run(self.TIMEOUT, function, *args)
+        junk = spinner.clean()
+        if junk:
+            try:
+                raise UncleanReactorError(junk)
+            except UncleanReactorError:
+                return self._got_user_exception(sys.exc_info())
 
 
 class ReentryError(Exception):
@@ -85,6 +93,18 @@ class ReentryError(Exception):
         super(ReentryError, self).__init__(
             "%r in not re-entrant but was called within a call to itself."
             % (function,))
+
+
+class UncleanReactorError(Exception):
+    """Raised when the reactor has junk in it."""
+
+    def __init__(self, junk):
+        super(UncleanReactorError, self).__init__(
+            "The reactor still thinks it needs to do things. Close all "
+            "connections, kill all processes and make sure all delayed "
+            "calls have either fired or been cancelled.  The management "
+            "thanks you: %s"
+            % map(repr, junk))
 
 
 def not_reentrant(function, _calls={}):

@@ -144,11 +144,14 @@ class RunTest(object):
         except KeyboardInterrupt:
             raise
         except:
-            exc_info = sys.exc_info()
-            e = exc_info[1]
-            self.case.onException(exc_info)
-            for exc_class, handler in self.handlers:
-                if isinstance(e, exc_class):
-                    self._exceptions.append(e)
-                    return self.exception_caught
-            raise e
+            return self._got_user_exception(sys.exc_info())
+
+    def _got_user_exception(self, exc_info):
+        """Called when user code raises an exception."""
+        e = exc_info[1]
+        self.case.onException(exc_info)
+        for exc_class, handler in self.handlers:
+            if isinstance(e, exc_class):
+                self._exceptions.append(e)
+                return self.exception_caught
+        raise e
