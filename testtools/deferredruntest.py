@@ -177,19 +177,23 @@ class AsynchronousDeferredRunTest(RunTest):
         # XXX: Make 'reactor' a parameter of something.
         from twisted.internet import reactor
         spinner = _Spinner(reactor)
+        # XXX: This can call addError on result multiple times. Not sure if
+        # this is a good idea.
         successful, unhandled = trap_unhandled_errors(
             spinner.run, self.TIMEOUT, self._run_deferred)
         if unhandled:
+            successful = False
             try:
                 raise UnhandledErrorInDeferred(unhandled)
             except UnhandledErrorInDeferred:
-                return self._got_user_exception(sys.exc_info())
+                self._got_user_exception(sys.exc_info())
         junk = spinner.clean()
         if junk:
+            successful = False
             try:
                 raise UncleanReactorError(junk)
             except UncleanReactorError:
-                return self._got_user_exception(sys.exc_info())
+                self._got_user_exception(sys.exc_info())
         if successful:
             self.result.addSuccess(self.case, details=self.case.getDetails())
 
