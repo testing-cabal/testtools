@@ -61,13 +61,20 @@ class SynchronousDeferredRunTest(RunTest):
         return result
 
 
+# XXX: Still need to demonstrate how this can be hooked up to an actual test.
+
 class AsynchronousDeferredRunTest(RunTest):
     """Runner for tests that return Deferreds that fire asynchronously.
 
     That is, this test runner assumes that the Deferreds will only fire if the
     reactor is left to spin for a while.
+
+    Do not rely too heavily on the nuances of the behaviour of this class.
+    What it does to the reactor is black magic, and if we can find nicer ways
+    of doing it we will gladly break backwards compatibility.
     """
 
+    # XXX: Probably should make timeout a parameter of something.
     TIMEOUT = 0.005
 
     def _run_deferred(self):
@@ -101,26 +108,24 @@ class AsynchronousDeferredRunTest(RunTest):
                 fails.append(None)
                 return clean_up()
             else:
-                d = defer.maybeDeferred(
-                    self._run_user, self.case._run_test_method, self.result)
+                d = self._run_user(self.case._run_test_method, self.result)
                 d.addCallback(fail_if_exception_caught)
                 d.addBoth(tear_down)
                 return d
 
         def tear_down(ignored):
-            d = defer.maybeDeferred(
-                self._run_user, self.case._run_teardown, self.result)
+            d = self._run_user(self.case._run_teardown, self.result)
             d.addCallback(fail_if_exception_caught)
             d.addBoth(clean_up)
             return d
 
-        d = defer.maybeDeferred(
-            self._run_user, self.case._run_setup, self.result)
+        d = self._run_user(self.case._run_setup, self.result)
         d.addCallback(set_up_done)
         d.addBoth(lambda ignored: len(fails) == 0)
         return d
 
     def _run_core(self):
+        # XXX: Make 'reactor' a parameter of something.
         from twisted.internet import reactor
         spinner = _Spinner(reactor)
         successful = spinner.run(self.TIMEOUT, self._run_deferred)
@@ -132,6 +137,16 @@ class AsynchronousDeferredRunTest(RunTest):
                 return self._got_user_exception(sys.exc_info())
         if successful:
             self.result.addSuccess(self.case, details=self.case.getDetails())
+
+    def _run_user(self, function, *args):
+        # XXX: I think this traps KeyboardInterrupt, and I think this is a bad
+        # thing. Perhaps we should have a maybeDeferred-like thing that
+        # re-raises KeyboardInterrupt. Or, we should have our own exception
+        # handler that stops the test run in the case of KeyboardInterrupt. But
+        # of course, the reactor installs a SIGINT handler anyway.
+        return defer.maybeDeferred(
+            super(AsynchronousDeferredRunTest, self)._run_user,
+            function, *args)
 
 
 class ReentryError(Exception):

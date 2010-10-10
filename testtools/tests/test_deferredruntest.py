@@ -229,6 +229,26 @@ class TestAsynchronousDeferredRunTest(TestCase):
              ('stopTest', test)]))
         self.assertThat(list(error.keys()), Equals(['traceback']))
 
+    def disabled_test_unhandled_error_from_deferred(self):
+        # XXX: re-enable this
+        # If there's a Deferred with an unhandled error, the test fails.
+        class SomeCase(TestCase):
+            def test_cruft(self):
+                # Note we aren't returning the Deferred so that the error will
+                # be unhandled.
+                defer.maybeDeferred(lambda: 1/0)
+        test = SomeCase('test_cruft')
+        runner = self.make_runner(test)
+        result = self.make_result()
+        runner.run(result)
+        error = result._events[1][2]
+        result._events[1] = ('addError', test, None)
+        self.assertThat(result._events, Equals(
+            [('startTest', test),
+             ('addError', test, None),
+             ('stopTest', test)]))
+        self.assertThat(list(error.keys()), Equals(['traceback']))
+
 
 class TestRunInReactor(TestCase):
 
