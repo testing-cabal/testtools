@@ -146,7 +146,7 @@ class TestAsynchronousDeferredRunTest(TestCase):
     def make_runner(self, test):
         return AsynchronousDeferredRunTest(test, test.exception_handlers)
 
-    def disabled_test_setUp_returns_deferred_that_fires_later(self):
+    def test_setUp_returns_deferred_that_fires_later(self):
         call_log = []
         marker = object()
         d = defer.Deferred().addCallback(call_log.append)
@@ -164,11 +164,11 @@ class TestAsynchronousDeferredRunTest(TestCase):
         runner = self.make_runner(test)
         result = self.make_result()
         reactor = self.make_reactor()
-        reactor.callLater(1, fire_deferred)
+        reactor.callLater(runner.TIMEOUT / 2.0, fire_deferred)
         runner.run(result)
         self.assertThat(call_log, Equals(['setUp', marker, 'test']))
 
-    def disabled_test_calls_setUp_test_tearDown_in_sequence(self):
+    def test_calls_setUp_test_tearDown_in_sequence(self):
         call_log = []
         a = defer.Deferred()
         b = defer.Deferred()
@@ -202,9 +202,9 @@ class TestAsynchronousDeferredRunTest(TestCase):
             self.assertThat(
                 call_log, Equals(['setUp', 'a', 'test', 'b', 'tearDown']))
             c.callback(None)
-        reactor.callLater(1, fire_a)
-        reactor.callLater(2, fire_b)
-        reactor.callLater(3, fire_c)
+        reactor.callLater(runner.TIMEOUT * 0.5, fire_a)
+        reactor.callLater(runner.TIMEOUT, fire_b)
+        reactor.callLater(runner.TIMEOUT * 1.5, fire_c)
         runner.run(result)
         # XXX: We ought to catch unhandled errors in Deferreds.  This means
         # hooking into Twisted's logging system.

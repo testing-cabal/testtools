@@ -13,7 +13,6 @@ from twisted.internet import defer
 from twisted.internet.interfaces import IReactorThreads
 from twisted.python.failure import Failure
 from twisted.python.util import mergeFunctionMetadata
-from twisted.trial.unittest import TestCase
 
 
 class DeferredNotFired(Exception):
@@ -67,15 +66,16 @@ class AsynchronousDeferredRunTest(RunTest):
     reactor is left to spin for a while.
     """
 
+    TIMEOUT = 0.01
+
     def _run_user(self, function, *args):
         # XXX: This is bogus. It'll start and stop the reactor multiple times
         # per test. We want to do this only once per test.
-
-        # XXX: We also need to rig things so that the test fails if the
-        # reactor is left dirty.
-        trial = TestCase()
-        d = defer.maybeDeferred(function, *args)
-        trial._wait(d)
+        #
+        # XXX: 'reactor' should be a parameter rather than using the global.
+        from twisted.internet import reactor
+        spinner = _Spinner(reactor)
+        spinner.run(self.TIMEOUT, function, *args)
 
 
 class ReentryError(Exception):
