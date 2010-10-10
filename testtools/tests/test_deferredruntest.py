@@ -23,6 +23,7 @@ from testtools.matchers import (
     Equals,
     Is,
     )
+from testtools.runtest import RunTest
 
 from twisted.internet import defer
 from twisted.python.failure import Failure
@@ -103,6 +104,111 @@ class TestTrapUnhandledErrors(TestCase):
         result, errors = trap_unhandled_errors(make_deferred_but_dont_handle)
         self.assertIs(None, result)
         self.assertEqual(failures, [error.failResult for error in errors])
+
+
+class X(object):
+    """Tests that we run as part of our tests, nested to avoid discovery."""
+
+    class Base(TestCase):
+        def setUp(self):
+            super(X.Base, self).setUp()
+            self.calls = ['setUp']
+            self.addCleanup(self.calls.append, 'clean-up')
+        def test_something(self):
+            self.calls.append('test')
+        def tearDown(self):
+            self.calls.append('tearDown')
+            super(X.Base, self).tearDown()
+
+    class Success(Base):
+        expected_calls = ['setUp', 'test', 'tearDown', 'clean-up']
+        expected_results = [['addSuccess']]
+
+    class ErrorInSetup(Base):
+        expected_calls = ['setUp', 'clean-up']
+        expected_results = [('addError', RuntimeError)]
+        def setUp(self):
+            super(X.ErrorInSetup, self).setUp()
+            raise RuntimeError("Error in setUp")
+
+    class ErrorInTest(Base):
+        expected_calls = ['setUp', 'tearDown', 'clean-up']
+        expected_results = [('addError', RuntimeError)]
+        def test_something(self):
+            raise RuntimeError("Error in test")
+
+    class FailureInTest(Base):
+        expected_calls = ['setUp', 'tearDown', 'clean-up']
+        expected_results = [('addFailure', AssertionError)]
+        def test_something(self):
+            self.fail("test failed")
+
+    class ErrorInTearDown(Base):
+        expected_calls = ['setUp', 'test', 'clean-up']
+        expected_results = [('addError', RuntimeError)]
+        def tearDown(self):
+            raise RuntimeError("Error in tearDown")
+
+    class ErrorInCleanup(Base):
+        expected_calls = ['setUp', 'test', 'tearDown', 'clean-up']
+        expected_results = [('addError', ZeroDivisionError)]
+        def test_something(self):
+            self.calls.append('test')
+            self.addCleanup(lambda: 1/0)
+
+    class TestIntegration(TestCase):
+
+        def assertResultsMatch(self, test, result):
+            events = list(result._events)
+            self.assertEqual(('startTest', test), events.pop(0))
+            for expected_result in test.expected_results:
+                result = events.pop(0)
+                if len(expected_result) == 1:
+                    self.assertEqual((expected_result[0], test), result)
+                else:
+                    self.assertEqual((expected_result[0], test), result[:2])
+                    error_type = expected_result[1]
+                    self.assertIn(error_type.__name__, str(result[2]))
+            self.assertEqual([('stopTest', test)], events)
+
+        def test_runner(self):
+            result = ExtendedTestResult()
+            test = self.test_factory('test_something', runTest=self.runner)
+            test.run(result)
+            self.assertEqual(test.calls, self.test_factory.expected_calls)
+            self.assertResultsMatch(test, result)
+
+
+def make_integration_tests():
+    from unittest import TestSuite
+    from testtools import clone_test_with_new_id
+    runners = [
+        RunTest,
+        SynchronousDeferredRunTest,
+        AsynchronousDeferredRunTest,
+        ]
+
+    tests = [
+        X.Success,
+        X.ErrorInSetup,
+        X.ErrorInTest,
+        X.ErrorInTearDown,
+        X.FailureInTest,
+        X.ErrorInCleanup,
+        ]
+    base_test = X.TestIntegration('test_runner')
+    integration_tests = []
+    for runner in runners:
+        for test in tests:
+            new_test = clone_test_with_new_id(
+                base_test, '%s(%s, %s)' % (
+                    base_test.id(),
+                    runner.__name__,
+                    test.__name__))
+            new_test.test_factory = test
+            new_test.runner = runner
+            integration_tests.append(new_test)
+    return TestSuite(integration_tests)
 
 
 class TestSynchronousDeferredRunTest(TestCase):
@@ -455,5 +561,7 @@ class TestRunInReactor(TestCase):
 
 
 def test_suite():
-    from unittest import TestLoader
-    return TestLoader().loadTestsFromName(__name__)
+    from unittest import TestLoader, TestSuite
+    return TestSuite(
+        [TestLoader().loadTestsFromName(__name__),
+         make_integration_tests()])

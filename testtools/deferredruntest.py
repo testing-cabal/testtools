@@ -100,12 +100,8 @@ class SynchronousDeferredRunTest(RunTest):
     def _run_user(self, function, *args):
         d = defer.maybeDeferred(function, *args)
         def got_exception(failure):
-            e = failure.value
-            for exc_class, handler in self.handlers:
-                if isinstance(e, exc_class):
-                    self._exceptions.append(e)
-                    return self.exception_caught
-            return failure
+            return self._got_user_exception(
+                (failure.type, failure.value, failure.tb))
         d.addErrback(got_exception)
         result = extract_result(d)
         return result
