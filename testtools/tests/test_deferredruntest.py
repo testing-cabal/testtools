@@ -14,6 +14,7 @@ from testtools.deferredruntest import (
     _Spinner,
     SynchronousDeferredRunTest,
     TimeoutError,
+    trap_unhandled_errors,
     )
 from testtools.tests.helpers import ExtendedTestResult
 from testtools.matchers import (
@@ -78,6 +79,28 @@ class TestNotReentrant(TestCase):
                 g()
         self.assertRaises(ReentryError, f)
         self.assertEqual(2, len(calls))
+
+
+class TestTrapUnhandledErrors(TestCase):
+
+    def test_no_deferreds(self):
+        marker = object()
+        result, errors = trap_unhandled_errors(lambda: marker)
+        self.assertEqual([], errors)
+        self.assertIs(marker, result)
+
+    def test_unhandled_error(self):
+        failures = []
+        def make_deferred_but_dont_handle():
+            try:
+                1/0
+            except ZeroDivisionError:
+                f = Failure()
+                failures.append(f)
+                defer.fail(f)
+        result, errors = trap_unhandled_errors(make_deferred_but_dont_handle)
+        self.assertIs(None, result)
+        self.assertEqual(failures, [error.failResult for error in errors])
 
 
 class TestSynchronousDeferredRunTest(TestCase):

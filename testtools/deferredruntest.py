@@ -44,6 +44,41 @@ def extract_result(deferred):
         raise DeferredNotFired("%r has not fired yet." % (deferred,))
 
 
+def trap_unhandled_errors(function, *args, **kwargs):
+    """Run a function, trapping any unhandled errors in Deferreds.
+
+    Assumes that 'function' will have handled any errors in Deferreds by the
+    time it is complete.  This is almost never true of any Twisted code, since
+    you can never tell when someone has added an errback to a Deferred.
+
+    If 'function' raises, then don't bother doing any unhandled error
+    jiggery-pokery, since something horrible has probably happened anyway.
+
+    :return: A tuple of '(result, error)', where 'result' is the value returned
+        by 'function' and 'error' is a list of `defer.DebugInfo` objects that
+        have unhandled errors in Deferreds.
+    """
+    real_DebugInfo = defer.DebugInfo
+    debug_infos = []
+    def DebugInfo():
+        info = real_DebugInfo()
+        debug_infos.append(info)
+        return info
+    defer.DebugInfo = DebugInfo
+    try:
+        result = function(*args, **kwargs)
+    finally:
+        defer.DebugInfo = real_DebugInfo
+    errors = []
+    for info in debug_infos:
+        if info.failResult is not None:
+            errors.append(info)
+            # Disable the destructor that logs to error. We are already
+            # catching the error here.
+            info.__del__ = lambda: None
+    return result, errors
+
+
 class SynchronousDeferredRunTest(RunTest):
     """Runner for tests that return synchronous Deferreds."""
 
