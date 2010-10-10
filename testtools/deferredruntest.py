@@ -135,6 +135,24 @@ class AsynchronousDeferredRunTest(RunTest):
         return lambda case, handlers=None: AsynchronousDeferredRunTest(
             case, handlers, reactor, timeout)
 
+    @defer.inlineCallbacks
+    def _run_cleanups(self):
+        """Run the cleanups on the test case.
+
+        We expect that the cleanups on the test case can also return
+        asynchronous Deferreds.  As such, we take the responsibility for
+        running the cleanups, rather than letting TestCase do it.
+        """
+        while self.case._cleanups:
+            f, args, kwargs = self.case._cleanups.pop()
+            try:
+                yield defer.maybeDeferred(f, *args, **kwargs)
+            except:
+                exc_info = sys.exc_info()
+                self.case._report_traceback(exc_info)
+                last_exception = exc_info[1]
+        defer.returnValue(last_exception)
+
     def _run_deferred(self):
         """Run the test, assuming everything in it is Deferred-returning.
 
@@ -151,9 +169,7 @@ class AsynchronousDeferredRunTest(RunTest):
 
         def clean_up(ignored=None):
             """Run the cleanups."""
-            # XXX: This doesn't really allow for cleanups that return
-            # Deferreds.
-            d = defer.maybeDeferred(self.case._runCleanups, self.result)
+            d = self._run_cleanups()
             def clean_up_done(result):
                 if result is not None:
                     self._exceptions.append(result)

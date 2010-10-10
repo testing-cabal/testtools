@@ -242,6 +242,37 @@ class TestAsynchronousDeferredRunTest(TestCase):
         self.assertThat(
             call_log, Equals(['setUp', 'a', 'test', 'b', 'tearDown', 'c']))
 
+    def test_async_cleanups(self):
+        class SomeCase(TestCase):
+            def test_whatever(self):
+                pass
+        test = SomeCase('test_whatever')
+        log = []
+        a = defer.Deferred().addCallback(lambda x: log.append('a'))
+        b = defer.Deferred().addCallback(lambda x: log.append('b'))
+        c = defer.Deferred().addCallback(lambda x: log.append('c'))
+        test.addCleanup(lambda: a)
+        test.addCleanup(lambda: b)
+        test.addCleanup(lambda: c)
+        def fire_a():
+            self.assertThat(log, Equals([]))
+            a.callback(None)
+        def fire_b():
+            self.assertThat(log, Equals(['a']))
+            b.callback(None)
+        def fire_c():
+            self.assertThat(log, Equals(['a', 'b']))
+            c.callback(None)
+        timeout = self.make_timeout()
+        reactor = self.make_reactor()
+        reactor.callLater(timeout * 0.25, fire_a)
+        reactor.callLater(timeout * 0.5, fire_b)
+        reactor.callLater(timeout * 0.75, fire_c)
+        runner = self.make_runner(test, timeout)
+        result = self.make_result()
+        runner.run(result)
+        self.assertThat(log, Equals(['a', 'b', 'c']))
+
     def test_clean_reactor(self):
         # If there's cruft left over in the reactor, the test fails.
         reactor = self.make_reactor()
