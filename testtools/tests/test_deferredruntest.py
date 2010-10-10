@@ -168,9 +168,7 @@ class TestAsynchronousDeferredRunTest(TestCase):
         runner.run(result)
         self.assertThat(call_log, Equals(['setUp', marker, 'test']))
 
-    def disabled_test_calls_setUp_test_tearDown_in_sequence(self):
-        # XXX: This test fails because the reactor is cleaned again after each
-        # stage of the test.
+    def test_calls_setUp_test_tearDown_in_sequence(self):
         call_log = []
         a = defer.Deferred()
         b = defer.Deferred()
@@ -204,9 +202,9 @@ class TestAsynchronousDeferredRunTest(TestCase):
             self.assertThat(
                 call_log, Equals(['setUp', 'a', 'test', 'b', 'tearDown']))
             c.callback(None)
-        reactor.callLater(runner.TIMEOUT * 0.5, fire_a)
-        reactor.callLater(runner.TIMEOUT, fire_b)
-        reactor.callLater(runner.TIMEOUT * 1.5, fire_c)
+        reactor.callLater(runner.TIMEOUT * 0.25, fire_a)
+        reactor.callLater(runner.TIMEOUT * 0.5, fire_b)
+        reactor.callLater(runner.TIMEOUT * 0.75, fire_c)
         runner.run(result)
         # XXX: We ought to catch unhandled errors in Deferreds.  This means
         # hooking into Twisted's logging system.

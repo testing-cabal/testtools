@@ -68,22 +68,70 @@ class AsynchronousDeferredRunTest(RunTest):
     reactor is left to spin for a while.
     """
 
-    TIMEOUT = 0.01
+    TIMEOUT = 0.005
 
-    def _run_user(self, function, *args):
-        # XXX: This is bogus. It'll start and stop the reactor multiple times
-        # per test. We want to do this only once per test.
-        #
-        # XXX: 'reactor' should be a parameter rather than using the global.
+    def _run_deferred(self):
+        """Run the test, assuming everything in it is Deferred-returning.
+
+        This should return a Deferred that fires with True if the test was
+        successful and False if the test was not successful.  It should *not*
+        call addSuccess on the result, because there's reactor clean up that
+        we needs to be done afterwards.
+        """
+        fails = []
+
+        def fail_if_exception_caught(exception_caught):
+            if self.exception_caught == exception_caught:
+                fails.append(None)
+
+        def clean_up(ignored=None):
+            """Run the cleanups."""
+            # XXX: This doesn't really allow for cleanups that return
+            # Deferreds.
+            d = defer.maybeDeferred(self.case._runCleanups, self.result)
+            def clean_up_done(result):
+                if result is not None:
+                    self._exceptions.append(result)
+                    fails.append(None)
+            return d.addCallback(clean_up_done)
+
+        def set_up_done(exception_caught):
+            """Set up is done, either clean up or run the test."""
+            if self.exception_caught == exception_caught:
+                fails.append(None)
+                return clean_up()
+            else:
+                d = defer.maybeDeferred(
+                    self._run_user, self.case._run_test_method, self.result)
+                d.addCallback(fail_if_exception_caught)
+                d.addBoth(tear_down)
+                return d
+
+        def tear_down(ignored):
+            d = defer.maybeDeferred(
+                self._run_user, self.case._run_teardown, self.result)
+            d.addCallback(fail_if_exception_caught)
+            d.addBoth(clean_up)
+            return d
+
+        d = defer.maybeDeferred(
+            self._run_user, self.case._run_setup, self.result)
+        d.addCallback(set_up_done)
+        d.addBoth(lambda ignored: len(fails) == 0)
+        return d
+
+    def _run_core(self):
         from twisted.internet import reactor
         spinner = _Spinner(reactor)
-        spinner.run(self.TIMEOUT, function, *args)
+        successful = spinner.run(self.TIMEOUT, self._run_deferred)
         junk = spinner.clean()
         if junk:
             try:
                 raise UncleanReactorError(junk)
             except UncleanReactorError:
                 return self._got_user_exception(sys.exc_info())
+        if successful:
+            self.result.addSuccess(self.case, details=self.case.getDetails())
 
 
 class ReentryError(Exception):
