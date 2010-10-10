@@ -166,10 +166,17 @@ class TestAsynchronousDeferredRunTest(TestCase):
     def make_result(self):
         return ExtendedTestResult()
 
-    def make_runner(self, test):
-        return AsynchronousDeferredRunTest(test, test.exception_handlers)
+    def make_runner(self, test, timeout=None):
+        if timeout is None:
+            timeout = self.make_timeout()
+        return AsynchronousDeferredRunTest(
+            test, test.exception_handlers, timeout=timeout)
+
+    def make_timeout(self):
+        return 0.005
 
     def test_setUp_returns_deferred_that_fires_later(self):
+        # XXX: Explain how this test works.
         call_log = []
         marker = object()
         d = defer.Deferred().addCallback(call_log.append)
@@ -184,14 +191,16 @@ class TestAsynchronousDeferredRunTest(TestCase):
             self.assertThat(call_log, Equals(['setUp']))
             d.callback(marker)
         test = SomeCase('test_something')
-        runner = self.make_runner(test)
+        timeout = self.make_timeout()
+        runner = self.make_runner(test, timeout=timeout)
         result = self.make_result()
         reactor = self.make_reactor()
-        reactor.callLater(runner._timeout / 2.0, fire_deferred)
+        reactor.callLater(timeout, fire_deferred)
         runner.run(result)
         self.assertThat(call_log, Equals(['setUp', marker, 'test']))
 
     def test_calls_setUp_test_tearDown_in_sequence(self):
+        # XXX: Explain how this test works.
         call_log = []
         a = defer.Deferred()
         b = defer.Deferred()
@@ -212,7 +221,8 @@ class TestAsynchronousDeferredRunTest(TestCase):
         b.addCallback(lambda x: call_log.append('b'))
         c.addCallback(lambda x: call_log.append('c'))
         test = SomeCase('test_success')
-        runner = self.make_runner(test)
+        timeout = self.make_timeout()
+        runner = self.make_runner(test, timeout)
         result = self.make_result()
         reactor = self.make_reactor()
         def fire_a():
@@ -225,9 +235,9 @@ class TestAsynchronousDeferredRunTest(TestCase):
             self.assertThat(
                 call_log, Equals(['setUp', 'a', 'test', 'b', 'tearDown']))
             c.callback(None)
-        reactor.callLater(runner._timeout * 0.25, fire_a)
-        reactor.callLater(runner._timeout * 0.5, fire_b)
-        reactor.callLater(runner._timeout * 0.75, fire_c)
+        reactor.callLater(timeout * 0.25, fire_a)
+        reactor.callLater(timeout * 0.5, fire_b)
+        reactor.callLater(timeout * 0.75, fire_c)
         runner.run(result)
         self.assertThat(
             call_log, Equals(['setUp', 'a', 'test', 'b', 'tearDown', 'c']))
@@ -235,11 +245,12 @@ class TestAsynchronousDeferredRunTest(TestCase):
     def test_clean_reactor(self):
         # If there's cruft left over in the reactor, the test fails.
         reactor = self.make_reactor()
+        timeout = self.make_timeout()
         class SomeCase(TestCase):
             def test_cruft(self):
-                reactor.callLater(runner._timeout * 2.0, lambda: None)
+                reactor.callLater(timeout * 2.0, lambda: None)
         test = SomeCase('test_cruft')
-        runner = self.make_runner(test)
+        runner = self.make_runner(test, timeout)
         result = self.make_result()
         runner.run(result)
         error = result._events[1][2]
