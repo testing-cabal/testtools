@@ -12,6 +12,12 @@ Improvements
 * In normal circumstances, a TestCase will no longer share details with clones
   of itself. (Andrew Bennetts, bug #637725)
 
+* Experimental support for running tests that return Deferreds.
+  (Jonathan Lange)
+
+* 'runTest' can now be passed to TestCase to specify a RunTest object to use.
+  (Jonathan Lange, bug #657760)
+
 
 0.9.6
 ~~~~~
