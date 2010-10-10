@@ -21,6 +21,20 @@ class DeferredNotFired(Exception):
     """Raised when we extract a result from a Deferred that's not fired yet."""
 
 
+class UnhandledErrorInDeferred(Exception):
+    """Raised when there are unhandlede errors in Deferreds.
+
+    If you are getting this error then you are probably either not returning a
+    Deferred from a function that makes one, or you are not adding an errback
+    to a Deferred.  Or both.  Use `Deferred.DEBUG` to get more information.
+    """
+
+    def __init__(self, debug_infos):
+        super(UnhandledErrorInDeferred, self).__init__(
+            "Unhandled error in Deferreds: %r" % (
+                [info.failResult for info in debug_infos]))
+
+
 def extract_result(deferred):
     """Extract the result from a fired deferred.
 
@@ -163,7 +177,13 @@ class AsynchronousDeferredRunTest(RunTest):
         # XXX: Make 'reactor' a parameter of something.
         from twisted.internet import reactor
         spinner = _Spinner(reactor)
-        successful = spinner.run(self.TIMEOUT, self._run_deferred)
+        successful, unhandled = trap_unhandled_errors(
+            spinner.run, self.TIMEOUT, self._run_deferred)
+        if unhandled:
+            try:
+                raise UnhandledErrorInDeferred(unhandled)
+            except UnhandledErrorInDeferred:
+                return self._got_user_exception(sys.exc_info())
         junk = spinner.clean()
         if junk:
             try:

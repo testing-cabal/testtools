@@ -229,8 +229,6 @@ class TestAsynchronousDeferredRunTest(TestCase):
         reactor.callLater(runner.TIMEOUT * 0.5, fire_b)
         reactor.callLater(runner.TIMEOUT * 0.75, fire_c)
         runner.run(result)
-        # XXX: We ought to catch unhandled errors in Deferreds.  This means
-        # hooking into Twisted's logging system.
         self.assertThat(
             call_log, Equals(['setUp', 'a', 'test', 'b', 'tearDown', 'c']))
 
@@ -252,7 +250,7 @@ class TestAsynchronousDeferredRunTest(TestCase):
              ('stopTest', test)]))
         self.assertThat(list(error.keys()), Equals(['traceback']))
 
-    def disabled_test_unhandled_error_from_deferred(self):
+    def test_unhandled_error_from_deferred(self):
         # XXX: re-enable this
         # If there's a Deferred with an unhandled error, the test fails.
         class SomeCase(TestCase):
