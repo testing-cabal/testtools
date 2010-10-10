@@ -203,8 +203,11 @@ class TestAsynchronousDeferredRunTest(TestCase):
         # XXX: Explain how this test works.
         call_log = []
         a = defer.Deferred()
+        a.addCallback(lambda x: call_log.append('a'))
         b = defer.Deferred()
+        b.addCallback(lambda x: call_log.append('b'))
         c = defer.Deferred()
+        c.addCallback(lambda x: call_log.append('c'))
         class SomeCase(TestCase):
             def setUp(self):
                 super(SomeCase, self).setUp()
@@ -217,9 +220,6 @@ class TestAsynchronousDeferredRunTest(TestCase):
                 super(SomeCase, self).tearDown()
                 call_log.append('tearDown')
                 return c
-        a.addCallback(lambda x: call_log.append('a'))
-        b.addCallback(lambda x: call_log.append('b'))
-        c.addCallback(lambda x: call_log.append('c'))
         test = SomeCase('test_success')
         timeout = self.make_timeout()
         runner = self.make_runner(test, timeout)
