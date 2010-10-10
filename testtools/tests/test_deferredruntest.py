@@ -176,7 +176,9 @@ class TestAsynchronousDeferredRunTest(TestCase):
         return 0.005
 
     def test_setUp_returns_deferred_that_fires_later(self):
-        # XXX: Explain how this test works.
+        # setUp can return a Deferred that might fire at any time.
+        # AsynchronousDeferredRunTest will not go on to running the test until
+        # the Deferred returned by setUp actually fires.
         call_log = []
         marker = object()
         d = defer.Deferred().addCallback(call_log.append)
@@ -200,7 +202,10 @@ class TestAsynchronousDeferredRunTest(TestCase):
         self.assertThat(call_log, Equals(['setUp', marker, 'test']))
 
     def test_calls_setUp_test_tearDown_in_sequence(self):
-        # XXX: Explain how this test works.
+        # setUp, the test method and tearDown can all return
+        # Deferreds. AsynchronousDeferredRunTest will make sure that each of
+        # these are run in turn, only going on to the next stage once the
+        # Deferred from the previous stage has fired.
         call_log = []
         a = defer.Deferred()
         a.addCallback(lambda x: call_log.append('a'))
@@ -243,6 +248,9 @@ class TestAsynchronousDeferredRunTest(TestCase):
             call_log, Equals(['setUp', 'a', 'test', 'b', 'tearDown', 'c']))
 
     def test_async_cleanups(self):
+        # Cleanups added with addCleanup can return
+        # Deferreds. AsynchronousDeferredRunTest will run each of them in
+        # turn.
         class SomeCase(TestCase):
             def test_whatever(self):
                 pass
