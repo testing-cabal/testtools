@@ -123,8 +123,17 @@ class AsynchronousDeferredRunTest(RunTest):
     of doing it we will gladly break backwards compatibility.
     """
 
-    # XXX: Probably should make timeout a parameter of something.
-    TIMEOUT = 0.005
+    def __init__(self, case, handlers=None, reactor=None, timeout=0.005):
+        super(AsynchronousDeferredRunTest, self).__init__(case, handlers)
+        if reactor is None:
+            from twisted.internet import reactor
+        self._reactor = reactor
+        self._timeout = timeout
+
+    @classmethod
+    def make_factory(cls, reactor, timeout):
+        return lambda case, handlers=None: AsynchronousDeferredRunTest(
+            case, handlers, reactor, timeout)
 
     def _run_deferred(self):
         """Run the test, assuming everything in it is Deferred-returning.
@@ -174,13 +183,11 @@ class AsynchronousDeferredRunTest(RunTest):
         return d
 
     def _run_core(self):
-        # XXX: Make 'reactor' a parameter of something.
-        from twisted.internet import reactor
-        spinner = _Spinner(reactor)
+        spinner = _Spinner(self._reactor)
         # XXX: This can call addError on result multiple times. Not sure if
         # this is a good idea.
         successful, unhandled = trap_unhandled_errors(
-            spinner.run, self.TIMEOUT, self._run_deferred)
+            spinner.run, self._timeout, self._run_deferred)
         if unhandled:
             successful = False
             try:

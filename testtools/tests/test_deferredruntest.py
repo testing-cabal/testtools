@@ -187,7 +187,7 @@ class TestAsynchronousDeferredRunTest(TestCase):
         runner = self.make_runner(test)
         result = self.make_result()
         reactor = self.make_reactor()
-        reactor.callLater(runner.TIMEOUT / 2.0, fire_deferred)
+        reactor.callLater(runner._timeout / 2.0, fire_deferred)
         runner.run(result)
         self.assertThat(call_log, Equals(['setUp', marker, 'test']))
 
@@ -225,9 +225,9 @@ class TestAsynchronousDeferredRunTest(TestCase):
             self.assertThat(
                 call_log, Equals(['setUp', 'a', 'test', 'b', 'tearDown']))
             c.callback(None)
-        reactor.callLater(runner.TIMEOUT * 0.25, fire_a)
-        reactor.callLater(runner.TIMEOUT * 0.5, fire_b)
-        reactor.callLater(runner.TIMEOUT * 0.75, fire_c)
+        reactor.callLater(runner._timeout * 0.25, fire_a)
+        reactor.callLater(runner._timeout * 0.5, fire_b)
+        reactor.callLater(runner._timeout * 0.75, fire_c)
         runner.run(result)
         self.assertThat(
             call_log, Equals(['setUp', 'a', 'test', 'b', 'tearDown', 'c']))
@@ -237,7 +237,7 @@ class TestAsynchronousDeferredRunTest(TestCase):
         reactor = self.make_reactor()
         class SomeCase(TestCase):
             def test_cruft(self):
-                reactor.callLater(runner.TIMEOUT * 2.0, lambda: None)
+                reactor.callLater(runner._timeout * 2.0, lambda: None)
         test = SomeCase('test_cruft')
         runner = self.make_runner(test)
         result = self.make_result()
@@ -268,6 +268,20 @@ class TestAsynchronousDeferredRunTest(TestCase):
              ('addError', test, None),
              ('stopTest', test)]))
         self.assertThat(list(error.keys()), Equals(['traceback']))
+
+    def test_convenient_construction(self):
+        # As a convenience method, AsynchronousDeferredRunTest has a
+        # classmethod that returns an AsynchronousDeferredRunTest
+        # factory. This factory has the same API as the RunTest constructor.
+        reactor = object()
+        timeout = object()
+        handler = object()
+        factory = AsynchronousDeferredRunTest.make_factory(reactor, timeout)
+        runner = factory(self, [handler])
+        self.assertIs(reactor, runner._reactor)
+        self.assertIs(timeout, runner._timeout)
+        self.assertIs(self, runner.case)
+        self.assertEqual([handler], runner.handlers)
 
 
 class TestRunInReactor(TestCase):
