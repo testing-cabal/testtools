@@ -251,7 +251,6 @@ class TestAsynchronousDeferredRunTest(TestCase):
         self.assertThat(list(error.keys()), Equals(['traceback']))
 
     def test_unhandled_error_from_deferred(self):
-        # XXX: re-enable this
         # If there's a Deferred with an unhandled error, the test fails.
         class SomeCase(TestCase):
             def test_cruft(self):
