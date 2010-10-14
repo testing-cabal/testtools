@@ -20,6 +20,9 @@ Improvements
   ThreadsafeForwardingResult so correct test durations can be reported.
   (Martin [gz], Robert Collins, #625594)
 
+* With unittest from Python 2.7 skipped tests will now show only the reason
+  rather than a serialisation of all details. (Martin [gz], #625583)
+
 
 0.9.6
 ~~~~~

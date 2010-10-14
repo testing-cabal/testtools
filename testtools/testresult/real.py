@@ -422,8 +422,11 @@ class ExtendedToOriginalDecorator(object):
             try:
                 return addSkip(test, details=details)
             except TypeError:
-                # have to convert
-                reason = _details_to_str(details)
+                # extract the reason if it's available
+                try:
+                    reason = ''.join(details['reason'].iter_text())
+                except KeyError:
+                    reason = _details_to_str(details)
         return addSkip(test, reason)
 
     def addUnexpectedSuccess(self, test, details=None):
