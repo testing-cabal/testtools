@@ -16,6 +16,10 @@ Improvements
 * In normal circumstances, a TestCase will no longer share details with clones
   of itself. (Andrew Bennetts, bug #637725)
 
+* Timestamps as produced by subunit protocol clients are now forwarded in the
+  ThreadsafeForwardingResult so correct test durations can be reported.
+  (Martin [gz], Robert Collins, #625594)
+
 
 0.9.6
 ~~~~~

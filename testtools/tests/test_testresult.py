@@ -51,46 +51,55 @@ class TestTestResultContract(TestCase):
     def test_addExpectedFailure(self):
         # Calling addExpectedFailure(test, exc_info) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addExpectedFailure(self, an_exc_info)
 
     def test_addExpectedFailure_details(self):
         # Calling addExpectedFailure(test, details=xxx) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addExpectedFailure(self, details={})
 
     def test_addError_details(self):
         # Calling addError(test, details=xxx) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addError(self, details={})
 
     def test_addFailure_details(self):
         # Calling addFailure(test, details=xxx) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addFailure(self, details={})
 
     def test_addSkipped(self):
         # Calling addSkip(test, reason) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addSkip(self, _u("Skipped for some reason"))
 
     def test_addSkipped_details(self):
         # Calling addSkip(test, reason) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addSkip(self, details={})
 
     def test_addUnexpectedSuccess(self):
         # Calling addUnexpectedSuccess(test) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addUnexpectedSuccess(self)
 
     def test_addUnexpectedSuccess_details(self):
         # Calling addUnexpectedSuccess(test) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addUnexpectedSuccess(self, details={})
 
     def test_addSuccess_details(self):
         # Calling addSuccess(test) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addSuccess(self, details={})
 
     def test_startStopTestRun(self):
@@ -419,7 +428,7 @@ AssertionError: yo!
 
 
 class TestThreadSafeForwardingResult(TestWithFakeExceptions):
-    """Tests for `MultiTestResult`."""
+    """Tests for `TestThreadSafeForwardingResult`."""
 
     def setUp(self):
         TestWithFakeExceptions.setUp(self)
@@ -452,22 +461,51 @@ class TestThreadSafeForwardingResult(TestWithFakeExceptions):
     def test_forwarding_methods(self):
         # error, failure, skip and success are forwarded in batches.
         exc_info1 = self.makeExceptionInfo(RuntimeError, 'error')
+        starttime1 = datetime.datetime.utcfromtimestamp(1.489)
+        endtime1 = datetime.datetime.utcfromtimestamp(51.476)
+        self.result1.time(starttime1)
+        self.result1.startTest(self)
+        self.result1.time(endtime1)
         self.result1.addError(self, exc_info1)
         exc_info2 = self.makeExceptionInfo(AssertionError, 'failure')
+        starttime2 = datetime.datetime.utcfromtimestamp(2.489)
+        endtime2 = datetime.datetime.utcfromtimestamp(3.476)
+        self.result1.time(starttime2)
+        self.result1.startTest(self)
+        self.result1.time(endtime2)
         self.result1.addFailure(self, exc_info2)
         reason = _u("Skipped for some reason")
+        starttime3 = datetime.datetime.utcfromtimestamp(4.489)
+        endtime3 = datetime.datetime.utcfromtimestamp(5.476)
+        self.result1.time(starttime3)
+        self.result1.startTest(self)
+        self.result1.time(endtime3)
         self.result1.addSkip(self, reason)
+        starttime4 = datetime.datetime.utcfromtimestamp(6.489)
+        endtime4 = datetime.datetime.utcfromtimestamp(7.476)
+        self.result1.time(starttime4)
+        self.result1.startTest(self)
+        self.result1.time(endtime4)
         self.result1.addSuccess(self)
-        self.assertEqual([('startTest', self),
+        self.assertEqual([
+            ('time', starttime1),
+            ('startTest', self),
+            ('time', endtime1),
             ('addError', self, exc_info1),
             ('stopTest', self),
+            ('time', starttime2),
             ('startTest', self),
+            ('time', endtime2),
             ('addFailure', self, exc_info2),
             ('stopTest', self),
+            ('time', starttime3),
             ('startTest', self),
+            ('time', endtime3),
             ('addSkip', self, reason),
             ('stopTest', self),
+            ('time', starttime4),
             ('startTest', self),
+            ('time', endtime4),
             ('addSuccess', self),
             ('stopTest', self),
             ], self.target._events)
