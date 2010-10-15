@@ -1,6 +1,10 @@
 # Copyright (c) 2010 Jonathan M. Lange. See LICENSE for details.
 
-"""Evil reactor-spinning logic for running Twisted tests."""
+"""Evil reactor-spinning logic for running Twisted tests.
+
+This code is highly experimental, liable to change and not to be trusted.  If
+you couldn't write this yourself, you should not be using it.
+"""
 
 __all__ = [
     'DeferredNotFired',
