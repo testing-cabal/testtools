@@ -8,23 +8,54 @@ import signal
 from testtools import (
     TestCase,
     )
-from testtools.deferredruntest import (
+from testtools.matchers import (
+    Equals,
+    Is,
+    )
+from testtools._spinner import (
     DeferredNotFired,
     extract_result,
     NoResultError,
+    not_reentrant,
     ReentryError,
     _Spinner,
     StaleJunkError,
     TimeoutError,
     trap_unhandled_errors,
     )
-from testtools.matchers import (
-    Equals,
-    Is,
-    )
 
 from twisted.internet import defer
 from twisted.python.failure import Failure
+
+
+class TestNotReentrant(TestCase):
+
+    def test_not_reentrant(self):
+        # A function decorated as not being re-entrant will raise a
+        # ReentryError if it is called while it is running.
+        calls = []
+        @not_reentrant
+        def log_something():
+            calls.append(None)
+            if len(calls) < 5:
+                log_something()
+        self.assertRaises(ReentryError, log_something)
+        self.assertEqual(1, len(calls))
+
+    def test_deeper_stack(self):
+        calls = []
+        @not_reentrant
+        def g():
+            calls.append(None)
+            if len(calls) < 5:
+                f()
+        @not_reentrant
+        def f():
+            calls.append(None)
+            if len(calls) < 5:
+                g()
+        self.assertRaises(ReentryError, f)
+        self.assertEqual(2, len(calls))
 
 
 class TestExtractResult(TestCase):
