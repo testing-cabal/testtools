@@ -16,6 +16,7 @@ from testtools.deferredruntest import (
     NoResultError,
     ReentryError,
     _Spinner,
+    StaleJunkError,
     SynchronousDeferredRunTest,
     TimeoutError,
     trap_unhandled_errors,
@@ -625,8 +626,42 @@ class TestRunInReactor(TestCase):
         spinner = self.make_spinner(reactor)
         port = reactor.listenTCP(0, ServerFactory())
         spinner.run(self.make_timeout(), lambda: None)
-        results = spinner._clean()
+        results = spinner.get_junk()
         self.assertThat(results, Equals([port]))
+
+    def test_leftover_junk_available(self):
+        # If 'run' is given a function that leaves the reactor dirty in some
+        # way, 'run' will clean up the reactor and then store information
+        # about the junk. This information can be got using get_junk.
+        from twisted.internet.protocol import ServerFactory
+        reactor = self.make_reactor()
+        spinner = self.make_spinner(reactor)
+        port = spinner.run(
+            self.make_timeout(), reactor.listenTCP, 0, ServerFactory())
+        self.assertThat(spinner.get_junk(), Equals([port]))
+
+    def test_will_not_run_with_previous_junk(self):
+        # If 'run' is called and there's still junk in the spinner's junk
+        # list, then the spinner will refuse to run.
+        from twisted.internet.protocol import ServerFactory
+        reactor = self.make_reactor()
+        spinner = self.make_spinner(reactor)
+        timeout = self.make_timeout()
+        spinner.run(timeout, reactor.listenTCP, 0, ServerFactory())
+        self.assertRaises(
+            StaleJunkError, spinner.run, timeout, lambda: None)
+
+    def test_clear_junk_clears_previous_junk(self):
+        # If 'run' is called and there's still junk in the spinner's junk
+        # list, then the spinner will refuse to run.
+        from twisted.internet.protocol import ServerFactory
+        reactor = self.make_reactor()
+        spinner = self.make_spinner(reactor)
+        timeout = self.make_timeout()
+        port = spinner.run(timeout, reactor.listenTCP, 0, ServerFactory())
+        junk = spinner.clear_junk()
+        self.assertThat(junk, Equals([port]))
+        self.assertThat(spinner.get_junk(), Equals([]))
 
     def test_sigint_raises_no_result_error(self):
         # If we get a SIGINT during a run, we raise NoResultError.

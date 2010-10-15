@@ -210,7 +210,7 @@ class AsynchronousDeferredRunTest(RunTest):
                 raise UnhandledErrorInDeferred(unhandled)
             except UnhandledErrorInDeferred:
                 self._got_user_exception(sys.exc_info())
-        junk = spinner._clean()
+        junk = spinner.clear_junk()
         if junk:
             successful = False
             try:
@@ -281,6 +281,15 @@ class NoResultError(Exception):
             "available.  Probably means we received SIGINT or similar.")
 
 
+class StaleJunkError(Exception):
+    """Raised when there's junk in the spinner from a previous run."""
+
+    def __init__(self, junk):
+        super(StaleJunkError, self).__init__(
+            "There was junk in the spinner from a previous run. "
+            "Use clear_junk() to clear it out: %r" % (junk,))
+
+
 class _Spinner(object):
     """Spin the reactor until a function is done.
 
@@ -305,6 +314,7 @@ class _Spinner(object):
         self._success = self._UNSET
         self._failure = self._UNSET
         self._saved_signals = []
+        self._junk = []
 
     def _cancel_timeout(self):
         if self._timeout_call:
@@ -315,9 +325,6 @@ class _Spinner(object):
             self._failure.raiseException()
         if self._success is not self._UNSET:
             return self._success
-        # Something killed the reactor, probably, so we'll take responsibility
-        # for cleaning it up.
-        self._clean()
         raise NoResultError()
 
     def _got_failure(self, result):
@@ -355,11 +362,21 @@ class _Spinner(object):
             self._reactor.suggestThreadPoolSize(0)
             if self._reactor.threadpool is not None:
                 self._reactor._stopThreadPool()
+        self._junk.extend(junk)
+        return junk
+
+    def clear_junk(self):
+        """Clear out our recorded junk.
+
+        :return: Whatever junk was there before.
+        """
+        junk = self._junk
+        self._junk = []
         return junk
 
     def get_junk(self):
         """Return any junk that has been found on the reactor."""
-        return []
+        return self._junk
 
     def _save_signals(self):
         self._saved_signals = [
@@ -378,26 +395,25 @@ class _Spinner(object):
         the Deferred fires and its chain completes or until the timeout is
         reached -- whichever comes first.
 
-        NOTE: If the reactor still has junk left over (e.g. untriggered
-        delayed calls), then it is the caller's responsibility to clean them
-        up using `clean()` UNLESS this method raises `NoResultError`, in which
-        case the reactor is cleaned for you.
-
         :raise TimeoutError: If 'timeout' is reached before the `Deferred`
             returned by 'function' has completed its callback chain.
         :raise NoResultError: If the reactor is somehow interrupted before
             the `Deferred` returned by 'function' has completed its callback
             chain.
+        :raise StaleJunkError: If there's junk in the spinner from a previous
+            run.
         :return: Whatever is at the end of the function's callback chain.  If
             it's an error, then raise that.
         """
+        junk = self.get_junk()
+        if junk:
+            raise StaleJunkError(junk)
         self._save_signals()
         self._timeout_call = self._reactor.callLater(
             timeout, self._timed_out, function, timeout)
         # Calling 'stop' on the reactor will make it impossible to re-start
         # the reactor.  Since the default signal handlers for TERM, BREAK and
         # INT all call reactor.stop(), we'll patch it over with crash.
-
         # XXX: It might be a better idea to either install custom signal
         # handlers or to override the methods that are Twisted's signal
         # handlers.
@@ -412,4 +428,7 @@ class _Spinner(object):
         finally:
             self._reactor.stop = stop
             self._restore_signals()
+        try:
             return self._get_result()
+        finally:
+            self._clean()
