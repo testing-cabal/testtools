@@ -443,6 +443,20 @@ class TestAsynchronousDeferredRunTest(TestCase):
         reactor.callLater(timeout, os.kill, os.getpid(), signal.SIGINT)
         self.assertRaises(KeyboardInterrupt, runner.run, result)
 
+    def test_fast_keyboard_interrupt_stops_test_run(self):
+        # If we get a SIGINT during a test run, the test stops and no more
+        # tests run.
+        class SomeCase(TestCase):
+            def test_pause(self):
+                return defer.Deferred()
+        test = SomeCase('test_pause')
+        reactor = self.make_reactor()
+        timeout = self.make_timeout()
+        runner = self.make_runner(test, timeout * 5)
+        result = self.make_result()
+        reactor.callWhenRunning(os.kill, os.getpid(), signal.SIGINT)
+        self.assertRaises(KeyboardInterrupt, runner.run, result)
+
     def test_convenient_construction(self):
         # As a convenience method, AsynchronousDeferredRunTest has a
         # classmethod that returns an AsynchronousDeferredRunTest
@@ -590,6 +604,19 @@ class TestRunInReactor(TestCase):
         # is exactly the same as test_sigint_raises_no_result_error, and
         # exists to make sure we haven't futzed with state.
         self.test_sigint_raises_no_result_error()
+
+    def test_fast_sigint_raises_no_result_error(self):
+        # If we get a SIGINT during a run, we raise NoResultError.
+        reactor = self.make_reactor()
+        spinner = self.make_spinner(reactor)
+        timeout = self.make_timeout()
+        reactor.callWhenRunning(os.kill, os.getpid(), signal.SIGINT)
+        self.assertRaises(
+            NoResultError, spinner.run, timeout * 5, defer.Deferred)
+        self.assertEqual([], spinner.clean())
+
+    def test_fast_sigint_raises_no_result_error_second_time(self):
+        self.test_fast_sigint_raises_no_result_error()
 
 
 def test_suite():
