@@ -148,8 +148,11 @@ class RunTest(object):
 
     def _got_user_exception(self, exc_info):
         """Called when user code raises an exception."""
-        e = exc_info[1]
-        self.case.onException(exc_info)
+        try:
+            e = exc_info[1]
+            self.case.onException(exc_info)
+        finally:
+            del exc_info
         for exc_class, handler in self.handlers:
             if isinstance(e, exc_class):
                 self._exceptions.append(e)

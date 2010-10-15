@@ -8,6 +8,7 @@ import unittest
 
 from testtools import (
     ErrorHolder,
+    MultipleExceptions,
     PlaceHolder,
     TestCase,
     clone_test_with_new_id,
@@ -608,6 +609,27 @@ class TestAddCleanup(TestCase):
         self.assertRaises(
             KeyboardInterrupt, self.test.run, self.logging_result)
 
+    def test_all_errors_from_MultipleExceptions_reported(self):
+        # When a MultipleExceptions exception is caught, all the errors are
+        # reported.
+        def raiseMany():
+            try:
+                1/0
+            except Exception:
+                exc_info1 = sys.exc_info()
+            try:
+                1/0
+            except Exception:
+                exc_info2 = sys.exc_info()
+            raise MultipleExceptions(exc_info1, exc_info2)
+        self.test.addCleanup(raiseMany)
+        self.logging_result = ExtendedTestResult()
+        self.test.run(self.logging_result)
+        self.assertEqual(['startTest', 'addError', 'stopTest'],
+            [event[0] for event in self.logging_result._events])
+        self.assertEqual(set(['traceback', 'traceback-1']),
+            set(self.logging_result._events[1][2].keys()))
+
     def test_multipleCleanupErrorsReported(self):
         # Errors from all failing cleanups are reported as separate backtraces.
         self.test.addCleanup(lambda: 1/0)
@@ -942,8 +964,7 @@ class TestSkipping(TestCase):
         test.run(result)
         case = result._events[0][1]
         self.assertEqual([('startTest', case),
-            ('addSkip', case, "Text attachment: reason\n------------\n"
-             "skipping this test\n------------\n"), ('stopTest', case)],
+            ('addSkip', case, "skipping this test"), ('stopTest', case)],
             calls)
 
     def test_skipException_in_test_method_calls_result_addSkip(self):
@@ -955,8 +976,7 @@ class TestSkipping(TestCase):
         test.run(result)
         case = result._events[0][1]
         self.assertEqual([('startTest', case),
-            ('addSkip', case, "Text attachment: reason\n------------\n"
-             "skipping this test\n------------\n"), ('stopTest', case)],
+            ('addSkip', case, "skipping this test"), ('stopTest', case)],
             result._events)
 
     def test_skip__in_setup_with_old_result_object_calls_addSuccess(self):

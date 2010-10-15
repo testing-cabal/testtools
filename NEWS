@@ -7,10 +7,24 @@ NEXT
 Improvements
 ------------
 
+* Cleanups can raise ``testtools.MultipleExceptions`` if they have multiple
+  exceptions to report. For instance, a cleanup which is itself responsible for
+  running several different internal cleanup routines might use this.
+
 * Code duplication between assertEqual and the matcher Equals has been removed.
 
 * In normal circumstances, a TestCase will no longer share details with clones
   of itself. (Andrew Bennetts, bug #637725)
+
+* Less exception object cycles are generated (reduces peak memory use between
+  garbage collection). (Martin [gz])
+
+* Timestamps as produced by subunit protocol clients are now forwarded in the
+  ThreadsafeForwardingResult so correct test durations can be reported.
+  (Martin [gz], Robert Collins, #625594)
+
+* With unittest from Python 2.7 skipped tests will now show only the reason
+  rather than a serialisation of all details. (Martin [gz], #625583)
 
 * Experimental support for running tests that return Deferreds.
   (Jonathan Lange)
