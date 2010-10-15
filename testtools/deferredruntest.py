@@ -144,7 +144,7 @@ class AsynchronousDeferredRunTest(RunTest):
             f, args, kwargs = self.case._cleanups.pop()
             try:
                 yield defer.maybeDeferred(f, *args, **kwargs)
-            except:
+            except Exception:
                 exc_info = sys.exc_info()
                 self.case._report_traceback(exc_info)
                 last_exception = exc_info[1]
@@ -199,8 +199,13 @@ class AsynchronousDeferredRunTest(RunTest):
         spinner = _Spinner(self._reactor)
         # XXX: This can call addError on result multiple times. Not sure if
         # this is a good idea.
-        successful, unhandled = trap_unhandled_errors(
-            spinner.run, self._timeout, self._run_deferred)
+        try:
+            successful, unhandled = trap_unhandled_errors(
+                spinner.run, self._timeout, self._run_deferred)
+        except NoResultError:
+            # We didn't get a result at all!  This could be for any number of
+            # reasons, but most likely someone hit Ctrl-C during the test.
+            raise KeyboardInterrupt
         if unhandled:
             successful = False
             try:
@@ -269,6 +274,14 @@ class TimeoutError(Exception):
     """Raised when run_in_reactor takes too long to run a function."""
 
 
+class NoResultError(Exception):
+    """Raised when the reactor has stopped but we don't have any result."""
+
+    def __init__(self):
+        super(NoResultError, self).__init__(
+            "Tried to get test's result from Deferred when no result is "
+            "available.  Probably means we received SIGINT or similar.")
+
 class _Spinner(object):
     """Spin the reactor until a function is done.
 
@@ -303,7 +316,7 @@ class _Spinner(object):
             self._failure.raiseException()
         if self._success is not self._UNSET:
             return self._success
-        raise AssertionError("Tried to get result when no result is available.")
+        raise NoResultError()
 
     def _got_failure(self, result):
         self._cancel_timeout()
@@ -358,6 +371,14 @@ class _Spinner(object):
         If 'function' returns a Deferred, the reactor will keep spinning until
         the Deferred fires and its chain completes or until the timeout is
         reached -- whichever comes first.
+
+        :raise TimeoutError: If 'timeout' is reached before the `Deferred`
+            returned by 'function' has completed its callback chain.
+        :raise NoResultError: If the reactor is somehow interrupted before
+            the `Deferred` returned by 'function' has completed its callback
+            chain.
+        :return: Whatever is at the end of the function's callback chain.  If
+            it's an error, then raise that.
         """
         self._save_signals()
         self._timeout_call = self._reactor.callLater(

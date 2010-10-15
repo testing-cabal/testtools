@@ -2,6 +2,7 @@
 
 """Tests for the DeferredRunTest single test execution logic."""
 
+import os
 import signal
 
 from testtools import (
@@ -426,6 +427,20 @@ class TestAsynchronousDeferredRunTest(TestCase):
              ('addError', test, None),
              ('stopTest', test)]))
         self.assertThat(list(error.keys()), Equals(['traceback']))
+
+    def test_keyboard_interrupt_stops_test_run(self):
+        # If we get a SIGINT during a test run, the test stops and no more
+        # tests run.
+        class SomeCase(TestCase):
+            def test_pause(self):
+                return defer.Deferred()
+        test = SomeCase('test_pause')
+        reactor = self.make_reactor()
+        timeout = self.make_timeout()
+        runner = self.make_runner(test, timeout * 5)
+        result = self.make_result()
+        reactor.callLater(timeout, os.kill, os.getpid(), signal.SIGINT)
+        self.assertRaises(KeyboardInterrupt, runner.run, result)
 
     def test_convenient_construction(self):
         # As a convenience method, AsynchronousDeferredRunTest has a
