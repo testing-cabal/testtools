@@ -316,6 +316,9 @@ class _Spinner(object):
             self._failure.raiseException()
         if self._success is not self._UNSET:
             return self._success
+        # Something killed the reactor, probably, so we'll take responsibility
+        # for cleaning it up.
+        self.clean()
         raise NoResultError()
 
     def _got_failure(self, result):
@@ -372,6 +375,11 @@ class _Spinner(object):
         the Deferred fires and its chain completes or until the timeout is
         reached -- whichever comes first.
 
+        NOTE: If the reactor still has junk left over (e.g. untriggered
+        delayed calls), then it is the caller's responsibility to clean them
+        up using `clean()` UNLESS this method raises `NoResultError`, in which
+        case the reactor is cleaned for you.
+
         :raise TimeoutError: If 'timeout' is reached before the `Deferred`
             returned by 'function' has completed its callback chain.
         :raise NoResultError: If the reactor is somehow interrupted before
@@ -383,11 +391,22 @@ class _Spinner(object):
         self._save_signals()
         self._timeout_call = self._reactor.callLater(
             timeout, self._timed_out, function, timeout)
+        # Calling 'stop' on the reactor will make it impossible to re-start
+        # the reactor.  Since the default signal handlers for TERM, BREAK and
+        # INT all call reactor.stop(), we'll patch it over with crash.
+
+        # XXX: It might be a better idea to either install custom signal
+        # handlers or to override the methods that are Twisted's signal
+        # handlers.
+        stop, self._reactor.stop = self._reactor.stop, self._reactor.crash
         def run_function():
             d = defer.maybeDeferred(function, *args, **kwargs)
             d.addCallbacks(self._got_success, self._got_failure)
             d.addBoth(self._stop_reactor)
-        self._reactor.callWhenRunning(run_function)
-        self._reactor.run()
-        self._restore_signals()
-        return self._get_result()
+        try:
+            self._reactor.callWhenRunning(run_function)
+            self._reactor.run()
+        finally:
+            self._reactor.stop = stop
+            self._restore_signals()
+            return self._get_result()

@@ -13,6 +13,7 @@ from testtools.deferredruntest import (
     DeferredNotFired,
     extract_result,
     not_reentrant,
+    NoResultError,
     ReentryError,
     _Spinner,
     SynchronousDeferredRunTest,
@@ -573,6 +574,22 @@ class TestRunInReactor(TestCase):
         spinner.run(self.make_timeout(), lambda: None)
         results = spinner.clean()
         self.assertThat(results, Equals([port]))
+
+    def test_sigint_raises_no_result_error(self):
+        # If we get a SIGINT during a run, we raise NoResultError.
+        reactor = self.make_reactor()
+        spinner = self.make_spinner(reactor)
+        timeout = self.make_timeout()
+        reactor.callLater(timeout, os.kill, os.getpid(), signal.SIGINT)
+        self.assertRaises(
+            NoResultError, spinner.run, timeout * 5, defer.Deferred)
+        self.assertEqual([], spinner.clean())
+
+    def test_sigint_raises_no_result_error_second_time(self):
+        # If we get a SIGINT during a run, we raise NoResultError.  This test
+        # is exactly the same as test_sigint_raises_no_result_error, and
+        # exists to make sure we haven't futzed with state.
+        self.test_sigint_raises_no_result_error()
 
 
 def test_suite():
