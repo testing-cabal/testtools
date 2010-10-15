@@ -18,7 +18,7 @@ from testtools._spinner import (
     NoResultError,
     not_reentrant,
     ReentryError,
-    _Spinner,
+    Spinner,
     StaleJunkError,
     TimeoutError,
     trap_unhandled_errors,
@@ -114,7 +114,7 @@ class TestRunInReactor(TestCase):
     def make_spinner(self, reactor=None):
         if reactor is None:
             reactor = self.make_reactor()
-        return _Spinner(reactor)
+        return Spinner(reactor)
 
     def make_timeout(self):
         return 0.01

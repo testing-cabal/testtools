@@ -13,7 +13,7 @@ from testtools.runtest import RunTest
 from testtools._spinner import (
     extract_result,
     NoResultError,
-    _Spinner,
+    Spinner,
     trap_unhandled_errors,
     UnhandledErrorInDeferred,
     )
@@ -123,7 +123,7 @@ class AsynchronousDeferredRunTest(RunTest):
         return d
 
     def _run_core(self):
-        spinner = _Spinner(self._reactor)
+        spinner = Spinner(self._reactor)
         try:
             successful, unhandled = trap_unhandled_errors(
                 spinner.run, self._timeout, self._run_deferred)

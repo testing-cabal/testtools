@@ -8,7 +8,7 @@ __all__ = [
     'NoResultError',
     'not_reentrant',
     'ReentryError',
-    '_Spinner',
+    'Spinner',
     'StaleJunkError',
     'TimeoutError',
     'trap_unhandled_errors',
@@ -146,7 +146,7 @@ class StaleJunkError(Exception):
             "Use clear_junk() to clear it out: %r" % (junk,))
 
 
-class _Spinner(object):
+class Spinner(object):
     """Spin the reactor until a function is done.
 
     This class emulates the behaviour of twisted.trial in that it grotesquely
