@@ -1,6 +1,10 @@
 # Copyright (c) 2010 Jonathan M. Lange. See LICENSE for details.
 
-"""Individual test case execution for tests that return Deferreds."""
+"""Individual test case execution for tests that return Deferreds.
+
+This module is highly experimental and is liable to change in ways that cause
+subtle failures in tests.  Use at your own peril.
+"""
 
 __all__ = [
     'AsynchronousDeferredRunTest',
