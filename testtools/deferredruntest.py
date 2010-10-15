@@ -197,8 +197,6 @@ class AsynchronousDeferredRunTest(RunTest):
 
     def _run_core(self):
         spinner = _Spinner(self._reactor)
-        # XXX: This can call addError on result multiple times. Not sure if
-        # this is a good idea.
         try:
             successful, unhandled = trap_unhandled_errors(
                 spinner.run, self._timeout, self._run_deferred)
@@ -223,11 +221,11 @@ class AsynchronousDeferredRunTest(RunTest):
             self.result.addSuccess(self.case, details=self.case.getDetails())
 
     def _run_user(self, function, *args):
-        # XXX: I think this traps KeyboardInterrupt, and I think this is a bad
-        # thing. Perhaps we should have a maybeDeferred-like thing that
-        # re-raises KeyboardInterrupt. Or, we should have our own exception
-        # handler that stops the test run in the case of KeyboardInterrupt. But
-        # of course, the reactor installs a SIGINT handler anyway.
+        """Run a user-supplied function.
+
+        This just makes sure that it returns a Deferred, regardless of how the
+        user wrote it.
+        """
         return defer.maybeDeferred(
             super(AsynchronousDeferredRunTest, self)._run_user,
             function, *args)

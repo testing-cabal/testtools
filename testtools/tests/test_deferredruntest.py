@@ -471,6 +471,40 @@ class TestAsynchronousDeferredRunTest(TestCase):
         self.assertIs(self, runner.case)
         self.assertEqual([handler], runner.handlers)
 
+    def test_only_addError_once(self):
+        # Even if the reactor is unclean and the test raises an error and the
+        # cleanups raise errors, we only called addError once per test.
+        reactor = self.make_reactor()
+        class WhenItRains(TestCase):
+            def it_pours(self):
+                # Add a dirty cleanup.
+                self.addCleanup(lambda: 3 / 0)
+                # Dirty the reactor.
+                from twisted.internet.protocol import ServerFactory
+                reactor.listenTCP(0, ServerFactory())
+                # Unhandled error.
+                defer.maybeDeferred(lambda: 2 / 0)
+                # Actual error.
+                raise RuntimeError("Excess precipitation")
+        test = WhenItRains('it_pours')
+        runner = self.make_runner(test)
+        result = self.make_result()
+        runner.run(result)
+        self.assertThat(
+            [event[:2] for event in result._events],
+            Equals([
+                ('startTest', test),
+                ('addError', test),
+                ('stopTest', test)]))
+        error = result._events[1][2]
+        self.assertThat(
+            sorted(error.keys()), Equals([
+                'traceback',
+                'traceback-1',
+                'traceback-2',
+                'traceback-3',
+                ]))
+
 
 class TestRunInReactor(TestCase):
 
