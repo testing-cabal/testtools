@@ -210,7 +210,7 @@ class AsynchronousDeferredRunTest(RunTest):
                 raise UnhandledErrorInDeferred(unhandled)
             except UnhandledErrorInDeferred:
                 self._got_user_exception(sys.exc_info())
-        junk = spinner.clean()
+        junk = spinner._clean()
         if junk:
             successful = False
             try:
@@ -317,7 +317,7 @@ class _Spinner(object):
             return self._success
         # Something killed the reactor, probably, so we'll take responsibility
         # for cleaning it up.
-        self.clean()
+        self._clean()
         raise NoResultError()
 
     def _got_failure(self, result):
@@ -338,7 +338,7 @@ class _Spinner(object):
         self._failure = Failure(e)
         self._stop_reactor()
 
-    def clean(self):
+    def _clean(self):
         """Clean up any junk in the reactor."""
         junk = []
         for delayed_call in self._reactor.getDelayedCalls():
@@ -356,6 +356,10 @@ class _Spinner(object):
             if self._reactor.threadpool is not None:
                 self._reactor._stopThreadPool()
         return junk
+
+    def get_junk(self):
+        """Return any junk that has been found on the reactor."""
+        return []
 
     def _save_signals(self):
         self._saved_signals = [

@@ -583,11 +583,16 @@ class TestRunInReactor(TestCase):
             TimeoutError,
             self.make_spinner().run, timeout, lambda: defer.Deferred())
 
+    def test_no_junk_by_default(self):
+        # If the reactor hasn't spun yet, then there cannot be any junk.
+        spinner = self.make_spinner()
+        self.assertThat(spinner.get_junk(), Equals([]))
+
     def test_clean_do_nothing(self):
         # If there's nothing going on in the reactor, then clean does nothing
         # and returns an empty list.
         spinner = self.make_spinner()
-        result = spinner.clean()
+        result = spinner._clean()
         self.assertThat(result, Equals([]))
 
     def test_clean_delayed_call(self):
@@ -596,7 +601,7 @@ class TestRunInReactor(TestCase):
         reactor = self.make_reactor()
         spinner = self.make_spinner(reactor)
         call = reactor.callLater(10, lambda: None)
-        results = spinner.clean()
+        results = spinner._clean()
         self.assertThat(results, Equals([call]))
         self.assertThat(call.active(), Equals(False))
 
@@ -607,7 +612,7 @@ class TestRunInReactor(TestCase):
         spinner = self.make_spinner(reactor)
         call = reactor.callLater(10, lambda: None)
         call.cancel()
-        results = spinner.clean()
+        results = spinner._clean()
         self.assertThat(results, Equals([]))
 
     def test_clean_selectables(self):
@@ -620,7 +625,7 @@ class TestRunInReactor(TestCase):
         spinner = self.make_spinner(reactor)
         port = reactor.listenTCP(0, ServerFactory())
         spinner.run(self.make_timeout(), lambda: None)
-        results = spinner.clean()
+        results = spinner._clean()
         self.assertThat(results, Equals([port]))
 
     def test_sigint_raises_no_result_error(self):
@@ -631,7 +636,7 @@ class TestRunInReactor(TestCase):
         reactor.callLater(timeout, os.kill, os.getpid(), signal.SIGINT)
         self.assertRaises(
             NoResultError, spinner.run, timeout * 5, defer.Deferred)
-        self.assertEqual([], spinner.clean())
+        self.assertEqual([], spinner._clean())
 
     def test_sigint_raises_no_result_error_second_time(self):
         # If we get a SIGINT during a run, we raise NoResultError.  This test
@@ -647,7 +652,7 @@ class TestRunInReactor(TestCase):
         reactor.callWhenRunning(os.kill, os.getpid(), signal.SIGINT)
         self.assertRaises(
             NoResultError, spinner.run, timeout * 5, defer.Deferred)
-        self.assertEqual([], spinner.clean())
+        self.assertEqual([], spinner._clean())
 
     def test_fast_sigint_raises_no_result_error_second_time(self):
         self.test_fast_sigint_raises_no_result_error()
