@@ -280,6 +280,7 @@ class NoResultError(Exception):
             "Tried to get test's result from Deferred when no result is "
             "available.  Probably means we received SIGINT or similar.")
 
+
 class _Spinner(object):
     """Spin the reactor until a function is done.
 
