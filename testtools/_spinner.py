@@ -219,11 +219,6 @@ class Spinner(object):
             # IProcessTransport.  Since only _dumbwin32proc processes do this,
             # we aren't going to bother.
             junk.append(selectable)
-        # XXX: Not tested. Not sure that the cost of testing this reliably
-        # outweighs the benefits.
-        #
-        # XXX: Also, we probably need to restore the threadpool the second
-        # time we run.
         if IReactorThreads.providedBy(self._reactor):
             self._reactor.suggestThreadPoolSize(0)
             if self._reactor.threadpool is not None:

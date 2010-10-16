@@ -227,6 +227,16 @@ class TestRunInReactor(TestCase):
         results = spinner.get_junk()
         self.assertThat(results, Equals([port]))
 
+    def test_clean_running_threads(self):
+        import threading
+        import time
+        current_threads = list(threading.enumerate())
+        reactor = self.make_reactor()
+        timeout = self.make_timeout()
+        spinner = self.make_spinner(reactor)
+        spinner.run(timeout, reactor.callInThread, time.sleep, timeout / 2.0)
+        self.assertThat(list(threading.enumerate()), Equals(current_threads))
+
     def test_leftover_junk_available(self):
         # If 'run' is given a function that leaves the reactor dirty in some
         # way, 'run' will clean up the reactor and then store information
