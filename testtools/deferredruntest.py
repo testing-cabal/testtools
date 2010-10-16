@@ -20,7 +20,6 @@ from testtools._spinner import (
     Spinner,
     TimeoutError,
     trap_unhandled_errors,
-    UnhandledErrorInDeferred,
     )
 
 from twisted.internet import defer

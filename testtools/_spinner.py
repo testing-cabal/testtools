@@ -16,7 +16,6 @@ __all__ = [
     'StaleJunkError',
     'TimeoutError',
     'trap_unhandled_errors',
-    'UnhandledErrorInDeferred',
     ]
 
 import signal
@@ -77,20 +76,6 @@ def extract_result(deferred):
         return successes[0]
     else:
         raise DeferredNotFired("%r has not fired yet." % (deferred,))
-
-
-class UnhandledErrorInDeferred(Exception):
-    """Raised when there are unhandled errors in Deferreds.
-
-    If you are getting this error then you are probably either not returning a
-    Deferred from a function that makes one, or you are not adding an errback
-    to a Deferred.  Or both.  Use `Deferred.DEBUG` to get more information.
-    """
-
-    def __init__(self, debug_infos):
-        super(UnhandledErrorInDeferred, self).__init__(
-            "Unhandled error in Deferreds: %r" % (
-                [info.failResult for info in debug_infos]))
 
 
 def trap_unhandled_errors(function, *args, **kwargs):
