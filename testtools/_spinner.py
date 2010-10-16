@@ -131,6 +131,10 @@ def trap_unhandled_errors(function, *args, **kwargs):
 class TimeoutError(Exception):
     """Raised when run_in_reactor takes too long to run a function."""
 
+    def __init__(self, function, timeout):
+        super(TimeoutError, self).__init__(
+            "%r took longer than %s seconds" % (function, timeout))
+
 
 class NoResultError(Exception):
     """Raised when the reactor has stopped but we don't have any result."""
@@ -200,8 +204,7 @@ class Spinner(object):
         self._reactor.crash()
 
     def _timed_out(self, function, timeout):
-        e = TimeoutError(
-            "%r took longer than %s seconds" % (function, timeout))
+        e = TimeoutError(function, timeout)
         self._failure = Failure(e)
         self._stop_reactor()
 

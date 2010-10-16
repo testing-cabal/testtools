@@ -18,6 +18,7 @@ from testtools._spinner import (
     extract_result,
     NoResultError,
     Spinner,
+    TimeoutError,
     trap_unhandled_errors,
     UnhandledErrorInDeferred,
     )
@@ -141,35 +142,40 @@ class AsynchronousDeferredRunTest(RunTest):
         d.addBoth(lambda ignored: len(fails) == 0)
         return d
 
+    def _log_user_exception(self, e):
+        """Raise 'e' and report it as a user exception."""
+        try:
+            raise e
+        except e.__class__:
+            self._got_user_exception(sys.exc_info())
+
     def _run_core(self):
         spinner = Spinner(self._reactor)
         try:
-            # XXX: Right now, TimeoutErrors are re-raised, causing the test
-            # runner to crash.  We probably just want to record them like test
-            # errors.
             successful, unhandled = trap_unhandled_errors(
                 spinner.run, self._timeout, self._run_deferred)
         except NoResultError:
             # We didn't get a result at all!  This could be for any number of
             # reasons, but most likely someone hit Ctrl-C during the test.
             raise KeyboardInterrupt
+        except TimeoutError:
+            # The function took too long to run.  No point reporting about
+            # junk and we don't have any information about unhandled errors in
+            # deferreds.  Report the timeout and skip to the end.
+            self._log_user_exception(TimeoutError(self.case, self._timeout))
+            return
+
         if unhandled:
             successful = False
             # TODO: Actually, rather than raising this with a special error,
             # we could add a traceback for each unhandled Deferred, or
             # something like that.  Would be way more helpful than just a list
             # of the reprs of the failures.
-            try:
-                raise UnhandledErrorInDeferred(unhandled)
-            except UnhandledErrorInDeferred:
-                self._got_user_exception(sys.exc_info())
+            self._log_user_exception(UnhandledErrorInDeferred(unhandled))
         junk = spinner.clear_junk()
         if junk:
             successful = False
-            try:
-                raise UncleanReactorError(junk)
-            except UncleanReactorError:
-                self._got_user_exception(sys.exc_info())
+            self._log_user_exception(UncleanReactorError(junk))
         if successful:
             self.result.addSuccess(self.case, details=self.case.getDetails())
 

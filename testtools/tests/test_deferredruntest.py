@@ -370,6 +370,24 @@ class TestAsynchronousDeferredRunTest(TestCase):
         reactor.callWhenRunning(os.kill, os.getpid(), signal.SIGINT)
         self.assertRaises(KeyboardInterrupt, runner.run, result)
 
+    def test_timeout_causes_test_error(self):
+        # If a test times out, it reports itself as having failed with a
+        # TimeoutError.
+        class SomeCase(TestCase):
+            def test_pause(self):
+                return defer.Deferred()
+        test = SomeCase('test_pause')
+        runner = self.make_runner(test)
+        result = self.make_result()
+        runner.run(result)
+        error = result._events[1][2]
+        self.assertThat(
+            [event[:2] for event in result._events], Equals(
+            [('startTest', test),
+             ('addError', test),
+             ('stopTest', test)]))
+        self.assertIn('TimeoutError', str(error['traceback']))
+
     def test_convenient_construction(self):
         # As a convenience method, AsynchronousDeferredRunTest has a
         # classmethod that returns an AsynchronousDeferredRunTest
