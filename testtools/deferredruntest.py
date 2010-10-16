@@ -167,11 +167,11 @@ class AsynchronousDeferredRunTest(RunTest):
 
         if unhandled:
             successful = False
-            # TODO: Actually, rather than raising this with a special error,
-            # we could add a traceback for each unhandled Deferred, or
-            # something like that.  Would be way more helpful than just a list
-            # of the reprs of the failures.
-            self._log_user_exception(UnhandledErrorInDeferred(unhandled))
+            # XXX: Maybe we could log creator & invoker here as well if
+            # present.
+            for debug_info in unhandled:
+                f = debug_info.failResult
+                self._got_user_exception((f.type, f.value, f.tb))
         junk = spinner.clear_junk()
         if junk:
             successful = False

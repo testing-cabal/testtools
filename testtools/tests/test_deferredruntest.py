@@ -324,12 +324,14 @@ class TestAsynchronousDeferredRunTest(TestCase):
         self.assertThat(list(error.keys()), Equals(['traceback']))
 
     def test_unhandled_error_from_deferred(self):
-        # If there's a Deferred with an unhandled error, the test fails.
+        # If there's a Deferred with an unhandled error, the test fails.  Each
+        # unhandled error is reported with a separate traceback.
         class SomeCase(TestCase):
             def test_cruft(self):
                 # Note we aren't returning the Deferred so that the error will
                 # be unhandled.
                 defer.maybeDeferred(lambda: 1/0)
+                defer.maybeDeferred(lambda: 2/0)
         test = SomeCase('test_cruft')
         runner = self.make_runner(test)
         result = self.make_result()
@@ -340,7 +342,8 @@ class TestAsynchronousDeferredRunTest(TestCase):
             [('startTest', test),
              ('addError', test, None),
              ('stopTest', test)]))
-        self.assertThat(list(error.keys()), Equals(['traceback']))
+        self.assertThat(
+            list(error.keys()), Equals(['traceback', 'traceback-1']))
 
     def test_keyboard_interrupt_stops_test_run(self):
         # If we get a SIGINT during a test run, the test stops and no more
