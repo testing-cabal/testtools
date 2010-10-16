@@ -168,6 +168,7 @@ class AsynchronousDeferredRunTest(RunTest):
             successful = False
             # XXX: Maybe we could log creator & invoker here as well if
             # present.
+            # XXX: Is there anything flagging these as unhandled errors?
             for debug_info in unhandled:
                 f = debug_info.failResult
                 self._got_user_exception((f.type, f.value, f.tb))
