@@ -25,6 +25,10 @@ from testtools._spinner import (
 from twisted.internet import defer
 
 
+# TODO: Need a helper to replace Trial's assertFailure.
+
+# TODO: Need a conversion guide for flushLoggedErrors
+
 class SynchronousDeferredRunTest(RunTest):
     """Runner for tests that return synchronous Deferreds."""
 
@@ -52,6 +56,17 @@ class AsynchronousDeferredRunTest(RunTest):
     """
 
     def __init__(self, case, handlers=None, reactor=None, timeout=0.005):
+        """Construct an `AsynchronousDeferredRunTest`.
+
+        :param case: The `testtools.TestCase` to run.
+        :param handlers: A list of exception handlers (ExceptionType, handler)
+            where 'handler' is a callable that takes a `TestCase`, a
+            `TestResult` and the exception raised.
+        :param reactor: The Twisted reactor to use.  If not given, we use the
+            default reactor.
+        :param timeout: The maximum time allowed for running a test.  The
+            default is 0.005s.
+        """
         super(AsynchronousDeferredRunTest, self).__init__(case, handlers)
         if reactor is None:
             from twisted.internet import reactor
@@ -129,6 +144,9 @@ class AsynchronousDeferredRunTest(RunTest):
     def _run_core(self):
         spinner = Spinner(self._reactor)
         try:
+            # XXX: Right now, TimeoutErrors are re-raised, causing the test
+            # runner to crash.  We probably just want to record them like test
+            # errors.
             successful, unhandled = trap_unhandled_errors(
                 spinner.run, self._timeout, self._run_deferred)
         except NoResultError:
@@ -137,6 +155,10 @@ class AsynchronousDeferredRunTest(RunTest):
             raise KeyboardInterrupt
         if unhandled:
             successful = False
+            # TODO: Actually, rather than raising this with a special error,
+            # we could add a traceback for each unhandled Deferred, or
+            # something like that.  Would be way more helpful than just a list
+            # of the reprs of the failures.
             try:
                 raise UnhandledErrorInDeferred(unhandled)
             except UnhandledErrorInDeferred:
