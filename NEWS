@@ -29,6 +29,9 @@ Improvements
 * With unittest from Python 2.7 skipped tests will now show only the reason
   rather than a serialisation of all details. (Martin [gz], #625583)
 
+* The testtools release process is now a little better documented and a little
+  smoother.  (Jonathan Lange, #623483, #623487)
+
 
 0.9.6
 ~~~~~
