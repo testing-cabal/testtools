@@ -112,10 +112,11 @@ class TestCase(unittest.TestCase):
 
         :param testMethod: The name of the method to run.
         :param runTest: Optional class to use to execute the test. If not
-            supplied testtools.runtest.RunTest is used. The instance to be
+            supplied `testtools.runtest.RunTest` is used. The instance to be
             used is created when run() is invoked, so will be fresh each time.
+            Overrides `run_tests_with` if given.
         """
-        runTest = kwargs.pop('runTest', self.run_tests_with)
+        runTest = kwargs.pop('runTest', None)
         unittest.TestCase.__init__(self, *args, **kwargs)
         self._cleanups = []
         self._unique_id_gen = itertools.count(1)
@@ -126,7 +127,10 @@ class TestCase(unittest.TestCase):
         # TestCase is safe to use with clone_test_with_new_id.
         self.__details = None
         test_method = self._get_test_method()
-        self.__RunTest = getattr(test_method, '_run_test_with', runTest)
+        if runTest is None:
+            runTest = getattr(
+                test_method, '_run_test_with', self.run_tests_with)
+        self.__RunTest = runTest
         self.__exception_handlers = []
         self.exception_handlers = [
             (self.skipException, self._report_skip),

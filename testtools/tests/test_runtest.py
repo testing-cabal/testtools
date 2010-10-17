@@ -207,6 +207,22 @@ class TestTestCaseSupportForRunTest(TestCase):
         from_run_test = case.run(result)
         self.assertThat(from_run_test, Is(CustomRunTest.marker))
 
+    def test_constructor_argument_overrides_class_variable(self):
+        # If a 'runTest' argument is passed to the test's constructor, that
+        # overrides the class variable.
+        marker = object()
+        class DifferentRunTest(RunTest):
+            def run(self, result=None):
+                return marker
+        class SomeCase(TestCase):
+            run_tests_with = CustomRunTest
+            def test_foo(self):
+                pass
+        result = TestResult()
+        case = SomeCase('test_foo', runTest=DifferentRunTest)
+        from_run_test = case.run(result)
+        self.assertThat(from_run_test, Is(marker))
+
     def test_decorator_for_run_test(self):
         # Individual test methods can be marked as needing a special runner.
         class SomeCase(TestCase):
@@ -235,6 +251,22 @@ class TestTestCaseSupportForRunTest(TestCase):
                 pass
         result = TestResult()
         case = SomeCase('test_foo')
+        from_run_test = case.run(result)
+        self.assertThat(from_run_test, Is(marker))
+
+    def test_constructor_overrides_decorator(self):
+        # If a 'runTest' argument is passed to the test's constructor, that
+        # overrides the decorator.
+        marker = object()
+        class DifferentRunTest(RunTest):
+            def run(self, result=None):
+                return marker
+        class SomeCase(TestCase):
+            @run_test_with(CustomRunTest)
+            def test_foo(self):
+                pass
+        result = TestResult()
+        case = SomeCase('test_foo', runTest=DifferentRunTest)
         from_run_test = case.run(result)
         self.assertThat(from_run_test, Is(marker))
 
