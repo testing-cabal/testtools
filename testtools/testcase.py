@@ -6,7 +6,7 @@ __metaclass__ = type
 __all__ = [
     'clone_test_with_new_id',
     'MultipleExceptions',
-    'run_tests_with',
+    'run_test_with',
     'skip',
     'skipIf',
     'skipUnless',
@@ -62,9 +62,25 @@ except ImportError:
         """
 
 
-def run_tests_with(test_runner):
+def run_test_with(test_runner, **kwargs):
+    """Decorate a test as using a specific `RunTest`.
+
+    e.g.
+      @run_test_with(CustomRunner, timeout=42)
+      def test_foo(self):
+          self.assertTrue(True)
+
+    :param test_runner: A `RunTest` factory that takes a test case and an
+        optional list of exception handlers.  See `RunTest`.
+    :param **kwargs: Keyword arguments to pass on as extra arguments to
+        `test_runner`.
+    :return: A decorator to be used for marking a test as needing a special
+        runner.
+    """
+    def make_test_runner(case, handlers=None):
+        return test_runner(case, handlers=handlers, **kwargs)
     def decorator(f):
-        f._run_tests_with = test_runner
+        f._run_test_with = make_test_runner
         return f
     return decorator
 
@@ -109,7 +125,7 @@ class TestCase(unittest.TestCase):
         # TestCase is safe to use with clone_test_with_new_id.
         self.__details = None
         test_method = self._get_test_method()
-        self.__RunTest = getattr(test_method, '_run_tests_with', runTest)
+        self.__RunTest = getattr(test_method, '_run_test_with', runTest)
         self.__exception_handlers = []
         self.exception_handlers = [
             (self.skipException, self._report_skip),

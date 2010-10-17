@@ -4,7 +4,7 @@
 
 from testtools import (
     ExtendedToOriginalDecorator,
-    run_tests_with,
+    run_test_with,
     RunTest,
     TestCase,
     TestResult,
@@ -208,14 +208,35 @@ class TestTestCaseSupportForRunTest(TestCase):
         self.assertThat(from_run_test, Is(CustomRunTest.marker))
 
     def test_decorator_for_run_test(self):
+        # Individual test methods can be marked as needing a special runner.
         class SomeCase(TestCase):
-            @run_tests_with(CustomRunTest)
+            @run_test_with(CustomRunTest)
             def test_foo(self):
                 pass
         result = TestResult()
         case = SomeCase('test_foo')
         from_run_test = case.run(result)
         self.assertThat(from_run_test, Is(CustomRunTest.marker))
+
+    def test_extended_decorator_for_run_test(self):
+        # Individual test methods can be marked as needing a special runner.
+        # Extra arguments can be passed to the decorator which will then be
+        # passed on to the RunTest object.
+        marker = object()
+        class FooRunTest(RunTest):
+            def __init__(self, case, handlers=None, bar=None):
+                super(FooRunTest, self).__init__(case, handlers)
+                self.bar = bar
+            def run(self, result=None):
+                return self.bar
+        class SomeCase(TestCase):
+            @run_test_with(FooRunTest, bar=marker)
+            def test_foo(self):
+                pass
+        result = TestResult()
+        case = SomeCase('test_foo')
+        from_run_test = case.run(result)
+        self.assertThat(from_run_test, Is(marker))
 
 
 def test_suite():
