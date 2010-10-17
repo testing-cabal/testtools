@@ -18,7 +18,6 @@ from testtools.matchers import (
     Equals,
     )
 from testtools.runtest import RunTest
-from testtools._spinner import extract_result
 
 from twisted.internet import defer
 from twisted.python import failure
@@ -446,18 +445,21 @@ class TestAsynchronousDeferredRunTest(TestCase):
 class TestAssertFailsWith(TestCase):
     """Tests for `assert_fails_with`."""
 
-    # XXX: This ought to be a test that uses SynchronousDeferredRunTest,
-    # rather than extract_result.
+    run_tests_with = SynchronousDeferredRunTest
 
     def test_assert_fails_with_success(self):
         # assert_fails_with fails the test if it's given a Deferred that
         # succeeds.
         marker = object()
         d = assert_fails_with(defer.succeed(marker), RuntimeError)
-        e = self.assertRaises(self.failureException, extract_result, d)
-        self.assertThat(
-            str(e),
-            Equals("RuntimeError not raised (%r returned)" % (marker,)))
+        def check_result(failure):
+            failure.trap(self.failureException)
+            self.assertThat(
+                str(failure.value),
+                Equals("RuntimeError not raised (%r returned)" % (marker,)))
+        d.addCallbacks(
+            lambda x: self.fail("Should not have succeeded"), check_result)
+        return d
 
     def test_assert_fails_with_success_multiple_types(self):
         # assert_fails_with fails the test if it's given a Deferred that
@@ -465,26 +467,34 @@ class TestAssertFailsWith(TestCase):
         marker = object()
         d = assert_fails_with(
             defer.succeed(marker), RuntimeError, ZeroDivisionError)
-        e = self.assertRaises(self.failureException, extract_result, d)
-        self.assertThat(
-            str(e),
-            Equals("RuntimeError, ZeroDivisionError not raised "
-                   "(%r returned)" % (marker,)))
+        def check_result(failure):
+            failure.trap(self.failureException)
+            self.assertThat(
+                str(failure.value),
+                Equals("RuntimeError, ZeroDivisionError not raised "
+                       "(%r returned)" % (marker,)))
+        d.addCallbacks(
+            lambda x: self.fail("Should not have succeeded"), check_result)
+        return d
 
     def test_assert_fails_with_wrong_exception(self):
         # assert_fails_with fails the test if it's given a Deferred that
         # succeeds.
         d = assert_fails_with(
             defer.maybeDeferred(lambda: 1/0), RuntimeError, KeyboardInterrupt)
-        e = self.assertRaises(self.failureException, extract_result, d)
-        lines = str(e).splitlines()
-        self.assertThat(
-            lines[:2],
-            Equals([
-                ("ZeroDivisionError raised instead of RuntimeError, "
-                 "KeyboardInterrupt:"),
-                " Traceback (most recent call last):",
-                ]))
+        def check_result(failure):
+            failure.trap(self.failureException)
+            lines = str(failure.value).splitlines()
+            self.assertThat(
+                lines[:2],
+                Equals([
+                    ("ZeroDivisionError raised instead of RuntimeError, "
+                     "KeyboardInterrupt:"),
+                    " Traceback (most recent call last):",
+                    ]))
+        d.addCallbacks(
+            lambda x: self.fail("Should not have succeeded"), check_result)
+        return d
 
     def test_assert_fails_with_expected_exception(self):
         # assert_fails_with calls back with the value of the failure if it's
@@ -494,8 +504,7 @@ class TestAssertFailsWith(TestCase):
         except ZeroDivisionError:
             f = failure.Failure()
         d = assert_fails_with(defer.fail(f), ZeroDivisionError)
-        result = extract_result(d)
-        self.assertThat(result, Equals(f.value))
+        return d.addCallback(self.assertThat, Equals(f.value))
 
     def test_custom_failure_exception(self):
         # If assert_fails_with is passed a 'failureException' keyword
@@ -506,10 +515,13 @@ class TestAssertFailsWith(TestCase):
         d = assert_fails_with(
             defer.succeed(marker), RuntimeError,
             failureException=CustomException)
-        e = self.assertRaises(CustomException, extract_result, d)
-        self.assertThat(
-            str(e),
-            Equals("RuntimeError not raised (%r returned)" % (marker,)))
+        def check_result(failure):
+            failure.trap(CustomException)
+            self.assertThat(
+                str(failure.value),
+                Equals("RuntimeError not raised (%r returned)" % (marker,)))
+        return d.addCallbacks(
+            lambda x: self.fail("Should not have succeeded"), check_result)
 
 
 def test_suite():
