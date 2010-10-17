@@ -179,12 +179,10 @@ class TestRunTest(TestCase):
 
 class CustomRunTest(RunTest):
 
-    def __init__(self, marker, *args, **kwargs):
-        super(CustomRunTest, self).__init__(*args, **kwargs)
-        self._marker = marker
+    marker = object()
 
     def run(self, result=None):
-        return self._marker
+        return self.marker
 
 
 class TestTestCaseSupportForRunTest(TestCase):
@@ -194,11 +192,19 @@ class TestTestCaseSupportForRunTest(TestCase):
             def test_foo(self):
                 pass
         result = TestResult()
-        marker = object()
-        case = SomeCase(
-            'test_foo', runTest=lambda *args: CustomRunTest(marker, *args))
+        case = SomeCase('test_foo', runTest=CustomRunTest)
         from_run_test = case.run(result)
-        self.assertThat(from_run_test, Is(marker))
+        self.assertThat(from_run_test, Is(CustomRunTest.marker))
+
+    def test_default_is_runTest_class_variable(self):
+        class SomeCase(TestCase):
+            run_tests_with = CustomRunTest
+            def test_foo(self):
+                pass
+        result = TestResult()
+        case = SomeCase('test_foo')
+        from_run_test = case.run(result)
+        self.assertThat(from_run_test, Is(CustomRunTest.marker))
 
 
 def test_suite():

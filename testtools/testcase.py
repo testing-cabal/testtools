@@ -74,9 +74,13 @@ class TestCase(unittest.TestCase):
     :ivar exception_handlers: Exceptions to catch from setUp, runTest and
         tearDown. This list is able to be modified at any time and consists of
         (exception_class, handler(case, result, exception_value)) pairs.
+    :cvar run_tests_with: A `RunTest` class to run tests with.  Defaults to
+        `RunTest`.
     """
 
     skipException = TestSkipped
+
+    run_tests_with = RunTest
 
     def __init__(self, *args, **kwargs):
         """Construct a TestCase.
@@ -86,7 +90,7 @@ class TestCase(unittest.TestCase):
             supplied testtools.runtest.RunTest is used. The instance to be
             used is created when run() is invoked, so will be fresh each time.
         """
-        runTest = kwargs.pop('runTest', RunTest)
+        runTest = kwargs.pop('runTest', self.run_tests_with)
         unittest.TestCase.__init__(self, *args, **kwargs)
         self._cleanups = []
         self._unique_id_gen = itertools.count(1)
