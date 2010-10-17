@@ -9,6 +9,7 @@ from testtools import (
     TestCase,
     )
 from testtools.deferredruntest import (
+    assert_fails_with,
     AsynchronousDeferredRunTest,
     SynchronousDeferredRunTest,
     )
@@ -17,8 +18,10 @@ from testtools.matchers import (
     Equals,
     )
 from testtools.runtest import RunTest
+from testtools._spinner import extract_result
 
 from twisted.internet import defer
+from twisted.python import failure
 
 
 class X(object):
@@ -438,6 +441,47 @@ class TestAsynchronousDeferredRunTest(TestCase):
                 'traceback-2',
                 'traceback-3',
                 ]))
+
+
+class TestAssertFailsWith(TestCase):
+    """Tests for `assert_fails_with`."""
+
+    # XXX: This ought to be a test that uses SynchronousDeferredRunTest,
+    # rather than extract_result.
+
+    def test_assert_fails_with_success(self):
+        # assert_fails_with fails the test if it's given a Deferred that
+        # succeeds.
+        marker = object()
+        d = assert_fails_with(defer.succeed(marker), RuntimeError)
+        e = self.assertRaises(self.failureException, extract_result, d)
+        self.assertThat(
+            str(e),
+            Equals("RuntimeError not raised (%r returned)" % (marker,)))
+
+    def test_assert_fails_with_wrong_exception(self):
+        # assert_fails_with fails the test if it's given a Deferred that
+        # succeeds.
+        d = assert_fails_with(defer.maybeDeferred(lambda: 1/0), RuntimeError)
+        e = self.assertRaises(self.failureException, extract_result, d)
+        lines = str(e).splitlines()
+        self.assertThat(
+            lines[:2],
+            Equals([
+                "ZeroDivisionError raised instead of RuntimeError:",
+                " Traceback (most recent call last):",
+                ]))
+
+    def test_assert_fails_with_expected_exception(self):
+        # assert_fails_with calls back with the value of the failure if it's
+        # one of the expected types of failures.
+        try:
+            1/0
+        except ZeroDivisionError:
+            f = failure.Failure()
+        d = assert_fails_with(defer.fail(f), ZeroDivisionError)
+        result = extract_result(d)
+        self.assertThat(result, Equals(f.value))
 
 
 def test_suite():

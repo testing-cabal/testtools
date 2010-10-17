@@ -7,6 +7,7 @@ subtle failures in tests.  Use at your own peril.
 """
 
 __all__ = [
+    'assert_fails_with',
     'AsynchronousDeferredRunTest',
     'SynchronousDeferredRunTest',
     ]
@@ -188,6 +189,30 @@ class AsynchronousDeferredRunTest(RunTest):
         return defer.maybeDeferred(
             super(AsynchronousDeferredRunTest, self)._run_user,
             function, *args)
+
+
+def assert_fails_with(d, *exc_types):
+    """Assert that 'd' will fail with one of 'exc_types'.
+
+    The normal way to use this is to return the result of 'assert_fails_with'
+    from your unit test.
+
+    :param d: A Deferred that is expected to fail.
+    :param *exc_types: The exception types that the Deferred is expected to
+        fail with.
+    :return: A Deferred that will fail with an `AssertionError` if 'd' does
+        not fail with one of the exception types.
+    """
+    expected_names = ", ".join(exc_type.__name__ for exc_type in exc_types)
+    def got_success(result):
+        raise AssertionError(
+            "%s not raised (%r returned)" % (expected_names, result))
+    def got_failure(failure):
+        if failure.check(*exc_types):
+            return failure.value
+        raise AssertionError("%s raised instead of %s:\n %s" % (
+            failure.type.__name__, expected_names, failure.getTraceback()))
+    return d.addCallbacks(got_success, got_failure)
 
 
 class UncleanReactorError(Exception):
