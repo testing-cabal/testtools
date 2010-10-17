@@ -4,6 +4,13 @@ testtools NEWS
 NEXT
 ~~~~
 
+
+0.9.7
+~~~~~
+
+Lots of little cleanups in this release; many small improvements to make your
+testing life more pleasant.
+
 Improvements
 ------------
 
