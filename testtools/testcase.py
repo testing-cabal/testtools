@@ -98,8 +98,9 @@ class TestCase(unittest.TestCase):
     :ivar exception_handlers: Exceptions to catch from setUp, runTest and
         tearDown. This list is able to be modified at any time and consists of
         (exception_class, handler(case, result, exception_value)) pairs.
-    :cvar run_tests_with: A `RunTest` class to run tests with.  Defaults to
-        `RunTest`.
+    :cvar run_tests_with: A factory to make the `RunTest` to run tests with.
+        Defaults to `RunTest`.  The factory is expected to take a test case
+        and an optional list of exception handlers.
     """
 
     skipException = TestSkipped
