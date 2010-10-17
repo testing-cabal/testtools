@@ -476,20 +476,22 @@ class TestCase(unittest.TestCase):
                 "super(%s, self).tearDown() from your tearDown()."
                 % self.__class__.__name__)
 
-    def _run_test_method(self, result):
-        """Run the test method for this test.
-
-        :param result: A testtools.TestResult to report activity to.
-        :return: None.
-        """
+    def _get_test_method(self):
         absent_attr = object()
         # Python 2.5+
         method_name = getattr(self, '_testMethodName', absent_attr)
         if method_name is absent_attr:
             # Python 2.4
             method_name = getattr(self, '_TestCase__testMethodName')
-        testMethod = getattr(self, method_name)
-        testMethod()
+        return getattr(self, method_name)
+
+    def _run_test_method(self, result):
+        """Run the test method for this test.
+
+        :param result: A testtools.TestResult to report activity to.
+        :return: None.
+        """
+        self._get_test_method()()
 
     def setUp(self):
         unittest.TestCase.setUp(self)
