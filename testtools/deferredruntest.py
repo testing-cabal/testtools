@@ -26,8 +26,6 @@ from testtools._spinner import (
 from twisted.internet import defer
 
 
-# TODO: Need a helper to replace Trial's assertFailure.
-
 # TODO: Need a conversion guide for flushLoggedErrors
 
 class SynchronousDeferredRunTest(RunTest):
