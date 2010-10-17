@@ -6,10 +6,11 @@ __metaclass__ = type
 __all__ = [
     'clone_test_with_new_id',
     'MultipleExceptions',
-    'TestCase',
+    'run_test_with',
     'skip',
     'skipIf',
     'skipUnless',
+    'TestCase',
     ]
 
 import copy
@@ -61,6 +62,29 @@ except ImportError:
         """
 
 
+def run_test_with(test_runner, **kwargs):
+    """Decorate a test as using a specific `RunTest`.
+
+    e.g.
+      @run_test_with(CustomRunner, timeout=42)
+      def test_foo(self):
+          self.assertTrue(True)
+
+    :param test_runner: A `RunTest` factory that takes a test case and an
+        optional list of exception handlers.  See `RunTest`.
+    :param **kwargs: Keyword arguments to pass on as extra arguments to
+        `test_runner`.
+    :return: A decorator to be used for marking a test as needing a special
+        runner.
+    """
+    def make_test_runner(case, handlers=None):
+        return test_runner(case, handlers=handlers, **kwargs)
+    def decorator(f):
+        f._run_test_with = make_test_runner
+        return f
+    return decorator
+
+
 class MultipleExceptions(Exception):
     """Represents many exceptions raised from some operation.
 
@@ -74,19 +98,25 @@ class TestCase(unittest.TestCase):
     :ivar exception_handlers: Exceptions to catch from setUp, runTest and
         tearDown. This list is able to be modified at any time and consists of
         (exception_class, handler(case, result, exception_value)) pairs.
+    :cvar run_tests_with: A factory to make the `RunTest` to run tests with.
+        Defaults to `RunTest`.  The factory is expected to take a test case
+        and an optional list of exception handlers.
     """
 
     skipException = TestSkipped
+
+    run_tests_with = RunTest
 
     def __init__(self, *args, **kwargs):
         """Construct a TestCase.
 
         :param testMethod: The name of the method to run.
         :param runTest: Optional class to use to execute the test. If not
-            supplied testtools.runtest.RunTest is used. The instance to be
+            supplied `testtools.runtest.RunTest` is used. The instance to be
             used is created when run() is invoked, so will be fresh each time.
+            Overrides `run_tests_with` if given.
         """
-        self.__RunTest = kwargs.pop('runTest', RunTest)
+        runTest = kwargs.pop('runTest', None)
         unittest.TestCase.__init__(self, *args, **kwargs)
         self._cleanups = []
         self._unique_id_gen = itertools.count(1)
@@ -96,6 +126,11 @@ class TestCase(unittest.TestCase):
         # __details is lazy-initialized so that a constructed-but-not-run
         # TestCase is safe to use with clone_test_with_new_id.
         self.__details = None
+        test_method = self._get_test_method()
+        if runTest is None:
+            runTest = getattr(
+                test_method, '_run_test_with', self.run_tests_with)
+        self.__RunTest = runTest
         self.__exception_handlers = []
         self.exception_handlers = [
             (self.skipException, self._report_skip),
@@ -473,20 +508,22 @@ class TestCase(unittest.TestCase):
                 % self.__class__.__name__)
         return ret
 
-    def _run_test_method(self, result):
-        """Run the test method for this test.
-
-        :param result: A testtools.TestResult to report activity to.
-        :return: None.
-        """
+    def _get_test_method(self):
         absent_attr = object()
         # Python 2.5+
         method_name = getattr(self, '_testMethodName', absent_attr)
         if method_name is absent_attr:
             # Python 2.4
             method_name = getattr(self, '_TestCase__testMethodName')
-        testMethod = getattr(self, method_name)
-        return testMethod()
+        return getattr(self, method_name)
+
+    def _run_test_method(self, result):
+        """Run the test method for this test.
+
+        :param result: A testtools.TestResult to report activity to.
+        :return: None.
+        """
+        return self._get_test_method()()
 
     def setUp(self):
         unittest.TestCase.setUp(self)

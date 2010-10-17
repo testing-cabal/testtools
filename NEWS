@@ -7,6 +7,12 @@ NEXT
 * Experimental support for running tests that return Deferreds.
   (Jonathan Lange)
 
+* Provide a per-test decoractor, run_test_with, to specify which RunTest
+  object to use for a given test.  (Jonathan Lange, #657780)
+
+* Fix the runTest parameter of TestCase to actually work, rather than raising
+  a TypeError.  (Jonathan Lange, #657760)
+
 
 0.9.7
 ~~~~~
