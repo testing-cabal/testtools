@@ -86,6 +86,7 @@ class TestCase(unittest.TestCase):
             supplied testtools.runtest.RunTest is used. The instance to be
             used is created when run() is invoked, so will be fresh each time.
         """
+        runTest = kwargs.pop('runTest', RunTest)
         unittest.TestCase.__init__(self, *args, **kwargs)
         self._cleanups = []
         self._unique_id_gen = itertools.count(1)
@@ -95,7 +96,7 @@ class TestCase(unittest.TestCase):
         # __details is lazy-initialized so that a constructed-but-not-run
         # TestCase is safe to use with clone_test_with_new_id.
         self.__details = None
-        self.__RunTest = kwargs.get('runTest', RunTest)
+        self.__RunTest = runTest
         self.__exception_handlers = []
         self.exception_handlers = [
             (self.skipException, self._report_skip),

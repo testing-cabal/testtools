@@ -8,6 +8,7 @@ from testtools import (
     TestCase,
     TestResult,
     )
+from testtools.matchers import Is
 from testtools.tests.helpers import ExtendedTestResult
 
 
@@ -174,6 +175,30 @@ class TestRunTest(TestCase):
             ('startTest', case),
             ('stopTest', case),
             ], result._events)
+
+
+class CustomRunTest(RunTest):
+
+    def __init__(self, marker, *args, **kwargs):
+        super(CustomRunTest, self).__init__(*args, **kwargs)
+        self._marker = marker
+
+    def run(self, result=None):
+        return self._marker
+
+
+class TestTestCaseSupportForRunTest(TestCase):
+
+    def test_pass_custom_run_test(self):
+        class SomeCase(TestCase):
+            def test_foo(self):
+                pass
+        result = TestResult()
+        marker = object()
+        case = SomeCase(
+            'test_foo', runTest=lambda *args: CustomRunTest(marker, *args))
+        from_run_test = case.run(result)
+        self.assertThat(from_run_test, Is(marker))
 
 
 def test_suite():
