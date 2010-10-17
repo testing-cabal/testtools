@@ -459,16 +459,30 @@ class TestAssertFailsWith(TestCase):
             str(e),
             Equals("RuntimeError not raised (%r returned)" % (marker,)))
 
+    def test_assert_fails_with_success_multiple_types(self):
+        # assert_fails_with fails the test if it's given a Deferred that
+        # succeeds.
+        marker = object()
+        d = assert_fails_with(
+            defer.succeed(marker), RuntimeError, ZeroDivisionError)
+        e = self.assertRaises(self.failureException, extract_result, d)
+        self.assertThat(
+            str(e),
+            Equals("RuntimeError, ZeroDivisionError not raised "
+                   "(%r returned)" % (marker,)))
+
     def test_assert_fails_with_wrong_exception(self):
         # assert_fails_with fails the test if it's given a Deferred that
         # succeeds.
-        d = assert_fails_with(defer.maybeDeferred(lambda: 1/0), RuntimeError)
+        d = assert_fails_with(
+            defer.maybeDeferred(lambda: 1/0), RuntimeError, KeyboardInterrupt)
         e = self.assertRaises(self.failureException, extract_result, d)
         lines = str(e).splitlines()
         self.assertThat(
             lines[:2],
             Equals([
-                "ZeroDivisionError raised instead of RuntimeError:",
+                ("ZeroDivisionError raised instead of RuntimeError, "
+                 "KeyboardInterrupt:"),
                 " Traceback (most recent call last):",
                 ]))
 
@@ -482,6 +496,20 @@ class TestAssertFailsWith(TestCase):
         d = assert_fails_with(defer.fail(f), ZeroDivisionError)
         result = extract_result(d)
         self.assertThat(result, Equals(f.value))
+
+    def test_custom_failure_exception(self):
+        # If assert_fails_with is passed a 'failureException' keyword
+        # argument, then it will raise that instead of `AssertionError`.
+        class CustomException(Exception):
+            pass
+        marker = object()
+        d = assert_fails_with(
+            defer.succeed(marker), RuntimeError,
+            failureException=CustomException)
+        e = self.assertRaises(CustomException, extract_result, d)
+        self.assertThat(
+            str(e),
+            Equals("RuntimeError not raised (%r returned)" % (marker,)))
 
 
 def test_suite():
