@@ -6,10 +6,11 @@ __metaclass__ = type
 __all__ = [
     'clone_test_with_new_id',
     'MultipleExceptions',
-    'TestCase',
+    'run_tests_with',
     'skip',
     'skipIf',
     'skipUnless',
+    'TestCase',
     ]
 
 import copy
@@ -61,6 +62,13 @@ except ImportError:
         """
 
 
+def run_tests_with(test_runner):
+    def decorator(f):
+        f._run_tests_with = test_runner
+        return f
+    return decorator
+
+
 class MultipleExceptions(Exception):
     """Represents many exceptions raised from some operation.
 
@@ -100,7 +108,8 @@ class TestCase(unittest.TestCase):
         # __details is lazy-initialized so that a constructed-but-not-run
         # TestCase is safe to use with clone_test_with_new_id.
         self.__details = None
-        self.__RunTest = runTest
+        test_method = self._get_test_method()
+        self.__RunTest = getattr(test_method, '_run_tests_with', runTest)
         self.__exception_handlers = []
         self.exception_handlers = [
             (self.skipException, self._report_skip),

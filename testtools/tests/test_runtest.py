@@ -4,6 +4,7 @@
 
 from testtools import (
     ExtendedToOriginalDecorator,
+    run_tests_with,
     RunTest,
     TestCase,
     TestResult,
@@ -199,6 +200,16 @@ class TestTestCaseSupportForRunTest(TestCase):
     def test_default_is_runTest_class_variable(self):
         class SomeCase(TestCase):
             run_tests_with = CustomRunTest
+            def test_foo(self):
+                pass
+        result = TestResult()
+        case = SomeCase('test_foo')
+        from_run_test = case.run(result)
+        self.assertThat(from_run_test, Is(CustomRunTest.marker))
+
+    def test_decorator_for_run_test(self):
+        class SomeCase(TestCase):
+            @run_tests_with(CustomRunTest)
             def test_foo(self):
                 pass
         result = TestResult()
