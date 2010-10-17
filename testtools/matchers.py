@@ -14,6 +14,7 @@ __metaclass__ = type
 __all__ = [
     'Annotate',
     'DocTestMatches',
+    'DoesNotStartWith',
     'Equals',
     'Is',
     'LessThan',
@@ -21,10 +22,12 @@ __all__ = [
     'MatchesAny',
     'NotEquals',
     'Not',
+    'StartsWith',
     ]
 
 import doctest
 import operator
+from pprint import pformat
 
 
 class Matcher(object):
@@ -151,6 +154,23 @@ class DocTestMismatch(Mismatch):
         return self.matcher._describe_difference(self.with_nl)
 
 
+class DoesNotStartWith(Mismatch):
+
+    def __init__(self, matchee, expected):
+        """Create a DoesNotStartWith Mismatch.
+
+        :param matchee: the string that did not match.
+        :param expected: the string that `matchee` was expected to start
+            with.
+        """
+        self.matchee = matchee
+        self.expected = expected
+
+    def describe(self):
+        return "'%s' does not start with '%s'." % (
+            self.matchee, self.expected)
+
+
 class _BinaryComparison(object):
     """Matcher that compares an object to another object."""
 
@@ -178,6 +198,14 @@ class _BinaryMismatch(Mismatch):
         self.other = other
 
     def describe(self):
+        left = repr(self.expected)
+        right = repr(self.other)
+        if len(left) + len(right) > 70:
+            return "%s:\nreference = %s\nactual = %s\n" % (
+                self._mismatch_string, pformat(self.expected),
+                pformat(self.other))
+        else:
+            return "%s %s %s" % (left, self._mismatch_string,right)
         return "%r %s %r" % (self.expected, self._mismatch_string, self.other)
 
 
@@ -294,6 +322,25 @@ class MatchedUnexpectedly(Mismatch):
 
     def describe(self):
         return "%r matches %s" % (self.other, self.matcher)
+
+
+class StartsWith(Matcher):
+    """Checks whether one string starts with another."""
+
+    def __init__(self, expected):
+        """Create a StartsWith Matcher.
+
+        :param expected: the string that matchees should start with.
+        """
+        self.expected = expected
+
+    def __str__(self):
+        return "Starts with '%s'." % self.expected
+
+    def match(self, matchee):
+        if not matchee.startswith(self.expected):
+            return DoesNotStartWith(matchee, self.expected)
+        return None
 
 
 class Annotate(object):

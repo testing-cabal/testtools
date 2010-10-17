@@ -300,59 +300,42 @@ class ThreadsafeForwardingResult(TestResult):
         self.result = ExtendedToOriginalDecorator(target)
         self.semaphore = semaphore
 
-    def addError(self, test, err=None, details=None):
+    def _add_result_with_semaphore(self, method, test, *args, **kwargs):
         self.semaphore.acquire()
         try:
+            self.result.time(self._test_start)
             self.result.startTest(test)
-            self.result.addError(test, err, details=details)
-            self.result.stopTest(test)
+            self.result.time(self._now())
+            try:
+                method(test, *args, **kwargs)
+            finally:
+                self.result.stopTest(test)
         finally:
             self.semaphore.release()
+
+    def addError(self, test, err=None, details=None):
+        self._add_result_with_semaphore(self.result.addError,
+            test, err, details=details)
 
     def addExpectedFailure(self, test, err=None, details=None):
-        self.semaphore.acquire()
-        try:
-            self.result.startTest(test)
-            self.result.addExpectedFailure(test, err, details=details)
-            self.result.stopTest(test)
-        finally:
-            self.semaphore.release()
+        self._add_result_with_semaphore(self.result.addExpectedFailure,
+            test, err, details=details)
 
     def addFailure(self, test, err=None, details=None):
-        self.semaphore.acquire()
-        try:
-            self.result.startTest(test)
-            self.result.addFailure(test, err, details=details)
-            self.result.stopTest(test)
-        finally:
-            self.semaphore.release()
+        self._add_result_with_semaphore(self.result.addFailure,
+            test, err, details=details)
 
     def addSkip(self, test, reason=None, details=None):
-        self.semaphore.acquire()
-        try:
-            self.result.startTest(test)
-            self.result.addSkip(test, reason, details=details)
-            self.result.stopTest(test)
-        finally:
-            self.semaphore.release()
+        self._add_result_with_semaphore(self.result.addSkip,
+            test, reason, details=details)
 
     def addSuccess(self, test, details=None):
-        self.semaphore.acquire()
-        try:
-            self.result.startTest(test)
-            self.result.addSuccess(test, details=details)
-            self.result.stopTest(test)
-        finally:
-            self.semaphore.release()
+        self._add_result_with_semaphore(self.result.addSuccess,
+            test, details=details)
 
     def addUnexpectedSuccess(self, test, details=None):
-        self.semaphore.acquire()
-        try:
-            self.result.startTest(test)
-            self.result.addUnexpectedSuccess(test, details=details)
-            self.result.stopTest(test)
-        finally:
-            self.semaphore.release()
+        self._add_result_with_semaphore(self.result.addUnexpectedSuccess,
+            test, details=details)
 
     def startTestRun(self):
         self.semaphore.acquire()
@@ -374,6 +357,10 @@ class ThreadsafeForwardingResult(TestResult):
             self.result.done()
         finally:
             self.semaphore.release()
+
+    def startTest(self, test):
+        self._test_start = self._now()
+        super(ThreadsafeForwardingResult, self).startTest(test)
 
 
 class ExtendedToOriginalDecorator(object):
@@ -435,8 +422,11 @@ class ExtendedToOriginalDecorator(object):
             try:
                 return addSkip(test, details=details)
             except TypeError:
-                # have to convert
-                reason = _details_to_str(details)
+                # extract the reason if it's available
+                try:
+                    reason = ''.join(details['reason'].iter_text())
+                except KeyError:
+                    reason = _details_to_str(details)
         return addSkip(test, reason)
 
     def addUnexpectedSuccess(self, test, details=None):

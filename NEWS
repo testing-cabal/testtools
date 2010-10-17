@@ -4,6 +4,32 @@ testtools NEWS
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* Cleanups can raise ``testtools.MultipleExceptions`` if they have multiple
+  exceptions to report. For instance, a cleanup which is itself responsible for
+  running several different internal cleanup routines might use this.
+
+* Code duplication between assertEqual and the matcher Equals has been removed.
+
+* In normal circumstances, a TestCase will no longer share details with clones
+  of itself. (Andrew Bennetts, bug #637725)
+
+* Less exception object cycles are generated (reduces peak memory use between
+  garbage collection). (Martin [gz])
+
+* New matchers 'DoesNotStartWith' and 'StartsWith' contributed by Canonical
+  from the Launchpad project. Written by James Westby.
+
+* Timestamps as produced by subunit protocol clients are now forwarded in the
+  ThreadsafeForwardingResult so correct test durations can be reported.
+  (Martin [gz], Robert Collins, #625594)
+
+* With unittest from Python 2.7 skipped tests will now show only the reason
+  rather than a serialisation of all details. (Martin [gz], #625583)
+
+
 0.9.6
 ~~~~~
 
@@ -17,32 +43,32 @@ patches and TestCase.assertEqual gives slightly nicer errors.
 Improvements
 ------------
 
- * 'TestCase.assertEqual' now formats errors a little more nicely, in the
-   style of bzrlib.
+* 'TestCase.assertEqual' now formats errors a little more nicely, in the
+  style of bzrlib.
 
- * Added `PlaceHolder` and `ErrorHolder`, TestCase-like objects that can be
-   used to add results to a `TestResult`.
+* Added `PlaceHolder` and `ErrorHolder`, TestCase-like objects that can be
+  used to add results to a `TestResult`.
 
- * 'Mismatch' now takes optional description and details parameters, so
-   custom Matchers aren't compelled to make their own subclass.
+* 'Mismatch' now takes optional description and details parameters, so
+  custom Matchers aren't compelled to make their own subclass.
 
- * jml added a built-in UTF8_TEXT ContentType to make it slightly easier to
-   add details to test results. See bug #520044.
+* jml added a built-in UTF8_TEXT ContentType to make it slightly easier to
+  add details to test results. See bug #520044.
 
- * Fix a bug in our built-in matchers where assertThat would blow up if any
-   of them failed. All built-in mismatch objects now provide get_details().
+* Fix a bug in our built-in matchers where assertThat would blow up if any
+  of them failed. All built-in mismatch objects now provide get_details().
 
- * New 'Is' matcher, which lets you assert that a thing is identical to
-   another thing.
+* New 'Is' matcher, which lets you assert that a thing is identical to
+  another thing.
 
- * New 'LessThan' matcher which lets you assert that a thing is less than
-   another thing.
+* New 'LessThan' matcher which lets you assert that a thing is less than
+  another thing.
 
- * TestCase now has a 'patch()' method to make it easier to monkey-patching
-   objects in tests. See the manual for more information. Fixes bug #310770.
+* TestCase now has a 'patch()' method to make it easier to monkey-patching
+  objects in tests. See the manual for more information. Fixes bug #310770.
 
- * MultiTestResult methods now pass back return values from the results it
-   forwards to.
+* MultiTestResult methods now pass back return values from the results it
+  forwards to.
 
 0.9.5
 ~~~~~

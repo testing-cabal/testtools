@@ -8,6 +8,7 @@ import unittest
 
 from testtools import (
     ErrorHolder,
+    MultipleExceptions,
     PlaceHolder,
     TestCase,
     clone_test_with_new_id,
@@ -461,6 +462,15 @@ class TestAssertions(TestCase):
              'a = %s' % pformat(a),
              'b = %s' % pformat(b),
              ''])
+        expected_error = '\n'.join([
+            'Match failed. Matchee: "%r"' % b,
+            'Matcher: Annotate(%r, Equals(%r))' % (message, a),
+            'Difference: !=:',
+            'reference = %s' % pformat(a),
+            'actual = %s' % pformat(b),
+            ': ' + message,
+            ''
+            ])
         self.assertFails(expected_error, self.assertEqual, a, b, message)
         self.assertFails(expected_error, self.assertEquals, a, b, message)
         self.assertFails(expected_error, self.failUnlessEqual, a, b, message)
@@ -468,11 +478,12 @@ class TestAssertions(TestCase):
     def test_assertEqual_formatting_no_message(self):
         a = "cat"
         b = "dog"
-        expected_error = '\n'.join(
-            ['not equal:',
-             'a = %s' % pformat(a),
-             'b = %s' % pformat(b),
-             ''])
+        expected_error = '\n'.join([
+            'Match failed. Matchee: "dog"',
+            'Matcher: Equals(\'cat\')',
+            'Difference: \'cat\' != \'dog\'',
+            ''
+            ])
         self.assertFails(expected_error, self.assertEqual, a, b)
         self.assertFails(expected_error, self.assertEquals, a, b)
         self.assertFails(expected_error, self.failUnlessEqual, a, b)
@@ -597,6 +608,27 @@ class TestAddCleanup(TestCase):
         self.test.addCleanup(raiseKeyboardInterrupt)
         self.assertRaises(
             KeyboardInterrupt, self.test.run, self.logging_result)
+
+    def test_all_errors_from_MultipleExceptions_reported(self):
+        # When a MultipleExceptions exception is caught, all the errors are
+        # reported.
+        def raiseMany():
+            try:
+                1/0
+            except Exception:
+                exc_info1 = sys.exc_info()
+            try:
+                1/0
+            except Exception:
+                exc_info2 = sys.exc_info()
+            raise MultipleExceptions(exc_info1, exc_info2)
+        self.test.addCleanup(raiseMany)
+        self.logging_result = ExtendedTestResult()
+        self.test.run(self.logging_result)
+        self.assertEqual(['startTest', 'addError', 'stopTest'],
+            [event[0] for event in self.logging_result._events])
+        self.assertEqual(set(['traceback', 'traceback-1']),
+            set(self.logging_result._events[1][2].keys()))
 
     def test_multipleCleanupErrorsReported(self):
         # Errors from all failing cleanups are reported as separate backtraces.
@@ -760,6 +792,18 @@ class TestCloneTestWithNewId(TestCase):
         self.assertEqual(oldName, test.id(),
             "the original test instance should be unchanged.")
 
+    def test_cloned_testcase_does_not_share_details(self):
+        """A cloned TestCase does not share the details dict."""
+        class Test(TestCase):
+            def test_foo(self):
+                self.addDetail(
+                    'foo', content.Content('text/plain', lambda: 'foo'))
+        orig_test = Test('test_foo')
+        cloned_test = clone_test_with_new_id(orig_test, self.getUniqueString())
+        orig_test.run(unittest.TestResult())
+        self.assertEqual('foo', orig_test.getDetails()['foo'].iter_bytes())
+        self.assertEqual(None, cloned_test.getDetails().get('foo'))
+
 
 class TestDetailsProvided(TestWithDetails):
 
@@ -920,8 +964,7 @@ class TestSkipping(TestCase):
         test.run(result)
         case = result._events[0][1]
         self.assertEqual([('startTest', case),
-            ('addSkip', case, "Text attachment: reason\n------------\n"
-             "skipping this test\n------------\n"), ('stopTest', case)],
+            ('addSkip', case, "skipping this test"), ('stopTest', case)],
             calls)
 
     def test_skipException_in_test_method_calls_result_addSkip(self):
@@ -933,8 +976,7 @@ class TestSkipping(TestCase):
         test.run(result)
         case = result._events[0][1]
         self.assertEqual([('startTest', case),
-            ('addSkip', case, "Text attachment: reason\n------------\n"
-             "skipping this test\n------------\n"), ('stopTest', case)],
+            ('addSkip', case, "skipping this test"), ('stopTest', case)],
             result._events)
 
     def test_skip__in_setup_with_old_result_object_calls_addSuccess(self):
