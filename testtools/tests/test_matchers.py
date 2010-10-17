@@ -12,6 +12,7 @@ from testtools.matchers import (
     Annotate,
     Equals,
     DocTestMatches,
+    DoesNotStartWith,
     Is,
     LessThan,
     MatchesAny,
@@ -19,6 +20,7 @@ from testtools.matchers import (
     Mismatch,
     Not,
     NotEquals,
+    StartsWith,
     )
 
 # Silence pyflakes.
@@ -219,6 +221,38 @@ class TestAnnotate(TestCase, TestMatchersInterface):
         ("Annotate('foo', Equals(1))", Annotate("foo", Equals(1)))]
 
     describe_examples = [("1 != 2: foo", 2, Annotate('foo', Equals(1)))]
+
+
+class DoesNotStartWithTests(TestCase):
+
+    def test_describe(self):
+        mismatch = DoesNotStartWith("fo", "bo")
+        self.assertEqual("'fo' does not start with 'bo'.", mismatch.describe())
+
+
+class StartsWithTests(TestCase):
+
+    def test_str(self):
+        matcher = StartsWith("bar")
+        self.assertEqual("Starts with 'bar'.", str(matcher))
+
+    def test_match(self):
+        matcher = StartsWith("bar")
+        self.assertIs(None, matcher.match("barf"))
+
+    def test_mismatch_returns_does_not_start_with(self):
+        matcher = StartsWith("bar")
+        self.assertIsInstance(matcher.match("foo"), DoesNotStartWith)
+
+    def test_mismatch_sets_matchee(self):
+        matcher = StartsWith("bar")
+        mismatch = matcher.match("foo")
+        self.assertEqual("foo", mismatch.matchee)
+
+    def test_mismatch_sets_expected(self):
+        matcher = StartsWith("bar")
+        mismatch = matcher.match("foo")
+        self.assertEqual("bar", mismatch.expected)
 
 
 def test_suite():
