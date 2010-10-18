@@ -406,7 +406,7 @@ Traceback (most recent call last):
   File "...testtools...runtest.py", line ..., in _run_user...
     return fn(*args)
   File "...testtools...testcase.py", line ..., in _run_test_method
-    testMethod()
+    self._get_test_method()()
   File "...testtools...tests...test_testresult.py", line ..., in error
     1/0
 ZeroDivisionError:... divi... by zero...
@@ -420,7 +420,7 @@ Traceback (most recent call last):
   File "...testtools...runtest.py", line ..., in _run_user...
     return fn(*args)
   File "...testtools...testcase.py", line ..., in _run_test_method
-    testMethod()
+    self._get_test_method()()
   File "...testtools...tests...test_testresult.py", line ..., in failed
     self.fail("yo!")
 AssertionError: yo!
