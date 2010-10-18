@@ -2,6 +2,7 @@
 
 """Tests for the RunTest single test execution logic."""
 
+from functools import wraps
 from testtools import (
     ExtendedToOriginalDecorator,
     run_test_with,
@@ -253,6 +254,25 @@ class TestTestCaseSupportForRunTest(TestCase):
         case = SomeCase('test_foo')
         from_run_test = case.run(result)
         self.assertThat(from_run_test, Is(marker))
+
+    def test_works_as_inner_decorator(self):
+        # Even if run_test_with is the innermost decorator, it will be
+        # respected.
+        def wrapped(function):
+            """Silly, trivial decorator."""
+            @wraps(function)
+            def decorated(*args, **kwargs):
+                return function(*args, **kwargs)
+            return decorated
+        class SomeCase(TestCase):
+            @wrapped
+            @run_test_with(CustomRunTest)
+            def test_foo(self):
+                pass
+        result = TestResult()
+        case = SomeCase('test_foo')
+        from_run_test = case.run(result)
+        self.assertThat(from_run_test, Is(CustomRunTest.marker))
 
     def test_constructor_overrides_decorator(self):
         # If a 'runTest' argument is passed to the test's constructor, that
