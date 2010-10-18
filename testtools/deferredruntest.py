@@ -195,6 +195,9 @@ def assert_fails_with(d, *exc_types, **kwargs):
     The normal way to use this is to return the result of 'assert_fails_with'
     from your unit test.
 
+    Note that this function is experimental and unstable.  Use at your own
+    peril; expect the API to change.
+
     :param d: A Deferred that is expected to fail.
     :param *exc_types: The exception types that the Deferred is expected to
         fail with.
@@ -230,5 +233,3 @@ class UncleanReactorError(Exception):
             "calls have either fired or been cancelled.  The management "
             "thanks you: %s"
             % map(repr, junk))
-
-
