@@ -41,10 +41,10 @@ def get_version():
     revno = get_revno()
     if phase == 'alpha':
         # No idea what the next version will be
-        return 'next-%s' % revno
+        return 'next-r%s' % revno
     else:
         # Preserve the version number but give it a revno prefix
-        return version + '~%s' % revno
+        return version + '-r%s' % revno
 
 
 def get_long_description():
