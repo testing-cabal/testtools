@@ -120,7 +120,9 @@ class TestCase(unittest.TestCase):
         unittest.TestCase.__init__(self, *args, **kwargs)
         self._cleanups = []
         self._unique_id_gen = itertools.count(1)
-        self._traceback_id_gen = itertools.count(0)
+        # Generators to ensure unique traceback ids.  Maps traceback label to
+        # iterators.
+        self._traceback_id_gens = {}
         self.__setup_called = False
         self.__teardown_called = False
         # __details is lazy-initialized so that a constructed-but-not-run
@@ -429,14 +431,14 @@ class TestCase(unittest.TestCase):
             prefix = self.id()
         return '%s-%d' % (prefix, self.getUniqueInteger())
 
-    def onException(self, exc_info):
+    def onException(self, exc_info, tb_label='traceback'):
         """Called when an exception propogates from test code.
 
         :seealso addOnException:
         """
         if exc_info[0] not in [
             TestSkipped, _UnexpectedSuccess, _ExpectedFailure]:
-            self._report_traceback(exc_info)
+            self._report_traceback(exc_info, tb_label=tb_label)
         for handler in self.__exception_handlers:
             handler(exc_info)
 
@@ -461,12 +463,12 @@ class TestCase(unittest.TestCase):
         self._add_reason(reason)
         result.addSkip(self, details=self.getDetails())
 
-    def _report_traceback(self, exc_info):
-        tb_id = advance_iterator(self._traceback_id_gen)
+    def _report_traceback(self, exc_info, tb_label='traceback'):
+        id_gen = self._traceback_id_gens.setdefault(
+            tb_label, itertools.count(0))
+        tb_id = advance_iterator(id_gen)
         if tb_id:
-            tb_label = 'traceback-%d' % tb_id
-        else:
-            tb_label = 'traceback'
+            tb_label = '%s-%d' % (tb_label, tb_id)
         self.addDetail(tb_label, content.TracebackContent(exc_info, self))
 
     @staticmethod

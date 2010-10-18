@@ -345,7 +345,10 @@ class TestAsynchronousDeferredRunTest(TestCase):
              ('addError', test, None),
              ('stopTest', test)]))
         self.assertThat(
-            list(error.keys()), Equals(['traceback', 'traceback-1']))
+            list(error.keys()), Equals([
+                'unhandled-error-in-deferred',
+                'unhandled-error-in-deferred-1',
+                ]))
 
     def test_keyboard_interrupt_stops_test_run(self):
         # If we get a SIGINT during a test run, the test stops and no more
@@ -438,7 +441,7 @@ class TestAsynchronousDeferredRunTest(TestCase):
                 'traceback',
                 'traceback-1',
                 'traceback-2',
-                'traceback-3',
+                'unhandled-error-in-deferred',
                 ]))
 
 

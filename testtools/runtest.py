@@ -146,11 +146,16 @@ class RunTest(object):
         except:
             return self._got_user_exception(sys.exc_info())
 
-    def _got_user_exception(self, exc_info):
-        """Called when user code raises an exception."""
+    def _got_user_exception(self, exc_info, tb_label='traceback'):
+        """Called when user code raises an exception.
+
+        :param exc_info: A sys.exc_info() tuple for the user error.
+        :param tb_label: An optional string label for the error.  If
+            not specified, will default to 'traceback'.
+        """
         try:
             e = exc_info[1]
-            self.case.onException(exc_info)
+            self.case.onException(exc_info, tb_label=tb_label)
         finally:
             del exc_info
         for exc_class, handler in self.handlers:
