@@ -4,6 +4,9 @@ testtools NEWS
 NEXT
 ~~~~
 
+Improvements
+------------
+
 * Experimental support for running tests that return Deferreds.
   (Jonathan Lange)
 
@@ -12,6 +15,9 @@ NEXT
 
 * Fix the runTest parameter of TestCase to actually work, rather than raising
   a TypeError.  (Jonathan Lange, #657760)
+
+* Non-release snapshots of testtools will now work with buildout.
+  (Jonathan Lange, #613734)
 
 
 0.9.7
