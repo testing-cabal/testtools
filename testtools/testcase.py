@@ -70,6 +70,15 @@ def run_test_with(test_runner, **kwargs):
       def test_foo(self):
           self.assertTrue(True)
 
+    The returned decorator works by setting an attribute on the decorated
+    function.  `TestCase.__init__` looks for this attribute when deciding
+    on a `RunTest` factory.  If you wish to use multiple decorators on a test
+    method, then you must either make this one the top-most decorator, or
+    you must write your decorators so that they update the wrapping function
+    with the attributes of the wrapped function.  The latter is recommended
+    style anyway.  `functools.wraps`, `functools.wrapper` and
+    `twisted.python.util.mergeFunctionMetadata` can help you do this.
+
     :param test_runner: A `RunTest` factory that takes a test case and an
         optional list of exception handlers.  See `RunTest`.
     :param **kwargs: Keyword arguments to pass on as extra arguments to
@@ -77,11 +86,13 @@ def run_test_with(test_runner, **kwargs):
     :return: A decorator to be used for marking a test as needing a special
         runner.
     """
-    def make_test_runner(case, handlers=None):
-        return test_runner(case, handlers=handlers, **kwargs)
-    def decorator(f):
-        f._run_test_with = make_test_runner
-        return f
+    def decorator(function):
+        # Set an attribute on 'function' which will inform TestCase how to
+        # make the runner.
+        function._run_test_with = (
+            lambda case, handlers=None:
+                test_runner(case, handlers=handlers, **kwargs))
+        return function
     return decorator
 
 
