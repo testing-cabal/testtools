@@ -274,3 +274,18 @@ install the 'discover' module, then you can invoke discovery::
 For more information see the Python 2.7 unittest documentation, or::
 
     python -m testtools.run --help
+
+
+Twisted support
+---------------
+
+Support for running Twisted tests is very experimental right now.  You
+shouldn't really do it.  However, if you are going to, here are some tips for
+converting your Trial tests into testtools tests.
+
+ * Use the AsynchronousDeferredRunTest runner
+ * Make sure to upcall to setUp and tearDown
+ * Don't use setUpClass or tearDownClass
+ * Don't expect setting .todo, .timeout or .skip attributes to do anything
+ * flushLoggedErrors is not there for you.  Sorry.
+ * assertFailure is not there for you.  Even more sorry.

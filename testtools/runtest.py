@@ -2,7 +2,6 @@
 
 """Individual test case execution."""
 
-__metaclass__ = type
 __all__ = [
     'RunTest',
     ]
@@ -145,14 +144,22 @@ class RunTest(object):
         except KeyboardInterrupt:
             raise
         except:
-            exc_info = sys.exc_info()
-            try:
-                e = exc_info[1]
-                self.case.onException(exc_info)
-            finally:
-                del exc_info
-            for exc_class, handler in self.handlers:
-                if isinstance(e, exc_class):
-                    self._exceptions.append(e)
-                    return self.exception_caught
-            raise e
+            return self._got_user_exception(sys.exc_info())
+
+    def _got_user_exception(self, exc_info, tb_label='traceback'):
+        """Called when user code raises an exception.
+
+        :param exc_info: A sys.exc_info() tuple for the user error.
+        :param tb_label: An optional string label for the error.  If
+            not specified, will default to 'traceback'.
+        """
+        try:
+            e = exc_info[1]
+            self.case.onException(exc_info, tb_label=tb_label)
+        finally:
+            del exc_info
+        for exc_class, handler in self.handlers:
+            if isinstance(e, exc_class):
+                self._exceptions.append(e)
+                return self.exception_caught
+        raise e
