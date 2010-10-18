@@ -5,17 +5,27 @@ from distutils.core import setup
 import os
 
 import testtools
-version = '.'.join(str(component) for component in testtools.__version__[0:3])
-phase = testtools.__version__[3]
-if phase != 'final':
+
+
+def get_revno():
     import bzrlib.workingtree
     t = bzrlib.workingtree.WorkingTree.open_containing(__file__)[0]
+    return t.branch.revno()
+
+
+def get_version():
+    version = '.'.join(
+        str(component) for component in testtools.__version__[0:3])
+    phase = testtools.__version__[3]
+    if phase == 'final':
+        return version
+    revno = get_revno()
     if phase == 'alpha':
         # No idea what the next version will be
-        version = 'next-%s' % t.branch.revno()
+        return 'next-%s' % revno
     else:
         # Preserve the version number but give it a revno prefix
-        version = version + '~%s' % t.branch.revno()
+        return version + '~%s' % revno
 
 
 def get_long_description():
@@ -30,6 +40,6 @@ setup(name='testtools',
       description=('Extensions to the Python standard library unit testing '
                    'framework'),
       long_description=get_long_description(),
-      version=version,
+      version=get_version(),
       classifiers=["License :: OSI Approved :: MIT License"],
       packages=['testtools', 'testtools.testresult', 'testtools.tests'])
