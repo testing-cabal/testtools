@@ -1083,7 +1083,7 @@ class TestNonAsciiResults(TestCase):
             ), textoutput)
 
     def test_syntax_error_malformed(self):
-        """Syntax errors with bogus parameters should break anythong"""
+        """Syntax errors with bogus parameters should break anything"""
         textoutput = self._test_external_case("raise SyntaxError(3, 2, 1)")
         self.assertIn(self._as_output("\nSyntaxError: "), textoutput)
 
