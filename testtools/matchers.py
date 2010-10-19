@@ -206,7 +206,6 @@ class _BinaryMismatch(Mismatch):
                 pformat(self.other))
         else:
             return "%s %s %s" % (left, self._mismatch_string,right)
-        return "%r %s %r" % (self.expected, self._mismatch_string, self.other)
 
 
 class Equals(_BinaryComparison):
