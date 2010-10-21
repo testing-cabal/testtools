@@ -19,6 +19,8 @@ Improvements
 * Non-release snapshots of testtools will now work with buildout.
   (Jonathan Lange, #613734)
 
+* Malformed SyntaxErrors no longer blow up the test suite.  (Martin [gz])
+
 
 0.9.7
 ~~~~~

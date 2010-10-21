@@ -1082,6 +1082,11 @@ class TestNonAsciiResults(TestCase):
             'SyntaxError: '
             ), textoutput)
 
+    def test_syntax_error_malformed(self):
+        """Syntax errors with bogus parameters should break anything"""
+        textoutput = self._test_external_case("raise SyntaxError(3, 2, 1)")
+        self.assertIn(self._as_output("\nSyntaxError: "), textoutput)
+
     def test_syntax_error_import_binary(self):
         """Importing a binary file shouldn't break SyntaxError formatting"""
         if sys.version_info < (2, 5):
