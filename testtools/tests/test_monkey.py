@@ -132,7 +132,7 @@ class MonkeyPatcherTest(TestCase):
         def _():
             self.assertEquals(self.test_object.foo, 'haha')
             self.assertEquals(self.test_object.bar, 'blahblah')
-            raise RuntimeError, "Something went wrong!"
+            raise RuntimeError("Something went wrong!")
 
         self.monkey_patcher.add_patch(self.test_object, 'foo', 'haha')
         self.monkey_patcher.add_patch(self.test_object, 'bar', 'blahblah')
