@@ -165,7 +165,9 @@ class TestRunInReactor(TestCase):
         self.assertThat(result, Is(marker))
 
     def test_preserve_signal_handler(self):
-        signals = [signal.SIGINT, signal.SIGTERM, signal.SIGCHLD]
+        signals = ['SIGINT', 'SIGTERM', 'SIGCHLD']
+        signals = filter(
+            None, (getattr(signal, name, None) for name in signals))
         for sig in signals:
             self.addCleanup(signal.signal, sig, signal.getsignal(sig))
         new_hdlrs = [lambda *a: None, lambda *a: None, lambda *a: None]
@@ -273,10 +275,13 @@ class TestRunInReactor(TestCase):
 
     def test_sigint_raises_no_result_error(self):
         # If we get a SIGINT during a run, we raise NoResultError.
+        SIGINT = getattr(signal, 'SIGINT', None)
+        if not SIGINT:
+            self.skipTest("SIGINT not available")
         reactor = self.make_reactor()
         spinner = self.make_spinner(reactor)
         timeout = self.make_timeout()
-        reactor.callLater(timeout, os.kill, os.getpid(), signal.SIGINT)
+        reactor.callLater(timeout, os.kill, os.getpid(), SIGINT)
         self.assertRaises(
             NoResultError, spinner.run, timeout * 5, defer.Deferred)
         self.assertEqual([], spinner._clean())
@@ -289,10 +294,13 @@ class TestRunInReactor(TestCase):
 
     def test_fast_sigint_raises_no_result_error(self):
         # If we get a SIGINT during a run, we raise NoResultError.
+        SIGINT = getattr(signal, 'SIGINT', None)
+        if not SIGINT:
+            self.skipTest("SIGINT not available")
         reactor = self.make_reactor()
         spinner = self.make_spinner(reactor)
         timeout = self.make_timeout()
-        reactor.callWhenRunning(os.kill, os.getpid(), signal.SIGINT)
+        reactor.callWhenRunning(os.kill, os.getpid(), SIGINT)
         self.assertRaises(
             NoResultError, spinner.run, timeout * 5, defer.Deferred)
         self.assertEqual([], spinner._clean())

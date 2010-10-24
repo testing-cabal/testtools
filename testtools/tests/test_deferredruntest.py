@@ -353,6 +353,9 @@ class TestAsynchronousDeferredRunTest(TestCase):
     def test_keyboard_interrupt_stops_test_run(self):
         # If we get a SIGINT during a test run, the test stops and no more
         # tests run.
+        SIGINT = getattr(signal, 'SIGINT', None)
+        if not SIGINT:
+            raise self.skipTest("SIGINT unavailable")
         class SomeCase(TestCase):
             def test_pause(self):
                 return defer.Deferred()
@@ -361,12 +364,15 @@ class TestAsynchronousDeferredRunTest(TestCase):
         timeout = self.make_timeout()
         runner = self.make_runner(test, timeout * 5)
         result = self.make_result()
-        reactor.callLater(timeout, os.kill, os.getpid(), signal.SIGINT)
+        reactor.callLater(timeout, os.kill, os.getpid(), SIGINT)
         self.assertRaises(KeyboardInterrupt, runner.run, result)
 
     def test_fast_keyboard_interrupt_stops_test_run(self):
         # If we get a SIGINT during a test run, the test stops and no more
         # tests run.
+        SIGINT = getattr(signal, 'SIGINT', None)
+        if not SIGINT:
+            raise self.skipTest("SIGINT unavailable")
         class SomeCase(TestCase):
             def test_pause(self):
                 return defer.Deferred()
@@ -375,7 +381,7 @@ class TestAsynchronousDeferredRunTest(TestCase):
         timeout = self.make_timeout()
         runner = self.make_runner(test, timeout * 5)
         result = self.make_result()
-        reactor.callWhenRunning(os.kill, os.getpid(), signal.SIGINT)
+        reactor.callWhenRunning(os.kill, os.getpid(), SIGINT)
         self.assertRaises(KeyboardInterrupt, runner.run, result)
 
     def test_timeout_causes_test_error(self):
