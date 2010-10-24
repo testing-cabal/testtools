@@ -11,6 +11,7 @@ __all__ = [
     ]
 
 import datetime
+import sys
 import unittest
 
 from testtools.compat import _format_exc_info, str_is_unicode, _u
@@ -432,7 +433,10 @@ class ExtendedToOriginalDecorator(object):
     def addUnexpectedSuccess(self, test, details=None):
         outcome = getattr(self.decorated, 'addUnexpectedSuccess', None)
         if outcome is None:
-            return self.decorated.addSuccess(test)
+            try:
+                test.fail("")
+            except test.failureException:
+                return self.addFailure(test, sys.exc_info())
         if details is not None:
             try:
                 return outcome(test, details=details)
