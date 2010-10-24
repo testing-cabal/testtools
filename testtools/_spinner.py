@@ -152,9 +152,9 @@ class Spinner(object):
 
     # Signals that we save and restore for each spin.
     _PRESERVED_SIGNALS = [
-        signal.SIGINT,
-        signal.SIGTERM,
-        signal.SIGCHLD,
+        'SIGINT',
+        'SIGTERM',
+        'SIGCHLD',
         ]
 
     def __init__(self, reactor):
@@ -225,8 +225,10 @@ class Spinner(object):
         return self._junk
 
     def _save_signals(self):
+        available_signals = [
+            getattr(signal, name, None) for name in self._PRESERVED_SIGNALS]
         self._saved_signals = [
-            (sig, signal.getsignal(sig)) for sig in self._PRESERVED_SIGNALS]
+            (sig, signal.getsignal(sig)) for sig in available_signals if sig]
 
     def _restore_signals(self):
         for sig, hdlr in self._saved_signals:

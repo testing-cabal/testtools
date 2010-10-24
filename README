@@ -24,6 +24,9 @@ Dependencies
 
  * Python 2.4+ or 3.0+
 
+If you would like to use our undocumented, unsupported Twisted support, then
+you will need Twisted.
+
 
 Bug reports and patches
 -----------------------
