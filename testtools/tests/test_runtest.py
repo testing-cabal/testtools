@@ -1,8 +1,9 @@
-# Copyright (c) 2009 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2009-2010 Jonathan M. Lange. See LICENSE for details.
 
 """Tests for the RunTest single test execution logic."""
 
-from functools import wraps
+from twisted.python.util import mergeFunctionMetadata
+
 from testtools import (
     ExtendedToOriginalDecorator,
     run_test_with,
@@ -260,10 +261,9 @@ class TestTestCaseSupportForRunTest(TestCase):
         # respected.
         def wrapped(function):
             """Silly, trivial decorator."""
-            @wraps(function)
             def decorated(*args, **kwargs):
                 return function(*args, **kwargs)
-            return decorated
+            return mergeFunctionMetadata(function, decorated)
         class SomeCase(TestCase):
             @wrapped
             @run_test_with(CustomRunTest)
