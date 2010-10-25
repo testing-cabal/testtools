@@ -8,7 +8,7 @@ Improvements
 ------------
 
 * Experimental support for running tests that return Deferreds.
-  (Jonathan Lange)
+  (Jonathan Lange, Martin [gz])
 
 * Provide a per-test decoractor, run_test_with, to specify which RunTest
   object to use for a given test.  (Jonathan Lange, #657780)

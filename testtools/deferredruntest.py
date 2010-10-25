@@ -227,7 +227,7 @@ class UncleanReactorError(Exception):
     """Raised when the reactor has junk in it."""
 
     def __init__(self, junk):
-        super(UncleanReactorError, self).__init__(
+        Exception.__init__(self,
             "The reactor still thinks it needs to do things. Close all "
             "connections, kill all processes and make sure all delayed "
             "calls have either fired or been cancelled.  The management "
