@@ -6,6 +6,7 @@ import os
 import signal
 
 from testtools import (
+    skipIf,
     TestCase,
     )
 from testtools.matchers import (
@@ -273,6 +274,7 @@ class TestRunInReactor(TestCase):
         self.assertThat(junk, Equals([port]))
         self.assertThat(spinner.get_junk(), Equals([]))
 
+    @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
     def test_sigint_raises_no_result_error(self):
         # If we get a SIGINT during a run, we raise NoResultError.
         SIGINT = getattr(signal, 'SIGINT', None)
@@ -286,12 +288,14 @@ class TestRunInReactor(TestCase):
             NoResultError, spinner.run, timeout * 5, defer.Deferred)
         self.assertEqual([], spinner._clean())
 
+    @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
     def test_sigint_raises_no_result_error_second_time(self):
         # If we get a SIGINT during a run, we raise NoResultError.  This test
         # is exactly the same as test_sigint_raises_no_result_error, and
         # exists to make sure we haven't futzed with state.
         self.test_sigint_raises_no_result_error()
 
+    @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
     def test_fast_sigint_raises_no_result_error(self):
         # If we get a SIGINT during a run, we raise NoResultError.
         SIGINT = getattr(signal, 'SIGINT', None)
@@ -305,6 +309,7 @@ class TestRunInReactor(TestCase):
             NoResultError, spinner.run, timeout * 5, defer.Deferred)
         self.assertEqual([], spinner._clean())
 
+    @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
     def test_fast_sigint_raises_no_result_error_second_time(self):
         self.test_fast_sigint_raises_no_result_error()
 

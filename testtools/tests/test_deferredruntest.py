@@ -6,6 +6,7 @@ import os
 import signal
 
 from testtools import (
+    skipIf,
     TestCase,
     )
 from testtools.deferredruntest import (
@@ -350,6 +351,7 @@ class TestAsynchronousDeferredRunTest(TestCase):
                 'unhandled-error-in-deferred-1',
                 ]))
 
+    @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
     def test_keyboard_interrupt_stops_test_run(self):
         # If we get a SIGINT during a test run, the test stops and no more
         # tests run.
@@ -367,6 +369,7 @@ class TestAsynchronousDeferredRunTest(TestCase):
         reactor.callLater(timeout, os.kill, os.getpid(), SIGINT)
         self.assertRaises(KeyboardInterrupt, runner.run, result)
 
+    @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
     def test_fast_keyboard_interrupt_stops_test_run(self):
         # If we get a SIGINT during a test run, the test stops and no more
         # tests run.
