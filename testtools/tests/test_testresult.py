@@ -810,7 +810,7 @@ class TestExtendedToOriginalAddSkip(
         self.make_27_result()
         self.check_outcome_details_to_string(self.outcome)
 
-    def test_outcome_Extended_py27_no_reason(self):
+    def test_outcome_Extended_py27_reason(self):
         self.make_27_result()
         self.check_outcome_details_to_arg(self.outcome, 'foo',
             {'reason': Content(UTF8_TEXT, lambda:['foo'])})
@@ -857,9 +857,38 @@ class TestExtendedToOriginalAddSuccess(
 
 
 class TestExtendedToOriginalAddUnexpectedSuccess(
-    TestExtendedToOriginalAddSuccess):
+    TestExtendedToOriginalResultDecoratorBase):
 
     outcome = 'addUnexpectedSuccess'
+    expected = 'addFailure'
+
+    def test_outcome_Original_py26(self):
+        self.make_26_result()
+        getattr(self.converter, self.outcome)(self)
+        [event] = self.result._events
+        self.assertEqual((self.expected, self), event[:2])
+
+    def test_outcome_Original_py27(self):
+        self.make_27_result()
+        self.check_outcome_nothing(self.outcome)
+
+    def test_outcome_Original_pyextended(self):
+        self.make_extended_result()
+        self.check_outcome_nothing(self.outcome)
+
+    def test_outcome_Extended_py26(self):
+        self.make_26_result()
+        getattr(self.converter, self.outcome)(self)
+        [event] = self.result._events
+        self.assertEqual((self.expected, self), event[:2])
+
+    def test_outcome_Extended_py27(self):
+        self.make_27_result()
+        self.check_outcome_details_to_nothing(self.outcome)
+
+    def test_outcome_Extended_pyextended(self):
+        self.make_extended_result()
+        self.check_outcome_details(self.outcome)
 
 
 class TestExtendedToOriginalResultOtherAttributes(
