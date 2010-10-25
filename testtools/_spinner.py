@@ -30,7 +30,7 @@ class ReentryError(Exception):
     """Raised when we try to re-enter a function that forbids it."""
 
     def __init__(self, function):
-        super(ReentryError, self).__init__(
+        Exception.__init__(self,
             "%r in not re-entrant but was called within a call to itself."
             % (function,))
 
@@ -117,7 +117,7 @@ class TimeoutError(Exception):
     """Raised when run_in_reactor takes too long to run a function."""
 
     def __init__(self, function, timeout):
-        super(TimeoutError, self).__init__(
+        Exception.__init__(self,
             "%r took longer than %s seconds" % (function, timeout))
 
 
@@ -125,7 +125,7 @@ class NoResultError(Exception):
     """Raised when the reactor has stopped but we don't have any result."""
 
     def __init__(self):
-        super(NoResultError, self).__init__(
+        Exception.__init__(self,
             "Tried to get test's result from Deferred when no result is "
             "available.  Probably means we received SIGINT or similar.")
 
@@ -134,7 +134,7 @@ class StaleJunkError(Exception):
     """Raised when there's junk in the spinner from a previous run."""
 
     def __init__(self, junk):
-        super(StaleJunkError, self).__init__(
+        Exception.__init__(self,
             "There was junk in the spinner from a previous run. "
             "Use clear_junk() to clear it out: %r" % (junk,))
 
