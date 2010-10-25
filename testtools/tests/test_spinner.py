@@ -170,7 +170,7 @@ class TestRunInReactor(TestCase):
             None, (getattr(signal, name, None) for name in signals))
         for sig in signals:
             self.addCleanup(signal.signal, sig, signal.getsignal(sig))
-        new_hdlrs = [lambda *a: None, lambda *a: None, lambda *a: None]
+        new_hdlrs = list(lambda *a: None for _ in signals)
         for sig, hdlr in zip(signals, new_hdlrs):
             signal.signal(sig, hdlr)
         spinner = self.make_spinner()
