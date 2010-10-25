@@ -2,8 +2,6 @@
 
 """Tests for the RunTest single test execution logic."""
 
-from twisted.python.util import mergeFunctionMetadata
-
 from testtools import (
     ExtendedToOriginalDecorator,
     run_test_with,
@@ -263,7 +261,9 @@ class TestTestCaseSupportForRunTest(TestCase):
             """Silly, trivial decorator."""
             def decorated(*args, **kwargs):
                 return function(*args, **kwargs)
-            return mergeFunctionMetadata(function, decorated)
+            decorated.__name__ = function.__name__
+            decorated.__dict__.update(function.__dict__)
+            return decorated
         class SomeCase(TestCase):
             @wrapped
             @run_test_with(CustomRunTest)
