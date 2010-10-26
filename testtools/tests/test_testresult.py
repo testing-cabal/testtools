@@ -813,7 +813,7 @@ class TestExtendedToOriginalAddSkip(
     def test_outcome_Extended_py27_reason(self):
         self.make_27_result()
         self.check_outcome_details_to_arg(self.outcome, 'foo',
-            {'reason': Content(UTF8_TEXT, lambda:['foo'])})
+            {'reason': Content(UTF8_TEXT, lambda:[_b('foo')])})
 
     def test_outcome_Extended_pyextended(self):
         self.make_extended_result()
