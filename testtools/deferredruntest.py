@@ -77,7 +77,7 @@ class AsynchronousDeferredRunTest(RunTest):
         return lambda case, handlers=None: AsynchronousDeferredRunTest(
             case, handlers, reactor, timeout)
 
-    @defer.inlineCallbacks
+    @defer.deferredGenerator
     def _run_cleanups(self):
         """Run the cleanups on the test case.
 
@@ -87,13 +87,16 @@ class AsynchronousDeferredRunTest(RunTest):
         """
         while self.case._cleanups:
             f, args, kwargs = self.case._cleanups.pop()
+            d = defer.maybeDeferred(f, *args, **kwargs)
+            thing = defer.waitForDeferred(d)
+            yield thing
             try:
-                yield defer.maybeDeferred(f, *args, **kwargs)
+                thing.getResult()
             except Exception:
                 exc_info = sys.exc_info()
                 self.case._report_traceback(exc_info)
                 last_exception = exc_info[1]
-        defer.returnValue(last_exception)
+        yield last_exception
 
     def _run_deferred(self):
         """Run the test, assuming everything in it is Deferred-returning.
