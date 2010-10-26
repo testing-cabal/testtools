@@ -538,6 +538,35 @@ class TestCase(unittest.TestCase):
         """
         return self._get_test_method()()
 
+    def useFixture(self, fixture):
+        """Use fixture in a test case.
+
+        The fixture will be setUp, and self.addCleanup(fixture.cleanUp) called.
+
+        :param fixture: The fixture to use.
+        :return: The fixture, after setting it up and scheduling a cleanup for
+           it.
+        """
+        fixture.setUp()
+        self.addCleanup(fixture.cleanUp)
+        self.addCleanup(self._gather_details, fixture.getDetails)
+        return fixture
+
+    def _gather_details(self, getDetails):
+        """Merge the details from getDetails() into self.getDetails()."""
+        details = getDetails()
+        my_details = self.getDetails()
+        for name, content_object in details.items():
+            new_name = name
+            disambiguator = itertools.count(1)
+            while new_name in my_details:
+                new_name = '%s-%d' % (name, advance_iterator(disambiguator))
+            name = new_name
+            content_bytes = list(content_object.iter_bytes())
+            content_callback = lambda:content_bytes
+            self.addDetail(name,
+                content.Content(content_object.content_type, content_callback))
+
     def setUp(self):
         unittest.TestCase.setUp(self)
         self.__setup_called = True

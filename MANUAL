@@ -116,6 +116,16 @@ instead. ``skipTest`` was previously known as ``skip`` but as Python 2.7 adds
 ``skipTest`` support, the ``skip`` name is now deprecated (but no warning
 is emitted yet - some time in the future we may do so).
 
+TestCase.useFixture
+~~~~~~~~~~~~~~~~~~~
+
+``useFixture(fixture)`` calls setUp on the fixture, schedules a cleanup to 
+clean it up, and schedules a cleanup to attach all details held by the 
+fixture to the details dict of the test case. The fixture object should meet
+the ``fixtures.Fixture`` protocol (version 0.3.4 or newer). This is useful
+for moving code out of setUp and tearDown methods and into composable side
+classes.
+
 
 New assertion methods
 ~~~~~~~~~~~~~~~~~~~~~
