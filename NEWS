@@ -24,6 +24,9 @@ Improvements
 * addUnexpectedSuccess is translated to addFailure for test results that don't
   know about addUnexpectedSuccess.  (Jonathan Lange, #654474)
 
+* Update documentation to say how to use testtools.run() on Python 2.4.
+  (Jonathan Lange, #501174)
+
 
 0.9.7
 ~~~~~
