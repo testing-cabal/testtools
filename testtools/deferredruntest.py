@@ -14,6 +14,7 @@ __all__ = [
 
 import sys
 
+from testtools.content import text_content
 from testtools.runtest import RunTest
 from testtools._spinner import (
     extract_result,
@@ -175,11 +176,13 @@ class AsynchronousDeferredRunTest(RunTest):
 
         if unhandled:
             successful = False
-            # XXX: Maybe we could log creator & invoker here as well if
-            # present.
             for debug_info in unhandled:
                 f = debug_info.failResult
-                
+                info = debug_info._getDebugTracebacks()
+                if info:
+                    self.case.addDetail(
+                        'unhandled-error-in-deferred-debug',
+                        text_content(info))
                 self._got_user_exception(
                     (f.type, f.value, f.tb), 'unhandled-error-in-deferred')
         junk = spinner.clear_junk()
