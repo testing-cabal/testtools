@@ -179,6 +179,7 @@ class AsynchronousDeferredRunTest(RunTest):
             # present.
             for debug_info in unhandled:
                 f = debug_info.failResult
+                
                 self._got_user_exception(
                     (f.type, f.value, f.tb), 'unhandled-error-in-deferred')
         junk = spinner.clear_junk()
