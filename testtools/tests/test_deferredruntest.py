@@ -419,6 +419,16 @@ class TestAsynchronousDeferredRunTest(TestCase):
         self.assertIs(self, runner.case)
         self.assertEqual([handler], runner.handlers)
 
+    def test_use_convenient_factory(self):
+        # Make sure that the factory can actually be used.
+        factory = AsynchronousDeferredRunTest.make_factory()
+        class SomeCase(TestCase):
+            run_tests_with = factory
+            def test_something(self):
+                pass
+        case = SomeCase('test_something')
+        case.run()
+
     def test_convenient_construction_default_reactor(self):
         # As a convenience method, AsynchronousDeferredRunTest has a
         # classmethod that returns an AsynchronousDeferredRunTest

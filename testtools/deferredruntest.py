@@ -75,8 +75,14 @@ class AsynchronousDeferredRunTest(RunTest):
     @classmethod
     def make_factory(cls, reactor=None, timeout=0.005):
         """Make a factory that conforms to the RunTest factory interface."""
-        return lambda case, handlers=None: AsynchronousDeferredRunTest(
-            case, handlers, reactor, timeout)
+        # This is horrible, but it means that the return value of the method
+        # will be able to be assigned to a class variable *and* also be
+        # invoked directly.
+        class AsynchronousDeferredRunTestFactory:
+            def __call__(self, case, handlers=None):
+                return AsynchronousDeferredRunTest(
+                    case, handlers, reactor, timeout)
+        return AsynchronousDeferredRunTestFactory()
 
     @defer.deferredGenerator
     def _run_cleanups(self):
