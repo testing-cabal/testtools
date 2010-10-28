@@ -73,7 +73,8 @@ class AsynchronousDeferredRunTest(RunTest):
         self._timeout = timeout
 
     @classmethod
-    def make_factory(cls, reactor, timeout):
+    def make_factory(cls, reactor=None, timeout=0.005):
+        """Make a factory that conforms to the RunTest factory interface."""
         return lambda case, handlers=None: AsynchronousDeferredRunTest(
             case, handlers, reactor, timeout)
 

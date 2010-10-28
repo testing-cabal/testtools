@@ -419,6 +419,30 @@ class TestAsynchronousDeferredRunTest(TestCase):
         self.assertIs(self, runner.case)
         self.assertEqual([handler], runner.handlers)
 
+    def test_convenient_construction_default_reactor(self):
+        # As a convenience method, AsynchronousDeferredRunTest has a
+        # classmethod that returns an AsynchronousDeferredRunTest
+        # factory. This factory has the same API as the RunTest constructor.
+        reactor = object()
+        handler = object()
+        factory = AsynchronousDeferredRunTest.make_factory(reactor=reactor)
+        runner = factory(self, [handler])
+        self.assertIs(reactor, runner._reactor)
+        self.assertIs(self, runner.case)
+        self.assertEqual([handler], runner.handlers)
+
+    def test_convenient_construction_default_timeout(self):
+        # As a convenience method, AsynchronousDeferredRunTest has a
+        # classmethod that returns an AsynchronousDeferredRunTest
+        # factory. This factory has the same API as the RunTest constructor.
+        timeout = object()
+        handler = object()
+        factory = AsynchronousDeferredRunTest.make_factory(timeout=timeout)
+        runner = factory(self, [handler])
+        self.assertIs(timeout, runner._timeout)
+        self.assertIs(self, runner.case)
+        self.assertEqual([handler], runner.handlers)
+
     def test_only_addError_once(self):
         # Even if the reactor is unclean and the test raises an error and the
         # cleanups raise errors, we only called addError once per test.
