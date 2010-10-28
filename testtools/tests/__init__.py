@@ -39,6 +39,15 @@ def test_suite():
         pass
     else:
         modules.extend([test_deferredruntest, test_spinner])
+    try:
+        # Tests that rely on 'fixtures'.
+        from testtools.tests import (
+            test_fixturesupport,
+            )
+    except ImportError:
+        pass
+    else:
+        modules.extend([test_fixturesupport])
 
     for module in modules:
         suites.append(getattr(module, 'test_suite')())
