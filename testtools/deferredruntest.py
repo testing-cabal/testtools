@@ -73,6 +73,11 @@ class AsynchronousDeferredRunTest(RunTest):
         self._reactor = reactor
         self._timeout = timeout
 
+    def _got_user_failure(self, failure, tb_label='traceback'):
+        """We got a failure from user code."""
+        return self._got_user_exception(
+            (failure.type, failure.value, failure.tb), tb_label=tb_label)
+
     @classmethod
     def make_factory(cls, reactor=None, timeout=0.005):
         """Make a factory that conforms to the RunTest factory interface."""
@@ -183,8 +188,7 @@ class AsynchronousDeferredRunTest(RunTest):
                     self.case.addDetail(
                         'unhandled-error-in-deferred-debug',
                         text_content(info))
-                self._got_user_exception(
-                    (f.type, f.value, f.tb), 'unhandled-error-in-deferred')
+                self._got_user_failure(f, 'unhandled-error-in-deferred')
         junk = spinner.clear_junk()
         if junk:
             successful = False
@@ -199,10 +203,7 @@ class AsynchronousDeferredRunTest(RunTest):
         user wrote it.
         """
         d = defer.maybeDeferred(function, *args)
-        def got_user_exception(failure):
-            return self._got_user_exception(
-                (failure.type, failure.value, failure.tb))
-        return d.addErrback(got_user_exception)
+        return d.addErrback(self._got_user_failure)
 
 
 def assert_fails_with(d, *exc_types, **kwargs):
