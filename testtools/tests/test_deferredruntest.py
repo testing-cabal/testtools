@@ -351,6 +351,32 @@ class TestAsynchronousDeferredRunTest(TestCase):
                 'unhandled-error-in-deferred-1',
                 ]))
 
+    def test_unhandled_error_from_deferred_combined_with_error(self):
+        # If there's a Deferred with an unhandled error, the test fails.  Each
+        # unhandled error is reported with a separate traceback, and the error
+        # is still reported.
+        class SomeCase(TestCase):
+            def test_cruft(self):
+                # Note we aren't returning the Deferred so that the error will
+                # be unhandled.
+                defer.maybeDeferred(lambda: 1/0)
+                2 / 0
+        test = SomeCase('test_cruft')
+        runner = self.make_runner(test)
+        result = self.make_result()
+        runner.run(result)
+        error = result._events[1][2]
+        result._events[1] = ('addError', test, None)
+        self.assertThat(result._events, Equals(
+            [('startTest', test),
+             ('addError', test, None),
+             ('stopTest', test)]))
+        self.assertThat(
+            sorted(list(error.keys())), Equals([
+                'traceback',
+                'unhandled-error-in-deferred',
+                ]))
+
     @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
     def test_keyboard_interrupt_stops_test_run(self):
         # If we get a SIGINT during a test run, the test stops and no more
@@ -452,6 +478,23 @@ class TestAsynchronousDeferredRunTest(TestCase):
         self.assertIs(timeout, runner._timeout)
         self.assertIs(self, runner.case)
         self.assertEqual([handler], runner.handlers)
+
+    def test_deferred_error(self):
+        class SomeTest(TestCase):
+            def test_something(self):
+                return defer.maybeDeferred(lambda: 1/0)
+        test = SomeTest('test_something')
+        runner = self.make_runner(test)
+        result = self.make_result()
+        runner.run(result)
+        self.assertThat(
+            [event[:2] for event in result._events],
+            Equals([
+                ('startTest', test),
+                ('addError', test),
+                ('stopTest', test)]))
+        error = result._events[1][2]
+        self.assertThat(sorted(error.keys()), Equals(['traceback']))
 
     def test_only_addError_once(self):
         # Even if the reactor is unclean and the test raises an error and the

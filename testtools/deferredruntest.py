@@ -198,9 +198,11 @@ class AsynchronousDeferredRunTest(RunTest):
         This just makes sure that it returns a Deferred, regardless of how the
         user wrote it.
         """
-        return defer.maybeDeferred(
-            super(AsynchronousDeferredRunTest, self)._run_user,
-            function, *args)
+        d = defer.maybeDeferred(function, *args)
+        def got_user_exception(failure):
+            return self._got_user_exception(
+                (failure.type, failure.value, failure.tb))
+        return d.addErrback(got_user_exception)
 
 
 def assert_fails_with(d, *exc_types, **kwargs):
