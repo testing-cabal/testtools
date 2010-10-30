@@ -171,25 +171,26 @@ class AsynchronousDeferredRunTest(RunTest):
         except e.__class__:
             self._got_user_exception(sys.exc_info())
 
-    def _run_core(self):
-        # Add an observer to trap all logged errors.
-        test_observer = _log_observer
-        test_observer._add()
-
-        spinner = Spinner(self._reactor)
+    def _blocking_run_deferred(self, spinner):
         try:
-            successful, unhandled = trap_unhandled_errors(
+            return trap_unhandled_errors(
                 spinner.run, self._timeout, self._run_deferred)
         except NoResultError:
             # We didn't get a result at all!  This could be for any number of
             # reasons, but most likely someone hit Ctrl-C during the test.
             raise KeyboardInterrupt
         except TimeoutError:
-            # The function took too long to run.  No point reporting about
-            # junk and we don't have any information about unhandled errors in
-            # deferreds.  Report the timeout and skip to the end.
+            # The function took too long to run.
             self._log_user_exception(TimeoutError(self.case, self._timeout))
-            return
+            return False, []
+
+    def _run_core(self):
+        # Add an observer to trap all logged errors.
+        test_observer = _log_observer
+        test_observer._add()
+        spinner = Spinner(self._reactor)
+        try:
+            successful, unhandled = self._blocking_run_deferred(spinner)
         finally:
             test_observer._remove()
 
