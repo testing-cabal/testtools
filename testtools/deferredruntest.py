@@ -27,6 +27,7 @@ from testtools._spinner import (
     )
 
 from twisted.internet import defer
+from twisted.python import log
 from twisted.trial.unittest import _LogObserver
 
 
@@ -43,6 +44,21 @@ class SynchronousDeferredRunTest(RunTest):
         d.addErrback(got_exception)
         result = extract_result(d)
         return result
+
+
+def run_with_log_observers(observers, function, *args, **kwargs):
+    real_observers = log.theLogPublisher.observers
+    for observer in real_observers:
+        log.theLogPublisher.removeObserver(observer)
+    for observer in observers:
+        log.theLogPublisher.addObserver(observer)
+    try:
+        return function(*args, **kwargs)
+    finally:
+        for observer in observers:
+            log.theLogPublisher.removeObserver(observer)
+        for observer in real_observers:
+            log.theLogPublisher.addObserver(observer)
 
 
 # Observer of the Twisted log that we install during tests.
@@ -187,12 +203,9 @@ class AsynchronousDeferredRunTest(RunTest):
     def _run_core(self):
         # Add an observer to trap all logged errors.
         test_observer = _log_observer
-        test_observer._add()
         spinner = Spinner(self._reactor)
-        try:
-            successful, unhandled = self._blocking_run_deferred(spinner)
-        finally:
-            test_observer._remove()
+        successful, unhandled = run_with_log_observers(
+            [test_observer.gotEvent], self._blocking_run_deferred, spinner)
 
         logged_errors = test_observer.flushErrors()
         for logged_error in logged_errors:
