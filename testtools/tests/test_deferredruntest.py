@@ -12,6 +12,7 @@ from testtools import (
 from testtools.deferredruntest import (
     assert_fails_with,
     AsynchronousDeferredRunTest,
+    flush_logged_errors,
     SynchronousDeferredRunTest,
     )
 from testtools.tests.helpers import ExtendedTestResult
@@ -21,7 +22,7 @@ from testtools.matchers import (
 from testtools.runtest import RunTest
 
 from twisted.internet import defer
-from twisted.python import failure
+from twisted.python import failure, log
 
 
 class X(object):
@@ -281,21 +282,21 @@ class TestAsynchronousDeferredRunTest(TestCase):
             def test_whatever(self):
                 pass
         test = SomeCase('test_whatever')
-        log = []
-        a = defer.Deferred().addCallback(lambda x: log.append('a'))
-        b = defer.Deferred().addCallback(lambda x: log.append('b'))
-        c = defer.Deferred().addCallback(lambda x: log.append('c'))
+        call_log = []
+        a = defer.Deferred().addCallback(lambda x: call_log.append('a'))
+        b = defer.Deferred().addCallback(lambda x: call_log.append('b'))
+        c = defer.Deferred().addCallback(lambda x: call_log.append('c'))
         test.addCleanup(lambda: a)
         test.addCleanup(lambda: b)
         test.addCleanup(lambda: c)
         def fire_a():
-            self.assertThat(log, Equals([]))
+            self.assertThat(call_log, Equals([]))
             a.callback(None)
         def fire_b():
-            self.assertThat(log, Equals(['a']))
+            self.assertThat(call_log, Equals(['a']))
             b.callback(None)
         def fire_c():
-            self.assertThat(log, Equals(['a', 'b']))
+            self.assertThat(call_log, Equals(['a', 'b']))
             c.callback(None)
         timeout = self.make_timeout()
         reactor = self.make_reactor()
@@ -305,7 +306,7 @@ class TestAsynchronousDeferredRunTest(TestCase):
         runner = self.make_runner(test, timeout)
         result = self.make_result()
         runner.run(result)
-        self.assertThat(log, Equals(['a', 'b', 'c']))
+        self.assertThat(call_log, Equals(['a', 'b', 'c']))
 
     def test_clean_reactor(self):
         # If there's cruft left over in the reactor, the test fails.
@@ -529,6 +530,51 @@ class TestAsynchronousDeferredRunTest(TestCase):
                 'traceback-2',
                 'unhandled-error-in-deferred',
                 ]))
+
+    def test_log_err_is_error(self):
+        # An error logged during the test run is recorded as an error in the
+        # tests.
+        class LogAnError(TestCase):
+            def test_something(self):
+                try:
+                    1/0
+                except ZeroDivisionError:
+                    f = failure.Failure()
+                log.err(f)
+        test = LogAnError('test_something')
+        runner = self.make_runner(test)
+        result = self.make_result()
+        runner.run(result)
+        self.assertThat(
+            [event[:2] for event in result._events],
+            Equals([
+                ('startTest', test),
+                ('addError', test),
+                ('stopTest', test)]))
+        error = result._events[1][2]
+        self.assertThat(sorted(error.keys()), Equals(['logged-error']))
+
+    def test_log_err_flushed_is_success(self):
+        # An error logged during the test run is recorded as an error in the
+        # tests.
+        class LogAnError(TestCase):
+            def test_something(self):
+                try:
+                    1/0
+                except ZeroDivisionError:
+                    f = failure.Failure()
+                log.err(f)
+                flush_logged_errors(ZeroDivisionError)
+        test = LogAnError('test_something')
+        runner = self.make_runner(test)
+        result = self.make_result()
+        runner.run(result)
+        self.assertThat(
+            result._events,
+            Equals([
+                ('startTest', test),
+                ('addSuccess', test),
+                ('stopTest', test)]))
 
 
 class TestAssertFailsWith(TestCase):

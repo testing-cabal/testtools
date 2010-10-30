@@ -14,7 +14,9 @@ __all__ = [
 
 import sys
 
-from testtools.content import text_content
+from testtools.content import (
+    text_content,
+    )
 from testtools.runtest import RunTest
 from testtools._spinner import (
     extract_result,
@@ -25,6 +27,7 @@ from testtools._spinner import (
     )
 
 from twisted.internet import defer
+from twisted.trial.unittest import _LogObserver
 
 
 # TODO: Need a conversion guide for flushLoggedErrors
@@ -40,6 +43,11 @@ class SynchronousDeferredRunTest(RunTest):
         d.addErrback(got_exception)
         result = extract_result(d)
         return result
+
+
+# Observer of the Twisted log that we install during tests.
+_log_observer = _LogObserver()
+
 
 
 class AsynchronousDeferredRunTest(RunTest):
@@ -164,6 +172,10 @@ class AsynchronousDeferredRunTest(RunTest):
             self._got_user_exception(sys.exc_info())
 
     def _run_core(self):
+        # Add an observer to trap all logged errors.
+        test_observer = _log_observer
+        test_observer._add()
+
         spinner = Spinner(self._reactor)
         try:
             successful, unhandled = trap_unhandled_errors(
@@ -178,6 +190,13 @@ class AsynchronousDeferredRunTest(RunTest):
             # deferreds.  Report the timeout and skip to the end.
             self._log_user_exception(TimeoutError(self.case, self._timeout))
             return
+        finally:
+            test_observer._remove()
+
+        logged_errors = test_observer.flushErrors()
+        for logged_error in logged_errors:
+            successful = False
+            self._got_user_failure(logged_error, tb_label='logged-error')
 
         if unhandled:
             successful = False
@@ -189,10 +208,12 @@ class AsynchronousDeferredRunTest(RunTest):
                         'unhandled-error-in-deferred-debug',
                         text_content(info))
                 self._got_user_failure(f, 'unhandled-error-in-deferred')
+
         junk = spinner.clear_junk()
         if junk:
             successful = False
             self._log_user_exception(UncleanReactorError(junk))
+
         if successful:
             self.result.addSuccess(self.case, details=self.case.getDetails())
 
@@ -238,6 +259,10 @@ def assert_fails_with(d, *exc_types, **kwargs):
         raise failureException("%s raised instead of %s:\n %s" % (
             failure.type.__name__, expected_names, failure.getTraceback()))
     return d.addCallbacks(got_success, got_failure)
+
+
+def flush_logged_errors(*error_types):
+    return _log_observer.flushErrors(*error_types)
 
 
 class UncleanReactorError(Exception):
