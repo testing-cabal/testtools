@@ -12,11 +12,17 @@ __all__ = [
     'SynchronousDeferredRunTest',
     ]
 
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 import sys
 
 from testtools.content import (
+    Content,
     text_content,
     )
+from testtools.content_type import UTF8_TEXT
 from testtools.runtest import RunTest
 from testtools._spinner import (
     extract_result,
@@ -47,6 +53,7 @@ class SynchronousDeferredRunTest(RunTest):
 
 
 def run_with_log_observers(observers, function, *args, **kwargs):
+    """Run 'function' with the given Twisted log observers."""
     real_observers = log.theLogPublisher.observers
     for observer in real_observers:
         log.theLogPublisher.removeObserver(observer)
@@ -202,12 +209,15 @@ class AsynchronousDeferredRunTest(RunTest):
 
     def _run_core(self):
         # Add an observer to trap all logged errors.
-        test_observer = _log_observer
+        error_observer = _log_observer
+        full_log = StringIO()
+        full_observer = log.FileLogObserver(full_log)
         spinner = Spinner(self._reactor)
         successful, unhandled = run_with_log_observers(
-            [test_observer.gotEvent], self._blocking_run_deferred, spinner)
+            [error_observer.gotEvent, full_observer.emit],
+            self._blocking_run_deferred, spinner)
 
-        logged_errors = test_observer.flushErrors()
+        logged_errors = error_observer.flushErrors()
         for logged_error in logged_errors:
             successful = False
             self._got_user_failure(logged_error, tb_label='logged-error')
@@ -230,6 +240,10 @@ class AsynchronousDeferredRunTest(RunTest):
 
         if successful:
             self.result.addSuccess(self.case, details=self.case.getDetails())
+        else:
+            self.case.addDetail(
+                'twisted-log',
+                Content(UTF8_TEXT, lambda: [full_log.getvalue()]))
 
     def _run_user(self, function, *args):
         """Run a user-supplied function.
