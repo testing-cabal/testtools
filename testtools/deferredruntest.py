@@ -216,6 +216,9 @@ class AsynchronousDeferredRunTest(RunTest):
             [error_observer.gotEvent, full_observer.emit],
             self._blocking_run_deferred, spinner)
 
+        self.case.addDetail(
+            'twisted-log', Content(UTF8_TEXT, full_log.readlines))
+
         logged_errors = error_observer.flushErrors()
         for logged_error in logged_errors:
             successful = False
@@ -239,9 +242,6 @@ class AsynchronousDeferredRunTest(RunTest):
 
         if successful:
             self.result.addSuccess(self.case, details=self.case.getDetails())
-        else:
-            self.case.addDetail(
-                'twisted-log', Content(UTF8_TEXT, full_log.readlines))
 
     def _run_user(self, function, *args):
         """Run a user-supplied function.

@@ -9,6 +9,9 @@ from testtools import (
     skipIf,
     TestCase,
     )
+from testtools.content import (
+    text_content,
+    )
 from testtools.deferredruntest import (
     assert_fails_with,
     AsynchronousDeferredRunTest,
@@ -39,10 +42,6 @@ class X(object):
         def tearDown(self):
             self.calls.append('tearDown')
             super(X.Base, self).tearDown()
-
-    class Success(Base):
-        expected_calls = ['setUp', 'test', 'tearDown', 'clean-up']
-        expected_results = [['addSuccess']]
 
     class ErrorInSetup(Base):
         expected_calls = ['setUp', 'clean-up']
@@ -109,7 +108,6 @@ def make_integration_tests():
         ]
 
     tests = [
-        X.Success,
         X.ErrorInSetup,
         X.ErrorInTest,
         X.ErrorInTearDown,
@@ -578,7 +576,7 @@ class TestAsynchronousDeferredRunTest(TestCase):
             result._events,
             Equals([
                 ('startTest', test),
-                ('addSuccess', test),
+                ('addSuccess', test, {'twisted-log': text_content('')}),
                 ('stopTest', test)]))
 
     def test_log_in_details(self):
