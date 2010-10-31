@@ -106,6 +106,7 @@ class AsynchronousDeferredRunTest(RunTest):
 
     def _got_user_failure(self, failure, tb_label='traceback'):
         """We got a failure from user code."""
+        # XXX: We don't always get tracebacks from these.
         return self._got_user_exception(
             (failure.type, failure.value, failure.tb), tb_label=tb_label)
 
@@ -241,6 +242,8 @@ class AsynchronousDeferredRunTest(RunTest):
         if successful:
             self.result.addSuccess(self.case, details=self.case.getDetails())
         else:
+            # XXX: Maybe we should only add this when there is something worth
+            # adding? i.e. don't add when it's empty.
             self.case.addDetail(
                 'twisted-log',
                 Content(UTF8_TEXT, lambda: [full_log.getvalue()]))
