@@ -240,11 +240,8 @@ class AsynchronousDeferredRunTest(RunTest):
         if successful:
             self.result.addSuccess(self.case, details=self.case.getDetails())
         else:
-            # XXX: Maybe we should only add this when there is something worth
-            # adding? i.e. don't add when it's empty.
             self.case.addDetail(
-                'twisted-log',
-                Content(UTF8_TEXT, lambda: [full_log.getvalue()]))
+                'twisted-log', Content(UTF8_TEXT, full_log.readlines))
 
     def _run_user(self, function, *args):
         """Run a user-supplied function.
