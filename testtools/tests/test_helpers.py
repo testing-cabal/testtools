@@ -18,12 +18,19 @@ class TestTryImport(TestCase):
         result = try_import('doesntexist')
         self.assertThat(result, Is(None))
 
-    def test_try_import_module(self):
+    def test_existing_module(self):
         # try_import('thing', foo) imports 'thing' and returns it if it's a
         # module that exists.
         result = try_import('os', object())
         import os
         self.assertThat(result, Is(os))
+
+    def test_existing_submodule(self):
+        # try_import('thing', foo) imports 'thing' and returns it if it's a
+        # module that exists.
+        result = try_import('os.path', object())
+        import os
+        self.assertThat(result, Is(os.path))
 
 
 def test_suite():
