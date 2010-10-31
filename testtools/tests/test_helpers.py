@@ -45,6 +45,13 @@ class TestTryImport(TestCase):
         result = try_import('os.doesntexist', marker)
         self.assertThat(result, Is(marker))
 
+    def test_object_from_module(self):
+        # try_import('thing.object') imports 'thing' and returns
+        # 'thing.object' if 'thing' is a module and 'object' is not.
+        result = try_import('os.path.join')
+        import os
+        self.assertThat(result, Is(os.path.join))
+
 
 class TestTryImports(TestCase):
 

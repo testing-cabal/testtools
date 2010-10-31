@@ -6,23 +6,34 @@ __all__ = [
     ]
 
 
-def try_import(module_name, alternative=None):
-    """Attempt to import `module_name`.  If it fails, return `alternative`.
+def try_import(name, alternative=None):
+    """Attempt to import `name`.  If it fails, return `alternative`.
 
     When supporting multiple versions of Python or optional dependencies, it
     is useful to be able to try to import a module.
 
-    :param module_name: The name of the module to import, e.g. 'os.path'.
+    :param name: The name of the object to import, e.g. 'os.path' or
+        'os.path.join'.
     :param alternative: The value to return if no module can be imported.
         Defaults to None.
     """
-    try:
-        module = __import__(module_name)
-    except ImportError:
+    module_segments = name.split('.')
+    while module_segments:
+        module_name = '.'.join(module_segments)
+        try:
+            module = __import__(module_name)
+        except ImportError:
+            module_segments.pop()
+            continue
+        else:
+            break
+    else:
         return alternative
-    segments = module_name.split('.')[1:]
-    for segment in segments:
-        module = getattr(module, segment)
+    nonexistent = object()
+    for segment in name.split('.')[1:]:
+        module = getattr(module, segment, nonexistent)
+        if module is nonexistent:
+            return alternative
     return module
 
 
