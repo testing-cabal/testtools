@@ -11,6 +11,7 @@ __all__ = [
     ]
 
 import datetime
+import sys
 import unittest
 
 from testtools.compat import _format_exc_info, str_is_unicode, _u
@@ -184,41 +185,43 @@ class MultiTestResult(TestResult):
         self._results = map(ExtendedToOriginalDecorator, results)
 
     def _dispatch(self, message, *args, **kwargs):
-        for result in self._results:
+        return tuple(
             getattr(result, message)(*args, **kwargs)
+            for result in self._results)
 
     def startTest(self, test):
-        self._dispatch('startTest', test)
+        return self._dispatch('startTest', test)
 
     def stopTest(self, test):
-        self._dispatch('stopTest', test)
+        return self._dispatch('stopTest', test)
 
     def addError(self, test, error=None, details=None):
-        self._dispatch('addError', test, error, details=details)
+        return self._dispatch('addError', test, error, details=details)
 
     def addExpectedFailure(self, test, err=None, details=None):
-        self._dispatch('addExpectedFailure', test, err, details=details)
+        return self._dispatch(
+            'addExpectedFailure', test, err, details=details)
 
     def addFailure(self, test, err=None, details=None):
-        self._dispatch('addFailure', test, err, details=details)
+        return self._dispatch('addFailure', test, err, details=details)
 
     def addSkip(self, test, reason=None, details=None):
-        self._dispatch('addSkip', test, reason, details=details)
+        return self._dispatch('addSkip', test, reason, details=details)
 
     def addSuccess(self, test, details=None):
-        self._dispatch('addSuccess', test, details=details)
+        return self._dispatch('addSuccess', test, details=details)
 
     def addUnexpectedSuccess(self, test, details=None):
-        self._dispatch('addUnexpectedSuccess', test, details=details)
+        return self._dispatch('addUnexpectedSuccess', test, details=details)
 
     def startTestRun(self):
-        self._dispatch('startTestRun')
+        return self._dispatch('startTestRun')
 
     def stopTestRun(self):
-        self._dispatch('stopTestRun')
+        return self._dispatch('stopTestRun')
 
     def done(self):
-        self._dispatch('done')
+        return self._dispatch('done')
 
 
 class TextTestResult(TestResult):
@@ -298,59 +301,42 @@ class ThreadsafeForwardingResult(TestResult):
         self.result = ExtendedToOriginalDecorator(target)
         self.semaphore = semaphore
 
-    def addError(self, test, err=None, details=None):
+    def _add_result_with_semaphore(self, method, test, *args, **kwargs):
         self.semaphore.acquire()
         try:
+            self.result.time(self._test_start)
             self.result.startTest(test)
-            self.result.addError(test, err, details=details)
-            self.result.stopTest(test)
+            self.result.time(self._now())
+            try:
+                method(test, *args, **kwargs)
+            finally:
+                self.result.stopTest(test)
         finally:
             self.semaphore.release()
+
+    def addError(self, test, err=None, details=None):
+        self._add_result_with_semaphore(self.result.addError,
+            test, err, details=details)
 
     def addExpectedFailure(self, test, err=None, details=None):
-        self.semaphore.acquire()
-        try:
-            self.result.startTest(test)
-            self.result.addExpectedFailure(test, err, details=details)
-            self.result.stopTest(test)
-        finally:
-            self.semaphore.release()
+        self._add_result_with_semaphore(self.result.addExpectedFailure,
+            test, err, details=details)
 
     def addFailure(self, test, err=None, details=None):
-        self.semaphore.acquire()
-        try:
-            self.result.startTest(test)
-            self.result.addFailure(test, err, details=details)
-            self.result.stopTest(test)
-        finally:
-            self.semaphore.release()
+        self._add_result_with_semaphore(self.result.addFailure,
+            test, err, details=details)
 
     def addSkip(self, test, reason=None, details=None):
-        self.semaphore.acquire()
-        try:
-            self.result.startTest(test)
-            self.result.addSkip(test, reason, details=details)
-            self.result.stopTest(test)
-        finally:
-            self.semaphore.release()
+        self._add_result_with_semaphore(self.result.addSkip,
+            test, reason, details=details)
 
     def addSuccess(self, test, details=None):
-        self.semaphore.acquire()
-        try:
-            self.result.startTest(test)
-            self.result.addSuccess(test, details=details)
-            self.result.stopTest(test)
-        finally:
-            self.semaphore.release()
+        self._add_result_with_semaphore(self.result.addSuccess,
+            test, details=details)
 
     def addUnexpectedSuccess(self, test, details=None):
-        self.semaphore.acquire()
-        try:
-            self.result.startTest(test)
-            self.result.addUnexpectedSuccess(test, details=details)
-            self.result.stopTest(test)
-        finally:
-            self.semaphore.release()
+        self._add_result_with_semaphore(self.result.addUnexpectedSuccess,
+            test, details=details)
 
     def startTestRun(self):
         self.semaphore.acquire()
@@ -372,6 +358,10 @@ class ThreadsafeForwardingResult(TestResult):
             self.result.done()
         finally:
             self.semaphore.release()
+
+    def startTest(self, test):
+        self._test_start = self._now()
+        super(ThreadsafeForwardingResult, self).startTest(test)
 
 
 class ExtendedToOriginalDecorator(object):
@@ -433,14 +423,20 @@ class ExtendedToOriginalDecorator(object):
             try:
                 return addSkip(test, details=details)
             except TypeError:
-                # have to convert
-                reason = _details_to_str(details)
+                # extract the reason if it's available
+                try:
+                    reason = ''.join(details['reason'].iter_text())
+                except KeyError:
+                    reason = _details_to_str(details)
         return addSkip(test, reason)
 
     def addUnexpectedSuccess(self, test, details=None):
         outcome = getattr(self.decorated, 'addUnexpectedSuccess', None)
         if outcome is None:
-            return self.decorated.addSuccess(test)
+            try:
+                test.fail("")
+            except test.failureException:
+                return self.addFailure(test, sys.exc_info())
         if details is not None:
             try:
                 return outcome(test, details=details)

@@ -14,16 +14,20 @@ __metaclass__ = type
 __all__ = [
     'Annotate',
     'DocTestMatches',
+    'DoesNotStartWith',
     'Equals',
     'Is',
+    'LessThan',
     'MatchesAll',
     'MatchesAny',
     'NotEquals',
     'Not',
+    'StartsWith',
     ]
 
 import doctest
 import operator
+from pprint import pformat
 
 
 class Matcher(object):
@@ -57,12 +61,29 @@ class Matcher(object):
 class Mismatch(object):
     """An object describing a mismatch detected by a Matcher."""
 
+    def __init__(self, description=None, details=None):
+        """Construct a `Mismatch`.
+
+        :param description: A description to use.  If not provided,
+            `Mismatch.describe` must be implemented.
+        :param details: Extra details about the mismatch.  Defaults
+            to the empty dict.
+        """
+        if description:
+            self._description = description
+        if details is None:
+            details = {}
+        self._details = details
+
     def describe(self):
         """Describe the mismatch.
 
         This should be either a human-readable string or castable to a string.
         """
-        raise NotImplementedError(self.describe_difference)
+        try:
+            return self._description
+        except AttributeError:
+            raise NotImplementedError(self.describe)
 
     def get_details(self):
         """Get extra details about the mismatch.
@@ -80,7 +101,7 @@ class Mismatch(object):
             to the result. For more information see the API to which items from
             this dict are passed testtools.TestCase.addDetail.
         """
-        return {}
+        return getattr(self, '_details', {})
 
 
 class DocTestMatches(object):
@@ -133,6 +154,23 @@ class DocTestMismatch(Mismatch):
         return self.matcher._describe_difference(self.with_nl)
 
 
+class DoesNotStartWith(Mismatch):
+
+    def __init__(self, matchee, expected):
+        """Create a DoesNotStartWith Mismatch.
+
+        :param matchee: the string that did not match.
+        :param expected: the string that `matchee` was expected to start
+            with.
+        """
+        self.matchee = matchee
+        self.expected = expected
+
+    def describe(self):
+        return "'%s' does not start with '%s'." % (
+            self.matchee, self.expected)
+
+
 class _BinaryComparison(object):
     """Matcher that compares an object to another object."""
 
@@ -143,7 +181,7 @@ class _BinaryComparison(object):
         return "%s(%r)" % (self.__class__.__name__, self.expected)
 
     def match(self, other):
-        if self.comparator(self.expected, other):
+        if self.comparator(other, self.expected):
             return None
         return _BinaryMismatch(self.expected, self.mismatch_string, other)
 
@@ -160,7 +198,14 @@ class _BinaryMismatch(Mismatch):
         self.other = other
 
     def describe(self):
-        return "%r %s %r" % (self.expected, self._mismatch_string, self.other)
+        left = repr(self.expected)
+        right = repr(self.other)
+        if len(left) + len(right) > 70:
+            return "%s:\nreference = %s\nactual = %s\n" % (
+                self._mismatch_string, pformat(self.expected),
+                pformat(self.other))
+        else:
+            return "%s %s %s" % (left, self._mismatch_string,right)
 
 
 class Equals(_BinaryComparison):
@@ -186,6 +231,13 @@ class Is(_BinaryComparison):
 
     comparator = operator.is_
     mismatch_string = 'is not'
+
+
+class LessThan(_BinaryComparison):
+    """Matches if the item is less than the matchers reference object."""
+
+    comparator = operator.__lt__
+    mismatch_string = 'is >='
 
 
 class MatchesAny(object):
@@ -269,6 +321,53 @@ class MatchedUnexpectedly(Mismatch):
 
     def describe(self):
         return "%r matches %s" % (self.other, self.matcher)
+
+
+class StartsWith(Matcher):
+    """Checks whether one string starts with another."""
+
+    def __init__(self, expected):
+        """Create a StartsWith Matcher.
+
+        :param expected: the string that matchees should start with.
+        """
+        self.expected = expected
+
+    def __str__(self):
+        return "Starts with '%s'." % self.expected
+
+    def match(self, matchee):
+        if not matchee.startswith(self.expected):
+            return DoesNotStartWith(matchee, self.expected)
+        return None
+
+
+class KeysEqual(Matcher):
+    """Checks whether a dict has particular keys."""
+
+    def __init__(self, *expected):
+        """Create a `KeysEqual` Matcher.
+
+        :param *expected: The keys the dict is expected to have.  If a dict,
+            then we use the keys of that dict, if a collection, we assume it
+            is a collection of expected keys.
+        """
+        try:
+            self.expected = expected.keys()
+        except AttributeError:
+            self.expected = list(expected)
+
+    def __str__(self):
+        return "KeysEqual(%s)" % ', '.join(map(repr, self.expected))
+
+    def match(self, matchee):
+        expected = sorted(self.expected)
+        matched = Equals(expected).match(sorted(matchee.keys()))
+        if matched:
+            return AnnotatedMismatch(
+                'Keys not equal',
+                _BinaryMismatch(expected, 'does not match', matchee))
+        return None
 
 
 class Annotate(object):

@@ -11,11 +11,12 @@ to the API docs (i.e. docstrings) for full details on a particular feature.
 Extensions to TestCase
 ----------------------
 
-Controlling test execution
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Custom exception handling
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Testtools supports two ways to control how tests are executed. The simplest
-is to add a new exception to self.exception_handlers::
+testtools provides a way to control how test exceptions are handled.  To do
+this, add a new exception to self.exception_handlers on a TestCase.  For
+example::
 
     >>> self.exception_handlers.insert(-1, (ExceptionClass, handler)).
 
@@ -23,12 +24,36 @@ Having done this, if any of setUp, tearDown, or the test method raise
 ExceptionClass, handler will be called with the test case, test result and the
 raised exception.
 
-Secondly, by overriding __init__ to pass in runTest=RunTestFactory the whole
-execution of the test can be altered. The default is testtools.runtest.RunTest
-and calls  case._run_setup, case._run_test_method and finally
-case._run_teardown. Other methods to control what RunTest is used may be
-added in future.
+Controlling test execution
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+If you want to control more than just how exceptions are raised, you can
+provide a custom `RunTest` to a TestCase.  The `RunTest` object can change
+everything about how the test executes.
+
+To work with `testtools.TestCase`, a `RunTest` must have a factory that takes
+a test and an optional list of exception handlers.  Instances returned by the
+factory must have a `run()` method that takes an optional `TestResult` object.
+
+The default is `testtools.runtest.RunTest` and calls 'setUp', the test method
+and 'tearDown' in the normal, vanilla way that Python's standard unittest
+does.
+
+To specify a `RunTest` for all the tests in a `TestCase` class, do something
+like this::
+
+  class SomeTests(TestCase):
+      run_tests_with = CustomRunTestFactory
+
+To specify a `RunTest` for a specific test in a `TestCase` class, do::
+
+  class SomeTests(TestCase):
+      @run_test_with(CustomRunTestFactory, extra_arg=42, foo='whatever')
+      def test_something(self):
+          pass
+
+In addition, either of these can be overridden by passing a factory in to the
+`TestCase` constructor with the optional 'runTest' argument.
 
 TestCase.addCleanup
 ~~~~~~~~~~~~~~~~~~~
@@ -42,6 +67,11 @@ logic in a try/finally block or tearDown method.  e.g.::
         self.addCleanup(foo.unlock)
         ...
 
+Cleanups can also report multiple errors, if appropriate by wrapping them in
+a testtools.MultipleExceptions object::
+
+    raise MultipleExceptions(exc_info1, exc_info2)
+
 
 TestCase.addOnException
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -50,6 +80,24 @@ addOnException adds an exception handler that will be called from the test
 framework when it detects an exception from your test code. The handler is
 given the exc_info for the exception, and can use this opportunity to attach
 more data (via the addDetails API) and potentially other uses.
+
+
+TestCase.patch
+~~~~~~~~~~~~~~
+
+``patch`` is a convenient way to monkey-patch a Python object for the duration
+of your test.  It's especially useful for testing legacy code.  e.g.::
+
+    def test_foo(self):
+        my_stream = StringIO()
+        self.patch(sys, 'stderr', my_stream)
+        run_some_code_that_prints_to_stderr()
+        self.assertEqual('', my_stream.getvalue())
+
+The call to ``patch`` above masks sys.stderr with 'my_stream' so that anything
+printed to stderr will be captured in a StringIO variable that can be actually
+tested. Once the test is done, the real sys.stderr is restored to its rightful
+place.
 
 
 TestCase.skipTest
@@ -67,6 +115,16 @@ the ``addSkip`` method will result in the ``addError`` method being invoked
 instead. ``skipTest`` was previously known as ``skip`` but as Python 2.7 adds
 ``skipTest`` support, the ``skip`` name is now deprecated (but no warning
 is emitted yet - some time in the future we may do so).
+
+TestCase.useFixture
+~~~~~~~~~~~~~~~~~~~
+
+``useFixture(fixture)`` calls setUp on the fixture, schedules a cleanup to 
+clean it up, and schedules a cleanup to attach all details held by the 
+fixture to the details dict of the test case. The fixture object should meet
+the ``fixtures.Fixture`` protocol (version 0.3.4 or newer). This is useful
+for moving code out of setUp and tearDown methods and into composable side
+classes.
 
 
 New assertion methods
@@ -211,13 +269,17 @@ ThreadsafeForwardingResult to coalesce their activity.
 Running tests
 -------------
 
-Testtools provides a convenient way to run a test suite using the testtools
+testtools provides a convenient way to run a test suite using the testtools
 result object: python -m testtools.run testspec [testspec...].
+
+To run tests with Python 2.4, you'll have to do something like:
+  python2.4 /path/to/testtools/run.py testspec [testspec ...].
+
 
 Test discovery
 --------------
 
-Testtools includes a backported version of the Python 2.7 glue for using the
+testtools includes a backported version of the Python 2.7 glue for using the
 discover test discovery module. If you either have Python 2.7/3.1 or newer, or
 install the 'discover' module, then you can invoke discovery::
 
@@ -226,3 +288,18 @@ install the 'discover' module, then you can invoke discovery::
 For more information see the Python 2.7 unittest documentation, or::
 
     python -m testtools.run --help
+
+
+Twisted support
+---------------
+
+Support for running Twisted tests is very experimental right now.  You
+shouldn't really do it.  However, if you are going to, here are some tips for
+converting your Trial tests into testtools tests.
+
+ * Use the AsynchronousDeferredRunTest runner
+ * Make sure to upcall to setUp and tearDown
+ * Don't use setUpClass or tearDownClass
+ * Don't expect setting .todo, .timeout or .skip attributes to do anything
+ * flushLoggedErrors is not there for you.  Sorry.
+ * assertFailure is not there for you.  Even more sorry.

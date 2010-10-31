@@ -5,9 +5,13 @@
 __all__ = [
     'clone_test_with_new_id',
     'ConcurrentTestSuite',
+    'ErrorHolder',
     'ExtendedToOriginalDecorator',
     'iterate_tests',
+    'MultipleExceptions',
     'MultiTestResult',
+    'PlaceHolder',
+    'run_test_with',
     'TestCase',
     'TestResult',
     'TextTestResult',
@@ -25,8 +29,12 @@ from testtools.runtest import (
     RunTest,
     )
 from testtools.testcase import (
+    ErrorHolder,
+    MultipleExceptions,
+    PlaceHolder,
     TestCase,
     clone_test_with_new_id,
+    run_test_with,
     skip,
     skipIf,
     skipUnless,
@@ -55,4 +63,4 @@ from testtools.testsuite import (
 # If the releaselevel is 'final', then the tarball will be major.minor.micro.
 # Otherwise it is major.minor.micro~$(revno).
 
-__version__ = (0, 9, 5, 'final', 0)
+__version__ = (0, 9, 8, 'dev', 0)

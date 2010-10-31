@@ -34,7 +34,8 @@ from testtools.compat import (
     _u,
     str_is_unicode,
     )
-from testtools.content import Content, ContentType
+from testtools.content import Content
+from testtools.content_type import ContentType, UTF8_TEXT
 from testtools.matchers import DocTestMatches
 from testtools.tests.helpers import (
     LoggingResult,
@@ -51,46 +52,55 @@ class TestTestResultContract(TestCase):
     def test_addExpectedFailure(self):
         # Calling addExpectedFailure(test, exc_info) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addExpectedFailure(self, an_exc_info)
 
     def test_addExpectedFailure_details(self):
         # Calling addExpectedFailure(test, details=xxx) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addExpectedFailure(self, details={})
 
     def test_addError_details(self):
         # Calling addError(test, details=xxx) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addError(self, details={})
 
     def test_addFailure_details(self):
         # Calling addFailure(test, details=xxx) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addFailure(self, details={})
 
     def test_addSkipped(self):
         # Calling addSkip(test, reason) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addSkip(self, _u("Skipped for some reason"))
 
     def test_addSkipped_details(self):
         # Calling addSkip(test, reason) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addSkip(self, details={})
 
     def test_addUnexpectedSuccess(self):
         # Calling addUnexpectedSuccess(test) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addUnexpectedSuccess(self)
 
     def test_addUnexpectedSuccess_details(self):
         # Calling addUnexpectedSuccess(test) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addUnexpectedSuccess(self, details={})
 
     def test_addSuccess_details(self):
         # Calling addSuccess(test) completes ok.
         result = self.makeResult()
+        result.startTest(self)
         result.addSuccess(self, details={})
 
     def test_startStopTestRun(self):
@@ -264,6 +274,17 @@ class TestMultiTestResult(TestWithFakeExceptions):
         self.multiResult.stopTestRun()
         self.assertResultLogsEqual([('stopTestRun')])
 
+    def test_stopTestRun_returns_results(self):
+        # `MultiTestResult.stopTestRun` returns a tuple of all of the return
+        # values the `stopTestRun`s that it forwards to.
+        class Result(LoggingResult):
+            def stopTestRun(self):
+                super(Result, self).stopTestRun()
+                return 'foo'
+        multi_result = MultiTestResult(Result([]), Result([]))
+        result = multi_result.stopTestRun()
+        self.assertEqual(('foo', 'foo'), result)
+
 
 class TestTextTestResult(TestCase):
     """Tests for `TextTestResult`."""
@@ -385,7 +406,7 @@ Traceback (most recent call last):
   File "...testtools...runtest.py", line ..., in _run_user...
     return fn(*args)
   File "...testtools...testcase.py", line ..., in _run_test_method
-    testMethod()
+    return self._get_test_method()()
   File "...testtools...tests...test_testresult.py", line ..., in error
     1/0
 ZeroDivisionError:... divi... by zero...
@@ -399,7 +420,7 @@ Traceback (most recent call last):
   File "...testtools...runtest.py", line ..., in _run_user...
     return fn(*args)
   File "...testtools...testcase.py", line ..., in _run_test_method
-    testMethod()
+    return self._get_test_method()()
   File "...testtools...tests...test_testresult.py", line ..., in failed
     self.fail("yo!")
 AssertionError: yo!
@@ -408,7 +429,7 @@ AssertionError: yo!
 
 
 class TestThreadSafeForwardingResult(TestWithFakeExceptions):
-    """Tests for `MultiTestResult`."""
+    """Tests for `TestThreadSafeForwardingResult`."""
 
     def setUp(self):
         TestWithFakeExceptions.setUp(self)
@@ -441,22 +462,51 @@ class TestThreadSafeForwardingResult(TestWithFakeExceptions):
     def test_forwarding_methods(self):
         # error, failure, skip and success are forwarded in batches.
         exc_info1 = self.makeExceptionInfo(RuntimeError, 'error')
+        starttime1 = datetime.datetime.utcfromtimestamp(1.489)
+        endtime1 = datetime.datetime.utcfromtimestamp(51.476)
+        self.result1.time(starttime1)
+        self.result1.startTest(self)
+        self.result1.time(endtime1)
         self.result1.addError(self, exc_info1)
         exc_info2 = self.makeExceptionInfo(AssertionError, 'failure')
+        starttime2 = datetime.datetime.utcfromtimestamp(2.489)
+        endtime2 = datetime.datetime.utcfromtimestamp(3.476)
+        self.result1.time(starttime2)
+        self.result1.startTest(self)
+        self.result1.time(endtime2)
         self.result1.addFailure(self, exc_info2)
         reason = _u("Skipped for some reason")
+        starttime3 = datetime.datetime.utcfromtimestamp(4.489)
+        endtime3 = datetime.datetime.utcfromtimestamp(5.476)
+        self.result1.time(starttime3)
+        self.result1.startTest(self)
+        self.result1.time(endtime3)
         self.result1.addSkip(self, reason)
+        starttime4 = datetime.datetime.utcfromtimestamp(6.489)
+        endtime4 = datetime.datetime.utcfromtimestamp(7.476)
+        self.result1.time(starttime4)
+        self.result1.startTest(self)
+        self.result1.time(endtime4)
         self.result1.addSuccess(self)
-        self.assertEqual([('startTest', self),
+        self.assertEqual([
+            ('time', starttime1),
+            ('startTest', self),
+            ('time', endtime1),
             ('addError', self, exc_info1),
             ('stopTest', self),
+            ('time', starttime2),
             ('startTest', self),
+            ('time', endtime2),
             ('addFailure', self, exc_info2),
             ('stopTest', self),
+            ('time', starttime3),
             ('startTest', self),
+            ('time', endtime3),
             ('addSkip', self, reason),
             ('stopTest', self),
+            ('time', starttime4),
             ('startTest', self),
+            ('time', endtime4),
             ('addSuccess', self),
             ('stopTest', self),
             ], self.target._events)
@@ -524,6 +574,14 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
         details, err_str = self.get_details_and_string()
         getattr(self.converter, outcome)(self, details=details)
         self.assertEqual([(outcome, self, err_str)], self.result._events)
+
+    def check_outcome_details_to_arg(self, outcome, arg, extra_detail=None):
+        """Call an outcome with a details dict to have an arg extracted."""
+        details, _ = self.get_details_and_string()
+        if extra_detail:
+            details.update(extra_detail)
+        getattr(self.converter, outcome)(self, details=details)
+        self.assertEqual([(outcome, self, arg)], self.result._events)
 
     def check_outcome_exc_info(self, outcome, expected=None):
         """Check that calling a legacy outcome still works."""
@@ -748,9 +806,14 @@ class TestExtendedToOriginalAddSkip(
         self.make_26_result()
         self.check_outcome_string_nothing(self.outcome, 'addSuccess')
 
-    def test_outcome_Extended_py27(self):
+    def test_outcome_Extended_py27_no_reason(self):
         self.make_27_result()
         self.check_outcome_details_to_string(self.outcome)
+
+    def test_outcome_Extended_py27_reason(self):
+        self.make_27_result()
+        self.check_outcome_details_to_arg(self.outcome, 'foo',
+            {'reason': Content(UTF8_TEXT, lambda:[_b('foo')])})
 
     def test_outcome_Extended_pyextended(self):
         self.make_extended_result()
@@ -794,9 +857,38 @@ class TestExtendedToOriginalAddSuccess(
 
 
 class TestExtendedToOriginalAddUnexpectedSuccess(
-    TestExtendedToOriginalAddSuccess):
+    TestExtendedToOriginalResultDecoratorBase):
 
     outcome = 'addUnexpectedSuccess'
+    expected = 'addFailure'
+
+    def test_outcome_Original_py26(self):
+        self.make_26_result()
+        getattr(self.converter, self.outcome)(self)
+        [event] = self.result._events
+        self.assertEqual((self.expected, self), event[:2])
+
+    def test_outcome_Original_py27(self):
+        self.make_27_result()
+        self.check_outcome_nothing(self.outcome)
+
+    def test_outcome_Original_pyextended(self):
+        self.make_extended_result()
+        self.check_outcome_nothing(self.outcome)
+
+    def test_outcome_Extended_py26(self):
+        self.make_26_result()
+        getattr(self.converter, self.outcome)(self)
+        [event] = self.result._events
+        self.assertEqual((self.expected, self), event[:2])
+
+    def test_outcome_Extended_py27(self):
+        self.make_27_result()
+        self.check_outcome_details_to_nothing(self.outcome)
+
+    def test_outcome_Extended_pyextended(self):
+        self.make_extended_result()
+        self.check_outcome_details(self.outcome)
 
 
 class TestExtendedToOriginalResultOtherAttributes(
@@ -1018,6 +1110,11 @@ class TestNonAsciiResults(TestCase):
             '          ^\n'
             'SyntaxError: '
             ), textoutput)
+
+    def test_syntax_error_malformed(self):
+        """Syntax errors with bogus parameters should break anything"""
+        textoutput = self._test_external_case("raise SyntaxError(3, 2, 1)")
+        self.assertIn(self._as_output("\nSyntaxError: "), textoutput)
 
     def test_syntax_error_import_binary(self):
         """Importing a binary file shouldn't break SyntaxError formatting"""

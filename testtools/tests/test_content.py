@@ -3,8 +3,8 @@
 import unittest
 from testtools import TestCase
 from testtools.compat import _u
-from testtools.content import Content, TracebackContent
-from testtools.content_type import ContentType
+from testtools.content import Content, TracebackContent, text_content
+from testtools.content_type import ContentType, UTF8_TEXT
 from testtools.tests.helpers import an_exc_info
 
 
@@ -66,6 +66,14 @@ class TestTracebackContent(TestCase):
         result = unittest.TestResult()
         expected = result._exc_info_to_string(an_exc_info, self)
         self.assertEqual(expected, ''.join(list(content.iter_text())))
+
+
+class TestBytesContent(TestCase):
+
+    def test_bytes(self):
+        data = _u("some data")
+        expected = Content(UTF8_TEXT, lambda: [data.encode('utf8')])
+        self.assertEqual(expected, text_content(data))
 
 
 def test_suite():

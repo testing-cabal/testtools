@@ -30,4 +30,4 @@ class ContentType(object):
         return "%s/%s params=%s" % (self.type, self.subtype, self.parameters)
 
 
-PLAIN_TEXT = ContentType('text', 'plain', {'charset': 'utf8'})
+UTF8_TEXT = ContentType('text', 'plain', {'charset': 'utf8'})
