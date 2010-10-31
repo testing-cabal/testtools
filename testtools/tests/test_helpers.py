@@ -5,7 +5,10 @@ from testtools.helpers import (
     try_import,
     try_imports,
     )
-from testtools.matchers import Is
+from testtools.matchers import (
+    Equals,
+    Is,
+    )
 
 
 class TestTryImport(TestCase):
@@ -58,8 +61,11 @@ class TestTryImports(TestCase):
 
     def test_None_is_default_alternative(self):
         # try_imports('thing') returns None if 'thing' doesn't exist.
-        result = try_imports(['doesntexist'])
-        self.assertThat(result, Is(None))
+        e = self.assertRaises(
+            ImportError, try_imports, ['doesntexist', 'noreally'])
+        self.assertThat(
+            str(e),
+            Equals("Could not import any of: doesntexist, noreally"))
 
     def test_existing_module(self):
         # try_imports('thing', foo) imports 'thing' and returns it if it's a
