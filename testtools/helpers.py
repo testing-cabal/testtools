@@ -2,6 +2,7 @@
 
 __all__ = [
     'try_import',
+    'try_imports',
     ]
 
 
