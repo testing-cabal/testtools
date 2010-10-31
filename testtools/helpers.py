@@ -10,6 +10,10 @@ def try_import(module_name, alternative=None):
 
     When supporting multiple versions of Python or optional dependencies, it
     is useful to be able to try to import a module.
+
+    :param module_name: The name of the module to import, e.g. 'os.path'.
+    :param alternative: The value to return if no module can be imported.
+        Defaults to None.
     """
     try:
         module = __import__(module_name)
@@ -19,3 +23,22 @@ def try_import(module_name, alternative=None):
     for segment in segments:
         module = getattr(module, segment)
     return module
+
+
+def try_imports(module_names, alternative=None):
+    """Attempt to import modules.
+
+    Tries to import the first module in `module_names`.  If it can be
+    imported, we return it.  If not, we go on to the second module and try
+    that.  The process continues until we run out of modules to try.  If none
+    of the modules can be imported, return the provided `alternative` value.
+
+    :param module_names: A sequence of module names to try to import.
+    :param alternative: The value to return if no module can be imported.
+        Defaults to 'None'.
+    """
+    for module_name in module_names:
+        module = try_import(module_name)
+        if module:
+            return module
+    return alternative
