@@ -18,6 +18,7 @@ from testtools.deferredruntest import (
 from testtools.tests.helpers import ExtendedTestResult
 from testtools.matchers import (
     Equals,
+    KeysEqual,
     )
 from testtools.runtest import RunTest
 
@@ -326,8 +327,7 @@ class TestAsynchronousDeferredRunTest(TestCase):
                  ('addError', test),
                  ('stopTest', test)]))
         error = result._events[1][2]
-        self.assertThat(
-            sorted(error.keys()), Equals(['traceback', 'twisted-log']))
+        self.assertThat(error, KeysEqual('traceback', 'twisted-log'))
 
     def test_unhandled_error_from_deferred(self):
         # If there's a Deferred with an unhandled error, the test fails.  Each
@@ -349,11 +349,11 @@ class TestAsynchronousDeferredRunTest(TestCase):
              ('addError', test, None),
              ('stopTest', test)]))
         self.assertThat(
-            sorted(error.keys()), Equals([
+            error, KeysEqual(
                 'twisted-log',
                 'unhandled-error-in-deferred',
                 'unhandled-error-in-deferred-1',
-                ]))
+                ))
 
     def test_unhandled_error_from_deferred_combined_with_error(self):
         # If there's a Deferred with an unhandled error, the test fails.  Each
@@ -376,11 +376,11 @@ class TestAsynchronousDeferredRunTest(TestCase):
              ('addError', test, None),
              ('stopTest', test)]))
         self.assertThat(
-            sorted(error.keys()), Equals([
+            error, KeysEqual(
                 'traceback',
                 'twisted-log',
                 'unhandled-error-in-deferred',
-                ]))
+                ))
 
     @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
     def test_keyboard_interrupt_stops_test_run(self):
@@ -499,8 +499,7 @@ class TestAsynchronousDeferredRunTest(TestCase):
                 ('addError', test),
                 ('stopTest', test)]))
         error = result._events[1][2]
-        self.assertThat(
-            sorted(error.keys()), Equals(['traceback', 'twisted-log']))
+        self.assertThat(error, KeysEqual('traceback', 'twisted-log'))
 
     def test_only_addError_once(self):
         # Even if the reactor is unclean and the test raises an error and the
@@ -529,13 +528,13 @@ class TestAsynchronousDeferredRunTest(TestCase):
                 ('stopTest', test)]))
         error = result._events[1][2]
         self.assertThat(
-            sorted(error.keys()), Equals([
+            error, KeysEqual(
                 'traceback',
                 'traceback-1',
                 'traceback-2',
                 'twisted-log',
                 'unhandled-error-in-deferred',
-                ]))
+                ))
 
     def test_log_err_is_error(self):
         # An error logged during the test run is recorded as an error in the
@@ -558,8 +557,7 @@ class TestAsynchronousDeferredRunTest(TestCase):
                 ('addError', test),
                 ('stopTest', test)]))
         error = result._events[1][2]
-        self.assertThat(
-            sorted(error.keys()), Equals(['logged-error', 'twisted-log']))
+        self.assertThat(error, KeysEqual('logged-error', 'twisted-log'))
 
     def test_log_err_flushed_is_success(self):
         # An error logged during the test run is recorded as an error in the
@@ -599,8 +597,7 @@ class TestAsynchronousDeferredRunTest(TestCase):
                 ('addError', test),
                 ('stopTest', test)]))
         error = result._events[1][2]
-        self.assertThat(
-            sorted(error.keys()), Equals(['traceback', 'twisted-log']))
+        self.assertThat(error, KeysEqual('traceback', 'twisted-log'))
 
 
 class TestAssertFailsWith(TestCase):
