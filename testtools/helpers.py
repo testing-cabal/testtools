@@ -1,5 +1,9 @@
 # Copyright (c) 2010 Jonathan M. Lange. See LICENSE for details.
 
+__all__ = [
+    'try_import',
+    ]
+
 
 def try_import(module_name, alternative=None):
     """Attempt to import `module_name`.  If it fails, return `alternative`.
