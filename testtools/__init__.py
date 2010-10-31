@@ -20,8 +20,14 @@ __all__ = [
     'skipIf',
     'skipUnless',
     'ThreadsafeForwardingResult',
+    'try_import',
+    'try_imports',
     ]
 
+from testtools.helpers import (
+    try_import,
+    try_imports,
+    )
 from testtools.matchers import (
     Matcher,
     )

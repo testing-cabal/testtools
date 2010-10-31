@@ -303,3 +303,33 @@ converting your Trial tests into testtools tests.
  * Don't expect setting .todo, .timeout or .skip attributes to do anything
  * flushLoggedErrors is not there for you.  Sorry.
  * assertFailure is not there for you.  Even more sorry.
+
+
+General helpers
+---------------
+
+Lots of the time we would like to conditionally import modules.  testtools
+needs to do this itself, and graciously extends the ability to its users.
+
+Instead of::
+
+    try:
+        from twisted.internet import defer
+    except ImportError:
+        defer = None
+
+You can do::
+
+    defer = try_import('twisted.internet.defer')
+
+
+Instead of::
+
+    try:
+        from StringIO import StringIO
+    except ImportError:
+        from io import StringIO
+
+You can do::
+
+    StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
