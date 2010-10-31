@@ -37,8 +37,6 @@ from twisted.python import log
 from twisted.trial.unittest import _LogObserver
 
 
-# TODO: Need a conversion guide for flushLoggedErrors
-
 class SynchronousDeferredRunTest(RunTest):
     """Runner for tests that return synchronous Deferreds."""
 
