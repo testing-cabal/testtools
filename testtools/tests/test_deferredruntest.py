@@ -314,17 +314,18 @@ class TestAsynchronousDeferredRunTest(TestCase):
         timeout = self.make_timeout()
         class SomeCase(TestCase):
             def test_cruft(self):
-                reactor.callLater(timeout * 2.0, lambda: None)
+                reactor.callLater(timeout * 10.0, lambda: None)
         test = SomeCase('test_cruft')
         runner = self.make_runner(test, timeout)
         result = self.make_result()
         runner.run(result)
+        self.assertThat(
+            [event[:2] for event in result._events],
+            Equals(
+                [('startTest', test),
+                 ('addError', test),
+                 ('stopTest', test)]))
         error = result._events[1][2]
-        result._events[1] = ('addError', test, None)
-        self.assertThat(result._events, Equals(
-            [('startTest', test),
-             ('addError', test, None),
-             ('stopTest', test)]))
         self.assertThat(
             sorted(error.keys()), Equals(['traceback', 'twisted-log']))
 
