@@ -12,8 +12,17 @@ __all__ = [
     'SynchronousDeferredRunTest',
     ]
 
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 import sys
 
+from testtools.content import (
+    Content,
+    text_content,
+    )
+from testtools.content_type import UTF8_TEXT
 from testtools.runtest import RunTest
 from testtools._spinner import (
     extract_result,
@@ -24,9 +33,9 @@ from testtools._spinner import (
     )
 
 from twisted.internet import defer
+from twisted.python import log
+from twisted.trial.unittest import _LogObserver
 
-
-# TODO: Need a conversion guide for flushLoggedErrors
 
 class SynchronousDeferredRunTest(RunTest):
     """Runner for tests that return synchronous Deferreds."""
@@ -39,6 +48,27 @@ class SynchronousDeferredRunTest(RunTest):
         d.addErrback(got_exception)
         result = extract_result(d)
         return result
+
+
+def run_with_log_observers(observers, function, *args, **kwargs):
+    """Run 'function' with the given Twisted log observers."""
+    real_observers = log.theLogPublisher.observers
+    for observer in real_observers:
+        log.theLogPublisher.removeObserver(observer)
+    for observer in observers:
+        log.theLogPublisher.addObserver(observer)
+    try:
+        return function(*args, **kwargs)
+    finally:
+        for observer in observers:
+            log.theLogPublisher.removeObserver(observer)
+        for observer in real_observers:
+            log.theLogPublisher.addObserver(observer)
+
+
+# Observer of the Twisted log that we install during tests.
+_log_observer = _LogObserver()
+
 
 
 class AsynchronousDeferredRunTest(RunTest):
@@ -72,11 +102,23 @@ class AsynchronousDeferredRunTest(RunTest):
         self._reactor = reactor
         self._timeout = timeout
 
+    def _got_user_failure(self, failure, tb_label='traceback'):
+        """We got a failure from user code."""
+        # XXX: We don't always get tracebacks from these.
+        return self._got_user_exception(
+            (failure.type, failure.value, failure.tb), tb_label=tb_label)
+
     @classmethod
     def make_factory(cls, reactor=None, timeout=0.005):
         """Make a factory that conforms to the RunTest factory interface."""
-        return lambda case, handlers=None: AsynchronousDeferredRunTest(
-            case, handlers, reactor, timeout)
+        # This is horrible, but it means that the return value of the method
+        # will be able to be assigned to a class variable *and* also be
+        # invoked directly.
+        class AsynchronousDeferredRunTestFactory:
+            def __call__(self, case, handlers=None):
+                return AsynchronousDeferredRunTest(
+                    case, handlers, reactor, timeout)
+        return AsynchronousDeferredRunTestFactory()
 
     @defer.deferredGenerator
     def _run_cleanups(self):
@@ -151,34 +193,53 @@ class AsynchronousDeferredRunTest(RunTest):
         except e.__class__:
             self._got_user_exception(sys.exc_info())
 
-    def _run_core(self):
-        spinner = Spinner(self._reactor)
+    def _blocking_run_deferred(self, spinner):
         try:
-            successful, unhandled = trap_unhandled_errors(
+            return trap_unhandled_errors(
                 spinner.run, self._timeout, self._run_deferred)
         except NoResultError:
             # We didn't get a result at all!  This could be for any number of
             # reasons, but most likely someone hit Ctrl-C during the test.
             raise KeyboardInterrupt
         except TimeoutError:
-            # The function took too long to run.  No point reporting about
-            # junk and we don't have any information about unhandled errors in
-            # deferreds.  Report the timeout and skip to the end.
+            # The function took too long to run.
             self._log_user_exception(TimeoutError(self.case, self._timeout))
-            return
+            return False, []
+
+    def _run_core(self):
+        # Add an observer to trap all logged errors.
+        error_observer = _log_observer
+        full_log = StringIO()
+        full_observer = log.FileLogObserver(full_log)
+        spinner = Spinner(self._reactor)
+        successful, unhandled = run_with_log_observers(
+            [error_observer.gotEvent, full_observer.emit],
+            self._blocking_run_deferred, spinner)
+
+        self.case.addDetail(
+            'twisted-log', Content(UTF8_TEXT, full_log.readlines))
+
+        logged_errors = error_observer.flushErrors()
+        for logged_error in logged_errors:
+            successful = False
+            self._got_user_failure(logged_error, tb_label='logged-error')
 
         if unhandled:
             successful = False
-            # XXX: Maybe we could log creator & invoker here as well if
-            # present.
             for debug_info in unhandled:
                 f = debug_info.failResult
-                self._got_user_exception(
-                    (f.type, f.value, f.tb), 'unhandled-error-in-deferred')
+                info = debug_info._getDebugTracebacks()
+                if info:
+                    self.case.addDetail(
+                        'unhandled-error-in-deferred-debug',
+                        text_content(info))
+                self._got_user_failure(f, 'unhandled-error-in-deferred')
+
         junk = spinner.clear_junk()
         if junk:
             successful = False
             self._log_user_exception(UncleanReactorError(junk))
+
         if successful:
             self.result.addSuccess(self.case, details=self.case.getDetails())
 
@@ -188,9 +249,8 @@ class AsynchronousDeferredRunTest(RunTest):
         This just makes sure that it returns a Deferred, regardless of how the
         user wrote it.
         """
-        return defer.maybeDeferred(
-            super(AsynchronousDeferredRunTest, self)._run_user,
-            function, *args)
+        d = defer.maybeDeferred(function, *args)
+        return d.addErrback(self._got_user_failure)
 
 
 def assert_fails_with(d, *exc_types, **kwargs):
@@ -225,6 +285,10 @@ def assert_fails_with(d, *exc_types, **kwargs):
         raise failureException("%s raised instead of %s:\n %s" % (
             failure.type.__name__, expected_names, failure.getTraceback()))
     return d.addCallbacks(got_success, got_failure)
+
+
+def flush_logged_errors(*error_types):
+    return _log_observer.flushErrors(*error_types)
 
 
 class UncleanReactorError(Exception):

@@ -13,6 +13,7 @@ from testtools.matchers import (
     Equals,
     DocTestMatches,
     DoesNotStartWith,
+    KeysEqual,
     Is,
     LessThan,
     MatchesAny,
@@ -209,6 +210,31 @@ class TestMatchesAllInterface(TestCase, TestMatchersInterface):
 ]
 """,
                           1, MatchesAll(NotEquals(1), NotEquals(2)))]
+
+
+class TestKeysEqual(TestCase, TestMatchersInterface):
+
+    matches_matcher = KeysEqual('foo', 'bar')
+    matches_matches = [
+        {'foo': 0, 'bar': 1},
+        ]
+    matches_mismatches = [
+        {},
+        {'foo': 0},
+        {'bar': 1},
+        {'foo': 0, 'bar': 1, 'baz': 2},
+        {'a': None, 'b': None, 'c': None},
+        ]
+
+    str_examples = [
+        ("KeysEqual('foo', 'bar')", KeysEqual('foo', 'bar')),
+        ]
+
+    describe_examples = [
+        ("['bar', 'foo'] does not match {'baz': 2, 'foo': 0, 'bar': 1}: "
+         "Keys not equal",
+         {'foo': 0, 'bar': 1, 'baz': 2}, KeysEqual('foo', 'bar')),
+        ]
 
 
 class TestAnnotate(TestCase, TestMatchersInterface):

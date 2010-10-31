@@ -5,7 +5,7 @@
 import codecs
 
 from testtools.compat import _b
-from testtools.content_type import ContentType
+from testtools.content_type import ContentType, UTF8_TEXT
 from testtools.testresult import TestResult
 
 
@@ -89,3 +89,11 @@ class TracebackContent(Content):
         value = self._result._exc_info_to_unicode(err, test)
         super(TracebackContent, self).__init__(
             content_type, lambda: [value.encode("utf8")])
+
+
+def text_content(text):
+    """Create a `Content` object from some text.
+
+    This is useful for adding details which are short strings.
+    """
+    return Content(UTF8_TEXT, lambda: [text.encode('utf8')])

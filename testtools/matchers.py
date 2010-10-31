@@ -342,6 +342,34 @@ class StartsWith(Matcher):
         return None
 
 
+class KeysEqual(Matcher):
+    """Checks whether a dict has particular keys."""
+
+    def __init__(self, *expected):
+        """Create a `KeysEqual` Matcher.
+
+        :param *expected: The keys the dict is expected to have.  If a dict,
+            then we use the keys of that dict, if a collection, we assume it
+            is a collection of expected keys.
+        """
+        try:
+            self.expected = expected.keys()
+        except AttributeError:
+            self.expected = list(expected)
+
+    def __str__(self):
+        return "KeysEqual(%s)" % ', '.join(map(repr, self.expected))
+
+    def match(self, matchee):
+        expected = sorted(self.expected)
+        matched = Equals(expected).match(sorted(matchee.keys()))
+        if matched:
+            return AnnotatedMismatch(
+                'Keys not equal',
+                _BinaryMismatch(expected, 'does not match', matchee))
+        return None
+
+
 class Annotate(object):
     """Annotates a matcher with a descriptive string.
 

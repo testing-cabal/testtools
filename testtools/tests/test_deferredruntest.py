@@ -9,19 +9,24 @@ from testtools import (
     skipIf,
     TestCase,
     )
+from testtools.content import (
+    text_content,
+    )
 from testtools.deferredruntest import (
     assert_fails_with,
     AsynchronousDeferredRunTest,
+    flush_logged_errors,
     SynchronousDeferredRunTest,
     )
 from testtools.tests.helpers import ExtendedTestResult
 from testtools.matchers import (
     Equals,
+    KeysEqual,
     )
 from testtools.runtest import RunTest
 
 from twisted.internet import defer
-from twisted.python import failure
+from twisted.python import failure, log
 
 
 class X(object):
@@ -37,10 +42,6 @@ class X(object):
         def tearDown(self):
             self.calls.append('tearDown')
             super(X.Base, self).tearDown()
-
-    class Success(Base):
-        expected_calls = ['setUp', 'test', 'tearDown', 'clean-up']
-        expected_results = [['addSuccess']]
 
     class ErrorInSetup(Base):
         expected_calls = ['setUp', 'clean-up']
@@ -107,7 +108,6 @@ def make_integration_tests():
         ]
 
     tests = [
-        X.Success,
         X.ErrorInSetup,
         X.ErrorInTest,
         X.ErrorInTearDown,
@@ -281,21 +281,21 @@ class TestAsynchronousDeferredRunTest(TestCase):
             def test_whatever(self):
                 pass
         test = SomeCase('test_whatever')
-        log = []
-        a = defer.Deferred().addCallback(lambda x: log.append('a'))
-        b = defer.Deferred().addCallback(lambda x: log.append('b'))
-        c = defer.Deferred().addCallback(lambda x: log.append('c'))
+        call_log = []
+        a = defer.Deferred().addCallback(lambda x: call_log.append('a'))
+        b = defer.Deferred().addCallback(lambda x: call_log.append('b'))
+        c = defer.Deferred().addCallback(lambda x: call_log.append('c'))
         test.addCleanup(lambda: a)
         test.addCleanup(lambda: b)
         test.addCleanup(lambda: c)
         def fire_a():
-            self.assertThat(log, Equals([]))
+            self.assertThat(call_log, Equals([]))
             a.callback(None)
         def fire_b():
-            self.assertThat(log, Equals(['a']))
+            self.assertThat(call_log, Equals(['a']))
             b.callback(None)
         def fire_c():
-            self.assertThat(log, Equals(['a', 'b']))
+            self.assertThat(call_log, Equals(['a', 'b']))
             c.callback(None)
         timeout = self.make_timeout()
         reactor = self.make_reactor()
@@ -305,7 +305,7 @@ class TestAsynchronousDeferredRunTest(TestCase):
         runner = self.make_runner(test, timeout)
         result = self.make_result()
         runner.run(result)
-        self.assertThat(log, Equals(['a', 'b', 'c']))
+        self.assertThat(call_log, Equals(['a', 'b', 'c']))
 
     def test_clean_reactor(self):
         # If there's cruft left over in the reactor, the test fails.
@@ -313,18 +313,19 @@ class TestAsynchronousDeferredRunTest(TestCase):
         timeout = self.make_timeout()
         class SomeCase(TestCase):
             def test_cruft(self):
-                reactor.callLater(timeout * 2.0, lambda: None)
+                reactor.callLater(timeout * 10.0, lambda: None)
         test = SomeCase('test_cruft')
         runner = self.make_runner(test, timeout)
         result = self.make_result()
         runner.run(result)
+        self.assertThat(
+            [event[:2] for event in result._events],
+            Equals(
+                [('startTest', test),
+                 ('addError', test),
+                 ('stopTest', test)]))
         error = result._events[1][2]
-        result._events[1] = ('addError', test, None)
-        self.assertThat(result._events, Equals(
-            [('startTest', test),
-             ('addError', test, None),
-             ('stopTest', test)]))
-        self.assertThat(list(error.keys()), Equals(['traceback']))
+        self.assertThat(error, KeysEqual('traceback', 'twisted-log'))
 
     def test_unhandled_error_from_deferred(self):
         # If there's a Deferred with an unhandled error, the test fails.  Each
@@ -346,10 +347,38 @@ class TestAsynchronousDeferredRunTest(TestCase):
              ('addError', test, None),
              ('stopTest', test)]))
         self.assertThat(
-            list(error.keys()), Equals([
+            error, KeysEqual(
+                'twisted-log',
                 'unhandled-error-in-deferred',
                 'unhandled-error-in-deferred-1',
-                ]))
+                ))
+
+    def test_unhandled_error_from_deferred_combined_with_error(self):
+        # If there's a Deferred with an unhandled error, the test fails.  Each
+        # unhandled error is reported with a separate traceback, and the error
+        # is still reported.
+        class SomeCase(TestCase):
+            def test_cruft(self):
+                # Note we aren't returning the Deferred so that the error will
+                # be unhandled.
+                defer.maybeDeferred(lambda: 1/0)
+                2 / 0
+        test = SomeCase('test_cruft')
+        runner = self.make_runner(test)
+        result = self.make_result()
+        runner.run(result)
+        error = result._events[1][2]
+        result._events[1] = ('addError', test, None)
+        self.assertThat(result._events, Equals(
+            [('startTest', test),
+             ('addError', test, None),
+             ('stopTest', test)]))
+        self.assertThat(
+            error, KeysEqual(
+                'traceback',
+                'twisted-log',
+                'unhandled-error-in-deferred',
+                ))
 
     @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
     def test_keyboard_interrupt_stops_test_run(self):
@@ -419,6 +448,16 @@ class TestAsynchronousDeferredRunTest(TestCase):
         self.assertIs(self, runner.case)
         self.assertEqual([handler], runner.handlers)
 
+    def test_use_convenient_factory(self):
+        # Make sure that the factory can actually be used.
+        factory = AsynchronousDeferredRunTest.make_factory()
+        class SomeCase(TestCase):
+            run_tests_with = factory
+            def test_something(self):
+                pass
+        case = SomeCase('test_something')
+        case.run()
+
     def test_convenient_construction_default_reactor(self):
         # As a convenience method, AsynchronousDeferredRunTest has a
         # classmethod that returns an AsynchronousDeferredRunTest
@@ -442,6 +481,23 @@ class TestAsynchronousDeferredRunTest(TestCase):
         self.assertIs(timeout, runner._timeout)
         self.assertIs(self, runner.case)
         self.assertEqual([handler], runner.handlers)
+
+    def test_deferred_error(self):
+        class SomeTest(TestCase):
+            def test_something(self):
+                return defer.maybeDeferred(lambda: 1/0)
+        test = SomeTest('test_something')
+        runner = self.make_runner(test)
+        result = self.make_result()
+        runner.run(result)
+        self.assertThat(
+            [event[:2] for event in result._events],
+            Equals([
+                ('startTest', test),
+                ('addError', test),
+                ('stopTest', test)]))
+        error = result._events[1][2]
+        self.assertThat(error, KeysEqual('traceback', 'twisted-log'))
 
     def test_only_addError_once(self):
         # Even if the reactor is unclean and the test raises an error and the
@@ -470,12 +526,76 @@ class TestAsynchronousDeferredRunTest(TestCase):
                 ('stopTest', test)]))
         error = result._events[1][2]
         self.assertThat(
-            sorted(error.keys()), Equals([
+            error, KeysEqual(
                 'traceback',
                 'traceback-1',
                 'traceback-2',
+                'twisted-log',
                 'unhandled-error-in-deferred',
-                ]))
+                ))
+
+    def test_log_err_is_error(self):
+        # An error logged during the test run is recorded as an error in the
+        # tests.
+        class LogAnError(TestCase):
+            def test_something(self):
+                try:
+                    1/0
+                except ZeroDivisionError:
+                    f = failure.Failure()
+                log.err(f)
+        test = LogAnError('test_something')
+        runner = self.make_runner(test)
+        result = self.make_result()
+        runner.run(result)
+        self.assertThat(
+            [event[:2] for event in result._events],
+            Equals([
+                ('startTest', test),
+                ('addError', test),
+                ('stopTest', test)]))
+        error = result._events[1][2]
+        self.assertThat(error, KeysEqual('logged-error', 'twisted-log'))
+
+    def test_log_err_flushed_is_success(self):
+        # An error logged during the test run is recorded as an error in the
+        # tests.
+        class LogAnError(TestCase):
+            def test_something(self):
+                try:
+                    1/0
+                except ZeroDivisionError:
+                    f = failure.Failure()
+                log.err(f)
+                flush_logged_errors(ZeroDivisionError)
+        test = LogAnError('test_something')
+        runner = self.make_runner(test)
+        result = self.make_result()
+        runner.run(result)
+        self.assertThat(
+            result._events,
+            Equals([
+                ('startTest', test),
+                ('addSuccess', test, {'twisted-log': text_content('')}),
+                ('stopTest', test)]))
+
+    def test_log_in_details(self):
+        class LogAnError(TestCase):
+            def test_something(self):
+                log.msg("foo")
+                1/0
+        test = LogAnError('test_something')
+        runner = self.make_runner(test)
+        result = self.make_result()
+        runner.run(result)
+        self.assertThat(
+            [event[:2] for event in result._events],
+            Equals([
+                ('startTest', test),
+                ('addError', test),
+                ('stopTest', test)]))
+        error = result._events[1][2]
+        self.assertThat(error, KeysEqual('traceback', 'twisted-log'))
 
 
 class TestAssertFailsWith(TestCase):
