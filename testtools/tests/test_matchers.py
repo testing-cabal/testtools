@@ -40,7 +40,8 @@ class TestMismatch(TestCase):
 
     def test_constructor_no_arguments(self):
         mismatch = Mismatch()
-        self.assertRaises(NotImplementedError, mismatch.describe)
+        self.assertThat(mismatch.describe,
+            Raises(MatchesException(NotImplementedError)))
         self.assertEqual({}, mismatch.get_details())
 
 
@@ -336,6 +337,33 @@ class TestRaisesExceptionMatcherInterface(TestCase, TestMatchersInterface):
 
     describe_examples = []
 
+
+class TestRaisesBaseTypes(TestCase):
+
+    def raiser(self):
+        raise KeyboardInterrupt('foo')
+
+    def test_KeyboardInterrupt_matched(self):
+        # When KeyboardInterrupt is matched, it is swallowed.
+        matcher = Raises(MatchesException(KeyboardInterrupt))
+        self.assertThat(self.raiser, matcher)
+
+    def test_KeyboardInterrupt_propogates(self):
+        # The default 'it raised' propogates KeyboardInterrupt.
+        match_keyb = Raises(MatchesException(KeyboardInterrupt))
+        def raise_keyb_from_match():
+            matcher = Raises()
+            matcher.match(self.raiser)
+        self.assertThat(raise_keyb_from_match, match_keyb)
+    
+    def test_KeyboardInterrupt_match_Exception_propogates(self):
+        # If the raised exception isn't matched, and it is not a subclass of
+        # Exception, it is propogated.
+        match_keyb = Raises(MatchesException(KeyboardInterrupt))
+        def raise_keyb_from_match():
+            matcher = Raises(MatchesException(Exception))
+            matcher.match(self.raiser)
+        self.assertThat(raise_keyb_from_match, match_keyb)
 
 
 class DoesNotStartWithTests(TestCase):

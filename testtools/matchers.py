@@ -442,7 +442,11 @@ class AnnotatedMismatch(Mismatch):
 
 
 class Raises(Matcher):
-    """Match if the matchee raises an exception when called."""
+    """Match if the matchee raises an exception when called.
+    
+    Exceptions which are not subclasses of Exception propogate out of the
+    Raises.match call unless they are explicitly matched.
+    """
 
     def __init__(self, exception_matcher=None):
         """Create a Raises matcher. 
@@ -458,10 +462,23 @@ class Raises(Matcher):
     def match(self, matchee):
         try:
             result = matchee()
-            return Mismatch('%r return %r' % (matchee, result))
-        except Exception:
+            return Mismatch('%r returned %r' % (matchee, result))
+        # Catch all exceptions: Raises() should be able to match a
+        # KeyboardInterrupt or SystemExit.
+        except:
+            exc_info = sys.exc_info()
             if self.exception_matcher:
-                return self.exception_matcher.match(sys.exc_info())
+                mismatch = self.exception_matcher.match(sys.exc_info())
+                if not mismatch:
+                    return
+            else:
+                mismatch = None
+            # The exception did not match, or no explicit matching logic was
+            # performed. If the exception is a non-user exception (that is, not
+            # a subclass of Exception) then propogate it.
+            if not issubclass(exc_info[0], Exception):
+                raise exc_info[0], exc_info[1], exc_info[2]
+            return mismatch
 
     def __str__(self):
         return 'Raises()'
