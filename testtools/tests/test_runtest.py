@@ -9,7 +9,7 @@ from testtools import (
     TestCase,
     TestResult,
     )
-from testtools.matchers import Is
+from testtools.matchers import MatchesException, Is, Raises
 from testtools.tests.helpers import ExtendedTestResult
 
 
@@ -64,7 +64,8 @@ class TestRunTest(TestCase):
             raise KeyboardInterrupt("yo")
         run = RunTest(case, None)
         run.result = ExtendedTestResult()
-        self.assertRaises(KeyboardInterrupt, run._run_user, raises)
+        self.assertThat(lambda: run._run_user(raises),
+            Raises(MatchesException(KeyboardInterrupt)))
         self.assertEqual([], run.result._events)
 
     def test__run_user_calls_onException(self):
@@ -109,7 +110,8 @@ class TestRunTest(TestCase):
             log.append((result, err))
         run = RunTest(case, [(ValueError, log_exc)])
         run.result = ExtendedTestResult()
-        self.assertRaises(KeyError, run._run_user, raises)
+        self.assertThat(lambda: run._run_user(raises),
+            Raises(MatchesException(KeyError)))
         self.assertEqual([], run.result._events)
         self.assertEqual([], log)
 
@@ -128,7 +130,8 @@ class TestRunTest(TestCase):
             log.append((result, err))
         run = RunTest(case, [(ValueError, log_exc)])
         run.result = ExtendedTestResult()
-        self.assertRaises(ValueError, run._run_user, raises)
+        self.assertThat(lambda: run._run_user(raises),
+            Raises(MatchesException(ValueError)))
         self.assertEqual([], run.result._events)
         self.assertEqual([], log)
 
@@ -171,7 +174,8 @@ class TestRunTest(TestCase):
             raise Exception("foo")
         run = RunTest(case, lambda x: x)
         run._run_core = inner
-        self.assertRaises(Exception, run.run, result)
+        self.assertThat(lambda: run.run(result),
+            Raises(MatchesException(Exception("foo"))))
         self.assertEqual([
             ('startTest', case),
             ('stopTest', case),
