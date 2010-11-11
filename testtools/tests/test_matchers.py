@@ -158,21 +158,19 @@ class TestLessThanInterface(TestCase, TestMatchersInterface):
     describe_examples = [('4 is >= 4', 4, LessThan(4))]
 
 
+def make_error(type, *args, **kwargs):
+    try:
+        raise type(*args, **kwargs)
+    except type:
+        return sys.exc_info()
+
+
 class TestMatchesExceptionInterface(TestCase, TestMatchersInterface):
 
     matches_matcher = MatchesException(ValueError("foo"))
-    try:
-        raise ValueError("foo")
-    except ValueError:
-        error_foo = sys.exc_info()
-    try:
-        raise ValueError("bar")
-    except ValueError: 
-        error_bar = sys.exc_info()
-    try:
-        raise Exception("foo")
-    except Exception:
-        error_base_foo = sys.exc_info()
+    error_foo = make_error(ValueError, 'foo')
+    error_bar = make_error(ValueError, 'bar')
+    error_base_foo = make_error(Exception, 'foo')
     matches_matches = [error_foo]
     matches_mismatches = [error_bar, error_base_foo]
 
