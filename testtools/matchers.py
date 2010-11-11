@@ -331,25 +331,32 @@ class MatchedUnexpectedly(Mismatch):
 
 
 class MatchesException(Matcher):
-    """Match an exc_info tuple against an exception."""
+    """Match an exc_info tuple against an exception instance or type."""
 
     def __init__(self, exception):
         """Create a MatchesException that will match exc_info's for exception.
         
-        :param exception: An exception to check against an exc_info tuple. The
-            traceback object is not inspected, only the type and arguments of
-            the exception.
+        :param exception: Either an exception instance or type.
+            If an instance is given, the type and arguments of the exception
+            are checked. If a type is given only the type of the exception is
+            checked.
         """
         Matcher.__init__(self)
         self.expected = exception
 
+    def _expected_type(self):
+        if type(self.expected) is type:
+            return self.expected
+        return type(self.expected)
+
     def match(self, other):
         if type(other) != tuple:
             return Mismatch('%r is not an exc_info tuple' % other)
-        if not issubclass(other[0], type(self.expected)):
+        if not issubclass(other[0], self._expected_type()):
             return Mismatch('%r is not a %r' % (
-                other[0], type(self.expected)))
-        if other[1].args != self.expected.args:
+                other[0], self._expected_type()))
+        if (type(self.expected) is not type and
+            other[1].args != self.expected.args):
             return Mismatch('%r has different arguments to %r.' % (
                 other[1], self.expected))
 

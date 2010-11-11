@@ -165,7 +165,7 @@ def make_error(type, *args, **kwargs):
         return sys.exc_info()
 
 
-class TestMatchesExceptionInterface(TestCase, TestMatchersInterface):
+class TestMatchesExceptionInstanceInterface(TestCase, TestMatchersInterface):
 
     matches_matcher = MatchesException(ValueError("foo"))
     error_foo = make_error(ValueError, 'foo')
@@ -186,6 +186,27 @@ class TestMatchesExceptionInterface(TestCase, TestMatchersInterface):
         ("ValueError('bar',) has different arguments to ValueError('foo',).",
          error_bar,
          MatchesException(ValueError("foo"))),
+        ]
+
+
+class TestMatchesExceptionTypeInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = MatchesException(ValueError)
+    error_foo = make_error(ValueError, 'foo')
+    error_sub = make_error(UnicodeError, 'bar')
+    error_base_foo = make_error(Exception, 'foo')
+    matches_matches = [error_foo, error_sub]
+    matches_mismatches = [error_base_foo]
+
+    str_examples = [
+        ("MatchesException(<type 'exceptions.Exception'>)",
+         MatchesException(Exception))
+        ]
+    describe_examples = [
+        ("<type 'exceptions.Exception'> is not a "
+         "<type 'exceptions.ValueError'>",
+         error_base_foo,
+         MatchesException(ValueError)),
         ]
 
 
