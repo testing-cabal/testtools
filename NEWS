@@ -4,6 +4,12 @@ testtools NEWS
 NEXT
 ~~~~
 
+Changes
+-------
+
+* addUnexpectedSuccess is translated to addFailure for test results that don't
+  know about addUnexpectedSuccess.  (Jonathan Lange, #654474)
+
 Improvements
 ------------
 
@@ -21,8 +27,16 @@ Improvements
 
 * Malformed SyntaxErrors no longer blow up the test suite.  (Martin [gz])
 
-* addUnexpectedSuccess is translated to addFailure for test results that don't
-  know about addUnexpectedSuccess.  (Jonathan Lange, #654474)
+* ``MatchesException`` added to the ``testtools.matchers`` module - matches
+  an exception class and parameters. (Robert Collins)
+
+* ``Raises`` added to the ``testtools.matchers`` module - matches if the
+  supplied callable raises, and delegates to an optional matcher for validation
+  of the exception. (Robert Collins)
+
+* ``raises`` added to the ``testtools.matchers`` module - matches if the
+  supplied callable raises and delegates to ``MatchesException`` to validate
+  the exception. (Jonathan Lange)
 
 * ``testools.TestCase.useFixture`` has been added to glue with fixtures nicely.
   (Robert Collins)

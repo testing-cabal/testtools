@@ -17,6 +17,10 @@ from testtools.compat import (
     _u,
     unicode_output_stream,
     )
+from testtools.matchers import (
+    MatchesException,
+    Raises,
+    )
 
 
 class TestDetectEncoding(testtools.TestCase):
@@ -241,7 +245,8 @@ class TestUnicodeOutputStream(testtools.TestCase):
         soutwrapper = unicode_output_stream(sout)
         if newio:
             self.expectFailure("Python 3 StringIO expects text not bytes",
-                self.assertRaises, TypeError, soutwrapper.write, self.uni)
+                self.assertThat, lambda: soutwrapper.write(self.uni),
+                Raises(MatchesException(TypeError)))
         soutwrapper.write(self.uni)
         self.assertEqual("pa???n", sout.getvalue())
 

@@ -36,7 +36,11 @@ from testtools.compat import (
     )
 from testtools.content import Content
 from testtools.content_type import ContentType, UTF8_TEXT
-from testtools.matchers import DocTestMatches
+from testtools.matchers import (
+    DocTestMatches,
+    MatchesException,
+    Raises,
+    )
 from testtools.tests.helpers import (
     LoggingResult,
     Python26TestResult,
@@ -760,8 +764,9 @@ class TestExtendedToOriginalAddError(TestExtendedToOriginalResultDecoratorBase):
 
     def test_outcome__no_details(self):
         self.make_extended_result()
-        self.assertRaises(ValueError,
-            getattr(self.converter, self.outcome), self)
+        self.assertThat(
+            lambda: getattr(self.converter, self.outcome)(self),
+            Raises(MatchesException(ValueError)))
 
 
 class TestExtendedToOriginalAddFailure(
@@ -821,8 +826,9 @@ class TestExtendedToOriginalAddSkip(
 
     def test_outcome__no_details(self):
         self.make_extended_result()
-        self.assertRaises(ValueError,
-            getattr(self.converter, self.outcome), self)
+        self.assertThat(
+            lambda: getattr(self.converter, self.outcome)(self),
+            Raises(MatchesException(ValueError)))
 
 
 class TestExtendedToOriginalAddSuccess(
