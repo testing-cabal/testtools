@@ -154,7 +154,8 @@ Note that this is incompatible with the assertRaises in unittest2/Python2.7.
 While we have no immediate plans to change to be compatible consider using the
 new assertThat facility instead::
 
-        self.assertThat(thing.frobnicate,
+        self.assertThat(
+            lambda: thing.frobnicate('foo', 'bar'),
             Raises(MatchesException(UnauthorisedError('bob')))
 
 
