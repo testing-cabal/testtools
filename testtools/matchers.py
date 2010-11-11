@@ -1,4 +1,4 @@
-# Copyright (c) 2009 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2009-2010 Jonathan M. Lange. See LICENSE for details.
 
 """Matchers, a way to express complex assertions outside the testcase.
 
@@ -20,14 +20,18 @@ __all__ = [
     'LessThan',
     'MatchesAll',
     'MatchesAny',
+    'MatchesException',
     'NotEquals',
     'Not',
+    'Raises',
+    'raises',
     'StartsWith',
     ]
 
 import doctest
 import operator
 from pprint import pformat
+import sys
 
 
 class Matcher(object):
@@ -102,6 +106,10 @@ class Mismatch(object):
             this dict are passed testtools.TestCase.addDetail.
         """
         return getattr(self, '_details', {})
+
+    def __repr__(self):
+        return  "<testtools.matchers.Mismatch object at %x attributes=%r>" % (
+            id(self), self.__dict__)
 
 
 class DocTestMatches(object):
@@ -323,6 +331,40 @@ class MatchedUnexpectedly(Mismatch):
         return "%r matches %s" % (self.other, self.matcher)
 
 
+class MatchesException(Matcher):
+    """Match an exc_info tuple against an exception instance or type."""
+
+    def __init__(self, exception):
+        """Create a MatchesException that will match exc_info's for exception.
+
+        :param exception: Either an exception instance or type.
+            If an instance is given, the type and arguments of the exception
+            are checked. If a type is given only the type of the exception is
+            checked.
+        """
+        Matcher.__init__(self)
+        self.expected = exception
+
+    def _expected_type(self):
+        if type(self.expected) is type:
+            return self.expected
+        return type(self.expected)
+
+    def match(self, other):
+        if type(other) != tuple:
+            return Mismatch('%r is not an exc_info tuple' % other)
+        if not issubclass(other[0], self._expected_type()):
+            return Mismatch('%r is not a %r' % (
+                other[0], self._expected_type()))
+        if (type(self.expected) is not type and
+            other[1].args != self.expected.args):
+            return Mismatch('%r has different arguments to %r.' % (
+                other[1], self.expected))
+
+    def __str__(self):
+        return "MatchesException(%r)" % self.expected
+
+
 class StartsWith(Matcher):
     """Checks whether one string starts with another."""
 
@@ -398,3 +440,57 @@ class AnnotatedMismatch(Mismatch):
 
     def describe(self):
         return '%s: %s' % (self.mismatch.describe(), self.annotation)
+
+
+class Raises(Matcher):
+    """Match if the matchee raises an exception when called.
+
+    Exceptions which are not subclasses of Exception propogate out of the
+    Raises.match call unless they are explicitly matched.
+    """
+
+    def __init__(self, exception_matcher=None):
+        """Create a Raises matcher.
+
+        :param exception_matcher: Optional validator for the exception raised
+            by matchee. If supplied the exc_info tuple for the exception raised
+            is passed into that matcher. If no exception_matcher is supplied
+            then the simple fact of raising an exception is considered enough
+            to match on.
+        """
+        self.exception_matcher = exception_matcher
+
+    def match(self, matchee):
+        try:
+            result = matchee()
+            return Mismatch('%r returned %r' % (matchee, result))
+        # Catch all exceptions: Raises() should be able to match a
+        # KeyboardInterrupt or SystemExit.
+        except:
+            exc_info = sys.exc_info()
+            if self.exception_matcher:
+                mismatch = self.exception_matcher.match(sys.exc_info())
+                if not mismatch:
+                    return
+            else:
+                mismatch = None
+            # The exception did not match, or no explicit matching logic was
+            # performed. If the exception is a non-user exception (that is, not
+            # a subclass of Exception) then propogate it.
+            if not issubclass(exc_info[0], Exception):
+                raise exc_info[0], exc_info[1], exc_info[2]
+            return mismatch
+
+    def __str__(self):
+        return 'Raises()'
+
+
+def raises(exception):
+    """Make a matcher that checks that a callable raises an exception.
+
+    This is a convenience function, exactly equivalent to::
+        return Raises(MatchesException(exception))
+
+    See `Raises` and `MatchesException` for more information.
+    """
+    return Raises(MatchesException(exception))

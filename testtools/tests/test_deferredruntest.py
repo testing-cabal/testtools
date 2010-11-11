@@ -22,6 +22,8 @@ from testtools.tests.helpers import ExtendedTestResult
 from testtools.matchers import (
     Equals,
     KeysEqual,
+    MatchesException,
+    Raises,
     )
 from testtools.runtest import RunTest
 
@@ -396,7 +398,8 @@ class TestAsynchronousDeferredRunTest(TestCase):
         runner = self.make_runner(test, timeout * 5)
         result = self.make_result()
         reactor.callLater(timeout, os.kill, os.getpid(), SIGINT)
-        self.assertRaises(KeyboardInterrupt, runner.run, result)
+        self.assertThat(lambda:runner.run(result),
+            Raises(MatchesException(KeyboardInterrupt)))
 
     @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
     def test_fast_keyboard_interrupt_stops_test_run(self):
@@ -414,7 +417,8 @@ class TestAsynchronousDeferredRunTest(TestCase):
         runner = self.make_runner(test, timeout * 5)
         result = self.make_result()
         reactor.callWhenRunning(os.kill, os.getpid(), SIGINT)
-        self.assertRaises(KeyboardInterrupt, runner.run, result)
+        self.assertThat(lambda:runner.run(result),
+            Raises(MatchesException(KeyboardInterrupt)))
 
     def test_timeout_causes_test_error(self):
         # If a test times out, it reports itself as having failed with a

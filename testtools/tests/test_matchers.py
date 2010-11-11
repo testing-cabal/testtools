@@ -1,8 +1,9 @@
-# Copyright (c) 2008 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2008-2010 Jonathan M. Lange. See LICENSE for details.
 
 """Tests for matchers."""
 
 import doctest
+import sys
 
 from testtools import (
     Matcher, # check that Matcher is exposed at the top level for docs.
@@ -18,9 +19,12 @@ from testtools.matchers import (
     LessThan,
     MatchesAny,
     MatchesAll,
+    MatchesException,
     Mismatch,
     Not,
     NotEquals,
+    Raises,
+    raises,
     StartsWith,
     )
 
@@ -37,7 +41,8 @@ class TestMismatch(TestCase):
 
     def test_constructor_no_arguments(self):
         mismatch = Mismatch()
-        self.assertRaises(NotImplementedError, mismatch.describe)
+        self.assertThat(mismatch.describe,
+            Raises(MatchesException(NotImplementedError)))
         self.assertEqual({}, mismatch.get_details())
 
 
@@ -155,6 +160,58 @@ class TestLessThanInterface(TestCase, TestMatchersInterface):
     describe_examples = [('4 is >= 4', 4, LessThan(4))]
 
 
+def make_error(type, *args, **kwargs):
+    try:
+        raise type(*args, **kwargs)
+    except type:
+        return sys.exc_info()
+
+
+class TestMatchesExceptionInstanceInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = MatchesException(ValueError("foo"))
+    error_foo = make_error(ValueError, 'foo')
+    error_bar = make_error(ValueError, 'bar')
+    error_base_foo = make_error(Exception, 'foo')
+    matches_matches = [error_foo]
+    matches_mismatches = [error_bar, error_base_foo]
+
+    str_examples = [
+        ("MatchesException(Exception('foo',))",
+         MatchesException(Exception('foo')))
+        ]
+    describe_examples = [
+        ("<type 'exceptions.Exception'> is not a "
+         "<type 'exceptions.ValueError'>",
+         error_base_foo,
+         MatchesException(ValueError("foo"))),
+        ("ValueError('bar',) has different arguments to ValueError('foo',).",
+         error_bar,
+         MatchesException(ValueError("foo"))),
+        ]
+
+
+class TestMatchesExceptionTypeInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = MatchesException(ValueError)
+    error_foo = make_error(ValueError, 'foo')
+    error_sub = make_error(UnicodeError, 'bar')
+    error_base_foo = make_error(Exception, 'foo')
+    matches_matches = [error_foo, error_sub]
+    matches_mismatches = [error_base_foo]
+
+    str_examples = [
+        ("MatchesException(<type 'exceptions.Exception'>)",
+         MatchesException(Exception))
+        ]
+    describe_examples = [
+        ("<type 'exceptions.Exception'> is not a "
+         "<type 'exceptions.ValueError'>",
+         error_base_foo,
+         MatchesException(ValueError)),
+        ]
+
+
 class TestNotInterface(TestCase, TestMatchersInterface):
 
     matches_matcher = Not(Equals(1))
@@ -247,6 +304,79 @@ class TestAnnotate(TestCase, TestMatchersInterface):
         ("Annotate('foo', Equals(1))", Annotate("foo", Equals(1)))]
 
     describe_examples = [("1 != 2: foo", 2, Annotate('foo', Equals(1)))]
+
+
+class TestRaisesInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = Raises()
+    def boom():
+        raise Exception('foo')
+    matches_matches = [boom]
+    matches_mismatches = [lambda:None]
+
+    # Tricky to get function objects to render constantly, and the interfaces
+    # helper uses assertEqual rather than (for instance) DocTestMatches.
+    str_examples = []
+
+    describe_examples = []
+
+
+class TestRaisesExceptionMatcherInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = Raises(
+        exception_matcher=MatchesException(Exception('foo')))
+    def boom_bar():
+        raise Exception('bar')
+    def boom_foo():
+        raise Exception('foo')
+    matches_matches = [boom_foo]
+    matches_mismatches = [lambda:None, boom_bar]
+
+    # Tricky to get function objects to render constantly, and the interfaces
+    # helper uses assertEqual rather than (for instance) DocTestMatches.
+    str_examples = []
+
+    describe_examples = []
+
+
+class TestRaisesBaseTypes(TestCase):
+
+    def raiser(self):
+        raise KeyboardInterrupt('foo')
+
+    def test_KeyboardInterrupt_matched(self):
+        # When KeyboardInterrupt is matched, it is swallowed.
+        matcher = Raises(MatchesException(KeyboardInterrupt))
+        self.assertThat(self.raiser, matcher)
+
+    def test_KeyboardInterrupt_propogates(self):
+        # The default 'it raised' propogates KeyboardInterrupt.
+        match_keyb = Raises(MatchesException(KeyboardInterrupt))
+        def raise_keyb_from_match():
+            matcher = Raises()
+            matcher.match(self.raiser)
+        self.assertThat(raise_keyb_from_match, match_keyb)
+
+    def test_KeyboardInterrupt_match_Exception_propogates(self):
+        # If the raised exception isn't matched, and it is not a subclass of
+        # Exception, it is propogated.
+        match_keyb = Raises(MatchesException(KeyboardInterrupt))
+        def raise_keyb_from_match():
+            matcher = Raises(MatchesException(Exception))
+            matcher.match(self.raiser)
+        self.assertThat(raise_keyb_from_match, match_keyb)
+
+
+class TestRaisesConvenience(TestCase):
+
+    def test_exc_type(self):
+        self.assertThat(lambda: 1/0, raises(ZeroDivisionError))
+
+    def test_exc_value(self):
+        e = RuntimeError("You lose!")
+        def raiser():
+            raise e
+        self.assertThat(raiser, raises(e))
 
 
 class DoesNotStartWithTests(TestCase):

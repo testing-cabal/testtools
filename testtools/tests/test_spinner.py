@@ -12,6 +12,8 @@ from testtools import (
 from testtools.matchers import (
     Equals,
     Is,
+    MatchesException,
+    Raises,
     )
 from testtools._spinner import (
     DeferredNotFired,
@@ -40,7 +42,7 @@ class TestNotReentrant(TestCase):
             calls.append(None)
             if len(calls) < 5:
                 log_something()
-        self.assertRaises(ReentryError, log_something)
+        self.assertThat(log_something, Raises(MatchesException(ReentryError)))
         self.assertEqual(1, len(calls))
 
     def test_deeper_stack(self):
@@ -55,7 +57,7 @@ class TestNotReentrant(TestCase):
             calls.append(None)
             if len(calls) < 5:
                 g()
-        self.assertRaises(ReentryError, f)
+        self.assertThat(f, Raises(MatchesException(ReentryError)))
         self.assertEqual(2, len(calls))
 
 
@@ -64,7 +66,8 @@ class TestExtractResult(TestCase):
     def test_not_fired(self):
         # extract_result raises DeferredNotFired if it's given a Deferred that
         # has not fired.
-        self.assertRaises(DeferredNotFired, extract_result, defer.Deferred())
+        self.assertThat(lambda:extract_result(defer.Deferred()),
+            Raises(MatchesException(DeferredNotFired)))
 
     def test_success(self):
         # extract_result returns the value of the Deferred if it has fired
@@ -81,7 +84,8 @@ class TestExtractResult(TestCase):
         except ZeroDivisionError:
             f = Failure()
         d = defer.fail(f)
-        self.assertRaises(ZeroDivisionError, extract_result, d)
+        self.assertThat(lambda:extract_result(d),
+            Raises(MatchesException(ZeroDivisionError)))
 
 
 class TestTrapUnhandledErrors(TestCase):
@@ -137,9 +141,9 @@ class TestRunInReactor(TestCase):
     def test_exception_reraised(self):
         # If the given function raises an error, run_in_reactor re-raises that
         # error.
-        self.assertRaises(
-            ZeroDivisionError,
-            self.make_spinner().run, self.make_timeout(), lambda: 1 / 0)
+        self.assertThat(
+            lambda:self.make_spinner().run(self.make_timeout(), lambda: 1/0),
+            Raises(MatchesException(ZeroDivisionError)))
 
     def test_keyword_arguments(self):
         # run_in_reactor passes keyword arguments on.
@@ -152,10 +156,9 @@ class TestRunInReactor(TestCase):
         # run_in_reactor raises an error if it is called inside another call
         # to run_in_reactor.
         spinner = self.make_spinner()
-        self.assertRaises(
-            ReentryError,
-            spinner.run, self.make_timeout(),
-            spinner.run, self.make_timeout(), lambda: None)
+        self.assertThat(lambda: spinner.run(
+            self.make_timeout(), spinner.run, self.make_timeout(), lambda: None),
+            Raises(MatchesException(ReentryError)))
 
     def test_deferred_value_returned(self):
         # If the given function returns a Deferred, run_in_reactor returns the
@@ -181,9 +184,9 @@ class TestRunInReactor(TestCase):
     def test_timeout(self):
         # If the function takes too long to run, we raise a TimeoutError.
         timeout = self.make_timeout()
-        self.assertRaises(
-            TimeoutError,
-            self.make_spinner().run, timeout, lambda: defer.Deferred())
+        self.assertThat(
+            lambda:self.make_spinner().run(timeout, lambda: defer.Deferred()),
+            Raises(MatchesException(TimeoutError)))
 
     def test_no_junk_by_default(self):
         # If the reactor hasn't spun yet, then there cannot be any junk.
@@ -259,8 +262,8 @@ class TestRunInReactor(TestCase):
         spinner = self.make_spinner(reactor)
         timeout = self.make_timeout()
         spinner.run(timeout, reactor.listenTCP, 0, ServerFactory())
-        self.assertRaises(
-            StaleJunkError, spinner.run, timeout, lambda: None)
+        self.assertThat(lambda: spinner.run(timeout, lambda: None),
+            Raises(MatchesException(StaleJunkError)))
 
     def test_clear_junk_clears_previous_junk(self):
         # If 'run' is called and there's still junk in the spinner's junk
@@ -284,8 +287,8 @@ class TestRunInReactor(TestCase):
         spinner = self.make_spinner(reactor)
         timeout = self.make_timeout()
         reactor.callLater(timeout, os.kill, os.getpid(), SIGINT)
-        self.assertRaises(
-            NoResultError, spinner.run, timeout * 5, defer.Deferred)
+        self.assertThat(lambda:spinner.run(timeout * 5, defer.Deferred),
+            Raises(MatchesException(NoResultError)))
         self.assertEqual([], spinner._clean())
 
     @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
@@ -305,8 +308,8 @@ class TestRunInReactor(TestCase):
         spinner = self.make_spinner(reactor)
         timeout = self.make_timeout()
         reactor.callWhenRunning(os.kill, os.getpid(), SIGINT)
-        self.assertRaises(
-            NoResultError, spinner.run, timeout * 5, defer.Deferred)
+        self.assertThat(lambda:spinner.run(timeout * 5, defer.Deferred),
+            Raises(MatchesException(NoResultError)))
         self.assertEqual([], spinner._clean())
 
     @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
