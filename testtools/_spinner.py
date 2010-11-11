@@ -194,12 +194,7 @@ class Spinner(object):
         self._stop_reactor()
 
     def _clean(self):
-        """Clean up any junk in the reactor.
-
-        This will *always* spin the reactor at least once.  We do this in
-        order to give the reactor a chance to do the disconnections and
-        terminations that were asked of it.
-        """
+        """Clean up any junk in the reactor."""
         junk = []
         for delayed_call in self._reactor.getDelayedCalls():
             delayed_call.cancel()
