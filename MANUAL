@@ -150,6 +150,13 @@ asserting more things about the exception than just the type::
         self.assertEqual('bob', error.username)
         self.assertEqual('User bob cannot frobnicate', str(error))
 
+Note that this is incompatible with the assertRaises in unittest2/Python2.7.
+While we have no immediate plans to change to be compatible consider using the
+new assertThat facility instead::
+
+        self.assertThat(thing.frobnicate,
+            Raises(MatchesException(UnauthorisedError('bob')))
+
 
 TestCase.assertThat
 ~~~~~~~~~~~~~~~~~~~

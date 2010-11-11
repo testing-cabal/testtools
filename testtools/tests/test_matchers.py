@@ -23,6 +23,7 @@ from testtools.matchers import (
     Mismatch,
     Not,
     NotEquals,
+    Raises,
     StartsWith,
     )
 
@@ -286,6 +287,40 @@ class TestAnnotate(TestCase, TestMatchersInterface):
         ("Annotate('foo', Equals(1))", Annotate("foo", Equals(1)))]
 
     describe_examples = [("1 != 2: foo", 2, Annotate('foo', Equals(1)))]
+
+
+class TestRaisesInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = Raises()
+    def boom():
+        raise Exception('foo')
+    matches_matches = [boom]
+    matches_mismatches = [lambda:None]
+
+    # Tricky to get function objects to render constantly, and the interfaces
+    # helper uses assertEqual rather than (for instance) DocTestMatches.
+    str_examples = []
+
+    describe_examples = []
+
+
+class TestRaisesExceptionMatcherInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = Raises(
+        exception_matcher=MatchesException(Exception('foo')))
+    def boom_bar():
+        raise Exception('bar')
+    def boom_foo():
+        raise Exception('foo')
+    matches_matches = [boom_foo]
+    matches_mismatches = [lambda:None, boom_bar]
+
+    # Tricky to get function objects to render constantly, and the interfaces
+    # helper uses assertEqual rather than (for instance) DocTestMatches.
+    str_examples = []
+
+    describe_examples = []
+
 
 
 class DoesNotStartWithTests(TestCase):

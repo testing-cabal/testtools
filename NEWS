@@ -7,6 +7,9 @@ NEXT
 Improvements
 ------------
 
+* addUnexpectedSuccess is translated to addFailure for test results that don't
+  know about addUnexpectedSuccess.  (Jonathan Lange, #654474)
+
 * Experimental support for running tests that return Deferreds.
   (Jonathan Lange, Martin [gz])
 
@@ -24,8 +27,9 @@ Improvements
 * ``MatchesException`` added to the ``testtools.matchers`` module - matches
   an exception class and parameters. (Robert Collins)
 
-* addUnexpectedSuccess is translated to addFailure for test results that don't
-  know about addUnexpectedSuccess.  (Jonathan Lange, #654474)
+* ``Raises`` added to the ``testtools.matchers`` module - matches if the 
+  supplied callable raises, and delegates to an optional matcher for validation
+  of the exception. (Robert Collins)
 
 * ``testools.TestCase.useFixture`` has been added to glue with fixtures nicely.
   (Robert Collins)

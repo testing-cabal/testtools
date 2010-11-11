@@ -23,12 +23,14 @@ __all__ = [
     'MatchesException',
     'NotEquals',
     'Not',
+    'Raises',
     'StartsWith',
     ]
 
 import doctest
 import operator
 from pprint import pformat
+import sys
 
 
 class Matcher(object):
@@ -103,6 +105,10 @@ class Mismatch(object):
             this dict are passed testtools.TestCase.addDetail.
         """
         return getattr(self, '_details', {})
+
+    def __repr__(self):
+        return  "<testtools.matchers.Mismatch object at %x attributes=%r>" % (
+            id(self), self.__dict__)
 
 
 class DocTestMatches(object):
@@ -426,3 +432,29 @@ class AnnotatedMismatch(Mismatch):
 
     def describe(self):
         return '%s: %s' % (self.mismatch.describe(), self.annotation)
+
+
+class Raises(Matcher):
+    """Match if the matchee raises an exception when called."""
+
+    def __init__(self, exception_matcher=None):
+        """Create a Raises matcher. 
+        
+        :param exception_matcher: Optional validator for the exception raised
+            by matchee. If supplied the exc_info tuple for the exception raised
+            is passed into that matcher. If no exception_matcher is supplied
+            then the simple fact of raising an exception is considered enough
+            to match on.
+        """
+        self.exception_matcher = exception_matcher
+
+    def match(self, matchee):
+        try:
+            result = matchee()
+            return Mismatch('%r return %r' % (matchee, result))
+        except Exception:
+            if self.exception_matcher:
+                return self.exception_matcher.match(sys.exc_info())
+
+    def __str__(self):
+        return 'Raises()'
