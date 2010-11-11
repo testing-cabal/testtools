@@ -9,17 +9,17 @@ from testtools.matchers import MatchesException, Raises
 from testtools.tests.helpers import an_exc_info
 
 
-raises_value = Raises(MatchesException(ValueError))
+raises_value_error = Raises(MatchesException(ValueError))
 
 
 class TestContent(TestCase):
 
     def test___init___None_errors(self):
-        self.assertThat(lambda:Content(None, None), raises_value)
+        self.assertThat(lambda:Content(None, None), raises_value_error)
         self.assertThat(lambda:Content(None, lambda: ["traceback"]),
-            raises_value)
+            raises_value_error)
         self.assertThat(lambda:Content(ContentType("text", "traceback"), None),
-            raises_value)
+            raises_value_error)
 
     def test___init___sets_ivars(self):
         content_type = ContentType("foo", "bar")
@@ -42,7 +42,7 @@ class TestContent(TestCase):
     def test_iter_text_not_text_errors(self):
         content_type = ContentType("foo", "bar")
         content = Content(content_type, lambda: ["bytes"])
-        self.assertThat(content.iter_text, raises_value)
+        self.assertThat(content.iter_text, raises_value_error)
 
     def test_iter_text_decodes(self):
         content_type = ContentType("text", "strange", {"charset": "utf8"})
@@ -61,7 +61,8 @@ class TestContent(TestCase):
 class TestTracebackContent(TestCase):
 
     def test___init___None_errors(self):
-        self.assertThat(lambda:TracebackContent(None, None), raises_value) 
+        self.assertThat(lambda:TracebackContent(None, None),
+            raises_value_error) 
 
     def test___init___sets_ivars(self):
         content = TracebackContent(an_exc_info, self)
