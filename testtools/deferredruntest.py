@@ -37,15 +37,22 @@ from twisted.python import log
 from twisted.trial.unittest import _LogObserver
 
 
-class SynchronousDeferredRunTest(RunTest):
+class _DeferredRunTest(RunTest):
+    """Base for tests that return Deferreds."""
+
+    def _got_user_failure(self, failure, tb_label='traceback'):
+        """We got a failure from user code."""
+        return self._got_user_exception(
+            (failure.type, failure.value, failure.getTracebackObject()),
+            tb_label=tb_label)
+
+
+class SynchronousDeferredRunTest(_DeferredRunTest):
     """Runner for tests that return synchronous Deferreds."""
 
     def _run_user(self, function, *args):
         d = defer.maybeDeferred(function, *args)
-        def got_exception(failure):
-            return self._got_user_exception(
-                (failure.type, failure.value, failure.tb))
-        d.addErrback(got_exception)
+        d.addErrback(self._got_user_failure)
         result = extract_result(d)
         return result
 
@@ -71,7 +78,7 @@ _log_observer = _LogObserver()
 
 
 
-class AsynchronousDeferredRunTest(RunTest):
+class AsynchronousDeferredRunTest(_DeferredRunTest):
     """Runner for tests that return Deferreds that fire asynchronously.
 
     That is, this test runner assumes that the Deferreds will only fire if the
@@ -101,12 +108,6 @@ class AsynchronousDeferredRunTest(RunTest):
             from twisted.internet import reactor
         self._reactor = reactor
         self._timeout = timeout
-
-    def _got_user_failure(self, failure, tb_label='traceback'):
-        """We got a failure from user code."""
-        # XXX: We don't always get tracebacks from these.
-        return self._got_user_exception(
-            (failure.type, failure.value, failure.tb), tb_label=tb_label)
 
     @classmethod
     def make_factory(cls, reactor=None, timeout=0.005):
