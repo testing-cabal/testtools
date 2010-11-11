@@ -3,6 +3,7 @@
 """Tests for matchers."""
 
 import doctest
+import sys
 
 from testtools import (
     Matcher, # check that Matcher is exposed at the top level for docs.
@@ -18,6 +19,7 @@ from testtools.matchers import (
     LessThan,
     MatchesAny,
     MatchesAll,
+    MatchesException,
     Mismatch,
     Not,
     NotEquals,
@@ -153,6 +155,43 @@ class TestLessThanInterface(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [('4 is >= 4', 4, LessThan(4))]
+
+
+class TestMatchesException(TestCase):
+
+    def test_does_not_match_different_exception_class(self):
+        matcher = MatchesException(ValueError("foo"))
+        try:
+            raise Exception("foo")
+        except Exception:
+            error = sys.exc_info()
+        mismatch = matcher.match(error)
+        self.assertNotEqual(None, mismatch)
+        self.assertEqual(
+            "<type 'exceptions.Exception'> is not a "
+            "<type 'exceptions.ValueError'>",
+            mismatch.describe())
+
+    def test_does_not_match_different_args(self):
+        matcher = MatchesException(Exception("foo"))
+        try:
+            raise Exception("bar")
+        except Exception: 
+            error = sys.exc_info()
+        mismatch = matcher.match(error)
+        self.assertNotEqual(None, mismatch)
+        self.assertEqual(
+            "Exception('bar',) has different arguments to Exception('foo',).",
+            mismatch.describe())
+
+    def test_matches_same_args(self):
+        matcher = MatchesException(Exception("foo"))
+        try:
+            raise Exception("foo")
+        except Exception:
+            error = sys.exc_info()
+        mismatch = matcher.match(error)
+        self.assertEqual(None, mismatch)
 
 
 class TestNotInterface(TestCase, TestMatchersInterface):
