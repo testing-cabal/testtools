@@ -1,4 +1,4 @@
-# Copyright (c) 2008 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2008-2010 Jonathan M. Lange. See LICENSE for details.
 
 """Tests for matchers."""
 
@@ -24,6 +24,7 @@ from testtools.matchers import (
     Not,
     NotEquals,
     Raises,
+    raises,
     StartsWith,
     )
 
@@ -355,7 +356,7 @@ class TestRaisesBaseTypes(TestCase):
             matcher = Raises()
             matcher.match(self.raiser)
         self.assertThat(raise_keyb_from_match, match_keyb)
-    
+
     def test_KeyboardInterrupt_match_Exception_propogates(self):
         # If the raised exception isn't matched, and it is not a subclass of
         # Exception, it is propogated.
@@ -364,6 +365,18 @@ class TestRaisesBaseTypes(TestCase):
             matcher = Raises(MatchesException(Exception))
             matcher.match(self.raiser)
         self.assertThat(raise_keyb_from_match, match_keyb)
+
+
+class TestRaisesConvenience(TestCase):
+
+    def test_exc_type(self):
+        self.assertThat(lambda: 1/0, raises(ZeroDivisionError))
+
+    def test_exc_value(self):
+        e = RuntimeError("You lose!")
+        def raiser():
+            raise e
+        self.assertThat(raiser, raises(e))
 
 
 class DoesNotStartWithTests(TestCase):

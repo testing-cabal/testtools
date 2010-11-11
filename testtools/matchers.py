@@ -1,4 +1,4 @@
-# Copyright (c) 2009 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2009-2010 Jonathan M. Lange. See LICENSE for details.
 
 """Matchers, a way to express complex assertions outside the testcase.
 
@@ -24,6 +24,7 @@ __all__ = [
     'NotEquals',
     'Not',
     'Raises',
+    'raises',
     'StartsWith',
     ]
 
@@ -482,3 +483,14 @@ class Raises(Matcher):
 
     def __str__(self):
         return 'Raises()'
+
+
+def raises(exception):
+    """Make a matcher that checks that a callable raises an exception.
+
+    This is a convenience function, exactly equivalent to::
+        return Raises(MatchesException(exception))
+
+    See `Raises` and `MatchesException` for more information.
+    """
+    return Raises(MatchesException(exception))

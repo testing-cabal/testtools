@@ -158,6 +158,12 @@ new assertThat facility instead::
             lambda: thing.frobnicate('foo', 'bar'),
             Raises(MatchesException(UnauthorisedError('bob')))
 
+There is also a convenience function to handle this common case::
+
+        self.assertThat(
+            lambda: thing.frobnicate('foo', 'bar'),
+            raises(UnauthorisedError('bob')))
+
 
 TestCase.assertThat
 ~~~~~~~~~~~~~~~~~~~
