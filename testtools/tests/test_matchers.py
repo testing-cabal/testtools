@@ -158,41 +158,37 @@ class TestLessThanInterface(TestCase, TestMatchersInterface):
     describe_examples = [('4 is >= 4', 4, LessThan(4))]
 
 
-class TestMatchesException(TestCase):
+class TestMatchesExceptionInterface(TestCase, TestMatchersInterface):
 
-    def test_does_not_match_different_exception_class(self):
-        matcher = MatchesException(ValueError("foo"))
-        try:
-            raise Exception("foo")
-        except Exception:
-            error = sys.exc_info()
-        mismatch = matcher.match(error)
-        self.assertNotEqual(None, mismatch)
-        self.assertEqual(
-            "<type 'exceptions.Exception'> is not a "
-            "<type 'exceptions.ValueError'>",
-            mismatch.describe())
+    matches_matcher = MatchesException(ValueError("foo"))
+    try:
+        raise ValueError("foo")
+    except ValueError:
+        error_foo = sys.exc_info()
+    try:
+        raise ValueError("bar")
+    except ValueError: 
+        error_bar = sys.exc_info()
+    try:
+        raise Exception("foo")
+    except Exception:
+        error_base_foo = sys.exc_info()
+    matches_matches = [error_foo]
+    matches_mismatches = [error_bar, error_base_foo]
 
-    def test_does_not_match_different_args(self):
-        matcher = MatchesException(Exception("foo"))
-        try:
-            raise Exception("bar")
-        except Exception: 
-            error = sys.exc_info()
-        mismatch = matcher.match(error)
-        self.assertNotEqual(None, mismatch)
-        self.assertEqual(
-            "Exception('bar',) has different arguments to Exception('foo',).",
-            mismatch.describe())
-
-    def test_matches_same_args(self):
-        matcher = MatchesException(Exception("foo"))
-        try:
-            raise Exception("foo")
-        except Exception:
-            error = sys.exc_info()
-        mismatch = matcher.match(error)
-        self.assertEqual(None, mismatch)
+    str_examples = [
+        ("MatchesException(Exception('foo',))",
+         MatchesException(Exception('foo')))
+        ]
+    describe_examples = [
+        ("<type 'exceptions.Exception'> is not a "
+         "<type 'exceptions.ValueError'>",
+         error_base_foo,
+         MatchesException(ValueError("foo"))),
+        ("ValueError('bar',) has different arguments to ValueError('foo',).",
+         error_bar,
+         MatchesException(ValueError("foo"))),
+        ]
 
 
 class TestNotInterface(TestCase, TestMatchersInterface):
