@@ -335,7 +335,7 @@ class MatchesException(Matcher):
 
     def __init__(self, exception):
         """Create a MatchesException that will match exc_info's for exception.
-        
+
         :param exception: Either an exception instance or type.
             If an instance is given, the type and arguments of the exception
             are checked. If a type is given only the type of the exception is
@@ -443,14 +443,14 @@ class AnnotatedMismatch(Mismatch):
 
 class Raises(Matcher):
     """Match if the matchee raises an exception when called.
-    
+
     Exceptions which are not subclasses of Exception propogate out of the
     Raises.match call unless they are explicitly matched.
     """
 
     def __init__(self, exception_matcher=None):
-        """Create a Raises matcher. 
-        
+        """Create a Raises matcher.
+
         :param exception_matcher: Optional validator for the exception raised
             by matchee. If supplied the exc_info tuple for the exception raised
             is passed into that matcher. If no exception_matcher is supplied
