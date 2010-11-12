@@ -683,9 +683,6 @@ class TestAssertFailsWith(TestCase):
         return d.addCallbacks(
             lambda x: self.fail("Should not have succeeded"), check_result)
 
-    def test_good_traceback(self):
-        1/0
-
 
 def test_suite():
     from unittest import TestLoader, TestSuite
