@@ -9,6 +9,9 @@ from testtools.content_type import ContentType, UTF8_TEXT
 from testtools.testresult import TestResult
 
 
+_join_b = _b("").join
+
+
 class Content(object):
     """A MIME-like Content object.
 
@@ -31,7 +34,7 @@ class Content(object):
 
     def __eq__(self, other):
         return (self.content_type == other.content_type and
-            ''.join(self.iter_bytes()) == ''.join(other.iter_bytes()))
+            _join_b(self.iter_bytes()) == _join_b(other.iter_bytes()))
 
     def iter_bytes(self):
         """Iterate over bytestrings of the serialised content."""
@@ -68,7 +71,7 @@ class Content(object):
 
     def __repr__(self):
         return "<Content type=%r, value=%r>" % (
-            self.content_type, ''.join(self.iter_bytes()))
+            self.content_type, _join_b(self.iter_bytes()))
 
 
 class TracebackContent(Content):
