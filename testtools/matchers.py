@@ -467,7 +467,6 @@ class Raises(Matcher):
         # Catch all exceptions: Raises() should be able to match a
         # KeyboardInterrupt or SystemExit.
         except:
-            exc_info = sys.exc_info()
             if self.exception_matcher:
                 mismatch = self.exception_matcher.match(sys.exc_info())
                 if not mismatch:
@@ -477,8 +476,8 @@ class Raises(Matcher):
             # The exception did not match, or no explicit matching logic was
             # performed. If the exception is a non-user exception (that is, not
             # a subclass of Exception) then propogate it.
-            if not issubclass(exc_info[0], Exception):
-                raise exc_info[0], exc_info[1], exc_info[2]
+            if not issubclass(sys.exc_info()[0], Exception):
+                raise
             return mismatch
 
     def __str__(self):
