@@ -181,8 +181,7 @@ class TestMatchesExceptionInstanceInterface(TestCase, TestMatchersInterface):
          MatchesException(Exception('foo')))
         ]
     describe_examples = [
-        ("<type 'exceptions.Exception'> is not a "
-         "<type 'exceptions.ValueError'>",
+        ("%r is not a %r" % (Exception, ValueError),
          error_base_foo,
          MatchesException(ValueError("foo"))),
         ("ValueError('bar',) has different arguments to ValueError('foo',).",
@@ -201,12 +200,11 @@ class TestMatchesExceptionTypeInterface(TestCase, TestMatchersInterface):
     matches_mismatches = [error_base_foo]
 
     str_examples = [
-        ("MatchesException(<type 'exceptions.Exception'>)",
+        ("MatchesException(%r)" % (Exception,),
          MatchesException(Exception))
         ]
     describe_examples = [
-        ("<type 'exceptions.Exception'> is not a "
-         "<type 'exceptions.ValueError'>",
+        ("%r is not a %r" % (Exception, ValueError),
          error_base_foo,
          MatchesException(ValueError)),
         ]
