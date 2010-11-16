@@ -33,6 +33,8 @@ import operator
 from pprint import pformat
 import sys
 
+from testtools.compat import classtypes
+
 
 class Matcher(object):
     """A pattern matcher.
@@ -346,9 +348,9 @@ class MatchesException(Matcher):
         self.expected = exception
 
     def _expected_type(self):
-        if type(self.expected) is type:
+        if type(self.expected) in classtypes():
             return self.expected
-        return type(self.expected)
+        return self.expected.__class__
 
     def match(self, other):
         if type(other) != tuple:
@@ -356,7 +358,7 @@ class MatchesException(Matcher):
         if not issubclass(other[0], self._expected_type()):
             return Mismatch('%r is not a %r' % (
                 other[0], self._expected_type()))
-        if (type(self.expected) is not type and
+        if (type(self.expected) not in classtypes() and
             other[1].args != self.expected.args):
             return Mismatch('%r has different arguments to %r.' % (
                 other[1], self.expected))
