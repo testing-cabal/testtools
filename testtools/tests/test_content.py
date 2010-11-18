@@ -2,7 +2,7 @@
 
 import unittest
 from testtools import TestCase
-from testtools.compat import _u
+from testtools.compat import _b, _u
 from testtools.content import Content, TracebackContent, text_content
 from testtools.content_type import ContentType, UTF8_TEXT
 from testtools.matchers import MatchesException, Raises
@@ -29,15 +29,22 @@ class TestContent(TestCase):
 
     def test___eq__(self):
         content_type = ContentType("foo", "bar")
-        content1 = Content(content_type, lambda: ["bytes"])
-        content2 = Content(content_type, lambda: ["bytes"])
-        content3 = Content(content_type, lambda: ["by", "tes"])
-        content4 = Content(content_type, lambda: ["by", "te"])
-        content5 = Content(ContentType("f", "b"), lambda: ["by", "tes"])
+        one_chunk = lambda: [_b("bytes")]
+        two_chunk = lambda: [_b("by"), _b("tes")]
+        content1 = Content(content_type, one_chunk)
+        content2 = Content(content_type, one_chunk)
+        content3 = Content(content_type, two_chunk)
+        content4 = Content(content_type, lambda: [_b("by"), _b("te")])
+        content5 = Content(ContentType("f", "b"), two_chunk)
         self.assertEqual(content1, content2)
         self.assertEqual(content1, content3)
         self.assertNotEqual(content1, content4)
         self.assertNotEqual(content1, content5)
+
+    def test___repr__(self):
+        content = Content(ContentType("application", "octet-stream"),
+            lambda: [_b("\x00bin"), _b("ary\xff")])
+        self.assertIn("\\x00binary\\xff", repr(content))
 
     def test_iter_text_not_text_errors(self):
         content_type = ContentType("foo", "bar")
