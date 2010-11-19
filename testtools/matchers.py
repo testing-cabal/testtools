@@ -33,7 +33,7 @@ import operator
 from pprint import pformat
 import sys
 
-from testtools.compat import classtypes, _error_repr
+from testtools.compat import classtypes, _error_repr, isbaseexception
 
 
 class Matcher(object):
@@ -476,8 +476,8 @@ class Raises(Matcher):
                 mismatch = None
             # The exception did not match, or no explicit matching logic was
             # performed. If the exception is a non-user exception (that is, not
-            # a subclass of Exception) then propogate it.
-            if not issubclass(sys.exc_info()[0], Exception):
+            # a subclass of Exception on Python 2.5+) then propogate it.
+            if isbaseexception(sys.exc_info()[1]):
                 raise
             return mismatch
 
