@@ -65,6 +65,14 @@ else:
 _u.__doc__ = __u_doc
 
 
+if sys.version_info > (2, 5):
+    _error_repr = BaseException.__repr__
+else:
+    def _error_repr(exception):
+        """Format an exception instance as Python 2.5 and later do"""
+        return exception.__class__.__name__ + repr(exception.args)
+
+
 def unicode_output_stream(stream):
     """Get wrapper for given stream that writes any unicode without exception
 

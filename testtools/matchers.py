@@ -33,7 +33,7 @@ import operator
 from pprint import pformat
 import sys
 
-from testtools.compat import classtypes
+from testtools.compat import classtypes, _error_repr
 
 
 class Matcher(object):
@@ -346,25 +346,24 @@ class MatchesException(Matcher):
         """
         Matcher.__init__(self)
         self.expected = exception
-
-    def _expected_type(self):
-        if type(self.expected) in classtypes():
-            return self.expected
-        return self.expected.__class__
+        self._is_instance = type(self.expected) not in classtypes()
 
     def match(self, other):
         if type(other) != tuple:
             return Mismatch('%r is not an exc_info tuple' % other)
-        if not issubclass(other[0], self._expected_type()):
-            return Mismatch('%r is not a %r' % (
-                other[0], self._expected_type()))
-        if (type(self.expected) not in classtypes() and
-            other[1].args != self.expected.args):
-            return Mismatch('%r has different arguments to %r.' % (
-                other[1], self.expected))
+        expected_class = self.expected
+        if self._is_instance:
+            expected_class = expected_class.__class__
+        if not issubclass(other[0], expected_class):
+            return Mismatch('%r is not a %r' % (other[0], expected_class))
+        if self._is_instance and other[1].args != self.expected.args:
+            return Mismatch('%s has different arguments to %s.' % (
+                _error_repr(other[1]), _error_repr(self.expected)))
 
     def __str__(self):
-        return "MatchesException(%r)" % self.expected
+        if self._is_instance:
+            return "MatchesException(%s)" % _error_repr(self.expected)
+        return "MatchesException(%s)" % self.expected.__name__
 
 
 class StartsWith(Matcher):
