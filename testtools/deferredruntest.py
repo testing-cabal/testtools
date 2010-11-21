@@ -118,8 +118,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         # invoked directly.
         class AsynchronousDeferredRunTestFactory:
             def __call__(self, case, handlers=None):
-                return AsynchronousDeferredRunTest(
-                    case, handlers, reactor, timeout)
+                return cls(case, handlers, reactor, timeout)
         return AsynchronousDeferredRunTestFactory()
 
     @defer.deferredGenerator
