@@ -9,6 +9,7 @@ subtle failures in tests.  Use at your own peril.
 __all__ = [
     'assert_fails_with',
     'AsynchronousDeferredRunTest',
+    'AsynchronousDeferredRunTestForBrokenTwisted',
     'SynchronousDeferredRunTest',
     ]
 
@@ -142,6 +143,10 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
                 last_exception = exc_info[1]
         yield last_exception
 
+    def _make_spinner(self):
+        """Make the `Spinner` to be used to run the tests."""
+        return Spinner(self._reactor)
+
     def _run_deferred(self):
         """Run the test, assuming everything in it is Deferred-returning.
 
@@ -212,7 +217,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         error_observer = _log_observer
         full_log = StringIO()
         full_observer = log.FileLogObserver(full_log)
-        spinner = Spinner(self._reactor)
+        spinner = self._make_spinner()
         successful, unhandled = run_with_log_observers(
             [error_observer.gotEvent, full_observer.emit],
             self._blocking_run_deferred, spinner)
@@ -252,6 +257,23 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         """
         d = defer.maybeDeferred(function, *args)
         return d.addErrback(self._got_user_failure)
+
+
+class AsynchronousDeferredRunTestForBrokenTwisted(AsynchronousDeferredRunTest):
+    """Test runner that works around Twisted brokenness re reactor junk.
+
+    There are many APIs within Twisted itself where a Deferred fires but
+    leaves cleanup work scheduled for the reactor to do.  Arguably, many of
+    these are bugs.  This runner iterates the reactor event loop a number of
+    times after every test, in order to shake out these buggy-but-commonplace
+    events.
+    """
+
+    def _make_spinner(self):
+        spinner = super(
+            AsynchronousDeferredRunTestForBrokenTwisted, self)._make_spinner
+        spinner._OBLIGATORY_REACTOR_ITERATIONS = 2
+        return spinner
 
 
 def assert_fails_with(d, *exc_types, **kwargs):

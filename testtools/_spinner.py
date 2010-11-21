@@ -159,10 +159,11 @@ class Spinner(object):
 
     # There are many APIs within Twisted itself where a Deferred fires but
     # leaves cleanup work scheduled for the reactor to do.  Arguably, many of
-    # these are bugs.  As such, we iterate the reactor event loop a number of
-    # times after every call, in order to shake out these
-    # buggy-but-commonplace events.
-    _OBLIGATORY_REACTOR_ITERATIONS = 2
+    # these are bugs.  As such, we provide a facility to iterate the reactor
+    # event loop a number of times after every call, in order to shake out
+    # these buggy-but-commonplace events.  The default is 0, because that is
+    # the ideal, and it actually works for many cases.
+    _OBLIGATORY_REACTOR_ITERATIONS = 0
 
     def __init__(self, reactor):
         self._reactor = reactor
