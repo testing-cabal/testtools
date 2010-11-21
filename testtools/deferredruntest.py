@@ -271,7 +271,7 @@ class AsynchronousDeferredRunTestForBrokenTwisted(AsynchronousDeferredRunTest):
 
     def _make_spinner(self):
         spinner = super(
-            AsynchronousDeferredRunTestForBrokenTwisted, self)._make_spinner
+            AsynchronousDeferredRunTestForBrokenTwisted, self)._make_spinner()
         spinner._OBLIGATORY_REACTOR_ITERATIONS = 2
         return spinner
 
