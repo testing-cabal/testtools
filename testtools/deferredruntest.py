@@ -321,6 +321,13 @@ class UncleanReactorError(Exception):
         Exception.__init__(self,
             "The reactor still thinks it needs to do things. Close all "
             "connections, kill all processes and make sure all delayed "
-            "calls have either fired or been cancelled.  The management "
-            "thanks you: %s"
-            % map(repr, junk))
+            "calls have either fired or been cancelled:\n%s"
+            % map(self._get_junk_info, junk))
+
+    def _get_junk_info(self, junk):
+        from twisted.internet.base import DelayedCall
+        if isinstance(junk, DelayedCall):
+            ret = str(junk)
+        else:
+            ret = repr(junk)
+        return '  %s\n' % (ret,)
