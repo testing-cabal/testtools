@@ -157,6 +157,13 @@ class Spinner(object):
         'SIGCHLD',
         ]
 
+    # There are many APIs within Twisted itself where a Deferred fires but
+    # leaves cleanup work scheduled for the reactor to do.  Arguably, many of
+    # these are bugs.  As such, we iterate the reactor event loop a number of
+    # times after every call, in order to shake out these
+    # buggy-but-commonplace events.
+    _OBLIGATORY_REACTOR_ITERATIONS = 2
+
     def __init__(self, reactor):
         self._reactor = reactor
         self._timeout_call = None
@@ -194,7 +201,16 @@ class Spinner(object):
         self._stop_reactor()
 
     def _clean(self):
-        """Clean up any junk in the reactor."""
+        """Clean up any junk in the reactor.
+
+        Will always iterate the reactor a number of times equal to
+        `_OBLIGATORY_REACTOR_ITERATIONS`.  This is to work around bugs in
+        various Twisted APIs where a Deferred fires but still leaves work
+        (e.g. cancelling a call, actually closing a connection) for the
+        reactor to do.
+        """
+        for i in range(self._OBLIGATORY_REACTOR_ITERATIONS):
+            self._reactor.iterate(0)
         junk = []
         for delayed_call in self._reactor.getDelayedCalls():
             delayed_call.cancel()
