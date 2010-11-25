@@ -6,10 +6,6 @@ __metaclass__ = type
 
 import codecs
 import datetime
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 import doctest
 import os
 import shutil
@@ -26,6 +22,7 @@ from testtools import (
     TextTestResult,
     ThreadsafeForwardingResult,
     testresult,
+    try_imports,
     )
 from testtools.compat import (
     _b,
@@ -48,6 +45,8 @@ from testtools.tests.helpers import (
     ExtendedTestResult,
     an_exc_info
     )
+
+StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
 
 
 class TestTestResultContract(TestCase):

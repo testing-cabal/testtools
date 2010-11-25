@@ -47,7 +47,10 @@ Improvements
 * ``text_content`` conveniently converts a Python string to a Content object.
   (Jonathan Lange, James Westby)
 
-* `New `KeysEqual`` matcher.  (Jonathan Lange)
+* New ``KeysEqual`` matcher.  (Jonathan Lange)
+
+* New helpers for conditionally importing modules, ``try_import`` and
+  ``try_imports``.  (Jonathan Lange)
 
 
 0.9.7

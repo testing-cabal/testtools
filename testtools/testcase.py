@@ -14,16 +14,15 @@ __all__ = [
     ]
 
 import copy
-try:
-    from functools import wraps
-except ImportError:
-    wraps = None
 import itertools
 import sys
 import types
 import unittest
 
-from testtools import content
+from testtools import (
+    content,
+    try_import,
+    )
 from testtools.compat import advance_iterator
 from testtools.matchers import (
     Annotate,
@@ -33,33 +32,30 @@ from testtools.monkey import patch
 from testtools.runtest import RunTest
 from testtools.testresult import TestResult
 
+wraps = try_import('functools.wraps')
 
-try:
-    # Try to use the python2.7 SkipTest exception for signalling skips.
-    from unittest.case import SkipTest as TestSkipped
-except ImportError:
-    class TestSkipped(Exception):
-        """Raised within TestCase.run() when a test is skipped."""
+class TestSkipped(Exception):
+    """Raised within TestCase.run() when a test is skipped."""
+TestSkipped = try_import('unittest.case.SkipTest', TestSkipped)
 
 
-try:
-    # Try to use the same exceptions python 2.7 does.
-    from unittest.case import _ExpectedFailure, _UnexpectedSuccess
-except ImportError:
-    # Oops, not available, make our own.
-    class _UnexpectedSuccess(Exception):
-        """An unexpected success was raised.
+class _UnexpectedSuccess(Exception):
+    """An unexpected success was raised.
 
-        Note that this exception is private plumbing in testtools' testcase
-        module.
-        """
+    Note that this exception is private plumbing in testtools' testcase
+    module.
+    """
+_UnexpectedSuccess = try_import(
+    'unittest.case._UnexpectedSuccess', _UnexpectedSuccess)
 
-    class _ExpectedFailure(Exception):
-        """An expected failure occured.
+class _ExpectedFailure(Exception):
+    """An expected failure occured.
 
-        Note that this exception is private plumbing in testtools' testcase
-        module.
-        """
+    Note that this exception is private plumbing in testtools' testcase
+    module.
+    """
+_ExpectedFailure = try_import(
+    'unittest.case._ExpectedFailure', _ExpectedFailure)
 
 
 def run_test_with(test_runner, **kwargs):

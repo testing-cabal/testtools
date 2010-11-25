@@ -13,12 +13,9 @@ __all__ = [
     'SynchronousDeferredRunTest',
     ]
 
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 import sys
 
+from testtools import try_imports
 from testtools.content import (
     Content,
     text_content,
@@ -36,6 +33,8 @@ from testtools._spinner import (
 from twisted.internet import defer
 from twisted.python import log
 from twisted.trial.unittest import _LogObserver
+
+StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
 
 
 class _DeferredRunTest(RunTest):
