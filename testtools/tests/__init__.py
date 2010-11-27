@@ -11,6 +11,7 @@ def test_suite():
         test_content,
         test_content_type,
         test_deferredruntest,
+        test_fixturesupport,
         test_helpers,
         test_matchers,
         test_monkey,
@@ -26,6 +27,7 @@ def test_suite():
         test_content,
         test_content_type,
         test_deferredruntest,
+        test_fixturesupport,
         test_helpers,
         test_matchers,
         test_monkey,
@@ -35,16 +37,6 @@ def test_suite():
         test_testsuite,
         test_testtools,
         ]
-    try:
-        # Tests that rely on 'fixtures'.
-        from testtools.tests import (
-            test_fixturesupport,
-            )
-    except ImportError:
-        pass
-    else:
-        modules.extend([test_fixturesupport])
-
     for module in modules:
         suites.append(getattr(module, 'test_suite')())
     return unittest.TestSuite(suites)

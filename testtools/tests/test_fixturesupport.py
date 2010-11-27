@@ -1,19 +1,25 @@
 import unittest
 
-import fixtures
-from fixtures.tests.helpers import LoggingFixture
-
 from testtools import (
     TestCase,
     content,
     content_type,
     )
+from testtools.helpers import try_import
 from testtools.tests.helpers import (
     ExtendedTestResult,
     )
 
+fixtures = try_import('fixtures')
+LoggingFixture = try_import('fixtures.tests.helpers.LoggingFixture')
+
 
 class TestFixtureSupport(TestCase):
+
+    def setUp(self):
+        super(TestFixtureSupport, self).setUp()
+        if fixtures is None or LoggingFixture is None:
+            self.skipTest("Need fixtures")
 
     def test_useFixture(self):
         fixture = LoggingFixture()
