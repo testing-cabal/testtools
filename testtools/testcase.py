@@ -5,7 +5,6 @@
 __metaclass__ = type
 __all__ = [
     'clone_test_with_new_id',
-    'MultipleExceptions',
     'run_test_with',
     'skip',
     'skipIf',
@@ -90,13 +89,6 @@ def run_test_with(test_runner, **kwargs):
                 test_runner(case, handlers=handlers, **kwargs))
         return function
     return decorator
-
-
-class MultipleExceptions(Exception):
-    """Represents many exceptions raised from some operation.
-
-    :ivar args: The sys.exc_info() tuples for each exception.
-    """
 
 
 class TestCase(unittest.TestCase):
@@ -223,35 +215,6 @@ class TestCase(unittest.TestCase):
         if className is None:
             className = ', '.join(klass.__name__ for klass in classOrIterable)
         return className
-
-    def _runCleanups(self, result):
-        """Run the cleanups that have been added with addCleanup.
-
-        See the docstring for addCleanup for more information.
-
-        :return: None if all cleanups ran without error, the most recently
-            raised exception from the cleanups otherwise.
-        """
-        last_exception = None
-        while self._cleanups:
-            function, arguments, keywordArguments = self._cleanups.pop()
-            try:
-                function(*arguments, **keywordArguments)
-            except KeyboardInterrupt:
-                raise
-            except:
-                exceptions = [sys.exc_info()]
-                while exceptions:
-                    try:
-                        exc_info = exceptions.pop()
-                        if exc_info[0] is MultipleExceptions:
-                            exceptions.extend(exc_info[1].args)
-                            continue
-                        self._report_traceback(exc_info)
-                        last_exception = exc_info[1]
-                    finally:
-                        del exc_info
-        return last_exception
 
     def addCleanup(self, function, *arguments, **keywordArguments):
         """Add a cleanup function to be called after tearDown.

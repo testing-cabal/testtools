@@ -32,11 +32,11 @@ from testtools.matchers import (
     Matcher,
     )
 from testtools.runtest import (
+    MultipleExceptions,
     RunTest,
     )
 from testtools.testcase import (
     ErrorHolder,
-    MultipleExceptions,
     PlaceHolder,
     TestCase,
     clone_test_with_new_id,

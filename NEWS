@@ -10,6 +10,10 @@ Changes
 * addUnexpectedSuccess is translated to addFailure for test results that don't
   know about addUnexpectedSuccess.  (Jonathan Lange, #654474)
 
+* Responsibility for running test cleanups has been moved to ``RunTest``.
+  This change does not affect public APIs and can be safely ignored by test
+  authors.  (Jonathan Lange, #662647)
+
 Improvements
 ------------
 

@@ -1,14 +1,22 @@
-# Copyright (c) 2009 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2009-2010 Jonathan M. Lange. See LICENSE for details.
 
 """Individual test case execution."""
 
 __all__ = [
+    'MultipleExceptions',
     'RunTest',
     ]
 
 import sys
 
 from testtools.testresult import ExtendedToOriginalDecorator
+
+
+class MultipleExceptions(Exception):
+    """Represents many exceptions raised from some operation.
+
+    :ivar args: The sys.exc_info() tuples for each exception.
+    """
 
 
 class RunTest(object):
@@ -107,7 +115,7 @@ class RunTest(object):
         if self.exception_caught == self._run_user(self.case._run_setup,
             self.result):
             # Don't run the test method if we failed getting here.
-            e = self.case._runCleanups(self.result)
+            e = self._run_cleanups(self.result)
             if e is not None:
                 self._exceptions.append(e)
             return
@@ -125,7 +133,7 @@ class RunTest(object):
                     failed = True
             finally:
                 try:
-                    e = self._run_user(self.case._runCleanups, self.result)
+                    e = self._run_user(self._run_cleanups, self.result)
                     if e is not None:
                         self._exceptions.append(e)
                         failed = True
@@ -145,6 +153,35 @@ class RunTest(object):
             raise
         except:
             return self._got_user_exception(sys.exc_info())
+
+    def _run_cleanups(self, result):
+        """Run the cleanups that have been added with addCleanup.
+
+        See the docstring for addCleanup for more information.
+
+        :return: None if all cleanups ran without error, the most recently
+            raised exception from the cleanups otherwise.
+        """
+        last_exception = None
+        while self.case._cleanups:
+            function, arguments, keywordArguments = self.case._cleanups.pop()
+            try:
+                function(*arguments, **keywordArguments)
+            except KeyboardInterrupt:
+                raise
+            except:
+                exceptions = [sys.exc_info()]
+                while exceptions:
+                    try:
+                        exc_info = exceptions.pop()
+                        if exc_info[0] is MultipleExceptions:
+                            exceptions.extend(exc_info[1].args)
+                            continue
+                        self.case._report_traceback(exc_info)
+                        last_exception = exc_info[1]
+                    finally:
+                        del exc_info
+        return last_exception
 
     def _got_user_exception(self, exc_info, tb_label='traceback'):
         """Called when user code raises an exception.
