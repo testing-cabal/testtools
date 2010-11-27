@@ -179,6 +179,22 @@ class DoesNotStartWith(Mismatch):
             self.matchee, self.expected)
 
 
+class DoesNotEndWith(Mismatch):
+
+    def __init__(self, matchee, expected):
+        """Create a DoesNotEndWith Mismatch.
+
+        :param matchee: the string that did not match.
+        :param expected: the string that `matchee` was expected to end with.
+        """
+        self.matchee = matchee
+        self.expected = expected
+
+    def describe(self):
+        return "'%s' does not end with '%s'." % (
+            self.matchee, self.expected)
+
+
 class _BinaryComparison(object):
     """Matcher that compares an object to another object."""
 
@@ -381,6 +397,25 @@ class StartsWith(Matcher):
     def match(self, matchee):
         if not matchee.startswith(self.expected):
             return DoesNotStartWith(matchee, self.expected)
+        return None
+
+
+class EndsWith(Matcher):
+    """Checks whether one string starts with another."""
+
+    def __init__(self, expected):
+        """Create a EndsWith Matcher.
+
+        :param expected: the string that matchees should end with.
+        """
+        self.expected = expected
+
+    def __str__(self):
+        return "Ends with '%s'." % self.expected
+
+    def match(self, matchee):
+        if not matchee.endswith(self.expected):
+            return DoesNotEndWith(matchee, self.expected)
         return None
 
 
