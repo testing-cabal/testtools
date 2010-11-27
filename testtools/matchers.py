@@ -363,7 +363,7 @@ class MatchesException(Matcher):
     def __str__(self):
         if self._is_instance:
             return "MatchesException(%s)" % _error_repr(self.expected)
-        return "MatchesException(%s)" % self.expected.__name__
+        return "MatchesException(%s)" % repr(self.expected)
 
 
 class StartsWith(Matcher):

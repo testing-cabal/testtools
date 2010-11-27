@@ -200,7 +200,7 @@ class TestMatchesExceptionTypeInterface(TestCase, TestMatchersInterface):
     matches_mismatches = [error_base_foo]
 
     str_examples = [
-        ("MatchesException(Exception)",
+        ("MatchesException(%r)" % Exception,
          MatchesException(Exception))
         ]
     describe_examples = [
