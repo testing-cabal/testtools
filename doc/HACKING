@@ -5,13 +5,12 @@ Notes for contributing to testtools
 Coding style
 ------------
 
-In general, follow PEP 8 <http://www.python.org/dev/peps/pep-0008/>.
+In general, follow PEP 8 <http://www.python.org/dev/peps/pep-0008/> except
+where consistency with the standard library's ``unittest`` module would
+suggest otherwise.
 
-For consistency with the standard library's ``unittest`` module, method names
-are generally ``camelCase``.
-
-testtools supports Python 2.4 and later, so avoid any 2.5-only features like
-the ``with`` statement.
+testtools supports Python 2.4 and later, including Python 3, so avoid any
+2.5-only features like the ``with`` statement.
 
 
 Copyright assignment
@@ -45,7 +44,7 @@ example of well-tested Python code!
 
 Take particular care to make sure the *intent* of each test is clear.
 
-You can run tests with ``make check``, or by running ``./run-tests`` directly.
+You can run tests with ``make check``.
 
 
 Source layout
