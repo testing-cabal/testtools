@@ -14,6 +14,7 @@ def test_suite():
         test_matchers,
         test_monkey,
         test_runtest,
+        test_spinner,
         test_testtools,
         test_testresult,
         test_testsuite,
@@ -27,6 +28,7 @@ def test_suite():
         test_matchers,
         test_monkey,
         test_runtest,
+        test_spinner,
         test_testresult,
         test_testsuite,
         test_testtools,
@@ -35,12 +37,11 @@ def test_suite():
         # Tests that rely on Twisted.
         from testtools.tests import (
             test_deferredruntest,
-            test_spinner,
             )
     except ImportError:
         pass
     else:
-        modules.extend([test_deferredruntest, test_spinner])
+        modules.extend([test_deferredruntest])
     try:
         # Tests that rely on 'fixtures'.
         from testtools.tests import (
