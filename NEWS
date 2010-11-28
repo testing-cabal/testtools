@@ -22,6 +22,9 @@ Improvements
 * Fix the runTest parameter of TestCase to actually work, rather than raising
   a TypeError.  (Jonathan Lange, #657760)
 
+* New matcher ``EndsWith`` added to complement the existing ``StartsWith``
+  matcher.  (Jonathan Lange, #669165)
+
 * Non-release snapshots of testtools will now work with buildout.
   (Jonathan Lange, #613734)
 

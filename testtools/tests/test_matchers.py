@@ -13,7 +13,9 @@ from testtools.matchers import (
     Annotate,
     Equals,
     DocTestMatches,
+    DoesNotEndWith,
     DoesNotStartWith,
+    EndsWith,
     KeysEqual,
     Is,
     LessThan,
@@ -407,6 +409,38 @@ class StartsWithTests(TestCase):
 
     def test_mismatch_sets_expected(self):
         matcher = StartsWith("bar")
+        mismatch = matcher.match("foo")
+        self.assertEqual("bar", mismatch.expected)
+
+
+class DoesNotEndWithTests(TestCase):
+
+    def test_describe(self):
+        mismatch = DoesNotEndWith("fo", "bo")
+        self.assertEqual("'fo' does not end with 'bo'.", mismatch.describe())
+
+
+class EndsWithTests(TestCase):
+
+    def test_str(self):
+        matcher = EndsWith("bar")
+        self.assertEqual("Ends with 'bar'.", str(matcher))
+
+    def test_match(self):
+        matcher = EndsWith("arf")
+        self.assertIs(None, matcher.match("barf"))
+
+    def test_mismatch_returns_does_not_end_with(self):
+        matcher = EndsWith("bar")
+        self.assertIsInstance(matcher.match("foo"), DoesNotEndWith)
+
+    def test_mismatch_sets_matchee(self):
+        matcher = EndsWith("bar")
+        mismatch = matcher.match("foo")
+        self.assertEqual("foo", mismatch.matchee)
+
+    def test_mismatch_sets_expected(self):
+        matcher = EndsWith("bar")
         mismatch = matcher.match("foo")
         self.assertEqual("bar", mismatch.expected)
 
