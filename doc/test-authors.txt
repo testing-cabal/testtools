@@ -72,6 +72,23 @@ of them will happily run testtools tests.  In particular:
  * unittest2_
  * zope.testrunner_ (aka zope.testing)
 
+
+Test discovery
+~~~~~~~~~~~~~~
+
+XXX - explain *why* anyone would care about this.
+
+testtools includes a backported version of the Python 2.7 glue for using the
+``discover`` test discovery module. If you have Python 2.7, 3.1, something
+even newer, or have installed the ``discover`` module, then you can invoke
+discovery::
+
+    python -m testtools.run discover [path]
+
+For more information see the Python 2.7 unittest documentation, or::
+
+    python -m testtools.run --help
+
 From now on, we'll assume that you know how to run your tests.
 
 
@@ -506,31 +523,300 @@ in the Matcher itself like this::
 Details
 =======
 
-XXX - add stuff here about addDetail and addOnException.  Refer to subunit and
-to the test framework document that describes getDetails.
+As we may have mentioned once or twice already, one of the great benefits of
+automated tests is that they help find, isolate and debug errors in your
+system.
 
-XXX - should we talk about content?
+Frequently however, the information provided by a mere assertion failure is
+not enough.  It's often useful to have other information: the contents of log
+files; what queries were run; benchmark timing information; what state certain
+subsystem components are in and so forth.
+
+testtools calls all of these things "details" and provides a single, powerful
+mechanism for including this information in your test run.
+
+Here's an example of how to add them::
+
+  from testtools import TestCase
+  from testtools.content import text_content
+
+  class TestSomething(TestCase):
+
+      def test_thingy(self):
+          self.addDetail('arbitrary-color-name', text_content("blue"))
+          1 / 0 # Gratuitous error!
+
+A detail an arbitrary piece of content given a name that's unique within the
+test.  Here the name is ``arbitrary-color-name`` and the content is
+``text_content("blue")``.  The name can be any text string, and the content
+can be any ``testtools.content.Content`` object.
+
+When the test runs, testtools will show you something like this::
+
+  ======================================================================
+  ERROR: exampletest.TestSomething.test_thingy
+  ----------------------------------------------------------------------
+  Text attachment: arbitrary-color-name
+  ------------
+  blue
+  ------------
+  Text attachment: traceback
+  ------------
+  Traceback (most recent call last):
+    ...
+    File "exampletest.py", line 8, in test_thingy
+      1 / 0 # Gratuitous error!
+  ZeroDivisionError: integer division or modulo by zero
+  ------------
+  Ran 1 test in 0.030s
+
+As you can see, the detail is included as a "Text attachment", here saying
+that our arbitrary-color-name is "blue".
 
 
-The rest
-========
+Content
+-------
 
-TestCase.addCleanup
+For the actual content of details, testtools uses its own MIME-based Content
+object.  This allows you to attach any information that you could possibly
+conceive of to a test, and allows testtools to use or serialize that
+information.
+
+The basic ``testtools.content.Content`` object is constructed from a
+``testtools.content.ContentType`` and a nullary callable that must return an
+iterator of chunks of bytes that the content is made from.
+
+So, to make a Content object that is just a simple string of text, you can
+do::
+
+  from testtools.content import Content
+  from testtools.content_type import ContentType
+
+  text = Content(ContentType('text', 'plain'), lambda: ["some text"])
+
+Because adding small bits of text content is very common, there's also a
+convenience method::
+
+  text = text_content("some text")
+
+To make content out of an image stored on disk, you could do something like::
+
+  image = Content(ContentType('image', 'png'), lambda: open('foo.png').read())
+
+The ``lambda`` helps make sure that the file is opened and the actual bytes
+read only when they are needed – by default, when the test is finished.  This
+means that tests can construct and add Content objects freely without worrying
+too much about how they affect run time.
+
+
+A realistic example
 -------------------
 
-addCleanup is a robust way to arrange for a cleanup function to be called
-before tearDown.  This is a powerful and simple alternative to putting cleanup
-logic in a try/finally block or tearDown method.  e.g.::
+A very common use of details is to add a log file to failing tests.  Say your
+project has a server represented by a class ``SomeServer`` that you can start
+up and shut down in tests, but runs in another process.  You want to test
+interaction with that server, and whenever the interaction fails, you want to
+see the client-side error *and* the logs from the server-side.  Here's how you
+might do it::
 
-    def test_foo(self):
-        foo.lock()
-        self.addCleanup(foo.unlock)
-        ...
+  from testtools import TestCase
+  from testtools.content import Content
+  from testtools.content_type import UTF8_TEXT
+
+  from myproject import SomeServer
+
+  class SomeTestCase(TestCase):
+
+      def setUp(self):
+          super(SomeTestCase, self).setUp()
+          self.server = SomeServer()
+          self.server.start_up()
+          self.addCleanup(self.server.shut_down)
+          self.addCleanup(self.attach_log_file)
+
+      def attach_log_file(self):
+          self.addDetail(
+              'log-file',
+              Content(UTF8_TEXT,
+                      lambda: open(self.server.logfile, 'r').readlines()))
+
+      def test_a_thing(self):
+          self.assertEqual("cool", self.server.temperature)
+
+This test will attach the log file of ``SomeServer`` to each test that is
+run.  testtools will only display the log file for failing tests, so it's not
+such a big deal.
+
+Note the callable passed to ``Content`` reads the log file line-by-line.  This
+is something of an optimization.  If we naively returned all of the log file
+as one bytestring, ``Content`` would treat that as a list of byte chunks.
+
+If the act of adding at detail is expensive, you might want to use
+addOnException_ so that you only do it when a test actually raises an
+exception.
+
+
+Controlling test execution
+==========================
+
+addCleanup
+----------
+
+``TestCase.addCleanup`` is a robust way to arrange for a clean up function to
+be called before ``tearDown``.  This is a powerful and simple alternative to
+putting clean up logic in a try/finally block or ``tearDown`` method.  For
+example::
+
+  def test_foo(self):
+      foo.lock()
+      self.addCleanup(foo.unlock)
+      ...
+
+This is particularly useful if you have some sort of factory in your test::
+
+  def make_locked_foo(self):
+      foo = Foo()
+      foo.lock()
+      self.addCleanup(foo.unlock)
+      return foo
+
+  def test_frotz_a_foo(self):
+      foo = self.make_locked_foo()
+      foo.frotz()
+      self.assertEqual(foo.frotz_count, 1)
+
+Any extra arguments or keyword arguments passed to ``addCleanup`` are passed
+to the callable at cleanup time.
 
 Cleanups can also report multiple errors, if appropriate by wrapping them in
-a testtools.MultipleExceptions object::
+a ``testtools.MultipleExceptions`` object::
 
-    raise MultipleExceptions(exc_info1, exc_info2)
+  raise MultipleExceptions(exc_info1, exc_info2)
+
+
+Fixtures
+--------
+
+Tests often depend on a system being set up in a certain way, or having
+certain resources available to them.  Perhaps a test needs a connection to the
+database or access to a running external server.
+
+One common way of doing this is to do::
+
+  class SomeTest(TestCase):
+      def setUp(self):
+          super(SomeTest, self).setUp()
+          self.server = Server()
+          self.server.setUp()
+          self.addCleanup(self.server.tearDown)
+
+testtools provides a more convenient, declarative way to do the same thing::
+
+  class SomeTest(TestCase):
+      def setUp(self):
+          super(SomeTest, self).setUp()
+          self.server = self.useFixture(Server())
+
+``useFixture(fixture)`` calls ``setUp`` on the fixture, schedules a clean up
+to clean it up, and schedules a clean up to attach all details_ held by the
+fixture to the test case.  The fixture object must meet the
+``fixtures.Fixture`` protocol (version 0.3.4 or newer, see fixtures_).
+
+If you have anything beyond the most simple test set up, we recommend that
+you put this set up into a ``Fixture`` class.  Once there, the fixture can be
+easily re-used by other tests and can be combined with other fixtures to make
+more complex resources.
+
+
+Skipping tests
+--------------
+
+Many reasons exist to skip a test: a dependency might be missing; a test might
+be too expensive and thus should not berun while on battery power; or perhaps
+the test is testing an incomplete feature.
+
+``TestCase.skipTest`` is a simple way to have a test stop running and be
+reported as a skipped test, rather than a success, error or failure.  For
+example::
+
+  def test_make_symlink(self):
+      symlink = getattr(os, 'symlink', None)
+      if symlink is None:
+          self.skipTest("No symlink support")
+      symlink(whatever, something_else)
+
+Using ``skipTest`` means that you can make decisions about what tests to run
+as late as possible, and close to the actual tests.  Without it, you might be
+forced to use convoluted logic during test loading, which is a bit of a mess.
+
+Legacy skip support
+~~~~~~~~~~~~~~~~~~~
+
+If you are using a this feature when running your test suite with a legacy
+``TestResult`` object that is missing the ``addSkip`` method, then the
+``addError`` method will be invoked instead.  If you are using a test result
+from testtools, you do not have to worry about this.
+
+In older versions of testtools, ``skipTest`` was known as ``skip``. Since
+Python 2.7 added ``skipTest`` support, the ``skip`` name is now deprecated.
+No warning is emitted yet – some time in the future we may do so.
+
+
+Twisted support
+---------------
+
+testtools provides *highly experimental* support for running Twisted tests –
+tests that return a Deferred_ and rely on the Twisted reactor.  You should not
+use this feature right now.  We reserve the right to change the API and
+behaviour without telling you first.
+
+However, if you are going to, here's how you do it::
+
+  from testtools import TestCase
+  from testtools.deferredruntest import AsynchronousDeferredRunTest
+
+  class MyTwistedTests(TestCase):
+
+      run_tests_with = AsynchronousDeferredRunTest
+
+      def test_foo(self):
+          # ...
+          return d
+
+In particular, note that you do *not* have to use a special base ``TestCase``
+in order to run Twisted tests.
+
+You can also run individual tests within a test case class using the Twisted
+test runner::
+
+   class MyTestsSomeOfWhichAreTwisted(TestCase):
+
+       def test_normal(self):
+           pass
+
+       @run_test_with(AsynchronousDeferredRunTest)
+       def test_twisted(self):
+           # ...
+           return d
+
+Here are some tips for converting your Trial tests into testtools tests.
+
+ * Use the ``AsynchronousDeferredRunTest`` runner
+ * Make sure to upcall to ``setUp`` and ``tearDown``
+ * Don't use ``setUpClass`` or ``tearDownClass``
+ * Don't expect setting .todo, .timeout or .skip attributes to do anything
+ * ``flushLoggedErrors`` is ``testtools.deferredruntest.flush_logged_errors``
+ * ``assertFailure`` is ``testtools.deferredruntest.assert_fails_with``
+ * Trial spins the reactor a couple of times before cleaning it up,
+   ``AsynchronousDeferredRunTest`` does not.  If you rely on this behavior, use
+   ``AsynchronousDeferredRunTestForBrokenTwisted``.
+
+
+Test helpers
+============
+
+testtools comes with a few little things that make it a little bit easier to
+write tests.
 
 
 TestCase.patch
@@ -539,84 +825,77 @@ TestCase.patch
 ``patch`` is a convenient way to monkey-patch a Python object for the duration
 of your test.  It's especially useful for testing legacy code.  e.g.::
 
-    def test_foo(self):
-        my_stream = StringIO()
-        self.patch(sys, 'stderr', my_stream)
-        run_some_code_that_prints_to_stderr()
-        self.assertEqual('', my_stream.getvalue())
+  def test_foo(self):
+      my_stream = StringIO()
+      self.patch(sys, 'stderr', my_stream)
+      run_some_code_that_prints_to_stderr()
+      self.assertEqual('', my_stream.getvalue())
 
-The call to ``patch`` above masks sys.stderr with 'my_stream' so that anything
-printed to stderr will be captured in a StringIO variable that can be actually
-tested. Once the test is done, the real sys.stderr is restored to its rightful
-place.
-
-
-TestCase.skipTest
------------------
-
-``skipTest`` is a simple way to have a test stop running and be reported as a
-skipped test, rather than a success/error/failure. This is an alternative to
-convoluted logic during test loading, permitting later and more localized
-decisions about the appropriateness of running a test. Many reasons exist to
-skip a test - for instance when a dependency is missing, or if the test is
-expensive and should not be run while on laptop battery power, or if the test
-is testing an incomplete feature (this is sometimes called a TODO). Using this
-feature when running your test suite with a TestResult object that is missing
-the ``addSkip`` method will result in the ``addError`` method being invoked
-instead. ``skipTest`` was previously known as ``skip`` but as Python 2.7 adds
-``skipTest`` support, the ``skip`` name is now deprecated (but no warning
-is emitted yet - some time in the future we may do so).
-
-TestCase.useFixture
--------------------
-
-``useFixture(fixture)`` calls setUp on the fixture, schedules a cleanup to
-clean it up, and schedules a cleanup to attach all details held by the
-fixture to the details dict of the test case. The fixture object should meet
-the ``fixtures.Fixture`` protocol (version 0.3.4 or newer). This is useful
-for moving code out of setUp and tearDown methods and into composable side
-classes.
+The call to ``patch`` above masks ``sys.stderr`` with ``my_stream`` so that
+anything printed to stderr will be captured in a StringIO variable that can be
+actually tested. Once the test is done, the real ``sys.stderr`` is restored to
+its rightful place.
 
 
 Creation methods
 ----------------
 
-testtools.TestCase implements creation methods called ``getUniqueString`` and
-``getUniqueInteger``.  See pages 419-423 of *xUnit Test Patterns* by Meszaros
-for a detailed discussion of creation methods.
+Often when writing unit tests, you want to create an object that is a
+completely normal instance of its type.  You don't want there to be anything
+special about its properties, because you are testing generic behaviour rather
+than specific conditions.
+
+A lot of the time, test authors do this by making up silly strings and numbers
+and passing them to constructors (e.g. 42, 'foo', "bar" etc), and that's
+fine.  However, sometimes it's useful to be able to create arbitrary objects
+at will, without having to make up silly sample data.
+
+To help with this, testtools.TestCase implements creation methods called
+``getUniqueString`` and ``getUniqueInteger``.  They return strings and
+integers that are unique within the context of the test that can be used to
+assemble more complex objects.  Here's a basic example where
+``getUniqueString`` is used instead of saying "foo" or "bar" or whatever::
+
+  class SomeTest(TestCase):
+
+      def test_full_name(self):
+          first_name = self.getUniqueString()
+          last_name = self.getUniqueString()
+          p = Person(first_name, last_name)
+          self.assertEqual(p.full_name, "%s %s" % (first_name, last_name))
 
 
-Test discovery
---------------
+And here's how it could be used to make a complicated test::
 
-testtools includes a backported version of the Python 2.7 glue for using the
-discover test discovery module. If you either have Python 2.7/3.1 or newer, or
-install the 'discover' module, then you can invoke discovery::
+  class TestCoupleLogic(TestCase):
 
-    python -m testtools.run discover [path]
+      def make_arbitrary_person(self):
+          return Person(self.getUniqueString(), self.getUniqueString())
 
-For more information see the Python 2.7 unittest documentation, or::
+      def test_get_invitation(self):
+          a = self.make_arbitrary_person()
+          b = self.make_arbitrary_person()
+          couple = Couple(a, b)
+          event_name = self.getUniqueString()
+          invitation = couple.get_invitation(event_name)
+          self.assertEqual(
+              invitation,
+              "We invite %s and %s to %s" % (
+                  a.full_name, b.full_name, event_name))
 
-    python -m testtools.run --help
+Essentially, creation methods like these are a way of reducing the number of
+assumptions in your tests and communicating to test readers that the exact
+details of certain variables don't actually matter.
 
-
-Twisted support
----------------
-
-Support for running Twisted tests is very experimental right now.  You
-shouldn't really do it.  However, if you are going to, here are some tips for
-converting your Trial tests into testtools tests.
-
- * Use the AsynchronousDeferredRunTest runner
- * Make sure to upcall to setUp and tearDown
- * Don't use setUpClass or tearDownClass
- * Don't expect setting .todo, .timeout or .skip attributes to do anything
- * flushLoggedErrors is not there for you.  Sorry.
- * assertFailure is not there for you.  Even more sorry.
+See pages 419-423 of *xUnit Test Patterns*_ by Gerard Meszaros for a detailed
+discussion of creation methods.
 
 
 General helpers
----------------
+===============
+
+Conditional imports
+-------------------
 
 Lots of the time we would like to conditionally import modules.  testtools
 needs to do this itself, and graciously extends the ability to its users.
@@ -650,3 +929,5 @@ You can do::
 .. _nose: http://somethingaboutorange.com/mrl/projects/nose/
 .. _unittest2: http://pypi.python.org/pypi/unittest2
 .. _zope.testrunner: http://pypi.python.org/pypi/zope.testrunner/
+.. _xUnit test patterns: http://xunitpatterns.com/
+.. _fixtures: http://pypi.python.org/pypi/fixtures
