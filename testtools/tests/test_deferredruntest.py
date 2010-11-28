@@ -12,12 +12,7 @@ from testtools import (
 from testtools.content import (
     text_content,
     )
-from testtools.deferredruntest import (
-    assert_fails_with,
-    AsynchronousDeferredRunTest,
-    flush_logged_errors,
-    SynchronousDeferredRunTest,
-    )
+from testtools.helpers import try_import
 from testtools.tests.helpers import ExtendedTestResult
 from testtools.matchers import (
     Equals,
@@ -26,9 +21,19 @@ from testtools.matchers import (
     Raises,
     )
 from testtools.runtest import RunTest
+from testtools.tests.test_spinner import NeedsTwistedTestCase
 
-from twisted.internet import defer
-from twisted.python import failure, log
+assert_fails_with = try_import('testtools.deferredruntest.assert_fails_with')
+AsynchronousDeferredRunTest = try_import(
+    'testtools.deferredruntest.AsynchronousDeferredRunTest')
+flush_logged_errors = try_import(
+    'testtools.deferredruntest.flush_logged_errors')
+SynchronousDeferredRunTest = try_import(
+    'testtools.deferredruntest.SynchronousDeferredRunTest')
+
+defer = try_import('twisted.internet.defer')
+failure = try_import('twisted.python.failure')
+log = try_import('twisted.python.log')
 
 
 class X(object):
@@ -77,7 +82,7 @@ class X(object):
             self.calls.append('test')
             self.addCleanup(lambda: 1/0)
 
-    class TestIntegration(TestCase):
+    class TestIntegration(NeedsTwistedTestCase):
 
         def assertResultsMatch(self, test, result):
             events = list(result._events)
@@ -104,9 +109,9 @@ def make_integration_tests():
     from unittest import TestSuite
     from testtools import clone_test_with_new_id
     runners = [
-        RunTest,
-        SynchronousDeferredRunTest,
-        AsynchronousDeferredRunTest,
+        ('RunTest', RunTest),
+        ('SynchronousDeferredRunTest', SynchronousDeferredRunTest),
+        ('AsynchronousDeferredRunTest', AsynchronousDeferredRunTest),
         ]
 
     tests = [
@@ -118,12 +123,12 @@ def make_integration_tests():
         ]
     base_test = X.TestIntegration('test_runner')
     integration_tests = []
-    for runner in runners:
+    for runner_name, runner in runners:
         for test in tests:
             new_test = clone_test_with_new_id(
                 base_test, '%s(%s, %s)' % (
                     base_test.id(),
-                    runner.__name__,
+                    runner_name,
                     test.__name__))
             new_test.test_factory = test
             new_test.runner = runner
@@ -131,7 +136,7 @@ def make_integration_tests():
     return TestSuite(integration_tests)
 
 
-class TestSynchronousDeferredRunTest(TestCase):
+class TestSynchronousDeferredRunTest(NeedsTwistedTestCase):
 
     def make_result(self):
         return ExtendedTestResult()
@@ -185,7 +190,7 @@ class TestSynchronousDeferredRunTest(TestCase):
                 ('stopTest', test)]))
 
 
-class TestAsynchronousDeferredRunTest(TestCase):
+class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
 
     def make_reactor(self):
         from twisted.internet import reactor
@@ -602,10 +607,11 @@ class TestAsynchronousDeferredRunTest(TestCase):
         self.assertThat(error, KeysEqual('traceback', 'twisted-log'))
 
 
-class TestAssertFailsWith(TestCase):
+class TestAssertFailsWith(NeedsTwistedTestCase):
     """Tests for `assert_fails_with`."""
 
-    run_tests_with = SynchronousDeferredRunTest
+    if SynchronousDeferredRunTest is not None:
+        run_tests_with = SynchronousDeferredRunTest
 
     def test_assert_fails_with_success(self):
         # assert_fails_with fails the test if it's given a Deferred that
