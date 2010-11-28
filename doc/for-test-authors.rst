@@ -8,13 +8,16 @@ use testtools to do so, this is the manual for you.
 We assume that you already know Python and that you know something about
 automated testing already.
 
+If you are a test author of an unusually large or unusually unusual test
+suite, you might be interested in :doc:`for-framework-folk`.
+
 
 Introduction
 ============
 
 testtools is a set of extensions to Python's standard unittest module.
 Writing tests with testtools is very much like writing tests with standard
-Python, or with Twisted's "trial", or nose, except a little bit easier and
+Python, or with Twisted's "trial_", or nose_, except a little bit easier and
 more enjoyable.
 
 Below, we'll try to give some examples of how to use testtools in its most
@@ -66,11 +69,11 @@ As your testing needs grow and evolve, you will probably want to use a more
 sophisticated test runner.  There are many of these for Python, and almost all
 of them will happily run testtools tests.  In particular:
 
- * testrepository_
- * Trial_
- * nose_
- * unittest2_
- * zope.testrunner_ (aka zope.testing)
+* testrepository_
+* Trial_
+* nose_
+* unittest2_
+* `zope.testrunner`_ (aka zope.testing)
 
 
 Test discovery
@@ -660,6 +663,8 @@ exception.
 Controlling test execution
 ==========================
 
+.. _addCleanup:
+
 addCleanup
 ----------
 
@@ -827,15 +832,15 @@ test runner::
 
 Here are some tips for converting your Trial tests into testtools tests.
 
- * Use the ``AsynchronousDeferredRunTest`` runner
- * Make sure to upcall to ``setUp`` and ``tearDown``
- * Don't use ``setUpClass`` or ``tearDownClass``
- * Don't expect setting .todo, .timeout or .skip attributes to do anything
- * ``flushLoggedErrors`` is ``testtools.deferredruntest.flush_logged_errors``
- * ``assertFailure`` is ``testtools.deferredruntest.assert_fails_with``
- * Trial spins the reactor a couple of times before cleaning it up,
-   ``AsynchronousDeferredRunTest`` does not.  If you rely on this behavior, use
-   ``AsynchronousDeferredRunTestForBrokenTwisted``.
+* Use the ``AsynchronousDeferredRunTest`` runner
+* Make sure to upcall to ``setUp`` and ``tearDown``
+* Don't use ``setUpClass`` or ``tearDownClass``
+* Don't expect setting .todo, .timeout or .skip attributes to do anything
+* ``flushLoggedErrors`` is ``testtools.deferredruntest.flush_logged_errors``
+* ``assertFailure`` is ``testtools.deferredruntest.assert_fails_with``
+* Trial spins the reactor a couple of times before cleaning it up,
+  ``AsynchronousDeferredRunTest`` does not.  If you rely on this behavior, use
+  ``AsynchronousDeferredRunTestForBrokenTwisted``.
 
 
 Test helpers
@@ -928,26 +933,26 @@ needs to do this itself, and graciously extends the ability to its users.
 
 Instead of::
 
-    try:
-        from twisted.internet import defer
-    except ImportError:
-        defer = None
+  try:
+      from twisted.internet import defer
+  except ImportError:
+      defer = None
 
 You can do::
 
-    defer = try_import('twisted.internet.defer')
+   defer = try_import('twisted.internet.defer')
 
 
 Instead of::
 
-    try:
-        from StringIO import StringIO
-    except ImportError:
-        from io import StringIO
+  try:
+      from StringIO import StringIO
+  except ImportError:
+      from io import StringIO
 
 You can do::
 
-    StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
+  StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
 
 
 .. _testrepository: https://launchpad.net/testrepository

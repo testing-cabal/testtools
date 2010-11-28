@@ -3,13 +3,23 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to testtools's documentation!
-=====================================
+testtools: tasteful testing for Python
+======================================
+
+testtools is a set of extensions to the Python standard library's unit testing
+framework. These extensions have been derived from many years of experience
+with unit testing in Python and come from many different sources. testtools
+also ports recent unittest changes all the way back to Python 2.4.
+
 
 Contents:
 
 .. toctree::
    :maxdepth: 2
+
+   for-test-authors
+   for-framework-folk
+   hacking
 
 Indices and tables
 ==================
