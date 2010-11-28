@@ -1,6 +1,6 @@
-=======================
-Manual for test authors
-=======================
+==========================
+testtools for test authors
+==========================
 
 If you are writing tests for a Python project and you (rather wisely) want to
 use testtools to do so, this is the manual for you.
@@ -46,7 +46,7 @@ Here's what a basic testtools unit tests look like::
 
 Here you have a class that inherits from ``testtools.TestCase`` and bundles
 together a bunch of related tests.  The tests themselves are methods on that
-class that begin with 'test_'.
+class that begin with ``test_``.
 
 Running your tests
 ------------------
@@ -108,7 +108,7 @@ assertions that you will almost certainly find useful.
 Improved assertRaises
 ---------------------
 
-TestCase.assertRaises returns the caught exception.  This is useful for
+``TestCase.assertRaises`` returns the caught exception.  This is useful for
 asserting more things about the exception than just the type::
 
   def test_square_bad_input(self):
@@ -118,8 +118,8 @@ asserting more things about the exception than just the type::
       self.assertEqual("orange", e.bad_value)
       self.assertEqual("Cannot square 'orange', not a number.", str(e))
 
-Note that this is incompatible with the assertRaises in unittest2 / Python2.7,
-and that we have no immediate plans it to be so.
+Note that this is incompatible with the ``assertRaises`` in unittest2 and
+Python2.7, and that we have no immediate plans it to be so.
 
 
 assertIn, assertNotIn
@@ -140,7 +140,7 @@ assertIs, assertIsNot
 ---------------------
 
 These two assertions check whether values are identical to one another.  This
-is sometimes useful when you want to test something stricter than mere
+is sometimes useful when you want to test something more strict than mere
 equality.  For example::
 
   def test_assert_is_example(self):
@@ -156,20 +156,18 @@ assertIsInstance
 ----------------
 
 As much as we love duck-typing and polymorphism, sometimes you need to check
-whether or not a value is of a given type.  This method does that.
+whether or not a value is of a given type.  This method does that.  For
+example::
 
   def test_assert_is_instance_example(self):
       now = datetime.now()
       self.assertIsInstance(now, datetime)
 
-Note that there is no 'assertIsNotInstance' in testtools currently.
+Note that there is no ``assertIsNotInstance`` in testtools currently.
 
 
 Matchers
 ========
-
-What are they?
---------------
 
 The built-in assertion methods are very useful, they are the bread and butter
 of writing tests.  However, soon enough you will probably want to write your
@@ -181,8 +179,7 @@ file).
 
 When you are in such situations, you could either make a base class for your
 project that inherits from ``testtools.TestCase`` and make sure that all of
-your tests derive from that, *or* you could use testtools rather natty
-``Matcher`` system.
+your tests derive from that, *or* you could use testtools ``Matcher`` system.
 
 
 Using Matchers
@@ -199,9 +196,10 @@ Here's a really basic example using stock matchers found in testtools::
          self.assertThat(result, Equals(49))
 
 The line ``self.assertThat(result, Equals(49))`` is equivalent to
-``self.assertEqual(result, 49)``.  The difference is that ``assertThat`` is a
-more general method that takes some kind of observed value (in this case,
-``result``) and any matcher object (here, ``Equals(49)``).
+``self.assertEqual(result, 49)`` and means "assert that ``result`` equals 49".
+The difference is that ``assertThat`` is a more general method that takes some
+kind of observed value (in this case, ``result``) and any matcher object
+(here, ``Equals(49)``).
 
 The matcher object could be absolutely anything that implements the Matcher
 protocol.  This means that you can make more complex matchers by combining
@@ -243,8 +241,8 @@ Matches if two items are identical.  For example::
       self.assertThat(foo, Is(foo))
 
 
-raises
-~~~~~~
+The raises helper
+~~~~~~~~~~~~~~~~~
 
 Matches if a callable raises a particular type of exception.  For example::
 
@@ -270,6 +268,7 @@ for making assertions about large chunks of text.  For example::
           DocTestMatches("Colorless ... ideas", doctest.ELLIPSIS))
 
 We highly recommend using the following flags::
+
   doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE | doctest.REPORT_NDIFF
 
 
@@ -308,7 +307,7 @@ example::
       self.assertThat(exc_info, MatchesException(RuntimeError))
       self.assertThat(exc_info, MatchesException(RuntimeError('bar'))
 
-Most of the time, you will want to uses raises_ instead.
+Most of the time, you will want to uses `The raises helper`_ instead.
 
 
 NotEquals
@@ -364,7 +363,7 @@ Since the annotation is only ever displayed when there is a mismatch
 (e.g. when ``result`` does not equal 42), it's a good idea to phrase the note
 negatively, so that it describes what a mismatch actually means.
 
-As with ``Not``_, you may wish to create a custom matcher that describes a
+As with Not_, you may wish to create a custom matcher that describes a
 common operation.  For example::
 
   PoliticallyEquals = lambda x: Annotate("Death to the aristos!", Equals(x))
@@ -393,7 +392,7 @@ It's much easier to understand in Python than in English::
 At this point some people ask themselves, "why bother doing this at all? why
 not just have two separate assertions?".  It's a good question.
 
-The first reason is that when a ``MatchesAll` gets a mismatch, the error will
+The first reason is that when a ``MatchesAll`` gets a mismatch, the error will
 include information about all of the bits that mismatched.  When you have two
 separate assertions, as below::
 
@@ -438,6 +437,8 @@ Although note that this could also be written as::
 
   def test_raises_example_convenient(self):
       self.assertThat(lambda: 1/0, raises(ZeroDivisionError))
+
+See also MatchesException_ and `the raises helper`_
 
 
 Writing your own matchers
@@ -762,6 +763,31 @@ Python 2.7 added ``skipTest`` support, the ``skip`` name is now deprecated.
 No warning is emitted yet – some time in the future we may do so.
 
 
+addOnException
+--------------
+
+Sometimes, you might wish to do something only when a test fails.  Perhaps you
+need to run expensive diagnostic routines or some such.
+``TestCase.addOnException`` allows you to easily do just this.  For example::
+
+  class SomeTest(TestCase):
+      def setUp(self):
+          super(SomeTest, self).setUp()
+          self.server = self.useFixture(SomeServer())
+          self.addOnException(self.attach_server_diagnostics)
+
+      def attach_server_diagnostics(self, exc_info):
+          self.server.prep_for_diagnostics() # Expensive!
+          self.addDetail('server-diagnostics', self.server.get_diagnostics)
+
+      def test_a_thing(self):
+          self.assertEqual('cheese', 'chalk')
+
+In this example, ``attach_server_diagnostics`` will only be called when a test
+fails.  It is given the exc_info tuple of the error raised by the test, just
+in case it is needed.
+
+
 Twisted support
 ---------------
 
@@ -850,7 +876,7 @@ and passing them to constructors (e.g. 42, 'foo', "bar" etc), and that's
 fine.  However, sometimes it's useful to be able to create arbitrary objects
 at will, without having to make up silly sample data.
 
-To help with this, testtools.TestCase implements creation methods called
+To help with this, ``testtools.TestCase`` implements creation methods called
 ``getUniqueString`` and ``getUniqueInteger``.  They return strings and
 integers that are unique within the context of the test that can be used to
 assemble more complex objects.  Here's a basic example where
@@ -887,7 +913,7 @@ Essentially, creation methods like these are a way of reducing the number of
 assumptions in your tests and communicating to test readers that the exact
 details of certain variables don't actually matter.
 
-See pages 419-423 of *xUnit Test Patterns*_ by Gerard Meszaros for a detailed
+See pages 419-423 of `xUnit Test Patterns`_ by Gerard Meszaros for a detailed
 discussion of creation methods.
 
 
@@ -931,3 +957,7 @@ You can do::
 .. _zope.testrunner: http://pypi.python.org/pypi/zope.testrunner/
 .. _xUnit test patterns: http://xunitpatterns.com/
 .. _fixtures: http://pypi.python.org/pypi/fixtures
+.. _unittest: http://docs.python.org/library/unittest.html
+.. _doctest: http://docs.python.org/library/doctest.html
+.. _Deferred: http://twistedmatrix.com/documents/current/core/howto/defer.html
+
