@@ -73,7 +73,7 @@ class TestTestResultContract(TestCase):
         # addExpectedFailure does not fail the test run.
         result = self.makeResult()
         result.startTest(self)
-        result.addExpectedFailure(self, details={})
+        result.addExpectedFailure(self, an_exc_info)
         result.stopTest(self)
         self.assertTrue(result.wasSuccessful())
 
@@ -101,7 +101,7 @@ class TestTestResultContract(TestCase):
         # addFailure fails the test run.
         result = self.makeResult()
         result.startTest(self)
-        result.addFailure(self, details={})
+        result.addFailure(self, an_exc_info)
         result.stopTest(self)
         self.assertFalse(result.wasSuccessful())
 
@@ -121,7 +121,7 @@ class TestTestResultContract(TestCase):
         # addSkip does not fail the test run.
         result = self.makeResult()
         result.startTest(self)
-        result.addSkip(self, details={})
+        result.addSkip(self, _u("Skipped for some reason"))
         result.stopTest(self)
         self.assertTrue(result.wasSuccessful())
 
@@ -137,11 +137,11 @@ class TestTestResultContract(TestCase):
         result.startTest(self)
         result.addUnexpectedSuccess(self, details={})
 
-    def test_addUnexpectedSuccess_is_failure(self):
+    def test_addUnexpectedSuccess_was_successful(self):
         # addUnexpectedSuccess fails the test run.
         result = self.makeResult()
         result.startTest(self)
-        result.addUnexpectedSuccess(self, details={})
+        result.addUnexpectedSuccess(self)
         result.stopTest(self)
         self.assertFalse(result.wasSuccessful())
 
@@ -155,7 +155,7 @@ class TestTestResultContract(TestCase):
         # addSuccess does not fail the test run.
         result = self.makeResult()
         result.startTest(self)
-        result.addSuccess(self, details={})
+        result.addSuccess(self)
         result.stopTest(self)
         self.assertTrue(result.wasSuccessful())
 
@@ -190,6 +190,12 @@ class TestThreadSafeForwardingResultContract(TestTestResultContract):
         result_semaphore = threading.Semaphore(1)
         target = TestResult()
         return ThreadsafeForwardingResult(target, result_semaphore)
+
+
+class TestExtendedTestResultContract(TestTestResultContract):
+
+    def makeResult(self):
+        return ExtendedTestResult()
 
 
 class TestTestResult(TestCase):

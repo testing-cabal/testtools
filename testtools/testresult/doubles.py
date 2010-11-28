@@ -1,4 +1,4 @@
-# Copyright (c) 2009 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2009-2010 Jonathan M. Lange. See LICENSE for details.
 
 """Doubles of test result objects, useful for testing unittest code."""
 
@@ -15,6 +15,7 @@ class LoggingBase(object):
     def __init__(self):
         self._events = []
         self.shouldStop = False
+        self._was_successful = True
 
 
 class Python26TestResult(LoggingBase):
@@ -37,6 +38,9 @@ class Python26TestResult(LoggingBase):
 
     def stopTest(self, test):
         self._events.append(('stopTest', test))
+
+    def wasSuccessful(self):
+        return self._was_successful
 
 
 class Python27TestResult(Python26TestResult):
@@ -62,9 +66,11 @@ class ExtendedTestResult(Python27TestResult):
     """A test result like the proposed extended unittest result API."""
 
     def addError(self, test, err=None, details=None):
+        self._was_successful = False
         self._events.append(('addError', test, err or details))
 
     def addFailure(self, test, err=None, details=None):
+        self._was_successful = False
         self._events.append(('addFailure', test, err or details))
 
     def addExpectedFailure(self, test, err=None, details=None):
@@ -80,6 +86,7 @@ class ExtendedTestResult(Python27TestResult):
             self._events.append(('addSuccess', test))
 
     def addUnexpectedSuccess(self, test, details=None):
+        self._was_successful = False
         if details is not None:
             self._events.append(('addUnexpectedSuccess', test, details))
         else:
@@ -93,3 +100,6 @@ class ExtendedTestResult(Python27TestResult):
 
     def time(self, time):
         self._events.append(('time', time))
+
+    def wasSuccessful(self):
+        return self._was_successful
