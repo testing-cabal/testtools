@@ -8,7 +8,9 @@ Changes
 -------
 
 * addUnexpectedSuccess is translated to addFailure for test results that don't
-  know about addUnexpectedSuccess.  (Jonathan Lange, #654474)
+  know about addUnexpectedSuccess.  Further, it fails the entire result for
+  all testtools TestResults (i.e. wasSuccessful() returns False after
+  addUnexpectedSuccess has been called).  (Jonathan Lange, #654474)
 
 Improvements
 ------------
