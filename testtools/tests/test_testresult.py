@@ -118,7 +118,7 @@ class Python27Contract(Python26Contract):
         result.addUnexpectedSuccess(self)
 
     def test_addUnexpectedSuccess_was_successful(self):
-        # addUnexpectedSuccess does not the test run in Python 2.7.
+        # addUnexpectedSuccess does not fail the test run in Python 2.7.
         result = self.makeResult()
         result.startTest(self)
         result.addUnexpectedSuccess(self)
@@ -186,7 +186,7 @@ class TestTestResultContract(TestCase, TestResultContract):
         return TestResult()
 
 
-class TestMultiTestresultContract(TestCase, TestResultContract):
+class TestMultiTestResultContract(TestCase, TestResultContract):
 
     def makeResult(self):
         return MultiTestResult(TestResult(), TestResult())
