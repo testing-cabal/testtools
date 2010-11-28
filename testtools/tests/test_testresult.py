@@ -137,13 +137,13 @@ class TestTestResultContract(TestCase):
         result.startTest(self)
         result.addUnexpectedSuccess(self, details={})
 
-    def test_addUnexpectedSuccess_is_success(self):
-        # addUnexpectedSuccess does not fail the test run.
+    def test_addUnexpectedSuccess_is_failure(self):
+        # addUnexpectedSuccess fails the test run.
         result = self.makeResult()
         result.startTest(self)
         result.addUnexpectedSuccess(self, details={})
         result.stopTest(self)
-        self.assertTrue(result.wasSuccessful())
+        self.assertFalse(result.wasSuccessful())
 
     def test_addSuccess_details(self):
         # Calling addSuccess(test) completes ok.

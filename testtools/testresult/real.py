@@ -108,6 +108,18 @@ class TestResult(unittest.TestResult):
         """Called when a test was expected to fail, but succeed."""
         self.unexpectedSuccesses.append(test)
 
+    def wasSuccessful(self):
+        """Has this result been successful so far?
+
+        If there have been any errors, failures or unexpected successes,
+        return False.  Otherwise, return True.
+
+        Note: This differs from standard unittest in that we consider
+        unexpected successes to be equivalent to failures, rather than
+        successes.
+        """
+        return not (self.errors or self.failures or self.unexpectedSuccesses)
+
     if str_is_unicode:
         # Python 3 and IronPython strings are unicode, use parent class method
         _exc_info_to_unicode = unittest.TestResult._exc_info_to_string
