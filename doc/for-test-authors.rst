@@ -63,7 +63,16 @@ mechanism for doing so::
 
   OK
 
-where 'exampletest' is a module or package that contains unit tests.
+where 'exampletest' is a module that contains unit tests.  By default,
+``testtools.run`` will *not* recursively search the module or package for unit
+tests.  To do this, you will need to either have the discover_ module
+installed or have Python 2.7 or later, and then run::
+
+  $ python -m testtools.run discover packagecontainingtests
+
+For more information see the Python 2.7 unittest documentation, or::
+
+    python -m testtools.run --help
 
 As your testing needs grow and evolve, you will probably want to use a more
 sophisticated test runner.  There are many of these for Python, and almost all
@@ -74,23 +83,6 @@ of them will happily run testtools tests.  In particular:
 * nose_
 * unittest2_
 * `zope.testrunner`_ (aka zope.testing)
-
-
-Test discovery
-~~~~~~~~~~~~~~
-
-XXX - explain *why* anyone would care about this.
-
-testtools includes a backported version of the Python 2.7 glue for using the
-``discover`` test discovery module. If you have Python 2.7, 3.1, something
-even newer, or have installed the ``discover`` module, then you can invoke
-discovery::
-
-    python -m testtools.run discover [path]
-
-For more information see the Python 2.7 unittest documentation, or::
-
-    python -m testtools.run --help
 
 From now on, we'll assume that you know how to run your tests.
 
@@ -965,4 +957,4 @@ You can do::
 .. _unittest: http://docs.python.org/library/unittest.html
 .. _doctest: http://docs.python.org/library/doctest.html
 .. _Deferred: http://twistedmatrix.com/documents/current/core/howto/defer.html
-
+.. _discover: http://pypi.python.org/pypi/discover
