@@ -142,13 +142,13 @@ class RunTest(object):
                         self.result.addSuccess(self.case,
                             details=self.case.getDetails())
 
-    def _run_user(self, fn, *args):
+    def _run_user(self, fn, *args, **kwargs):
         """Run a user supplied function.
 
         Exceptions are processed by self.handlers.
         """
         try:
-            return fn(*args)
+            return fn(*args, **kwargs)
         except KeyboardInterrupt:
             raise
         except:
