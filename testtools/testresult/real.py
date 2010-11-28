@@ -223,6 +223,13 @@ class MultiTestResult(TestResult):
     def done(self):
         return self._dispatch('done')
 
+    def wasSuccessful(self):
+        """Was this result successful?
+
+        Only returns True if every constituent result was successful.
+        """
+        return all(self._dispatch('wasSuccessful'))
+
 
 class TextTestResult(TestResult):
     """A TestResult which outputs activity to a text stream."""
@@ -362,6 +369,9 @@ class ThreadsafeForwardingResult(TestResult):
     def startTest(self, test):
         self._test_start = self._now()
         super(ThreadsafeForwardingResult, self).startTest(test)
+
+    def wasSuccessful(self):
+        return self.result.wasSuccessful()
 
 
 class ExtendedToOriginalDecorator(object):

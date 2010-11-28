@@ -52,6 +52,11 @@ StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
 class TestTestResultContract(TestCase):
     """Tests for the contract of TestResults."""
 
+    def test_fresh_result_is_successful(self):
+        # A result is considered successful before any tests are run.
+        result = self.makeResult()
+        self.assertTrue(result.wasSuccessful())
+
     def test_addExpectedFailure(self):
         # Calling addExpectedFailure(test, exc_info) completes ok.
         result = self.makeResult()
@@ -64,17 +69,41 @@ class TestTestResultContract(TestCase):
         result.startTest(self)
         result.addExpectedFailure(self, details={})
 
+    def test_addExpectedFailure_is_success(self):
+        # addExpectedFailure does not fail the test run.
+        result = self.makeResult()
+        result.startTest(self)
+        result.addExpectedFailure(self, details={})
+        result.stopTest(self)
+        self.assertTrue(result.wasSuccessful())
+
     def test_addError_details(self):
         # Calling addError(test, details=xxx) completes ok.
         result = self.makeResult()
         result.startTest(self)
         result.addError(self, details={})
 
+    def test_addError_is_failure(self):
+        # addError fails the test run.
+        result = self.makeResult()
+        result.startTest(self)
+        result.addError(self, details={})
+        result.stopTest(self)
+        self.assertFalse(result.wasSuccessful())
+
     def test_addFailure_details(self):
         # Calling addFailure(test, details=xxx) completes ok.
         result = self.makeResult()
         result.startTest(self)
         result.addFailure(self, details={})
+
+    def test_addFailure_is_failure(self):
+        # addFailure fails the test run.
+        result = self.makeResult()
+        result.startTest(self)
+        result.addFailure(self, details={})
+        result.stopTest(self)
+        self.assertFalse(result.wasSuccessful())
 
     def test_addSkipped(self):
         # Calling addSkip(test, reason) completes ok.
@@ -88,6 +117,14 @@ class TestTestResultContract(TestCase):
         result.startTest(self)
         result.addSkip(self, details={})
 
+    def test_addSkip_is_success(self):
+        # addSkip does not fail the test run.
+        result = self.makeResult()
+        result.startTest(self)
+        result.addSkip(self, details={})
+        result.stopTest(self)
+        self.assertTrue(result.wasSuccessful())
+
     def test_addUnexpectedSuccess(self):
         # Calling addUnexpectedSuccess(test) completes ok.
         result = self.makeResult()
@@ -100,11 +137,27 @@ class TestTestResultContract(TestCase):
         result.startTest(self)
         result.addUnexpectedSuccess(self, details={})
 
+    def test_addUnexpectedSuccess_is_success(self):
+        # addUnexpectedSuccess does not fail the test run.
+        result = self.makeResult()
+        result.startTest(self)
+        result.addUnexpectedSuccess(self, details={})
+        result.stopTest(self)
+        self.assertTrue(result.wasSuccessful())
+
     def test_addSuccess_details(self):
         # Calling addSuccess(test) completes ok.
         result = self.makeResult()
         result.startTest(self)
         result.addSuccess(self, details={})
+
+    def test_addSuccess_is_success(self):
+        # addSuccess does not fail the test run.
+        result = self.makeResult()
+        result.startTest(self)
+        result.addSuccess(self, details={})
+        result.stopTest(self)
+        self.assertTrue(result.wasSuccessful())
 
     def test_startStopTestRun(self):
         # Calling startTestRun completes ok.
