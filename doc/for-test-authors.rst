@@ -11,6 +11,8 @@ automated testing already.
 If you are a test author of an unusually large or unusually unusual test
 suite, you might be interested in :doc:`for-framework-folk`.
 
+You might also be interested in the `testtools API docs`_.
+
 
 Introduction
 ============
@@ -958,3 +960,4 @@ You can do::
 .. _doctest: http://docs.python.org/library/doctest.html
 .. _Deferred: http://twistedmatrix.com/documents/current/core/howto/defer.html
 .. _discover: http://pypi.python.org/pypi/discover
+.. _`testtools API docs`: http://mumak.net/testtools/apidocs/
