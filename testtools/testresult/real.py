@@ -398,11 +398,13 @@ class ExtendedToOriginalDecorator(object):
 
     def __init__(self, decorated):
         self.decorated = decorated
+        self._was_successful = True
 
     def __getattr__(self, name):
         return getattr(self.decorated, name)
 
     def addError(self, test, err=None, details=None):
+        self._was_successful = False
         self._check_args(err, details)
         if details is not None:
             try:
@@ -427,6 +429,7 @@ class ExtendedToOriginalDecorator(object):
         return addExpectedFailure(test, err)
 
     def addFailure(self, test, err=None, details=None):
+        self._was_successful = False
         self._check_args(err, details)
         if details is not None:
             try:
@@ -453,6 +456,7 @@ class ExtendedToOriginalDecorator(object):
         return addSkip(test, reason)
 
     def addUnexpectedSuccess(self, test, details=None):
+        self._was_successful = False
         outcome = getattr(self.decorated, 'addUnexpectedSuccess', None)
         if outcome is None:
             try:
@@ -539,7 +543,7 @@ class ExtendedToOriginalDecorator(object):
         return method(a_datetime)
 
     def wasSuccessful(self):
-        return self.decorated.wasSuccessful()
+        return self._was_successful
 
 
 class _StringException(Exception):

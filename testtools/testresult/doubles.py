@@ -22,9 +22,11 @@ class Python26TestResult(LoggingBase):
     """A precisely python 2.6 like test result, that logs."""
 
     def addError(self, test, err):
+        self._was_successful = False
         self._events.append(('addError', test, err))
 
     def addFailure(self, test, err):
+        self._was_successful = False
         self._events.append(('addFailure', test, err))
 
     def addSuccess(self, test):
