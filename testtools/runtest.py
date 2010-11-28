@@ -115,9 +115,7 @@ class RunTest(object):
         if self.exception_caught == self._run_user(self.case._run_setup,
             self.result):
             # Don't run the test method if we failed getting here.
-            e = self._run_cleanups(self.result)
-            if e is not None:
-                self._exceptions.append(e)
+            self._run_cleanups(self.result)
             return
         # Run everything from here on in. If any of the methods raise an
         # exception we'll have failed.
@@ -133,9 +131,8 @@ class RunTest(object):
                     failed = True
             finally:
                 try:
-                    e = self._run_user(self._run_cleanups, self.result)
-                    if e is not None:
-                        self._exceptions.append(e)
+                    if self.exception_caught == self._run_user(
+                        self._run_cleanups, self.result):
                         failed = True
                 finally:
                     if not failed:
@@ -162,26 +159,15 @@ class RunTest(object):
         :return: None if all cleanups ran without error, the most recently
             raised exception from the cleanups otherwise.
         """
-        last_exception = None
+        failing = False
         while self.case._cleanups:
             function, arguments, keywordArguments = self.case._cleanups.pop()
-            try:
-                function(*arguments, **keywordArguments)
-            except KeyboardInterrupt:
-                raise
-            except:
-                exceptions = [sys.exc_info()]
-                while exceptions:
-                    try:
-                        exc_info = exceptions.pop()
-                        if exc_info[0] is MultipleExceptions:
-                            exceptions.extend(exc_info[1].args)
-                            continue
-                        self.case._report_traceback(exc_info)
-                        last_exception = exc_info[1]
-                    finally:
-                        del exc_info
-        return last_exception
+            got_exception = self._run_user(
+                function, *arguments, **keywordArguments)
+            if got_exception == self.exception_caught:
+                failing = True
+        if failing:
+            return self.exception_caught
 
     def _got_user_exception(self, exc_info, tb_label='traceback'):
         """Called when user code raises an exception.
@@ -190,6 +176,10 @@ class RunTest(object):
         :param tb_label: An optional string label for the error.  If
             not specified, will default to 'traceback'.
         """
+        if exc_info[0] is MultipleExceptions:
+            for sub_exc_info in exc_info[1].args:
+                self._got_user_exception(sub_exc_info, tb_label)
+            return self.exception_caught
         try:
             e = exc_info[1]
             self.case.onException(exc_info, tb_label=tb_label)
