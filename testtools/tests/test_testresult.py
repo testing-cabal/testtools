@@ -428,6 +428,12 @@ class TestTextTestResult(TestCase):
                 self.fail("yo!")
         return Test("failed")
 
+    def make_unexpectedly_successful_test(self):
+        class Test(TestCase):
+            def succeeded(self):
+                self.expectFailure("yo!", lambda: None)
+        return Test("succeeded")
+
     def make_test(self):
         class Test(TestCase):
             def test(self):
@@ -513,9 +519,18 @@ class TestTextTestResult(TestCase):
         self.assertThat(self.getvalue(),
             DocTestMatches("...\n\nFAILED (failures=1)\n", doctest.ELLIPSIS))
 
+    def test_stopTestRun_not_successful_unexpected_success(self):
+        test = self.make_unexpectedly_successful_test()
+        self.result.startTestRun()
+        test.run(self.result)
+        self.result.stopTestRun()
+        self.assertThat(self.getvalue(),
+            DocTestMatches("...\n\nFAILED (failures=1)\n", doctest.ELLIPSIS))
+
     def test_stopTestRun_shows_details(self):
         self.result.startTestRun()
         self.make_erroring_test().run(self.result)
+        self.make_unexpectedly_successful_test().run(self.result)
         self.make_failing_test().run(self.result)
         self.reset_output()
         self.result.stopTestRun()
@@ -548,7 +563,10 @@ Traceback (most recent call last):
     self.fail("yo!")
 AssertionError: yo!
 ------------
-...""", doctest.ELLIPSIS))
+======================================================================
+UNEXPECTED SUCCESS: testtools.tests.test_testresult.Test.succeeded
+----------------------------------------------------------------------
+...""", doctest.ELLIPSIS | doctest.REPORT_NDIFF))
 
 
 class TestThreadSafeForwardingResult(TestWithFakeExceptions):

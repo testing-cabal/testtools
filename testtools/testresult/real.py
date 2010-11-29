@@ -280,6 +280,10 @@ class TextTestResult(TestResult):
         stop = self._now()
         self._show_list('ERROR', self.errors)
         self._show_list('FAIL', self.failures)
+        for test in self.unexpectedSuccesses:
+            self.stream.write(
+                "%sUNEXPECTED SUCCESS: %s\n%s" % (
+                    self.sep1, test.id(), self.sep2))
         self.stream.write("Ran %d test%s in %.3fs\n\n" %
             (self.testsRun, plural,
              self._delta_to_float(stop - self.__start)))
@@ -289,7 +293,8 @@ class TextTestResult(TestResult):
             self.stream.write("FAILED (")
             details = []
             details.append("failures=%d" % (
-                len(self.failures) + len(self.errors)))
+                len(self.failures) + len(self.errors)
+                + len(self.unexpectedSuccesses)))
             self.stream.write(", ".join(details))
             self.stream.write(")\n")
         super(TextTestResult, self).stopTestRun()
