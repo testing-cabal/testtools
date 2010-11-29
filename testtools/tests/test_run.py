@@ -44,7 +44,7 @@ class TestRun(TestCase):
             self.skipTest("Need fixtures")
         package = self.useFixture(SampleTestFixture())
         out = StringIO.StringIO()
-        run.main(['-l', 'testtools.runexample.test_suite'], out)
+        run.main(['prog', '-l', 'testtools.runexample.test_suite'], out)
         self.assertEqual("""testtools.runexample.TestFoo.test_bar
 testtools.runexample.TestFoo.test_quux
 """, out.getvalue())
