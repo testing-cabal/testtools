@@ -7,7 +7,7 @@ Introduction
 
 In addition to having many features :doc:`for test authors
 <for-test-authors>`, testtools also has many bits and pieces that are useful
-for folk who writing testing frameworks.
+for folk who write testing frameworks.
 
 If you are the author of a test runner, are working on a very large
 unit-tested project, are trying to get one testing framework to play nicely

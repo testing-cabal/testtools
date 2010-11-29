@@ -447,7 +447,7 @@ sometimes you will have to write your own.  Here's how.
 
 You need to make two closely-linked objects: a ``Matcher`` and a
 ``Mismatch``.  The ``Matcher`` knows how to actually make the comparison, and
-the ``Mismatch`` knows how describe a failure to match.
+the ``Mismatch`` knows how to describe a failure to match.
 
 Here's an example matcher::
 
@@ -753,7 +753,7 @@ forced to use convoluted logic during test loading, which is a bit of a mess.
 Legacy skip support
 ~~~~~~~~~~~~~~~~~~~
 
-If you are using a this feature when running your test suite with a legacy
+If you are using this feature when running your test suite with a legacy
 ``TestResult`` object that is missing the ``addSkip`` method, then the
 ``addError`` method will be invoked instead.  If you are using a test result
 from testtools, you do not have to worry about this.
