@@ -12,6 +12,9 @@ Changes
   all testtools TestResults (i.e. wasSuccessful() returns False after
   addUnexpectedSuccess has been called).  (Jonathan Lange, #654474)
 
+* startTestRun will reset any errors on the result.  That is, wasSuccessful()
+  will always return True immediately after startTestRun() is called.
+
 Improvements
 ------------
 
