@@ -176,7 +176,8 @@ file).
 
 When you are in such situations, you could either make a base class for your
 project that inherits from ``testtools.TestCase`` and make sure that all of
-your tests derive from that, *or* you could use testtools ``Matcher`` system.
+your tests derive from that, *or* you could use the testtools ``Matcher``
+system.
 
 
 Using Matchers
