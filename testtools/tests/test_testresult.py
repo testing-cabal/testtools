@@ -407,7 +407,7 @@ Text attachment: traceback
 ------------
 Traceback (most recent call last):
   File "...testtools...runtest.py", line ..., in _run_user...
-    return fn(*args)
+    return fn(*args, **kwargs)
   File "...testtools...testcase.py", line ..., in _run_test_method
     return self._get_test_method()()
   File "...testtools...tests...test_testresult.py", line ..., in error
@@ -421,7 +421,7 @@ Text attachment: traceback
 ------------
 Traceback (most recent call last):
   File "...testtools...runtest.py", line ..., in _run_user...
-    return fn(*args)
+    return fn(*args, **kwargs)
   File "...testtools...testcase.py", line ..., in _run_test_method
     return self._get_test_method()()
   File "...testtools...tests...test_testresult.py", line ..., in failed
