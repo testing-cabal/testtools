@@ -33,6 +33,9 @@ def test_suite():
         self.addCleanup(testtools.__path__.remove, package.base)
         out = StringIO.StringIO()
         run.main(['-l', 'testtools.runexample.test_suite'], out)
+        self.assertEqual("""testtools.runexample.TestFoo.test_bar
+testtools.runexample.TestFoo.test_quux
+""", out.getvalue())
 
 def test_suite():
     from unittest import TestLoader
