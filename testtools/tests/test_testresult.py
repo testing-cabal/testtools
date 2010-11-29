@@ -179,6 +179,29 @@ class TestResultContract(Python27Contract):
         result.stopTest(self)
         self.assertFalse(result.wasSuccessful())
 
+    def test_startTestRun_resets_unexpected_success(self):
+        result = self.makeResult()
+        result.startTest(self)
+        result.addUnexpectedSuccess(self)
+        result.stopTest(self)
+        result.startTestRun()
+        self.assertTrue(result.wasSuccessful())
+
+    def test_startTestRun_resets_failure(self):
+        result = self.makeResult()
+        result.startTest(self)
+        result.addFailure(self, an_exc_info)
+        result.stopTest(self)
+        result.startTestRun()
+        self.assertTrue(result.wasSuccessful())
+
+    def test_startTestRun_resets_errors(self):
+        result = self.makeResult()
+        result.startTest(self)
+        result.addError(self, an_exc_info)
+        result.stopTest(self)
+        result.startTestRun()
+        self.assertTrue(result.wasSuccessful())
 
 class TestTestResultContract(TestCase, TestResultContract):
 

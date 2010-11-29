@@ -160,6 +160,9 @@ class TestResult(unittest.TestResult):
 
         New in python 2.7
         """
+        self.unexpectedSuccesses = []
+        self.errors = []
+        self.failures = []
 
     def stopTestRun(self):
         """Called after a test run completes
@@ -513,6 +516,7 @@ class ExtendedToOriginalDecorator(object):
         return self.decorated.startTest(test)
 
     def startTestRun(self):
+        self._was_successful = True
         try:
             return self.decorated.startTestRun()
         except AttributeError:

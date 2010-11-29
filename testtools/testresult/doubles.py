@@ -97,6 +97,10 @@ class ExtendedTestResult(Python27TestResult):
     def progress(self, offset, whence):
         self._events.append(('progress', offset, whence))
 
+    def startTestRun(self):
+        super(ExtendedTestResult, self).startTestRun()
+        self._was_successful = True
+
     def tags(self, new_tags, gone_tags):
         self._events.append(('tags', new_tags, gone_tags))
 
