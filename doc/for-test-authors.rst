@@ -116,7 +116,7 @@ asserting more things about the exception than just the type::
       self.assertEqual("Cannot square 'orange', not a number.", str(e))
 
 Note that this is incompatible with the ``assertRaises`` in unittest2 and
-Python2.7, and that we have no immediate plans it to be so.
+Python2.7.
 
 
 assertIn, assertNotIn
