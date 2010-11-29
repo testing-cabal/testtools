@@ -49,6 +49,29 @@ class TestRun(TestCase):
 testtools.runexample.TestFoo.test_quux
 """, out.getvalue())
 
+    def test_run_load_list(self):
+        if fixtures is None:
+            self.skipTest("Need fixtures")
+        package = self.useFixture(SampleTestFixture())
+        out = StringIO.StringIO()
+        # We load two tests - one that exists and one that doesn't, and we
+        # should get the one that exists and neither the one that doesn't nor
+        # the unmentioned one that does.
+        tempdir = self.useFixture(fixtures.TempDir())
+        tempname = tempdir.path + '/tests.list'
+        f = open(tempname, 'wb')
+        try:
+            f.write("""
+testtools.runexample.TestFoo.test_bar
+testtools.runexample.missingtest
+""")
+        finally:
+            f.close()
+        run.main(['prog', '-l', '--load-list', tempname,
+            'testtools.runexample.test_suite'], out)
+        self.assertEqual("""testtools.runexample.TestFoo.test_bar
+""", out.getvalue())
+
 def test_suite():
     from unittest import TestLoader
     return TestLoader().loadTestsFromName(__name__)

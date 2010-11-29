@@ -62,6 +62,12 @@ class TestToolsTestRunner(object):
 #    removed.
 #  - A tweak has been added to detect 'python -m *.run' and use a
 #    better progName in that case.
+#  - self.module is more comprehensively set to None when being invoked from
+#    the commandline - __name__ is used as a sentinel value.
+#  - --list has been added which can list tests (should be upstreamed).
+#  - --load-list has been added which can reduce the tests used (should be
+#    upstreamed).
+#  - The limitation of using getopt is declared to the user.
 
 FAILFAST     = "  -f, --failfast   Stop on first failure\n"
 CATCHBREAK   = "  -c, --catch      Catch control-C and display results\n"
@@ -75,14 +81,16 @@ Options:
   -v, --verbose    Verbose output
   -q, --quiet      Minimal output
   -l, --list       List tests rather than executing them.
+  --load-list      Specifies a file containing test ids, only tests matching
+                   those ids are executed.
 %(failfast)s%(catchbreak)s%(buffer)s
 Examples:
   %(progName)s test_module               - run tests from test_module
   %(progName)s module.TestClass          - run tests from module.TestClass
   %(progName)s module.Class.test_method  - run specified test method
 
-[tests] can be a list of any number of test modules, classes and test
-methods.
+All options must come before [tests].  [tests] can be a list of any number of
+test modules, classes and test methods.
 
 Alternative Usage: %(progName)s discover [options]
 
@@ -93,6 +101,8 @@ Options:
   -t directory     Top level directory of project (default to
                    start directory)
   -l, --list       List tests rather than executing them.
+  --load-list      Specifies a file containing test ids, only tests matching
+                   those ids are executed.
 
 For test discovery all test modules must be importable from the top
 level directory of the project.
@@ -130,6 +140,7 @@ class TestProgram(object):
         self.buffer = buffer
         self.defaultTest = defaultTest
         self.listtests = False
+        self.load_list = None
         self.testRunner = testRunner
         self.testLoader = testLoader
         progName = argv[0]
@@ -140,6 +151,22 @@ class TestProgram(object):
             progName = os.path.basename(argv[0])
         self.progName = progName
         self.parseArgs(argv)
+        if self.load_list:
+            # TODO: preserve existing suites (like testresources does in
+            # OptimisingTestSuite.add, but with a standard protocol).
+            # This is needed because the load_tests hook allows arbitrary
+            # suites, even if that is rarely used.
+            source = file(self.load_list, 'rb')
+            try:
+                lines = source.readlines()
+            finally:
+                source.close()
+            test_ids = set(line.strip() for line in lines)
+            filtered = unittest.TestSuite()
+            for test in iterate_tests(self.test):
+                if test.id() in test_ids:
+                    filtered.addTest(test)
+            self.test = filtered
         if not self.listtests:
             self.runTests()
         else:
@@ -167,7 +194,7 @@ class TestProgram(object):
 
         import getopt
         long_opts = ['help', 'verbose', 'quiet', 'failfast', 'catch', 'buffer',
-            'list']
+            'list', 'load-list=']
         try:
             options, args = getopt.getopt(argv[1:], 'hHvqfcbl', long_opts)
             for opt, value in options:
@@ -191,6 +218,8 @@ class TestProgram(object):
                     # Should this raise an exception if -b is not valid?
                 if opt in ('-l', '--list'):
                     self.listtests = True
+                if opt == '--load-list':
+                    self.load_list = value
             if len(args) == 0 and self.defaultTest is None:
                 # createTests will load tests from self.module
                 self.testNames = None
@@ -240,6 +269,8 @@ class TestProgram(object):
                           help='Top level directory of project (defaults to start directory)')
         parser.add_option('-l', '--list', dest='listtests', default=False,
                           help='List tests rather than running them.')
+        parser.add_option('--load-list', dest='load_list', default=None,
+                          help='Specify a filename containing the test ids to use.')
 
         options, args = parser.parse_args(argv)
         if len(args) > 3:
@@ -257,6 +288,7 @@ class TestProgram(object):
         if self.buffer is None:
             self.buffer = options.buffer
         self.listtests = options.listtests
+        self.load_list = options.load_list
 
         if options.verbose:
             self.verbosity = 2
