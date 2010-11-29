@@ -15,13 +15,13 @@ def test_suite():
         test_helpers,
         test_matchers,
         test_monkey,
+        test_run,
         test_runtest,
         test_spinner,
         test_testtools,
         test_testresult,
         test_testsuite,
         )
-    suites = []
     modules = [
         test_compat,
         test_content,
@@ -31,12 +31,11 @@ def test_suite():
         test_helpers,
         test_matchers,
         test_monkey,
-        test_runtest,
+        test_run,
         test_spinner,
         test_testresult,
         test_testsuite,
         test_testtools,
         ]
-    for module in modules:
-        suites.append(getattr(module, 'test_suite')())
+    suites = map(lambda x:x.test_suite(), modules)
     return unittest.TestSuite(suites)
