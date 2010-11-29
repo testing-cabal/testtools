@@ -108,6 +108,18 @@ class TestResult(unittest.TestResult):
         """Called when a test was expected to fail, but succeed."""
         self.unexpectedSuccesses.append(test)
 
+    def wasSuccessful(self):
+        """Has this result been successful so far?
+
+        If there have been any errors, failures or unexpected successes,
+        return False.  Otherwise, return True.
+
+        Note: This differs from standard unittest in that we consider
+        unexpected successes to be equivalent to failures, rather than
+        successes.
+        """
+        return not (self.errors or self.failures or self.unexpectedSuccesses)
+
     if str_is_unicode:
         # Python 3 and IronPython strings are unicode, use parent class method
         _exc_info_to_unicode = unittest.TestResult._exc_info_to_string
@@ -148,6 +160,9 @@ class TestResult(unittest.TestResult):
 
         New in python 2.7
         """
+        self.unexpectedSuccesses = []
+        self.errors = []
+        self.failures = []
 
     def stopTestRun(self):
         """Called after a test run completes
@@ -182,7 +197,7 @@ class MultiTestResult(TestResult):
 
     def __init__(self, *results):
         TestResult.__init__(self)
-        self._results = map(ExtendedToOriginalDecorator, results)
+        self._results = list(map(ExtendedToOriginalDecorator, results))
 
     def _dispatch(self, message, *args, **kwargs):
         return tuple(
@@ -223,6 +238,13 @@ class MultiTestResult(TestResult):
     def done(self):
         return self._dispatch('done')
 
+    def wasSuccessful(self):
+        """Was this result successful?
+
+        Only returns True if every constituent result was successful.
+        """
+        return all(self._dispatch('wasSuccessful'))
+
 
 class TextTestResult(TestResult):
     """A TestResult which outputs activity to a text stream."""
@@ -258,6 +280,10 @@ class TextTestResult(TestResult):
         stop = self._now()
         self._show_list('ERROR', self.errors)
         self._show_list('FAIL', self.failures)
+        for test in self.unexpectedSuccesses:
+            self.stream.write(
+                "%sUNEXPECTED SUCCESS: %s\n%s" % (
+                    self.sep1, test.id(), self.sep2))
         self.stream.write("Ran %d test%s in %.3fs\n\n" %
             (self.testsRun, plural,
              self._delta_to_float(stop - self.__start)))
@@ -267,7 +293,8 @@ class TextTestResult(TestResult):
             self.stream.write("FAILED (")
             details = []
             details.append("failures=%d" % (
-                len(self.failures) + len(self.errors)))
+                len(self.failures) + len(self.errors)
+                + len(self.unexpectedSuccesses)))
             self.stream.write(", ".join(details))
             self.stream.write(")\n")
         super(TextTestResult, self).stopTestRun()
@@ -363,6 +390,9 @@ class ThreadsafeForwardingResult(TestResult):
         self._test_start = self._now()
         super(ThreadsafeForwardingResult, self).startTest(test)
 
+    def wasSuccessful(self):
+        return self.result.wasSuccessful()
+
 
 class ExtendedToOriginalDecorator(object):
     """Permit new TestResult API code to degrade gracefully with old results.
@@ -376,11 +406,13 @@ class ExtendedToOriginalDecorator(object):
 
     def __init__(self, decorated):
         self.decorated = decorated
+        self._was_successful = True
 
     def __getattr__(self, name):
         return getattr(self.decorated, name)
 
     def addError(self, test, err=None, details=None):
+        self._was_successful = False
         self._check_args(err, details)
         if details is not None:
             try:
@@ -405,6 +437,7 @@ class ExtendedToOriginalDecorator(object):
         return addExpectedFailure(test, err)
 
     def addFailure(self, test, err=None, details=None):
+        self._was_successful = False
         self._check_args(err, details)
         if details is not None:
             try:
@@ -431,6 +464,7 @@ class ExtendedToOriginalDecorator(object):
         return addSkip(test, reason)
 
     def addUnexpectedSuccess(self, test, details=None):
+        self._was_successful = False
         outcome = getattr(self.decorated, 'addUnexpectedSuccess', None)
         if outcome is None:
             try:
@@ -487,6 +521,7 @@ class ExtendedToOriginalDecorator(object):
         return self.decorated.startTest(test)
 
     def startTestRun(self):
+        self._was_successful = True
         try:
             return self.decorated.startTestRun()
         except AttributeError:
@@ -517,7 +552,7 @@ class ExtendedToOriginalDecorator(object):
         return method(a_datetime)
 
     def wasSuccessful(self):
-        return self.decorated.wasSuccessful()
+        return self._was_successful
 
 
 class _StringException(Exception):
