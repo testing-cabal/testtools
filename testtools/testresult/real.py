@@ -194,7 +194,7 @@ class MultiTestResult(TestResult):
 
     def __init__(self, *results):
         TestResult.__init__(self)
-        self._results = map(ExtendedToOriginalDecorator, results)
+        self._results = list(map(ExtendedToOriginalDecorator, results))
 
     def _dispatch(self, message, *args, **kwargs):
         return tuple(
