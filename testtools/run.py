@@ -14,6 +14,7 @@ import sys
 
 from testtools import TextTestResult
 from testtools.compat import classtypes, istext, unicode_output_stream
+from testtools.testsuite import iterate_tests
 
 
 defaultTestLoader = unittest.defaultTestLoader
@@ -34,9 +35,12 @@ else:
 class TestToolsTestRunner(object):
     """ A thunk object to support unittest.TestProgram."""
 
+    def __init__(self, stdout):
+        self.stdout = stdout
+
     def run(self, test):
         "Run the given test case or test suite."
-        result = TextTestResult(unicode_output_stream(sys.stdout))
+        result = TextTestResult(unicode_output_stream(self.stdout))
         result.startTestRun()
         try:
             return test.run(result)
@@ -70,6 +74,7 @@ Options:
   -h, --help       Show this message
   -v, --verbose    Verbose output
   -q, --quiet      Minimal output
+  -l, --list       List tests rather than executing them.
 %(failfast)s%(catchbreak)s%(buffer)s
 Examples:
   %(progName)s test_module               - run tests from test_module
@@ -87,6 +92,7 @@ Options:
   -p pattern       Pattern to match test files ('test*.py' default)
   -t directory     Top level directory of project (default to
                    start directory)
+  -l, --list       List tests rather than executing them.
 
 For test discovery all test modules must be importable from the top
 level directory of the project.
@@ -102,11 +108,13 @@ class TestProgram(object):
     # defaults for testing
     failfast = catchbreak = buffer = progName = None
 
-    def __init__(self, module='__main__', defaultTest=None, argv=None,
+    def __init__(self, module=__name__, defaultTest=None, argv=None,
                     testRunner=None, testLoader=defaultTestLoader,
                     exit=True, verbosity=1, failfast=None, catchbreak=None,
-                    buffer=None):
-        if istext(module):
+                    buffer=None, stdout=None):
+        if module == __name__:
+            self.module = None
+        elif istext(module):
             self.module = __import__(module)
             for part in module.split('.')[1:]:
                 self.module = getattr(self.module, part)
@@ -121,6 +129,7 @@ class TestProgram(object):
         self.verbosity = verbosity
         self.buffer = buffer
         self.defaultTest = defaultTest
+        self.listtests = False
         self.testRunner = testRunner
         self.testLoader = testLoader
         progName = argv[0]
@@ -131,7 +140,11 @@ class TestProgram(object):
             progName = os.path.basename(argv[0])
         self.progName = progName
         self.parseArgs(argv)
-        self.runTests()
+        if not self.listtests:
+            self.runTests()
+        else:
+            for test in iterate_tests(self.test):
+                stdout.write('%s\n' % test.id())
 
     def usageExit(self, msg=None):
         if msg:
@@ -153,9 +166,10 @@ class TestProgram(object):
             return
 
         import getopt
-        long_opts = ['help', 'verbose', 'quiet', 'failfast', 'catch', 'buffer']
+        long_opts = ['help', 'verbose', 'quiet', 'failfast', 'catch', 'buffer',
+            'list']
         try:
-            options, args = getopt.getopt(argv[1:], 'hHvqfcb', long_opts)
+            options, args = getopt.getopt(argv[1:], 'hHvqfcbl', long_opts)
             for opt, value in options:
                 if opt in ('-h','-H','--help'):
                     self.usageExit()
@@ -175,14 +189,13 @@ class TestProgram(object):
                     if self.buffer is None:
                         self.buffer = True
                     # Should this raise an exception if -b is not valid?
+                if opt in ('-l', '--list'):
+                    self.listtests = True
             if len(args) == 0 and self.defaultTest is None:
                 # createTests will load tests from self.module
                 self.testNames = None
             elif len(args) > 0:
                 self.testNames = args
-                if __name__ == '__main__':
-                    # to support python -m unittest ...
-                    self.module = None
             else:
                 self.testNames = (self.defaultTest,)
             self.createTests()
@@ -225,6 +238,8 @@ class TestProgram(object):
                           help="Pattern to match tests ('test*.py' default)")
         parser.add_option('-t', '--top-level-directory', dest='top', default=None,
                           help='Top level directory of project (defaults to start directory)')
+        parser.add_option('-l', '--list', dest='listtests', default=False,
+                          help='List tests rather than running them.')
 
         options, args = parser.parse_args(argv)
         if len(args) > 3:
@@ -241,6 +256,7 @@ class TestProgram(object):
             self.catchbreak = options.catchbreak
         if self.buffer is None:
             self.buffer = options.buffer
+        self.listtests = options.listtests
 
         if options.verbose:
             self.verbosity = 2
@@ -274,7 +290,9 @@ class TestProgram(object):
             sys.exit(not self.result.wasSuccessful())
 ################
 
+def main(argv, stdout):
+    runner = TestToolsTestRunner(stdout)
+    program = TestProgram(argv=argv, testRunner=runner, stdout=stdout)
 
 if __name__ == '__main__':
-    runner = TestToolsTestRunner()
-    program = TestProgram(argv=sys.argv, testRunner=runner)
+    main(sys.argv, sys.stdout)

@@ -42,6 +42,11 @@ Improvements
 * ``MatchesException`` added to the ``testtools.matchers`` module - matches
   an exception class and parameters. (Robert Collins)
 
+* New ``KeysEqual`` matcher.  (Jonathan Lange)
+
+* New helpers for conditionally importing modules, ``try_import`` and
+  ``try_imports``.  (Jonathan Lange)
+
 * ``Raises`` added to the ``testtools.matchers`` module - matches if the
   supplied callable raises, and delegates to an optional matcher for validation
   of the exception. (Robert Collins)
@@ -53,16 +58,16 @@ Improvements
 * ``testools.TestCase.useFixture`` has been added to glue with fixtures nicely.
   (Robert Collins)
 
+* ``testtools.run`` now supports ``-l`` to list tests rather than executing
+  them. This is useful for integration with external test analysis/processing
+  tools like subunit and testrepository. (Robert Collins)
+
 * Update documentation to say how to use testtools.run() on Python 2.4.
   (Jonathan Lange, #501174)
 
 * ``text_content`` conveniently converts a Python string to a Content object.
   (Jonathan Lange, James Westby)
 
-* New ``KeysEqual`` matcher.  (Jonathan Lange)
-
-* New helpers for conditionally importing modules, ``try_import`` and
-  ``try_imports``.  (Jonathan Lange)
 
 
 0.9.7
