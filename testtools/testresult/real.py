@@ -293,8 +293,8 @@ class TextTestResult(TestResult):
             self.stream.write("FAILED (")
             details = []
             details.append("failures=%d" % (
-                len(self.failures) + len(self.errors)
-                + len(self.unexpectedSuccesses)))
+                sum(map(len, (
+                    self.failures, self.errors, self.unexpectedSuccesses)))))
             self.stream.write(", ".join(details))
             self.stream.write(")\n")
         super(TextTestResult, self).stopTestRun()
