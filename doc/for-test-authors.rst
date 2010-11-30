@@ -750,6 +750,7 @@ Using ``skipTest`` means that you can make decisions about what tests to run
 as late as possible, and close to the actual tests.  Without it, you might be
 forced to use convoluted logic during test loading, which is a bit of a mess.
 
+
 Legacy skip support
 ~~~~~~~~~~~~~~~~~~~
 
