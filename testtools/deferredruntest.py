@@ -91,7 +91,8 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
     This is highly experimental code.  Use at your own risk.
     """
 
-    def __init__(self, case, handlers=None, reactor=None, timeout=0.005):
+    def __init__(self, case, handlers=None, reactor=None, timeout=0.005,
+                 debug=False):
         """Construct an `AsynchronousDeferredRunTest`.
 
         :param case: The `testtools.TestCase` to run.
@@ -102,12 +103,16 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
             default reactor.
         :param timeout: The maximum time allowed for running a test.  The
             default is 0.005s.
+        :param debug: Whether or not to enable Twisted's debugging.  Use this
+            to get information about unhandled Deferreds and left-over
+            DelayedCalls.  Defaults to False.
         """
         super(AsynchronousDeferredRunTest, self).__init__(case, handlers)
         if reactor is None:
             from twisted.internet import reactor
         self._reactor = reactor
         self._timeout = timeout
+        self._debug = debug
 
     @classmethod
     def make_factory(cls, reactor=None, timeout=0.005):
@@ -143,7 +148,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
 
     def _make_spinner(self):
         """Make the `Spinner` to be used to run the tests."""
-        return Spinner(self._reactor)
+        return Spinner(self._reactor, debug=self._debug)
 
     def _run_deferred(self):
         """Run the test, assuming everything in it is Deferred-returning.

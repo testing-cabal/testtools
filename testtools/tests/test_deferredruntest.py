@@ -34,6 +34,7 @@ SynchronousDeferredRunTest = try_import(
 defer = try_import('twisted.internet.defer')
 failure = try_import('twisted.python.failure')
 log = try_import('twisted.python.log')
+DelayedCall = try_import('twisted.internet.base.DelayedCall')
 
 
 class X(object):
@@ -605,6 +606,35 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
                 ('stopTest', test)]))
         error = result._events[1][2]
         self.assertThat(error, KeysEqual('traceback', 'twisted-log'))
+
+    def test_debugging_unchanged_during_test_by_default(self):
+        debugging = [(defer.Deferred.debug, DelayedCall.debug)]
+        class SomeCase(TestCase):
+            def test_debugging_enabled(self):
+                debugging.append((defer.Deferred.debug, DelayedCall.debug))
+        test = SomeCase('test_debugging_enabled')
+        runner = AsynchronousDeferredRunTest(
+            test, handlers=test.exception_handlers,
+            reactor=self.make_reactor(), timeout=self.make_timeout())
+        runner.run(self.make_result())
+        self.assertEqual(debugging[0], debugging[1])
+
+    def test_debugging_enabled_during_test_with_debug_flag(self):
+        self.patch(defer.Deferred, 'debug', False)
+        self.patch(DelayedCall, 'debug', False)
+        debugging = []
+        class SomeCase(TestCase):
+            def test_debugging_enabled(self):
+                debugging.append((defer.Deferred.debug, DelayedCall.debug))
+        test = SomeCase('test_debugging_enabled')
+        runner = AsynchronousDeferredRunTest(
+            test, handlers=test.exception_handlers,
+            reactor=self.make_reactor(), timeout=self.make_timeout(),
+            debug=True)
+        runner.run(self.make_result())
+        self.assertEqual([(True, True)], debugging)
+        self.assertEqual(False, defer.Deferred.debug)
+        self.assertEqual(False, defer.Deferred.debug)
 
 
 class TestAssertFailsWith(NeedsTwistedTestCase):
