@@ -492,6 +492,17 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
         self.assertIs(self, runner.case)
         self.assertEqual([handler], runner.handlers)
 
+    def test_convenient_construction_default_debugging(self):
+        # As a convenience method, AsynchronousDeferredRunTest has a
+        # classmethod that returns an AsynchronousDeferredRunTest
+        # factory. This factory has the same API as the RunTest constructor.
+        handler = object()
+        factory = AsynchronousDeferredRunTest.make_factory(debug=True)
+        runner = factory(self, [handler])
+        self.assertIs(self, runner.case)
+        self.assertEqual([handler], runner.handlers)
+        self.assertEqual(True, runner._debug)
+
     def test_deferred_error(self):
         class SomeTest(TestCase):
             def test_something(self):
