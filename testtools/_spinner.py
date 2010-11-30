@@ -20,7 +20,10 @@ __all__ = [
 
 import signal
 
+from testtools.monkey import MonkeyPatcher
+
 from twisted.internet import defer
+from twisted.internet.base import DelayedCall
 from twisted.internet.interfaces import IReactorThreads
 from twisted.python.failure import Failure
 from twisted.python.util import mergeFunctionMetadata
@@ -165,13 +168,20 @@ class Spinner(object):
     # the ideal, and it actually works for many cases.
     _OBLIGATORY_REACTOR_ITERATIONS = 0
 
-    def __init__(self, reactor):
+    def __init__(self, reactor, debug=False):
+        """Construct a Spinner.
+
+        :param reactor: A Twisted reactor.
+        :param debug: Whether or not to enable Twisted's debugging.  Defaults
+            to False.
+        """
         self._reactor = reactor
         self._timeout_call = None
         self._success = self._UNSET
         self._failure = self._UNSET
         self._saved_signals = []
         self._junk = []
+        self._debug = debug
 
     def _cancel_timeout(self):
         if self._timeout_call:
@@ -270,30 +280,38 @@ class Spinner(object):
         :return: Whatever is at the end of the function's callback chain.  If
             it's an error, then raise that.
         """
-        junk = self.get_junk()
-        if junk:
-            raise StaleJunkError(junk)
-        self._save_signals()
-        self._timeout_call = self._reactor.callLater(
-            timeout, self._timed_out, function, timeout)
-        # Calling 'stop' on the reactor will make it impossible to re-start
-        # the reactor.  Since the default signal handlers for TERM, BREAK and
-        # INT all call reactor.stop(), we'll patch it over with crash.
-        # XXX: It might be a better idea to either install custom signal
-        # handlers or to override the methods that are Twisted's signal
-        # handlers.
-        stop, self._reactor.stop = self._reactor.stop, self._reactor.crash
-        def run_function():
-            d = defer.maybeDeferred(function, *args, **kwargs)
-            d.addCallbacks(self._got_success, self._got_failure)
-            d.addBoth(self._stop_reactor)
+        debug = MonkeyPatcher()
+        if self._debug:
+            debug.add_patch(defer.Deferred, 'debug', True)
+            debug.add_patch(DelayedCall, 'debug', True)
+        debug.patch()
         try:
-            self._reactor.callWhenRunning(run_function)
-            self._reactor.run()
+            junk = self.get_junk()
+            if junk:
+                raise StaleJunkError(junk)
+            self._save_signals()
+            self._timeout_call = self._reactor.callLater(
+                timeout, self._timed_out, function, timeout)
+            # Calling 'stop' on the reactor will make it impossible to
+            # re-start the reactor.  Since the default signal handlers for
+            # TERM, BREAK and INT all call reactor.stop(), we'll patch it over
+            # with crash.  XXX: It might be a better idea to either install
+            # custom signal handlers or to override the methods that are
+            # Twisted's signal handlers.
+            stop, self._reactor.stop = self._reactor.stop, self._reactor.crash
+            def run_function():
+                d = defer.maybeDeferred(function, *args, **kwargs)
+                d.addCallbacks(self._got_success, self._got_failure)
+                d.addBoth(self._stop_reactor)
+            try:
+                self._reactor.callWhenRunning(run_function)
+                self._reactor.run()
+            finally:
+                self._reactor.stop = stop
+                self._restore_signals()
+            try:
+                return self._get_result()
+            finally:
+                self._clean()
         finally:
-            self._reactor.stop = stop
-            self._restore_signals()
-        try:
-            return self._get_result()
-        finally:
-            self._clean()
+            debug.restore()
