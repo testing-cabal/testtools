@@ -35,13 +35,11 @@ class TestResult(unittest.TestResult):
     """
 
     def __init__(self):
-        super(TestResult, self).__init__()
-        self.skip_reasons = {}
-        self.__now = None
-        # -- Start: As per python 2.7 --
-        self.expectedFailures = []
-        self.unexpectedSuccesses = []
-        # -- End:   As per python 2.7 --
+        # startTestRun resets all attributes, and older clients don't know to
+        # call startTestRun, so it is called once here.
+        # Because subclasses may reasonably not expect this, we call the 
+        # specific version we want to run.
+        TestResult.startTestRun(self)
 
     def addExpectedFailure(self, test, err=None, details=None):
         """Called when a test has failed in an expected manner.
@@ -160,9 +158,13 @@ class TestResult(unittest.TestResult):
 
         New in python 2.7
         """
+        super(TestResult, self).__init__()
+        self.skip_reasons = {}
+        self.__now = None
+        # -- Start: As per python 2.7 --
+        self.expectedFailures = []
         self.unexpectedSuccesses = []
-        self.errors = []
-        self.failures = []
+        # -- End:   As per python 2.7 --
 
     def stopTestRun(self):
         """Called after a test run completes
@@ -406,13 +408,11 @@ class ExtendedToOriginalDecorator(object):
 
     def __init__(self, decorated):
         self.decorated = decorated
-        self._was_successful = True
 
     def __getattr__(self, name):
         return getattr(self.decorated, name)
 
     def addError(self, test, err=None, details=None):
-        self._was_successful = False
         self._check_args(err, details)
         if details is not None:
             try:
@@ -437,7 +437,6 @@ class ExtendedToOriginalDecorator(object):
         return addExpectedFailure(test, err)
 
     def addFailure(self, test, err=None, details=None):
-        self._was_successful = False
         self._check_args(err, details)
         if details is not None:
             try:
@@ -464,7 +463,6 @@ class ExtendedToOriginalDecorator(object):
         return addSkip(test, reason)
 
     def addUnexpectedSuccess(self, test, details=None):
-        self._was_successful = False
         outcome = getattr(self.decorated, 'addUnexpectedSuccess', None)
         if outcome is None:
             try:
@@ -521,7 +519,6 @@ class ExtendedToOriginalDecorator(object):
         return self.decorated.startTest(test)
 
     def startTestRun(self):
-        self._was_successful = True
         try:
             return self.decorated.startTestRun()
         except AttributeError:
@@ -552,7 +549,7 @@ class ExtendedToOriginalDecorator(object):
         return method(a_datetime)
 
     def wasSuccessful(self):
-        return self._was_successful
+        return self.decorated.wasSuccessful()
 
 
 class _StringException(Exception):

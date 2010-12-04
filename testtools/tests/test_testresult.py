@@ -132,7 +132,7 @@ class Python27Contract(Python26Contract):
         result.stopTestRun()
 
 
-class TestResultContract(Python27Contract):
+class DetailsContract(Python27Contract):
     """Tests for the contract of TestResults."""
 
     def test_addExpectedFailure_details(self):
@@ -171,6 +171,13 @@ class TestResultContract(Python27Contract):
         result.startTest(self)
         result.addSuccess(self, details={})
 
+
+class FallbackContract(DetailsContract):
+    """When we fallback we take our policy choice to map calls.
+
+    For instance, we map unexpectedSuccess to an error code, not to success.
+    """
+
     def test_addUnexpectedSuccess_was_successful(self):
         # addUnexpectedSuccess fails test run in testtools.
         result = self.makeResult()
@@ -178,6 +185,14 @@ class TestResultContract(Python27Contract):
         result.addUnexpectedSuccess(self)
         result.stopTest(self)
         self.assertFalse(result.wasSuccessful())
+
+
+class StartTestRunContract(FallbackContract):
+    """Defines the contract for testtools policy choices.
+    
+    That is things which are not simply extensions to unittest but choices we
+    have made differently.
+    """
 
     def test_startTestRun_resets_unexpected_success(self):
         result = self.makeResult()
@@ -203,25 +218,26 @@ class TestResultContract(Python27Contract):
         result.startTestRun()
         self.assertTrue(result.wasSuccessful())
 
-class TestTestResultContract(TestCase, TestResultContract):
+
+class TestTestResultContract(TestCase, StartTestRunContract):
 
     def makeResult(self):
         return TestResult()
 
 
-class TestMultiTestResultContract(TestCase, TestResultContract):
+class TestMultiTestResultContract(TestCase, StartTestRunContract):
 
     def makeResult(self):
         return MultiTestResult(TestResult(), TestResult())
 
 
-class TestTextTestResultContract(TestCase, TestResultContract):
+class TestTextTestResultContract(TestCase, StartTestRunContract):
 
     def makeResult(self):
         return TextTestResult(StringIO())
 
 
-class TestThreadSafeForwardingResultContract(TestCase, TestResultContract):
+class TestThreadSafeForwardingResultContract(TestCase, StartTestRunContract):
 
     def makeResult(self):
         result_semaphore = threading.Semaphore(1)
@@ -229,7 +245,7 @@ class TestThreadSafeForwardingResultContract(TestCase, TestResultContract):
         return ThreadsafeForwardingResult(target, result_semaphore)
 
 
-class TestExtendedTestResultContract(TestCase, TestResultContract):
+class TestExtendedTestResultContract(TestCase, StartTestRunContract):
 
     def makeResult(self):
         return ExtendedTestResult()
@@ -241,7 +257,7 @@ class TestPython26TestResultContract(TestCase, Python26Contract):
         return Python26TestResult()
 
 
-class TestAdaptedPython26TestResultContract(TestCase, TestResultContract):
+class TestAdaptedPython26TestResultContract(TestCase, FallbackContract):
 
     def makeResult(self):
         return ExtendedToOriginalDecorator(Python26TestResult())
@@ -253,7 +269,7 @@ class TestPython27TestResultContract(TestCase, Python27Contract):
         return Python27TestResult()
 
 
-class TestAdaptedPython27TestResultContract(TestCase, TestResultContract):
+class TestAdaptedPython27TestResultContract(TestCase, DetailsContract):
 
     def makeResult(self):
         return ExtendedToOriginalDecorator(Python27TestResult())
