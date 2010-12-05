@@ -156,7 +156,8 @@ class TestResult(unittest.TestResult):
     def startTestRun(self):
         """Called before a test run starts.
 
-        New in python 2.7
+        New in python 2.7. The testtools version resets the result to a
+        pristine condition ready for use in another test run.
         """
         super(TestResult, self).__init__()
         self.skip_reasons = {}
