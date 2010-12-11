@@ -2,10 +2,9 @@
 
 """Tests for the test runner logic."""
 
-import StringIO
-
-from testtools.helpers import try_import
+from testtools.helpers import try_import, try_imports
 fixtures = try_import('fixtures')
+StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
 
 import testtools
 from testtools import TestCase, run
@@ -43,7 +42,7 @@ class TestRun(TestCase):
         if fixtures is None:
             self.skipTest("Need fixtures")
         package = self.useFixture(SampleTestFixture())
-        out = StringIO.StringIO()
+        out = StringIO()
         run.main(['prog', '-l', 'testtools.runexample.test_suite'], out)
         self.assertEqual("""testtools.runexample.TestFoo.test_bar
 testtools.runexample.TestFoo.test_quux
