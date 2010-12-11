@@ -66,12 +66,19 @@ _u.__doc__ = __u_doc
 
 
 if sys.version_info > (2, 5):
+    all = all
     _error_repr = BaseException.__repr__
     def isbaseexception(exception):
         """Return whether exception inherits from BaseException only"""
         return (isinstance(exception, BaseException)
             and not isinstance(exception, Exception))
 else:
+    def all(iterable):
+        """If contents of iterable all evaluate as boolean True"""
+        for obj in iterable:
+            if not obj:
+                return False
+        return True
     def _error_repr(exception):
         """Format an exception instance as Python 2.5 and later do"""
         return exception.__class__.__name__ + repr(exception.args)
