@@ -316,7 +316,7 @@ class MismatchesAll(Mismatch):
         descriptions = ["Differences: ["]
         for mismatch in self.mismatches:
             descriptions.append(mismatch.describe())
-        descriptions.append("]\n")
+        descriptions.append("]")
         return '\n'.join(descriptions)
 
 

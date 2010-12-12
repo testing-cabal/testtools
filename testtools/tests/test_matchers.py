@@ -247,8 +247,7 @@ Expected:
 Got:
     3
 
-]
-""",
+]""",
         "3", MatchesAny(DocTestMatches("1"), DocTestMatches("2")))]
 
 
@@ -264,8 +263,7 @@ class TestMatchesAllInterface(TestCase, TestMatchersInterface):
 
     describe_examples = [("""Differences: [
 1 == 1
-]
-""",
+]""",
                           1, MatchesAll(NotEquals(1), NotEquals(2)))]
 
 
