@@ -375,6 +375,16 @@ class TestAssertions(TestCase):
             '42 is not an instance of %s' % self._formatTypes([Foo, Bar]),
             self.assertIsInstance, 42, (Foo, Bar))
 
+    def test_assertIsInstance_overridden_message(self):
+        # assertIsInstance(obj, klass, msg) fails the test with the specified
+        # message when obj is not an instance of klass.
+
+        class Foo(object):
+            """Simple class for testing assertIsInstance."""
+
+        self.assertFails("Bericht",
+            self.assertIsInstance, 42, Foo, "Bericht")
+
     def test_assertIs(self):
         # assertIs asserts that an object is identical to another object.
         self.assertIs(None, None)
