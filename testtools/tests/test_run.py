@@ -52,7 +52,7 @@ testtools.runexample.TestFoo.test_quux
         if fixtures is None:
             self.skipTest("Need fixtures")
         package = self.useFixture(SampleTestFixture())
-        out = StringIO.StringIO()
+        out = StringIO()
         # We load two tests - one that exists and one that doesn't, and we
         # should get the one that exists and neither the one that doesn't nor
         # the unmentioned one that does.
