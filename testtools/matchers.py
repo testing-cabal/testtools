@@ -32,6 +32,7 @@ import operator
 from pprint import pformat
 import re
 import sys
+import types
 
 from testtools.compat import classtypes, _error_repr, isbaseexception
 
@@ -704,3 +705,35 @@ class MatchesSetwise(object):
                 return Annotate(
                     msg, EachOf(remaining_matchers[:common_length])
                     ).match(not_matched[:common_length])
+
+
+class AfterPreproccessing(object):
+    """Matches if the value matches after passing through a function.
+
+    This can be used to aid in creating trivial matchers as functions, for
+    example:
+
+    def PathHasFileContent(content):
+        def _read(path):
+            return open(path).read()
+        return AfterPreproccessing(_read, Equals(content))
+    """
+
+    def __init__(self, preprocessor, matcher):
+        self.preprocessor = preprocessor
+        self.matcher = matcher
+
+    def _str_preprocessor(self):
+        if isinstance(self.preprocessor, types.FunctionType):
+            return '<function %s>' % self.preprocessor.__name__
+        return str(self.preprocessor)
+
+    def __str__(self):
+        return "AfterPreproccessing(%s, %s)" % (
+            self._str_preprocessor(), self.matcher)
+
+    def match(self, value):
+        value = self.preprocessor(value)
+        return Annotate(
+            "after %s" % self._str_preprocessor(),
+            self.matcher).match(value)

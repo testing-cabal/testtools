@@ -12,6 +12,7 @@ from testtools import (
     TestCase,
     )
 from testtools.matchers import (
+    AfterPreproccessing,
     Annotate,
     Equals,
     DocTestMatches,
@@ -616,6 +617,27 @@ class TestMatchesSetwise(TestCase):
             MatchesRegex(
                 '.*There was 1 mismatch and 2 extra values: \[[145], [145]\]',
                 re.S))
+
+
+class TestAfterPreproccessing(TestCase, TestMatchersInterface):
+
+    def parity(x):
+        return x % 2
+
+    matches_matcher = AfterPreproccessing(parity, Equals(1))
+    matches_matches = [3, 5]
+    matches_mismatches = [2]
+
+    str_examples = [
+        ("AfterPreproccessing(<function parity>, Equals(1))",
+         AfterPreproccessing(parity, Equals(1))),
+        ]
+
+    describe_examples = [
+        ("1 != 0: after <function parity>",
+         2,
+         AfterPreproccessing(parity, Equals(1))),
+        ]
 
 
 def test_suite():
