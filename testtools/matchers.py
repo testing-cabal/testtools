@@ -528,3 +528,78 @@ def raises(exception):
     See `Raises` and `MatchesException` for more information.
     """
     return Raises(MatchesException(exception))
+
+
+class EachOf(object):
+    """Matches if each matcher matches the corresponding value.
+
+    More easily explained by example than in words:
+
+    >>> EachOf([Equals(1)]).match([1])
+    >>> EachOf([Equals(1), Equals(2)]).match([1, 2])
+    >>> print EachOf([Equals(1), Equals(2)]).match([2, 1]).describe()
+    Differences: [
+    1 != 2
+    2 != 1
+    ]
+    """
+
+    def __init__(self, matchers):
+        self.matchers = matchers
+
+    def match(self, values):
+        mismatches = []
+        length_mismatch = Annotate(
+            "Length mismatch", Equals(len(self.matchers))).match(len(values))
+        if length_mismatch:
+            mismatches.append(length_mismatch)
+        for matcher, value in zip(self.matchers, values):
+            mismatch = matcher.match(value)
+            if mismatch:
+                mismatches.append(mismatch)
+        if mismatches:
+            return MismatchesAll(mismatches)
+
+
+class MatchesStructure(object):
+    """Matcher that matches an object structurally.
+
+    'Structurally' here means that attributes of the object being matched are
+    compared against given matchers.
+
+    `fromExample` allows the creation of a matcher from a prototype object and
+    then modified versions can be created with `update`.
+    """
+
+    def __init__(self, **kwargs):
+        self.kws = kwargs
+
+    @classmethod
+    def fromExample(cls, example, *attributes):
+        kwargs = {}
+        for attr in attributes:
+            kwargs[attr] = Equals(getattr(example, attr))
+        return cls(**kwargs)
+
+    def update(self, **kws):
+        new_kws = self.kws.copy()
+        for attr, matcher in kws.iteritems():
+            if matcher is None:
+                new_kws.pop(attr, None)
+            else:
+                new_kws[attr] = matcher
+        return type(self)(**new_kws)
+
+    def __str__(self):
+        kws = []
+        for attr, matcher in sorted(self.kws.iteritems()):
+            kws.append("%s=%s" % (attr, matcher))
+        return "%s(%s)" % (self.__class__.__name__, ', '.join(kws))
+
+    def match(self, value):
+        matchers = []
+        values = []
+        for attr, matcher in sorted(self.kws.iteritems()):
+            matchers.append(Annotate(attr, matcher))
+            values.append(getattr(value, attr))
+        return EachOf(matchers).match(values)

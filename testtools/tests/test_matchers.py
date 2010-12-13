@@ -3,6 +3,7 @@
 """Tests for matchers."""
 
 import doctest
+import StringIO
 import sys
 
 from testtools import (
@@ -15,6 +16,7 @@ from testtools.matchers import (
     DocTestMatches,
     DoesNotEndWith,
     DoesNotStartWith,
+    EachOf,
     EndsWith,
     KeysEqual,
     Is,
@@ -22,6 +24,7 @@ from testtools.matchers import (
     MatchesAny,
     MatchesAll,
     MatchesException,
+    MatchesStructure,
     Mismatch,
     Not,
     NotEquals,
@@ -444,6 +447,79 @@ class EndsWithTests(TestCase):
         matcher = EndsWith("bar")
         mismatch = matcher.match("foo")
         self.assertEqual("bar", mismatch.expected)
+
+
+def run_doctest(obj, name):
+    p = doctest.DocTestParser()
+    t = p.get_doctest(
+        obj.__doc__, sys.modules[obj.__module__].__dict__, name, '', 0)
+    r = doctest.DocTestRunner()
+    output = StringIO.StringIO()
+    r.run(t, out=output.write)
+    return r.failures, output.getvalue()
+
+
+class TestEachOf(TestCase):
+
+    def test_docstring(self):
+        failure_count, output = run_doctest(EachOf, "EachOf")
+        if failure_count:
+            self.fail("Doctest failed with %s" % output)
+
+
+class TestMatchesStructure(TestCase, TestMatchersInterface):
+
+    class SimpleClass:
+        def __init__(self, x, y):
+            self.x = x
+            self.y = y
+
+    matches_matcher = MatchesStructure(x=Equals(1), y=Equals(2))
+    matches_matches = [SimpleClass(1, 2)]
+    matches_mismatches = [
+        SimpleClass(2, 2),
+        SimpleClass(1, 1),
+        SimpleClass(3, 3),
+        ]
+
+    str_examples = [
+        ("MatchesStructure(x=Equals(1))", MatchesStructure(x=Equals(1))),
+        ("MatchesStructure(y=Equals(2))", MatchesStructure(y=Equals(2))),
+        ("MatchesStructure(x=Equals(1), y=Equals(2))",
+         MatchesStructure(x=Equals(1), y=Equals(2))),
+        ]
+
+    describe_examples = [
+        ("""\
+Differences: [
+3 != 1: x
+]""", SimpleClass(1, 2), MatchesStructure(x=Equals(3), y=Equals(2))),
+        ("""\
+Differences: [
+3 != 2: y
+]""", SimpleClass(1, 2), MatchesStructure(x=Equals(1), y=Equals(3))),
+        ("""\
+Differences: [
+0 != 1: x
+0 != 2: y
+]""", SimpleClass(1, 2), MatchesStructure(x=Equals(0), y=Equals(0))),
+        ]
+
+    def test_fromExample(self):
+        self.assertThat(
+            self.SimpleClass(1, 2),
+            MatchesStructure.fromExample(self.SimpleClass(1, 3), 'x'))
+
+    def test_update(self):
+        self.assertThat(
+            self.SimpleClass(1, 2),
+            MatchesStructure(x=NotEquals(1)).update(x=Equals(1)))
+
+    def test_update_none(self):
+        self.assertThat(
+            self.SimpleClass(1, 2),
+            MatchesStructure(x=Equals(1), z=NotEquals(42)).update(
+                z=None))
 
 
 def test_suite():
