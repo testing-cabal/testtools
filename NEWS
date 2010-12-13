@@ -50,6 +50,9 @@ Improvements
 * ``MatchesException`` added to the ``testtools.matchers`` module - matches
   an exception class and parameters. (Robert Collins)
 
+* ``MismatchesAll.describe`` no longer appends a trailing newline.
+  (Michael Hudson-Doyle, #686790)
+
 * New ``KeysEqual`` matcher.  (Jonathan Lange)
 
 * New helpers for conditionally importing modules, ``try_import`` and
