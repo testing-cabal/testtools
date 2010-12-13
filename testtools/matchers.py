@@ -30,6 +30,7 @@ __all__ = [
 import doctest
 import operator
 from pprint import pformat
+import re
 import sys
 
 from testtools.compat import classtypes, _error_repr, isbaseexception
@@ -603,3 +604,27 @@ class MatchesStructure(object):
             matchers.append(Annotate(attr, matcher))
             values.append(getattr(value, attr))
         return EachOf(matchers).match(values)
+
+
+class MatchesRegex(object):
+    """Matches if the matchee is matched by a regular expression."""
+
+    def __init__(self, pattern, flags=0):
+        self.pattern = pattern
+        self.flags = flags
+
+    def __str__(self):
+        args = ['%r' % self.pattern]
+        flag_arg = []
+        # dir() sorts the attributes for us, so we don't need to do it again.
+        for flag in dir(re):
+            if len(flag) == 1:
+                if self.flags & getattr(re, flag):
+                    flag_arg.append('re.%s' % flag)
+        if flag_arg:
+            args.append('|'.join(flag_arg))
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(args))
+
+    def match(self, value):
+        if not re.match(self.pattern, value, self.flags):
+            return Mismatch("%r did not match %r" % (self.pattern, value))

@@ -3,6 +3,7 @@
 """Tests for matchers."""
 
 import doctest
+import re
 import StringIO
 import sys
 
@@ -24,6 +25,7 @@ from testtools.matchers import (
     MatchesAny,
     MatchesAll,
     MatchesException,
+    MatchesRegex,
     MatchesStructure,
     Mismatch,
     Not,
@@ -520,6 +522,23 @@ Differences: [
             self.SimpleClass(1, 2),
             MatchesStructure(x=Equals(1), z=NotEquals(42)).update(
                 z=None))
+
+
+class TestMatchesRegex(TestCase, TestMatchersInterface):
+
+    matches_matcher = MatchesRegex('a|b')
+    matches_matches = ['a', 'b']
+    matches_mismatches = ['c']
+
+    str_examples = [
+        ("MatchesRegex('a|b')", MatchesRegex('a|b')),
+        ("MatchesRegex('a|b', re.M)", MatchesRegex('a|b', re.M)),
+        ("MatchesRegex('a|b', re.I|re.M)", MatchesRegex('a|b', re.I|re.M)),
+        ]
+
+    describe_examples = [
+        ("'a|b' did not match 'c'", 'c', MatchesRegex('a|b')),
+        ]
 
 
 def test_suite():
