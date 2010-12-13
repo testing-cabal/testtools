@@ -30,6 +30,10 @@ Changes
 Improvements
 ------------
 
+* ``assertIsInstance`` supports a custom error message to be supplied, which
+  is necessary when using ``assertDictEqual`` on Python 2.7 with a
+  ``testtools.TestCase`` base class. (Jelmer Vernooij)
+
 * Experimental support for running tests that return Deferreds.
   (Jonathan Lange, Martin [gz])
 
