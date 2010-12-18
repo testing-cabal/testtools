@@ -1,8 +1,18 @@
 testtools NEWS
 ++++++++++++++
 
-NEXT
-~~~~
+0.9.8
+~~~~~
+
+In this release we bring some very interesting improvements:
+
+* new matchers for exceptions, sets, lists, dicts and more.
+
+* experimental (works but the contract isn't supported) twisted reactor
+  support.
+
+* The built in runner can now list tests and filter tests (the -l and
+  --load-list options).
 
 Changes
 -------
