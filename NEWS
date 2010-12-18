@@ -70,7 +70,11 @@ Improvements
   supplied callable raises and delegates to ``MatchesException`` to validate
   the exception. (Jonathan Lange)
 
-* ``testools.TestCase.useFixture`` has been added to glue with fixtures nicely.
+* Tests will now pass on Python 2.6.4 : an ``Exception`` change made only in
+  2.6.4 and reverted in Python 2.6.5 was causing test failures on that version.
+  (Martin [gz], #689858).
+
+* ``testtools.TestCase.useFixture`` has been added to glue with fixtures nicely.
   (Robert Collins)
 
 * ``testtools.run`` now supports ``-l`` to list tests rather than executing

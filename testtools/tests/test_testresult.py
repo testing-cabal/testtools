@@ -1230,6 +1230,8 @@ class TestNonAsciiResults(TestCase):
             "class UnprintableError(Exception):\n"
             "    def __str__(self):\n"
             "        raise RuntimeError\n"
+            "    def __unicode__(self):\n"
+            "        raise RuntimeError\n"
             "    def __repr__(self):\n"
             "        raise RuntimeError\n")
         textoutput = self._test_external_case(
