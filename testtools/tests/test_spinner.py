@@ -9,90 +9,91 @@ from testtools import (
     skipIf,
     TestCase,
     )
+from testtools.helpers import try_import
 from testtools.matchers import (
     Equals,
     Is,
     MatchesException,
     Raises,
     )
-from testtools._spinner import (
-    DeferredNotFired,
-    extract_result,
-    NoResultError,
-    not_reentrant,
-    ReentryError,
-    Spinner,
-    StaleJunkError,
-    TimeoutError,
-    trap_unhandled_errors,
-    )
 
-from twisted.internet import defer
-from twisted.python.failure import Failure
+_spinner = try_import('testtools._spinner')
+
+defer = try_import('twisted.internet.defer')
+Failure = try_import('twisted.python.failure.Failure')
 
 
-class TestNotReentrant(TestCase):
+class NeedsTwistedTestCase(TestCase):
+
+    def setUp(self):
+        super(NeedsTwistedTestCase, self).setUp()
+        if defer is None or Failure is None:
+            self.skipTest("Need Twisted to run")
+
+
+class TestNotReentrant(NeedsTwistedTestCase):
 
     def test_not_reentrant(self):
         # A function decorated as not being re-entrant will raise a
-        # ReentryError if it is called while it is running.
+        # _spinner.ReentryError if it is called while it is running.
         calls = []
-        @not_reentrant
+        @_spinner.not_reentrant
         def log_something():
             calls.append(None)
             if len(calls) < 5:
                 log_something()
-        self.assertThat(log_something, Raises(MatchesException(ReentryError)))
+        self.assertThat(
+            log_something, Raises(MatchesException(_spinner.ReentryError)))
         self.assertEqual(1, len(calls))
 
     def test_deeper_stack(self):
         calls = []
-        @not_reentrant
+        @_spinner.not_reentrant
         def g():
             calls.append(None)
             if len(calls) < 5:
                 f()
-        @not_reentrant
+        @_spinner.not_reentrant
         def f():
             calls.append(None)
             if len(calls) < 5:
                 g()
-        self.assertThat(f, Raises(MatchesException(ReentryError)))
+        self.assertThat(f, Raises(MatchesException(_spinner.ReentryError)))
         self.assertEqual(2, len(calls))
 
 
-class TestExtractResult(TestCase):
+class TestExtractResult(NeedsTwistedTestCase):
 
     def test_not_fired(self):
-        # extract_result raises DeferredNotFired if it's given a Deferred that
-        # has not fired.
-        self.assertThat(lambda:extract_result(defer.Deferred()),
-            Raises(MatchesException(DeferredNotFired)))
+        # _spinner.extract_result raises _spinner.DeferredNotFired if it's
+        # given a Deferred that has not fired.
+        self.assertThat(lambda:_spinner.extract_result(defer.Deferred()),
+            Raises(MatchesException(_spinner.DeferredNotFired)))
 
     def test_success(self):
-        # extract_result returns the value of the Deferred if it has fired
-        # successfully.
+        # _spinner.extract_result returns the value of the Deferred if it has
+        # fired successfully.
         marker = object()
         d = defer.succeed(marker)
-        self.assertThat(extract_result(d), Equals(marker))
+        self.assertThat(_spinner.extract_result(d), Equals(marker))
 
     def test_failure(self):
-        # extract_result raises the failure's exception if it's given a
-        # Deferred that is failing.
+        # _spinner.extract_result raises the failure's exception if it's given
+        # a Deferred that is failing.
         try:
             1/0
         except ZeroDivisionError:
             f = Failure()
         d = defer.fail(f)
-        self.assertThat(lambda:extract_result(d),
+        self.assertThat(lambda:_spinner.extract_result(d),
             Raises(MatchesException(ZeroDivisionError)))
 
 
-class TestTrapUnhandledErrors(TestCase):
+class TestTrapUnhandledErrors(NeedsTwistedTestCase):
 
     def test_no_deferreds(self):
         marker = object()
-        result, errors = trap_unhandled_errors(lambda: marker)
+        result, errors = _spinner.trap_unhandled_errors(lambda: marker)
         self.assertEqual([], errors)
         self.assertIs(marker, result)
 
@@ -105,12 +106,13 @@ class TestTrapUnhandledErrors(TestCase):
                 f = Failure()
                 failures.append(f)
                 defer.fail(f)
-        result, errors = trap_unhandled_errors(make_deferred_but_dont_handle)
+        result, errors = _spinner.trap_unhandled_errors(
+            make_deferred_but_dont_handle)
         self.assertIs(None, result)
         self.assertEqual(failures, [error.failResult for error in errors])
 
 
-class TestRunInReactor(TestCase):
+class TestRunInReactor(NeedsTwistedTestCase):
 
     def make_reactor(self):
         from twisted.internet import reactor
@@ -119,7 +121,7 @@ class TestRunInReactor(TestCase):
     def make_spinner(self, reactor=None):
         if reactor is None:
             reactor = self.make_reactor()
-        return Spinner(reactor)
+        return _spinner.Spinner(reactor)
 
     def make_timeout(self):
         return 0.01
@@ -157,8 +159,8 @@ class TestRunInReactor(TestCase):
         # to run_in_reactor.
         spinner = self.make_spinner()
         self.assertThat(lambda: spinner.run(
-            self.make_timeout(), spinner.run, self.make_timeout(), lambda: None),
-            Raises(MatchesException(ReentryError)))
+            self.make_timeout(), spinner.run, self.make_timeout(),
+            lambda: None), Raises(MatchesException(_spinner.ReentryError)))
 
     def test_deferred_value_returned(self):
         # If the given function returns a Deferred, run_in_reactor returns the
@@ -182,11 +184,12 @@ class TestRunInReactor(TestCase):
         self.assertEqual(new_hdlrs, map(signal.getsignal, signals))
 
     def test_timeout(self):
-        # If the function takes too long to run, we raise a TimeoutError.
+        # If the function takes too long to run, we raise a
+        # _spinner.TimeoutError.
         timeout = self.make_timeout()
         self.assertThat(
             lambda:self.make_spinner().run(timeout, lambda: defer.Deferred()),
-            Raises(MatchesException(TimeoutError)))
+            Raises(MatchesException(_spinner.TimeoutError)))
 
     def test_no_junk_by_default(self):
         # If the reactor hasn't spun yet, then there cannot be any junk.
@@ -241,7 +244,14 @@ class TestRunInReactor(TestCase):
         timeout = self.make_timeout()
         spinner = self.make_spinner(reactor)
         spinner.run(timeout, reactor.callInThread, time.sleep, timeout / 2.0)
-        self.assertThat(list(threading.enumerate()), Equals(current_threads))
+        # Python before 2.5 has a race condition with thread handling where
+        # join() does not remove threads from enumerate before returning - the
+        # thread being joined does the removal. This was fixed in Python 2.5
+        # but we still support 2.4, so we have to workaround the issue.
+        # http://bugs.python.org/issue1703448.
+        self.assertThat(
+            [thread for thread in threading.enumerate() if thread.isAlive()],
+            Equals(current_threads))
 
     def test_leftover_junk_available(self):
         # If 'run' is given a function that leaves the reactor dirty in some
@@ -263,7 +273,7 @@ class TestRunInReactor(TestCase):
         timeout = self.make_timeout()
         spinner.run(timeout, reactor.listenTCP, 0, ServerFactory())
         self.assertThat(lambda: spinner.run(timeout, lambda: None),
-            Raises(MatchesException(StaleJunkError)))
+            Raises(MatchesException(_spinner.StaleJunkError)))
 
     def test_clear_junk_clears_previous_junk(self):
         # If 'run' is called and there's still junk in the spinner's junk
@@ -279,7 +289,7 @@ class TestRunInReactor(TestCase):
 
     @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
     def test_sigint_raises_no_result_error(self):
-        # If we get a SIGINT during a run, we raise NoResultError.
+        # If we get a SIGINT during a run, we raise _spinner.NoResultError.
         SIGINT = getattr(signal, 'SIGINT', None)
         if not SIGINT:
             self.skipTest("SIGINT not available")
@@ -288,19 +298,19 @@ class TestRunInReactor(TestCase):
         timeout = self.make_timeout()
         reactor.callLater(timeout, os.kill, os.getpid(), SIGINT)
         self.assertThat(lambda:spinner.run(timeout * 5, defer.Deferred),
-            Raises(MatchesException(NoResultError)))
+            Raises(MatchesException(_spinner.NoResultError)))
         self.assertEqual([], spinner._clean())
 
     @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
     def test_sigint_raises_no_result_error_second_time(self):
-        # If we get a SIGINT during a run, we raise NoResultError.  This test
-        # is exactly the same as test_sigint_raises_no_result_error, and
-        # exists to make sure we haven't futzed with state.
+        # If we get a SIGINT during a run, we raise _spinner.NoResultError.
+        # This test is exactly the same as test_sigint_raises_no_result_error,
+        # and exists to make sure we haven't futzed with state.
         self.test_sigint_raises_no_result_error()
 
     @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
     def test_fast_sigint_raises_no_result_error(self):
-        # If we get a SIGINT during a run, we raise NoResultError.
+        # If we get a SIGINT during a run, we raise _spinner.NoResultError.
         SIGINT = getattr(signal, 'SIGINT', None)
         if not SIGINT:
             self.skipTest("SIGINT not available")
@@ -309,7 +319,7 @@ class TestRunInReactor(TestCase):
         timeout = self.make_timeout()
         reactor.callWhenRunning(os.kill, os.getpid(), SIGINT)
         self.assertThat(lambda:spinner.run(timeout * 5, defer.Deferred),
-            Raises(MatchesException(NoResultError)))
+            Raises(MatchesException(_spinner.NoResultError)))
         self.assertEqual([], spinner._clean())
 
     @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")

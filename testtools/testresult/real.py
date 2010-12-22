@@ -14,7 +14,26 @@ import datetime
 import sys
 import unittest
 
-from testtools.compat import _format_exc_info, str_is_unicode, _u
+from testtools.compat import all, _format_exc_info, str_is_unicode, _u
+
+# From http://docs.python.org/library/datetime.html
+_ZERO = datetime.timedelta(0)
+
+# A UTC class.
+
+class UTC(datetime.tzinfo):
+    """UTC"""
+
+    def utcoffset(self, dt):
+        return _ZERO
+
+    def tzname(self, dt):
+        return "UTC"
+
+    def dst(self, dt):
+        return _ZERO
+
+utc = UTC()
 
 
 class TestResult(unittest.TestResult):
@@ -35,13 +54,11 @@ class TestResult(unittest.TestResult):
     """
 
     def __init__(self):
-        super(TestResult, self).__init__()
-        self.skip_reasons = {}
-        self.__now = None
-        # -- Start: As per python 2.7 --
-        self.expectedFailures = []
-        self.unexpectedSuccesses = []
-        # -- End:   As per python 2.7 --
+        # startTestRun resets all attributes, and older clients don't know to
+        # call startTestRun, so it is called once here.
+        # Because subclasses may reasonably not expect this, we call the 
+        # specific version we want to run.
+        TestResult.startTestRun(self)
 
     def addExpectedFailure(self, test, err=None, details=None):
         """Called when a test has failed in an expected manner.
@@ -108,6 +125,18 @@ class TestResult(unittest.TestResult):
         """Called when a test was expected to fail, but succeed."""
         self.unexpectedSuccesses.append(test)
 
+    def wasSuccessful(self):
+        """Has this result been successful so far?
+
+        If there have been any errors, failures or unexpected successes,
+        return False.  Otherwise, return True.
+
+        Note: This differs from standard unittest in that we consider
+        unexpected successes to be equivalent to failures, rather than
+        successes.
+        """
+        return not (self.errors or self.failures or self.unexpectedSuccesses)
+
     if str_is_unicode:
         # Python 3 and IronPython strings are unicode, use parent class method
         _exc_info_to_unicode = unittest.TestResult._exc_info_to_string
@@ -139,15 +168,23 @@ class TestResult(unittest.TestResult):
         time() method.
         """
         if self.__now is None:
-            return datetime.datetime.now()
+            return datetime.datetime.now(utc)
         else:
             return self.__now
 
     def startTestRun(self):
         """Called before a test run starts.
 
-        New in python 2.7
+        New in python 2.7. The testtools version resets the result to a
+        pristine condition ready for use in another test run.
         """
+        super(TestResult, self).__init__()
+        self.skip_reasons = {}
+        self.__now = None
+        # -- Start: As per python 2.7 --
+        self.expectedFailures = []
+        self.unexpectedSuccesses = []
+        # -- End:   As per python 2.7 --
 
     def stopTestRun(self):
         """Called after a test run completes
@@ -182,7 +219,7 @@ class MultiTestResult(TestResult):
 
     def __init__(self, *results):
         TestResult.__init__(self)
-        self._results = map(ExtendedToOriginalDecorator, results)
+        self._results = list(map(ExtendedToOriginalDecorator, results))
 
     def _dispatch(self, message, *args, **kwargs):
         return tuple(
@@ -220,8 +257,18 @@ class MultiTestResult(TestResult):
     def stopTestRun(self):
         return self._dispatch('stopTestRun')
 
+    def time(self, a_datetime):
+        return self._dispatch('time', a_datetime)
+
     def done(self):
         return self._dispatch('done')
+
+    def wasSuccessful(self):
+        """Was this result successful?
+
+        Only returns True if every constituent result was successful.
+        """
+        return all(self._dispatch('wasSuccessful'))
 
 
 class TextTestResult(TestResult):
@@ -258,6 +305,10 @@ class TextTestResult(TestResult):
         stop = self._now()
         self._show_list('ERROR', self.errors)
         self._show_list('FAIL', self.failures)
+        for test in self.unexpectedSuccesses:
+            self.stream.write(
+                "%sUNEXPECTED SUCCESS: %s\n%s" % (
+                    self.sep1, test.id(), self.sep2))
         self.stream.write("Ran %d test%s in %.3fs\n\n" %
             (self.testsRun, plural,
              self._delta_to_float(stop - self.__start)))
@@ -267,7 +318,8 @@ class TextTestResult(TestResult):
             self.stream.write("FAILED (")
             details = []
             details.append("failures=%d" % (
-                len(self.failures) + len(self.errors)))
+                sum(map(len, (
+                    self.failures, self.errors, self.unexpectedSuccesses)))))
             self.stream.write(", ".join(details))
             self.stream.write(")\n")
         super(TextTestResult, self).stopTestRun()
@@ -362,6 +414,9 @@ class ThreadsafeForwardingResult(TestResult):
     def startTest(self, test):
         self._test_start = self._now()
         super(ThreadsafeForwardingResult, self).startTest(test)
+
+    def wasSuccessful(self):
+        return self.result.wasSuccessful()
 
 
 class ExtendedToOriginalDecorator(object):

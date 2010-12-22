@@ -13,7 +13,9 @@ from testtools.matchers import (
     Annotate,
     Equals,
     DocTestMatches,
+    DoesNotEndWith,
     DoesNotStartWith,
+    EndsWith,
     KeysEqual,
     Is,
     LessThan,
@@ -181,8 +183,7 @@ class TestMatchesExceptionInstanceInterface(TestCase, TestMatchersInterface):
          MatchesException(Exception('foo')))
         ]
     describe_examples = [
-        ("<type 'exceptions.Exception'> is not a "
-         "<type 'exceptions.ValueError'>",
+        ("%r is not a %r" % (Exception, ValueError),
          error_base_foo,
          MatchesException(ValueError("foo"))),
         ("ValueError('bar',) has different arguments to ValueError('foo',).",
@@ -201,12 +202,11 @@ class TestMatchesExceptionTypeInterface(TestCase, TestMatchersInterface):
     matches_mismatches = [error_base_foo]
 
     str_examples = [
-        ("MatchesException(<type 'exceptions.Exception'>)",
+        ("MatchesException(%r)" % Exception,
          MatchesException(Exception))
         ]
     describe_examples = [
-        ("<type 'exceptions.Exception'> is not a "
-         "<type 'exceptions.ValueError'>",
+        ("%r is not a %r" % (Exception, ValueError),
          error_base_foo,
          MatchesException(ValueError)),
         ]
@@ -247,8 +247,7 @@ Expected:
 Got:
     3
 
-]
-""",
+]""",
         "3", MatchesAny(DocTestMatches("1"), DocTestMatches("2")))]
 
 
@@ -264,8 +263,7 @@ class TestMatchesAllInterface(TestCase, TestMatchersInterface):
 
     describe_examples = [("""Differences: [
 1 == 1
-]
-""",
+]""",
                           1, MatchesAll(NotEquals(1), NotEquals(2)))]
 
 
@@ -362,7 +360,12 @@ class TestRaisesBaseTypes(TestCase):
         # Exception, it is propogated.
         match_keyb = Raises(MatchesException(KeyboardInterrupt))
         def raise_keyb_from_match():
-            matcher = Raises(MatchesException(Exception))
+            if sys.version_info > (2, 5):
+                matcher = Raises(MatchesException(Exception))
+            else:
+                # On Python 2.4 KeyboardInterrupt is a StandardError subclass
+                # but should propogate from less generic exception matchers
+                matcher = Raises(MatchesException(EnvironmentError))
             matcher.match(self.raiser)
         self.assertThat(raise_keyb_from_match, match_keyb)
 
@@ -407,6 +410,38 @@ class StartsWithTests(TestCase):
 
     def test_mismatch_sets_expected(self):
         matcher = StartsWith("bar")
+        mismatch = matcher.match("foo")
+        self.assertEqual("bar", mismatch.expected)
+
+
+class DoesNotEndWithTests(TestCase):
+
+    def test_describe(self):
+        mismatch = DoesNotEndWith("fo", "bo")
+        self.assertEqual("'fo' does not end with 'bo'.", mismatch.describe())
+
+
+class EndsWithTests(TestCase):
+
+    def test_str(self):
+        matcher = EndsWith("bar")
+        self.assertEqual("Ends with 'bar'.", str(matcher))
+
+    def test_match(self):
+        matcher = EndsWith("arf")
+        self.assertIs(None, matcher.match("barf"))
+
+    def test_mismatch_returns_does_not_end_with(self):
+        matcher = EndsWith("bar")
+        self.assertIsInstance(matcher.match("foo"), DoesNotEndWith)
+
+    def test_mismatch_sets_matchee(self):
+        matcher = EndsWith("bar")
+        mismatch = matcher.match("foo")
+        self.assertEqual("foo", mismatch.matchee)
+
+    def test_mismatch_sets_expected(self):
+        matcher = EndsWith("bar")
         mismatch = matcher.match("foo")
         self.assertEqual("bar", mismatch.expected)
 

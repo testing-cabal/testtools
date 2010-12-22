@@ -12,12 +12,7 @@ from testtools import (
 from testtools.content import (
     text_content,
     )
-from testtools.deferredruntest import (
-    assert_fails_with,
-    AsynchronousDeferredRunTest,
-    flush_logged_errors,
-    SynchronousDeferredRunTest,
-    )
+from testtools.helpers import try_import
 from testtools.tests.helpers import ExtendedTestResult
 from testtools.matchers import (
     Equals,
@@ -26,9 +21,20 @@ from testtools.matchers import (
     Raises,
     )
 from testtools.runtest import RunTest
+from testtools.tests.test_spinner import NeedsTwistedTestCase
 
-from twisted.internet import defer
-from twisted.python import failure, log
+assert_fails_with = try_import('testtools.deferredruntest.assert_fails_with')
+AsynchronousDeferredRunTest = try_import(
+    'testtools.deferredruntest.AsynchronousDeferredRunTest')
+flush_logged_errors = try_import(
+    'testtools.deferredruntest.flush_logged_errors')
+SynchronousDeferredRunTest = try_import(
+    'testtools.deferredruntest.SynchronousDeferredRunTest')
+
+defer = try_import('twisted.internet.defer')
+failure = try_import('twisted.python.failure')
+log = try_import('twisted.python.log')
+DelayedCall = try_import('twisted.internet.base.DelayedCall')
 
 
 class X(object):
@@ -77,7 +83,7 @@ class X(object):
             self.calls.append('test')
             self.addCleanup(lambda: 1/0)
 
-    class TestIntegration(TestCase):
+    class TestIntegration(NeedsTwistedTestCase):
 
         def assertResultsMatch(self, test, result):
             events = list(result._events)
@@ -104,9 +110,9 @@ def make_integration_tests():
     from unittest import TestSuite
     from testtools import clone_test_with_new_id
     runners = [
-        RunTest,
-        SynchronousDeferredRunTest,
-        AsynchronousDeferredRunTest,
+        ('RunTest', RunTest),
+        ('SynchronousDeferredRunTest', SynchronousDeferredRunTest),
+        ('AsynchronousDeferredRunTest', AsynchronousDeferredRunTest),
         ]
 
     tests = [
@@ -118,12 +124,12 @@ def make_integration_tests():
         ]
     base_test = X.TestIntegration('test_runner')
     integration_tests = []
-    for runner in runners:
+    for runner_name, runner in runners:
         for test in tests:
             new_test = clone_test_with_new_id(
                 base_test, '%s(%s, %s)' % (
                     base_test.id(),
-                    runner.__name__,
+                    runner_name,
                     test.__name__))
             new_test.test_factory = test
             new_test.runner = runner
@@ -131,7 +137,7 @@ def make_integration_tests():
     return TestSuite(integration_tests)
 
 
-class TestSynchronousDeferredRunTest(TestCase):
+class TestSynchronousDeferredRunTest(NeedsTwistedTestCase):
 
     def make_result(self):
         return ExtendedTestResult()
@@ -185,7 +191,7 @@ class TestSynchronousDeferredRunTest(TestCase):
                 ('stopTest', test)]))
 
 
-class TestAsynchronousDeferredRunTest(TestCase):
+class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
 
     def make_reactor(self):
         from twisted.internet import reactor
@@ -486,6 +492,17 @@ class TestAsynchronousDeferredRunTest(TestCase):
         self.assertIs(self, runner.case)
         self.assertEqual([handler], runner.handlers)
 
+    def test_convenient_construction_default_debugging(self):
+        # As a convenience method, AsynchronousDeferredRunTest has a
+        # classmethod that returns an AsynchronousDeferredRunTest
+        # factory. This factory has the same API as the RunTest constructor.
+        handler = object()
+        factory = AsynchronousDeferredRunTest.make_factory(debug=True)
+        runner = factory(self, [handler])
+        self.assertIs(self, runner.case)
+        self.assertEqual([handler], runner.handlers)
+        self.assertEqual(True, runner._debug)
+
     def test_deferred_error(self):
         class SomeTest(TestCase):
             def test_something(self):
@@ -601,11 +618,41 @@ class TestAsynchronousDeferredRunTest(TestCase):
         error = result._events[1][2]
         self.assertThat(error, KeysEqual('traceback', 'twisted-log'))
 
+    def test_debugging_unchanged_during_test_by_default(self):
+        debugging = [(defer.Deferred.debug, DelayedCall.debug)]
+        class SomeCase(TestCase):
+            def test_debugging_enabled(self):
+                debugging.append((defer.Deferred.debug, DelayedCall.debug))
+        test = SomeCase('test_debugging_enabled')
+        runner = AsynchronousDeferredRunTest(
+            test, handlers=test.exception_handlers,
+            reactor=self.make_reactor(), timeout=self.make_timeout())
+        runner.run(self.make_result())
+        self.assertEqual(debugging[0], debugging[1])
 
-class TestAssertFailsWith(TestCase):
+    def test_debugging_enabled_during_test_with_debug_flag(self):
+        self.patch(defer.Deferred, 'debug', False)
+        self.patch(DelayedCall, 'debug', False)
+        debugging = []
+        class SomeCase(TestCase):
+            def test_debugging_enabled(self):
+                debugging.append((defer.Deferred.debug, DelayedCall.debug))
+        test = SomeCase('test_debugging_enabled')
+        runner = AsynchronousDeferredRunTest(
+            test, handlers=test.exception_handlers,
+            reactor=self.make_reactor(), timeout=self.make_timeout(),
+            debug=True)
+        runner.run(self.make_result())
+        self.assertEqual([(True, True)], debugging)
+        self.assertEqual(False, defer.Deferred.debug)
+        self.assertEqual(False, defer.Deferred.debug)
+
+
+class TestAssertFailsWith(NeedsTwistedTestCase):
     """Tests for `assert_fails_with`."""
 
-    run_tests_with = SynchronousDeferredRunTest
+    if SynchronousDeferredRunTest is not None:
+        run_tests_with = SynchronousDeferredRunTest
 
     def test_assert_fails_with_success(self):
         # assert_fails_with fails the test if it's given a Deferred that

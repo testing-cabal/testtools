@@ -119,28 +119,28 @@ permanently present at the top of the list.
 Release tasks
 -------------
 
-#. Choose a version number, say X.Y.Z
-#. Branch from trunk to testtools-X.Y.Z
-#. In testtools-X.Y.Z, ensure __init__ has version X.Y.Z.
-#. Replace NEXT in NEWS with the version number X.Y.Z, adjusting the reST.
-#. Possibly write a blurb into NEWS.
-#. Replace any additional references to NEXT with the version being released.
-   (should be none).
-#. Commit the changes.
-#. Tag the release, bzr tag testtools-X.Y.Z
-#. Create a source distribution and upload to pypi ('make release').
-#. Make sure all "Fix committed" bugs are in the 'next' milestone on Launchpad
-#. Rename the 'next' milestone on Launchpad to 'X.Y.Z'
-#. Create a release on the newly-renamed 'X.Y.Z' milestone
-#. Upload the tarball and asc file to Launchpad
-#. Merge the release branch testtools-X.Y.Z into trunk. Before the commit,
-   add a NEXT heading to the top of NEWS. Push trunk to Launchpad.
-#. If a new series has been created (e.g. 0.10.0), make the series on Launchpad.
-#. Make a new milestone for the *next release*.
-
-   #. During release we rename NEXT to $version.
-   #. We call new milestones NEXT.
-
+1. Choose a version number, say X.Y.Z
+1. Branch from trunk to testtools-X.Y.Z
+1. In testtools-X.Y.Z, ensure __init__ has version X.Y.Z.
+1. Replace NEXT in NEWS with the version number X.Y.Z, adjusting the reST.
+1. Possibly write a blurb into NEWS.
+1. Replace any additional references to NEXT with the version being
+   released. (should be none).
+1. Commit the changes.
+1. Tag the release, bzr tag testtools-X.Y.Z
+1. Create a source distribution and upload to pypi ('make release').
+1. Make sure all "Fix committed" bugs are in the 'next' milestone on
+   Launchpad
+1. Rename the 'next' milestone on Launchpad to 'X.Y.Z'
+1. Create a release on the newly-renamed 'X.Y.Z' milestone
+1. Upload the tarball and asc file to Launchpad
+1. Merge the release branch testtools-X.Y.Z into trunk. Before the commit,
+   add a NEXT heading to the top of NEWS and bump the version in __init__.py.
+   Push trunk to Launchpad
+1. If a new series has been created (e.g. 0.10.0), make the series on Launchpad.
+1. Make a new milestone for the *next release*.
+   1. During release we rename NEXT to $version.
+   1. We call new milestones NEXT.
 
 .. _PEP 8: http://www.python.org/dev/peps/pep-0008/
 .. _unittest: http://docs.python.org/library/unittest.html
@@ -148,3 +148,4 @@ Release tasks
 .. _MIT license: http://www.opensource.org/licenses/mit-license.php
 .. _Sphinx: http://sphinx.pocoo.org/
 .. _restructuredtext: http://docutils.sourceforge.net/rst.html
+

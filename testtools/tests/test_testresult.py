@@ -45,18 +45,96 @@ from testtools.tests.helpers import (
     ExtendedTestResult,
     an_exc_info
     )
+from testtools.testresult.real import utc
 
 StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
 
 
-class TestTestResultContract(TestCase):
-    """Tests for the contract of TestResults."""
+class Python26Contract(object):
+
+    def test_fresh_result_is_successful(self):
+        # A result is considered successful before any tests are run.
+        result = self.makeResult()
+        self.assertTrue(result.wasSuccessful())
+
+    def test_addError_is_failure(self):
+        # addError fails the test run.
+        result = self.makeResult()
+        result.startTest(self)
+        result.addError(self, an_exc_info)
+        result.stopTest(self)
+        self.assertFalse(result.wasSuccessful())
+
+    def test_addFailure_is_failure(self):
+        # addFailure fails the test run.
+        result = self.makeResult()
+        result.startTest(self)
+        result.addFailure(self, an_exc_info)
+        result.stopTest(self)
+        self.assertFalse(result.wasSuccessful())
+
+    def test_addSuccess_is_success(self):
+        # addSuccess does not fail the test run.
+        result = self.makeResult()
+        result.startTest(self)
+        result.addSuccess(self)
+        result.stopTest(self)
+        self.assertTrue(result.wasSuccessful())
+
+
+class Python27Contract(Python26Contract):
 
     def test_addExpectedFailure(self):
         # Calling addExpectedFailure(test, exc_info) completes ok.
         result = self.makeResult()
         result.startTest(self)
         result.addExpectedFailure(self, an_exc_info)
+
+    def test_addExpectedFailure_is_success(self):
+        # addExpectedFailure does not fail the test run.
+        result = self.makeResult()
+        result.startTest(self)
+        result.addExpectedFailure(self, an_exc_info)
+        result.stopTest(self)
+        self.assertTrue(result.wasSuccessful())
+
+    def test_addSkipped(self):
+        # Calling addSkip(test, reason) completes ok.
+        result = self.makeResult()
+        result.startTest(self)
+        result.addSkip(self, _u("Skipped for some reason"))
+
+    def test_addSkip_is_success(self):
+        # addSkip does not fail the test run.
+        result = self.makeResult()
+        result.startTest(self)
+        result.addSkip(self, _u("Skipped for some reason"))
+        result.stopTest(self)
+        self.assertTrue(result.wasSuccessful())
+
+    def test_addUnexpectedSuccess(self):
+        # Calling addUnexpectedSuccess(test) completes ok.
+        result = self.makeResult()
+        result.startTest(self)
+        result.addUnexpectedSuccess(self)
+
+    def test_addUnexpectedSuccess_was_successful(self):
+        # addUnexpectedSuccess does not fail the test run in Python 2.7.
+        result = self.makeResult()
+        result.startTest(self)
+        result.addUnexpectedSuccess(self)
+        result.stopTest(self)
+        self.assertTrue(result.wasSuccessful())
+
+    def test_startStopTestRun(self):
+        # Calling startTestRun completes ok.
+        result = self.makeResult()
+        result.startTestRun()
+        result.stopTestRun()
+
+
+class DetailsContract(Python27Contract):
+    """Tests for the contract of TestResults."""
 
     def test_addExpectedFailure_details(self):
         # Calling addExpectedFailure(test, details=xxx) completes ok.
@@ -76,23 +154,11 @@ class TestTestResultContract(TestCase):
         result.startTest(self)
         result.addFailure(self, details={})
 
-    def test_addSkipped(self):
-        # Calling addSkip(test, reason) completes ok.
-        result = self.makeResult()
-        result.startTest(self)
-        result.addSkip(self, _u("Skipped for some reason"))
-
     def test_addSkipped_details(self):
         # Calling addSkip(test, reason) completes ok.
         result = self.makeResult()
         result.startTest(self)
         result.addSkip(self, details={})
-
-    def test_addUnexpectedSuccess(self):
-        # Calling addUnexpectedSuccess(test) completes ok.
-        result = self.makeResult()
-        result.startTest(self)
-        result.addUnexpectedSuccess(self)
 
     def test_addUnexpectedSuccess_details(self):
         # Calling addUnexpectedSuccess(test) completes ok.
@@ -106,37 +172,108 @@ class TestTestResultContract(TestCase):
         result.startTest(self)
         result.addSuccess(self, details={})
 
-    def test_startStopTestRun(self):
-        # Calling startTestRun completes ok.
+
+class FallbackContract(DetailsContract):
+    """When we fallback we take our policy choice to map calls.
+
+    For instance, we map unexpectedSuccess to an error code, not to success.
+    """
+
+    def test_addUnexpectedSuccess_was_successful(self):
+        # addUnexpectedSuccess fails test run in testtools.
         result = self.makeResult()
+        result.startTest(self)
+        result.addUnexpectedSuccess(self)
+        result.stopTest(self)
+        self.assertFalse(result.wasSuccessful())
+
+
+class StartTestRunContract(FallbackContract):
+    """Defines the contract for testtools policy choices.
+    
+    That is things which are not simply extensions to unittest but choices we
+    have made differently.
+    """
+
+    def test_startTestRun_resets_unexpected_success(self):
+        result = self.makeResult()
+        result.startTest(self)
+        result.addUnexpectedSuccess(self)
+        result.stopTest(self)
         result.startTestRun()
-        result.stopTestRun()
+        self.assertTrue(result.wasSuccessful())
+
+    def test_startTestRun_resets_failure(self):
+        result = self.makeResult()
+        result.startTest(self)
+        result.addFailure(self, an_exc_info)
+        result.stopTest(self)
+        result.startTestRun()
+        self.assertTrue(result.wasSuccessful())
+
+    def test_startTestRun_resets_errors(self):
+        result = self.makeResult()
+        result.startTest(self)
+        result.addError(self, an_exc_info)
+        result.stopTest(self)
+        result.startTestRun()
+        self.assertTrue(result.wasSuccessful())
 
 
-class TestTestResultContract(TestTestResultContract):
+class TestTestResultContract(TestCase, StartTestRunContract):
 
     def makeResult(self):
         return TestResult()
 
 
-class TestMultiTestresultContract(TestTestResultContract):
+class TestMultiTestResultContract(TestCase, StartTestRunContract):
 
     def makeResult(self):
         return MultiTestResult(TestResult(), TestResult())
 
 
-class TestTextTestResultContract(TestTestResultContract):
+class TestTextTestResultContract(TestCase, StartTestRunContract):
 
     def makeResult(self):
         return TextTestResult(StringIO())
 
 
-class TestThreadSafeForwardingResultContract(TestTestResultContract):
+class TestThreadSafeForwardingResultContract(TestCase, StartTestRunContract):
 
     def makeResult(self):
         result_semaphore = threading.Semaphore(1)
         target = TestResult()
         return ThreadsafeForwardingResult(target, result_semaphore)
+
+
+class TestExtendedTestResultContract(TestCase, StartTestRunContract):
+
+    def makeResult(self):
+        return ExtendedTestResult()
+
+
+class TestPython26TestResultContract(TestCase, Python26Contract):
+
+    def makeResult(self):
+        return Python26TestResult()
+
+
+class TestAdaptedPython26TestResultContract(TestCase, FallbackContract):
+
+    def makeResult(self):
+        return ExtendedToOriginalDecorator(Python26TestResult())
+
+
+class TestPython27TestResultContract(TestCase, Python27Contract):
+
+    def makeResult(self):
+        return Python27TestResult()
+
+
+class TestAdaptedPython27TestResultContract(TestCase, DetailsContract):
+
+    def makeResult(self):
+        return ExtendedToOriginalDecorator(Python27TestResult())
 
 
 class TestTestResult(TestCase):
@@ -169,10 +306,10 @@ class TestTestResult(TestCase):
         self.addCleanup(restore)
         class Module:
             pass
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(utc)
         stubdatetime = Module()
         stubdatetime.datetime = Module()
-        stubdatetime.datetime.now = lambda: now
+        stubdatetime.datetime.now = lambda tz: now
         testresult.real.datetime = stubdatetime
         # Calling _now() looks up the time.
         self.assertEqual(now, result._now())
@@ -187,7 +324,7 @@ class TestTestResult(TestCase):
 
     def test_now_datetime_time(self):
         result = self.makeResult()
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(utc)
         result.time(now)
         self.assertEqual(now, result._now())
 
@@ -288,6 +425,11 @@ class TestMultiTestResult(TestWithFakeExceptions):
         result = multi_result.stopTestRun()
         self.assertEqual(('foo', 'foo'), result)
 
+    def test_time(self):
+        # the time call is dispatched, not eaten by the base class
+        self.multiResult.time('foo')
+        self.assertResultLogsEqual([('time', 'foo')])
+
 
 class TestTextTestResult(TestCase):
     """Tests for `TextTestResult`."""
@@ -307,6 +449,12 @@ class TestTextTestResult(TestCase):
             def failed(self):
                 self.fail("yo!")
         return Test("failed")
+
+    def make_unexpectedly_successful_test(self):
+        class Test(TestCase):
+            def succeeded(self):
+                self.expectFailure("yo!", lambda: None)
+        return Test("succeeded")
 
     def make_test(self):
         class Test(TestCase):
@@ -359,7 +507,7 @@ class TestTextTestResult(TestCase):
 
     def test_stopTestRun_current_time(self):
         test = self.make_test()
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(utc)
         self.result.time(now)
         self.result.startTestRun()
         self.result.startTest(test)
@@ -393,9 +541,18 @@ class TestTextTestResult(TestCase):
         self.assertThat(self.getvalue(),
             DocTestMatches("...\n\nFAILED (failures=1)\n", doctest.ELLIPSIS))
 
+    def test_stopTestRun_not_successful_unexpected_success(self):
+        test = self.make_unexpectedly_successful_test()
+        self.result.startTestRun()
+        test.run(self.result)
+        self.result.stopTestRun()
+        self.assertThat(self.getvalue(),
+            DocTestMatches("...\n\nFAILED (failures=1)\n", doctest.ELLIPSIS))
+
     def test_stopTestRun_shows_details(self):
         self.result.startTestRun()
         self.make_erroring_test().run(self.result)
+        self.make_unexpectedly_successful_test().run(self.result)
         self.make_failing_test().run(self.result)
         self.reset_output()
         self.result.stopTestRun()
@@ -407,7 +564,7 @@ Text attachment: traceback
 ------------
 Traceback (most recent call last):
   File "...testtools...runtest.py", line ..., in _run_user...
-    return fn(*args)
+    return fn(*args, **kwargs)
   File "...testtools...testcase.py", line ..., in _run_test_method
     return self._get_test_method()()
   File "...testtools...tests...test_testresult.py", line ..., in error
@@ -421,14 +578,17 @@ Text attachment: traceback
 ------------
 Traceback (most recent call last):
   File "...testtools...runtest.py", line ..., in _run_user...
-    return fn(*args)
+    return fn(*args, **kwargs)
   File "...testtools...testcase.py", line ..., in _run_test_method
     return self._get_test_method()()
   File "...testtools...tests...test_testresult.py", line ..., in failed
     self.fail("yo!")
 AssertionError: yo!
 ------------
-...""", doctest.ELLIPSIS))
+======================================================================
+UNEXPECTED SUCCESS: testtools.tests.test_testresult.Test.succeeded
+----------------------------------------------------------------------
+...""", doctest.ELLIPSIS | doctest.REPORT_NDIFF))
 
 
 class TestThreadSafeForwardingResult(TestWithFakeExceptions):
@@ -1075,6 +1235,8 @@ class TestNonAsciiResults(TestCase):
         exception_class = (
             "class UnprintableError(Exception):\n"
             "    def __str__(self):\n"
+            "        raise RuntimeError\n"
+            "    def __unicode__(self):\n"
             "        raise RuntimeError\n"
             "    def __repr__(self):\n"
             "        raise RuntimeError\n")
