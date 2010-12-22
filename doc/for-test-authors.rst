@@ -163,6 +163,32 @@ example::
 Note that there is no ``assertIsNotInstance`` in testtools currently.
 
 
+expectFailure
+-------------
+
+Sometimes it's useful to write tests that fail.  For example, you might want
+to turn a bug report into a unit test, but you don't know how to fix the bug
+yet.  Or perhaps you want to document a known, temporary deficiency in a
+dependency.
+
+testtools gives you the ``TestCase.expectFailure`` to help with this.  You use
+it to say that you expect this assertion to fail.  When the test runs and the
+assertion fails, testtools will report it as an "expected failure".
+
+Here's an example::
+
+  def test_expect_failure_example(self):
+      self.expectFailure(
+          "cats should be dogs", self.assertEqual, 'cats', 'dogs')
+
+As long as 'cats' is not equal to 'dogs', the test will be reported as an
+expected failure.
+
+If ever by some miracle 'cats' becomes 'dogs', then testtools will report an
+"unexpected success".  Unlike standard unittest, testtools treats this as
+something that fails the test suite, like an error or a failure.
+
+
 Matchers
 ========
 
