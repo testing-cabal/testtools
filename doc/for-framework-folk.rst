@@ -161,9 +161,12 @@ Python 2.7 added hooks ``startTestRun`` and ``stopTestRun`` which are called
 before and after the entire test run. 'stopTestRun' is particularly useful for
 test results that wish to produce summary output.
 
-``testtools.TestResult`` provides empty ``startTestRun`` and ``stopTestRun``
-methods, and the default testtools runner will call these methods
+``testtools.TestResult`` provides default ``startTestRun`` and ``stopTestRun``
+methods, and he default testtools runner will call these methods
 appropriately.
+
+The ``startTestRun`` method will reset any errors, failures and so forth on
+the result, making the result object look as if no tests have been run.
 
 
 Extensions to TestSuite
