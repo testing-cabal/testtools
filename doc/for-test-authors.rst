@@ -345,6 +345,18 @@ You only need to worry about this distinction if you are testing code that
 relies on badly written overloaded equality operators.
 
 
+KeysEqual
+~~~~~~~~~
+
+Matches if the keys of one dict are equal to the keys of another dict.  For
+example::
+
+  def test_keys_equal(self):
+      x = {'a': 1, 'b': 2}
+      y = {'a': 2, 'b': 3}
+      self.assertThat(a, KeysEqual(b))
+
+
 Combining matchers
 ------------------
 
