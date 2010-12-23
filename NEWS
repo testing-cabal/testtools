@@ -16,6 +16,11 @@ Improvements
 
 * ``MultiTestResult`` now forwards the ``time`` API. (Robert Collins, #692294)
 
+* ``MultiTestResult`` now documented in the manual. (Jonathan Lange, #661116)
+
+* Vastly improved and extended documentation. (Jonathan Lange)
+
+
 0.9.8
 ~~~~~
 
