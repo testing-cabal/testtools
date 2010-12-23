@@ -49,7 +49,7 @@ def get_version():
 
 def get_long_description():
     manual_path = os.path.join(
-        os.path.dirname(__file__), 'doc/for-test-authors.rst')
+        os.path.dirname(__file__), 'doc/overview.rst')
     return open(manual_path).read()
 
 
