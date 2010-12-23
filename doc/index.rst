@@ -17,6 +17,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   overview
    for-test-authors
    for-framework-folk
    hacking
