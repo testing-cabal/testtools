@@ -94,6 +94,28 @@ class TracebackContent(Content):
             content_type, lambda: [value.encode("utf8")])
 
 
+DEFAULT_CHUNK_SIZE = 4096
+
+
+def stream_content(stream, content_type=None, chunk_size=DEFAULT_CHUNK_SIZE):
+    """Create a `Content` object from a file-like stream.
+
+    :param stream: A file-like object to read the content from.
+    :param content_type: The type of content. If not specified, defaults to
+        UTF8-encoded text/plain.
+    :param chunk_size: The size of chunks to read from the file.  Defaults to
+        `DEFAULT_CHUNK_SIZE`.
+    """
+    if content_type is None:
+        content_type = UTF8_TEXT
+    def read_chunk():
+        chunk = stream.read(chunk_size)
+        while chunk:
+            yield chunk
+            chunk = stream.read(chunk_size)
+    return Content(content_type, read_chunk)
+
+
 def text_content(text):
     """Create a `Content` object from some text.
 

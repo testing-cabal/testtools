@@ -2,10 +2,26 @@
 
 import unittest
 from testtools import TestCase
-from testtools.compat import _b, _u
-from testtools.content import Content, TracebackContent, text_content
-from testtools.content_type import ContentType, UTF8_TEXT
-from testtools.matchers import MatchesException, Raises
+from testtools.compat import (
+    _b,
+    _u,
+    StringIO,
+    )
+from testtools.content import (
+    Content,
+    TracebackContent,
+    stream_content,
+    text_content,
+    )
+from testtools.content_type import (
+    ContentType,
+    UTF8_TEXT,
+    )
+from testtools.matchers import (
+    Equals,
+    MatchesException,
+    Raises,
+    )
 from testtools.tests.helpers import an_exc_info
 
 
@@ -88,6 +104,20 @@ class TestBytesContent(TestCase):
         data = _u("some data")
         expected = Content(UTF8_TEXT, lambda: [data.encode('utf8')])
         self.assertEqual(expected, text_content(data))
+
+
+class TestStreamContent(TestCase):
+
+    def test_stream(self):
+        data = StringIO('some data')
+        content = stream_content(data, UTF8_TEXT, chunk_size=2)
+        self.assertThat(
+            list(content.iter_bytes()), Equals(['so', 'me', ' d', 'at', 'a']))
+
+    def test_default_type(self):
+        data = StringIO('some data')
+        content = stream_content(data)
+        self.assertThat(content.content_type, Equals(UTF8_TEXT))
 
 
 def test_suite():
