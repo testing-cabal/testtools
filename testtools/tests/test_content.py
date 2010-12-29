@@ -10,7 +10,6 @@ from testtools.compat import (
 from testtools.content import (
     Content,
     TracebackContent,
-    stream_content,
     text_content,
     )
 from testtools.content_type import (
@@ -81,6 +80,22 @@ class TestContent(TestCase):
         content = Content(content_type, lambda: [iso_version])
         self.assertEqual([text], list(content.iter_text()))
 
+    def test_from_stream(self):
+        data = StringIO('some data')
+        content = Content.from_stream(data, UTF8_TEXT, chunk_size=2)
+        self.assertThat(
+            list(content.iter_bytes()), Equals(['so', 'me', ' d', 'at', 'a']))
+
+    def test_from_stream_default_type(self):
+        data = StringIO('some data')
+        content = Content.from_stream(data)
+        self.assertThat(content.content_type, Equals(UTF8_TEXT))
+
+    def test_from_text(self):
+        data = _u("some data")
+        expected = Content(UTF8_TEXT, lambda: [data.encode('utf8')])
+        self.assertEqual(expected, Content.from_text(data))
+
 
 class TestTracebackContent(TestCase):
 
@@ -104,20 +119,6 @@ class TestBytesContent(TestCase):
         data = _u("some data")
         expected = Content(UTF8_TEXT, lambda: [data.encode('utf8')])
         self.assertEqual(expected, text_content(data))
-
-
-class TestStreamContent(TestCase):
-
-    def test_stream(self):
-        data = StringIO('some data')
-        content = stream_content(data, UTF8_TEXT, chunk_size=2)
-        self.assertThat(
-            list(content.iter_bytes()), Equals(['so', 'me', ' d', 'at', 'a']))
-
-    def test_default_type(self):
-        data = StringIO('some data')
-        content = stream_content(data)
-        self.assertThat(content.content_type, Equals(UTF8_TEXT))
 
 
 def test_suite():

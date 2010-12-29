@@ -12,6 +12,9 @@ from testtools.testresult import TestResult
 _join_b = _b("").join
 
 
+DEFAULT_CHUNK_SIZE = 4096
+
+
 class Content(object):
     """A MIME-like Content object.
 
@@ -35,6 +38,34 @@ class Content(object):
     def __eq__(self, other):
         return (self.content_type == other.content_type and
             _join_b(self.iter_bytes()) == _join_b(other.iter_bytes()))
+
+    @classmethod
+    def from_stream(cls, stream, content_type=None,
+                    chunk_size=DEFAULT_CHUNK_SIZE):
+        """Create a `Content` object from a file-like stream.
+
+        :param stream: A file-like object to read the content from.
+        :param content_type: The type of content. If not specified, defaults
+            to UTF8-encoded text/plain.
+        :param chunk_size: The size of chunks to read from the file.
+             Defaults to `DEFAULT_CHUNK_SIZE`.
+        """
+        if content_type is None:
+            content_type = UTF8_TEXT
+        def read_chunk():
+            chunk = stream.read(chunk_size)
+            while chunk:
+                yield chunk
+                chunk = stream.read(chunk_size)
+        return Content(content_type, read_chunk)
+
+    @classmethod
+    def from_text(cls, text):
+        """Create a `Content` object from some text.
+
+        This is useful for adding details which are short strings.
+        """
+        return cls(UTF8_TEXT, lambda: [text.encode('utf8')])
 
     def iter_bytes(self):
         """Iterate over bytestrings of the serialised content."""
@@ -94,31 +125,9 @@ class TracebackContent(Content):
             content_type, lambda: [value.encode("utf8")])
 
 
-DEFAULT_CHUNK_SIZE = 4096
-
-
-def stream_content(stream, content_type=None, chunk_size=DEFAULT_CHUNK_SIZE):
-    """Create a `Content` object from a file-like stream.
-
-    :param stream: A file-like object to read the content from.
-    :param content_type: The type of content. If not specified, defaults to
-        UTF8-encoded text/plain.
-    :param chunk_size: The size of chunks to read from the file.  Defaults to
-        `DEFAULT_CHUNK_SIZE`.
-    """
-    if content_type is None:
-        content_type = UTF8_TEXT
-    def read_chunk():
-        chunk = stream.read(chunk_size)
-        while chunk:
-            yield chunk
-            chunk = stream.read(chunk_size)
-    return Content(content_type, read_chunk)
-
-
 def text_content(text):
     """Create a `Content` object from some text.
 
     This is useful for adding details which are short strings.
     """
-    return Content(UTF8_TEXT, lambda: [text.encode('utf8')])
+    return Content.from_text(text)
