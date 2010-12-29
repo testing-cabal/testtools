@@ -2,6 +2,15 @@
 
 """Compatibility support for python 2 and 3."""
 
+__metaclass__ = type
+__all__ = [
+    '_b',
+    '_u',
+    'advance_iterator',
+    'str_is_unicode',
+    'StringIO',
+    'unicode_output_stream',
+    ]
 
 import codecs
 import linecache
@@ -11,14 +20,9 @@ import re
 import sys
 import traceback
 
-__metaclass__ = type
-__all__ = [
-    '_b',
-    '_u',
-    'advance_iterator',
-    'str_is_unicode',
-    'unicode_output_stream',
-    ]
+from testtools.helpers import try_imports
+
+StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
 
 
 __u_doc = """A function version of the 'u' prefix.
