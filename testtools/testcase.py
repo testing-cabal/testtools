@@ -167,6 +167,11 @@ class TestCase(unittest.TestCase):
             self.__details = {}
         self.__details[name] = content_object
 
+    def attachFile(self, name, path, content_type=None, chunk_size=None):
+        content_object = content.Content.from_file(
+            path, content_type, chunk_size)
+        self.addDetail(name, content_object)
+
     def getDetails(self):
         """Get the details dict that will be reported with this test's outcome.
 
