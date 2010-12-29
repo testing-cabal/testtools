@@ -14,6 +14,9 @@ Changes
 Improvements
 ------------
 
+* ``EndsWith`` and ``KeysEqual`` now in testtools.matchers.__all__.
+  (Jonathan Lange, #692158)
+
 * ``MultiTestResult`` now forwards the ``time`` API. (Robert Collins, #692294)
 
 * ``MultiTestResult`` now documented in the manual. (Jonathan Lange, #661116)

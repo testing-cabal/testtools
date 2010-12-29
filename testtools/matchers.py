@@ -14,8 +14,10 @@ __metaclass__ = type
 __all__ = [
     'Annotate',
     'DocTestMatches',
+    'EndsWith',
     'Equals',
     'Is',
+    'KeysEqual',
     'LessThan',
     'MatchesAll',
     'MatchesAny',
