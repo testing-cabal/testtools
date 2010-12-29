@@ -168,6 +168,20 @@ class TestCase(unittest.TestCase):
         self.__details[name] = content_object
 
     def attachFile(self, name, path, content_type=None, chunk_size=None):
+        """Attach a file to this test as a detail.
+
+        This is a convenience method wrapping around `addDetail`.
+
+        Note that the file *must* exist when the test result is called with
+        the results of this test, after the test has been torn down.
+
+        :param name: The name to give to the detail for the attached file.
+        :param path: The path to the file to attach.
+        :param content_type: The content type of the file.  If not provided,
+            defaults to UTF8-encoded text/plain.
+        :param chunk_size: The size of chunks to read from the file.  Defaults
+            to something sensible.
+        """
         content_object = content.Content.from_file(
             path, content_type, chunk_size)
         self.addDetail(name, content_object)

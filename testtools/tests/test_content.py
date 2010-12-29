@@ -23,6 +23,7 @@ from testtools.matchers import (
     Equals,
     MatchesException,
     Raises,
+    raises,
     )
 from testtools.tests.helpers import an_exc_info
 
@@ -91,6 +92,12 @@ class TestContent(TestCase):
         content = Content.from_file(path, UTF8_TEXT, chunk_size=2)
         self.assertThat(
             list(content.iter_bytes()), Equals(['so', 'me', ' d', 'at', 'a']))
+
+    def test_from_nonexistent_file(self):
+        directory = tempfile.mkdtemp()
+        nonexistent = os.path.join(directory, 'nonexistent-file')
+        content = Content.from_file(nonexistent)
+        self.assertThat(content.iter_bytes, raises(IOError))
 
     def test_from_file_default_type(self):
         content = Content.from_file('/nonexistent/path')

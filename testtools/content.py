@@ -55,6 +55,9 @@ class Content(object):
     def from_file(cls, path, content_type=None, chunk_size=None):
         """Create a `Content` object from a file on disk.
 
+        Note that the file will only be read from when ``iter_bytes`` is
+        called.
+
         :param path: The path to the file to be used as content.
         :param content_type: The type of content.  If not specified, defaults
             to UTF8-encoded text/plain.
@@ -75,6 +78,9 @@ class Content(object):
     @classmethod
     def from_stream(cls, stream, content_type=None, chunk_size=None):
         """Create a `Content` object from a file-like stream.
+
+        Note that the stream will only be read from when ``iter_bytes`` is
+        called.
 
         :param stream: A file-like object to read the content from.
         :param content_type: The type of content. If not specified, defaults
