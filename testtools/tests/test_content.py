@@ -103,6 +103,15 @@ class TestContent(TestCase):
         content = Content.from_file('/nonexistent/path')
         self.assertThat(content.content_type, Equals(UTF8_TEXT))
 
+    def test_from_file_eager_loading(self):
+        fd, path = tempfile.mkstemp()
+        os.write(fd, 'some data')
+        os.close(fd)
+        content = Content.from_file(path, UTF8_TEXT, read_now=True)
+        os.remove(path)
+        self.assertThat(
+            _b('').join(content.iter_bytes()), Equals('some data'))
+
     def test_from_stream(self):
         data = StringIO('some data')
         content = Content.from_stream(data, UTF8_TEXT, chunk_size=2)
@@ -113,6 +122,17 @@ class TestContent(TestCase):
         data = StringIO('some data')
         content = Content.from_stream(data)
         self.assertThat(content.content_type, Equals(UTF8_TEXT))
+
+    def test_from_stream_eager_loading(self):
+        fd, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
+        os.write(fd, 'some data')
+        stream = open(path, 'rb')
+        content = Content.from_stream(stream, UTF8_TEXT, read_now=True)
+        os.write(fd, 'more data')
+        os.close(fd)
+        self.assertThat(
+            _b('').join(content.iter_bytes()), Equals('some data'))
 
     def test_from_text(self):
         data = _u("some data")
