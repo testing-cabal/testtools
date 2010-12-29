@@ -15,10 +15,11 @@ raises_value_error = Raises(MatchesException(ValueError))
 class TestContent(TestCase):
 
     def test___init___None_errors(self):
-        self.assertThat(lambda:Content(None, None), raises_value_error)
-        self.assertThat(lambda:Content(None, lambda: ["traceback"]),
-            raises_value_error)
-        self.assertThat(lambda:Content(ContentType("text", "traceback"), None),
+        self.assertThat(lambda: Content(None, None), raises_value_error)
+        self.assertThat(
+            lambda: Content(None, lambda: ["traceback"]), raises_value_error)
+        self.assertThat(
+            lambda: Content(ContentType("text", "traceback"), None),
             raises_value_error)
 
     def test___init___sets_ivars(self):
@@ -68,8 +69,8 @@ class TestContent(TestCase):
 class TestTracebackContent(TestCase):
 
     def test___init___None_errors(self):
-        self.assertThat(lambda:TracebackContent(None, None),
-            raises_value_error) 
+        self.assertThat(
+            lambda: TracebackContent(None, None), raises_value_error)
 
     def test___init___sets_ivars(self):
         content = TracebackContent(an_exc_info, self)
