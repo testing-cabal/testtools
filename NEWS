@@ -21,8 +21,8 @@ Improvements
 
 * ``MultiTestResult`` now documented in the manual. (Jonathan Lange, #661116)
 
-* New content helper ``Content.from_stream`` makes it easier to attach
-  file-like objects to a test. (Jonathan Lange, #694126)
+* New content helpers ``Content.from_file`` and ``Content.from_stream`` make
+  it easier to attach file-like objects to a test. (Jonathan Lange, #694126)
 
 * Vastly improved and extended documentation. (Jonathan Lange)
 

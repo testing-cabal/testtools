@@ -634,11 +634,15 @@ do::
 Because adding small bits of text content is very common, there's also a
 convenience method::
 
-  text = text_content("some text")
+  text = Content.from_text("some text")
 
 To make content out of an image stored on disk, you could do something like::
 
   image = Content(ContentType('image', 'png'), lambda: open('foo.png').read())
+
+Or you could use the convenience method::
+
+  image = Content.from_file('foo.png', ContentType('image', 'png'))
 
 The ``lambda`` helps make sure that the file is opened and the actual bytes
 read only when they are needed – by default, when the test is finished.  This
