@@ -40,6 +40,28 @@ class Content(object):
             _join_b(self.iter_bytes()) == _join_b(other.iter_bytes()))
 
     @classmethod
+    def from_file(cls, path, content_type=None,
+                  chunk_size=DEFAULT_CHUNK_SIZE):
+        """Create a `Content` object from a file on disk.
+
+        :param path: The path to the file to be used as content.
+        :param content_type: The type of content.  If not specified, defaults
+            to UTF8-encoded text/plain.
+        :param chunk_size: The size of chunks to read from the file.
+             Defaults to `DEFAULT_CHUNK_SIZE`.
+        """
+        if content_type is None:
+            content_type = UTF8_TEXT
+        def read_file():
+            stream = open(path, 'rb')
+            chunk = stream.read(chunk_size)
+            while chunk:
+                yield chunk
+                chunk = stream.read(chunk_size)
+            stream.close()
+        return cls(content_type, read_file)
+
+    @classmethod
     def from_stream(cls, stream, content_type=None,
                     chunk_size=DEFAULT_CHUNK_SIZE):
         """Create a `Content` object from a file-like stream.

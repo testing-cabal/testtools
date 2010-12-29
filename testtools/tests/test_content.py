@@ -1,6 +1,9 @@
 # Copyright (c) 2008-2010 Jonathan M. Lange. See LICENSE for details.
 
+import os
+import tempfile
 import unittest
+
 from testtools import TestCase
 from testtools.compat import (
     _b,
@@ -79,6 +82,19 @@ class TestContent(TestCase):
         iso_version = text.encode("ISO-8859-1")
         content = Content(content_type, lambda: [iso_version])
         self.assertEqual([text], list(content.iter_text()))
+
+    def test_from_file(self):
+        fd, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
+        os.write(fd, 'some data')
+        os.close(fd)
+        content = Content.from_file(path, UTF8_TEXT, chunk_size=2)
+        self.assertThat(
+            list(content.iter_bytes()), Equals(['so', 'me', ' d', 'at', 'a']))
+
+    def test_from_file_default_type(self):
+        content = Content.from_file('/nonexistent/path')
+        self.assertThat(content.content_type, Equals(UTF8_TEXT))
 
     def test_from_stream(self):
         data = StringIO('some data')
