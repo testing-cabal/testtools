@@ -15,6 +15,18 @@ _join_b = _b("").join
 DEFAULT_CHUNK_SIZE = 4096
 
 
+def _iter_chunks(stream, chunk_size):
+    """Read 'stream' in chunks of 'chunk_size'.
+
+    :param stream: A file-like object to read from.
+    :param chunk_size: The size of each read from 'stream'.
+    """
+    chunk = stream.read(chunk_size)
+    while chunk:
+        yield chunk
+        chunk = stream.read(chunk_size)
+
+
 class Content(object):
     """A MIME-like Content object.
 
@@ -54,10 +66,8 @@ class Content(object):
             content_type = UTF8_TEXT
         def read_file():
             stream = open(path, 'rb')
-            chunk = stream.read(chunk_size)
-            while chunk:
+            for chunk in _iter_chunks(stream, chunk_size):
                 yield chunk
-                chunk = stream.read(chunk_size)
             stream.close()
         return cls(content_type, read_file)
 
@@ -74,12 +84,7 @@ class Content(object):
         """
         if content_type is None:
             content_type = UTF8_TEXT
-        def read_chunk():
-            chunk = stream.read(chunk_size)
-            while chunk:
-                yield chunk
-                chunk = stream.read(chunk_size)
-        return Content(content_type, read_chunk)
+        return Content(content_type, lambda: _iter_chunks(stream, chunk_size))
 
     @classmethod
     def from_text(cls, text):
