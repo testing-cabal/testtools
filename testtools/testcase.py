@@ -35,6 +35,7 @@ wraps = try_import('functools.wraps')
 
 class TestSkipped(Exception):
     """Raised within TestCase.run() when a test is skipped."""
+testSkipped = try_import('unittest2.case.SkipTest', TestSkipped)
 TestSkipped = try_import('unittest.case.SkipTest', TestSkipped)
 
 
@@ -45,6 +46,8 @@ class _UnexpectedSuccess(Exception):
     module.
     """
 _UnexpectedSuccess = try_import(
+    'unittest2.case._UnexpectedSuccess', _UnexpectedSuccess)
+_UnexpectedSuccess = try_import(
     'unittest.case._UnexpectedSuccess', _UnexpectedSuccess)
 
 class _ExpectedFailure(Exception):
@@ -53,6 +56,8 @@ class _ExpectedFailure(Exception):
     Note that this exception is private plumbing in testtools' testcase
     module.
     """
+_ExpectedFailure = try_import(
+    'unittest2.case._ExpectedFailure', _ExpectedFailure)
 _ExpectedFailure = try_import(
     'unittest.case._ExpectedFailure', _ExpectedFailure)
 
