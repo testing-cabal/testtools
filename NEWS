@@ -23,6 +23,8 @@ Improvements
 
 * Vastly improved and extended documentation. (Jonathan Lange)
 
+* Use unittest2 exception classes if available. (Jelmer Vernooij)
+
 
 0.9.8
 ~~~~~
