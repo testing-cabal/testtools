@@ -66,6 +66,8 @@ def run_test_with(test_runner, **kwargs):
     """Decorate a test as using a specific `RunTest`.
 
     e.g.
+    .. python::
+
       @run_test_with(CustomRunner, timeout=42)
       def test_foo(self):
           self.assertTrue(True)
@@ -76,13 +78,13 @@ def run_test_with(test_runner, **kwargs):
     method, then you must either make this one the top-most decorator, or
     you must write your decorators so that they update the wrapping function
     with the attributes of the wrapped function.  The latter is recommended
-    style anyway.  `functools.wraps`, `functools.wrapper` and
-    `twisted.python.util.mergeFunctionMetadata` can help you do this.
+    style anyway.  'functools.wraps', 'functools.wrapper' and
+    'twisted.python.util.mergeFunctionMetadata' can help you do this.
 
     :param test_runner: A `RunTest` factory that takes a test case and an
         optional list of exception handlers.  See `RunTest`.
-    :param **kwargs: Keyword arguments to pass on as extra arguments to
-        `test_runner`.
+    :param kwargs: Keyword arguments to pass on as extra arguments to
+        'test_runner'.
     :return: A decorator to be used for marking a test as needing a special
         runner.
     """
@@ -115,10 +117,10 @@ class TestCase(unittest.TestCase):
         """Construct a TestCase.
 
         :param testMethod: The name of the method to run.
-        :param runTest: Optional class to use to execute the test. If not
-            supplied `testtools.runtest.RunTest` is used. The instance to be
-            used is created when run() is invoked, so will be fresh each time.
-            Overrides `run_tests_with` if given.
+        :keyword runTest: Optional class to use to execute the test. If not
+            supplied `RunTest` is used. The instance to be used is created
+            when run() is invoked, so will be fresh each time. Overrides
+            `TestCase.run_tests_with` if given.
         """
         runTest = kwargs.pop('runTest', None)
         unittest.TestCase.__init__(self, *args, **kwargs)
@@ -544,8 +546,8 @@ class TestCase(unittest.TestCase):
 class PlaceHolder(object):
     """A placeholder test.
 
-    `PlaceHolder` implements much of the same interface as `TestCase` and is
-    particularly suitable for being added to `TestResult`s.
+    `PlaceHolder` implements much of the same interface as TestCase and is
+    particularly suitable for being added to TestResults.
     """
 
     def __init__(self, test_id, short_description=None):

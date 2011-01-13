@@ -29,7 +29,9 @@ snapshot: prerelease
 ### Documentation ###
 
 apidocs:
-	pydoctor --make-html --add-package testtools \
+	# pydoctor emits deprecation warnings under Ubuntu 10.10 LTS
+	PYTHONWARNINGS='ignore::DeprecationWarning' \
+		pydoctor --make-html --add-package testtools \
 		--docformat=restructuredtext --project-name=testtools \
 		--project-url=https://launchpad.net/testtools
 

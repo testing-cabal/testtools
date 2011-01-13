@@ -171,8 +171,7 @@ class DoesNotStartWith(Mismatch):
         """Create a DoesNotStartWith Mismatch.
 
         :param matchee: the string that did not match.
-        :param expected: the string that `matchee` was expected to start
-            with.
+        :param expected: the string that 'matchee' was expected to start with.
         """
         self.matchee = matchee
         self.expected = expected
@@ -188,7 +187,7 @@ class DoesNotEndWith(Mismatch):
         """Create a DoesNotEndWith Mismatch.
 
         :param matchee: the string that did not match.
-        :param expected: the string that `matchee` was expected to end with.
+        :param expected: the string that 'matchee' was expected to end with.
         """
         self.matchee = matchee
         self.expected = expected
@@ -245,8 +244,8 @@ class Equals(_BinaryComparison):
 class NotEquals(_BinaryComparison):
     """Matches if the items are not equal.
 
-    In most cases, this is equivalent to `Not(Equals(foo))`. The difference
-    only matters when testing `__ne__` implementations.
+    In most cases, this is equivalent to ``Not(Equals(foo))``. The difference
+    only matters when testing ``__ne__`` implementations.
     """
 
     comparator = operator.ne
@@ -427,7 +426,7 @@ class KeysEqual(Matcher):
     def __init__(self, *expected):
         """Create a `KeysEqual` Matcher.
 
-        :param *expected: The keys the dict is expected to have.  If a dict,
+        :param expected: The keys the dict is expected to have.  If a dict,
             then we use the keys of that dict, if a collection, we assume it
             is a collection of expected keys.
         """
@@ -525,6 +524,7 @@ def raises(exception):
     """Make a matcher that checks that a callable raises an exception.
 
     This is a convenience function, exactly equivalent to::
+
         return Raises(MatchesException(exception))
 
     See `Raises` and `MatchesException` for more information.
