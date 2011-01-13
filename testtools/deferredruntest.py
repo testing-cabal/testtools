@@ -289,7 +289,7 @@ def assert_fails_with(d, *exc_types, **kwargs):
     peril; expect the API to change.
 
     :param d: A Deferred that is expected to fail.
-    :param *exc_types: The exception types that the Deferred is expected to
+    :param exc_types: The exception types that the Deferred is expected to
         fail with.
     :param failureException: An optional keyword argument.  If provided, will
         raise that exception instead of `testtools.TestCase.failureException`.

@@ -83,7 +83,7 @@ def run_test_with(test_runner, **kwargs):
 
     :param test_runner: A `RunTest` factory that takes a test case and an
         optional list of exception handlers.  See `RunTest`.
-    :param `**kwargs`: Keyword arguments to pass on as extra arguments to
+    :param kwargs: Keyword arguments to pass on as extra arguments to
         'test_runner'.
     :return: A decorator to be used for marking a test as needing a special
         runner.
@@ -117,7 +117,7 @@ class TestCase(unittest.TestCase):
         """Construct a TestCase.
 
         :param testMethod: The name of the method to run.
-        :param runTest: Optional class to use to execute the test. If not
+        :keyword runTest: Optional class to use to execute the test. If not
             supplied `RunTest` is used. The instance to be used is created
             when run() is invoked, so will be fresh each time. Overrides
             `TestCase.run_tests_with` if given.
@@ -546,8 +546,8 @@ class TestCase(unittest.TestCase):
 class PlaceHolder(object):
     """A placeholder test.
 
-    `PlaceHolder` implements much of the same interface as `TestCase` and is
-    particularly suitable for being added to `TestResult`s.
+    `PlaceHolder` implements much of the same interface as TestCase and is
+    particularly suitable for being added to TestResults.
     """
 
     def __init__(self, test_id, short_description=None):

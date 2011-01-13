@@ -426,7 +426,7 @@ class KeysEqual(Matcher):
     def __init__(self, *expected):
         """Create a `KeysEqual` Matcher.
 
-        :param *expected: The keys the dict is expected to have.  If a dict,
+        :param expected: The keys the dict is expected to have.  If a dict,
             then we use the keys of that dict, if a collection, we assume it
             is a collection of expected keys.
         """
