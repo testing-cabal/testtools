@@ -95,10 +95,10 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
                  debug=False):
         """Construct an `AsynchronousDeferredRunTest`.
 
-        :param case: The `testtools.TestCase` to run.
+        :param case: The `TestCase` to run.
         :param handlers: A list of exception handlers (ExceptionType, handler)
             where 'handler' is a callable that takes a `TestCase`, a
-            `TestResult` and the exception raised.
+            `testtools.TestResult` and the exception raised.
         :param reactor: The Twisted reactor to use.  If not given, we use the
             default reactor.
         :param timeout: The maximum time allowed for running a test.  The
