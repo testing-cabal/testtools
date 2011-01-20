@@ -14,6 +14,7 @@ __all__ = [
 
 import copy
 import itertools
+import re
 import sys
 import types
 import unittest
@@ -682,3 +683,24 @@ def skipUnless(condition, reason):
     def _id(obj):
         return obj
     return _id
+
+
+class ExpectedException:
+    """A context manager to handle expected exceptions."""
+
+    def __init__(self, exc_type, value_re):
+        self.exc_type = exc_type
+        self.value_re = value_re
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type is None:
+            raise AssertionError('%s not raised.' % self.exc_type.__name__)
+        if exc_type != self.exc_type:
+            return False
+        if not re.match(self.value_re, str(exc_value)):
+            raise AssertionError('"%s" does not match "%s".' %
+                                 (str(exc_value), self.value_re))
+        return True

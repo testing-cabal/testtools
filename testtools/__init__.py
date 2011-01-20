@@ -37,6 +37,7 @@ from testtools.runtest import (
     )
 from testtools.testcase import (
     ErrorHolder,
+    ExpectedException,
     PlaceHolder,
     TestCase,
     clone_test_with_new_id,
