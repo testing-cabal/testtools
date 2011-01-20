@@ -32,6 +32,7 @@ __all__ = [
 import doctest
 import operator
 from pprint import pformat
+import re
 import sys
 
 from testtools.compat import classtypes, _error_repr, isbaseexception
@@ -352,16 +353,20 @@ class MatchedUnexpectedly(Mismatch):
 class MatchesException(Matcher):
     """Match an exc_info tuple against an exception instance or type."""
 
-    def __init__(self, exception):
+    def __init__(self, exception, value_re=None):
         """Create a MatchesException that will match exc_info's for exception.
 
         :param exception: Either an exception instance or type.
             If an instance is given, the type and arguments of the exception
             are checked. If a type is given only the type of the exception is
             checked.
+        :param value_re: If 'exception' is a type, and the matchee exception
+            is of the right type, then the 'str()' of the matchee exception
+            is matched against this regular expression.
         """
         Matcher.__init__(self)
         self.expected = exception
+        self.value_re = value_re
         self._is_instance = type(self.expected) not in classtypes()
 
     def match(self, other):
@@ -372,9 +377,16 @@ class MatchesException(Matcher):
             expected_class = expected_class.__class__
         if not issubclass(other[0], expected_class):
             return Mismatch('%r is not a %r' % (other[0], expected_class))
-        if self._is_instance and other[1].args != self.expected.args:
-            return Mismatch('%s has different arguments to %s.' % (
-                _error_repr(other[1]), _error_repr(self.expected)))
+        if self._is_instance:
+            if other[1].args != self.expected.args:
+                return Mismatch('%s has different arguments to %s.' % (
+                        _error_repr(other[1]), _error_repr(self.expected)))
+        elif self.value_re is not None:
+            str_exc_value = str(other[1])
+            if not re.match(self.value_re, str_exc_value):
+                return Mismatch(
+                    '"%s" does not match "%s"'
+                    % (str_exc_value, self.value_re))
 
     def __str__(self):
         if self._is_instance:
