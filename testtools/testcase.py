@@ -695,7 +695,10 @@ class ExpectedException:
           with ExpectedException(ValueError, 'fo.*'):
               raise ValueError('foo')
 
-    will pass.
+    will pass.  If the raised exception has a type other than the specified
+    type, it will be re-raised.  If it has a 'str()' that does not match the
+    given regular expression, an AssertionError will be raised.  If no
+    exception is raised, an AssertionError will be raised.
     """
 
     def __init__(self, exc_type, value_re):
