@@ -17,9 +17,15 @@ Improvements
 * ``EndsWith`` and ``KeysEqual`` now in testtools.matchers.__all__.
   (Jonathan Lange, #692158)
 
+* ``MatchesException`` extended to support a regular expression check against
+  the str() of a raised exception.  (Jonathan Lange)
+
 * ``MultiTestResult`` now forwards the ``time`` API. (Robert Collins, #692294)
 
 * ``MultiTestResult`` now documented in the manual. (Jonathan Lange, #661116)
+
+* New ``ExpectedException`` context manager to help write tests against things
+  that are expected to raise exceptions. (Aaron Bentley)
 
 * Vastly improved and extended documentation. (Jonathan Lange)
 

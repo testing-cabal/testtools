@@ -119,6 +119,24 @@ Note that this is incompatible with the ``assertRaises`` in unittest2 and
 Python2.7.
 
 
+ExpectedException
+-----------------
+
+If you are using a version of Python that supports the ``with`` context
+manager syntax, you might prefer to use that syntax to ensure that code raises
+particular errors.  ``ExpectedException`` does just that.  For example::
+
+  def test_square_root_bad_input_2(self):
+      # 'square' raises a TypeError if it's given bad input.
+      with ExpectedException(TypeError, "Cannot square.*"):
+          silly.square('orange')
+
+The first argument to ``ExpectedException`` is the type of exception you
+expect to see raised.  The second argument is an optional regular expression,
+if provided, the ``str()`` of the raised exception must match the regular
+expression.
+
+
 assertIn, assertNotIn
 ---------------------
 

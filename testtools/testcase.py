@@ -1,10 +1,11 @@
-# Copyright (c) 2008-2010 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2008-2011 Jonathan M. Lange. See LICENSE for details.
 
 """Test case related stuff."""
 
 __metaclass__ = type
 __all__ = [
     'clone_test_with_new_id',
+    'ExpectedException',
     'run_test_with',
     'skip',
     'skipIf',
@@ -14,6 +15,7 @@ __all__ = [
 
 import copy
 import itertools
+import re
 import sys
 import types
 import unittest
@@ -682,3 +684,42 @@ def skipUnless(condition, reason):
     def _id(obj):
         return obj
     return _id
+
+
+class ExpectedException:
+    """A context manager to handle expected exceptions.
+
+    In Python 2.5 or later::
+
+      def test_foo(self):
+          with ExpectedException(ValueError, 'fo.*'):
+              raise ValueError('foo')
+
+    will pass.  If the raised exception has a type other than the specified
+    type, it will be re-raised.  If it has a 'str()' that does not match the
+    given regular expression, an AssertionError will be raised.  If no
+    exception is raised, an AssertionError will be raised.
+    """
+
+    def __init__(self, exc_type, value_re):
+        """Construct an `ExpectedException`.
+
+        :param exc_type: The type of exception to expect.
+        :param value_re: A regular expression to match against the
+            'str()' of the raised exception.
+        """
+        self.exc_type = exc_type
+        self.value_re = value_re
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type is None:
+            raise AssertionError('%s not raised.' % self.exc_type.__name__)
+        if exc_type != self.exc_type:
+            return False
+        if not re.match(self.value_re, str(exc_value)):
+            raise AssertionError('"%s" does not match "%s".' %
+                                 (str(exc_value), self.value_re))
+        return True

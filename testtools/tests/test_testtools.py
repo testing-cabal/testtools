@@ -30,6 +30,12 @@ from testtools.tests.helpers import (
     Python27TestResult,
     ExtendedTestResult,
     )
+try:
+    exec('from __future__ import with_statement')
+except SyntaxError:
+    pass
+else:
+    from test_with_with import *
 
 
 class TestPlaceHolder(TestCase):
