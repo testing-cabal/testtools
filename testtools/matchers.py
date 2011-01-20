@@ -385,7 +385,7 @@ class MatchesException(Matcher):
             str_exc_value = str(other[1])
             if not re.match(self.value_re, str_exc_value):
                 return Mismatch(
-                    '"%s" does not match "%s"'
+                    '"%s" does not match "%s".'
                     % (str_exc_value, self.value_re))
 
     def __str__(self):

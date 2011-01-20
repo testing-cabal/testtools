@@ -226,7 +226,7 @@ class TestMatchesExceptionTypeReInterface(TestCase, TestMatchersInterface):
          MatchesException(Exception))
         ]
     describe_examples = [
-        ('"bar" does not match "fo."',
+        ('"bar" does not match "fo.".',
          error_bar, MatchesException(ValueError, "fo.")),
         ]
 

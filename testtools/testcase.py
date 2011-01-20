@@ -702,7 +702,7 @@ class ExpectedException:
         """Construct an `ExpectedException`.
 
         :param exc_type: The type of exception to expect.
-        :param value_re: A regular expression string to match against the
+        :param value_re: A regular expression to match against the
             'str()' of the raised exception.
         """
         self.exc_type = exc_type
