@@ -21,6 +21,9 @@ Improvements
 
 * ``MultiTestResult`` now documented in the manual. (Jonathan Lange, #661116)
 
+* New ``ExpectedException`` context manager to help write tests against things
+  that are expected to raise exceptions. (Aaron Bentley)
+
 * Vastly improved and extended documentation. (Jonathan Lange)
 
 * Use unittest2 exception classes if available. (Jelmer Vernooij)
