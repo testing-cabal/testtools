@@ -1,4 +1,4 @@
-# Copyright (c) 2008, 2009, 2010 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2008-2011 Jonathan M. Lange. See LICENSE for details.
 
 """Extensions to the standard Python unittest library."""
 
@@ -6,6 +6,7 @@ __all__ = [
     'clone_test_with_new_id',
     'ConcurrentTestSuite',
     'ErrorHolder',
+    'ExpectedException',
     'ExtendedToOriginalDecorator',
     'iterate_tests',
     'MultipleExceptions',
@@ -37,6 +38,7 @@ from testtools.runtest import (
     )
 from testtools.testcase import (
     ErrorHolder,
+    ExpectedException,
     PlaceHolder,
     TestCase,
     clone_test_with_new_id,
@@ -69,4 +71,4 @@ from testtools.testsuite import (
 # If the releaselevel is 'final', then the tarball will be major.minor.micro.
 # Otherwise it is major.minor.micro~$(revno).
 
-__version__ = (0, 9, 8, 'dev', 0)
+__version__ = (0, 9, 9, 'dev', 0)

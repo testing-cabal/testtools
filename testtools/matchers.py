@@ -14,8 +14,10 @@ __metaclass__ = type
 __all__ = [
     'Annotate',
     'DocTestMatches',
+    'EndsWith',
     'Equals',
     'Is',
+    'KeysEqual',
     'LessThan',
     'MatchesAll',
     'MatchesAny',
@@ -171,8 +173,7 @@ class DoesNotStartWith(Mismatch):
         """Create a DoesNotStartWith Mismatch.
 
         :param matchee: the string that did not match.
-        :param expected: the string that `matchee` was expected to start
-            with.
+        :param expected: the string that 'matchee' was expected to start with.
         """
         self.matchee = matchee
         self.expected = expected
@@ -188,7 +189,7 @@ class DoesNotEndWith(Mismatch):
         """Create a DoesNotEndWith Mismatch.
 
         :param matchee: the string that did not match.
-        :param expected: the string that `matchee` was expected to end with.
+        :param expected: the string that 'matchee' was expected to end with.
         """
         self.matchee = matchee
         self.expected = expected
@@ -245,8 +246,8 @@ class Equals(_BinaryComparison):
 class NotEquals(_BinaryComparison):
     """Matches if the items are not equal.
 
-    In most cases, this is equivalent to `Not(Equals(foo))`. The difference
-    only matters when testing `__ne__` implementations.
+    In most cases, this is equivalent to ``Not(Equals(foo))``. The difference
+    only matters when testing ``__ne__`` implementations.
     """
 
     comparator = operator.ne
@@ -353,16 +354,20 @@ class MatchedUnexpectedly(Mismatch):
 class MatchesException(Matcher):
     """Match an exc_info tuple against an exception instance or type."""
 
-    def __init__(self, exception):
+    def __init__(self, exception, value_re=None):
         """Create a MatchesException that will match exc_info's for exception.
 
         :param exception: Either an exception instance or type.
             If an instance is given, the type and arguments of the exception
             are checked. If a type is given only the type of the exception is
             checked.
+        :param value_re: If 'exception' is a type, and the matchee exception
+            is of the right type, then the 'str()' of the matchee exception
+            is matched against this regular expression.
         """
         Matcher.__init__(self)
         self.expected = exception
+        self.value_re = value_re
         self._is_instance = type(self.expected) not in classtypes()
 
     def match(self, other):
@@ -373,9 +378,16 @@ class MatchesException(Matcher):
             expected_class = expected_class.__class__
         if not issubclass(other[0], expected_class):
             return Mismatch('%r is not a %r' % (other[0], expected_class))
-        if self._is_instance and other[1].args != self.expected.args:
-            return Mismatch('%s has different arguments to %s.' % (
-                _error_repr(other[1]), _error_repr(self.expected)))
+        if self._is_instance:
+            if other[1].args != self.expected.args:
+                return Mismatch('%s has different arguments to %s.' % (
+                        _error_repr(other[1]), _error_repr(self.expected)))
+        elif self.value_re is not None:
+            str_exc_value = str(other[1])
+            if not re.match(self.value_re, str_exc_value):
+                return Mismatch(
+                    '"%s" does not match "%s".'
+                    % (str_exc_value, self.value_re))
 
     def __str__(self):
         if self._is_instance:
@@ -427,7 +439,7 @@ class KeysEqual(Matcher):
     def __init__(self, *expected):
         """Create a `KeysEqual` Matcher.
 
-        :param *expected: The keys the dict is expected to have.  If a dict,
+        :param expected: The keys the dict is expected to have.  If a dict,
             then we use the keys of that dict, if a collection, we assume it
             is a collection of expected keys.
         """
@@ -525,6 +537,7 @@ def raises(exception):
     """Make a matcher that checks that a callable raises an exception.
 
     This is a convenience function, exactly equivalent to::
+
         return Raises(MatchesException(exception))
 
     See `Raises` and `MatchesException` for more information.

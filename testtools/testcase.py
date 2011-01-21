@@ -1,10 +1,11 @@
-# Copyright (c) 2008-2010 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2008-2011 Jonathan M. Lange. See LICENSE for details.
 
 """Test case related stuff."""
 
 __metaclass__ = type
 __all__ = [
     'clone_test_with_new_id',
+    'ExpectedException',
     'run_test_with',
     'skip',
     'skipIf',
@@ -14,6 +15,7 @@ __all__ = [
 
 import copy
 import itertools
+import re
 import sys
 import types
 import unittest
@@ -35,6 +37,7 @@ wraps = try_import('functools.wraps')
 
 class TestSkipped(Exception):
     """Raised within TestCase.run() when a test is skipped."""
+testSkipped = try_import('unittest2.case.SkipTest', TestSkipped)
 TestSkipped = try_import('unittest.case.SkipTest', TestSkipped)
 
 
@@ -45,6 +48,8 @@ class _UnexpectedSuccess(Exception):
     module.
     """
 _UnexpectedSuccess = try_import(
+    'unittest2.case._UnexpectedSuccess', _UnexpectedSuccess)
+_UnexpectedSuccess = try_import(
     'unittest.case._UnexpectedSuccess', _UnexpectedSuccess)
 
 class _ExpectedFailure(Exception):
@@ -54,6 +59,8 @@ class _ExpectedFailure(Exception):
     module.
     """
 _ExpectedFailure = try_import(
+    'unittest2.case._ExpectedFailure', _ExpectedFailure)
+_ExpectedFailure = try_import(
     'unittest.case._ExpectedFailure', _ExpectedFailure)
 
 
@@ -61,6 +68,8 @@ def run_test_with(test_runner, **kwargs):
     """Decorate a test as using a specific `RunTest`.
 
     e.g.
+    .. python::
+
       @run_test_with(CustomRunner, timeout=42)
       def test_foo(self):
           self.assertTrue(True)
@@ -71,13 +80,13 @@ def run_test_with(test_runner, **kwargs):
     method, then you must either make this one the top-most decorator, or
     you must write your decorators so that they update the wrapping function
     with the attributes of the wrapped function.  The latter is recommended
-    style anyway.  `functools.wraps`, `functools.wrapper` and
-    `twisted.python.util.mergeFunctionMetadata` can help you do this.
+    style anyway.  'functools.wraps', 'functools.wrapper' and
+    'twisted.python.util.mergeFunctionMetadata' can help you do this.
 
     :param test_runner: A `RunTest` factory that takes a test case and an
         optional list of exception handlers.  See `RunTest`.
-    :param **kwargs: Keyword arguments to pass on as extra arguments to
-        `test_runner`.
+    :param kwargs: Keyword arguments to pass on as extra arguments to
+        'test_runner'.
     :return: A decorator to be used for marking a test as needing a special
         runner.
     """
@@ -110,10 +119,10 @@ class TestCase(unittest.TestCase):
         """Construct a TestCase.
 
         :param testMethod: The name of the method to run.
-        :param runTest: Optional class to use to execute the test. If not
-            supplied `testtools.runtest.RunTest` is used. The instance to be
-            used is created when run() is invoked, so will be fresh each time.
-            Overrides `run_tests_with` if given.
+        :keyword runTest: Optional class to use to execute the test. If not
+            supplied `RunTest` is used. The instance to be used is created
+            when run() is invoked, so will be fresh each time. Overrides
+            `TestCase.run_tests_with` if given.
         """
         runTest = kwargs.pop('runTest', None)
         unittest.TestCase.__init__(self, *args, **kwargs)
@@ -539,8 +548,8 @@ class TestCase(unittest.TestCase):
 class PlaceHolder(object):
     """A placeholder test.
 
-    `PlaceHolder` implements much of the same interface as `TestCase` and is
-    particularly suitable for being added to `TestResult`s.
+    `PlaceHolder` implements much of the same interface as TestCase and is
+    particularly suitable for being added to TestResults.
     """
 
     def __init__(self, test_id, short_description=None):
@@ -675,3 +684,42 @@ def skipUnless(condition, reason):
     def _id(obj):
         return obj
     return _id
+
+
+class ExpectedException:
+    """A context manager to handle expected exceptions.
+
+    In Python 2.5 or later::
+
+      def test_foo(self):
+          with ExpectedException(ValueError, 'fo.*'):
+              raise ValueError('foo')
+
+    will pass.  If the raised exception has a type other than the specified
+    type, it will be re-raised.  If it has a 'str()' that does not match the
+    given regular expression, an AssertionError will be raised.  If no
+    exception is raised, an AssertionError will be raised.
+    """
+
+    def __init__(self, exc_type, value_re):
+        """Construct an `ExpectedException`.
+
+        :param exc_type: The type of exception to expect.
+        :param value_re: A regular expression to match against the
+            'str()' of the raised exception.
+        """
+        self.exc_type = exc_type
+        self.value_re = value_re
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type is None:
+            raise AssertionError('%s not raised.' % self.exc_type.__name__)
+        if exc_type != self.exc_type:
+            return False
+        if not re.match(self.value_re, str(exc_value)):
+            raise AssertionError('"%s" does not match "%s".' %
+                                 (str(exc_value), self.value_re))
+        return True

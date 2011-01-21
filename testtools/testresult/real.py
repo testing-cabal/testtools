@@ -16,6 +16,25 @@ import unittest
 
 from testtools.compat import all, _format_exc_info, str_is_unicode, _u
 
+# From http://docs.python.org/library/datetime.html
+_ZERO = datetime.timedelta(0)
+
+# A UTC class.
+
+class UTC(datetime.tzinfo):
+    """UTC"""
+
+    def utcoffset(self, dt):
+        return _ZERO
+
+    def tzname(self, dt):
+        return "UTC"
+
+    def dst(self, dt):
+        return _ZERO
+
+utc = UTC()
+
 
 class TestResult(unittest.TestResult):
     """Subclass of unittest.TestResult extending the protocol for flexability.
@@ -149,15 +168,16 @@ class TestResult(unittest.TestResult):
         time() method.
         """
         if self.__now is None:
-            return datetime.datetime.now()
+            return datetime.datetime.now(utc)
         else:
             return self.__now
 
     def startTestRun(self):
         """Called before a test run starts.
 
-        New in python 2.7. The testtools version resets the result to a
-        pristine condition ready for use in another test run.
+        New in Python 2.7. The testtools version resets the result to a
+        pristine condition ready for use in another test run.  Note that this
+        is different from Python 2.7's startTestRun, which does nothing.
         """
         super(TestResult, self).__init__()
         self.skip_reasons = {}
@@ -237,6 +257,9 @@ class MultiTestResult(TestResult):
 
     def stopTestRun(self):
         return self._dispatch('stopTestRun')
+
+    def time(self, a_datetime):
+        return self._dispatch('time', a_datetime)
 
     def done(self):
         return self._dispatch('done')
