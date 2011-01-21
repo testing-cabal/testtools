@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2010 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2009-2011 Jonathan M. Lange. See LICENSE for details.
 
 """Matchers, a way to express complex assertions outside the testcase.
 
@@ -532,14 +532,14 @@ def raises(exception):
     return Raises(MatchesException(exception))
 
 
-class EachOf(object):
+class MatchesListwise(object):
     """Matches if each matcher matches the corresponding value.
 
     More easily explained by example than in words:
 
-    >>> EachOf([Equals(1)]).match([1])
-    >>> EachOf([Equals(1), Equals(2)]).match([1, 2])
-    >>> print EachOf([Equals(1), Equals(2)]).match([2, 1]).describe()
+    >>> MatchesListwise([Equals(1)]).match([1])
+    >>> MatchesListwise([Equals(1), Equals(2)]).match([1, 2])
+    >>> print MatchesListwise([Equals(1), Equals(2)]).match([2, 1]).describe()
     Differences: [
     1 != 2
     2 != 1
@@ -574,6 +574,10 @@ class MatchesStructure(object):
     """
 
     def __init__(self, **kwargs):
+        """Construct a `MatchesStructure`.
+
+        :param kwargs: A mapping of attributes to matchers.
+        """
         self.kws = kwargs
 
     @classmethod
@@ -604,7 +608,7 @@ class MatchesStructure(object):
         for attr, matcher in sorted(self.kws.iteritems()):
             matchers.append(Annotate(attr, matcher))
             values.append(getattr(value, attr))
-        return EachOf(matchers).match(values)
+        return MatchesListwise(matchers).match(values)
 
 
 class MatchesRegex(object):
@@ -634,8 +638,11 @@ class MatchesRegex(object):
 class MatchesSetwise(object):
     """Matches if all the matchers match elements of the value being matched.
 
-    The difference compared to `EachOf` is that the order of the matchings
-    does not matter.
+    That is, each element in the 'observed' set must match exactly one matcher
+    from the set of matchers, with no matchers left over.
+
+    The difference compared to `MatchesListwise` is that the order of the
+    matchings does not matter.
     """
 
     def __init__(self, *matchers):
@@ -703,7 +710,7 @@ class MatchesSetwise(object):
                         msg += "s"
                     msg += ': ' + str(extra_values)
                 return Annotate(
-                    msg, EachOf(remaining_matchers[:common_length])
+                    msg, MatchesListwise(remaining_matchers[:common_length])
                     ).match(not_matched[:common_length])
 
 

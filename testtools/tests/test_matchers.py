@@ -18,7 +18,6 @@ from testtools.matchers import (
     DocTestMatches,
     DoesNotEndWith,
     DoesNotStartWith,
-    EachOf,
     EndsWith,
     KeysEqual,
     Is,
@@ -26,6 +25,7 @@ from testtools.matchers import (
     MatchesAny,
     MatchesAll,
     MatchesException,
+    MatchesListwise,
     MatchesRegex,
     MatchesSetwise,
     MatchesStructure,
@@ -463,10 +463,11 @@ def run_doctest(obj, name):
     return r.failures, output.getvalue()
 
 
-class TestEachOf(TestCase):
+class TestMatchesListwise(TestCase):
 
     def test_docstring(self):
-        failure_count, output = run_doctest(EachOf, "EachOf")
+        failure_count, output = run_doctest(
+            MatchesListwise, "MatchesListwise")
         if failure_count:
             self.fail("Doctest failed with %s" % output)
 
