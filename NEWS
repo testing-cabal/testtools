@@ -32,8 +32,8 @@ Improvements
 
 * New matchers:
 
-  * ``EachOf`` matches an iterable of matchers against an iterable of values.
-    (Michael Hudson-Doyle)
+  * ``MatchesListwise`` matches an iterable of matchers against an iterable
+    of values. (Michael Hudson-Doyle)
 
   * ``MatchesRegex`` matches a string against a regular expression.  (Michael
     Hudson-Doyle)
