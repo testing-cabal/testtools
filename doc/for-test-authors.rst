@@ -476,6 +476,21 @@ For example::
       self.assertThat(42, MatchesAny(Equals(5), Not(Equals(6))))
 
 
+MatchesListwise
+~~~~~~~~~~~~~~~
+
+Where ``MatchesAny`` and ``MatchesAll`` combine many matchers to match a
+single value, ``MatchesListwise`` combines many matches to match many values.
+
+For example::
+
+  def test_matches_listwise_example(self):
+      self.assertThat(
+          [1, 2, 3], MatchesListwise([Equals(1), Equals(2), Equals(3)]))
+
+This is useful for writing custom, domain-specific matchers.
+
+
 Raises
 ~~~~~~
 
