@@ -27,6 +27,23 @@ Improvements
 * New ``ExpectedException`` context manager to help write tests against things
   that are expected to raise exceptions. (Aaron Bentley)
 
+* New matchers:
+
+  * ``MatchesListwise`` matches an iterable of matchers against an iterable
+    of values. (Michael Hudson-Doyle)
+
+  * ``MatchesRegex`` matches a string against a regular expression.
+    (Michael Hudson-Doyle)
+
+  * ``MatchesStructure`` matches attributes of an object against given
+    matchers.  (Michael Hudson-Doyle)
+
+  * ``AfterPreproccessing`` matches values against a matcher after passing them
+    through a callable.  (Michael Hudson-Doyle)
+
+  * ``MatchesSetwise`` matches an iterable of matchers against an iterable of
+    values, without regard to order.  (Michael Hudson-Doyle)
+
 * Vastly improved and extended documentation. (Jonathan Lange)
 
 * Use unittest2 exception classes if available. (Jelmer Vernooij)
@@ -72,21 +89,6 @@ Improvements
 ------------
 
 * New matchers:
-
-  * ``MatchesListwise`` matches an iterable of matchers against an iterable
-    of values. (Michael Hudson-Doyle)
-
-  * ``MatchesRegex`` matches a string against a regular expression.  (Michael
-    Hudson-Doyle)
-
-  * ``MatchesStructure`` matches attributes of an object against given
-    matchers.  (Michael Hudson-Doyle)
-
-  * ``AfterPreproccessing`` matches values against a matcher after passing them
-    through a callable.  (Michael Hudson-Doyle)
-
-  * ``MatchesSetwise`` matches an iterable of matchers against an iterable of
-    values, without regard to order.  (Michael Hudson-Doyle)
 
   * ``EndsWith`` which complements the existing ``StartsWith`` matcher.
     (Jonathan Lange, #669165)
