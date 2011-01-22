@@ -375,6 +375,16 @@ example::
       self.assertThat(a, KeysEqual(b))
 
 
+MatchesRegex
+~~~~~~~~~~~~
+
+Matches a string against a regular expression, which is a wonderful thing to
+be able to do, if you think about it::
+
+  def test_matches_regex_example(self):
+      self.assertThat('foo', MatchesRegex('fo+'))
+
+
 Combining matchers
 ------------------
 
@@ -426,6 +436,21 @@ common operation.  For example::
       self.assertThat("orange", PoliticallyEquals("yellow"))
 
 
+AfterPreprocessing
+~~~~~~~~~~~~~~~~~~
+
+Used to make a matcher that applies a function to the matched object before
+matching. This can be used to aid in creating trivial matchers as functions, for
+example::
+
+  def test_after_preprocessing_example(self):
+      def HasFileContent(content):
+          def _read(path):
+              return open(path).read()
+          return AfterPreproccessing(_read, Equals(content))
+      self.assertThat('/tmp/foo.txt', PathHasFileContent("Hello world!"))
+
+
 MatchesAll
 ~~~~~~~~~~
 
@@ -474,6 +499,60 @@ For example::
 
   def test_matches_any_example(self):
       self.assertThat(42, MatchesAny(Equals(5), Not(Equals(6))))
+
+
+MatchesListwise
+~~~~~~~~~~~~~~~
+
+Where ``MatchesAny`` and ``MatchesAll`` combine many matchers to match a
+single value, ``MatchesListwise`` combines many matches to match many values.
+
+For example::
+
+  def test_matches_listwise_example(self):
+      self.assertThat(
+          [1, 2, 3], MatchesListwise(map(Equals, [1, 2, 3])))
+
+This is useful for writing custom, domain-specific matchers.
+
+
+MatchesSetwise
+~~~~~~~~~~~~~~
+
+Combines many matchers to match many values, without regard to their order.
+
+Here's an example::
+
+  def test_matches_setwise_example(self):
+      self.assertThat(
+          [1, 2, 3], MatchesSetwise(Equals(2), Equals(3), Equals(1)))
+
+Much like ``MatchesListwise``, best used for writing custom, domain-specific
+matchers.
+
+
+MatchesStructure
+~~~~~~~~~~~~~~~~
+
+Creates a matcher that matches certain attributes of an object against a
+pre-defined set of matchers.
+
+It's much easier to understand in Python than in English::
+
+  def test_matches_structure_example(self):
+      foo = Foo()
+      foo.a = 1
+      foo.b = 2
+      matcher = MatchesStructure({'a', Equals(1), 'b', Equals(2)})
+      self.assertThat(foo, matcher)
+
+``MatchesStructure.from_example`` takes an object and a list of attributes and
+creates a ``MatchesStructure`` matcher where each attribute of the matched
+object must equal each attribute of the example object.  For example::
+
+      matcher = MatchesStructure.from_example(foo, 'a', 'b')
+
+is exactly equivalent to ``matcher`` in the previous example.
 
 
 Raises

@@ -27,6 +27,23 @@ Improvements
 * New ``ExpectedException`` context manager to help write tests against things
   that are expected to raise exceptions. (Aaron Bentley)
 
+* New matchers:
+
+  * ``MatchesListwise`` matches an iterable of matchers against an iterable
+    of values. (Michael Hudson-Doyle)
+
+  * ``MatchesRegex`` matches a string against a regular expression.
+    (Michael Hudson-Doyle)
+
+  * ``MatchesStructure`` matches attributes of an object against given
+    matchers.  (Michael Hudson-Doyle)
+
+  * ``AfterPreproccessing`` matches values against a matcher after passing them
+    through a callable.  (Michael Hudson-Doyle)
+
+  * ``MatchesSetwise`` matches an iterable of matchers against an iterable of
+    values, without regard to order.  (Michael Hudson-Doyle)
+
 * Vastly improved and extended documentation. (Jonathan Lange)
 
 * Use unittest2 exception classes if available. (Jelmer Vernooij)
@@ -71,6 +88,16 @@ Changes
 Improvements
 ------------
 
+* New matchers:
+
+  * ``EndsWith`` which complements the existing ``StartsWith`` matcher.
+    (Jonathan Lange, #669165)
+
+  * ``MatchesException`` matches an exception class and parameters. (Robert
+    Collins)
+
+  * ``KeysEqual`` matches a dictionary with particular keys.  (Jonathan Lange)
+
 * ``assertIsInstance`` supports a custom error message to be supplied, which
   is necessary when using ``assertDictEqual`` on Python 2.7 with a
   ``testtools.TestCase`` base class. (Jelmer Vernooij)
@@ -84,21 +111,13 @@ Improvements
 * Fix the runTest parameter of TestCase to actually work, rather than raising
   a TypeError.  (Jonathan Lange, #657760)
 
-* New matcher ``EndsWith`` added to complement the existing ``StartsWith``
-  matcher.  (Jonathan Lange, #669165)
-
 * Non-release snapshots of testtools will now work with buildout.
   (Jonathan Lange, #613734)
 
 * Malformed SyntaxErrors no longer blow up the test suite.  (Martin [gz])
 
-* ``MatchesException`` added to the ``testtools.matchers`` module - matches
-  an exception class and parameters. (Robert Collins)
-
 * ``MismatchesAll.describe`` no longer appends a trailing newline.
   (Michael Hudson-Doyle, #686790)
-
-* New ``KeysEqual`` matcher.  (Jonathan Lange)
 
 * New helpers for conditionally importing modules, ``try_import`` and
   ``try_imports``.  (Jonathan Lange)
