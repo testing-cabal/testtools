@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2011 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
 
 """Test case related stuff."""
 
