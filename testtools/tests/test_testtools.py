@@ -835,7 +835,7 @@ class TestDetailsProvided(TestWithDetails):
         self.addCleanup(os.remove, path)
         os.write(fd, 'some data')
         os.close(fd)
-        my_content = content.Content.from_text('some data')
+        my_content = content.text_content('some data')
         test.attachFile('foo', path)
         self.assertEqual({'foo': my_content}, test.getDetails())
 

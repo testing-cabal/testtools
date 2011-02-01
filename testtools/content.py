@@ -2,6 +2,12 @@
 
 """Content - a MIME-like Content object."""
 
+__all__ = [
+    'Content',
+    'text_content',
+    'TracebackContent',
+    ]
+
 import codecs
 
 from testtools.compat import _b
@@ -105,14 +111,6 @@ class Content(object):
             reader = lambda: contents
         return cls(content_type, reader)
 
-    @classmethod
-    def from_text(cls, text):
-        """Create a `Content` object from some text.
-
-        This is useful for adding details which are short strings.
-        """
-        return cls(UTF8_TEXT, lambda: [text.encode('utf8')])
-
     def iter_bytes(self):
         """Iterate over bytestrings of the serialised content."""
         return self._get_bytes()
@@ -176,4 +174,5 @@ def text_content(text):
 
     This is useful for adding details which are short strings.
     """
-    return Content.from_text(text)
+    return Content(UTF8_TEXT, lambda: [text.encode('utf8')])
+

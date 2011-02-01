@@ -137,7 +137,7 @@ class TestContent(TestCase):
     def test_from_text(self):
         data = _u("some data")
         expected = Content(UTF8_TEXT, lambda: [data.encode('utf8')])
-        self.assertEqual(expected, Content.from_text(data))
+        self.assertEqual(expected, text_content(data))
 
 
 class TestTracebackContent(TestCase):
@@ -154,14 +154,6 @@ class TestTracebackContent(TestCase):
         result = unittest.TestResult()
         expected = result._exc_info_to_string(an_exc_info, self)
         self.assertEqual(expected, ''.join(list(content.iter_text())))
-
-
-class TestBytesContent(TestCase):
-
-    def test_bytes(self):
-        data = _u("some data")
-        expected = Content(UTF8_TEXT, lambda: [data.encode('utf8')])
-        self.assertEqual(expected, text_content(data))
 
 
 def test_suite():
