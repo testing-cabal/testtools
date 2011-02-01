@@ -161,18 +161,61 @@ class TestTracebackContent(TestCase):
 
 class TestAttachFile(TestCase):
 
+    def make_file(self, data):
+        fd, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
+        os.write(fd, data)
+        os.close(fd)
+        return path
+
     def test_simple(self):
         class SomeTest(TestCase):
             def test_foo(self):
                 pass
         test = SomeTest('test_foo')
-        fd, path = tempfile.mkstemp()
-        self.addCleanup(os.remove, path)
-        os.write(fd, 'some data')
-        os.close(fd)
-        my_content = text_content('some data')
+        data = 'some data'
+        path = self.make_file(data)
+        my_content = text_content(data)
         attach_file(test, path, name='foo')
         self.assertEqual({'foo': my_content}, test.getDetails())
+
+    def test_optional_name(self):
+        # If no name is provided, attach_file just uses the base name of the
+        # file.
+        class SomeTest(TestCase):
+            def test_foo(self):
+                pass
+        test = SomeTest('test_foo')
+        path = self.make_file('some data')
+        base_path = os.path.basename(path)
+        attach_file(test, path)
+        self.assertEqual([base_path], list(test.getDetails()))
+
+    def test_lazy_read(self):
+        class SomeTest(TestCase):
+            def test_foo(self):
+                pass
+        test = SomeTest('test_foo')
+        path = self.make_file('some data')
+        attach_file(test, path, name='foo', lazy_read=True)
+        content = test.getDetails()['foo']
+        content_file = open(path, 'w')
+        content_file.write('new data')
+        content_file.close()
+        self.assertEqual(''.join(content.iter_bytes()), 'new data')
+
+    def test_eager_read_by_default(self):
+        class SomeTest(TestCase):
+            def test_foo(self):
+                pass
+        test = SomeTest('test_foo')
+        path = self.make_file('some data')
+        attach_file(test, path, name='foo')
+        content = test.getDetails()['foo']
+        content_file = open(path, 'w')
+        content_file.write('new data')
+        content_file.close()
+        self.assertEqual(''.join(content.iter_bytes()), 'some data')
 
 
 def test_suite():

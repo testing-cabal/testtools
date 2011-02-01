@@ -12,6 +12,7 @@ __all__ = [
     ]
 
 import codecs
+import os
 
 from testtools.compat import _b
 from testtools.content_type import ContentType, UTF8_TEXT
@@ -182,7 +183,8 @@ def content_from_stream(stream, content_type=None, chunk_size=None,
     return Content(content_type, reader)
 
 
-def attach_file(detailed, path, name,content_type=None, chunk_size=None):
+def attach_file(detailed, path, name=None, content_type=None,
+                chunk_size=None, lazy_read=False):
     """Attach a file to this test as a detail.
 
     This is a convenience method wrapping around `addDetail`.
@@ -192,8 +194,8 @@ def attach_file(detailed, path, name,content_type=None, chunk_size=None):
     test, after the test has been torn down.
 
     :param detailed: An object with details
-    :param name: The name to give to the detail for the attached file.
     :param path: The path to the file to attach.
+    :param name: The name to give to the detail for the attached file.
     :param content_type: The content type of the file.  If not provided,
         defaults to UTF8-encoded text/plain.
     :param chunk_size: The size of chunks to read from the file.  Defaults
@@ -205,8 +207,10 @@ def attach_file(detailed, path, name,content_type=None, chunk_size=None):
         deleted. To handle those cases, using attach_file as a cleanup is
         recommended::
 
-            obj_with_details.addCleanUp(attach_file, 'foo.txt', obj_with_details)
+            detailed.addCleanup(attach_file, 'foo.txt', detailed)
     """
-    content_object = content_from_file(path, content_type, chunk_size)
+    if name is None:
+        name = os.path.basename(os.path.abspath(path))
+    content_object = content_from_file(
+        path, content_type, chunk_size, lazy_read)
     detailed.addDetail(name, content_object)
-
