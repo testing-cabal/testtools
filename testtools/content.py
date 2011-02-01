@@ -127,7 +127,7 @@ def text_content(text):
 
 
 def content_from_file(path, content_type=None, chunk_size=None,
-                      read_now=False):
+                      lazy_read=True):
     """Create a `Content` object from a file on disk.
 
     Note that unless 'read_now' is explicitly passed in as True, the file
@@ -138,8 +138,8 @@ def content_from_file(path, content_type=None, chunk_size=None,
         to UTF8-encoded text/plain.
     :param chunk_size: The size of chunks to read from the file.
         Defaults to `DEFAULT_CHUNK_SIZE`.
-    :param read_now: If True, read the file from disk now and keep it in
-        memory.
+    :param lazy_read: If False, read the file from disk now and keep it in
+        memory. Otherwise, only read when the content is serialized.
     """
     if content_type is None:
         content_type = UTF8_TEXT
@@ -150,14 +150,14 @@ def content_from_file(path, content_type=None, chunk_size=None,
         for chunk in _iter_chunks(stream, chunk_size):
             yield chunk
         stream.close()
-    if read_now:
+    if not lazy_read:
         contents = list(reader())
         reader = lambda: contents
     return Content(content_type, reader)
 
 
 def content_from_stream(stream, content_type=None, chunk_size=None,
-                        read_now=False):
+                        lazy_read=True):
     """Create a `Content` object from a file-like stream.
 
     Note that the stream will only be read from when ``iter_bytes`` is
@@ -167,21 +167,22 @@ def content_from_stream(stream, content_type=None, chunk_size=None,
     :param content_type: The type of content. If not specified, defaults
         to UTF8-encoded text/plain.
     :param chunk_size: The size of chunks to read from the file.
-         Defaults to `DEFAULT_CHUNK_SIZE`.
+        Defaults to `DEFAULT_CHUNK_SIZE`.
+    :param lazy_read: If False, reads from the stream right now. Otherwise,
+        only reads when the content is serialized. Defaults to True.
     """
     if content_type is None:
         content_type = UTF8_TEXT
     if chunk_size is None:
         chunk_size = DEFAULT_CHUNK_SIZE
     reader = lambda: _iter_chunks(stream, chunk_size)
-    if read_now:
+    if not lazy_read:
         contents = list(reader())
         reader = lambda: contents
     return Content(content_type, reader)
 
 
-def attach_file(detailed, path, name,content_type=None, chunk_size=None,
-                read_now=False):
+def attach_file(detailed, path, name,content_type=None, chunk_size=None):
     """Attach a file to this test as a detail.
 
     This is a convenience method wrapping around `addDetail`.
@@ -197,8 +198,14 @@ def attach_file(detailed, path, name,content_type=None, chunk_size=None,
         defaults to UTF8-encoded text/plain.
     :param chunk_size: The size of chunks to read from the file.  Defaults
         to something sensible.
-    :param read_now: Whether to read the file into memory now, or wait
-        until the test reports its results.  Defaults to False.
+    :param lazy_read: If True the file content is not read when attach_file is
+        called, but later when the content object is evaluated. Note that this
+        may be after any cleanups that obj_with_details has, so if the file is
+        a temporary file lazy_read may cause the file to be read after it is
+        deleted. To handle those cases, using attach_file as a cleanup is
+        recommended::
+
+            obj_with_details.addCleanUp(attach_file, 'foo.txt', obj_with_details)
     """
     content_object = content_from_file(path, content_type, chunk_size)
     detailed.addDetail(name, content_object)

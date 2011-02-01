@@ -110,7 +110,7 @@ class TestContent(TestCase):
         fd, path = tempfile.mkstemp()
         os.write(fd, 'some data')
         os.close(fd)
-        content = content_from_file(path, UTF8_TEXT, read_now=True)
+        content = content_from_file(path, UTF8_TEXT, lazy_read=False)
         os.remove(path)
         self.assertThat(
             _b('').join(content.iter_bytes()), Equals('some data'))
@@ -131,7 +131,7 @@ class TestContent(TestCase):
         self.addCleanup(os.remove, path)
         os.write(fd, 'some data')
         stream = open(path, 'rb')
-        content = content_from_stream(stream, UTF8_TEXT, read_now=True)
+        content = content_from_stream(stream, UTF8_TEXT, lazy_read=False)
         os.write(fd, 'more data')
         os.close(fd)
         self.assertThat(
