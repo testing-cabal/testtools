@@ -195,7 +195,7 @@ class TestCase(unittest.TestCase):
         :param read_now: Whether to read the file into memory now, or wait
             until the test reports its results.  Defaults to False.
         """
-        content_object = content.Content.from_file(
+        content_object = content.content_from_file(
             path, content_type, chunk_size)
         self.addDetail(name, content_object)
 

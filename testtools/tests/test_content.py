@@ -12,6 +12,8 @@ from testtools.compat import (
     )
 from testtools.content import (
     Content,
+    content_from_file,
+    content_from_stream,
     TracebackContent,
     text_content,
     )
@@ -89,38 +91,38 @@ class TestContent(TestCase):
         self.addCleanup(os.remove, path)
         os.write(fd, 'some data')
         os.close(fd)
-        content = Content.from_file(path, UTF8_TEXT, chunk_size=2)
+        content = content_from_file(path, UTF8_TEXT, chunk_size=2)
         self.assertThat(
             list(content.iter_bytes()), Equals(['so', 'me', ' d', 'at', 'a']))
 
     def test_from_nonexistent_file(self):
         directory = tempfile.mkdtemp()
         nonexistent = os.path.join(directory, 'nonexistent-file')
-        content = Content.from_file(nonexistent)
+        content = content_from_file(nonexistent)
         self.assertThat(content.iter_bytes, raises(IOError))
 
     def test_from_file_default_type(self):
-        content = Content.from_file('/nonexistent/path')
+        content = content_from_file('/nonexistent/path')
         self.assertThat(content.content_type, Equals(UTF8_TEXT))
 
     def test_from_file_eager_loading(self):
         fd, path = tempfile.mkstemp()
         os.write(fd, 'some data')
         os.close(fd)
-        content = Content.from_file(path, UTF8_TEXT, read_now=True)
+        content = content_from_file(path, UTF8_TEXT, read_now=True)
         os.remove(path)
         self.assertThat(
             _b('').join(content.iter_bytes()), Equals('some data'))
 
     def test_from_stream(self):
         data = StringIO('some data')
-        content = Content.from_stream(data, UTF8_TEXT, chunk_size=2)
+        content = content_from_stream(data, UTF8_TEXT, chunk_size=2)
         self.assertThat(
             list(content.iter_bytes()), Equals(['so', 'me', ' d', 'at', 'a']))
 
     def test_from_stream_default_type(self):
         data = StringIO('some data')
-        content = Content.from_stream(data)
+        content = content_from_stream(data)
         self.assertThat(content.content_type, Equals(UTF8_TEXT))
 
     def test_from_stream_eager_loading(self):
@@ -128,7 +130,7 @@ class TestContent(TestCase):
         self.addCleanup(os.remove, path)
         os.write(fd, 'some data')
         stream = open(path, 'rb')
-        content = Content.from_stream(stream, UTF8_TEXT, read_now=True)
+        content = content_from_stream(stream, UTF8_TEXT, read_now=True)
         os.write(fd, 'more data')
         os.close(fd)
         self.assertThat(

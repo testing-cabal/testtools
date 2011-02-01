@@ -4,6 +4,8 @@
 
 __all__ = [
     'Content',
+    'content_from_file',
+    'content_from_stream',
     'text_content',
     'TracebackContent',
     ]
@@ -56,60 +58,6 @@ class Content(object):
     def __eq__(self, other):
         return (self.content_type == other.content_type and
             _join_b(self.iter_bytes()) == _join_b(other.iter_bytes()))
-
-    @classmethod
-    def from_file(cls, path, content_type=None, chunk_size=None,
-                  read_now=False):
-        """Create a `Content` object from a file on disk.
-
-        Note that unless 'read_now' is explicitly passed in as True, the file
-        will only be read from when ``iter_bytes`` is called.
-
-        :param path: The path to the file to be used as content.
-        :param content_type: The type of content.  If not specified, defaults
-            to UTF8-encoded text/plain.
-        :param chunk_size: The size of chunks to read from the file.
-            Defaults to `DEFAULT_CHUNK_SIZE`.
-        :param read_now: If True, read the file from disk now and keep it in
-            memory.
-        """
-        if content_type is None:
-            content_type = UTF8_TEXT
-        if chunk_size is None:
-            chunk_size = DEFAULT_CHUNK_SIZE
-        def reader():
-            stream = open(path, 'rb')
-            for chunk in _iter_chunks(stream, chunk_size):
-                yield chunk
-            stream.close()
-        if read_now:
-            contents = list(reader())
-            reader = lambda: contents
-        return cls(content_type, reader)
-
-    @classmethod
-    def from_stream(cls, stream, content_type=None, chunk_size=None,
-                    read_now=False):
-        """Create a `Content` object from a file-like stream.
-
-        Note that the stream will only be read from when ``iter_bytes`` is
-        called.
-
-        :param stream: A file-like object to read the content from.
-        :param content_type: The type of content. If not specified, defaults
-            to UTF8-encoded text/plain.
-        :param chunk_size: The size of chunks to read from the file.
-             Defaults to `DEFAULT_CHUNK_SIZE`.
-        """
-        if content_type is None:
-            content_type = UTF8_TEXT
-        if chunk_size is None:
-            chunk_size = DEFAULT_CHUNK_SIZE
-        reader = lambda: _iter_chunks(stream, chunk_size)
-        if read_now:
-            contents = list(reader())
-            reader = lambda: contents
-        return cls(content_type, reader)
 
     def iter_bytes(self):
         """Iterate over bytestrings of the serialised content."""
@@ -176,3 +124,56 @@ def text_content(text):
     """
     return Content(UTF8_TEXT, lambda: [text.encode('utf8')])
 
+
+def content_from_file(path, content_type=None, chunk_size=None,
+                      read_now=False):
+    """Create a `Content` object from a file on disk.
+
+    Note that unless 'read_now' is explicitly passed in as True, the file
+    will only be read from when ``iter_bytes`` is called.
+
+    :param path: The path to the file to be used as content.
+    :param content_type: The type of content.  If not specified, defaults
+        to UTF8-encoded text/plain.
+    :param chunk_size: The size of chunks to read from the file.
+        Defaults to `DEFAULT_CHUNK_SIZE`.
+    :param read_now: If True, read the file from disk now and keep it in
+        memory.
+    """
+    if content_type is None:
+        content_type = UTF8_TEXT
+    if chunk_size is None:
+        chunk_size = DEFAULT_CHUNK_SIZE
+    def reader():
+        stream = open(path, 'rb')
+        for chunk in _iter_chunks(stream, chunk_size):
+            yield chunk
+        stream.close()
+    if read_now:
+        contents = list(reader())
+        reader = lambda: contents
+    return Content(content_type, reader)
+
+
+def content_from_stream(stream, content_type=None, chunk_size=None,
+                        read_now=False):
+    """Create a `Content` object from a file-like stream.
+
+    Note that the stream will only be read from when ``iter_bytes`` is
+    called.
+
+    :param stream: A file-like object to read the content from.
+    :param content_type: The type of content. If not specified, defaults
+        to UTF8-encoded text/plain.
+    :param chunk_size: The size of chunks to read from the file.
+         Defaults to `DEFAULT_CHUNK_SIZE`.
+    """
+    if content_type is None:
+        content_type = UTF8_TEXT
+    if chunk_size is None:
+        chunk_size = DEFAULT_CHUNK_SIZE
+    reader = lambda: _iter_chunks(stream, chunk_size)
+    if read_now:
+        contents = list(reader())
+        reader = lambda: contents
+    return Content(content_type, reader)
