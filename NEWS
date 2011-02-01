@@ -24,8 +24,8 @@ Improvements
 
 * ``MultiTestResult`` now documented in the manual. (Jonathan Lange, #661116)
 
-* New content helpers ``Content.from_file``, ``Content.from_stream`` and
-  ``TestCase.attachFile`` make it easier to attach file-like objects to a
+* New content helpers ``content_from_file``, ``content_from_stream`` and
+  ``attach_file`` make it easier to attach file-like objects to a
   test. (Jonathan Lange, #694126)
 
 * New ``ExpectedException`` context manager to help write tests against things

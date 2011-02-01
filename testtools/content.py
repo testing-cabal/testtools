@@ -3,6 +3,7 @@
 """Content - a MIME-like Content object."""
 
 __all__ = [
+    'attach_file',
     'Content',
     'content_from_file',
     'content_from_stream',
@@ -177,3 +178,28 @@ def content_from_stream(stream, content_type=None, chunk_size=None,
         contents = list(reader())
         reader = lambda: contents
     return Content(content_type, reader)
+
+
+def attach_file(detailed, name, path, content_type=None, chunk_size=None,
+                read_now=False):
+    """Attach a file to this test as a detail.
+
+    This is a convenience method wrapping around `addDetail`.
+
+    Note that unless 'read_now' is explicitly passed in as True, the file
+    *must* exist when the test result is called with the results of this
+    test, after the test has been torn down.
+
+    :param detailed: An object with details
+    :param name: The name to give to the detail for the attached file.
+    :param path: The path to the file to attach.
+    :param content_type: The content type of the file.  If not provided,
+        defaults to UTF8-encoded text/plain.
+    :param chunk_size: The size of chunks to read from the file.  Defaults
+        to something sensible.
+    :param read_now: Whether to read the file into memory now, or wait
+        until the test reports its results.  Defaults to False.
+    """
+    content_object = content_from_file(path, content_type, chunk_size)
+    detailed.addDetail(name, content_object)
+

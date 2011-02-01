@@ -11,6 +11,7 @@ from testtools.compat import (
     StringIO,
     )
 from testtools.content import (
+    attach_file,
     Content,
     content_from_file,
     content_from_stream,
@@ -156,6 +157,22 @@ class TestTracebackContent(TestCase):
         result = unittest.TestResult()
         expected = result._exc_info_to_string(an_exc_info, self)
         self.assertEqual(expected, ''.join(list(content.iter_text())))
+
+
+class TestAttachFile(TestCase):
+
+    def test_simple(self):
+        class SomeTest(TestCase):
+            def test_foo(self):
+                pass
+        test = SomeTest('test_foo')
+        fd, path = tempfile.mkstemp()
+        self.addCleanup(os.remove, path)
+        os.write(fd, 'some data')
+        os.close(fd)
+        my_content = text_content('some data')
+        attach_file(test, 'foo', path)
+        self.assertEqual({'foo': my_content}, test.getDetails())
 
 
 def test_suite():

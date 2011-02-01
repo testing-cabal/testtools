@@ -826,19 +826,6 @@ class TestDetailsProvided(TestWithDetails):
         details = self.getDetails()
         self.assertEqual({"foo": mycontent}, details)
 
-    def test_attachFile(self):
-        class SomeTest(TestCase):
-            def test_foo(self):
-                pass
-        test = SomeTest('test_foo')
-        fd, path = tempfile.mkstemp()
-        self.addCleanup(os.remove, path)
-        os.write(fd, 'some data')
-        os.close(fd)
-        my_content = content.text_content('some data')
-        test.attachFile('foo', path)
-        self.assertEqual({'foo': my_content}, test.getDetails())
-
     def test_addError(self):
         class Case(TestCase):
             def test(this):
