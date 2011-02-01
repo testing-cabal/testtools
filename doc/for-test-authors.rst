@@ -737,9 +737,9 @@ To make content out of an image stored on disk, you could do something like::
 
   image = Content(ContentType('image', 'png'), lambda: open('foo.png').read())
 
-Or you could use the convenience method::
+Or you could use the convenience function::
 
-  image = Content.from_file('foo.png', ContentType('image', 'png'))
+  image = content_from_file('foo.png', ContentType('image', 'png'))
 
 The ``lambda`` helps make sure that the file is opened and the actual bytes
 read only when they are needed – by default, when the test is finished.  This
