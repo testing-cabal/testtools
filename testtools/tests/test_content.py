@@ -171,7 +171,7 @@ class TestAttachFile(TestCase):
         os.write(fd, 'some data')
         os.close(fd)
         my_content = text_content('some data')
-        attach_file(test, 'foo', path)
+        attach_file(test, path, name='foo')
         self.assertEqual({'foo': my_content}, test.getDetails())
 
 

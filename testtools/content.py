@@ -180,7 +180,7 @@ def content_from_stream(stream, content_type=None, chunk_size=None,
     return Content(content_type, reader)
 
 
-def attach_file(detailed, name, path, content_type=None, chunk_size=None,
+def attach_file(detailed, path, name,content_type=None, chunk_size=None,
                 read_now=False):
     """Attach a file to this test as a detail.
 
