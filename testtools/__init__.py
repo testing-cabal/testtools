@@ -1,4 +1,4 @@
-# Copyright (c) 2008, 2009, 2010 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
 
 """Extensions to the standard Python unittest library."""
 
@@ -6,6 +6,7 @@ __all__ = [
     'clone_test_with_new_id',
     'ConcurrentTestSuite',
     'ErrorHolder',
+    'ExpectedException',
     'ExtendedToOriginalDecorator',
     'iterate_tests',
     'MultipleExceptions',
@@ -37,6 +38,7 @@ from testtools.runtest import (
     )
 from testtools.testcase import (
     ErrorHolder,
+    ExpectedException,
     PlaceHolder,
     TestCase,
     clone_test_with_new_id,

@@ -1,3 +1,5 @@
+# Copyright (c) 2010 testtools developers. See LICENSE for details.
+
 import unittest
 
 from testtools import (

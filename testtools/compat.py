@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2010 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
 
 """Compatibility support for python 2 and 3."""
 

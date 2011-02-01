@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2010 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2008-2010 testtools developers. See LICENSE for details.
 
 """Tests for extensions to the base test library."""
 
@@ -32,6 +32,12 @@ from testtools.tests.helpers import (
     Python27TestResult,
     ExtendedTestResult,
     )
+try:
+    exec('from __future__ import with_statement')
+except SyntaxError:
+    pass
+else:
+    from test_with_with import *
 
 
 class TestPlaceHolder(TestCase):

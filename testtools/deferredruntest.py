@@ -1,4 +1,4 @@
-# Copyright (c) 2010 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2010 testtools developers. See LICENSE for details.
 
 """Individual test case execution for tests that return Deferreds.
 
@@ -93,10 +93,10 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
                  debug=False):
         """Construct an `AsynchronousDeferredRunTest`.
 
-        :param case: The `testtools.TestCase` to run.
+        :param case: The `TestCase` to run.
         :param handlers: A list of exception handlers (ExceptionType, handler)
             where 'handler' is a callable that takes a `TestCase`, a
-            `TestResult` and the exception raised.
+            `testtools.TestResult` and the exception raised.
         :param reactor: The Twisted reactor to use.  If not given, we use the
             default reactor.
         :param timeout: The maximum time allowed for running a test.  The
@@ -287,7 +287,7 @@ def assert_fails_with(d, *exc_types, **kwargs):
     peril; expect the API to change.
 
     :param d: A Deferred that is expected to fail.
-    :param *exc_types: The exception types that the Deferred is expected to
+    :param exc_types: The exception types that the Deferred is expected to
         fail with.
     :param failureException: An optional keyword argument.  If provided, will
         raise that exception instead of `testtools.TestCase.failureException`.

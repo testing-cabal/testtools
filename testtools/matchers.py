@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2010 Jonathan M. Lange. See LICENSE for details.
+# Copyright (c) 2009-2011 testtools developers. See LICENSE for details.
 
 """Matchers, a way to express complex assertions outside the testcase.
 
@@ -32,7 +32,9 @@ __all__ = [
 import doctest
 import operator
 from pprint import pformat
+import re
 import sys
+import types
 
 from testtools.compat import classtypes, _error_repr, isbaseexception
 
@@ -171,8 +173,7 @@ class DoesNotStartWith(Mismatch):
         """Create a DoesNotStartWith Mismatch.
 
         :param matchee: the string that did not match.
-        :param expected: the string that `matchee` was expected to start
-            with.
+        :param expected: the string that 'matchee' was expected to start with.
         """
         self.matchee = matchee
         self.expected = expected
@@ -188,7 +189,7 @@ class DoesNotEndWith(Mismatch):
         """Create a DoesNotEndWith Mismatch.
 
         :param matchee: the string that did not match.
-        :param expected: the string that `matchee` was expected to end with.
+        :param expected: the string that 'matchee' was expected to end with.
         """
         self.matchee = matchee
         self.expected = expected
@@ -245,8 +246,8 @@ class Equals(_BinaryComparison):
 class NotEquals(_BinaryComparison):
     """Matches if the items are not equal.
 
-    In most cases, this is equivalent to `Not(Equals(foo))`. The difference
-    only matters when testing `__ne__` implementations.
+    In most cases, this is equivalent to ``Not(Equals(foo))``. The difference
+    only matters when testing ``__ne__`` implementations.
     """
 
     comparator = operator.ne
@@ -353,16 +354,20 @@ class MatchedUnexpectedly(Mismatch):
 class MatchesException(Matcher):
     """Match an exc_info tuple against an exception instance or type."""
 
-    def __init__(self, exception):
+    def __init__(self, exception, value_re=None):
         """Create a MatchesException that will match exc_info's for exception.
 
         :param exception: Either an exception instance or type.
             If an instance is given, the type and arguments of the exception
             are checked. If a type is given only the type of the exception is
             checked.
+        :param value_re: If 'exception' is a type, and the matchee exception
+            is of the right type, then the 'str()' of the matchee exception
+            is matched against this regular expression.
         """
         Matcher.__init__(self)
         self.expected = exception
+        self.value_re = value_re
         self._is_instance = type(self.expected) not in classtypes()
 
     def match(self, other):
@@ -373,9 +378,16 @@ class MatchesException(Matcher):
             expected_class = expected_class.__class__
         if not issubclass(other[0], expected_class):
             return Mismatch('%r is not a %r' % (other[0], expected_class))
-        if self._is_instance and other[1].args != self.expected.args:
-            return Mismatch('%s has different arguments to %s.' % (
-                _error_repr(other[1]), _error_repr(self.expected)))
+        if self._is_instance:
+            if other[1].args != self.expected.args:
+                return Mismatch('%s has different arguments to %s.' % (
+                        _error_repr(other[1]), _error_repr(self.expected)))
+        elif self.value_re is not None:
+            str_exc_value = str(other[1])
+            if not re.match(self.value_re, str_exc_value):
+                return Mismatch(
+                    '"%s" does not match "%s".'
+                    % (str_exc_value, self.value_re))
 
     def __str__(self):
         if self._is_instance:
@@ -427,7 +439,7 @@ class KeysEqual(Matcher):
     def __init__(self, *expected):
         """Create a `KeysEqual` Matcher.
 
-        :param *expected: The keys the dict is expected to have.  If a dict,
+        :param expected: The keys the dict is expected to have.  If a dict,
             then we use the keys of that dict, if a collection, we assume it
             is a collection of expected keys.
         """
@@ -525,8 +537,223 @@ def raises(exception):
     """Make a matcher that checks that a callable raises an exception.
 
     This is a convenience function, exactly equivalent to::
+
         return Raises(MatchesException(exception))
 
     See `Raises` and `MatchesException` for more information.
     """
     return Raises(MatchesException(exception))
+
+
+class MatchesListwise(object):
+    """Matches if each matcher matches the corresponding value.
+
+    More easily explained by example than in words:
+
+    >>> MatchesListwise([Equals(1)]).match([1])
+    >>> MatchesListwise([Equals(1), Equals(2)]).match([1, 2])
+    >>> print MatchesListwise([Equals(1), Equals(2)]).match([2, 1]).describe()
+    Differences: [
+    1 != 2
+    2 != 1
+    ]
+    """
+
+    def __init__(self, matchers):
+        self.matchers = matchers
+
+    def match(self, values):
+        mismatches = []
+        length_mismatch = Annotate(
+            "Length mismatch", Equals(len(self.matchers))).match(len(values))
+        if length_mismatch:
+            mismatches.append(length_mismatch)
+        for matcher, value in zip(self.matchers, values):
+            mismatch = matcher.match(value)
+            if mismatch:
+                mismatches.append(mismatch)
+        if mismatches:
+            return MismatchesAll(mismatches)
+
+
+class MatchesStructure(object):
+    """Matcher that matches an object structurally.
+
+    'Structurally' here means that attributes of the object being matched are
+    compared against given matchers.
+
+    `fromExample` allows the creation of a matcher from a prototype object and
+    then modified versions can be created with `update`.
+    """
+
+    def __init__(self, **kwargs):
+        """Construct a `MatchesStructure`.
+
+        :param kwargs: A mapping of attributes to matchers.
+        """
+        self.kws = kwargs
+
+    @classmethod
+    def fromExample(cls, example, *attributes):
+        kwargs = {}
+        for attr in attributes:
+            kwargs[attr] = Equals(getattr(example, attr))
+        return cls(**kwargs)
+
+    def update(self, **kws):
+        new_kws = self.kws.copy()
+        for attr, matcher in kws.iteritems():
+            if matcher is None:
+                new_kws.pop(attr, None)
+            else:
+                new_kws[attr] = matcher
+        return type(self)(**new_kws)
+
+    def __str__(self):
+        kws = []
+        for attr, matcher in sorted(self.kws.iteritems()):
+            kws.append("%s=%s" % (attr, matcher))
+        return "%s(%s)" % (self.__class__.__name__, ', '.join(kws))
+
+    def match(self, value):
+        matchers = []
+        values = []
+        for attr, matcher in sorted(self.kws.iteritems()):
+            matchers.append(Annotate(attr, matcher))
+            values.append(getattr(value, attr))
+        return MatchesListwise(matchers).match(values)
+
+
+class MatchesRegex(object):
+    """Matches if the matchee is matched by a regular expression."""
+
+    def __init__(self, pattern, flags=0):
+        self.pattern = pattern
+        self.flags = flags
+
+    def __str__(self):
+        args = ['%r' % self.pattern]
+        flag_arg = []
+        # dir() sorts the attributes for us, so we don't need to do it again.
+        for flag in dir(re):
+            if len(flag) == 1:
+                if self.flags & getattr(re, flag):
+                    flag_arg.append('re.%s' % flag)
+        if flag_arg:
+            args.append('|'.join(flag_arg))
+        return '%s(%s)' % (self.__class__.__name__, ', '.join(args))
+
+    def match(self, value):
+        if not re.match(self.pattern, value, self.flags):
+            return Mismatch("%r did not match %r" % (self.pattern, value))
+
+
+class MatchesSetwise(object):
+    """Matches if all the matchers match elements of the value being matched.
+
+    That is, each element in the 'observed' set must match exactly one matcher
+    from the set of matchers, with no matchers left over.
+
+    The difference compared to `MatchesListwise` is that the order of the
+    matchings does not matter.
+    """
+
+    def __init__(self, *matchers):
+        self.matchers = matchers
+
+    def match(self, observed):
+        remaining_matchers = set(self.matchers)
+        not_matched = []
+        for value in observed:
+            for matcher in remaining_matchers:
+                if matcher.match(value) is None:
+                    remaining_matchers.remove(matcher)
+                    break
+            else:
+                not_matched.append(value)
+        if not_matched or remaining_matchers:
+            remaining_matchers = list(remaining_matchers)
+            # There are various cases that all should be reported somewhat
+            # differently.
+
+            # There are two trivial cases:
+            # 1) There are just some matchers left over.
+            # 2) There are just some values left over.
+
+            # Then there are three more interesting cases:
+            # 3) There are the same number of matchers and values left over.
+            # 4) There are more matchers left over than values.
+            # 5) There are more values left over than matchers.
+
+            if len(not_matched) == 0:
+                if len(remaining_matchers) > 1:
+                    msg = "There were %s matchers left over: " % (
+                        len(remaining_matchers),)
+                else:
+                    msg = "There was 1 matcher left over: "
+                msg += ', '.join(map(str, remaining_matchers))
+                return Mismatch(msg)
+            elif len(remaining_matchers) == 0:
+                if len(not_matched) > 1:
+                    return Mismatch(
+                        "There were %s values left over: %s" % (
+                            len(not_matched), not_matched))
+                else:
+                    return Mismatch(
+                        "There was 1 value left over: %s" % (
+                            not_matched, ))
+            else:
+                common_length = min(len(remaining_matchers), len(not_matched))
+                if common_length == 0:
+                    raise AssertionError("common_length can't be 0 here")
+                if common_length > 1:
+                    msg = "There were %s mismatches" % (common_length,)
+                else:
+                    msg = "There was 1 mismatch"
+                if len(remaining_matchers) > len(not_matched):
+                    extra_matchers = remaining_matchers[common_length:]
+                    msg += " and %s extra matcher" % (len(extra_matchers), )
+                    if len(extra_matchers) > 1:
+                        msg += "s"
+                    msg += ': ' + ', '.join(map(str, extra_matchers))
+                elif len(not_matched) > len(remaining_matchers):
+                    extra_values = not_matched[common_length:]
+                    msg += " and %s extra value" % (len(extra_values), )
+                    if len(extra_values) > 1:
+                        msg += "s"
+                    msg += ': ' + str(extra_values)
+                return Annotate(
+                    msg, MatchesListwise(remaining_matchers[:common_length])
+                    ).match(not_matched[:common_length])
+
+
+class AfterPreproccessing(object):
+    """Matches if the value matches after passing through a function.
+
+    This can be used to aid in creating trivial matchers as functions, for
+    example:
+
+    def PathHasFileContent(content):
+        def _read(path):
+            return open(path).read()
+        return AfterPreproccessing(_read, Equals(content))
+    """
+
+    def __init__(self, preprocessor, matcher):
+        self.preprocessor = preprocessor
+        self.matcher = matcher
+
+    def _str_preprocessor(self):
+        if isinstance(self.preprocessor, types.FunctionType):
+            return '<function %s>' % self.preprocessor.__name__
+        return str(self.preprocessor)
+
+    def __str__(self):
+        return "AfterPreproccessing(%s, %s)" % (
+            self._str_preprocessor(), self.matcher)
+
+    def match(self, value):
+        value = self.preprocessor(value)
+        return Annotate(
+            "after %s" % self._str_preprocessor(),
+            self.matcher).match(value)
