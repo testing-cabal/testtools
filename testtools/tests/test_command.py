@@ -41,6 +41,11 @@ def test_suite():
 
 class TestCommandTest(TestCase):
 
+    def setUp(self):
+        super(TestCommandTest, self).setUp()
+        if fixtures is None:
+            self.skipTest("Need fixtures")
+
     def test_test_module(self):
         self.useFixture(SampleTestFixture())
         stream = StringIO()
