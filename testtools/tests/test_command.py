@@ -1,4 +1,4 @@
-# Copyright (c) 2010 Testtools authors. See LICENSE for details.
+# Copyright (c) 2010-2011 Testtools authors. See LICENSE for details.
 
 """Tests for the distutils test command logic."""
 
