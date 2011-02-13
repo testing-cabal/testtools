@@ -7,6 +7,7 @@ import unittest
 
 def test_suite():
     from testtools.tests import (
+        test_command,
         test_compat,
         test_content,
         test_content_type,
@@ -23,6 +24,7 @@ def test_suite():
         test_testsuite,
         )
     modules = [
+        test_command,
         test_compat,
         test_content,
         test_content_type,
@@ -33,9 +35,10 @@ def test_suite():
         test_monkey,
         test_run,
         test_spinner,
+        test_runtest,
         test_testresult,
         test_testsuite,
         test_testtools,
         ]
-    suites = map(lambda x:x.test_suite(), modules)
+    suites = map(lambda x: x.test_suite(), modules)
     return unittest.TestSuite(suites)
