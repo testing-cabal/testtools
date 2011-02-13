@@ -58,6 +58,9 @@ from testtools.testsuite import (
     ConcurrentTestSuite,
     iterate_tests,
     )
+from testtools.command import (
+    TestCommand
+    )
 
 # same format as sys.version_info: "A tuple containing the five components of
 # the version number: major, minor, micro, releaselevel, and serial. All
