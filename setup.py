@@ -7,7 +7,6 @@ import os
 
 import testtools
 
-
 def get_revno():
     import bzrlib.workingtree
     t = bzrlib.workingtree.WorkingTree.open_containing(__file__)[0]
@@ -62,4 +61,5 @@ setup(name='testtools',
       long_description=get_long_description(),
       version=get_version(),
       classifiers=["License :: OSI Approved :: MIT License"],
-      packages=['testtools', 'testtools.testresult', 'testtools.tests'])
+      packages=['testtools', 'testtools.testresult', 'testtools.tests'],
+      cmdclass={'test': testtools.TestCommand})

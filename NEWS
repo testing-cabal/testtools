@@ -14,6 +14,9 @@ Changes
 Improvements
 ------------
 
+* distutils integration for the testtools test runner. Can now use it for
+  'python setup.py test'. (Christian Kampa, #693773)
+
 * ``EndsWith`` and ``KeysEqual`` now in testtools.matchers.__all__.
   (Jonathan Lange, #692158)
 
