@@ -43,41 +43,41 @@ class TestCommandTest(TestCase):
 
     def test_test_module(self):
         self.useFixture(SampleTestFixture())
-        self.buffer = StringIO()
-        self.dist = Distribution()
-        self.dist.script_name = 'setup.py'
-        self.dist.script_args = ['test']
-        self.dist.cmdclass = {'test': TestCommand}
-        self.dist.command_options = {
+        stream = StringIO()
+        dist = Distribution()
+        dist.script_name = 'setup.py'
+        dist.script_args = ['test']
+        dist.cmdclass = {'test': TestCommand}
+        dist.command_options = {
             'test': {'test_module': ('command line', 'testtools.runexample')}}
-        cmd = self.dist.reinitialize_command('test')
-        cmd.runner.stdout = self.buffer
-        self.dist.run_command('test')
+        cmd = dist.reinitialize_command('test')
+        cmd.runner.stdout = stream
+        dist.run_command('test')
         self.assertEqual("""Tests running...
 Ran 2 tests in 0.000s
 
 OK
-""", self.buffer.getvalue())
+""", stream.getvalue())
 
     def test_test_suite(self):
         self.useFixture(SampleTestFixture())
-        self.buffer = StringIO()
-        self.dist = Distribution()
-        self.dist.script_name = 'setup.py'
-        self.dist.script_args = ['test']
-        self.dist.cmdclass = {'test': TestCommand}
-        self.dist.command_options = {
+        stream = StringIO()
+        dist = Distribution()
+        dist.script_name = 'setup.py'
+        dist.script_args = ['test']
+        dist.cmdclass = {'test': TestCommand}
+        dist.command_options = {
             'test': {
                 'test_suite': (
                     'command line', 'testtools.runexample.test_suite')}}
-        cmd = self.dist.reinitialize_command('test')
-        cmd.runner.stdout = self.buffer
-        self.dist.run_command('test')
+        cmd = dist.reinitialize_command('test')
+        cmd.runner.stdout = stream
+        dist.run_command('test')
         self.assertEqual("""Tests running...
 Ran 2 tests in 0.000s
 
 OK
-""", self.buffer.getvalue())
+""", stream.getvalue())
 
 
 def test_suite():
