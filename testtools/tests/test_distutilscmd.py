@@ -10,7 +10,7 @@ StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
 
 import testtools
 from testtools import TestCase
-from testtools.command import TestCommand
+from testtools.distutilscmd import TestCommand
 
 
 if fixtures:
