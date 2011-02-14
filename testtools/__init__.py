@@ -32,6 +32,9 @@ from testtools.helpers import (
 from testtools.matchers import (
     Matcher,
     )
+# Shut up, pyflakes. We are importing for documentation, not for namespacing.
+Matcher
+
 from testtools.runtest import (
     MultipleExceptions,
     RunTest,
@@ -57,9 +60,6 @@ from testtools.testresult import (
 from testtools.testsuite import (
     ConcurrentTestSuite,
     iterate_tests,
-    )
-from testtools.command import (
-    TestCommand
     )
 
 # same format as sys.version_info: "A tuple containing the five components of
