@@ -737,6 +737,10 @@ To make content out of an image stored on disk, you could do something like::
 
   image = Content(ContentType('image', 'png'), lambda: open('foo.png').read())
 
+Or you could use the convenience function::
+
+  image = content_from_file('foo.png', ContentType('image', 'png'))
+
 The ``lambda`` helps make sure that the file is opened and the actual bytes
 read only when they are needed – by default, when the test is finished.  This
 means that tests can construct and add Content objects freely without worrying
@@ -754,7 +758,7 @@ see the client-side error *and* the logs from the server-side.  Here's how you
 might do it::
 
   from testtools import TestCase
-  from testtools.content import Content
+  from testtools.content import attach_file, Content
   from testtools.content_type import UTF8_TEXT
 
   from myproject import SomeServer
@@ -766,7 +770,7 @@ might do it::
           self.server = SomeServer()
           self.server.start_up()
           self.addCleanup(self.server.shut_down)
-          self.addCleanup(self.attach_log_file)
+          self.addCleanup(attach_file, self.server.logfile, self)
 
       def attach_log_file(self):
           self.addDetail(
@@ -780,10 +784,6 @@ might do it::
 This test will attach the log file of ``SomeServer`` to each test that is
 run.  testtools will only display the log file for failing tests, so it's not
 such a big deal.
-
-Note the callable passed to ``Content`` reads the log file line-by-line.  This
-is something of an optimization.  If we naively returned all of the log file
-as one bytestring, ``Content`` would treat that as a list of byte chunks.
 
 If the act of adding at detail is expensive, you might want to use
 addOnException_ so that you only do it when a test actually raises an

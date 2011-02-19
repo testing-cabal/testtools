@@ -22,7 +22,6 @@ from testtools import (
     TextTestResult,
     ThreadsafeForwardingResult,
     testresult,
-    try_imports,
     )
 from testtools.compat import (
     _b,
@@ -30,6 +29,7 @@ from testtools.compat import (
     _r,
     _u,
     str_is_unicode,
+    StringIO,
     )
 from testtools.content import Content
 from testtools.content_type import ContentType, UTF8_TEXT
@@ -46,8 +46,6 @@ from testtools.tests.helpers import (
     an_exc_info
     )
 from testtools.testresult.real import utc
-
-StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
 
 
 class Python26Contract(object):
