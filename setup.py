@@ -13,7 +13,7 @@ def get_revno():
     import bzrlib.workingtree
     try:
         t = bzrlib.workingtree.WorkingTree.open_containing(__file__)[0]
-    except bzrlib.errors.NoWorkingTree:
+    except (bzrlib.errors.NotBranchError, bzrlib.errors.NoWorkingTree):
         return None
     else:
         return t.branch.revno()
