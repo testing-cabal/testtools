@@ -7,13 +7,13 @@ __all__ = [
 
 
 def try_import(name, alternative=None):
-    """Attempt to import 'name'.  If it fails, return 'alternative'.
+    """Attempt to import ``name``.  If it fails, return ``alternative``.
 
     When supporting multiple versions of Python or optional dependencies, it
     is useful to be able to try to import a module.
 
-    :param name: The name of the object to import, e.g. 'os.path' or
-        'os.path.join'.
+    :param name: The name of the object to import, e.g. ``os.path`` or
+        ``os.path.join``.
     :param alternative: The value to return if no module can be imported.
         Defaults to None.
     """
@@ -41,11 +41,11 @@ _RAISE_EXCEPTION = object()
 def try_imports(module_names, alternative=_RAISE_EXCEPTION):
     """Attempt to import modules.
 
-    Tries to import the first module in 'module_names'.  If it can be
+    Tries to import the first module in ``module_names``.  If it can be
     imported, we return it.  If not, we go on to the second module and try
     that.  The process continues until we run out of modules to try.  If none
     of the modules can be imported, either raise an exception or return the
-    provided 'alternative' value.
+    provided ``alternative`` value.
 
     :param module_names: A sequence of module names to try to import.
     :param alternative: The value to return if no module can be imported.
