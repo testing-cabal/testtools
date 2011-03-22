@@ -145,7 +145,7 @@ class RunTest(object):
         See the docstring for addCleanup for more information.
 
         :return: None if all cleanups ran without error,
-            `exception_caught` if there was an error.
+            ``exception_caught`` if there was an error.
         """
         failing = False
         while self.case._cleanups:
@@ -162,7 +162,7 @@ class RunTest(object):
 
         Exceptions are processed by `_got_user_exception`.
 
-        :return: Either whatever 'fn' returns or `exception_caught` if
+        :return: Either whatever 'fn' returns or ``exception_caught`` if
             'fn' raised an exception.
         """
         try:

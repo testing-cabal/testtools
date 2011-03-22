@@ -215,9 +215,9 @@ class Spinner(object):
         """Clean up any junk in the reactor.
 
         Will always iterate the reactor a number of times equal to
-        `Spinner._OBLIGATORY_REACTOR_ITERATIONS`.  This is to work around bugs
-        in various Twisted APIs where a Deferred fires but still leaves work
-        (e.g. cancelling a call, actually closing a connection) for the
+        ``Spinner._OBLIGATORY_REACTOR_ITERATIONS``.  This is to work around
+        bugs in various Twisted APIs where a Deferred fires but still leaves
+        work (e.g. cancelling a call, actually closing a connection) for the
         reactor to do.
         """
         for i in range(self._OBLIGATORY_REACTOR_ITERATIONS):

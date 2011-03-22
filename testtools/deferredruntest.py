@@ -98,7 +98,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         :param case: The `TestCase` to run.
         :param handlers: A list of exception handlers (ExceptionType, handler)
             where 'handler' is a callable that takes a `TestCase`, a
-            `testtools.TestResult` and the exception raised.
+            ``testtools.TestResult`` and the exception raised.
         :param reactor: The Twisted reactor to use.  If not given, we use the
             default reactor.
         :param timeout: The maximum time allowed for running a test.  The
@@ -292,8 +292,9 @@ def assert_fails_with(d, *exc_types, **kwargs):
     :param exc_types: The exception types that the Deferred is expected to
         fail with.
     :param failureException: An optional keyword argument.  If provided, will
-        raise that exception instead of `testtools.TestCase.failureException`.
-    :return: A Deferred that will fail with an `AssertionError` if 'd' does
+        raise that exception instead of
+        ``testtools.TestCase.failureException``.
+    :return: A Deferred that will fail with an ``AssertionError`` if 'd' does
         not fail with one of the exception types.
     """
     failureException = kwargs.pop('failureException', None)
