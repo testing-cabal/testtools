@@ -277,7 +277,7 @@ class TestAdaptedPython27TestResultContract(TestCase, DetailsContract):
 
 
 class TestTestResult(TestCase):
-    """Tests for `TestResult`."""
+    """Tests for 'TestResult'."""
 
     def makeResult(self):
         """Make an arbitrary result for testing."""
@@ -339,7 +339,7 @@ class TestWithFakeExceptions(TestCase):
 
 
 class TestMultiTestResult(TestWithFakeExceptions):
-    """Tests for `MultiTestResult`."""
+    """Tests for 'MultiTestResult'."""
 
     def setUp(self):
         TestWithFakeExceptions.setUp(self)
@@ -432,7 +432,7 @@ class TestMultiTestResult(TestWithFakeExceptions):
 
 
 class TestTextTestResult(TestCase):
-    """Tests for `TextTestResult`."""
+    """Tests for 'TextTestResult'."""
 
     def setUp(self):
         super(TestTextTestResult, self).setUp()

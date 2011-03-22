@@ -200,7 +200,7 @@ class TestErrorHolder(TestCase):
 
 
 class TestEquality(TestCase):
-    """Test `TestCase`'s equality implementation."""
+    """Test ``TestCase``'s equality implementation."""
 
     def test_identicalIsEqual(self):
         # TestCase's are equal if they are identical.

@@ -65,26 +65,25 @@ _ExpectedFailure = try_import(
 
 
 def run_test_with(test_runner, **kwargs):
-    """Decorate a test as using a specific `RunTest`.
+    """Decorate a test as using a specific ``RunTest``.
 
-    e.g.
-    .. python::
+    e.g.::
 
       @run_test_with(CustomRunner, timeout=42)
       def test_foo(self):
           self.assertTrue(True)
 
     The returned decorator works by setting an attribute on the decorated
-    function.  `TestCase.__init__` looks for this attribute when deciding
-    on a `RunTest` factory.  If you wish to use multiple decorators on a test
-    method, then you must either make this one the top-most decorator, or
-    you must write your decorators so that they update the wrapping function
-    with the attributes of the wrapped function.  The latter is recommended
-    style anyway.  'functools.wraps', 'functools.wrapper' and
-    'twisted.python.util.mergeFunctionMetadata' can help you do this.
+    function.  `TestCase.__init__` looks for this attribute when deciding on a
+    ``RunTest`` factory.  If you wish to use multiple decorators on a test
+    method, then you must either make this one the top-most decorator, or you
+    must write your decorators so that they update the wrapping function with
+    the attributes of the wrapped function.  The latter is recommended style
+    anyway.  ``functools.wraps``, ``functools.wrapper`` and
+    ``twisted.python.util.mergeFunctionMetadata`` can help you do this.
 
-    :param test_runner: A `RunTest` factory that takes a test case and an
-        optional list of exception handlers.  See `RunTest`.
+    :param test_runner: A ``RunTest`` factory that takes a test case and an
+        optional list of exception handlers.  See ``RunTest``.
     :param kwargs: Keyword arguments to pass on as extra arguments to
         'test_runner'.
     :return: A decorator to be used for marking a test as needing a special
@@ -106,8 +105,8 @@ class TestCase(unittest.TestCase):
     :ivar exception_handlers: Exceptions to catch from setUp, runTest and
         tearDown. This list is able to be modified at any time and consists of
         (exception_class, handler(case, result, exception_value)) pairs.
-    :cvar run_tests_with: A factory to make the `RunTest` to run tests with.
-        Defaults to `RunTest`.  The factory is expected to take a test case
+    :cvar run_tests_with: A factory to make the ``RunTest`` to run tests with.
+        Defaults to ``RunTest``.  The factory is expected to take a test case
         and an optional list of exception handlers.
     """
 
@@ -120,9 +119,9 @@ class TestCase(unittest.TestCase):
 
         :param testMethod: The name of the method to run.
         :keyword runTest: Optional class to use to execute the test. If not
-            supplied `RunTest` is used. The instance to be used is created
+            supplied ``RunTest`` is used. The instance to be used is created
             when run() is invoked, so will be fresh each time. Overrides
-            `TestCase.run_tests_with` if given.
+            ``TestCase.run_tests_with`` if given.
         """
         runTest = kwargs.pop('runTest', None)
         unittest.TestCase.__init__(self, *args, **kwargs)
@@ -639,7 +638,7 @@ if types.FunctionType not in copy._copy_dispatch:
 
 
 def clone_test_with_new_id(test, new_id):
-    """Copy a TestCase, and give the copied test a new id.
+    """Copy a `TestCase`, and give the copied test a new id.
 
     This is only expected to be used on tests that have been constructed but
     not executed.

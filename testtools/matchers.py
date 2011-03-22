@@ -731,12 +731,12 @@ class AfterPreproccessing(object):
     """Matches if the value matches after passing through a function.
 
     This can be used to aid in creating trivial matchers as functions, for
-    example:
+    example::
 
-    def PathHasFileContent(content):
-        def _read(path):
-            return open(path).read()
-        return AfterPreproccessing(_read, Equals(content))
+      def PathHasFileContent(content):
+          def _read(path):
+              return open(path).read()
+          return AfterPreproccessing(_read, Equals(content))
     """
 
     def __init__(self, preprocessor, matcher):
