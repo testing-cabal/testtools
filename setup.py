@@ -7,10 +7,16 @@ import os
 
 import testtools
 
+
 def get_revno():
+    import bzrlib.errors
     import bzrlib.workingtree
-    t = bzrlib.workingtree.WorkingTree.open_containing(__file__)[0]
-    return t.branch.revno()
+    try:
+        t = bzrlib.workingtree.WorkingTree.open_containing(__file__)[0]
+    except (bzrlib.errors.NotBranchError, bzrlib.errors.NoWorkingTree):
+        return None
+    else:
+        return t.branch.revno()
 
 
 def get_version_from_pkg_info():
@@ -38,6 +44,8 @@ def get_version():
     if pkg_info_version:
         return pkg_info_version
     revno = get_revno()
+    if revno is None:
+        return "snapshot"
     if phase == 'alpha':
         # No idea what the next version will be
         return 'next-r%s' % revno

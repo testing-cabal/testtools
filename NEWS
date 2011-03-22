@@ -47,6 +47,9 @@ Improvements
   * ``MatchesSetwise`` matches an iterable of matchers against an iterable of
     values, without regard to order.  (Michael Hudson-Doyle)
 
+* ``setup.py`` can now build a snapshot when Bazaar is installed but the tree
+  is not a Bazaar tree. (Jelmer Vernooij)
+
 * Vastly improved and extended documentation. (Jonathan Lange)
 
 * Use unittest2 exception classes if available. (Jelmer Vernooij)
