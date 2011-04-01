@@ -14,6 +14,7 @@ from testtools import (
 from testtools.matchers import (
     AfterPreproccessing,
     Annotate,
+    AnnotatedMismatch,
     Equals,
     DocTestMatches,
     DoesNotEndWith,
@@ -328,6 +329,14 @@ class TestAnnotate(TestCase, TestMatchersInterface):
         ("Annotate('foo', Equals(1))", Annotate("foo", Equals(1)))]
 
     describe_examples = [("1 != 2: foo", 2, Annotate('foo', Equals(1)))]
+
+
+class TestAnnotatedMismatch(TestCase):
+
+    def test_forwards_details(self):
+        x = Mismatch('description', {'foo': 'bar'})
+        annotated = AnnotatedMismatch("annotation", x)
+        self.assertEqual(x.get_details(), annotated.get_details())
 
 
 class TestRaisesInterface(TestCase, TestMatchersInterface):

@@ -490,6 +490,9 @@ class AnnotatedMismatch(Mismatch):
     def describe(self):
         return '%s: %s' % (self.mismatch.describe(), self.annotation)
 
+    def get_details(self):
+        return self.mismatch.get_details()
+
 
 class Raises(Matcher):
     """Match if the matchee raises an exception when called.
