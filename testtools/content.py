@@ -137,33 +137,7 @@ def maybe_wrap(wrapper, func):
     return wrapper
 
 
-def _default_parameter(offset, name, default):
-    """Create a decorator which will default a parameter to a value.
-
-    :param offset: the offset if the parameter is supplied in *args.
-        e.g. in 'def foo(bar, quux)' the offset of quux is 2.
-    :param name: The key for the parameter if supplied in **kwargs.
-    :param default: The default value to use for the parameter.
-    """
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            if len(args) < offset:
-                if kwargs.get(name, None) is None:
-                    kwargs[name] = default
-            elif args[offset-1] is None:
-                args = args[:offset-1] + (default,) + args[offset:]
-            return func(*args, **kwargs)
-        return maybe_wrap(wrapper, func)
-    return decorator
-
-
-_set_content_type = _default_parameter(2, 'content_type', UTF8_TEXT)
-_set_chunk_size = _default_parameter(3, 'chunk_size', DEFAULT_CHUNK_SIZE)
-
-
-@_set_content_type
-@_set_chunk_size
-def content_from_file(path, content_type=None, chunk_size=None,
+def content_from_file(path, content_type=None, chunk_size=DEFAULT_CHUNK_SIZE,
                       buffer_now=False):
     """Create a `Content` object from a file on disk.
 
@@ -178,6 +152,8 @@ def content_from_file(path, content_type=None, chunk_size=None,
     :param buffer_now: If True, read the file from disk now and keep it in
         memory. Otherwise, only read when the content is serialized.
     """
+    if content_type is None:
+        content_type = UTF8_TEXT
     def reader():
         # This should be try:finally:, but python2.4 makes that hard. When
         # We drop older python support we can make this use a context manager
@@ -189,10 +165,8 @@ def content_from_file(path, content_type=None, chunk_size=None,
     return content_from_reader(reader, content_type, buffer_now)
 
 
-@_set_content_type
-@_set_chunk_size
-def content_from_stream(stream, content_type=None, chunk_size=None,
-                        buffer_now=False):
+def content_from_stream(stream, content_type=None,
+                        chunk_size=DEFAULT_CHUNK_SIZE, buffer_now=False):
     """Create a `Content` object from a file-like stream.
 
     Note that the stream will only be read from when ``iter_bytes`` is
@@ -207,6 +181,8 @@ def content_from_stream(stream, content_type=None, chunk_size=None,
     :param buffer_now: If True, reads from the stream right now. Otherwise,
         only reads when the content is serialized. Defaults to False.
     """
+    if content_type is None:
+        content_type = UTF8_TEXT
     reader = lambda: _iter_chunks(stream, chunk_size)
     return content_from_reader(reader, content_type, buffer_now)
 
@@ -220,6 +196,8 @@ def content_from_reader(reader, content_type, buffer_now):
     :param buffer_now: If True the reader is evaluated immediately and
         buffered.
     """
+    if content_type is None:
+        content_type = UTF8_TEXT
     if buffer_now:
         contents = list(reader())
         reader = lambda: contents
@@ -227,7 +205,7 @@ def content_from_reader(reader, content_type, buffer_now):
 
 
 def attach_file(detailed, path, name=None, content_type=None,
-                chunk_size=None, buffer_now=True):
+                chunk_size=DEFAULT_CHUNK_SIZE, buffer_now=True):
     """Attach a file to this test as a detail.
 
     This is a convenience method wrapping around `addDetail`.

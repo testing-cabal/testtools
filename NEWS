@@ -29,7 +29,7 @@ Improvements
 
 * New content helpers ``content_from_file``, ``content_from_stream`` and
   ``attach_file`` make it easier to attach file-like objects to a
-  test. (Jonathan Lange, #694126)
+  test. (Jonathan Lange, Robert Collins, #694126)
 
 * New ``ExpectedException`` context manager to help write tests against things
   that are expected to raise exceptions. (Aaron Bentley)
