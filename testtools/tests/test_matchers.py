@@ -31,6 +31,7 @@ from testtools.matchers import (
     MatchesSetwise,
     MatchesStructure,
     Mismatch,
+    MismatchDecorator,
     Not,
     NotEquals,
     Raises,
@@ -667,6 +668,19 @@ class TestAfterPreproccessing(TestCase, TestMatchersInterface):
          2,
          AfterPreproccessing(parity, Equals(1))),
         ]
+
+
+class TestMismatchDecorator(TestCase):
+
+    def test_forwards_description(self):
+        x = Mismatch("description", {'foo': 'bar'})
+        decorated = MismatchDecorator(x)
+        self.assertEqual(x.describe(), decorated.describe())
+
+    def test_forwards_details(self):
+        x = Mismatch("description", {'foo': 'bar'})
+        decorated = MismatchDecorator(x)
+        self.assertEqual(x.get_details(), decorated.get_details())
 
 
 def test_suite():

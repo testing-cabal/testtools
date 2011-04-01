@@ -117,6 +117,18 @@ class Mismatch(object):
             id(self), self.__dict__)
 
 
+class MismatchDecorator(object):
+
+    def __init__(self, original):
+        self.original = original
+
+    def describe(self):
+        return self.original.describe()
+
+    def get_details(self):
+        return self.original.get_details()
+
+
 class DocTestMatches(object):
     """See if a string matches a doctest example."""
 
