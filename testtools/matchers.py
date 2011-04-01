@@ -132,6 +132,9 @@ class MismatchDecorator(object):
         """
         self.original = original
 
+    def __repr__(self):
+        return '<testtools.matchers.MismatchDecorator(%r)>' % (self.original,)
+
     def describe(self):
         return self.original.describe()
 
@@ -502,18 +505,16 @@ class Annotate(object):
             return AnnotatedMismatch(self.annotation, mismatch)
 
 
-class AnnotatedMismatch(Mismatch):
+class AnnotatedMismatch(MismatchDecorator):
     """A mismatch annotated with a descriptive string."""
 
     def __init__(self, annotation, mismatch):
+        super(AnnotatedMismatch, self).__init__(mismatch)
         self.annotation = annotation
         self.mismatch = mismatch
 
     def describe(self):
-        return '%s: %s' % (self.mismatch.describe(), self.annotation)
-
-    def get_details(self):
-        return self.mismatch.get_details()
+        return '%s: %s' % (self.original.describe(), self.annotation)
 
 
 class Raises(Matcher):

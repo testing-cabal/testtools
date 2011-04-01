@@ -682,6 +682,13 @@ class TestMismatchDecorator(TestCase):
         decorated = MismatchDecorator(x)
         self.assertEqual(x.get_details(), decorated.get_details())
 
+    def test_repr(self):
+        x = Mismatch("description", {'foo': 'bar'})
+        decorated = MismatchDecorator(x)
+        self.assertEqual(
+            '<testtools.matchers.MismatchDecorator(%r)>' % (x,),
+            repr(decorated))
+
 
 def test_suite():
     from unittest import TestLoader
