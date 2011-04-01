@@ -50,6 +50,8 @@ Improvements
 * ``setup.py`` can now build a snapshot when Bazaar is installed but the tree
   is not a Bazaar tree. (Jelmer Vernooij)
 
+* Support for running tests using distutils (Christian Kampka, #726539)
+
 * Vastly improved and extended documentation. (Jonathan Lange)
 
 * Use unittest2 exception classes if available. (Jelmer Vernooij)

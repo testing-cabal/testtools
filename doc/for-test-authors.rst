@@ -88,6 +88,34 @@ of them will happily run testtools tests.  In particular:
 
 From now on, we'll assume that you know how to run your tests.
 
+Running test with Distutils
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you are using Distutils_ to build your Python project, you can use the testtools
+Distutils_ command to integrate testtools into your Distutils_ workflow::
+
+  from distutils.core import setup
+  from testtools import TestCommand
+  setup(name='foo',
+      version='1.0',
+      py_modules=['foo'],
+      cmdclass={'test': TestCommand}
+  )
+
+You can then run::
+
+  $ python setup.py test -m exampletest
+  Tests running...
+  Ran 2 tests in 0.000s
+
+  OK
+
+For more information about the capabilities of the `TestCommand` command see::
+
+	$ python setup.py test --help
+
+You can use the `setup configuration`_ to specify the default behavior of the
+`TestCommand` command.
 
 Assertions
 ==========
@@ -1098,3 +1126,5 @@ You can do::
 .. _Deferred: http://twistedmatrix.com/documents/current/core/howto/defer.html
 .. _discover: http://pypi.python.org/pypi/discover
 .. _`testtools API docs`: http://mumak.net/testtools/apidocs/
+.. _Distutils: http://docs.python.org/library/distutils.html
+.. _`setup configuration`: http://docs.python.org/distutils/configfile.html
