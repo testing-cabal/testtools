@@ -47,6 +47,8 @@ Improvements
   * ``MatchesSetwise`` matches an iterable of matchers against an iterable of
     values, without regard to order.  (Michael Hudson-Doyle)
 
+* Support for running tests using distutils (Christian Kampka, #726539)
+
 * Vastly improved and extended documentation. (Jonathan Lange)
 
 * Use unittest2 exception classes if available. (Jelmer Vernooij)
