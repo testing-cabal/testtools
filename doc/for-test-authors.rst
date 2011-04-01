@@ -102,7 +102,7 @@ Distutils_ command to integrate testtools into your Distutils_ workflow::
       cmdclass={'test': TestCommand}
   )
 
-You can the run::
+You can then run::
 
   $ python setup.py test -m exampletest
   Tests running...
