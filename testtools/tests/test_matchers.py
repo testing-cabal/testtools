@@ -14,6 +14,7 @@ from testtools import (
 from testtools.matchers import (
     AfterPreproccessing,
     Annotate,
+    AnnotatedMismatch,
     Equals,
     DocTestMatches,
     DoesNotEndWith,
@@ -30,6 +31,7 @@ from testtools.matchers import (
     MatchesSetwise,
     MatchesStructure,
     Mismatch,
+    MismatchDecorator,
     Not,
     NotEquals,
     Raises,
@@ -328,6 +330,14 @@ class TestAnnotate(TestCase, TestMatchersInterface):
         ("Annotate('foo', Equals(1))", Annotate("foo", Equals(1)))]
 
     describe_examples = [("1 != 2: foo", 2, Annotate('foo', Equals(1)))]
+
+
+class TestAnnotatedMismatch(TestCase):
+
+    def test_forwards_details(self):
+        x = Mismatch('description', {'foo': 'bar'})
+        annotated = AnnotatedMismatch("annotation", x)
+        self.assertEqual(x.get_details(), annotated.get_details())
 
 
 class TestRaisesInterface(TestCase, TestMatchersInterface):
@@ -658,6 +668,26 @@ class TestAfterPreproccessing(TestCase, TestMatchersInterface):
          2,
          AfterPreproccessing(parity, Equals(1))),
         ]
+
+
+class TestMismatchDecorator(TestCase):
+
+    def test_forwards_description(self):
+        x = Mismatch("description", {'foo': 'bar'})
+        decorated = MismatchDecorator(x)
+        self.assertEqual(x.describe(), decorated.describe())
+
+    def test_forwards_details(self):
+        x = Mismatch("description", {'foo': 'bar'})
+        decorated = MismatchDecorator(x)
+        self.assertEqual(x.get_details(), decorated.get_details())
+
+    def test_repr(self):
+        x = Mismatch("description", {'foo': 'bar'})
+        decorated = MismatchDecorator(x)
+        self.assertEqual(
+            '<testtools.matchers.MismatchDecorator(%r)>' % (x,),
+            repr(decorated))
 
 
 def test_suite():

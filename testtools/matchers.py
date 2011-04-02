@@ -117,6 +117,31 @@ class Mismatch(object):
             id(self), self.__dict__)
 
 
+class MismatchDecorator(object):
+    """Decorate a ``Mismatch``.
+
+    Forwards all messages to the original mismatch object.  Probably the best
+    way to use this is inherit from this class and then provide your own
+    custom decoration logic.
+    """
+
+    def __init__(self, original):
+        """Construct a `MismatchDecorator`.
+
+        :param original: A `Mismatch` object to decorate.
+        """
+        self.original = original
+
+    def __repr__(self):
+        return '<testtools.matchers.MismatchDecorator(%r)>' % (self.original,)
+
+    def describe(self):
+        return self.original.describe()
+
+    def get_details(self):
+        return self.original.get_details()
+
+
 class DocTestMatches(object):
     """See if a string matches a doctest example."""
 
@@ -480,15 +505,16 @@ class Annotate(object):
             return AnnotatedMismatch(self.annotation, mismatch)
 
 
-class AnnotatedMismatch(Mismatch):
+class AnnotatedMismatch(MismatchDecorator):
     """A mismatch annotated with a descriptive string."""
 
     def __init__(self, annotation, mismatch):
+        super(AnnotatedMismatch, self).__init__(mismatch)
         self.annotation = annotation
         self.mismatch = mismatch
 
     def describe(self):
-        return '%s: %s' % (self.mismatch.describe(), self.annotation)
+        return '%s: %s' % (self.original.describe(), self.annotation)
 
 
 class Raises(Matcher):

@@ -14,6 +14,9 @@ Changes
 Improvements
 ------------
 
+* ``AnnotatedMismatch`` now correctly returns details.
+  (Jonathan Lange, #724691)
+
 * distutils integration for the testtools test runner. Can now use it for
   'python setup.py test'. (Christian Kampka, #693773)
 
