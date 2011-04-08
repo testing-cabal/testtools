@@ -31,10 +31,15 @@ from testtools.compat import (
     str_is_unicode,
     StringIO,
     )
-from testtools.content import Content
+from testtools.content import (
+    Content,
+    content_from_stream,
+    text_content,
+    )
 from testtools.content_type import ContentType, UTF8_TEXT
 from testtools.matchers import (
     DocTestMatches,
+    Equals,
     MatchesException,
     Raises,
     )
@@ -45,7 +50,10 @@ from testtools.tests.helpers import (
     ExtendedTestResult,
     an_exc_info
     )
-from testtools.testresult.real import utc
+from testtools.testresult.real import (
+    _details_to_str,
+    utc,
+    )
 
 
 def make_erroring_test():
@@ -1367,6 +1375,42 @@ class TestNonAsciiResultsWithUnittest(TestNonAsciiResults):
         if str_is_unicode:
             return text
         return text.encode("utf-8")
+
+
+class TestDetailsToStr(TestCase):
+
+    def test_no_details(self):
+        string = _details_to_str({})
+        self.assertThat(string, Equals(u''))
+
+    def test_binary_content(self):
+        content = content_from_stream(
+            StringIO('foo'), content_type=ContentType('image', 'jpeg'))
+        string = _details_to_str({'attachment': content})
+        self.assertThat(string, Equals(u"Binary content: attachment\n"))
+
+    def test_text_content(self):
+        content = text_content('foo')
+        string = _details_to_str({'attachment': content})
+        self.assertThat(
+            string, Equals(u'Text attachment: attachment\n'
+                           u'------------\n'
+                           u'foo\n'
+                           u'------------\n'))
+
+    def test_multiple_text_content(self):
+        string = _details_to_str(
+            {'attachment': text_content('foo'),
+             'attachment-1': text_content('bar')})
+        self.assertThat(
+            string, Equals(u'Text attachment: attachment\n'
+                           u'------------\n'
+                           u'foo\n'
+                           u'------------\n'
+                           u'Text attachment: attachment-1\n'
+                           u'------------\n'
+                           u'bar\n'
+                           u'------------\n'))
 
 
 def test_suite():
