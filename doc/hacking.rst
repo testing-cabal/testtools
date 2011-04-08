@@ -121,7 +121,7 @@ Release tasks
 
 #. Choose a version number, say X.Y.Z
 #. Branch from trunk to testtools-X.Y.Z
-#. In testtools-X.Y.Z, ensure __init__ has version X.Y.Z.
+#. In testtools-X.Y.Z, ensure __init__ has version ``(X, Y, Z, 'final', 0)``
 #. Replace NEXT in NEWS with the version number X.Y.Z, adjusting the reST.
 #. Possibly write a blurb into NEWS.
 #. Replace any additional references to NEXT with the version being
@@ -133,6 +133,10 @@ Release tasks
    Launchpad
 #. Rename the 'next' milestone on Launchpad to 'X.Y.Z'
 #. Create a release on the newly-renamed 'X.Y.Z' milestone
+
+   * Make the milestone inactive (this is the default)
+   * Set the release date to the current day
+
 #. Upload the tarball and asc file to Launchpad
 #. Merge the release branch testtools-X.Y.Z into trunk. Before the commit,
    add a NEXT heading to the top of NEWS and bump the version in __init__.py.
@@ -142,6 +146,8 @@ Release tasks
 
    #. During release we rename NEXT to $version.
    #. We call new milestones NEXT.
+
+#. Set all bugs that were "Fix Committed" to "Fix Released"
 
 .. _PEP 8: http://www.python.org/dev/peps/pep-0008/
 .. _unittest: http://docs.python.org/library/unittest.html
