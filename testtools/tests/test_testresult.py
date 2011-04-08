@@ -369,6 +369,25 @@ class TestTestResult(TestCase):
         result.time(now)
         self.assertEqual(now, result._now())
 
+    def test_traceback_formatting(self):
+        result = self.makeResult()
+        test = make_erroring_test()
+        test.run(result)
+        self.assertThat(
+            result.errors[0][1],
+            DocTestMatches(
+                u'Text attachment: traceback\n'
+                u'------------\n'
+                u'Traceback (most recent call last):\n'
+                u'  File "testtools/runtest.py", line ..., in _run_user\n'
+                u'    return fn(*args, **kwargs)\n'
+                u'  File "testtools/testcase.py", line ..., in _run_test_method\n'
+                u'    return self._get_test_method()()\n'
+                u'  File "testtools/tests/test_testresult.py", line ..., in error\n'
+                u'    1/0\n'
+                u'ZeroDivisionError: integer division or modulo by zero\n'
+                u'------------\n', doctest.ELLIPSIS))
+
 
 class TestMultiTestResult(TestCase):
     """Tests for 'MultiTestResult'."""
