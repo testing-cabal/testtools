@@ -1434,10 +1434,7 @@ class TestDetailsToStr(TestCase):
     def test_empty_attachment(self):
         string = _details_to_str({'attachment': text_content('')})
         self.assertThat(
-            string, Equals(u'Text attachment: attachment\n'
-                           u'------------\n'
-                           u'\n'
-                           u'------------\n'))
+            string, Equals(u'Empty attachments: attachment\n'))
 
 
 def test_suite():

@@ -14,7 +14,7 @@ import datetime
 import sys
 import unittest
 
-from testtools.compat import all, _format_exc_info, str_is_unicode, _u
+from testtools.compat import all, _b, _format_exc_info, str_is_unicode, _u
 
 # From http://docs.python.org/library/datetime.html
 _ZERO = datetime.timedelta(0)
@@ -608,14 +608,21 @@ def _details_to_str(details):
     chars = []
     # sorted is for testing, may want to remove that and use a dict
     # subclass with defined order for items instead.
+    empty_attachments = []
     for key, content in sorted(details.items()):
         if content.content_type.type != 'text':
             chars.append('Binary content: %s\n' % key)
             continue
-        chars.append('Text attachment: %s\n' % key)
+        text = _b('').join(content.iter_text())
+        if not text:
+            empty_attachments.append(key)
+            continue
+        chars.append('Text attachment: %s\n' % (key,))
         chars.append('------------\n')
-        chars.extend(content.iter_text())
+        chars.extend(text)
         if not chars[-1].endswith('\n'):
             chars.append('\n')
         chars.append('------------\n')
+    if empty_attachments:
+        chars.append('Empty attachments: %s\n' % ', '.join(empty_attachments))
     return _u('').join(chars)
