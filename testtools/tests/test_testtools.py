@@ -3,9 +3,7 @@
 """Tests for extensions to the base test library."""
 
 from pprint import pformat
-import os
 import sys
-import tempfile
 import unittest
 
 from testtools import (
