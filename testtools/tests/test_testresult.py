@@ -76,6 +76,12 @@ def make_test():
     return Test("test")
 
 
+def make_exception_info(exceptionFactory, *args, **kwargs):
+    try:
+        raise exceptionFactory(*args, **kwargs)
+    except:
+        return sys.exc_info()
+
 
 class Python26Contract(object):
 
@@ -357,13 +363,7 @@ class TestTestResult(TestCase):
 
 
 class TestWithFakeExceptions(TestCase):
-
-    def makeExceptionInfo(self, exceptionFactory, *args, **kwargs):
-        try:
-            raise exceptionFactory(*args, **kwargs)
-        except:
-            return sys.exc_info()
-
+    pass
 
 class TestMultiTestResult(TestWithFakeExceptions):
     """Tests for 'MultiTestResult'."""
@@ -418,14 +418,14 @@ class TestMultiTestResult(TestWithFakeExceptions):
     def test_addFailure(self):
         # Calling `addFailure` on a `MultiTestResult` calls `addFailure` on
         # all its `TestResult`s.
-        exc_info = self.makeExceptionInfo(AssertionError, 'failure')
+        exc_info = make_exception_info(AssertionError, 'failure')
         self.multiResult.addFailure(self, exc_info)
         self.assertResultLogsEqual([('addFailure', self, exc_info)])
 
     def test_addError(self):
         # Calling `addError` on a `MultiTestResult` calls `addError` on all
         # its `TestResult`s.
-        exc_info = self.makeExceptionInfo(RuntimeError, 'error')
+        exc_info = make_exception_info(RuntimeError, 'error')
         self.multiResult.addError(self, exc_info)
         self.assertResultLogsEqual([('addError', self, exc_info)])
 
@@ -627,14 +627,14 @@ class TestThreadSafeForwardingResult(TestWithFakeExceptions):
 
     def test_forwarding_methods(self):
         # error, failure, skip and success are forwarded in batches.
-        exc_info1 = self.makeExceptionInfo(RuntimeError, 'error')
+        exc_info1 = make_exception_info(RuntimeError, 'error')
         starttime1 = datetime.datetime.utcfromtimestamp(1.489)
         endtime1 = datetime.datetime.utcfromtimestamp(51.476)
         self.result1.time(starttime1)
         self.result1.startTest(self)
         self.result1.time(endtime1)
         self.result1.addError(self, exc_info1)
-        exc_info2 = self.makeExceptionInfo(AssertionError, 'failure')
+        exc_info2 = make_exception_info(AssertionError, 'failure')
         starttime2 = datetime.datetime.utcfromtimestamp(2.489)
         endtime2 = datetime.datetime.utcfromtimestamp(3.476)
         self.result1.time(starttime2)
