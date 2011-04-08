@@ -1431,6 +1431,14 @@ class TestDetailsToStr(TestCase):
                            u'bar\n'
                            u'------------\n'))
 
+    def test_empty_attachment(self):
+        string = _details_to_str({'attachment': text_content('')})
+        self.assertThat(
+            string, Equals(u'Text attachment: attachment\n'
+                           u'------------\n'
+                           u'\n'
+                           u'------------\n'))
+
 
 def test_suite():
     from unittest import TestLoader
