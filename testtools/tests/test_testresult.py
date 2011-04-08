@@ -48,6 +48,35 @@ from testtools.tests.helpers import (
 from testtools.testresult.real import utc
 
 
+def make_erroring_test():
+    class Test(TestCase):
+        def error(self):
+            1/0
+    return Test("error")
+
+
+def make_failing_test():
+    class Test(TestCase):
+        def failed(self):
+            self.fail("yo!")
+    return Test("failed")
+
+
+def make_unexpectedly_successful_test():
+    class Test(TestCase):
+        def succeeded(self):
+            self.expectFailure("yo!", lambda: None)
+    return Test("succeeded")
+
+
+def make_test():
+    class Test(TestCase):
+        def test(self):
+            pass
+    return Test("test")
+
+
+
 class Python26Contract(object):
 
     def test_fresh_result_is_successful(self):
@@ -188,7 +217,7 @@ class FallbackContract(DetailsContract):
 
 class StartTestRunContract(FallbackContract):
     """Defines the contract for testtools policy choices.
-    
+
     That is things which are not simply extensions to unittest but choices we
     have made differently.
     """
@@ -436,30 +465,6 @@ class TestTextTestResult(TestCase):
         super(TestTextTestResult, self).setUp()
         self.result = TextTestResult(StringIO())
 
-    def make_erroring_test(self):
-        class Test(TestCase):
-            def error(self):
-                1/0
-        return Test("error")
-
-    def make_failing_test(self):
-        class Test(TestCase):
-            def failed(self):
-                self.fail("yo!")
-        return Test("failed")
-
-    def make_unexpectedly_successful_test(self):
-        class Test(TestCase):
-            def succeeded(self):
-                self.expectFailure("yo!", lambda: None)
-        return Test("succeeded")
-
-    def make_test(self):
-        class Test(TestCase):
-            def test(self):
-                pass
-        return Test("test")
-
     def getvalue(self):
         return self.result.stream.getvalue()
 
@@ -475,7 +480,7 @@ class TestTextTestResult(TestCase):
         self.assertEqual("Tests running...\n", self.getvalue())
 
     def test_stopTestRun_count_many(self):
-        test = self.make_test()
+        test = make_test()
         self.result.startTestRun()
         self.result.startTest(test)
         self.result.stopTest(test)
@@ -487,7 +492,7 @@ class TestTextTestResult(TestCase):
             DocTestMatches("Ran 2 tests in ...s\n...", doctest.ELLIPSIS))
 
     def test_stopTestRun_count_single(self):
-        test = self.make_test()
+        test = make_test()
         self.result.startTestRun()
         self.result.startTest(test)
         self.result.stopTest(test)
@@ -504,7 +509,7 @@ class TestTextTestResult(TestCase):
             DocTestMatches("Ran 0 tests in ...s\n\nOK\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_current_time(self):
-        test = self.make_test()
+        test = make_test()
         now = datetime.datetime.now(utc)
         self.result.time(now)
         self.result.startTestRun()
@@ -524,7 +529,7 @@ class TestTextTestResult(TestCase):
             DocTestMatches("...\n\nOK\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_not_successful_failure(self):
-        test = self.make_failing_test()
+        test = make_failing_test()
         self.result.startTestRun()
         test.run(self.result)
         self.result.stopTestRun()
@@ -532,7 +537,7 @@ class TestTextTestResult(TestCase):
             DocTestMatches("...\n\nFAILED (failures=1)\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_not_successful_error(self):
-        test = self.make_erroring_test()
+        test = make_erroring_test()
         self.result.startTestRun()
         test.run(self.result)
         self.result.stopTestRun()
@@ -540,7 +545,7 @@ class TestTextTestResult(TestCase):
             DocTestMatches("...\n\nFAILED (failures=1)\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_not_successful_unexpected_success(self):
-        test = self.make_unexpectedly_successful_test()
+        test = make_unexpectedly_successful_test()
         self.result.startTestRun()
         test.run(self.result)
         self.result.stopTestRun()
@@ -549,9 +554,9 @@ class TestTextTestResult(TestCase):
 
     def test_stopTestRun_shows_details(self):
         self.result.startTestRun()
-        self.make_erroring_test().run(self.result)
-        self.make_unexpectedly_successful_test().run(self.result)
-        self.make_failing_test().run(self.result)
+        make_erroring_test().run(self.result)
+        make_unexpectedly_successful_test().run(self.result)
+        make_failing_test().run(self.result)
         self.reset_output()
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
