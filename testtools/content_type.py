@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2010 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2011 testtools developers. See LICENSE for details.
 
 """ContentType - a MIME Content Type."""
 
@@ -27,7 +27,10 @@ class ContentType(object):
         return self.__dict__ == other.__dict__
 
     def __repr__(self):
-        return "%s/%s params=%s" % (self.type, self.subtype, self.parameters)
+        return "%s/%s; %s" % (
+            self.type, self.subtype,
+            ', '.join('%s="%s"' % (k, v)
+                      for k, v in self.parameters.iteritems()))
 
 
 UTF8_TEXT = ContentType('text', 'plain', {'charset': 'utf8'})
