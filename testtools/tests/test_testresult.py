@@ -1437,6 +1437,19 @@ class TestDetailsToStr(TestCase):
             string, Equals(u'Empty attachments: attachment\n'))
 
 
+# XXX: We probably want to have a "special" key in details_to_str for the
+# attachment representing the main error from the test.  This error would not
+# have a named attachment and would always be shown in a certain position
+# (either first or last).
+
+# XXX: Want to hide certain levels of the traceback in most circumstances.
+# Probably should hook into the __unittest logic that I think unittest2 has.
+
+# XXX: Do we need to say "Text attachment"?
+
+# XXX: Probably the last attachment doesn't need to have the closing dashes,
+# since the test itself will have those.
+
 def test_suite():
     from unittest import TestLoader
     return TestLoader().loadTestsFromName(__name__)
