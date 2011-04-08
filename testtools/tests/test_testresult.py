@@ -362,14 +362,11 @@ class TestTestResult(TestCase):
         self.assertEqual(now, result._now())
 
 
-class TestWithFakeExceptions(TestCase):
-    pass
-
-class TestMultiTestResult(TestWithFakeExceptions):
+class TestMultiTestResult(TestCase):
     """Tests for 'MultiTestResult'."""
 
     def setUp(self):
-        TestWithFakeExceptions.setUp(self)
+        super(TestMultiTestResult, self).setUp()
         self.result1 = LoggingResult([])
         self.result2 = LoggingResult([])
         self.multiResult = MultiTestResult(self.result1, self.result2)
@@ -594,11 +591,11 @@ UNEXPECTED SUCCESS: testtools.tests.test_testresult.Test.succeeded
 ...""", doctest.ELLIPSIS | doctest.REPORT_NDIFF))
 
 
-class TestThreadSafeForwardingResult(TestWithFakeExceptions):
+class TestThreadSafeForwardingResult(TestCase):
     """Tests for `TestThreadSafeForwardingResult`."""
 
     def setUp(self):
-        TestWithFakeExceptions.setUp(self)
+        super(TestThreadSafeForwardingResult, self).setUp()
         self.result_semaphore = threading.Semaphore(1)
         self.target = LoggingResult([])
         self.result1 = ThreadsafeForwardingResult(self.target,
