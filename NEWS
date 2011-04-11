@@ -5,7 +5,17 @@ NEXT
 ~~~~
 
 Changes
--------
+~~~~~~~
+
+Improvements
+~~~~~~~~~~~~
+
+
+0.9.10
+~~~~~~
+
+The last release of testtools could not be easy_installed.  This is considered
+severe enough for a re-release.
 
 Improvements
 ------------
