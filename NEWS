@@ -10,6 +10,9 @@ Changes
 Improvements
 ------------
 
+* Include ``doc/`` in the source distribution, making testtools installable
+  from PyPI again (Tres Seaver, #757439)
+
 
 0.9.9
 ~~~~~
