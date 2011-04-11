@@ -1,11 +1,11 @@
 testtools NEWS
 ++++++++++++++
 
-NEXT
-~~~~
+0.9.10
+~~~~~~
 
-Changes
--------
+The last release of testtools could not be easy_installed.  This is considered
+severe enough for a re-release.
 
 Improvements
 ------------
