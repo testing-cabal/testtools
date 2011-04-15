@@ -571,7 +571,7 @@ It's much easier to understand in Python than in English::
       foo = Foo()
       foo.a = 1
       foo.b = 2
-      matcher = MatchesStructure({'a', Equals(1), 'b', Equals(2)})
+      matcher = MatchesStructure(a=Equals(1), b=Equals(2))
       self.assertThat(foo, matcher)
 
 ``MatchesStructure.from_example`` takes an object and a list of attributes and

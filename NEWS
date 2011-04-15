@@ -10,6 +10,9 @@ Changes
 Improvements
 ~~~~~~~~~~~~
 
+* Corrected documentation for ``MatchesStructure`` in the test authors
+  document.  (Jonathan Lange)
+
 
 0.9.10
 ~~~~~~
