@@ -290,7 +290,7 @@ class LessThan(_BinaryComparison):
     """Matches if the item is less than the matchers reference object."""
 
     comparator = operator.__lt__
-    mismatch_string = 'is >='
+    mismatch_string = 'is not >'
 
 
 class MatchesAny(object):

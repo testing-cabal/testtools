@@ -13,6 +13,9 @@ Improvements
 * Corrected documentation for ``MatchesStructure`` in the test authors
   document.  (Jonathan Lange)
 
+* ``LessThan`` error message now says something that is logically correct.
+  (Gavin Panella, #762008)
+
 
 0.9.10
 ~~~~~~

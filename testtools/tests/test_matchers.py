@@ -168,7 +168,10 @@ class TestLessThanInterface(TestCase, TestMatchersInterface):
         ("LessThan(12)", LessThan(12)),
         ]
 
-    describe_examples = [('4 is >= 4', 4, LessThan(4))]
+    describe_examples = [
+        ('4 is not > 5', 5, LessThan(4)),
+        ('4 is not > 4', 4, LessThan(4)),
+        ]
 
 
 def make_error(type, *args, **kwargs):
