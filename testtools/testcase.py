@@ -279,8 +279,8 @@ class TestCase(unittest.TestCase):
 
     def assertIn(self, needle, haystack):
         """Assert that needle is in haystack."""
-        self.assertTrue(
-            needle in haystack, '%r not in %r' % (needle, haystack))
+        if needle not in haystack:
+            self.fail('%r not in %r' % (needle, haystack))
 
     def assertIs(self, expected, observed, message=''):
         """Assert that 'expected' is 'observed'.
@@ -291,28 +291,27 @@ class TestCase(unittest.TestCase):
         """
         if message:
             message = ': ' + message
-        self.assertTrue(
-            expected is observed,
-            '%r is not %r%s' % (expected, observed, message))
+        if expected is not observed:
+            self.fail('%r is not %r%s' % (expected, observed, message))
 
     def assertIsNot(self, expected, observed, message=''):
         """Assert that 'expected' is not 'observed'."""
         if message:
             message = ': ' + message
-        self.assertTrue(
-            expected is not observed,
-            '%r is %r%s' % (expected, observed, message))
+        if expected is observed:
+            self.fail('%r is %r%s' % (expected, observed, message))
 
     def assertNotIn(self, needle, haystack):
         """Assert that needle is not in haystack."""
-        self.assertTrue(
-            needle not in haystack, '%r in %r' % (needle, haystack))
+        if needle in haystack:
+            self.fail('%r in %r' % (needle, haystack))
 
     def assertIsInstance(self, obj, klass, msg=None):
         if msg is None:
             msg = '%r is not an instance of %s' % (
                 obj, self._formatTypes(klass))
-        self.assertTrue(isinstance(obj, klass), msg)
+        if not isinstance(obj, klass):
+            self.fail(msg)
 
     def assertRaises(self, excClass, callableObj, *args, **kwargs):
         """Fail unless an exception of class excClass is thrown

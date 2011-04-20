@@ -4,12 +4,14 @@
 
 import doctest
 import re
-import StringIO
 import sys
 
 from testtools import (
     Matcher, # check that Matcher is exposed at the top level for docs.
     TestCase,
+    )
+from testtools.compat import (
+    StringIO,
     )
 from testtools.matchers import (
     AfterPreproccessing,
@@ -490,7 +492,7 @@ def run_doctest(obj, name):
     t = p.get_doctest(
         obj.__doc__, sys.modules[obj.__module__].__dict__, name, '', 0)
     r = doctest.DocTestRunner()
-    output = StringIO.StringIO()
+    output = StringIO()
     r.run(t, out=output.write)
     return r.failures, output.getvalue()
 

@@ -578,7 +578,7 @@ class MatchesListwise(object):
 
     >>> MatchesListwise([Equals(1)]).match([1])
     >>> MatchesListwise([Equals(1), Equals(2)]).match([1, 2])
-    >>> print MatchesListwise([Equals(1), Equals(2)]).match([2, 1]).describe()
+    >>> print (MatchesListwise([Equals(1), Equals(2)]).match([2, 1]).describe())
     Differences: [
     1 != 2
     2 != 1
@@ -628,7 +628,7 @@ class MatchesStructure(object):
 
     def update(self, **kws):
         new_kws = self.kws.copy()
-        for attr, matcher in kws.iteritems():
+        for attr, matcher in kws.items():
             if matcher is None:
                 new_kws.pop(attr, None)
             else:
@@ -637,14 +637,14 @@ class MatchesStructure(object):
 
     def __str__(self):
         kws = []
-        for attr, matcher in sorted(self.kws.iteritems()):
+        for attr, matcher in sorted(self.kws.items()):
             kws.append("%s=%s" % (attr, matcher))
         return "%s(%s)" % (self.__class__.__name__, ', '.join(kws))
 
     def match(self, value):
         matchers = []
         values = []
-        for attr, matcher in sorted(self.kws.iteritems()):
+        for attr, matcher in sorted(self.kws.items()):
             matchers.append(Annotate(attr, matcher))
             values.append(getattr(value, attr))
         return MatchesListwise(matchers).match(values)
