@@ -10,6 +10,9 @@ Changes
 Improvements
 ~~~~~~~~~~~~
 
+* Additional compat helper for ``BytesIO`` for libraries that build on
+  testtools and are working on Python 3 porting. (Robert Collins)
+
 * Corrected documentation for ``MatchesStructure`` in the test authors
   document.  (Jonathan Lange)
 
