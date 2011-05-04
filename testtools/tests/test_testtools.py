@@ -37,7 +37,7 @@ try:
 except SyntaxError:
     pass
 else:
-    from test_with_with import *
+    from testtools.tests.test_with_with import *
 
 
 class TestPlaceHolder(TestCase):

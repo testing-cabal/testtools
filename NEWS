@@ -19,6 +19,8 @@ Improvements
 * ``LessThan`` error message now says something that is logically correct.
   (Gavin Panella, #762008)
 
+* Python 3 support now back in action. (Martin [gz], #688729)
+
 
 0.9.10
 ~~~~~~
