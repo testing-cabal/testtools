@@ -1138,6 +1138,36 @@ class TestPatchSupport(TestCase):
         self.assertIs(marker, value)
 
 
+class TestTestCaseSuper(TestCase):
+    def test_setup_uses_super(self):
+        class OtherBaseCase(unittest.TestCase):
+            setup_called = False
+            def setUp(self):
+                self.setup_called = True
+                super(OtherBaseCase, self).setUp()
+        class OurCase(TestCase, OtherBaseCase):
+            def runTest(self):
+                pass
+        test = OurCase()
+        test.setUp()
+        test.tearDown()
+        self.assertTrue(test.setup_called)
+
+    def test_teardown_uses_super(self):
+        class OtherBaseCase(unittest.TestCase):
+            teardown_called = False
+            def tearDown(self):
+                self.teardown_called = True
+                super(OtherBaseCase, self).tearDown()
+        class OurCase(TestCase, OtherBaseCase):
+            def runTest(self):
+                pass
+        test = OurCase()
+        test.setUp()
+        test.tearDown()
+        self.assertTrue(test.teardown_called)
+
+
 def test_suite():
     from unittest import TestLoader
     return TestLoader().loadTestsFromName(__name__)

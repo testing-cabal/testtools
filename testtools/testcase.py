@@ -124,7 +124,7 @@ class TestCase(unittest.TestCase):
             ``TestCase.run_tests_with`` if given.
         """
         runTest = kwargs.pop('runTest', None)
-        unittest.TestCase.__init__(self, *args, **kwargs)
+        super(TestCase, self).__init__(*args, **kwargs)
         self._cleanups = []
         self._unique_id_gen = itertools.count(1)
         # Generators to ensure unique traceback ids.  Maps traceback label to
@@ -535,10 +535,11 @@ class TestCase(unittest.TestCase):
                 content.Content(content_object.content_type, content_callback))
 
     def setUp(self):
-        unittest.TestCase.setUp(self)
+        super(TestCase, self).setUp()
         self.__setup_called = True
 
     def tearDown(self):
+        super(TestCase, self).tearDown()
         unittest.TestCase.tearDown(self)
         self.__teardown_called = True
 

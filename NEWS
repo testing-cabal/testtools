@@ -7,6 +7,9 @@ NEXT
 Changes
 ~~~~~~~
 
+* ``TestCase`` now uses super to call base ``unittest.TestCase`` constructor,
+  ``setUp`` and ``tearDown``. (Tim Cole, #771508)
+
 Improvements
 ~~~~~~~~~~~~
 
