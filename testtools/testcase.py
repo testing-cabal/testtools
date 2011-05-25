@@ -534,10 +534,15 @@ class TestCase(unittest.TestCase):
         :return: The fixture, after setting it up and scheduling a cleanup for
            it.
         """
-        fixture.setUp()
-        self.addCleanup(fixture.cleanUp)
-        self.addCleanup(gather_details, fixture, self)
-        return fixture
+        try:
+            fixture.setUp()
+        except:
+            gather_details(fixture, self)
+            raise
+        else:
+            self.addCleanup(fixture.cleanUp)
+            self.addCleanup(gather_details, fixture, self)
+            return fixture
 
     def setUp(self):
         super(TestCase, self).setUp()
