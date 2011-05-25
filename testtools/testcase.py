@@ -100,11 +100,15 @@ def run_test_with(test_runner, **kwargs):
 
 
 def copy_content(content_object):
-    """Make a copy of the given `content.Content` object.
+    """Make a copy of the given content object.
 
     The content within `content_object` is iterated and saved. This is useful
     when the source of the content is volatile, a log file in a temporary
     directory for example.
+
+    :param content_object: A `content.Content` instance.
+    :return: A `content.Content` instance with the same mime-type as
+        `content_object` and a non-volatile copy of its content.
     """
     content_bytes = list(content_object.iter_bytes())
     content_callback = lambda: content_bytes
