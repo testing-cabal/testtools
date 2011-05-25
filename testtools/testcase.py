@@ -99,6 +99,18 @@ def run_test_with(test_runner, **kwargs):
     return decorator
 
 
+def copy_content(content_object):
+    """Make a copy of the given `content.Content` object.
+
+    The content within `content_object` is iterated and saved. This is useful
+    when the source of the content is volatile, a log file in a temporary
+    directory for example.
+    """
+    content_bytes = list(content_object.iter_bytes())
+    content_callback = lambda: content_bytes
+    return content.Content(content_object.content_type, content_callback)
+
+
 def gather_details(source, target):
     """Merge the details from `source` into `target`.
 
@@ -113,10 +125,7 @@ def gather_details(source, target):
         while new_name in target_details:
             new_name = '%s-%d' % (name, advance_iterator(disambiguator))
         name = new_name
-        content_bytes = list(content_object.iter_bytes())
-        content_callback = lambda: content_bytes
-        target.addDetail(name,
-            content.Content(content_object.content_type, content_callback))
+        target.addDetail(name, copy_content(content_object))
 
 
 class TestCase(unittest.TestCase):
