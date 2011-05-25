@@ -99,6 +99,22 @@ def run_test_with(test_runner, **kwargs):
     return decorator
 
 
+def gather_details(test_case, getDetails):
+    """Merge the details from getDetails() into test_case.getDetails()."""
+    details = getDetails()
+    my_details = test_case.getDetails()
+    for name, content_object in details.items():
+        new_name = name
+        disambiguator = itertools.count(1)
+        while new_name in my_details:
+            new_name = '%s-%d' % (name, advance_iterator(disambiguator))
+        name = new_name
+        content_bytes = list(content_object.iter_bytes())
+        content_callback = lambda:content_bytes
+        test_case.addDetail(name,
+            content.Content(content_object.content_type, content_callback))
+
+
 class TestCase(unittest.TestCase):
     """Extensions to the basic TestCase.
 
@@ -516,23 +532,8 @@ class TestCase(unittest.TestCase):
         """
         fixture.setUp()
         self.addCleanup(fixture.cleanUp)
-        self.addCleanup(self._gather_details, fixture.getDetails)
+        self.addCleanup(gather_details, self, fixture.getDetails)
         return fixture
-
-    def _gather_details(self, getDetails):
-        """Merge the details from getDetails() into self.getDetails()."""
-        details = getDetails()
-        my_details = self.getDetails()
-        for name, content_object in details.items():
-            new_name = name
-            disambiguator = itertools.count(1)
-            while new_name in my_details:
-                new_name = '%s-%d' % (name, advance_iterator(disambiguator))
-            name = new_name
-            content_bytes = list(content_object.iter_bytes())
-            content_callback = lambda:content_bytes
-            self.addDetail(name,
-                content.Content(content_object.content_type, content_callback))
 
     def setUp(self):
         super(TestCase, self).setUp()
