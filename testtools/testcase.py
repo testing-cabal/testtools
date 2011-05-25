@@ -99,19 +99,23 @@ def run_test_with(test_runner, **kwargs):
     return decorator
 
 
-def gather_details(test_case, getDetails):
-    """Merge the details from getDetails() into test_case.getDetails()."""
-    details = getDetails()
-    my_details = test_case.getDetails()
-    for name, content_object in details.items():
+def gather_details(source, target):
+    """Merge the details from `source` into `target`.
+
+    :param source: A *detailed* object from which details will be gathered.
+    :param target: A *detailed* object into which details will be gathered.
+    """
+    source_details = source.getDetails()
+    target_details = target.getDetails()
+    for name, content_object in source_details.items():
         new_name = name
         disambiguator = itertools.count(1)
-        while new_name in my_details:
+        while new_name in target_details:
             new_name = '%s-%d' % (name, advance_iterator(disambiguator))
         name = new_name
         content_bytes = list(content_object.iter_bytes())
-        content_callback = lambda:content_bytes
-        test_case.addDetail(name,
+        content_callback = lambda: content_bytes
+        target.addDetail(name,
             content.Content(content_object.content_type, content_callback))
 
 
@@ -532,7 +536,7 @@ class TestCase(unittest.TestCase):
         """
         fixture.setUp()
         self.addCleanup(fixture.cleanUp)
-        self.addCleanup(gather_details, self, fixture.getDetails)
+        self.addCleanup(gather_details, fixture, self)
         return fixture
 
     def setUp(self):
