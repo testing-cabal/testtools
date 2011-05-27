@@ -6,6 +6,7 @@ __metaclass__ = type
 __all__ = [
     'clone_test_with_new_id',
     'ExpectedException',
+    'gather_details',
     'run_test_with',
     'skip',
     'skipIf',
@@ -97,6 +98,39 @@ def run_test_with(test_runner, **kwargs):
                 test_runner(case, handlers=handlers, **kwargs))
         return function
     return decorator
+
+
+def _copy_content(content_object):
+    """Make a copy of the given content object.
+
+    The content within `content_object` is iterated and saved. This is useful
+    when the source of the content is volatile, a log file in a temporary
+    directory for example.
+
+    :param content_object: A `content.Content` instance.
+    :return: A `content.Content` instance with the same mime-type as
+        `content_object` and a non-volatile copy of its content.
+    """
+    content_bytes = list(content_object.iter_bytes())
+    content_callback = lambda: content_bytes
+    return content.Content(content_object.content_type, content_callback)
+
+
+def gather_details(source, target):
+    """Merge the details from `source` into `target`.
+
+    :param source: A *detailed* object from which details will be gathered.
+    :param target: A *detailed* object into which details will be gathered.
+    """
+    source_details = source.getDetails()
+    target_details = target.getDetails()
+    for name, content_object in source_details.items():
+        new_name = name
+        disambiguator = itertools.count(1)
+        while new_name in target_details:
+            new_name = '%s-%d' % (name, advance_iterator(disambiguator))
+        name = new_name
+        target.addDetail(name, _copy_content(content_object))
 
 
 class TestCase(unittest.TestCase):
@@ -514,25 +548,15 @@ class TestCase(unittest.TestCase):
         :return: The fixture, after setting it up and scheduling a cleanup for
            it.
         """
-        fixture.setUp()
-        self.addCleanup(fixture.cleanUp)
-        self.addCleanup(self._gather_details, fixture.getDetails)
-        return fixture
-
-    def _gather_details(self, getDetails):
-        """Merge the details from getDetails() into self.getDetails()."""
-        details = getDetails()
-        my_details = self.getDetails()
-        for name, content_object in details.items():
-            new_name = name
-            disambiguator = itertools.count(1)
-            while new_name in my_details:
-                new_name = '%s-%d' % (name, advance_iterator(disambiguator))
-            name = new_name
-            content_bytes = list(content_object.iter_bytes())
-            content_callback = lambda:content_bytes
-            self.addDetail(name,
-                content.Content(content_object.content_type, content_callback))
+        try:
+            fixture.setUp()
+        except:
+            gather_details(fixture, self)
+            raise
+        else:
+            self.addCleanup(fixture.cleanUp)
+            self.addCleanup(gather_details, fixture, self)
+            return fixture
 
     def setUp(self):
         super(TestCase, self).setUp()
