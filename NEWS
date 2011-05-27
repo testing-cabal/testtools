@@ -10,6 +10,10 @@ Changes
 * ``TestCase`` now uses super to call base ``unittest.TestCase`` constructor,
   ``setUp`` and ``tearDown``. (Tim Cole, #771508)
 
+* If, when calling ``useFixture`` an error occurs during fixture set up, we
+  still attempt to gather details from the fixture. (Gavin Panella)
+
+
 Improvements
 ~~~~~~~~~~~~
 
@@ -21,6 +25,9 @@ Improvements
 
 * ``LessThan`` error message now says something that is logically correct.
   (Gavin Panella, #762008)
+
+* Multiple details from a single fixture are now kept separate, rather than
+  being mooshed together. (Gavin Panella, #788182)
 
 * Python 3 support now back in action. (Martin [gz], #688729)
 
