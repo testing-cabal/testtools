@@ -100,7 +100,7 @@ def run_test_with(test_runner, **kwargs):
     return decorator
 
 
-def copy_content(content_object):
+def _copy_content(content_object):
     """Make a copy of the given content object.
 
     The content within `content_object` is iterated and saved. This is useful
@@ -130,7 +130,7 @@ def gather_details(source, target):
         while new_name in target_details:
             new_name = '%s-%d' % (name, advance_iterator(disambiguator))
         name = new_name
-        target.addDetail(name, copy_content(content_object))
+        target.addDetail(name, _copy_content(content_object))
 
 
 class TestCase(unittest.TestCase):
