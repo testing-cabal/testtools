@@ -6,6 +6,7 @@ __metaclass__ = type
 __all__ = [
     'clone_test_with_new_id',
     'ExpectedException',
+    'gather_details',
     'run_test_with',
     'skip',
     'skipIf',
