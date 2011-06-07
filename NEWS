@@ -31,6 +31,9 @@ Improvements
 
 * Python 3 support now back in action. (Martin [gz], #688729)
 
+* ``try_import`` and ``try_imports`` have a callback that is called whenever
+  they fail to import a module.  (Martin Pool)
+
 
 0.9.10
 ~~~~~~
