@@ -125,7 +125,8 @@ Release tasks
 #. Replace NEXT in NEWS with the version number X.Y.Z, adjusting the reST.
 #. Possibly write a blurb into NEWS.
 #. Replace any additional references to NEXT with the version being
-   released. (should be none).
+   released. (There should be none other than the ones in these release tasks
+   which should not be replaced).
 #. Commit the changes.
 #. Tag the release, bzr tag testtools-X.Y.Z
 #. Create a source distribution and upload to pypi ('make release').
