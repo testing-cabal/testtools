@@ -1,8 +1,12 @@
 testtools NEWS
 ++++++++++++++
 
-NEXT
-~~~~
+0.9.11
+~~~~~~
+
+This release brings consistent use of super for better compatibility with
+multiple inheritance, fixed Python3 support, improvements in fixture and mather
+outputs and a compat helper for testing libraries that deal with bytestrings.
 
 Changes
 ~~~~~~~
