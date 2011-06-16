@@ -25,6 +25,7 @@ from testtools.matchers import (
     KeysEqual,
     Is,
     LessThan,
+	GreaterThan,
     MatchesAny,
     MatchesAll,
     MatchesException,
@@ -175,6 +176,20 @@ class TestLessThanInterface(TestCase, TestMatchersInterface):
         ('4 is not > 4', 4, LessThan(4)),
         ]
 
+class TestGreaterThanInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = GreaterThan(4)
+    matches_matches = [5, 8]
+    matches_mismatches = [-2, 0, 4]
+
+    str_examples = [
+        ("GreaterThan(12)", GreaterThan(12)),
+        ]
+
+    describe_examples = [
+        ('5 is not < 4', 4, GreaterThan(5)),
+        ('4 is not < 4', 4, GreaterThan(4)),
+        ]
 
 def make_error(type, *args, **kwargs):
     try:
