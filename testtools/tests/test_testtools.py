@@ -501,6 +501,29 @@ class TestAssertions(TestCase):
         self.assertFails(expected_error, self.assertEquals, a, b)
         self.assertFails(expected_error, self.failUnlessEqual, a, b)
 
+    def test_assertIsNone(self):
+        self.assertIsNone(None)
+
+        expected_error = '\n'.join([
+            'Match failed. Matchee: "0"',
+            'Matcher: Equals(None)',
+            'Difference: None != 0',
+            ''
+            ])
+        self.assertFails(expected_error, self.assertIsNone, 0)
+
+    def test_assertIsNotNone(self):
+        self.assertIsNotNone(0)
+        self.assertIsNotNone("0")
+
+        expected_error = '\n'.join([
+            'Match failed. Matchee: "None"',
+            'Matcher: Not(Equals(None))',
+            'Difference: None matches Equals(None)',
+            ''
+            ])
+        self.assertFails(expected_error, self.assertIsNotNone, None)
+        
 
 class TestAddCleanup(TestCase):
     """Tests for TestCase.addCleanup."""
