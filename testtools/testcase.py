@@ -29,6 +29,7 @@ from testtools.compat import advance_iterator
 from testtools.matchers import (
     Annotate,
     Equals,
+    Not,
     )
 from testtools.monkey import patch
 from testtools.runtest import RunTest
@@ -315,6 +316,28 @@ class TestCase(unittest.TestCase):
         """Assert that needle is in haystack."""
         if needle not in haystack:
             self.fail('%r not in %r' % (needle, haystack))
+
+    def assertIsNone(self, observed, message=''):
+        """Assert that 'observed' is equal to None.
+
+        :param observed: The observed value.
+        :param message: An optional message describing the error.
+        """
+        matcher = Equals(None)
+        if message:
+            matcher = Annotate(message, matcher)
+        self.assertThat(observed, matcher)
+
+    def assertIsNotNone(self, observed, message=''):
+        """Assert that 'observed' is not equal to None.
+
+        :param observed: The observed value.
+        :param message: An optional message describing the error.
+        """
+        matcher = Not(Equals(None))
+        if message:
+            matcher = Annotate(message, matcher)
+        self.assertThat(observed, matcher)
 
     def assertIs(self, expected, observed, message=''):
         """Assert that 'expected' is 'observed'.
