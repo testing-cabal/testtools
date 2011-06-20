@@ -4,6 +4,13 @@ testtools NEWS
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* New convenience assertions, ``assertIsNone`` and ``assertIsNotNone``.
+  (Christian Kampka)
+
+
 0.9.11
 ~~~~~~
 
@@ -12,7 +19,7 @@ multiple inheritance, fixed Python3 support, improvements in fixture and mather
 outputs and a compat helper for testing libraries that deal with bytestrings.
 
 Changes
-~~~~~~~
+-------
 
 * ``TestCase`` now uses super to call base ``unittest.TestCase`` constructor,
   ``setUp`` and ``tearDown``. (Tim Cole, #771508)
@@ -22,7 +29,7 @@ Changes
 
 
 Improvements
-~~~~~~~~~~~~
+------------
 
 * Additional compat helper for ``BytesIO`` for libraries that build on
   testtools and are working on Python 3 porting. (Robert Collins)
