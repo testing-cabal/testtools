@@ -293,11 +293,13 @@ class LessThan(_BinaryComparison):
     comparator = operator.__lt__
     mismatch_string = 'is not >'
 
+
 class GreaterThan(_BinaryComparison):
     """Matches if the item is greater than the matchers reference object."""
 
     comparator = operator.__gt__
     mismatch_string = 'is not <'
+
 
 class MatchesAny(object):
     """Matches if any of the matchers it is created with match."""
