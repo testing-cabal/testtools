@@ -1,11 +1,9 @@
-# Copyright (c) 2008-2010 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
 
 """Tests for extensions to the base test library."""
 
 from pprint import pformat
-import os
 import sys
-import tempfile
 import unittest
 
 from testtools import (
@@ -523,7 +521,7 @@ class TestAssertions(TestCase):
             ''
             ])
         self.assertFails(expected_error, self.assertIsNotNone, None)
-        
+
 
 class TestAddCleanup(TestCase):
     """Tests for TestCase.addCleanup."""
