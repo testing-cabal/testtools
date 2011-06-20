@@ -504,8 +504,8 @@ class TestAssertions(TestCase):
 
         expected_error = '\n'.join([
             'Match failed. Matchee: "0"',
-            'Matcher: Equals(None)',
-            'Difference: None != 0',
+            'Matcher: Is(None)',
+            'Difference: None is not 0',
             ''
             ])
         self.assertFails(expected_error, self.assertIsNone, 0)
@@ -516,8 +516,8 @@ class TestAssertions(TestCase):
 
         expected_error = '\n'.join([
             'Match failed. Matchee: "None"',
-            'Matcher: Not(Equals(None))',
-            'Difference: None matches Equals(None)',
+            'Matcher: Not(Is(None))',
+            'Difference: None matches Is(None)',
             ''
             ])
         self.assertFails(expected_error, self.assertIsNotNone, None)

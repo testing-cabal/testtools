@@ -29,6 +29,7 @@ from testtools.compat import advance_iterator
 from testtools.matchers import (
     Annotate,
     Equals,
+    Is,
     Not,
     )
 from testtools.monkey import patch
@@ -323,7 +324,7 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message describing the error.
         """
-        matcher = Equals(None)
+        matcher = Is(None)
         if message:
             matcher = Annotate(message, matcher)
         self.assertThat(observed, matcher)
@@ -334,7 +335,7 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message describing the error.
         """
-        matcher = Not(Equals(None))
+        matcher = Not(Is(None))
         if message:
             matcher = Annotate(message, matcher)
         self.assertThat(observed, matcher)
