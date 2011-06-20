@@ -306,15 +306,14 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message to include in the error.
         """
-        matcher = Equals(expected)
-        if message:
-            matcher = Annotate(message, matcher)
+        matcher = Annotate.if_message(message, Equals(expected))
         self.assertThat(observed, matcher)
 
     failUnlessEqual = assertEquals = assertEqual
 
     def assertIn(self, needle, haystack):
         """Assert that needle is in haystack."""
+        # XXX: Re-implement with matchers.
         if needle not in haystack:
             self.fail('%r not in %r' % (needle, haystack))
 
@@ -324,9 +323,7 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message describing the error.
         """
-        matcher = Is(None)
-        if message:
-            matcher = Annotate(message, matcher)
+        matcher = Annotate.if_message(message, Is(None))
         self.assertThat(observed, matcher)
 
     def assertIsNotNone(self, observed, message=''):
@@ -335,9 +332,7 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message describing the error.
         """
-        matcher = Not(Is(None))
-        if message:
-            matcher = Annotate(message, matcher)
+        matcher = Annotate.if_message(message, Not(Is(None)))
         self.assertThat(observed, matcher)
 
     def assertIs(self, expected, observed, message=''):
@@ -347,6 +342,7 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message describing the error.
         """
+        # XXX: Re-implement with matchers.
         if message:
             message = ': ' + message
         if expected is not observed:
@@ -354,6 +350,7 @@ class TestCase(unittest.TestCase):
 
     def assertIsNot(self, expected, observed, message=''):
         """Assert that 'expected' is not 'observed'."""
+        # XXX: Re-implement with matchers.
         if message:
             message = ': ' + message
         if expected is observed:
@@ -361,10 +358,12 @@ class TestCase(unittest.TestCase):
 
     def assertNotIn(self, needle, haystack):
         """Assert that needle is not in haystack."""
+        # XXX: Re-implement with matchers.
         if needle in haystack:
             self.fail('%r in %r' % (needle, haystack))
 
     def assertIsInstance(self, obj, klass, msg=None):
+        # XXX: Re-implement with matchers.
         if msg is None:
             msg = '%r is not an instance of %s' % (
                 obj, self._formatTypes(klass))
@@ -379,6 +378,7 @@ class TestCase(unittest.TestCase):
            deemed to have suffered an error, exactly as for an
            unexpected exception.
         """
+        # XXX: Re-implement with matchers.
         try:
             ret = callableObj(*args, **kwargs)
         except excClass:
@@ -395,6 +395,8 @@ class TestCase(unittest.TestCase):
         :param matcher: An object meeting the testtools.Matcher protocol.
         :raises self.failureException: When matcher does not match thing.
         """
+        # XXX: Should this take an optional 'message' parameter? Would kind of
+        # make sense.
         mismatch = matcher.match(matchee)
         if not mismatch:
             return
