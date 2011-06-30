@@ -42,7 +42,12 @@ import re
 import sys
 import types
 
-from testtools.compat import classtypes, _error_repr, isbaseexception
+from testtools.compat import (
+    classtypes,
+    _error_repr,
+    isbaseexception,
+    istext,
+    )
 
 
 class Matcher(object):
