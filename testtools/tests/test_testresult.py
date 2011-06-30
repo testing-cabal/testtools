@@ -1478,9 +1478,6 @@ traceback
 """))
 
 
-# XXX: Want to hide certain levels of the traceback in most circumstances.
-# Probably should hook into the __unittest logic that I think unittest2 has.
-
 def test_suite():
     from unittest import TestLoader
     return TestLoader().loadTestsFromName(__name__)
