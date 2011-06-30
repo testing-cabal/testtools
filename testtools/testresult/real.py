@@ -158,7 +158,7 @@ class TestResult(unittest.TestResult):
         """Convert an error in exc_info form or a contents dict to a string."""
         if err is not None:
             return self._exc_info_to_unicode(err, test)
-        return _details_to_str(details)
+        return _details_to_str(details, special='traceback')
 
     def _now(self):
         """Return the current 'test time'.

@@ -376,7 +376,6 @@ class TestTestResult(TestCase):
         self.assertThat(
             result.errors[0][1],
             DocTestMatches(
-                u'traceback: {{{\n'
                 u'Traceback (most recent call last):\n'
                 u'  File "testtools/runtest.py", line ..., in _run_user\n'
                 u'    return fn(*args, **kwargs)\n'
@@ -384,8 +383,7 @@ class TestTestResult(TestCase):
                 u'    return self._get_test_method()()\n'
                 u'  File "testtools/tests/test_testresult.py", line ..., in error\n'
                 u'    1/0\n'
-                u'ZeroDivisionError: integer division or modulo by zero\n'
-                u'}}}',
+                u'ZeroDivisionError: integer division or modulo by zero\n',
                 doctest.ELLIPSIS))
 
 
@@ -587,7 +585,6 @@ class TestTextTestResult(TestCase):
             DocTestMatches("""...======================================================================
 ERROR: testtools.tests.test_testresult.Test.error
 ----------------------------------------------------------------------
-traceback: {{{
 Traceback (most recent call last):
   File "...testtools...runtest.py", line ..., in _run_user...
     return fn(*args, **kwargs)
@@ -596,11 +593,9 @@ Traceback (most recent call last):
   File "...testtools...tests...test_testresult.py", line ..., in error
     1/0
 ZeroDivisionError:... divi... by zero...
-}}}
 ======================================================================
 FAIL: testtools.tests.test_testresult.Test.failed
 ----------------------------------------------------------------------
-traceback: {{{
 Traceback (most recent call last):
   File "...testtools...runtest.py", line ..., in _run_user...
     return fn(*args, **kwargs)
@@ -609,7 +604,6 @@ Traceback (most recent call last):
   File "...testtools...tests...test_testresult.py", line ..., in failed
     self.fail("yo!")
 AssertionError: yo!
-}}}
 ======================================================================
 UNEXPECTED SUCCESS: testtools.tests.test_testresult.Test.succeeded
 ----------------------------------------------------------------------
@@ -1482,16 +1476,8 @@ traceback
 """))
 
 
-# XXX: We probably want to have a "special" key in details_to_str for the
-# attachment representing the main error from the test.  This error would not
-# have a named attachment and would always be shown in a certain position
-# (either first or last).
-
 # XXX: Want to hide certain levels of the traceback in most circumstances.
 # Probably should hook into the __unittest logic that I think unittest2 has.
-
-# XXX: Probably the last attachment doesn't need to have the closing dashes,
-# since the test itself will have those.
 
 def test_suite():
     from unittest import TestLoader
