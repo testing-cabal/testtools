@@ -342,6 +342,16 @@ We highly recommend using the following flags::
   doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE | doctest.REPORT_NDIFF
 
 
+GreaterThan
+~~~~~~~~~~~
+
+Matches if the given thing is greater than the thing in the matcher.  For
+example::
+
+  def test_greater_than_example(self):
+      self.assertThat(3, GreaterThan(2))
+
+
 LessThan
 ~~~~~~~~
 
@@ -571,7 +581,7 @@ It's much easier to understand in Python than in English::
       foo = Foo()
       foo.a = 1
       foo.b = 2
-      matcher = MatchesStructure({'a', Equals(1), 'b', Equals(2)})
+      matcher = MatchesStructure(a=Equals(1), b=Equals(2))
       self.assertThat(foo, matcher)
 
 ``MatchesStructure.from_example`` takes an object and a list of attributes and

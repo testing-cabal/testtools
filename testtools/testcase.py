@@ -6,6 +6,7 @@ __metaclass__ = type
 __all__ = [
     'clone_test_with_new_id',
     'ExpectedException',
+    'gather_details',
     'run_test_with',
     'skip',
     'skipIf',
@@ -28,6 +29,8 @@ from testtools.compat import advance_iterator
 from testtools.matchers import (
     Annotate,
     Equals,
+    Is,
+    Not,
     )
 from testtools.monkey import patch
 from testtools.runtest import RunTest
@@ -99,6 +102,39 @@ def run_test_with(test_runner, **kwargs):
     return decorator
 
 
+def _copy_content(content_object):
+    """Make a copy of the given content object.
+
+    The content within `content_object` is iterated and saved. This is useful
+    when the source of the content is volatile, a log file in a temporary
+    directory for example.
+
+    :param content_object: A `content.Content` instance.
+    :return: A `content.Content` instance with the same mime-type as
+        `content_object` and a non-volatile copy of its content.
+    """
+    content_bytes = list(content_object.iter_bytes())
+    content_callback = lambda: content_bytes
+    return content.Content(content_object.content_type, content_callback)
+
+
+def gather_details(source, target):
+    """Merge the details from `source` into `target`.
+
+    :param source: A *detailed* object from which details will be gathered.
+    :param target: A *detailed* object into which details will be gathered.
+    """
+    source_details = source.getDetails()
+    target_details = target.getDetails()
+    for name, content_object in source_details.items():
+        new_name = name
+        disambiguator = itertools.count(1)
+        while new_name in target_details:
+            new_name = '%s-%d' % (name, advance_iterator(disambiguator))
+        name = new_name
+        target.addDetail(name, _copy_content(content_object))
+
+
 class TestCase(unittest.TestCase):
     """Extensions to the basic TestCase.
 
@@ -124,7 +160,7 @@ class TestCase(unittest.TestCase):
             ``TestCase.run_tests_with`` if given.
         """
         runTest = kwargs.pop('runTest', None)
-        unittest.TestCase.__init__(self, *args, **kwargs)
+        super(TestCase, self).__init__(*args, **kwargs)
         self._cleanups = []
         self._unique_id_gen = itertools.count(1)
         # Generators to ensure unique traceback ids.  Maps traceback label to
@@ -270,17 +306,34 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message to include in the error.
         """
-        matcher = Equals(expected)
-        if message:
-            matcher = Annotate(message, matcher)
+        matcher = Annotate.if_message(message, Equals(expected))
         self.assertThat(observed, matcher)
 
     failUnlessEqual = assertEquals = assertEqual
 
     def assertIn(self, needle, haystack):
         """Assert that needle is in haystack."""
-        self.assertTrue(
-            needle in haystack, '%r not in %r' % (needle, haystack))
+        # XXX: Re-implement with matchers.
+        if needle not in haystack:
+            self.fail('%r not in %r' % (needle, haystack))
+
+    def assertIsNone(self, observed, message=''):
+        """Assert that 'observed' is equal to None.
+
+        :param observed: The observed value.
+        :param message: An optional message describing the error.
+        """
+        matcher = Annotate.if_message(message, Is(None))
+        self.assertThat(observed, matcher)
+
+    def assertIsNotNone(self, observed, message=''):
+        """Assert that 'observed' is not equal to None.
+
+        :param observed: The observed value.
+        :param message: An optional message describing the error.
+        """
+        matcher = Annotate.if_message(message, Not(Is(None)))
+        self.assertThat(observed, matcher)
 
     def assertIs(self, expected, observed, message=''):
         """Assert that 'expected' is 'observed'.
@@ -289,30 +342,33 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message describing the error.
         """
+        # XXX: Re-implement with matchers.
         if message:
             message = ': ' + message
-        self.assertTrue(
-            expected is observed,
-            '%r is not %r%s' % (expected, observed, message))
+        if expected is not observed:
+            self.fail('%r is not %r%s' % (expected, observed, message))
 
     def assertIsNot(self, expected, observed, message=''):
         """Assert that 'expected' is not 'observed'."""
+        # XXX: Re-implement with matchers.
         if message:
             message = ': ' + message
-        self.assertTrue(
-            expected is not observed,
-            '%r is %r%s' % (expected, observed, message))
+        if expected is observed:
+            self.fail('%r is %r%s' % (expected, observed, message))
 
     def assertNotIn(self, needle, haystack):
         """Assert that needle is not in haystack."""
-        self.assertTrue(
-            needle not in haystack, '%r in %r' % (needle, haystack))
+        # XXX: Re-implement with matchers.
+        if needle in haystack:
+            self.fail('%r in %r' % (needle, haystack))
 
     def assertIsInstance(self, obj, klass, msg=None):
+        # XXX: Re-implement with matchers.
         if msg is None:
             msg = '%r is not an instance of %s' % (
                 obj, self._formatTypes(klass))
-        self.assertTrue(isinstance(obj, klass), msg)
+        if not isinstance(obj, klass):
+            self.fail(msg)
 
     def assertRaises(self, excClass, callableObj, *args, **kwargs):
         """Fail unless an exception of class excClass is thrown
@@ -322,6 +378,7 @@ class TestCase(unittest.TestCase):
            deemed to have suffered an error, exactly as for an
            unexpected exception.
         """
+        # XXX: Re-implement with matchers.
         try:
             ret = callableObj(*args, **kwargs)
         except excClass:
@@ -338,6 +395,8 @@ class TestCase(unittest.TestCase):
         :param matcher: An object meeting the testtools.Matcher protocol.
         :raises self.failureException: When matcher does not match thing.
         """
+        # XXX: Should this take an optional 'message' parameter? Would kind of
+        # make sense.
         mismatch = matcher.match(matchee)
         if not mismatch:
             return
@@ -515,31 +574,22 @@ class TestCase(unittest.TestCase):
         :return: The fixture, after setting it up and scheduling a cleanup for
            it.
         """
-        fixture.setUp()
-        self.addCleanup(fixture.cleanUp)
-        self.addCleanup(self._gather_details, fixture.getDetails)
-        return fixture
-
-    def _gather_details(self, getDetails):
-        """Merge the details from getDetails() into self.getDetails()."""
-        details = getDetails()
-        my_details = self.getDetails()
-        for name, content_object in details.items():
-            new_name = name
-            disambiguator = itertools.count(1)
-            while new_name in my_details:
-                new_name = '%s-%d' % (name, advance_iterator(disambiguator))
-            name = new_name
-            content_bytes = list(content_object.iter_bytes())
-            content_callback = lambda:content_bytes
-            self.addDetail(name,
-                content.Content(content_object.content_type, content_callback))
+        try:
+            fixture.setUp()
+        except:
+            gather_details(fixture, self)
+            raise
+        else:
+            self.addCleanup(fixture.cleanUp)
+            self.addCleanup(gather_details, fixture, self)
+            return fixture
 
     def setUp(self):
-        unittest.TestCase.setUp(self)
+        super(TestCase, self).setUp()
         self.__setup_called = True
 
     def tearDown(self):
+        super(TestCase, self).tearDown()
         unittest.TestCase.tearDown(self)
         self.__teardown_called = True
 

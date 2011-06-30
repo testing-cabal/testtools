@@ -2,6 +2,8 @@
 
 from __future__ import with_statement
 
+import sys
+
 from testtools import (
     ExpectedException,
     TestCase,
@@ -18,7 +20,8 @@ class TestExpectedException(TestCase):
         try:
             with ExpectedException(ValueError, 'tes.'):
                 raise ValueError('mismatch')
-        except AssertionError, e:
+        except AssertionError:
+            e = sys.exc_info()[1]
             self.assertEqual('"mismatch" does not match "tes.".', str(e))
         else:
             self.fail('AssertionError not raised.')
@@ -27,7 +30,8 @@ class TestExpectedException(TestCase):
         try:
             with ExpectedException(TypeError, 'tes.'):
                 raise ValueError('mismatch')
-        except ValueError, e:
+        except ValueError:
+            e = sys.exc_info()[1]
             self.assertEqual('mismatch', str(e))
         else:
             self.fail('ValueError not raised.')
@@ -36,7 +40,8 @@ class TestExpectedException(TestCase):
         try:
             with ExpectedException(TypeError, 'tes.'):
                 pass
-        except AssertionError, e:
+        except AssertionError:
+            e = sys.exc_info()[1]
             self.assertEqual('TypeError not raised.', str(e))
         else:
             self.fail('AssertionError not raised.')

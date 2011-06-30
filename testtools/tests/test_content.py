@@ -90,11 +90,12 @@ class TestContent(TestCase):
     def test_from_file(self):
         fd, path = tempfile.mkstemp()
         self.addCleanup(os.remove, path)
-        os.write(fd, 'some data')
+        os.write(fd, _b('some data'))
         os.close(fd)
         content = content_from_file(path, UTF8_TEXT, chunk_size=2)
         self.assertThat(
-            list(content.iter_bytes()), Equals(['so', 'me', ' d', 'at', 'a']))
+            list(content.iter_bytes()),
+            Equals([_b('so'), _b('me'), _b(' d'), _b('at'), _b('a')]))
 
     def test_from_nonexistent_file(self):
         directory = tempfile.mkdtemp()
@@ -108,12 +109,12 @@ class TestContent(TestCase):
 
     def test_from_file_eager_loading(self):
         fd, path = tempfile.mkstemp()
-        os.write(fd, 'some data')
+        os.write(fd, _b('some data'))
         os.close(fd)
         content = content_from_file(path, UTF8_TEXT, buffer_now=True)
         os.remove(path)
         self.assertThat(
-            _b('').join(content.iter_bytes()), Equals('some data'))
+            ''.join(content.iter_text()), Equals('some data'))
 
     def test_from_stream(self):
         data = StringIO('some data')
@@ -129,13 +130,13 @@ class TestContent(TestCase):
     def test_from_stream_eager_loading(self):
         fd, path = tempfile.mkstemp()
         self.addCleanup(os.remove, path)
-        os.write(fd, 'some data')
+        os.write(fd, _b('some data'))
         stream = open(path, 'rb')
         content = content_from_stream(stream, UTF8_TEXT, buffer_now=True)
-        os.write(fd, 'more data')
+        os.write(fd, _b('more data'))
         os.close(fd)
         self.assertThat(
-            _b('').join(content.iter_bytes()), Equals('some data'))
+            ''.join(content.iter_text()), Equals('some data'))
 
     def test_from_text(self):
         data = _u("some data")
@@ -162,9 +163,12 @@ class TestTracebackContent(TestCase):
 class TestAttachFile(TestCase):
 
     def make_file(self, data):
+        # GZ 2011-04-21: This helper could be useful for methods above trying
+        #                to use mkstemp, but should handle write failures and
+        #                always close the fd. There must be a better way.
         fd, path = tempfile.mkstemp()
         self.addCleanup(os.remove, path)
-        os.write(fd, data)
+        os.write(fd, _b(data))
         os.close(fd)
         return path
 
@@ -202,7 +206,7 @@ class TestAttachFile(TestCase):
         content_file = open(path, 'w')
         content_file.write('new data')
         content_file.close()
-        self.assertEqual(''.join(content.iter_bytes()), 'new data')
+        self.assertEqual(''.join(content.iter_text()), 'new data')
 
     def test_eager_read_by_default(self):
         class SomeTest(TestCase):
@@ -215,7 +219,7 @@ class TestAttachFile(TestCase):
         content_file = open(path, 'w')
         content_file.write('new data')
         content_file.close()
-        self.assertEqual(''.join(content.iter_bytes()), 'some data')
+        self.assertEqual(''.join(content.iter_text()), 'some data')
 
 
 def test_suite():

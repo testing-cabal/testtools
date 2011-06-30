@@ -4,11 +4,64 @@ testtools NEWS
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* New convenience assertions, ``assertIsNone`` and ``assertIsNotNone``.
+  (Christian Kampka)
+
+* New matcher, ``GreaterThan``. (Christian Kampka)
+
+
+0.9.11
+~~~~~~
+
+This release brings consistent use of super for better compatibility with
+multiple inheritance, fixed Python3 support, improvements in fixture and mather
+outputs and a compat helper for testing libraries that deal with bytestrings.
+
 Changes
 -------
 
+* ``TestCase`` now uses super to call base ``unittest.TestCase`` constructor,
+  ``setUp`` and ``tearDown``. (Tim Cole, #771508)
+
+* If, when calling ``useFixture`` an error occurs during fixture set up, we
+  still attempt to gather details from the fixture. (Gavin Panella)
+
+
 Improvements
 ------------
+
+* Additional compat helper for ``BytesIO`` for libraries that build on
+  testtools and are working on Python 3 porting. (Robert Collins)
+
+* Corrected documentation for ``MatchesStructure`` in the test authors
+  document.  (Jonathan Lange)
+
+* ``LessThan`` error message now says something that is logically correct.
+  (Gavin Panella, #762008)
+
+* Multiple details from a single fixture are now kept separate, rather than
+  being mooshed together. (Gavin Panella, #788182)
+
+* Python 3 support now back in action. (Martin [gz], #688729)
+
+* ``try_import`` and ``try_imports`` have a callback that is called whenever
+  they fail to import a module.  (Martin Pool)
+
+
+0.9.10
+~~~~~~
+
+The last release of testtools could not be easy_installed.  This is considered
+severe enough for a re-release.
+
+Improvements
+------------
+
+* Include ``doc/`` in the source distribution, making testtools installable
+  from PyPI again (Tres Seaver, #757439)
 
 
 0.9.9

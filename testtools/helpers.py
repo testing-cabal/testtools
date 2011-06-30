@@ -6,7 +6,7 @@ __all__ = [
     ]
 
 
-def try_import(name, alternative=None):
+def try_import(name, alternative=None, error_callback=None):
     """Attempt to import ``name``.  If it fails, return ``alternative``.
 
     When supporting multiple versions of Python or optional dependencies, it
@@ -16,29 +16,37 @@ def try_import(name, alternative=None):
         ``os.path.join``.
     :param alternative: The value to return if no module can be imported.
         Defaults to None.
+    :param error_callback: If non-None, a callable that is passed the ImportError
+        when the module cannot be loaded.
     """
     module_segments = name.split('.')
+    last_error = None
     while module_segments:
         module_name = '.'.join(module_segments)
         try:
             module = __import__(module_name)
-        except ImportError:
+        except ImportError, e:
+            last_error = e
             module_segments.pop()
             continue
         else:
             break
     else:
+        if last_error is not None and error_callback is not None:
+            error_callback(last_error)
         return alternative
     nonexistent = object()
     for segment in name.split('.')[1:]:
         module = getattr(module, segment, nonexistent)
         if module is nonexistent:
+            if last_error is not None and error_callback is not None:
+                error_callback(last_error)
             return alternative
     return module
 
 
 _RAISE_EXCEPTION = object()
-def try_imports(module_names, alternative=_RAISE_EXCEPTION):
+def try_imports(module_names, alternative=_RAISE_EXCEPTION, error_callback=None):
     """Attempt to import modules.
 
     Tries to import the first module in ``module_names``.  If it can be
@@ -50,12 +58,14 @@ def try_imports(module_names, alternative=_RAISE_EXCEPTION):
     :param module_names: A sequence of module names to try to import.
     :param alternative: The value to return if no module can be imported.
         If unspecified, we raise an ImportError.
+    :param error_callback: If None, called with the ImportError for *each* 
+        module that fails to load.
     :raises ImportError: If none of the modules can be imported and no
         alternative value was specified.
     """
     module_names = list(module_names)
     for module_name in module_names:
-        module = try_import(module_name)
+        module = try_import(module_name, error_callback=error_callback)
         if module:
             return module
     if alternative is _RAISE_EXCEPTION:

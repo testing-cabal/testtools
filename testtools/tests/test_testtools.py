@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2010 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
 
 """Tests for extensions to the base test library."""
 
@@ -35,7 +35,7 @@ try:
 except SyntaxError:
     pass
 else:
-    from test_with_with import *
+    from testtools.tests.test_with_with import *
 
 
 class TestPlaceHolder(TestCase):
@@ -498,6 +498,29 @@ class TestAssertions(TestCase):
         self.assertFails(expected_error, self.assertEqual, a, b)
         self.assertFails(expected_error, self.assertEquals, a, b)
         self.assertFails(expected_error, self.failUnlessEqual, a, b)
+
+    def test_assertIsNone(self):
+        self.assertIsNone(None)
+
+        expected_error = '\n'.join([
+            'Match failed. Matchee: "0"',
+            'Matcher: Is(None)',
+            'Difference: None is not 0',
+            ''
+            ])
+        self.assertFails(expected_error, self.assertIsNone, 0)
+
+    def test_assertIsNotNone(self):
+        self.assertIsNotNone(0)
+        self.assertIsNotNone("0")
+
+        expected_error = '\n'.join([
+            'Match failed. Matchee: "None"',
+            'Matcher: Not(Is(None))',
+            'Difference: None matches Is(None)',
+            ''
+            ])
+        self.assertFails(expected_error, self.assertIsNotNone, None)
 
 
 class TestAddCleanup(TestCase):
@@ -1134,6 +1157,36 @@ class TestPatchSupport(TestCase):
         marker = object()
         value = getattr(self, 'doesntexist', marker)
         self.assertIs(marker, value)
+
+
+class TestTestCaseSuper(TestCase):
+    def test_setup_uses_super(self):
+        class OtherBaseCase(unittest.TestCase):
+            setup_called = False
+            def setUp(self):
+                self.setup_called = True
+                super(OtherBaseCase, self).setUp()
+        class OurCase(TestCase, OtherBaseCase):
+            def runTest(self):
+                pass
+        test = OurCase()
+        test.setUp()
+        test.tearDown()
+        self.assertTrue(test.setup_called)
+
+    def test_teardown_uses_super(self):
+        class OtherBaseCase(unittest.TestCase):
+            teardown_called = False
+            def tearDown(self):
+                self.teardown_called = True
+                super(OtherBaseCase, self).tearDown()
+        class OurCase(TestCase, OtherBaseCase):
+            def runTest(self):
+                pass
+        test = OurCase()
+        test.setUp()
+        test.tearDown()
+        self.assertTrue(test.teardown_called)
 
 
 def test_suite():
