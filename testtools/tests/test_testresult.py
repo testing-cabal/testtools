@@ -1455,27 +1455,30 @@ Empty attachments:
             StringIO(x), ContentType('image', 'jpeg'))
         attachments = {
             'attachment': text_content('foo'),
-            'attachment-1': jpg('pic1'),
-            'attachment-2': text_content('bar'),
-            'attachment-3': text_content(''),
-            'attachment-4': jpg('pic2'),
+            'attachment-1': text_content('traceback'),
+            'attachment-2': jpg('pic1'),
+            'attachment-3': text_content('bar'),
+            'attachment-4': text_content(''),
+            'attachment-5': jpg('pic2'),
             }
-        string = _details_to_str(attachments)
+        string = _details_to_str(attachments, special='attachment-1')
         self.assertThat(
             string, Equals(u"""\
 Binary content:
-  attachment-1 (image/jpeg)
-  attachment-4 (image/jpeg)
+  attachment-2 (image/jpeg)
+  attachment-5 (image/jpeg)
 Empty attachments:
-  attachment-3
+  attachment-4
 
 attachment: {{{
 foo
 }}}
 
-attachment-2: {{{
+attachment-3: {{{
 bar
 }}}
+
+traceback
 """))
 
 

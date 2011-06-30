@@ -603,9 +603,7 @@ class _StringException(Exception):
             return False
 
 
-def _format_text_attachment(name, text, special):
-    if name == special:
-        return '%s\n' % (text,)
+def _format_text_attachment(name, text):
     return """\
 %s: {{{
 %s
@@ -614,10 +612,18 @@ def _format_text_attachment(name, text, special):
 
 
 def _details_to_str(details, special=None):
-    """Convert a details dict to a string."""
+    """Convert a details dict to a string.
+
+    :param details: A dictionary mapping short names to ``Content`` objects.
+    :param special: If specified, an attachment that should have special
+        attention drawn to it. The primary attachment. Normally it's the
+        traceback that caused the test to fail.
+    :return: A formatted string that can be included in text test results.
+    """
     empty_attachments = []
     binary_attachments = []
     text_attachments = []
+    special_content = None
     # sorted is for testing, may want to remove that and use a dict
     # subclass with defined order for items instead.
     for key, content in sorted(details.items()):
@@ -628,7 +634,13 @@ def _details_to_str(details, special=None):
         if not text:
             empty_attachments.append(key)
             continue
-        text_attachments.append(_format_text_attachment(key, text, special))
+        # We want the 'special' attachment to be at the bottom.
+        if key == special:
+            special_content = '%s\n' % (text,)
+            continue
+        text_attachments.append(_format_text_attachment(key, text))
+    if special_content:
+        text_attachments.append(special_content)
     lines = []
     if binary_attachments:
         lines.append('Binary content:\n')
