@@ -728,12 +728,8 @@ When the test runs, testtools will show you something like this::
   ======================================================================
   ERROR: exampletest.TestSomething.test_thingy
   ----------------------------------------------------------------------
-  arbitrary-color-name
-  ------------
-  blue
-  ------------
-  traceback
-  ------------
+  arbitrary-color-name: {{{blue}}}
+
   Traceback (most recent call last):
     ...
     File "exampletest.py", line 8, in test_thingy
