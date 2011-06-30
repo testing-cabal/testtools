@@ -385,8 +385,8 @@ class TestTestResult(TestCase):
                 u'    return self._get_test_method()()\n'
                 u'  File "testtools/tests/test_testresult.py", line ..., in error\n'
                 u'    1/0\n'
-                u'ZeroDivisionError: integer division or modulo by zero\n'
-                u'------------\n', doctest.ELLIPSIS))
+                u'ZeroDivisionError: integer division or modulo by zero\n',
+                doctest.ELLIPSIS))
 
 
 class TestMultiTestResult(TestCase):
@@ -597,7 +597,6 @@ Traceback (most recent call last):
   File "...testtools...tests...test_testresult.py", line ..., in error
     1/0
 ZeroDivisionError:... divi... by zero...
-------------
 ======================================================================
 FAIL: testtools.tests.test_testresult.Test.failed
 ----------------------------------------------------------------------
@@ -611,7 +610,6 @@ Traceback (most recent call last):
   File "...testtools...tests...test_testresult.py", line ..., in failed
     self.fail("yo!")
 AssertionError: yo!
-------------
 ======================================================================
 UNEXPECTED SUCCESS: testtools.tests.test_testresult.Test.succeeded
 ----------------------------------------------------------------------
@@ -745,8 +743,7 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
                  "text 2\n"
                  "------------\n"
                  "3\n"
-                 "4\n"
-                 "------------\n"))
+                 "4\n"))
 
     def check_outcome_details_to_exec_info(self, outcome, expected=None):
         """Call an outcome with a details dict to be made into exc_info."""
@@ -1422,8 +1419,7 @@ class TestDetailsToStr(TestCase):
         self.assertThat(
             string, Equals(u'attachment\n'
                            u'------------\n'
-                           u'foo\n'
-                           u'------------\n'))
+                           u'foo\n'))
 
     def test_multiple_text_content(self):
         string = _details_to_str(
@@ -1436,8 +1432,7 @@ class TestDetailsToStr(TestCase):
                            u'------------\n'
                            u'attachment-1\n'
                            u'------------\n'
-                           u'bar\n'
-                           u'------------\n'))
+                           u'bar\n'))
 
     def test_empty_attachment(self):
         string = _details_to_str({'attachment': text_content('')})

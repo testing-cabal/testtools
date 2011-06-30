@@ -605,25 +605,24 @@ class _StringException(Exception):
 
 def _details_to_str(details):
     """Convert a details dict to a string."""
-    lines = []
+    empty_attachments = []
+    binary_attachments = []
+    text_attachments = []
     # sorted is for testing, may want to remove that and use a dict
     # subclass with defined order for items instead.
-    empty_attachments = []
     for key, content in sorted(details.items()):
         if content.content_type.type != 'text':
-            lines.append('Binary content: %s' % key)
+            binary_attachments.append(key)
             continue
-        # XXX: This is wrong because it makes whitespace-only text attachments
-        # look like empty attachments.
         text = _b('').join(content.iter_text()).strip()
         if not text:
             empty_attachments.append(key)
             continue
-        lines.append(str(key))
-        lines.append('------------')
-        lines.append(text)
-        lines.append('------------')
+        text_attachments.append('%s\n------------\n%s\n' % (key, text))
+    lines = []
+    for attachment in binary_attachments:
+        lines.append('Binary content: %s\n' % (attachment,))
     if empty_attachments:
-        lines.append('Empty attachments: %s' % ', '.join(empty_attachments))
-    lines.append('')
-    return _u('\n').join(lines)
+        lines.append('Empty attachments: %s\n' % ', '.join(empty_attachments))
+    lines.append('------------\n'.join(text_attachments))
+    return _u('').join(lines)
