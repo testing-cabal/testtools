@@ -7,6 +7,9 @@ NEXT
 Improvements
 ------------
 
+* Less boilerplate displayed in test failures and errors.
+  (Jonathan Lange, #660852)
+
 * New convenience assertions, ``assertIsNone`` and ``assertIsNotNone``.
   (Christian Kampka)
 
