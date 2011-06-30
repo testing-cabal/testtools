@@ -14,7 +14,7 @@ import datetime
 import sys
 import unittest
 
-from testtools.compat import all, _b, _format_exc_info, str_is_unicode, _u
+from testtools.compat import all, _format_exc_info, str_is_unicode, _u
 
 # From http://docs.python.org/library/datetime.html
 _ZERO = datetime.timedelta(0)
@@ -520,8 +520,10 @@ class ExtendedToOriginalDecorator(object):
 
     def _details_to_exc_info(self, details):
         """Convert a details dict to an exc_info tuple."""
-        return (_StringException,
-            _StringException(_details_to_str(details)), None)
+        return (
+            _StringException,
+            _StringException(_details_to_str(details, special='traceback')),
+            None)
 
     def done(self):
         try:
