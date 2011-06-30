@@ -1421,6 +1421,11 @@ class TestDetailsToStr(TestCase):
                            u'------------\n'
                            u'foo\n'))
 
+    def test_special_text_content(self):
+        content = text_content('foo')
+        string = _details_to_str({'attachment': content}, special='attachment')
+        self.assertThat(string, Equals(u'foo\n'))
+
     def test_multiple_text_content(self):
         string = _details_to_str(
             {'attachment': text_content('foo'),
