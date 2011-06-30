@@ -1,9 +1,11 @@
-# Copyright (c) 2010 testtools developers. See LICENSE for details.
+# Copyright (c) 2010-2011 testtools developers. See LICENSE for details.
 
 __all__ = [
     'try_import',
     'try_imports',
     ]
+
+import sys
 
 
 def try_import(name, alternative=None, error_callback=None):
@@ -25,8 +27,8 @@ def try_import(name, alternative=None, error_callback=None):
         module_name = '.'.join(module_segments)
         try:
             module = __import__(module_name)
-        except ImportError, e:
-            last_error = e
+        except ImportError:
+            last_error = sys.exc_info()[1]
             module_segments.pop()
             continue
         else:

@@ -56,7 +56,7 @@ class TestResult(unittest.TestResult):
     def __init__(self):
         # startTestRun resets all attributes, and older clients don't know to
         # call startTestRun, so it is called once here.
-        # Because subclasses may reasonably not expect this, we call the 
+        # Because subclasses may reasonably not expect this, we call the
         # specific version we want to run.
         TestResult.startTestRun(self)
 
