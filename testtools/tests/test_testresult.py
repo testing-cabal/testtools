@@ -376,7 +376,7 @@ class TestTestResult(TestCase):
         self.assertThat(
             result.errors[0][1],
             DocTestMatches(
-                u'Text attachment: traceback\n'
+                u'traceback\n'
                 u'------------\n'
                 u'Traceback (most recent call last):\n'
                 u'  File "testtools/runtest.py", line ..., in _run_user\n'
@@ -587,7 +587,7 @@ class TestTextTestResult(TestCase):
             DocTestMatches("""...======================================================================
 ERROR: testtools.tests.test_testresult.Test.error
 ----------------------------------------------------------------------
-Text attachment: traceback
+traceback
 ------------
 Traceback (most recent call last):
   File "...testtools...runtest.py", line ..., in _run_user...
@@ -601,7 +601,7 @@ ZeroDivisionError:... divi... by zero...
 ======================================================================
 FAIL: testtools.tests.test_testresult.Test.failed
 ----------------------------------------------------------------------
-Text attachment: traceback
+traceback
 ------------
 Traceback (most recent call last):
   File "...testtools...runtest.py", line ..., in _run_user...
@@ -735,10 +735,18 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
         details = {'text 1': Content(ContentType('text', 'plain'), text1),
             'text 2': Content(ContentType('text', 'strange'), text2),
             'bin 1': Content(ContentType('application', 'binary'), bin1)}
-        return (details, "Binary content: bin 1\n"
-            "Text attachment: text 1\n------------\n1\n2\n"
-            "------------\nText attachment: text 2\n------------\n"
-            "3\n4\n------------\n")
+        return (details,
+                ("Binary content: bin 1\n"
+                 "text 1\n"
+                 "------------\n"
+                 "1\n"
+                 "2\n"
+                 "------------\n"
+                 "text 2\n"
+                 "------------\n"
+                 "3\n"
+                 "4\n"
+                 "------------\n"))
 
     def check_outcome_details_to_exec_info(self, outcome, expected=None):
         """Call an outcome with a details dict to be made into exc_info."""
@@ -1412,7 +1420,7 @@ class TestDetailsToStr(TestCase):
         content = text_content('foo')
         string = _details_to_str({'attachment': content})
         self.assertThat(
-            string, Equals(u'Text attachment: attachment\n'
+            string, Equals(u'attachment\n'
                            u'------------\n'
                            u'foo\n'
                            u'------------\n'))
@@ -1422,11 +1430,11 @@ class TestDetailsToStr(TestCase):
             {'attachment': text_content('foo'),
              'attachment-1': text_content('bar')})
         self.assertThat(
-            string, Equals(u'Text attachment: attachment\n'
+            string, Equals(u'attachment\n'
                            u'------------\n'
                            u'foo\n'
                            u'------------\n'
-                           u'Text attachment: attachment-1\n'
+                           u'attachment-1\n'
                            u'------------\n'
                            u'bar\n'
                            u'------------\n'))
@@ -1444,8 +1452,6 @@ class TestDetailsToStr(TestCase):
 
 # XXX: Want to hide certain levels of the traceback in most circumstances.
 # Probably should hook into the __unittest logic that I think unittest2 has.
-
-# XXX: Do we need to say "Text attachment"?
 
 # XXX: Probably the last attachment doesn't need to have the closing dashes,
 # since the test itself will have those.

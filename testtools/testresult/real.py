@@ -619,7 +619,7 @@ def _details_to_str(details):
         if not text:
             empty_attachments.append(key)
             continue
-        lines.append('Text attachment: %s' % (key,))
+        lines.append(str(key))
         lines.append('------------')
         lines.append(text)
         lines.append('------------')

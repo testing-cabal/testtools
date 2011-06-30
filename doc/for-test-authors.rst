@@ -728,11 +728,11 @@ When the test runs, testtools will show you something like this::
   ======================================================================
   ERROR: exampletest.TestSomething.test_thingy
   ----------------------------------------------------------------------
-  Text attachment: arbitrary-color-name
+  arbitrary-color-name
   ------------
   blue
   ------------
-  Text attachment: traceback
+  traceback
   ------------
   Traceback (most recent call last):
     ...
@@ -742,7 +742,7 @@ When the test runs, testtools will show you something like this::
   ------------
   Ran 1 test in 0.030s
 
-As you can see, the detail is included as a "Text attachment", here saying
+As you can see, the detail is included as an attachment, here saying
 that our arbitrary-color-name is "blue".
 
 
