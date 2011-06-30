@@ -27,10 +27,13 @@ class ContentType(object):
         return self.__dict__ == other.__dict__
 
     def __repr__(self):
-        return "%s/%s; %s" % (
-            self.type, self.subtype,
-            ', '.join('%s="%s"' % (k, v)
-                      for k, v in self.parameters.iteritems()))
+        if self.parameters:
+            params = '; '
+            params += ', '.join(
+                '%s="%s"' % (k, v) for k, v in self.parameters.iteritems())
+        else:
+            params = ''
+        return "%s/%s%s" % (self.type, self.subtype, params)
 
 
 UTF8_TEXT = ContentType('text', 'plain', {'charset': 'utf8'})

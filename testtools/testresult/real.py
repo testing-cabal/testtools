@@ -606,7 +606,11 @@ class _StringException(Exception):
 def _format_text_attachment(name, text, special):
     if name == special:
         return '%s\n' % (text,)
-    return '%s\n------------\n%s\n' % (name, text)
+    return """\
+%s: {{{
+%s
+}}}
+""" % (name, text)
 
 
 def _details_to_str(details, special=None):
@@ -618,7 +622,7 @@ def _details_to_str(details, special=None):
     # subclass with defined order for items instead.
     for key, content in sorted(details.items()):
         if content.content_type.type != 'text':
-            binary_attachments.append(key)
+            binary_attachments.append((key, content.content_type))
             continue
         text = _b('').join(content.iter_text()).strip()
         if not text:
@@ -626,9 +630,15 @@ def _details_to_str(details, special=None):
             continue
         text_attachments.append(_format_text_attachment(key, text, special))
     lines = []
-    for attachment in binary_attachments:
-        lines.append('Binary content: %s\n' % (attachment,))
+    if binary_attachments:
+        lines.append('Binary content:\n')
+        for name, content_type in binary_attachments:
+            lines.append('  %s (%s)\n' % (name, content_type))
     if empty_attachments:
-        lines.append('Empty attachments: %s\n' % ', '.join(empty_attachments))
-    lines.append('------------\n'.join(text_attachments))
+        lines.append('Empty attachments:\n')
+        for name in empty_attachments:
+            lines.append('  %s\n' % (name,))
+    if (binary_attachments or empty_attachments) and text_attachments:
+        lines.append('\n')
+    lines.append('\n'.join(text_attachments))
     return _u('').join(lines)

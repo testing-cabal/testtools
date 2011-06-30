@@ -31,6 +31,16 @@ class TestContentType(TestCase):
         self.assertTrue(content_type1.__eq__(content_type2))
         self.assertFalse(content_type1.__eq__(content_type3))
 
+    def test_basic_repr(self):
+        content_type = ContentType('text', 'plain')
+        self.assertThat(repr(content_type), Equals('text/plain'))
+
+    def test_extended_repr(self):
+        content_type = ContentType(
+            'text', 'plain', {'foo': 'bar', 'baz': 'qux'})
+        self.assertThat(
+            repr(content_type), Equals('text/plain; foo="bar", baz="qux"'))
+
 
 class TestBuiltinContentTypes(TestCase):
 

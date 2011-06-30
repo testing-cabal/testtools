@@ -376,8 +376,7 @@ class TestTestResult(TestCase):
         self.assertThat(
             result.errors[0][1],
             DocTestMatches(
-                u'traceback\n'
-                u'------------\n'
+                u'traceback: {{{\n'
                 u'Traceback (most recent call last):\n'
                 u'  File "testtools/runtest.py", line ..., in _run_user\n'
                 u'    return fn(*args, **kwargs)\n'
@@ -385,7 +384,8 @@ class TestTestResult(TestCase):
                 u'    return self._get_test_method()()\n'
                 u'  File "testtools/tests/test_testresult.py", line ..., in error\n'
                 u'    1/0\n'
-                u'ZeroDivisionError: integer division or modulo by zero\n',
+                u'ZeroDivisionError: integer division or modulo by zero\n'
+                u'}}}',
                 doctest.ELLIPSIS))
 
 
@@ -587,8 +587,7 @@ class TestTextTestResult(TestCase):
             DocTestMatches("""...======================================================================
 ERROR: testtools.tests.test_testresult.Test.error
 ----------------------------------------------------------------------
-traceback
-------------
+traceback: {{{
 Traceback (most recent call last):
   File "...testtools...runtest.py", line ..., in _run_user...
     return fn(*args, **kwargs)
@@ -597,11 +596,11 @@ Traceback (most recent call last):
   File "...testtools...tests...test_testresult.py", line ..., in error
     1/0
 ZeroDivisionError:... divi... by zero...
+}}}
 ======================================================================
 FAIL: testtools.tests.test_testresult.Test.failed
 ----------------------------------------------------------------------
-traceback
-------------
+traceback: {{{
 Traceback (most recent call last):
   File "...testtools...runtest.py", line ..., in _run_user...
     return fn(*args, **kwargs)
@@ -610,6 +609,7 @@ Traceback (most recent call last):
   File "...testtools...tests...test_testresult.py", line ..., in failed
     self.fail("yo!")
 AssertionError: yo!
+}}}
 ======================================================================
 UNEXPECTED SUCCESS: testtools.tests.test_testresult.Test.succeeded
 ----------------------------------------------------------------------
@@ -734,16 +734,18 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
             'text 2': Content(ContentType('text', 'strange'), text2),
             'bin 1': Content(ContentType('application', 'binary'), bin1)}
         return (details,
-                ("Binary content: bin 1\n"
-                 "text 1\n"
-                 "------------\n"
+                ("Binary content:\n"
+                 "  bin 1 (application/binary)\n"
+                 "\n"
+                 "text 1: {{{\n"
                  "1\n"
                  "2\n"
-                 "------------\n"
-                 "text 2\n"
-                 "------------\n"
+                 "}}}\n"
+                 "\n"
+                 "text 2: {{{\n"
                  "3\n"
-                 "4\n"))
+                 "4\n"
+                 "}}}\n"))
 
     def check_outcome_details_to_exec_info(self, outcome, expected=None):
         """Call an outcome with a details dict to be made into exc_info."""
@@ -1411,15 +1413,16 @@ class TestDetailsToStr(TestCase):
         content = content_from_stream(
             StringIO('foo'), content_type=ContentType('image', 'jpeg'))
         string = _details_to_str({'attachment': content})
-        self.assertThat(string, Equals(u"Binary content: attachment\n"))
+        self.assertThat(
+            string, Equals(u"""\
+Binary content:
+  attachment (image/jpeg)
+"""))
 
     def test_text_content(self):
         content = text_content('foo')
         string = _details_to_str({'attachment': content})
-        self.assertThat(
-            string, Equals(u'attachment\n'
-                           u'------------\n'
-                           u'foo\n'))
+        self.assertThat(string, Equals(u'attachment: {{{\nfoo\n}}}\n'))
 
     def test_special_text_content(self):
         content = text_content('foo')
@@ -1431,18 +1434,21 @@ class TestDetailsToStr(TestCase):
             {'attachment': text_content('foo'),
              'attachment-1': text_content('bar')})
         self.assertThat(
-            string, Equals(u'attachment\n'
-                           u'------------\n'
+            string, Equals(u'attachment: {{{\n'
                            u'foo\n'
-                           u'------------\n'
-                           u'attachment-1\n'
-                           u'------------\n'
-                           u'bar\n'))
+                           u'}}}\n'
+                           u'\n'
+                           u'attachment-1: {{{\n'
+                           u'bar\n'
+                           u'}}}\n'))
 
     def test_empty_attachment(self):
         string = _details_to_str({'attachment': text_content('')})
         self.assertThat(
-            string, Equals(u'Empty attachments: attachment\n'))
+            string, Equals(u"""\
+Empty attachments:
+  attachment
+"""))
 
     def test_lots_of_different_attachments(self):
         jpg = lambda x: content_from_stream(
@@ -1457,16 +1463,19 @@ class TestDetailsToStr(TestCase):
         string = _details_to_str(attachments)
         self.assertThat(
             string, Equals(u"""\
-Binary content: attachment-1
-Binary content: attachment-4
-Empty attachments: attachment-3
-attachment
-------------
+Binary content:
+  attachment-1 (image/jpeg)
+  attachment-4 (image/jpeg)
+Empty attachments:
+  attachment-3
+
+attachment: {{{
 foo
-------------
-attachment-2
-------------
+}}}
+
+attachment-2: {{{
 bar
+}}}
 """))
 
 
