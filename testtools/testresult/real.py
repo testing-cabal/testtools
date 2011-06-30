@@ -628,7 +628,7 @@ def _details_to_str(details, special=None):
         if content.content_type.type != 'text':
             binary_attachments.append((key, content.content_type))
             continue
-        text = _b('').join(content.iter_text()).strip()
+        text = _u('').join(content.iter_text()).strip()
         if not text:
             empty_attachments.append(key)
             continue

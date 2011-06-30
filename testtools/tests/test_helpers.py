@@ -10,12 +10,12 @@ from testtools.matchers import (
     Is,
     Not,
     )
-    
-    
-def check_error_callback(test, function, arg, expected_error_count, 
+
+
+def check_error_callback(test, function, arg, expected_error_count,
     expect_result):
     """General test template for error_callback argument.
-    
+
     :param test: Test case instance.
     :param function: Either try_import or try_imports.
     :param arg: Name or names to import.
@@ -29,7 +29,7 @@ def check_error_callback(test, function, arg, expected_error_count,
         cb_calls.append(e)
     try:
         result = function(arg, error_callback=cb)
-    except ImportError, e:
+    except ImportError:
         test.assertFalse(expect_result)
     else:
         if expect_result:
@@ -79,20 +79,20 @@ class TestTryImport(TestCase):
         result = try_import('os.path.join')
         import os
         self.assertThat(result, Is(os.path.join))
-        
+
     def test_error_callback(self):
         # the error callback is called on failures.
         check_error_callback(self, try_import, 'doesntexist', 1, False)
 
     def test_error_callback_missing_module_member(self):
-        # the error callback is called on failures to find an object 
+        # the error callback is called on failures to find an object
         # inside an existing module.
         check_error_callback(self, try_import, 'os.nonexistent', 1, False)
 
     def test_error_callback_not_on_success(self):
         # the error callback is not called on success.
         check_error_callback(self, try_import, 'os.path', 0, True)
-        
+
 
 class TestTryImports(TestCase):
 
@@ -140,16 +140,16 @@ class TestTryImports(TestCase):
         result = try_imports(['os.doesntexist', 'os.path'])
         import os
         self.assertThat(result, Is(os.path))
-        
+
     def test_error_callback(self):
         # One error for every class that doesn't exist.
-        check_error_callback(self, try_imports, 
+        check_error_callback(self, try_imports,
             ['os.doesntexist', 'os.notthiseither'],
             2, False)
-        check_error_callback(self, try_imports, 
+        check_error_callback(self, try_imports,
             ['os.doesntexist', 'os.notthiseither', 'os'],
             2, True)
-        check_error_callback(self, try_imports, 
+        check_error_callback(self, try_imports,
             ['os.path'],
             0, True)
 

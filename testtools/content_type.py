@@ -30,7 +30,7 @@ class ContentType(object):
         if self.parameters:
             params = '; '
             params += ', '.join(
-                '%s="%s"' % (k, v) for k, v in self.parameters.iteritems())
+                '%s="%s"' % (k, v) for k, v in self.parameters.items())
         else:
             params = ''
         return "%s/%s%s" % (self.type, self.subtype, params)

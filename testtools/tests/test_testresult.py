@@ -376,14 +376,14 @@ class TestTestResult(TestCase):
         self.assertThat(
             result.errors[0][1],
             DocTestMatches(
-                u'Traceback (most recent call last):\n'
-                u'  File "testtools/runtest.py", line ..., in _run_user\n'
-                u'    return fn(*args, **kwargs)\n'
-                u'  File "testtools/testcase.py", line ..., in _run_test_method\n'
-                u'    return self._get_test_method()()\n'
-                u'  File "testtools/tests/test_testresult.py", line ..., in error\n'
-                u'    1/0\n'
-                u'ZeroDivisionError: integer division or modulo by zero\n',
+                'Traceback (most recent call last):\n'
+                '  File "testtools/runtest.py", line ..., in _run_user\n'
+                '    return fn(*args, **kwargs)\n'
+                '  File "testtools/testcase.py", line ..., in _run_test_method\n'
+                '    return self._get_test_method()()\n'
+                '  File "testtools/tests/test_testresult.py", line ..., in error\n'
+                '    1/0\n'
+                'ZeroDivisionError: ...\n',
                 doctest.ELLIPSIS))
 
 
@@ -1401,14 +1401,14 @@ class TestDetailsToStr(TestCase):
 
     def test_no_details(self):
         string = _details_to_str({})
-        self.assertThat(string, Equals(u''))
+        self.assertThat(string, Equals(''))
 
     def test_binary_content(self):
         content = content_from_stream(
             StringIO('foo'), content_type=ContentType('image', 'jpeg'))
         string = _details_to_str({'attachment': content})
         self.assertThat(
-            string, Equals(u"""\
+            string, Equals("""\
 Binary content:
   attachment (image/jpeg)
 """))
@@ -1416,37 +1416,37 @@ Binary content:
     def test_single_line_content(self):
         content = text_content('foo')
         string = _details_to_str({'attachment': content})
-        self.assertThat(string, Equals(u'attachment: {{{foo}}}\n'))
+        self.assertThat(string, Equals('attachment: {{{foo}}}\n'))
 
     def test_multi_line_text_content(self):
         content = text_content('foo\nbar\nbaz')
         string = _details_to_str({'attachment': content})
-        self.assertThat(string, Equals(u'attachment: {{{\nfoo\nbar\nbaz\n}}}\n'))
+        self.assertThat(string, Equals('attachment: {{{\nfoo\nbar\nbaz\n}}}\n'))
 
     def test_special_text_content(self):
         content = text_content('foo')
         string = _details_to_str({'attachment': content}, special='attachment')
-        self.assertThat(string, Equals(u'foo\n'))
+        self.assertThat(string, Equals('foo\n'))
 
     def test_multiple_text_content(self):
         string = _details_to_str(
             {'attachment': text_content('foo\nfoo'),
              'attachment-1': text_content('bar\nbar')})
         self.assertThat(
-            string, Equals(u'attachment: {{{\n'
-                           u'foo\n'
-                           u'foo\n'
-                           u'}}}\n'
-                           u'\n'
-                           u'attachment-1: {{{\n'
-                           u'bar\n'
-                           u'bar\n'
-                           u'}}}\n'))
+            string, Equals('attachment: {{{\n'
+                           'foo\n'
+                           'foo\n'
+                           '}}}\n'
+                           '\n'
+                           'attachment-1: {{{\n'
+                           'bar\n'
+                           'bar\n'
+                           '}}}\n'))
 
     def test_empty_attachment(self):
         string = _details_to_str({'attachment': text_content('')})
         self.assertThat(
-            string, Equals(u"""\
+            string, Equals("""\
 Empty attachments:
   attachment
 """))
@@ -1464,7 +1464,7 @@ Empty attachments:
             }
         string = _details_to_str(attachments, special='attachment-1')
         self.assertThat(
-            string, Equals(u"""\
+            string, Equals("""\
 Binary content:
   attachment-2 (image/jpeg)
   attachment-5 (image/jpeg)
