@@ -1,11 +1,9 @@
-# Copyright (c) 2008-2010 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
 
 """Tests for extensions to the base test library."""
 
 from pprint import pformat
-import os
 import sys
-import tempfile
 import unittest
 
 from testtools import (
@@ -506,8 +504,8 @@ class TestAssertions(TestCase):
 
         expected_error = '\n'.join([
             'Match failed. Matchee: "0"',
-            'Matcher: Equals(None)',
-            'Difference: None != 0',
+            'Matcher: Is(None)',
+            'Difference: None is not 0',
             ''
             ])
         self.assertFails(expected_error, self.assertIsNone, 0)
@@ -518,12 +516,12 @@ class TestAssertions(TestCase):
 
         expected_error = '\n'.join([
             'Match failed. Matchee: "None"',
-            'Matcher: Not(Equals(None))',
-            'Difference: None matches Equals(None)',
+            'Matcher: Not(Is(None))',
+            'Difference: None matches Is(None)',
             ''
             ])
         self.assertFails(expected_error, self.assertIsNotNone, None)
-        
+
 
 class TestAddCleanup(TestCase):
     """Tests for TestCase.addCleanup."""

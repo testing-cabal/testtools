@@ -353,6 +353,23 @@ class TestAnnotate(TestCase, TestMatchersInterface):
 
     describe_examples = [("1 != 2: foo", 2, Annotate('foo', Equals(1)))]
 
+    def test_if_message_no_message(self):
+        # Annotate.if_message returns the given matcher if there is no
+        # message.
+        matcher = Equals(1)
+        not_annotated = Annotate.if_message('', matcher)
+        self.assertIs(matcher, not_annotated)
+
+    def test_if_message_given_message(self):
+        # Annotate.if_message returns an annotated version of the matcher if a
+        # message is provided.
+        matcher = Equals(1)
+        expected = Annotate('foo', matcher)
+        annotated = Annotate.if_message('foo', matcher)
+        self.assertThat(
+            annotated,
+            MatchesStructure.fromExample(expected, 'annotation', 'matcher'))
+
 
 class TestAnnotatedMismatch(TestCase):
 
