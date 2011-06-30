@@ -603,6 +603,10 @@ class _StringException(Exception):
             return False
 
 
+def _format_text_attachment(name, text):
+    return '%s\n------------\n%s\n' % (name, text)
+
+
 def _details_to_str(details):
     """Convert a details dict to a string."""
     empty_attachments = []
@@ -618,7 +622,7 @@ def _details_to_str(details):
         if not text:
             empty_attachments.append(key)
             continue
-        text_attachments.append('%s\n------------\n%s\n' % (key, text))
+        text_attachments.append(_format_text_attachment(key, text))
     lines = []
     for attachment in binary_attachments:
         lines.append('Binary content: %s\n' % (attachment,))
