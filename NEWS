@@ -10,6 +10,8 @@ Improvements
 * New convenience assertions, ``assertIsNone`` and ``assertIsNotNone``.
   (Christian Kampka)
 
+* New matcher, ``GreaterThan``. (Christian Kampka)
+
 
 0.9.11
 ~~~~~~
