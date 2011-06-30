@@ -1413,10 +1413,15 @@ Binary content:
   attachment (image/jpeg)
 """))
 
-    def test_text_content(self):
+    def test_single_line_content(self):
         content = text_content('foo')
         string = _details_to_str({'attachment': content})
-        self.assertThat(string, Equals(u'attachment: {{{\nfoo\n}}}\n'))
+        self.assertThat(string, Equals(u'attachment: {{{foo}}}\n'))
+
+    def test_multi_line_text_content(self):
+        content = text_content('foo\nbar\nbaz')
+        string = _details_to_str({'attachment': content})
+        self.assertThat(string, Equals(u'attachment: {{{\nfoo\nbar\nbaz\n}}}\n'))
 
     def test_special_text_content(self):
         content = text_content('foo')
@@ -1425,14 +1430,16 @@ Binary content:
 
     def test_multiple_text_content(self):
         string = _details_to_str(
-            {'attachment': text_content('foo'),
-             'attachment-1': text_content('bar')})
+            {'attachment': text_content('foo\nfoo'),
+             'attachment-1': text_content('bar\nbar')})
         self.assertThat(
             string, Equals(u'attachment: {{{\n'
+                           u'foo\n'
                            u'foo\n'
                            u'}}}\n'
                            u'\n'
                            u'attachment-1: {{{\n'
+                           u'bar\n'
                            u'bar\n'
                            u'}}}\n'))
 
@@ -1464,13 +1471,8 @@ Binary content:
 Empty attachments:
   attachment-4
 
-attachment: {{{
-foo
-}}}
-
-attachment-3: {{{
-bar
-}}}
+attachment: {{{foo}}}
+attachment-3: {{{bar}}}
 
 traceback
 """))

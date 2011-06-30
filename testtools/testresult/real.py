@@ -604,11 +604,9 @@ class _StringException(Exception):
 
 
 def _format_text_attachment(name, text):
-    return """\
-%s: {{{
-%s
-}}}
-""" % (name, text)
+    if '\n' in text:
+        return "%s: {{{\n%s\n}}}\n" % (name, text)
+    return "%s: {{{%s}}}" % (name, text)
 
 
 def _details_to_str(details, special=None):
@@ -639,6 +637,8 @@ def _details_to_str(details, special=None):
             special_content = '%s\n' % (text,)
             continue
         text_attachments.append(_format_text_attachment(key, text))
+    if text_attachments and not text_attachments[-1].endswith('\n'):
+        text_attachments.append('')
     if special_content:
         text_attachments.append(special_content)
     lines = []
