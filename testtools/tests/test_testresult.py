@@ -1444,6 +1444,31 @@ class TestDetailsToStr(TestCase):
         self.assertThat(
             string, Equals(u'Empty attachments: attachment\n'))
 
+    def test_lots_of_different_attachments(self):
+        jpg = lambda x: content_from_stream(
+            StringIO(x), ContentType('image', 'jpeg'))
+        attachments = {
+            'attachment': text_content('foo'),
+            'attachment-1': jpg('pic1'),
+            'attachment-2': text_content('bar'),
+            'attachment-3': text_content(''),
+            'attachment-4': jpg('pic2'),
+            }
+        string = _details_to_str(attachments)
+        self.assertThat(
+            string, Equals(u"""\
+Binary content: attachment-1
+Binary content: attachment-4
+Empty attachments: attachment-3
+attachment
+------------
+foo
+------------
+attachment-2
+------------
+bar
+"""))
+
 
 # XXX: We probably want to have a "special" key in details_to_str for the
 # attachment representing the main error from the test.  This error would not
