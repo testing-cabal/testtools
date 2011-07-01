@@ -1,6 +1,6 @@
 # See README for copyright and licensing details.
 
-PYTHON=python
+PYTHON=python3
 SOURCES=$(shell find testtools -name "*.py")
 
 check:

@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2010 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
 
 """Tests for matchers."""
 
@@ -27,6 +27,7 @@ from testtools.matchers import (
     KeysEqual,
     Is,
     LessThan,
+    GreaterThan,
     MatchesAny,
     MatchesAll,
     MatchesException,
@@ -195,6 +196,22 @@ class TestLessThanInterface(TestCase, TestMatchersInterface):
         ]
 
 
+class TestGreaterThanInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = GreaterThan(4)
+    matches_matches = [5, 8]
+    matches_mismatches = [-2, 0, 4]
+
+    str_examples = [
+        ("GreaterThan(12)", GreaterThan(12)),
+        ]
+
+    describe_examples = [
+        ('5 is not < 4', 4, GreaterThan(5)),
+        ('4 is not < 4', 4, GreaterThan(4)),
+        ]
+
+
 def make_error(type, *args, **kwargs):
     try:
         raise type(*args, **kwargs)
@@ -354,6 +371,23 @@ class TestAnnotate(TestCase, TestMatchersInterface):
         ("Annotate('foo', Equals(1))", Annotate("foo", Equals(1)))]
 
     describe_examples = [("1 != 2: foo", 2, Annotate('foo', Equals(1)))]
+
+    def test_if_message_no_message(self):
+        # Annotate.if_message returns the given matcher if there is no
+        # message.
+        matcher = Equals(1)
+        not_annotated = Annotate.if_message('', matcher)
+        self.assertIs(matcher, not_annotated)
+
+    def test_if_message_given_message(self):
+        # Annotate.if_message returns an annotated version of the matcher if a
+        # message is provided.
+        matcher = Equals(1)
+        expected = Annotate('foo', matcher)
+        annotated = Annotate.if_message('foo', matcher)
+        self.assertThat(
+            annotated,
+            MatchesStructure.fromExample(expected, 'annotation', 'matcher'))
 
 
 class TestAnnotatedMismatch(TestCase):

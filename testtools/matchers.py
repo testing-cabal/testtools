@@ -12,16 +12,22 @@ $ python -c 'import testtools.matchers; print testtools.matchers.__all__'
 
 __metaclass__ = type
 __all__ = [
+    'AfterPreproccessing',
     'Annotate',
     'DocTestMatches',
     'EndsWith',
     'Equals',
+    'GreaterThan',
     'Is',
     'KeysEqual',
     'LessThan',
     'MatchesAll',
     'MatchesAny',
     'MatchesException',
+    'MatchesListwise',
+    'MatchesRegex',
+    'MatchesSetwise',
+    'MatchesStructure',
     'NotEquals',
     'Not',
     'Raises',
@@ -36,7 +42,12 @@ import re
 import sys
 import types
 
-from testtools.compat import classtypes, _error_repr, isbaseexception
+from testtools.compat import (
+    classtypes,
+    _error_repr,
+    isbaseexception,
+    istext,
+    )
 
 
 class Matcher(object):
@@ -293,6 +304,13 @@ class LessThan(_BinaryComparison):
     mismatch_string = 'is not >'
 
 
+class GreaterThan(_BinaryComparison):
+    """Matches if the item is greater than the matchers reference object."""
+
+    comparator = operator.__gt__
+    mismatch_string = 'is not <'
+
+
 class MatchesAny(object):
     """Matches if any of the matchers it is created with match."""
 
@@ -495,6 +513,13 @@ class Annotate(object):
     def __init__(self, annotation, matcher):
         self.annotation = annotation
         self.matcher = matcher
+
+    @classmethod
+    def if_message(cls, annotation, matcher):
+        """Annotate ``matcher`` only if ``annotation`` is non-empty."""
+        if not annotation:
+            return matcher
+        return cls(annotation, matcher)
 
     def __str__(self):
         return 'Annotate(%r, %s)' % (self.annotation, self.matcher)

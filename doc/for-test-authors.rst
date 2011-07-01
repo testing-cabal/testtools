@@ -342,6 +342,16 @@ We highly recommend using the following flags::
   doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE | doctest.REPORT_NDIFF
 
 
+GreaterThan
+~~~~~~~~~~~
+
+Matches if the given thing is greater than the thing in the matcher.  For
+example::
+
+  def test_greater_than_example(self):
+      self.assertThat(3, GreaterThan(2))
+
+
 LessThan
 ~~~~~~~~
 

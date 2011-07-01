@@ -15,6 +15,7 @@ from testtools.compat import (
     _detect_encoding,
     _get_source_encoding,
     _u,
+    str_is_unicode,
     unicode_output_stream,
     )
 from testtools.matchers import (
@@ -225,14 +226,18 @@ class TestUnicodeOutputStream(testtools.TestCase):
         unicode_output_stream(sout).write(self.uni)
         self.assertEqual([_b("pa?\xe8?n")], sout.writelog)
 
-    def test_unicode_encodings_not_wrapped(self):
-        """A unicode encoding is left unwrapped as needs no error handler"""
+    def test_unicode_encodings_wrapped(self):
+        """A unicode encoding is wrapped but needs no error handler"""
         sout = _FakeOutputStream()
         sout.encoding = "utf-8"
-        self.assertIs(unicode_output_stream(sout), sout)
-        sout = _FakeOutputStream()
-        sout.encoding = "utf-16-be"
-        self.assertIs(unicode_output_stream(sout), sout)
+        uout = unicode_output_stream(sout)
+        if str_is_unicode:
+            # No wrapping needed if native str type is unicode
+            self.assertIs(uout, sout)
+            return
+        self.assertEqual(uout.errors, "strict")
+        uout.write(self.uni)
+        self.assertEqual([_b("pa\xc9\xaa\xce\xb8\xc9\x99n")], sout.writelog)
 
     def test_stringio(self):
         """A StringIO object should maybe get an ascii native str type"""
