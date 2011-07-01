@@ -18,7 +18,7 @@ already had a tarball built and uploaded with 'python setup.py sdist upload
 --sign'.
 """
 
-from datetime import date
+from datetime import datetime, timedelta, tzinfo
 import logging
 import os
 import sys
@@ -29,7 +29,7 @@ from launchpadlib import uris
 
 APP_NAME = 'testtools-lp-release'
 CACHE_DIR = os.path.expanduser('~/.launchpadlib/cache')
-SERVICE_ROOT = uris.LPNET_SERVICE_ROOT
+SERVICE_ROOT = uris.STAGING_SERVICE_ROOT
 
 FIX_COMMITTED = u"Fix Committed"
 FIX_RELEASED = u"Fix Released"
@@ -41,7 +41,22 @@ PROJECT_NAME = 'testtools'
 NEXT_MILESTONE_NAME = 'next'
 
 # Whether we should actually release. Used for debugging.
-FOR_REAL = False
+FOR_REAL = True
+
+
+class _UTC(tzinfo):
+    """UTC"""
+
+    def utcoffset(self, dt):
+        return timedelta(0)
+
+    def tzname(self, dt):
+        return "UTC"
+
+    def dst(self, dt):
+        return timedelta(0)
+
+UTC = _UTC()
 
 
 def configure_logging():
@@ -129,7 +144,7 @@ def get_release_notes_and_changelog(news_path):
 
 
 def release_milestone(milestone, release_notes, changelog):
-    date_released = date.today()
+    date_released = datetime.now(tz=UTC)
     LOG.info(
         "Releasing milestone: %s, date %s" % (milestone.name, date_released))
     return milestone.createProductRelease(
@@ -154,6 +169,7 @@ def close_fixed_bugs(milestone):
             task.status = FIX_RELEASED
             task.lp_save()
         else:
+            # XXX: Should remove link to milestone
             LOG.warning(
                 "Not fix committed, ignoring: %s" % (task.title,))
 
@@ -161,8 +177,7 @@ def close_fixed_bugs(milestone):
 def upload_tarball(release, tarball_path):
     with open(tarball_path) as tarball:
         tarball_content = tarball.read()
-    # XXX: Not sure where our sig lives
-    sig_path = tarball_path + '.sig'
+    sig_path = tarball_path + '.asc'
     with open(sig_path) as sig:
         sig_content = sig.read()
     tarball_name = os.path.basename(tarball_path)
@@ -183,11 +198,11 @@ def release_project(launchpad, project_name, next_milestone_name):
         get_path('NEWS'))
     if FOR_REAL:
         rename_milestone(next_milestone, release_name)
-        release = release_milestone(next_milestone)
+        release = release_milestone(next_milestone, release_notes, changelog)
         upload_tarball(
             release,
             get_path('dist/%s-%s.tar.gz' % (project_name, release_name,)))
-        create_milestone(next_milestone.series, next_milestone_name)
+        create_milestone(next_milestone.series_target, next_milestone_name)
         close_fixed_bugs(next_milestone)
     else:
         print "Rename milestone to %s" % (release_name,)
