@@ -40,9 +40,6 @@ CODE_RELEASE_TARBALL = 'Code Release Tarball'
 PROJECT_NAME = 'testtools'
 NEXT_MILESTONE_NAME = 'next'
 
-# Whether we should actually release. Used for debugging.
-FOR_REAL = True
-
 
 class _UTC(tzinfo):
     """UTC"""
@@ -196,20 +193,13 @@ def release_project(launchpad, project_name, next_milestone_name):
     assign_fix_committed_to_next(testtools, next_milestone)
     release_name, release_notes, changelog = get_release_notes_and_changelog(
         get_path('NEWS'))
-    if FOR_REAL:
-        rename_milestone(next_milestone, release_name)
-        release = release_milestone(next_milestone, release_notes, changelog)
-        upload_tarball(
-            release,
-            get_path('dist/%s-%s.tar.gz' % (project_name, release_name,)))
-        create_milestone(next_milestone.series_target, next_milestone_name)
-        close_fixed_bugs(next_milestone)
-    else:
-        print "Rename milestone to %s" % (release_name,)
-        print "Upload tarball: dist/testtools-%s.tar.gz" % (release_name,)
-        print 'Release notes: """%s"""' % (release_notes,)
-        print 'Changelog: """\\\n%s"""' % (changelog,)
-        print 'Create milestone: %s' % (next_milestone_name,)
+    rename_milestone(next_milestone, release_name)
+    release = release_milestone(next_milestone, release_notes, changelog)
+    upload_tarball(
+        release,
+        get_path('dist/%s-%s.tar.gz' % (project_name, release_name,)))
+    create_milestone(next_milestone.series_target, next_milestone_name)
+    close_fixed_bugs(next_milestone)
 
 
 def main(args):
