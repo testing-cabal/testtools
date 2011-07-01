@@ -145,8 +145,8 @@ Release tasks
 #. If a new series has been created (e.g. 0.10.0), make the series on Launchpad.
 #. Make a new milestone for the *next release*.
 
-   #. During release we rename NEXT to $version.
-   #. We call new milestones NEXT.
+   #. During release we rename 'next' to $version.
+   #. We call new milestones 'next'.
 
 #. Set all bugs that were "Fix Committed" to "Fix Released"
 
