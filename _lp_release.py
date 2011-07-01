@@ -136,16 +136,10 @@ def release_milestone(milestone, release_notes, changelog):
         )
 
 
-def create_next_milestone(series):
-    """Create a new milestone in the same series as 'release_milestone'.
-
-    Use the name in NEXT_MILESTONE_NAME, since it's a milestone intended to be
-    released with this script.
-    """
-    LOG.info(
-        "Creating milestone %s in series %s"
-        % (series.name, NEXT_MILESTONE_NAME))
-    return series.newMilestone(name=NEXT_MILESTONE_NAME)
+def create_milestone(series, name):
+    """Create a new milestone in the same series as 'release_milestone'."""
+    LOG.info("Creating milestone %s in series %s" % (series.name, name))
+    return series.newMilestone(name=name)
 
 
 def close_fixed_bugs(milestone):
@@ -177,7 +171,9 @@ def upload_tarball(release, tarball_path):
         content_type="application/x-gzip; charset=binary")
 
 
-def release_testtools(testtools, next_milestone):
+def release_project(launchpad, project_name, next_milestone_name):
+    testtools = launchpad.projects[project_name]
+    next_milestone = testtools.getMilestone(name=next_milestone_name)
     FOR_REAL = False
     assign_fix_committed_to_next(testtools, next_milestone)
     release_name, release_notes, changelog = get_release_notes_and_changelog(
@@ -186,28 +182,22 @@ def release_testtools(testtools, next_milestone):
         rename_milestone(next_milestone, release_name)
         release = release_milestone(next_milestone)
         upload_tarball(
-            release, get_path('dist/testtools-%s.tar.gz' % (release_name,)))
-        create_next_milestone(next_milestone.series)
+            release,
+            get_path('dist/%s-%s.tar.gz' % (project_name, release_name,)))
+        create_milestone(next_milestone.series, next_milestone_name)
         close_fixed_bugs(next_milestone)
     else:
         print "Rename milestone to %s" % (release_name,)
         print "Upload tarball: dist/testtools-%s.tar.gz" % (release_name,)
         print 'Release notes: """%s"""' % (release_notes,)
         print 'Changelog: """\\\n%s"""' % (changelog,)
-        print 'Create milestone: %s' % (NEXT_MILESTONE_NAME,)
-    # mark all fix committed as fix released
+        print 'Create milestone: %s' % (next_milestone_name,)
 
 
 def main(args):
     launchpad = Launchpad.login_with(
         'jml-crit-bug', SERVICE_ROOT, CACHE_DIR)
-    # XXX: We can probably write 'release_testtools' without it knowing the
-    # name of the project.
-    testtools = launchpad.projects[PROJECT_NAME]
-    # XXX: We can probably localize NEXT_MILESTONE_NAME knowledge to
-    # 'release_testtools'.
-    next_milestone = testtools.getMilestone(name=NEXT_MILESTONE_NAME)
-    release_testtools(testtools, next_milestone)
+    release_project(launchpad, PROJECT_NAME, NEXT_MILESTONE_NAME)
     return 0
 
 
