@@ -76,22 +76,24 @@ def rename_milestone(next_milestone, new_name):
     next_milestone.lp_save()
 
 
-def get_release_notes_and_changelog(milestone):
-    milestone_name = milestone.name.lower()
+def get_release_notes_and_changelog(news_path):
     release_notes = []
     changelog = []
     state = None
+    last_line = None
 
     def is_heading_marker(line, marker_char):
         return line and line == marker_char * len(line)
 
-    news_path = get_path('NEWS')
     with open(news_path, 'r') as news:
         for line in news:
             line = line.strip()
             if state is None:
-                if line.lower() == milestone_name:
-                    state = 'title'
+                if is_heading_marker(line, '~'):
+                    milestone_name = last_line
+                    state = 'release-notes'
+                else:
+                    last_line = line
             elif state == 'title':
                 # The line after the title is a heading marker line, so we
                 # ignore it and change state. That which follows are the
@@ -117,11 +119,10 @@ def get_release_notes_and_changelog(milestone):
                 raise ValueError("Couldn't parse NEWS")
     release_notes = '\n'.join(release_notes).strip() + '\n'
     changelog = '\n'.join(changelog).strip() + '\n'
-    return release_notes, changelog
+    return milestone_name, release_notes, changelog
 
 
-def release_milestone(milestone):
-    release_notes, changelog = get_release_notes_and_changelog()
+def release_milestone(milestone, release_notes, changelog):
     date_released = date.today()
     return milestone.createProductRelease(
         date_released=date_released,
@@ -145,13 +146,22 @@ def upload_tarball(release, tarball_path):
         content_type="application/x-gzip; charset=binary")
 
 
-def release_testtools(testtools, next_milestone, release_name):
+def release_testtools(testtools, next_milestone):
+    FOR_REAL = False
     assign_fix_committed_to_next(testtools, next_milestone)
-    # XXX: We can actually get the release name from NEWS
-    rename_milestone(next_milestone, release_name)
-    release = release_milestone(next_milestone)
-    upload_tarball(
-        release, get_path('dist/testtools-%s.tar.gz' % (release_name,)))
+    release_name, release_notes, changelog = get_release_notes_and_changelog(
+        get_path('NEWS'))
+    if FOR_REAL:
+        rename_milestone(next_milestone, release_name)
+        release = release_milestone(next_milestone)
+        upload_tarball(
+            release, get_path('dist/testtools-%s.tar.gz' % (release_name,)))
+    else:
+        print "Rename milestone to %s" % (release_name,)
+        print "Upload tarball: dist/testtools-%s.tar.gz" % (release_name,)
+        print 'Release notes: """%s"""' % (release_notes,)
+        print 'Changelog: """\\\n%s"""' % (changelog,)
+
     # create milestone, 'next'
     # mark all fix committed as fix released
 
@@ -161,7 +171,7 @@ def main(args):
         'jml-crit-bug', SERVICE_ROOT, CACHE_DIR)
     testtools = launchpad.projects[PROJECT_NAME]
     next_milestone = testtools.getMilestone(name=NEXT_MILESTONE_NAME)
-    release_testtools(testtools, next_milestone, '0.9.12')
+    release_testtools(testtools, next_milestone)
     return 0
 
 
