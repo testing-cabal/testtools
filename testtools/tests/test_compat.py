@@ -231,13 +231,13 @@ class TestUnicodeOutputStream(testtools.TestCase):
         sout = _FakeOutputStream()
         sout.encoding = "utf-8"
         uout = unicode_output_stream(sout)
+        if str_is_unicode:
+            # No wrapping needed if native str type is unicode
+            self.assertIs(uout, sout)
+            return
         self.assertEqual(uout.errors, "strict")
         uout.write(self.uni)
-        if str_is_unicode:
-            expected = self.uni
-        else:
-            expected = _b("pa\xc9\xaa\xce\xb8\xc9\x99n")
-        self.assertEqual([expected], sout.writelog)
+        self.assertEqual([_b("pa\xc9\xaa\xce\xb8\xc9\x99n")], sout.writelog)
 
     def test_stringio(self):
         """A StringIO object should maybe get an ascii native str type"""
