@@ -310,7 +310,7 @@ class TextTestResult(TestResult):
             self.stream.write(
                 "%sUNEXPECTED SUCCESS: %s\n%s" % (
                     self.sep1, test.id(), self.sep2))
-        self.stream.write("Ran %d test%s in %.3fs\n\n" %
+        self.stream.write("\nRan %d test%s in %.3fs\n" %
             (self.testsRun, plural,
              self._delta_to_float(stop - self.__start)))
         if self.wasSuccessful():

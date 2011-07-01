@@ -511,7 +511,7 @@ class TestTextTestResult(TestCase):
         self.result.stream = StringIO()
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
-            DocTestMatches("Ran 2 tests in ...s\n...", doctest.ELLIPSIS))
+            DocTestMatches("\nRan 2 tests in ...s\n...", doctest.ELLIPSIS))
 
     def test_stopTestRun_count_single(self):
         test = make_test()
@@ -521,14 +521,14 @@ class TestTextTestResult(TestCase):
         self.reset_output()
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
-            DocTestMatches("Ran 1 test in ...s\n\nOK\n", doctest.ELLIPSIS))
+            DocTestMatches("\nRan 1 test in ...s\nOK\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_count_zero(self):
         self.result.startTestRun()
         self.reset_output()
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
-            DocTestMatches("Ran 0 tests in ...s\n\nOK\n", doctest.ELLIPSIS))
+            DocTestMatches("\nRan 0 tests in ...s\nOK\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_current_time(self):
         test = make_test()
@@ -548,7 +548,7 @@ class TestTextTestResult(TestCase):
         self.result.startTestRun()
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
-            DocTestMatches("...\n\nOK\n", doctest.ELLIPSIS))
+            DocTestMatches("...\nOK\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_not_successful_failure(self):
         test = make_failing_test()
@@ -556,7 +556,7 @@ class TestTextTestResult(TestCase):
         test.run(self.result)
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
-            DocTestMatches("...\n\nFAILED (failures=1)\n", doctest.ELLIPSIS))
+            DocTestMatches("...\nFAILED (failures=1)\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_not_successful_error(self):
         test = make_erroring_test()
@@ -564,7 +564,7 @@ class TestTextTestResult(TestCase):
         test.run(self.result)
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
-            DocTestMatches("...\n\nFAILED (failures=1)\n", doctest.ELLIPSIS))
+            DocTestMatches("...\nFAILED (failures=1)\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_not_successful_unexpected_success(self):
         test = make_unexpectedly_successful_test()
@@ -572,7 +572,7 @@ class TestTextTestResult(TestCase):
         test.run(self.result)
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
-            DocTestMatches("...\n\nFAILED (failures=1)\n", doctest.ELLIPSIS))
+            DocTestMatches("...\nFAILED (failures=1)\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_shows_details(self):
         self.result.startTestRun()
