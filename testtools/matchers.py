@@ -12,17 +12,22 @@ $ python -c 'import testtools.matchers; print testtools.matchers.__all__'
 
 __metaclass__ = type
 __all__ = [
+    'AfterPreproccessing',
     'Annotate',
     'DocTestMatches',
     'EndsWith',
     'Equals',
+    'GreaterThan',
     'Is',
     'KeysEqual',
     'LessThan',
-    'GreaterThan',
     'MatchesAll',
     'MatchesAny',
     'MatchesException',
+    'MatchesListwise',
+    'MatchesRegex',
+    'MatchesSetwise',
+    'MatchesStructure',
     'NotEquals',
     'Not',
     'Raises',
