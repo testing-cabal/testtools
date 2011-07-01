@@ -164,11 +164,11 @@ def close_fixed_bugs(milestone):
         if task.status == FIX_COMMITTED:
             LOG.info("Closing %s" % (task.title,))
             task.status = FIX_RELEASED
-            task.lp_save()
         else:
-            # XXX: Should remove link to milestone
             LOG.warning(
-                "Not fix committed, ignoring: %s" % (task.title,))
+                "Bug not fixed, removing from milestone: %s" % (task.title,))
+            task.milestone = None
+        task.lp_save()
 
 
 def upload_tarball(release, tarball_path):
@@ -188,6 +188,8 @@ def upload_tarball(release, tarball_path):
 
 
 def release_project(launchpad, project_name, next_milestone_name):
+    # XXX: Since reversing these operations is hard, and inspecting errors
+    # from Launchpad is also difficult, do some looking before leaping.
     testtools = launchpad.projects[project_name]
     next_milestone = testtools.getMilestone(name=next_milestone_name)
     assign_fix_committed_to_next(testtools, next_milestone)
