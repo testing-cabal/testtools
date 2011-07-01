@@ -29,7 +29,7 @@ from launchpadlib import uris
 
 APP_NAME = 'testtools-lp-release'
 CACHE_DIR = os.path.expanduser('~/.launchpadlib/cache')
-SERVICE_ROOT = uris.STAGING_SERVICE_ROOT
+SERVICE_ROOT = uris.LPNET_SERVICE_ROOT
 
 FIX_COMMITTED = u"Fix Committed"
 FIX_RELEASED = u"Fix Released"
@@ -57,7 +57,7 @@ UTC = _UTC()
 
 
 def configure_logging():
-    level = logging.DEBUG
+    level = logging.INFO
     log = logging.getLogger(APP_NAME)
     log.setLevel(level)
     handler = logging.StreamHandler()
