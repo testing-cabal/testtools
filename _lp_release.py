@@ -144,11 +144,14 @@ def release_milestone(milestone, release_notes, changelog):
     date_released = datetime.now(tz=UTC)
     LOG.info(
         "Releasing milestone: %s, date %s" % (milestone.name, date_released))
-    return milestone.createProductRelease(
+    release = milestone.createProductRelease(
         date_released=date_released,
         changelog=changelog,
         release_notes=release_notes,
         )
+    milestone.is_active = False
+    milestone.lp_save()
+    return release
 
 
 def create_milestone(series, name):
