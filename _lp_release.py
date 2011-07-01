@@ -195,8 +195,7 @@ def release_project(launchpad, project_name, next_milestone_name):
 
 
 def main(args):
-    launchpad = Launchpad.login_with(
-        'jml-crit-bug', SERVICE_ROOT, CACHE_DIR)
+    launchpad = Launchpad.login_with(APP_NAME, SERVICE_ROOT, CACHE_DIR)
     release_project(launchpad, PROJECT_NAME, NEXT_MILESTONE_NAME)
     return 0
 
