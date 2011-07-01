@@ -51,7 +51,7 @@ def configure_logging():
     handler.setFormatter(formatter)
     log.addHandler(handler)
     return log
-log = configure_logging()
+LOG = configure_logging()
 
 
 def get_path(relpath):
@@ -63,15 +63,16 @@ def assign_fix_committed_to_next(testtools, next_milestone):
     """Find all 'Fix Committed' and make sure they are in 'next'."""
     fixed_bugs = list(testtools.searchTasks(status=FIX_COMMITTED))
     for task in fixed_bugs:
-        log.debug("%s" % (task.title,))
+        LOG.debug("%s" % (task.title,))
         if task.milestone != next_milestone:
             task.milestone = next_milestone
-            log.info("Re-assigning %s" % (task.title,))
+            LOG.info("Re-assigning %s" % (task.title,))
             task.lp_save()
 
 
 def rename_milestone(next_milestone, new_name):
     """Rename 'next_milestone' to 'new_name'."""
+    LOG.info("Renaming %s to %s" % (next_milestone.name, new_name))
     next_milestone.name = new_name
     next_milestone.lp_save()
 
@@ -85,6 +86,7 @@ def get_release_notes_and_changelog(news_path):
     def is_heading_marker(line, marker_char):
         return line and line == marker_char * len(line)
 
+    LOG.debug("Loading NEWS from %s" % (news_path,))
     with open(news_path, 'r') as news:
         for line in news:
             line = line.strip()
@@ -117,6 +119,7 @@ def get_release_notes_and_changelog(news_path):
                     changelog.append(line)
             else:
                 raise ValueError("Couldn't parse NEWS")
+
     release_notes = '\n'.join(release_notes).strip() + '\n'
     changelog = '\n'.join(changelog).strip() + '\n'
     return milestone_name, release_notes, changelog
@@ -124,11 +127,38 @@ def get_release_notes_and_changelog(news_path):
 
 def release_milestone(milestone, release_notes, changelog):
     date_released = date.today()
+    LOG.info(
+        "Releasing milestone: %s, date %s" % (milestone.name, date_released))
     return milestone.createProductRelease(
         date_released=date_released,
         changelog=changelog,
         release_notes=release_notes,
         )
+
+
+def create_next_milestone(series):
+    """Create a new milestone in the same series as 'release_milestone'.
+
+    Use the name in NEXT_MILESTONE_NAME, since it's a milestone intended to be
+    released with this script.
+    """
+    LOG.info(
+        "Creating milestone %s in series %s"
+        % (series.name, NEXT_MILESTONE_NAME))
+    return series.newMilestone(name=NEXT_MILESTONE_NAME)
+
+
+def close_fixed_bugs(milestone):
+    tasks = list(milestone.searchTasks())
+    for task in tasks:
+        LOG.debug("Found %s" % (task.title,))
+        if task.status == FIX_COMMITTED:
+            LOG.info("Closing %s" % (task.title,))
+            task.status = FIX_RELEASED
+            task.lp_save()
+        else:
+            LOG.warning(
+                "Not fix committed, ignoring: %s" % (task.title,))
 
 
 def upload_tarball(release, tarball_path):
@@ -138,6 +168,7 @@ def upload_tarball(release, tarball_path):
     with open(sig_path) as sig:
         sig_content = sig.read()
     tarball_name = os.path.basename(tarball_path)
+    LOG.info("Uploading tarball: %s" % (tarball_path,))
     release.add_file(
         file_type=CODE_RELEASE_TARBALL,
         file_content=tarball_content, filename=tarball_name,
@@ -156,20 +187,25 @@ def release_testtools(testtools, next_milestone):
         release = release_milestone(next_milestone)
         upload_tarball(
             release, get_path('dist/testtools-%s.tar.gz' % (release_name,)))
+        create_next_milestone(next_milestone.series)
+        close_fixed_bugs(next_milestone)
     else:
         print "Rename milestone to %s" % (release_name,)
         print "Upload tarball: dist/testtools-%s.tar.gz" % (release_name,)
         print 'Release notes: """%s"""' % (release_notes,)
         print 'Changelog: """\\\n%s"""' % (changelog,)
-
-    # create milestone, 'next'
+        print 'Create milestone: %s' % (NEXT_MILESTONE_NAME,)
     # mark all fix committed as fix released
 
 
 def main(args):
     launchpad = Launchpad.login_with(
         'jml-crit-bug', SERVICE_ROOT, CACHE_DIR)
+    # XXX: We can probably write 'release_testtools' without it knowing the
+    # name of the project.
     testtools = launchpad.projects[PROJECT_NAME]
+    # XXX: We can probably localize NEXT_MILESTONE_NAME knowledge to
+    # 'release_testtools'.
     next_milestone = testtools.getMilestone(name=NEXT_MILESTONE_NAME)
     release_testtools(testtools, next_milestone)
     return 0
