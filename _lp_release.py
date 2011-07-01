@@ -156,7 +156,7 @@ def release_milestone(milestone, release_notes, changelog):
 
 def create_milestone(series, name):
     """Create a new milestone in the same series as 'release_milestone'."""
-    LOG.info("Creating milestone %s in series %s" % (series.name, name))
+    LOG.info("Creating milestone %s in series %s" % (name, series.name))
     return series.newMilestone(name=name)
 
 
@@ -191,26 +191,37 @@ def upload_tarball(release, tarball_path):
 
 
 def release_project(launchpad, project_name, next_milestone_name):
-    # XXX: Since reversing these operations is hard, and inspecting errors
-    # from Launchpad is also difficult, do some looking before leaping.
     testtools = launchpad.projects[project_name]
     next_milestone = testtools.getMilestone(name=next_milestone_name)
-    assign_fix_committed_to_next(testtools, next_milestone)
     release_name, release_notes, changelog = get_release_notes_and_changelog(
         get_path('NEWS'))
+    LOG.info("Releasing %s %s" % (project_name, release_name))
+    # Since reversing these operations is hard, and inspecting errors from
+    # Launchpad is also difficult, do some looking before leaping.
+    errors = []
+    tarball_path = get_path('dist/%s-%s.tar.gz' % (project_name, release_name,))
+    if not os.path.isfile(tarball_path):
+        errors.append("%s does not exist" % (tarball_path,))
+    if not os.path.isfile(tarball_path + '.asc'):
+        errors.append("%s does not exist" % (tarball_path + '.asc',))
+    if testtools.getMilestone(name=release_name):
+        errors.append("Milestone %s exists on %s" % (release_name, project_name))
+    if errors:
+        for error in errors:
+            LOG.error(error)
+        return 1
+    assign_fix_committed_to_next(testtools, next_milestone)
     rename_milestone(next_milestone, release_name)
     release = release_milestone(next_milestone, release_notes, changelog)
-    upload_tarball(
-        release,
-        get_path('dist/%s-%s.tar.gz' % (project_name, release_name,)))
+    upload_tarball(release, tarball_path)
     create_milestone(next_milestone.series_target, next_milestone_name)
     close_fixed_bugs(next_milestone)
+    return 0
 
 
 def main(args):
     launchpad = Launchpad.login_with(APP_NAME, SERVICE_ROOT, CACHE_DIR)
-    release_project(launchpad, PROJECT_NAME, NEXT_MILESTONE_NAME)
-    return 0
+    return release_project(launchpad, PROJECT_NAME, NEXT_MILESTONE_NAME)
 
 
 if __name__ == '__main__':
