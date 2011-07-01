@@ -40,6 +40,9 @@ CODE_RELEASE_TARBALL = 'Code Release Tarball'
 PROJECT_NAME = 'testtools'
 NEXT_MILESTONE_NAME = 'next'
 
+# Whether we should actually release. Used for debugging.
+FOR_REAL = False
+
 
 def configure_logging():
     level = logging.DEBUG
@@ -158,6 +161,7 @@ def close_fixed_bugs(milestone):
 def upload_tarball(release, tarball_path):
     with open(tarball_path) as tarball:
         tarball_content = tarball.read()
+    # XXX: Not sure where our sig lives
     sig_path = tarball_path + '.sig'
     with open(sig_path) as sig:
         sig_content = sig.read()
@@ -174,7 +178,6 @@ def upload_tarball(release, tarball_path):
 def release_project(launchpad, project_name, next_milestone_name):
     testtools = launchpad.projects[project_name]
     next_milestone = testtools.getMilestone(name=next_milestone_name)
-    FOR_REAL = False
     assign_fix_committed_to_next(testtools, next_milestone)
     release_name, release_notes, changelog = get_release_notes_and_changelog(
         get_path('NEWS'))
