@@ -12,6 +12,10 @@ Steps:
 
 Assumes that NEWS is in the same directory, that the release sections are
 underlined with '~' and the subsections are underlined with '-'.
+
+Assumes that this file is in the top-level of a testtools tree that has
+already had a tarball built and uploaded with 'python setup.py sdist upload
+--sign'.
 """
 
 from datetime import date
@@ -30,6 +34,12 @@ SERVICE_ROOT = uris.LPNET_SERVICE_ROOT
 FIX_COMMITTED = u"Fix Committed"
 FIX_RELEASED = u"Fix Released"
 
+# Launchpad file type for a tarball upload.
+CODE_RELEASE_TARBALL = 'Code Release Tarball'
+
+PROJECT_NAME = 'testtools'
+NEXT_MILESTONE_NAME = 'next'
+
 
 def configure_logging():
     level = logging.DEBUG
@@ -41,9 +51,13 @@ def configure_logging():
     handler.setFormatter(formatter)
     log.addHandler(handler)
     return log
-
-
 log = configure_logging()
+
+
+def get_path(relpath):
+    """Get the absolute path for something relative to this file."""
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), relpath))
+
 
 def assign_fix_committed_to_next(testtools, next_milestone):
     """Find all 'Fix Committed' and make sure they are in 'next'."""
@@ -71,7 +85,8 @@ def get_release_notes_and_changelog(milestone):
     def is_heading_marker(line, marker_char):
         return line and line == marker_char * len(line)
 
-    with open('NEWS', 'r') as news:
+    news_path = get_path('NEWS')
+    with open(news_path, 'r') as news:
         for line in news:
             line = line.strip()
             if state is None:
@@ -118,24 +133,25 @@ def release_milestone(milestone):
 def upload_tarball(release, tarball_path):
     with open(tarball_path) as tarball:
         tarball_content = tarball.read()
-    with open(tarball_path + '.sig') as sig:
+    sig_path = tarball_path + '.sig'
+    with open(sig_path) as sig:
         sig_content = sig.read()
     tarball_name = os.path.basename(tarball_path)
     release.add_file(
-        file_type='Code Release Tarball',
+        file_type=CODE_RELEASE_TARBALL,
         file_content=tarball_content, filename=tarball_name,
         signature_content=sig_content,
-        signature_filename=tarball_name + '.sig',
+        signature_filename=sig_path,
         content_type="application/x-gzip; charset=binary")
 
 
 def release_testtools(testtools, next_milestone, release_name):
     assign_fix_committed_to_next(testtools, next_milestone)
     # XXX: We can actually get the release name from NEWS
-    # XXX: Using hardcoded paths
     rename_milestone(next_milestone, release_name)
     release = release_milestone(next_milestone)
-    upload_tarball(release, 'dist/testtools-%s.tar.gz' % (release_name,))
+    upload_tarball(
+        release, get_path('dist/testtools-%s.tar.gz' % (release_name,)))
     # create milestone, 'next'
     # mark all fix committed as fix released
 
@@ -143,8 +159,8 @@ def release_testtools(testtools, next_milestone, release_name):
 def main(args):
     launchpad = Launchpad.login_with(
         'jml-crit-bug', SERVICE_ROOT, CACHE_DIR)
-    testtools = launchpad.projects['testtools']
-    next_milestone = testtools.getMilestone(name='next')
+    testtools = launchpad.projects[PROJECT_NAME]
+    next_milestone = testtools.getMilestone(name=NEXT_MILESTONE_NAME)
     release_testtools(testtools, next_milestone, '0.9.12')
     return 0
 
