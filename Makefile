@@ -1,6 +1,6 @@
 # See README for copyright and licensing details.
 
-PYTHON=python3
+PYTHON=python
 SOURCES=$(shell find testtools -name "*.py")
 
 check:
@@ -22,6 +22,7 @@ prerelease:
 
 release:
 	./setup.py sdist upload --sign
+	$(PYTHON) _lp_release.py
 
 snapshot: prerelease
 	./setup.py sdist
