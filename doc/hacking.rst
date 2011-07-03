@@ -129,26 +129,16 @@ Release tasks
    which should not be replaced).
 #. Commit the changes.
 #. Tag the release, bzr tag testtools-X.Y.Z
-#. Create a source distribution and upload to pypi ('make release').
-#. Make sure all "Fix committed" bugs are in the 'next' milestone on
-   Launchpad
-#. Rename the 'next' milestone on Launchpad to 'X.Y.Z'
-#. Create a release on the newly-renamed 'X.Y.Z' milestone
-
-   * Make the milestone inactive (this is the default)
-   * Set the release date to the current day
-
-#. Upload the tarball and asc file to Launchpad
+#. Run 'make release', this:
+   #. Creates a source distribution and uploads to PyPI
+   #. Ensures all Fix Committed bugs are in the release milestone
+   #. Makes a release on Launchpad and uploads the tarball
+   #. Marks all the Fix Committed bugs as Fix Released
+   #. Creates a new milestone
 #. Merge the release branch testtools-X.Y.Z into trunk. Before the commit,
    add a NEXT heading to the top of NEWS and bump the version in __init__.py.
    Push trunk to Launchpad
 #. If a new series has been created (e.g. 0.10.0), make the series on Launchpad.
-#. Make a new milestone for the *next release*.
-
-   #. During release we rename NEXT to $version.
-   #. We call new milestones NEXT.
-
-#. Set all bugs that were "Fix Committed" to "Fix Released"
 
 .. _PEP 8: http://www.python.org/dev/peps/pep-0008/
 .. _unittest: http://docs.python.org/library/unittest.html
