@@ -10,6 +10,12 @@ Improvements
 * Less boilerplate displayed in test failures and errors.
   (Jonathan Lange, #660852)
 
+* Automated the Launchpad part of the release process.
+  (Jonathan Lange, #623486)
+
+* Correctly display non-ASCII unicode output on terminals that claim to have a
+  unicode encoding. (Martin [gz], #804122)
+
 * New convenience assertions, ``assertIsNone`` and ``assertIsNotNone``.
   (Christian Kampka)
 

@@ -22,6 +22,7 @@ prerelease:
 
 release:
 	./setup.py sdist upload --sign
+	$(PYTHON) _lp_release.py
 
 snapshot: prerelease
 	./setup.py sdist

@@ -119,7 +119,9 @@ def unicode_output_stream(stream):
         return codecs.getwriter("ascii")(stream, "replace")
     if writer.__module__.rsplit(".", 1)[1].startswith("utf"):
         # The current stream has a unicode encoding so no error handler is needed
-        return stream
+        if sys.version_info > (3, 0):
+            return stream
+        return writer(stream)
     if sys.version_info > (3, 0):
         # Python 3 doesn't seem to make this easy, handle a common case
         try:
