@@ -177,7 +177,7 @@ class DocTestMatches(object):
         return 'DocTestMatches(%r%s)' % (self.want, flagstr)
 
     def _with_nl(self, actual):
-        result = self.want.__class__(actual)
+        result = str(actual)
         if not result.endswith('\n'):
             result += '\n'
         return result
