@@ -19,9 +19,9 @@ def test_suite():
         test_run,
         test_runtest,
         test_spinner,
+        test_testcase,
         test_testresult,
         test_testsuite,
-        test_testtools,
         )
     modules = [
         test_compat,
@@ -36,9 +36,9 @@ def test_suite():
         test_run,
         test_runtest,
         test_spinner,
+        test_testcase,
         test_testresult,
         test_testsuite,
-        test_testtools,
         ]
     suites = map(lambda x: x.test_suite(), modules)
     return unittest.TestSuite(suites)
