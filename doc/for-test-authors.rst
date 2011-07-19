@@ -731,7 +731,6 @@ When the test runs, testtools will show you something like this::
   arbitrary-color-name: {{{blue}}}
 
   Traceback (most recent call last):
-    ...
     File "exampletest.py", line 8, in test_thingy
       1 / 0 # Gratuitous error!
   ZeroDivisionError: integer division or modulo by zero

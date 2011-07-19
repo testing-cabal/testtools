@@ -24,6 +24,9 @@ Improvements
 
 * New matcher, ``GreaterThan``. (Christian Kampka)
 
+* Hide testtools's own stack frames when displaying tracebacks, making it
+  easier for test authors to focus on their errors.  (Jonathan Lange, #788974)
+
 
 0.9.11
 ~~~~~~
