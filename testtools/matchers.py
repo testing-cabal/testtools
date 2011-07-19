@@ -261,13 +261,20 @@ class _BinaryMismatch(Mismatch):
         self._mismatch_string = mismatch_string
         self.other = other
 
+    def _format(self, thing):
+        # Blocks of text with newlines are formatted as triple-quote
+        # strings. Everything else is pretty-printed.
+        if istext(thing) and '\n' in thing:
+            return '"""\\\n%s"""' % (thing,)
+        return pformat(thing)
+
     def describe(self):
         left = repr(self.expected)
         right = repr(self.other)
         if len(left) + len(right) > 70:
             return "%s:\nreference = %s\nactual = %s\n" % (
-                self._mismatch_string, pformat(self.expected),
-                pformat(self.other))
+                self._mismatch_string, self._format(self.expected),
+                self._format(self.other))
         else:
             return "%s %s %s" % (left, self._mismatch_string,right)
 

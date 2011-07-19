@@ -16,6 +16,9 @@ Improvements
 * Correctly display non-ASCII unicode output on terminals that claim to have a
   unicode encoding. (Martin [gz], #804122)
 
+* Less boilerplate displayed in test failures and errors.
+  (Jonathan Lange, #660852)
+
 * New convenience assertions, ``assertIsNone`` and ``assertIsNotNone``.
   (Christian Kampka)
 

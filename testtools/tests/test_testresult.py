@@ -31,10 +31,15 @@ from testtools.compat import (
     str_is_unicode,
     StringIO,
     )
-from testtools.content import Content
+from testtools.content import (
+    Content,
+    content_from_stream,
+    text_content,
+    )
 from testtools.content_type import ContentType, UTF8_TEXT
 from testtools.matchers import (
     DocTestMatches,
+    Equals,
     MatchesException,
     Raises,
     )
@@ -45,7 +50,45 @@ from testtools.tests.helpers import (
     ExtendedTestResult,
     an_exc_info
     )
-from testtools.testresult.real import utc
+from testtools.testresult.real import (
+    _details_to_str,
+    utc,
+    )
+
+
+def make_erroring_test():
+    class Test(TestCase):
+        def error(self):
+            1/0
+    return Test("error")
+
+
+def make_failing_test():
+    class Test(TestCase):
+        def failed(self):
+            self.fail("yo!")
+    return Test("failed")
+
+
+def make_unexpectedly_successful_test():
+    class Test(TestCase):
+        def succeeded(self):
+            self.expectFailure("yo!", lambda: None)
+    return Test("succeeded")
+
+
+def make_test():
+    class Test(TestCase):
+        def test(self):
+            pass
+    return Test("test")
+
+
+def make_exception_info(exceptionFactory, *args, **kwargs):
+    try:
+        raise exceptionFactory(*args, **kwargs)
+    except:
+        return sys.exc_info()
 
 
 class Python26Contract(object):
@@ -188,7 +231,7 @@ class FallbackContract(DetailsContract):
 
 class StartTestRunContract(FallbackContract):
     """Defines the contract for testtools policy choices.
-    
+
     That is things which are not simply extensions to unittest but choices we
     have made differently.
     """
@@ -326,21 +369,29 @@ class TestTestResult(TestCase):
         result.time(now)
         self.assertEqual(now, result._now())
 
+    def test_traceback_formatting(self):
+        result = self.makeResult()
+        test = make_erroring_test()
+        test.run(result)
+        self.assertThat(
+            result.errors[0][1],
+            DocTestMatches(
+                'Traceback (most recent call last):\n'
+                '  File "testtools/runtest.py", line ..., in _run_user\n'
+                '    return fn(*args, **kwargs)\n'
+                '  File "testtools/testcase.py", line ..., in _run_test_method\n'
+                '    return self._get_test_method()()\n'
+                '  File "testtools/tests/test_testresult.py", line ..., in error\n'
+                '    1/0\n'
+                'ZeroDivisionError: ...\n',
+                doctest.ELLIPSIS))
 
-class TestWithFakeExceptions(TestCase):
 
-    def makeExceptionInfo(self, exceptionFactory, *args, **kwargs):
-        try:
-            raise exceptionFactory(*args, **kwargs)
-        except:
-            return sys.exc_info()
-
-
-class TestMultiTestResult(TestWithFakeExceptions):
+class TestMultiTestResult(TestCase):
     """Tests for 'MultiTestResult'."""
 
     def setUp(self):
-        TestWithFakeExceptions.setUp(self)
+        super(TestMultiTestResult, self).setUp()
         self.result1 = LoggingResult([])
         self.result2 = LoggingResult([])
         self.multiResult = MultiTestResult(self.result1, self.result2)
@@ -389,14 +440,14 @@ class TestMultiTestResult(TestWithFakeExceptions):
     def test_addFailure(self):
         # Calling `addFailure` on a `MultiTestResult` calls `addFailure` on
         # all its `TestResult`s.
-        exc_info = self.makeExceptionInfo(AssertionError, 'failure')
+        exc_info = make_exception_info(AssertionError, 'failure')
         self.multiResult.addFailure(self, exc_info)
         self.assertResultLogsEqual([('addFailure', self, exc_info)])
 
     def test_addError(self):
         # Calling `addError` on a `MultiTestResult` calls `addError` on all
         # its `TestResult`s.
-        exc_info = self.makeExceptionInfo(RuntimeError, 'error')
+        exc_info = make_exception_info(RuntimeError, 'error')
         self.multiResult.addError(self, exc_info)
         self.assertResultLogsEqual([('addError', self, exc_info)])
 
@@ -436,30 +487,6 @@ class TestTextTestResult(TestCase):
         super(TestTextTestResult, self).setUp()
         self.result = TextTestResult(StringIO())
 
-    def make_erroring_test(self):
-        class Test(TestCase):
-            def error(self):
-                1/0
-        return Test("error")
-
-    def make_failing_test(self):
-        class Test(TestCase):
-            def failed(self):
-                self.fail("yo!")
-        return Test("failed")
-
-    def make_unexpectedly_successful_test(self):
-        class Test(TestCase):
-            def succeeded(self):
-                self.expectFailure("yo!", lambda: None)
-        return Test("succeeded")
-
-    def make_test(self):
-        class Test(TestCase):
-            def test(self):
-                pass
-        return Test("test")
-
     def getvalue(self):
         return self.result.stream.getvalue()
 
@@ -475,7 +502,7 @@ class TestTextTestResult(TestCase):
         self.assertEqual("Tests running...\n", self.getvalue())
 
     def test_stopTestRun_count_many(self):
-        test = self.make_test()
+        test = make_test()
         self.result.startTestRun()
         self.result.startTest(test)
         self.result.stopTest(test)
@@ -484,27 +511,27 @@ class TestTextTestResult(TestCase):
         self.result.stream = StringIO()
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
-            DocTestMatches("Ran 2 tests in ...s\n...", doctest.ELLIPSIS))
+            DocTestMatches("\nRan 2 tests in ...s\n...", doctest.ELLIPSIS))
 
     def test_stopTestRun_count_single(self):
-        test = self.make_test()
+        test = make_test()
         self.result.startTestRun()
         self.result.startTest(test)
         self.result.stopTest(test)
         self.reset_output()
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
-            DocTestMatches("Ran 1 test in ...s\n\nOK\n", doctest.ELLIPSIS))
+            DocTestMatches("\nRan 1 test in ...s\nOK\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_count_zero(self):
         self.result.startTestRun()
         self.reset_output()
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
-            DocTestMatches("Ran 0 tests in ...s\n\nOK\n", doctest.ELLIPSIS))
+            DocTestMatches("\nRan 0 tests in ...s\nOK\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_current_time(self):
-        test = self.make_test()
+        test = make_test()
         now = datetime.datetime.now(utc)
         self.result.time(now)
         self.result.startTestRun()
@@ -521,45 +548,43 @@ class TestTextTestResult(TestCase):
         self.result.startTestRun()
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
-            DocTestMatches("...\n\nOK\n", doctest.ELLIPSIS))
+            DocTestMatches("...\nOK\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_not_successful_failure(self):
-        test = self.make_failing_test()
+        test = make_failing_test()
         self.result.startTestRun()
         test.run(self.result)
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
-            DocTestMatches("...\n\nFAILED (failures=1)\n", doctest.ELLIPSIS))
+            DocTestMatches("...\nFAILED (failures=1)\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_not_successful_error(self):
-        test = self.make_erroring_test()
+        test = make_erroring_test()
         self.result.startTestRun()
         test.run(self.result)
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
-            DocTestMatches("...\n\nFAILED (failures=1)\n", doctest.ELLIPSIS))
+            DocTestMatches("...\nFAILED (failures=1)\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_not_successful_unexpected_success(self):
-        test = self.make_unexpectedly_successful_test()
+        test = make_unexpectedly_successful_test()
         self.result.startTestRun()
         test.run(self.result)
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
-            DocTestMatches("...\n\nFAILED (failures=1)\n", doctest.ELLIPSIS))
+            DocTestMatches("...\nFAILED (failures=1)\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_shows_details(self):
         self.result.startTestRun()
-        self.make_erroring_test().run(self.result)
-        self.make_unexpectedly_successful_test().run(self.result)
-        self.make_failing_test().run(self.result)
+        make_erroring_test().run(self.result)
+        make_unexpectedly_successful_test().run(self.result)
+        make_failing_test().run(self.result)
         self.reset_output()
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
             DocTestMatches("""...======================================================================
 ERROR: testtools.tests.test_testresult.Test.error
 ----------------------------------------------------------------------
-Text attachment: traceback
-------------
 Traceback (most recent call last):
   File "...testtools...runtest.py", line ..., in _run_user...
     return fn(*args, **kwargs)
@@ -568,12 +593,9 @@ Traceback (most recent call last):
   File "...testtools...tests...test_testresult.py", line ..., in error
     1/0
 ZeroDivisionError:... divi... by zero...
-------------
 ======================================================================
 FAIL: testtools.tests.test_testresult.Test.failed
 ----------------------------------------------------------------------
-Text attachment: traceback
-------------
 Traceback (most recent call last):
   File "...testtools...runtest.py", line ..., in _run_user...
     return fn(*args, **kwargs)
@@ -582,18 +604,17 @@ Traceback (most recent call last):
   File "...testtools...tests...test_testresult.py", line ..., in failed
     self.fail("yo!")
 AssertionError: yo!
-------------
 ======================================================================
 UNEXPECTED SUCCESS: testtools.tests.test_testresult.Test.succeeded
 ----------------------------------------------------------------------
 ...""", doctest.ELLIPSIS | doctest.REPORT_NDIFF))
 
 
-class TestThreadSafeForwardingResult(TestWithFakeExceptions):
+class TestThreadSafeForwardingResult(TestCase):
     """Tests for `TestThreadSafeForwardingResult`."""
 
     def setUp(self):
-        TestWithFakeExceptions.setUp(self)
+        super(TestThreadSafeForwardingResult, self).setUp()
         self.result_semaphore = threading.Semaphore(1)
         self.target = LoggingResult([])
         self.result1 = ThreadsafeForwardingResult(self.target,
@@ -622,14 +643,14 @@ class TestThreadSafeForwardingResult(TestWithFakeExceptions):
 
     def test_forwarding_methods(self):
         # error, failure, skip and success are forwarded in batches.
-        exc_info1 = self.makeExceptionInfo(RuntimeError, 'error')
+        exc_info1 = make_exception_info(RuntimeError, 'error')
         starttime1 = datetime.datetime.utcfromtimestamp(1.489)
         endtime1 = datetime.datetime.utcfromtimestamp(51.476)
         self.result1.time(starttime1)
         self.result1.startTest(self)
         self.result1.time(endtime1)
         self.result1.addError(self, exc_info1)
-        exc_info2 = self.makeExceptionInfo(AssertionError, 'failure')
+        exc_info2 = make_exception_info(AssertionError, 'failure')
         starttime2 = datetime.datetime.utcfromtimestamp(2.489)
         endtime2 = datetime.datetime.utcfromtimestamp(3.476)
         self.result1.time(starttime2)
@@ -706,10 +727,19 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
         details = {'text 1': Content(ContentType('text', 'plain'), text1),
             'text 2': Content(ContentType('text', 'strange'), text2),
             'bin 1': Content(ContentType('application', 'binary'), bin1)}
-        return (details, "Binary content: bin 1\n"
-            "Text attachment: text 1\n------------\n1\n2\n"
-            "------------\nText attachment: text 2\n------------\n"
-            "3\n4\n------------\n")
+        return (details,
+                ("Binary content:\n"
+                 "  bin 1 (application/binary)\n"
+                 "\n"
+                 "text 1: {{{\n"
+                 "1\n"
+                 "2\n"
+                 "}}}\n"
+                 "\n"
+                 "text 2: {{{\n"
+                 "3\n"
+                 "4\n"
+                 "}}}\n"))
 
     def check_outcome_details_to_exec_info(self, outcome, expected=None):
         """Call an outcome with a details dict to be made into exc_info."""
@@ -1365,6 +1395,87 @@ class TestNonAsciiResultsWithUnittest(TestNonAsciiResults):
         if str_is_unicode:
             return text
         return text.encode("utf-8")
+
+
+class TestDetailsToStr(TestCase):
+
+    def test_no_details(self):
+        string = _details_to_str({})
+        self.assertThat(string, Equals(''))
+
+    def test_binary_content(self):
+        content = content_from_stream(
+            StringIO('foo'), content_type=ContentType('image', 'jpeg'))
+        string = _details_to_str({'attachment': content})
+        self.assertThat(
+            string, Equals("""\
+Binary content:
+  attachment (image/jpeg)
+"""))
+
+    def test_single_line_content(self):
+        content = text_content('foo')
+        string = _details_to_str({'attachment': content})
+        self.assertThat(string, Equals('attachment: {{{foo}}}\n'))
+
+    def test_multi_line_text_content(self):
+        content = text_content('foo\nbar\nbaz')
+        string = _details_to_str({'attachment': content})
+        self.assertThat(string, Equals('attachment: {{{\nfoo\nbar\nbaz\n}}}\n'))
+
+    def test_special_text_content(self):
+        content = text_content('foo')
+        string = _details_to_str({'attachment': content}, special='attachment')
+        self.assertThat(string, Equals('foo\n'))
+
+    def test_multiple_text_content(self):
+        string = _details_to_str(
+            {'attachment': text_content('foo\nfoo'),
+             'attachment-1': text_content('bar\nbar')})
+        self.assertThat(
+            string, Equals('attachment: {{{\n'
+                           'foo\n'
+                           'foo\n'
+                           '}}}\n'
+                           '\n'
+                           'attachment-1: {{{\n'
+                           'bar\n'
+                           'bar\n'
+                           '}}}\n'))
+
+    def test_empty_attachment(self):
+        string = _details_to_str({'attachment': text_content('')})
+        self.assertThat(
+            string, Equals("""\
+Empty attachments:
+  attachment
+"""))
+
+    def test_lots_of_different_attachments(self):
+        jpg = lambda x: content_from_stream(
+            StringIO(x), ContentType('image', 'jpeg'))
+        attachments = {
+            'attachment': text_content('foo'),
+            'attachment-1': text_content('traceback'),
+            'attachment-2': jpg('pic1'),
+            'attachment-3': text_content('bar'),
+            'attachment-4': text_content(''),
+            'attachment-5': jpg('pic2'),
+            }
+        string = _details_to_str(attachments, special='attachment-1')
+        self.assertThat(
+            string, Equals("""\
+Binary content:
+  attachment-2 (image/jpeg)
+  attachment-5 (image/jpeg)
+Empty attachments:
+  attachment-4
+
+attachment: {{{foo}}}
+attachment-3: {{{bar}}}
+
+traceback
+"""))
 
 
 def test_suite():

@@ -59,8 +59,8 @@ class TestCommandTest(TestCase):
         cmd.runner.stdout = stream
         dist.run_command('test')
         self.assertEqual("""Tests running...
-Ran 2 tests in 0.000s
 
+Ran 2 tests in 0.000s
 OK
 """, stream.getvalue())
 
@@ -79,8 +79,8 @@ OK
         cmd.runner.stdout = stream
         dist.run_command('test')
         self.assertEqual("""Tests running...
-Ran 2 tests in 0.000s
 
+Ran 2 tests in 0.000s
 OK
 """, stream.getvalue())
 
