@@ -377,10 +377,6 @@ class TestTestResult(TestCase):
             result.errors[0][1],
             DocTestMatches(
                 'Traceback (most recent call last):\n'
-                '  File "testtools/runtest.py", line ..., in _run_user\n'
-                '    return fn(*args, **kwargs)\n'
-                '  File "testtools/testcase.py", line ..., in _run_test_method\n'
-                '    return self._get_test_method()()\n'
                 '  File "testtools/tests/test_testresult.py", line ..., in error\n'
                 '    1/0\n'
                 'ZeroDivisionError: ...\n',
@@ -586,10 +582,6 @@ class TestTextTestResult(TestCase):
 ERROR: testtools.tests.test_testresult.Test.error
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "...testtools...runtest.py", line ..., in _run_user...
-    return fn(*args, **kwargs)
-  File "...testtools...testcase.py", line ..., in _run_test_method
-    return self._get_test_method()()
   File "...testtools...tests...test_testresult.py", line ..., in error
     1/0
 ZeroDivisionError:... divi... by zero...
@@ -597,10 +589,6 @@ ZeroDivisionError:... divi... by zero...
 FAIL: testtools.tests.test_testresult.Test.failed
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "...testtools...runtest.py", line ..., in _run_user...
-    return fn(*args, **kwargs)
-  File "...testtools...testcase.py", line ..., in _run_test_method
-    return self._get_test_method()()
   File "...testtools...tests...test_testresult.py", line ..., in failed
     self.fail("yo!")
 AssertionError: yo!

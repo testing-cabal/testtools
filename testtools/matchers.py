@@ -815,3 +815,8 @@ class AfterPreproccessing(object):
         return Annotate(
             "after %s" % self._str_preprocessor(),
             self.matcher).match(value)
+
+
+# Signal that this is part of the testing framework, and that code from this
+# should not normally appear in tracebacks.
+__unittest = True
