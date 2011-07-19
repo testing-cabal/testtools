@@ -584,6 +584,16 @@ It's much easier to understand in Python than in English::
       matcher = MatchesStructure(a=Equals(1), b=Equals(2))
       self.assertThat(foo, matcher)
 
+Since all of the matchers used were ``Equals``, we could also write this using
+the ``byEquality`` helper::
+
+  def test_matches_structure_example(self):
+      foo = Foo()
+      foo.a = 1
+      foo.b = 2
+      matcher = MatchesStructure.byEquality(a=1, b=2)
+      self.assertThat(foo, matcher)
+
 ``MatchesStructure.from_example`` takes an object and a list of attributes and
 creates a ``MatchesStructure`` matcher where each attribute of the matched
 object must equal each attribute of the example object.  For example::
