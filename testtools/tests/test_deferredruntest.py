@@ -8,6 +8,7 @@ import signal
 from testtools import (
     skipIf,
     TestCase,
+    TestResult,
     )
 from testtools.content import (
     text_content,
@@ -334,6 +335,20 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
                  ('stopTest', test)]))
         error = result._events[1][2]
         self.assertThat(error, KeysEqual('traceback', 'twisted-log'))
+
+    def test_exports_reactor(self):
+        # The reactor is set as an attribute on the test case.
+        reactor = self.make_reactor()
+        timeout = self.make_timeout()
+        class SomeCase(TestCase):
+            def test_cruft(self):
+                self.assertIs(reactor, self.reactor)
+        test = SomeCase('test_cruft')
+        runner = self.make_runner(test, timeout)
+        result = TestResult()
+        runner.run(result)
+        self.assertEqual([], result.errors)
+        self.assertEqual([], result.failures)
 
     def test_unhandled_error_from_deferred(self):
         # If there's a Deferred with an unhandled error, the test fails.  Each

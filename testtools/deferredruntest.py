@@ -215,6 +215,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
 
     def _run_core(self):
         # Add an observer to trap all logged errors.
+        self.case.reactor = self._reactor
         error_observer = _log_observer
         full_log = StringIO()
         full_observer = log.FileLogObserver(full_log)
