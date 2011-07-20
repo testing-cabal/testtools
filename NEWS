@@ -4,6 +4,12 @@ testtools NEWS
 NEXT
 ~~~~
 
+Changes
+-------
+
+* Tests that run with ``AsynchronousDeferredRunTest`` now have the ``reactor``
+  attribute set to the running reactor. (Jonathan Lange, #720749)
+
 Improvements
 ------------
 
