@@ -15,6 +15,9 @@ Changes
 * ``gather_details`` takes two dicts, rather than two detailed objects.
   (Jonathan Lange, #801027)
 
+* ``MatchesRegex`` mismatch now says "<value> does not match <regex>" rather
+  than "<regex> did not match <value>"
+
 
 Improvements
 ------------
@@ -36,6 +39,9 @@ Improvements
 
 * Less boilerplate displayed in test failures and errors.
   (Jonathan Lange, #660852)
+
+* ``MatchesException`` now allows you to match exceptions against any matcher,
+  rather than just regular expressions.  (Jonathan Lange, #791889)
 
 * ``MatchesStructure.byEquality`` added to make the common case of matching
   many attributes by equality much easier.  ``MatchesStructure.byMatcher``

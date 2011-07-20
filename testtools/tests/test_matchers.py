@@ -255,11 +255,33 @@ class TestMatchesExceptionTypeReInterface(TestCase, TestMatchersInterface):
 
     str_examples = [
         ("MatchesException(%r)" % Exception,
-         MatchesException(Exception))
+         MatchesException(Exception, 'fo.'))
         ]
     describe_examples = [
-        ('"bar" does not match "fo.".',
+        # XXX: This is kind of a crappy message. Need to change
+        # AfterPreproccessing.
+        ("'bar' does not match 'fo.': after <type 'str'> on ValueError('bar',)",
          error_bar, MatchesException(ValueError, "fo.")),
+        ]
+
+
+class TestMatchesExceptionTypeMatcherInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = MatchesException(
+        ValueError, AfterPreproccessing(str, Equals('foo')))
+    error_foo = make_error(ValueError, 'foo')
+    error_sub = make_error(UnicodeError, 'foo')
+    error_bar = make_error(ValueError, 'bar')
+    matches_matches = [error_foo, error_sub]
+    matches_mismatches = [error_bar]
+
+    str_examples = [
+        ("MatchesException(%r)" % Exception,
+         MatchesException(Exception, Equals('foo')))
+        ]
+    describe_examples = [
+        ("5 != ValueError('bar',)",
+         error_bar, MatchesException(ValueError, Equals(5))),
         ]
 
 
@@ -619,7 +641,7 @@ class TestMatchesRegex(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ("'a|b' did not match 'c'", 'c', MatchesRegex('a|b')),
+        ("'c' does not match 'a|b'", 'c', MatchesRegex('a|b')),
         ]
 
 
@@ -714,7 +736,7 @@ class TestAfterPreprocessing(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ("1 != 0: after <function parity>",
+        ("1 != 0: after <function parity> on 2",
          2,
          AfterPreprocessing(parity, Equals(1))),
         ]
