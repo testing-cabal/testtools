@@ -539,6 +539,21 @@ For example::
       self.assertThat(42, MatchesAny(Equals(5), Not(Equals(6))))
 
 
+AllMatch
+~~~~~~~~
+
+Matches many values against a single matcher.  Can be used to make sure that
+many things all meet the same condition::
+
+  def test_all_match_example(self):
+      self.assertThat([2, 3, 5, 7], AllMatch(LessThan(10)))
+
+If the match fails, then all of the values that fail to match will be included
+in the error message.
+
+In some ways, this is the converse of MatchesAll_.
+
+
 MatchesListwise
 ~~~~~~~~~~~~~~~
 

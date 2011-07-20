@@ -39,7 +39,12 @@ Improvements
 * New convenience assertions, ``assertIsNone`` and ``assertIsNotNone``.
   (Christian Kampka)
 
-* New matcher, ``GreaterThan``. (Christian Kampka)
+* New matchers:
+
+  * ``AllMatch`` matches many values against a single matcher.
+    (Jonathan Lange, #615108)
+
+  * ``GreaterThan``. (Christian Kampka)
 
 
 0.9.11

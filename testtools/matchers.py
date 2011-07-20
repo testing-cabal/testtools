@@ -13,6 +13,7 @@ $ python -c 'import testtools.matchers; print testtools.matchers.__all__'
 __metaclass__ = type
 __all__ = [
     'AfterPreprocessing',
+    'AllMatch',
     'Annotate',
     'DocTestMatches',
     'EndsWith',
@@ -842,7 +843,25 @@ class AfterPreprocessing(object):
             "after %s" % self._str_preprocessor(),
             self.matcher).match(value)
 
-
 # This is the old, deprecated. spelling of the name, kept for backwards
 # compatibility.
 AfterPreproccessing = AfterPreprocessing
+
+
+class AllMatch(object):
+    """Matches if all provided values match the given matcher."""
+
+    def __init__(self, matcher):
+        self.matcher = matcher
+
+    def __str__(self):
+        return 'AllMatch(%s)' % (self.matcher,)
+
+    def match(self, values):
+        mismatches = []
+        for value in values:
+            mismatch = self.matcher.match(value)
+            if mismatch:
+                mismatches.append(mismatch)
+        if mismatches:
+            return MismatchesAll(mismatches)
