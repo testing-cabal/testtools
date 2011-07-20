@@ -486,12 +486,6 @@ class TestAssertions(TestCase):
              'Major': 'A military officer, ranked below colonel',
              'Blair': 'To shout loudly',
              'Brown': 'The colour of healthy human faeces'}
-        expected_error = '\n'.join(
-            [message,
-             'not equal:',
-             'a = %s' % pformat(a),
-             'b = %s' % pformat(b),
-             ''])
         expected_error = '\n'.join([
             '!=:',
             'reference = %s' % pformat(a),
