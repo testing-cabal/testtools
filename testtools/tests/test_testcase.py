@@ -456,7 +456,6 @@ class TestAssertions(TestCase):
         self.assertEqual([
             ('match', "foo"),
             ('describe_diff', "foo"),
-            ('__str__',),
             ], calls)
         self.assertFalse(result.wasSuccessful())
 
@@ -474,13 +473,10 @@ class TestAssertions(TestCase):
              'b = %s' % pformat(b),
              ''])
         expected_error = '\n'.join([
-            'Match failed. Matchee: "%r"' % b,
-            'Matcher: Annotate(%r, Equals(%r))' % (message, a),
-            'Difference: !=:',
+            '!=:',
             'reference = %s' % pformat(a),
             'actual = %s' % pformat(b),
             ': ' + message,
-            ''
             ])
         self.assertFails(expected_error, self.assertEqual, a, b, message)
         self.assertFails(expected_error, self.assertEquals, a, b, message)
@@ -489,12 +485,7 @@ class TestAssertions(TestCase):
     def test_assertEqual_formatting_no_message(self):
         a = "cat"
         b = "dog"
-        expected_error = '\n'.join([
-            'Match failed. Matchee: "dog"',
-            'Matcher: Equals(\'cat\')',
-            'Difference: \'cat\' != \'dog\'',
-            ''
-            ])
+        expected_error = "'cat' != 'dog'"
         self.assertFails(expected_error, self.assertEqual, a, b)
         self.assertFails(expected_error, self.assertEquals, a, b)
         self.assertFails(expected_error, self.failUnlessEqual, a, b)
@@ -502,24 +493,14 @@ class TestAssertions(TestCase):
     def test_assertIsNone(self):
         self.assertIsNone(None)
 
-        expected_error = '\n'.join([
-            'Match failed. Matchee: "0"',
-            'Matcher: Is(None)',
-            'Difference: None is not 0',
-            ''
-            ])
+        expected_error = 'None is not 0'
         self.assertFails(expected_error, self.assertIsNone, 0)
 
     def test_assertIsNotNone(self):
         self.assertIsNotNone(0)
         self.assertIsNotNone("0")
 
-        expected_error = '\n'.join([
-            'Match failed. Matchee: "None"',
-            'Matcher: Not(Is(None))',
-            'Difference: None matches Is(None)',
-            ''
-            ])
+        expected_error = 'None matches Is(None)'
         self.assertFails(expected_error, self.assertIsNotNone, None)
 
 

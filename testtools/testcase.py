@@ -388,7 +388,7 @@ class TestCase(unittest.TestCase):
             self.fail("%s not raised, %r returned instead." % (excName, ret))
     failUnlessRaises = assertRaises
 
-    def assertThat(self, matchee, matcher):
+    def assertThat(self, matchee, matcher, verbose=False):
         """Assert that matchee is matched by matcher.
 
         :param matchee: An object to match with matcher.
@@ -396,7 +396,7 @@ class TestCase(unittest.TestCase):
         :raises self.failureException: When matcher does not match thing.
         """
         # XXX: Should this take an optional 'message' parameter? Would kind of
-        # make sense.
+        # make sense. The hamcrest one does.
         mismatch = matcher.match(matchee)
         if not mismatch:
             return
@@ -408,8 +408,13 @@ class TestCase(unittest.TestCase):
                 full_name = "%s-%d" % (name, suffix)
                 suffix += 1
             self.addDetail(full_name, content)
-        self.fail('Match failed. Matchee: "%s"\nMatcher: %s\nDifference: %s\n'
-            % (matchee, matcher, mismatch.describe()))
+        if verbose:
+            message = (
+                'Match failed. Matchee: "%s"\nMatcher: %s\nDifference: %s\n'
+                % (matchee, matcher, mismatch.describe()))
+        else:
+            message = mismatch.describe()
+        self.fail(message)
 
     def defaultTestResult(self):
         return TestResult()
