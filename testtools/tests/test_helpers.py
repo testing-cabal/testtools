@@ -181,8 +181,8 @@ class TestStackHiding(TestCase):
         testtools.testcase,
         ]
 
-    def test_hidden_by_default(self):
-        self.assertThat(self.modules, StackHidden(True))
+    def test_shown_during_testtools_testsuite(self):
+        self.assertThat(self.modules, StackHidden(False))
 
     def test_show_stack(self):
         current_state = getattr(testtools.matchers, '__unittest')
