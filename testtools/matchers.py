@@ -13,6 +13,7 @@ $ python -c 'import testtools.matchers; print testtools.matchers.__all__'
 __metaclass__ = type
 __all__ = [
     'AfterPreproccessing',
+    'AllMatch',
     'Annotate',
     'DocTestMatches',
     'EndsWith',
@@ -642,6 +643,13 @@ class MatchesStructure(object):
 
     `fromExample` allows the creation of a matcher from a prototype object and
     then modified versions can be created with `update`.
+
+    `byEquality` creates a matcher in much the same way as the constructor,
+    except that the matcher for each of the attributes is assumed to be
+    `Equals`.
+
+    `byMatcher` creates a similar matcher to `byEquality`, but you get to pick
+    the matcher, rather than just using `Equals`.
     """
 
     def __init__(self, **kwargs):
@@ -650,6 +658,25 @@ class MatchesStructure(object):
         :param kwargs: A mapping of attributes to matchers.
         """
         self.kws = kwargs
+
+    @classmethod
+    def byEquality(cls, **kwargs):
+        """Matches an object where the attributes equal the keyword values.
+
+        Similar to the constructor, except that the matcher is assumed to be
+        Equals.
+        """
+        return cls.byMatcher(Equals, **kwargs)
+
+    @classmethod
+    def byMatcher(cls, matcher, **kwargs):
+        """Matches an object where the attributes match the keyword values.
+
+        Similar to the constructor, except that the provided matcher is used
+        to match all of the values.
+        """
+        return cls(
+            **dict((name, matcher(value)) for name, value in kwargs.items()))
 
     @classmethod
     def fromExample(cls, example, *attributes):
@@ -817,6 +844,26 @@ class AfterPreproccessing(object):
             self.matcher).match(value)
 
 
+class AllMatch(object):
+    """Matches if all provided values match the given matcher."""
+
+    def __init__(self, matcher):
+        self.matcher = matcher
+
+    def __str__(self):
+        return 'AllMatch(%s)' % (self.matcher,)
+
+    def match(self, values):
+        mismatches = []
+        for value in values:
+            mismatch = self.matcher.match(value)
+            if mismatch:
+                mismatches.append(mismatch)
+        if mismatches:
+            return MismatchesAll(mismatches)
+
+
 # Signal that this is part of the testing framework, and that code from this
 # should not normally appear in tracebacks.
 __unittest = True
+

@@ -539,6 +539,21 @@ For example::
       self.assertThat(42, MatchesAny(Equals(5), Not(Equals(6))))
 
 
+AllMatch
+~~~~~~~~
+
+Matches many values against a single matcher.  Can be used to make sure that
+many things all meet the same condition::
+
+  def test_all_match_example(self):
+      self.assertThat([2, 3, 5, 7], AllMatch(LessThan(10)))
+
+If the match fails, then all of the values that fail to match will be included
+in the error message.
+
+In some ways, this is the converse of MatchesAll_.
+
+
 MatchesListwise
 ~~~~~~~~~~~~~~~
 
@@ -582,6 +597,16 @@ It's much easier to understand in Python than in English::
       foo.a = 1
       foo.b = 2
       matcher = MatchesStructure(a=Equals(1), b=Equals(2))
+      self.assertThat(foo, matcher)
+
+Since all of the matchers used were ``Equals``, we could also write this using
+the ``byEquality`` helper::
+
+  def test_matches_structure_example(self):
+      foo = Foo()
+      foo.a = 1
+      foo.b = 2
+      matcher = MatchesStructure.byEquality(a=1, b=2)
       self.assertThat(foo, matcher)
 
 ``MatchesStructure.from_example`` takes an object and a list of attributes and
