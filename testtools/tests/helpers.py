@@ -8,7 +8,7 @@ __all__ = [
 
 import sys
 
-from fixtures import Fixture
+from fixtures import FunctionFixture
 
 from testtools import TestResult
 from testtools.helpers import (
@@ -84,6 +84,7 @@ def hide_testtools_stack(should_hide=True):
         'testtools.runtest',
         'testtools.testcase',
         ]
+    result = is_stack_hidden()
     for module_name in modules:
         module = try_import(module_name)
         if should_hide:
@@ -94,15 +95,8 @@ def hide_testtools_stack(should_hide=True):
             except AttributeError:
                 # Attribute already doesn't exist. Our work here is done.
                 pass
+    return result
 
 
-class StackHidingFixture(Fixture):
-
-    def __init__(self, should_hide):
-        super(StackHidingFixture, self).__init__()
-        self._should_hide = should_hide
-
-    def setUp(self):
-        super(StackHidingFixture, self).setUp()
-        self.addCleanup(hide_testtools_stack, is_stack_hidden())
-        hide_testtools_stack(self._should_hide)
+StackHidingFixture = lambda x: FunctionFixture(
+    lambda: hide_testtools_stack(x), hide_testtools_stack)
