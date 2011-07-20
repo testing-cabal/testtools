@@ -485,7 +485,7 @@ example::
       def HasFileContent(content):
           def _read(path):
               return open(path).read()
-          return AfterPreproccessing(_read, Equals(content))
+          return AfterPreprocessing(_read, Equals(content))
       self.assertThat('/tmp/foo.txt', PathHasFileContent("Hello world!"))
 
 

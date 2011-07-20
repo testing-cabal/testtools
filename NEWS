@@ -4,6 +4,15 @@ testtools NEWS
 NEXT
 ~~~~
 
+Changes
+-------
+
+* ``AfterPreproccessing`` renamed to ``AfterPreproccesing``, which is a more
+  correct spelling.  Old name preserved for backwards compatibility, but is
+  now deprecated.  Please stop using it.
+  (Jonathan Lange, #813460)
+
+
 Improvements
 ------------
 

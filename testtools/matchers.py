@@ -12,7 +12,7 @@ $ python -c 'import testtools.matchers; print testtools.matchers.__all__'
 
 __metaclass__ = type
 __all__ = [
-    'AfterPreproccessing',
+    'AfterPreprocessing',
     'AllMatch',
     'Annotate',
     'DocTestMatches',
@@ -812,7 +812,7 @@ class MatchesSetwise(object):
                     ).match(not_matched[:common_length])
 
 
-class AfterPreproccessing(object):
+class AfterPreprocessing(object):
     """Matches if the value matches after passing through a function.
 
     This can be used to aid in creating trivial matchers as functions, for
@@ -821,7 +821,7 @@ class AfterPreproccessing(object):
       def PathHasFileContent(content):
           def _read(path):
               return open(path).read()
-          return AfterPreproccessing(_read, Equals(content))
+          return AfterPreprocessing(_read, Equals(content))
     """
 
     def __init__(self, preprocessor, matcher):
@@ -834,7 +834,7 @@ class AfterPreproccessing(object):
         return str(self.preprocessor)
 
     def __str__(self):
-        return "AfterPreproccessing(%s, %s)" % (
+        return "AfterPreprocessing(%s, %s)" % (
             self._str_preprocessor(), self.matcher)
 
     def match(self, value):
@@ -842,6 +842,10 @@ class AfterPreproccessing(object):
         return Annotate(
             "after %s" % self._str_preprocessor(),
             self.matcher).match(value)
+
+# This is the old, deprecated. spelling of the name, kept for backwards
+# compatibility.
+AfterPreproccessing = AfterPreprocessing
 
 
 class AllMatch(object):
@@ -866,4 +870,3 @@ class AllMatch(object):
 # Signal that this is part of the testing framework, and that code from this
 # should not normally appear in tracebacks.
 __unittest = True
-
