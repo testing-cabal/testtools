@@ -8,12 +8,14 @@ __all__ = [
     'ErrorHolder',
     'ExpectedException',
     'ExtendedToOriginalDecorator',
+    'FixtureSuite',
     'iterate_tests',
     'MultipleExceptions',
     'MultiTestResult',
     'PlaceHolder',
     'run_test_with',
     'TestCase',
+    'TestCommand',
     'TestResult',
     'TextTestResult',
     'RunTest',
@@ -59,6 +61,7 @@ from testtools.testresult import (
     )
 from testtools.testsuite import (
     ConcurrentTestSuite,
+    FixtureSuite,
     iterate_tests,
     )
 from testtools.distutilscmd import (
