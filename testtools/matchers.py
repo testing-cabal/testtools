@@ -662,7 +662,12 @@ class MatchesStructure(object):
         Similar to the constructor, except that the matcher is assumed to be
         Equals.
         """
-        return cls(**dict((name, Equals(value)) for name, value in kwargs.items()))
+        return cls.byMatcher(Equals, **kwargs)
+
+    @classmethod
+    def byMatcher(cls, matcher, **kwargs):
+        return cls(
+            **dict((name, matcher(value)) for name, value in kwargs.items()))
 
     @classmethod
     def fromExample(cls, example, *attributes):

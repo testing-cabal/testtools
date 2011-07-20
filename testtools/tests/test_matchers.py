@@ -588,6 +588,11 @@ Differences: [
             self.SimpleClass(1, 2),
             MatchesStructure.byEquality(x=1))
 
+    def test_withStructure(self):
+        self.assertThat(
+            self.SimpleClass(1, 2),
+            MatchesStructure.byMatcher(LessThan, x=2))
+
     def test_update(self):
         self.assertThat(
             self.SimpleClass(1, 2),
