@@ -646,6 +646,9 @@ class MatchesStructure(object):
     `byEquality` creates a matcher in much the same way as the constructor,
     except that the matcher for each of the attributes is assumed to be
     `Equals`.
+
+    `byMatcher` creates a similar matcher to `byEquality`, but you get to pick
+    the matcher, rather than just using `Equals`.
     """
 
     def __init__(self, **kwargs):
@@ -666,6 +669,11 @@ class MatchesStructure(object):
 
     @classmethod
     def byMatcher(cls, matcher, **kwargs):
+        """Matches an object where the attributes match the keyword values.
+
+        Similar to the constructor, except that the provided matcher is used
+        to match all of the values.
+        """
         return cls(
             **dict((name, matcher(value)) for name, value in kwargs.items()))
 

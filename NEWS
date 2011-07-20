@@ -20,7 +20,9 @@ Improvements
   (Jonathan Lange, #660852)
 
 * ``MatchesStructure.byEquality`` added to make the common case of matching
-  many attributes by equality much easier.  (Jonathan Lange)
+  many attributes by equality much easier.  ``MatchesStructure.byMatcher``
+  added in case folk want to match by things other than equality.
+  (Jonathan Lange)
 
 * New convenience assertions, ``assertIsNone`` and ``assertIsNotNone``.
   (Christian Kampka)
