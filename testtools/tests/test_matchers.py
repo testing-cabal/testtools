@@ -14,7 +14,7 @@ from testtools.compat import (
     StringIO,
     )
 from testtools.matchers import (
-    AfterPreproccessing,
+    AfterPreprocessing,
     Annotate,
     AnnotatedMismatch,
     Equals,
@@ -698,24 +698,24 @@ class TestMatchesSetwise(TestCase):
                 re.S))
 
 
-class TestAfterPreproccessing(TestCase, TestMatchersInterface):
+class TestAfterPreprocessing(TestCase, TestMatchersInterface):
 
     def parity(x):
         return x % 2
 
-    matches_matcher = AfterPreproccessing(parity, Equals(1))
+    matches_matcher = AfterPreprocessing(parity, Equals(1))
     matches_matches = [3, 5]
     matches_mismatches = [2]
 
     str_examples = [
-        ("AfterPreproccessing(<function parity>, Equals(1))",
-         AfterPreproccessing(parity, Equals(1))),
+        ("AfterPreprocessing(<function parity>, Equals(1))",
+         AfterPreprocessing(parity, Equals(1))),
         ]
 
     describe_examples = [
         ("1 != 0: after <function parity>",
          2,
-         AfterPreproccessing(parity, Equals(1))),
+         AfterPreprocessing(parity, Equals(1))),
         ]
 
 
