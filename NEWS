@@ -4,6 +4,12 @@ testtools NEWS
 NEXT
 ~~~~
 
+Changes
+-------
+
+* ``MatchesRegex`` mismatch now says "<value> does not match <regex>" rather
+  than "<regex> did not match <value>"
+
 Improvements
 ------------
 

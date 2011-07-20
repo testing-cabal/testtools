@@ -417,6 +417,8 @@ class MatchesException(Matcher):
         """
         Matcher.__init__(self)
         self.expected = exception
+        if value_re:
+            value_re = MatchesRegex(value_re)
         self.value_re = value_re
         self._is_instance = type(self.expected) not in classtypes()
 
@@ -434,10 +436,7 @@ class MatchesException(Matcher):
                         _error_repr(other[1]), _error_repr(self.expected)))
         elif self.value_re is not None:
             str_exc_value = str(other[1])
-            if not re.match(self.value_re, str_exc_value):
-                return Mismatch(
-                    '"%s" does not match "%s".'
-                    % (str_exc_value, self.value_re))
+            return self.value_re.match(str_exc_value)
 
     def __str__(self):
         if self._is_instance:
@@ -729,7 +728,7 @@ class MatchesRegex(object):
 
     def match(self, value):
         if not re.match(self.pattern, value, self.flags):
-            return Mismatch("%r did not match %r" % (self.pattern, value))
+            return Mismatch("%r does not match %r" % (value, self.pattern))
 
 
 class MatchesSetwise(object):
