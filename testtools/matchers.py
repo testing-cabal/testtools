@@ -642,6 +642,13 @@ class MatchesStructure(object):
 
     `fromExample` allows the creation of a matcher from a prototype object and
     then modified versions can be created with `update`.
+
+    `byEquality` creates a matcher in much the same way as the constructor,
+    except that the matcher for each of the attributes is assumed to be
+    `Equals`.
+
+    `byMatcher` creates a similar matcher to `byEquality`, but you get to pick
+    the matcher, rather than just using `Equals`.
     """
 
     def __init__(self, **kwargs):
@@ -650,6 +657,25 @@ class MatchesStructure(object):
         :param kwargs: A mapping of attributes to matchers.
         """
         self.kws = kwargs
+
+    @classmethod
+    def byEquality(cls, **kwargs):
+        """Matches an object where the attributes equal the keyword values.
+
+        Similar to the constructor, except that the matcher is assumed to be
+        Equals.
+        """
+        return cls.byMatcher(Equals, **kwargs)
+
+    @classmethod
+    def byMatcher(cls, matcher, **kwargs):
+        """Matches an object where the attributes match the keyword values.
+
+        Similar to the constructor, except that the provided matcher is used
+        to match all of the values.
+        """
+        return cls(
+            **dict((name, matcher(value)) for name, value in kwargs.items()))
 
     @classmethod
     def fromExample(cls, example, *attributes):
