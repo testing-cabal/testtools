@@ -1,4 +1,4 @@
-# Copyright (c) 2009 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2011 testtools developers. See LICENSE for details.
 
 """Test suites and related things."""
 
@@ -8,10 +8,10 @@ __all__ = [
   'iterate_tests',
   ]
 
-try:
-    from Queue import Queue
-except ImportError:
-    from queue import Queue
+from testtools.helpers import try_imports
+
+Queue = try_imports(['Queue.Queue', 'queue.Queue'])
+
 import threading
 import unittest
 

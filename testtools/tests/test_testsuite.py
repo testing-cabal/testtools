@@ -1,19 +1,15 @@
-# Copyright (c) 2009 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2011 testtools developers. See LICENSE for details.
 
 """Test ConcurrentTestSuite and related things."""
 
 __metaclass__ = type
 
-import datetime
 import unittest
 
 from testtools import (
     ConcurrentTestSuite,
     iterate_tests,
     TestCase,
-    )
-from testtools.matchers import (
-    Equals,
     )
 from testtools.tests.helpers import LoggingResult
 
