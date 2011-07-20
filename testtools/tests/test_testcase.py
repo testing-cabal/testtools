@@ -459,6 +459,26 @@ class TestAssertions(TestCase):
             ], calls)
         self.assertFalse(result.wasSuccessful())
 
+    def test_assertThat_output(self):
+        matchee = 'foo'
+        matcher = Equals('bar')
+        expected = matcher.match(matchee).describe()
+        self.assertFails(expected, self.assertThat, matchee, matcher)
+
+    def test_assertThat_verbose_output(self):
+        matchee = 'foo'
+        matcher = Equals('bar')
+        expected = (
+            'Match failed. Matchee: "%s"\n'
+            'Matcher: %s\n'
+            'Difference: %s\n' % (
+                matchee,
+                matcher,
+                matcher.match(matchee).describe(),
+                ))
+        self.assertFails(
+            expected, self.assertThat, matchee, matcher, verbose=True)
+
     def test_assertEqual_nice_formatting(self):
         message = "These things ought not be equal."
         a = ['apple', 'banana', 'cherry']
