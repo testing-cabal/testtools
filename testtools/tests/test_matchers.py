@@ -254,7 +254,7 @@ class TestMatchesExceptionTypeReInterface(TestCase, TestMatchersInterface):
 
     str_examples = [
         ("MatchesException(%r)" % Exception,
-         MatchesException(Exception))
+         MatchesException(Exception, 'fo.'))
         ]
     describe_examples = [
         ("'bar' does not match 'fo.'",
@@ -274,11 +274,11 @@ class TestMatchesExceptionTypeMatcherInterface(TestCase, TestMatchersInterface):
 
     str_examples = [
         ("MatchesException(%r)" % Exception,
-         MatchesException(Exception))
+         MatchesException(Exception, Equals('foo')))
         ]
     describe_examples = [
-        ("'bar' does not match 'fo.'",
-         error_bar, MatchesException(ValueError, "fo.")),
+        ("'foo' != 'bar'",
+         error_bar, MatchesException(ValueError, Equals('foo'))),
         ]
 
 
