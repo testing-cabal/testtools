@@ -2,7 +2,8 @@
 
 # See README for copyright and licensing details.
 
-import unittest
+from testtools.tests.helpers import StackHidingFixture
+from testtools.testsuite import FixtureSuite
 
 
 def test_suite():
@@ -41,4 +42,4 @@ def test_suite():
         test_testsuite,
         ]
     suites = map(lambda x: x.test_suite(), modules)
-    return unittest.TestSuite(suites)
+    return FixtureSuite(StackHidingFixture(False), suites)

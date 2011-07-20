@@ -44,11 +44,14 @@ from testtools.matchers import (
     Raises,
     )
 from testtools.tests.helpers import (
+    an_exc_info,
     LoggingResult,
+    StackHidingFixture,
+    )
+from testtools.testresult.doubles import (
     Python26TestResult,
     Python27TestResult,
     ExtendedTestResult,
-    an_exc_info
     )
 from testtools.testresult.real import (
     _details_to_str,
@@ -369,7 +372,10 @@ class TestTestResult(TestCase):
         result.time(now)
         self.assertEqual(now, result._now())
 
-    def test_traceback_formatting(self):
+    def test_traceback_formatting_without_stack_hidden(self):
+        # During the testtools test run, we show our levels of the stack,
+        # because we want to be able to use our test suite to debug our own
+        # code.
         result = self.makeResult()
         test = make_erroring_test()
         test.run(result)
@@ -385,6 +391,20 @@ class TestTestResult(TestCase):
                 '    1/0\n'
                 'ZeroDivisionError: ...\n',
                 doctest.ELLIPSIS | doctest.REPORT_UDIFF))
+
+    def test_traceback_formatting_with_stack_hidden(self):
+        result = self.makeResult()
+        test = make_erroring_test()
+        with StackHidingFixture(True):
+            test.run(result)
+        self.assertThat(
+            result.errors[0][1],
+            DocTestMatches(
+                'Traceback (most recent call last):\n'
+                '  File "testtools/tests/test_testresult.py", line ..., in error\n'
+                '    1/0\n'
+                'ZeroDivisionError: ...\n',
+                doctest.ELLIPSIS))
 
 
 class TestMultiTestResult(TestCase):
@@ -575,21 +595,18 @@ class TestTextTestResult(TestCase):
             DocTestMatches("...\nFAILED (failures=1)\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_shows_details(self):
-        self.result.startTestRun()
-        make_erroring_test().run(self.result)
-        make_unexpectedly_successful_test().run(self.result)
-        make_failing_test().run(self.result)
-        self.reset_output()
-        self.result.stopTestRun()
+        with StackHidingFixture(True):
+            self.result.startTestRun()
+            make_erroring_test().run(self.result)
+            make_unexpectedly_successful_test().run(self.result)
+            make_failing_test().run(self.result)
+            self.reset_output()
+            self.result.stopTestRun()
         self.assertThat(self.getvalue(),
             DocTestMatches("""...======================================================================
 ERROR: testtools.tests.test_testresult.Test.error
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "...testtools...runtest.py", line ..., in _run_user...
-    return fn(*args, **kwargs)
-  File "...testtools...testcase.py", line ..., in _run_test_method
-    return self._get_test_method()()
   File "...testtools...tests...test_testresult.py", line ..., in error
     1/0
 ZeroDivisionError:... divi... by zero...
@@ -597,10 +614,6 @@ ZeroDivisionError:... divi... by zero...
 FAIL: testtools.tests.test_testresult.Test.failed
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "...testtools...runtest.py", line ..., in _run_user...
-    return fn(*args, **kwargs)
-  File "...testtools...testcase.py", line ..., in _run_test_method
-    return self._get_test_method()()
   File "...testtools...tests...test_testresult.py", line ..., in failed
     self.fail("yo!")
 AssertionError: yo!

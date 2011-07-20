@@ -756,7 +756,6 @@ When the test runs, testtools will show you something like this::
   arbitrary-color-name: {{{blue}}}
 
   Traceback (most recent call last):
-    ...
     File "exampletest.py", line 8, in test_thingy
       1 / 0 # Gratuitous error!
   ZeroDivisionError: integer division or modulo by zero
@@ -1145,6 +1144,14 @@ You can do::
   StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
 
 
+Safe attribute testing
+----------------------
+
+``hasattr`` is broken_ on many versions of Python.  testtools provides
+``safe_hasattr``, which can be used to safely test whether an object has a
+particular attribute.
+
+
 .. _testrepository: https://launchpad.net/testrepository
 .. _Trial: http://twistedmatrix.com/documents/current/core/howto/testing.html
 .. _nose: http://somethingaboutorange.com/mrl/projects/nose/
@@ -1159,3 +1166,4 @@ You can do::
 .. _`testtools API docs`: http://mumak.net/testtools/apidocs/
 .. _Distutils: http://docs.python.org/library/distutils.html
 .. _`setup configuration`: http://docs.python.org/distutils/configfile.html
+.. _broken: http://chipaca.com/post/3210673069/hasattr-17-less-harmful

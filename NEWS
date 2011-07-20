@@ -28,6 +28,12 @@ Improvements
 * Correctly display non-ASCII unicode output on terminals that claim to have a
   unicode encoding. (Martin [gz], #804122)
 
+* ``FixtureSuite`` added, allows test suites to run with a given fixture.
+  (Jonathan Lange)
+
+* Hide testtools's own stack frames when displaying tracebacks, making it
+  easier for test authors to focus on their errors.  (Jonathan Lange, #788974)
+
 * Less boilerplate displayed in test failures and errors.
   (Jonathan Lange, #660852)
 
@@ -45,6 +51,8 @@ Improvements
     (Jonathan Lange, #615108)
 
   * ``GreaterThan``. (Christian Kampka)
+
+* New helper, ``safe_hasattr`` added. (Jonathan Lange)
 
 
 0.9.11

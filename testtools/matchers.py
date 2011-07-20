@@ -865,3 +865,8 @@ class AllMatch(object):
                 mismatches.append(mismatch)
         if mismatches:
             return MismatchesAll(mismatches)
+
+
+# Signal that this is part of the testing framework, and that code from this
+# should not normally appear in tracebacks.
+__unittest = True

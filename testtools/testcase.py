@@ -771,3 +771,8 @@ class ExpectedException:
             raise AssertionError('"%s" does not match "%s".' %
                                  (str(exc_value), self.value_re))
         return True
+
+
+# Signal that this is part of the testing framework, and that code from this
+# should not normally appear in tracebacks.
+__unittest = True
