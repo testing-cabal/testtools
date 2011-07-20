@@ -835,7 +835,7 @@ class AfterPreproccessing(object):
             self._str_preprocessor(), self.matcher)
 
     def match(self, value):
-        value = self.preprocessor(value)
+        after = self.preprocessor(value)
         return Annotate(
-            "after %s" % self._str_preprocessor(),
-            self.matcher).match(value)
+            "after %s on %r" % (self._str_preprocessor(), value),
+            self.matcher).match(after)
