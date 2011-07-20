@@ -412,8 +412,10 @@ class MatchesException(Matcher):
             are checked. If a type is given only the type of the exception is
             checked.
         :param value_re: If 'exception' is a type, and the matchee exception
-            is of the right type, then the 'str()' of the matchee exception
-            is matched against this regular expression.
+            is of the right type, then match against this.  If value_re is a
+            string, then assume value_re is a regular expression and match
+            the str() of the exception against it.  Otherwise, assume value_re
+            is a matcher, and match the exception against it.
         """
         Matcher.__init__(self)
         self.expected = exception
