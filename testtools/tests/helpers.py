@@ -11,7 +11,10 @@ import sys
 from fixtures import Fixture
 
 from testtools import TestResult
-from testtools.helpers import try_import
+from testtools.helpers import (
+    safe_hasattr,
+    try_import,
+    )
 from testtools import runtest
 
 
@@ -69,11 +72,6 @@ class LoggingResult(TestResult):
     def time(self, a_datetime):
         self._events.append(('time', a_datetime))
         super(LoggingResult, self).time(a_datetime)
-
-
-def safe_hasattr(obj, attr):
-    marker = object()
-    return getattr(obj, attr, marker) is not marker
 
 
 def is_stack_hidden():

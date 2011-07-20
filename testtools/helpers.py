@@ -1,6 +1,7 @@
 # Copyright (c) 2010-2011 testtools developers. See LICENSE for details.
 
 __all__ = [
+    'safe_hasattr',
     'try_import',
     'try_imports',
     ]
@@ -60,7 +61,7 @@ def try_imports(module_names, alternative=_RAISE_EXCEPTION, error_callback=None)
     :param module_names: A sequence of module names to try to import.
     :param alternative: The value to return if no module can be imported.
         If unspecified, we raise an ImportError.
-    :param error_callback: If None, called with the ImportError for *each* 
+    :param error_callback: If None, called with the ImportError for *each*
         module that fails to load.
     :raises ImportError: If none of the modules can be imported and no
         alternative value was specified.
@@ -74,3 +75,14 @@ def try_imports(module_names, alternative=_RAISE_EXCEPTION, error_callback=None)
         raise ImportError(
             "Could not import any of: %s" % ', '.join(module_names))
     return alternative
+
+
+def safe_hasattr(obj, attr):
+    """Does 'obj' have an attribute 'attr'?
+
+    Use this rather than built-in hasattr, as the built-in swallows exceptions
+    in some versions of Python and behaves unpredictably with respect to
+    properties.
+    """
+    marker = object()
+    return getattr(obj, attr, marker) is not marker
