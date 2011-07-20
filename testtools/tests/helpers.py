@@ -2,12 +2,13 @@
 
 """Helpers for tests."""
 
-import sys
-
-__metaclass__ = type
 __all__ = [
     'LoggingResult',
     ]
+
+import sys
+
+from fixtures import Fixture
 
 from testtools import TestResult
 from testtools.helpers import try_import
@@ -75,6 +76,21 @@ def hide_testtools_stack(should_hide=True):
         'testtools.runtest',
         'testtools.testcase',
         ]
+    current_value = None
     for module_name in modules:
         module = try_import(module_name)
+        current_value = getattr(module, '__unittest')
         setattr(module, '__unittest', should_hide)
+    return current_value
+
+
+class StackHidingFixture(Fixture):
+
+    def __init__(self, should_hide):
+        super(StackHidingFixture, self).__init__()
+        self._should_hide = should_hide
+
+    def setUp(self):
+        super(StackHidingFixture, self).setUp()
+        current_value = hide_testtools_stack(self._should_hide)
+        self.addCleanup(hide_testtools_stack, current_value)

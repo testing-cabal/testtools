@@ -6,11 +6,14 @@ __metaclass__ = type
 
 import unittest
 
+from fixtures import FunctionFixture
+
 from testtools import (
     ConcurrentTestSuite,
     iterate_tests,
     TestCase,
     )
+from testtools.testsuite import FixtureSuite
 from testtools.tests.helpers import LoggingResult
 
 
@@ -42,6 +45,23 @@ class TestConcurrentTestSuiteRun(TestCase):
     def split_suite(self, suite):
         tests = list(iterate_tests(suite))
         return tests[0], tests[1]
+
+
+class TestFixtureSuite(TestCase):
+
+    def test_fixture_suite(self):
+        log = []
+        class Sample(TestCase):
+            def test_one(self):
+                log.append(1)
+            def test_two(self):
+                log.append(2)
+        fixture = FunctionFixture(
+            lambda: log.append('setUp'),
+            lambda fixture: log.append('tearDown'))
+        suite = FixtureSuite(fixture, [Sample('test_one'), Sample('test_two')])
+        suite.run(LoggingResult([]))
+        self.assertEqual(['setUp', 1, 2, 'tearDown'], log)
 
 
 def test_suite():

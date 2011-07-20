@@ -85,3 +85,14 @@ class ConcurrentTestSuite(unittest.TestSuite):
             test.run(process_result)
         finally:
             queue.put(test)
+
+
+class FixtureSuite(unittest.TestSuite):
+
+    def __init__(self, fixture, tests):
+        super(FixtureSuite, self).__init__(tests)
+        self._fixture = fixture
+
+    def run(self, result):
+        with self._fixture:
+            super(FixtureSuite, self).run(result)

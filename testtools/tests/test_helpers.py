@@ -6,11 +6,16 @@ from testtools.helpers import (
     try_imports,
     )
 from testtools.matchers import (
+    AfterPreproccessing,
     Equals,
     Is,
+    MatchesListwise,
     Not,
     )
-from testtools.tests.helpers import hide_testtools_stack
+from testtools.tests.helpers import (
+    hide_testtools_stack,
+    StackHidingFixture,
+    )
 
 
 def check_error_callback(test, function, arg, expected_error_count,
@@ -159,6 +164,7 @@ import testtools.matchers
 import testtools.runtest
 import testtools.testcase
 
+
 class TestStackHiding(TestCase):
 
     def test_hidden_by_default(self):
@@ -173,6 +179,24 @@ class TestStackHiding(TestCase):
         self.assertEqual(False, getattr(testtools.runtest, '__unittest'))
         self.assertEqual(False, getattr(testtools.testcase, '__unittest'))
         hide_testtools_stack(current_state)
+
+    def test_fixture(self):
+        current_state = getattr(testtools.matchers, '__unittest')
+        fixture = StackHidingFixture(not current_state)
+        with fixture:
+            self.assertEqual(
+                not current_state, getattr(testtools.matchers, '__unittest'))
+            self.assertEqual(
+                not current_state, getattr(testtools.runtest, '__unittest'))
+            self.assertEqual(
+                not current_state, getattr(testtools.testcase, '__unittest'))
+        self.assertEqual(
+            current_state, getattr(testtools.matchers, '__unittest'))
+        self.assertEqual(
+            current_state, getattr(testtools.runtest, '__unittest'))
+        self.assertEqual(
+            current_state, getattr(testtools.testcase, '__unittest'))
+
 
 
 def test_suite():
