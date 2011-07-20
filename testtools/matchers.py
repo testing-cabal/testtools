@@ -820,7 +820,7 @@ class AfterPreprocessing(object):
       def PathHasFileContent(content):
           def _read(path):
               return open(path).read()
-          return AfterPreproccessing(_read, Equals(content))
+          return AfterPreprocessing(_read, Equals(content))
     """
 
     def __init__(self, preprocessor, matcher):
