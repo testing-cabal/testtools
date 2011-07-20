@@ -45,10 +45,12 @@ from testtools.matchers import (
     )
 from testtools.tests.helpers import (
     LoggingResult,
+    an_exc_info
+    )
+from testtools.testresult.doubles import (
     Python26TestResult,
     Python27TestResult,
     ExtendedTestResult,
-    an_exc_info
     )
 from testtools.testresult.real import (
     _details_to_str,

@@ -1,4 +1,4 @@
-# Copyright (c) 2008 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
 
 """Helpers for tests."""
 
@@ -66,7 +66,3 @@ class LoggingResult(TestResult):
     def time(self, a_datetime):
         self._events.append(('time', a_datetime))
         super(LoggingResult, self).time(a_datetime)
-
-# Note, the following three classes are different to LoggingResult by
-# being fully defined exact matches rather than supersets.
-from testtools.testresult.doubles import *

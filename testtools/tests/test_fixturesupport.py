@@ -1,4 +1,4 @@
-# Copyright (c) 2010 testtools developers. See LICENSE for details.
+# Copyright (c) 2010-2011 testtools developers. See LICENSE for details.
 
 import unittest
 
@@ -8,7 +8,7 @@ from testtools import (
     content_type,
     )
 from testtools.helpers import try_import
-from testtools.tests.helpers import (
+from testtools.testresult.doubles import (
     ExtendedTestResult,
     )
 
