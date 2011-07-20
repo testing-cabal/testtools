@@ -843,4 +843,6 @@ class AfterPreprocessing(object):
             self.matcher).match(value)
 
 
+# This is the old, deprecated. spelling of the name, kept for backwards
+# compatibility.
 AfterPreproccessing = AfterPreprocessing
