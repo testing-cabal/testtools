@@ -77,12 +77,11 @@ def try_imports(module_names, alternative=_RAISE_EXCEPTION, error_callback=None)
     return alternative
 
 
-def safe_hasattr(obj, attr):
+def safe_hasattr(obj, attr, _marker=object()):
     """Does 'obj' have an attribute 'attr'?
 
     Use this rather than built-in hasattr, as the built-in swallows exceptions
     in some versions of Python and behaves unpredictably with respect to
     properties.
     """
-    marker = object()
-    return getattr(obj, attr, marker) is not marker
+    return getattr(obj, attr, _marker) is not _marker
