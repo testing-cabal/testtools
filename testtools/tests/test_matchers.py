@@ -262,6 +262,26 @@ class TestMatchesExceptionTypeReInterface(TestCase, TestMatchersInterface):
         ]
 
 
+class TestMatchesExceptionTypeMatcherInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = MatchesException(
+        ValueError, AfterPreproccessing(str, Equals('foo')))
+    error_foo = make_error(ValueError, 'foo')
+    error_sub = make_error(UnicodeError, 'foo')
+    error_bar = make_error(ValueError, 'bar')
+    matches_matches = [error_foo, error_sub]
+    matches_mismatches = [error_bar]
+
+    str_examples = [
+        ("MatchesException(%r)" % Exception,
+         MatchesException(Exception))
+        ]
+    describe_examples = [
+        ("'bar' does not match 'fo.'",
+         error_bar, MatchesException(ValueError, "fo.")),
+        ]
+
+
 class TestNotInterface(TestCase, TestMatchersInterface):
 
     matches_matcher = Not(Equals(1))

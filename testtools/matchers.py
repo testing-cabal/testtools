@@ -417,7 +417,7 @@ class MatchesException(Matcher):
         """
         Matcher.__init__(self)
         self.expected = exception
-        if value_re:
+        if istext(value_re):
             value_re = MatchesRegex(value_re)
         self.value_re = value_re
         self._is_instance = type(self.expected) not in classtypes()
