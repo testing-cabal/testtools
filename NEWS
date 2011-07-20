@@ -4,6 +4,12 @@ testtools NEWS
 NEXT
 ~~~~
 
+Changes
+-------
+
+* ``gather_details`` takes two dicts, rather than two detailed objects.
+  (Jonathan Lange, #801027)
+
 Improvements
 ------------
 
