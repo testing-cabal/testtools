@@ -12,6 +12,7 @@ from fixtures import Fixture
 
 from testtools import TestResult
 from testtools.helpers import try_import
+from testtools import runtest
 
 
 # GZ 2010-08-12: Don't do this, pointlessly creates an exc_info cycle
@@ -70,18 +71,31 @@ class LoggingResult(TestResult):
         super(LoggingResult, self).time(a_datetime)
 
 
+def safe_hasattr(obj, attr):
+    marker = object()
+    return getattr(obj, attr, marker) is not marker
+
+
+def is_stack_hidden():
+    return safe_hasattr(runtest, '__unittest')
+
+
 def hide_testtools_stack(should_hide=True):
     modules = [
         'testtools.matchers',
         'testtools.runtest',
         'testtools.testcase',
         ]
-    current_value = None
     for module_name in modules:
         module = try_import(module_name)
-        current_value = getattr(module, '__unittest')
-        setattr(module, '__unittest', should_hide)
-    return current_value
+        if should_hide:
+            setattr(module, '__unittest', True)
+        else:
+            try:
+                delattr(module, '__unittest')
+            except AttributeError:
+                # Attribute already doesn't exist. Our work here is done.
+                pass
 
 
 class StackHidingFixture(Fixture):
@@ -92,5 +106,5 @@ class StackHidingFixture(Fixture):
 
     def setUp(self):
         super(StackHidingFixture, self).setUp()
-        current_value = hide_testtools_stack(self._should_hide)
-        self.addCleanup(hide_testtools_stack, current_value)
+        self.addCleanup(hide_testtools_stack, is_stack_hidden())
+        hide_testtools_stack(self._should_hide)
