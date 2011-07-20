@@ -377,14 +377,14 @@ class TestTestResult(TestCase):
             result.errors[0][1],
             DocTestMatches(
                 'Traceback (most recent call last):\n'
-                '  File "testtools/runtest.py", line ..., in _run_user\n'
+                '  File "testtools...runtest.py", line ..., in _run_user\n'
                 '    return fn(*args, **kwargs)\n'
-                '  File "testtools/testcase.py", line ..., in _run_test_method\n'
+                '  File "testtools...testcase.py", line ..., in _run_test_method\n'
                 '    return self._get_test_method()()\n'
-                '  File "testtools/tests/test_testresult.py", line ..., in error\n'
+                '  File "testtools...tests...test_testresult.py", line ..., in error\n'
                 '    1/0\n'
                 'ZeroDivisionError: ...\n',
-                doctest.ELLIPSIS))
+                doctest.ELLIPSIS | doctest.REPORT_UDIFF))
 
 
 class TestMultiTestResult(TestCase):

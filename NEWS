@@ -4,6 +4,18 @@ testtools NEWS
 NEXT
 ~~~~
 
+Changes
+-------
+
+* ``AfterPreproccessing`` renamed to ``AfterPreprocessing``, which is a more
+  correct spelling.  Old name preserved for backwards compatibility, but is
+  now deprecated.  Please stop using it.
+  (Jonathan Lange, #813460)
+
+* ``gather_details`` takes two dicts, rather than two detailed objects.
+  (Jonathan Lange, #801027)
+
+
 Improvements
 ------------
 
