@@ -418,7 +418,7 @@ class MatchesException(Matcher):
         Matcher.__init__(self)
         self.expected = exception
         if istext(value_re):
-            value_re = MatchesRegex(value_re)
+            value_re = AfterPreproccessing(str, MatchesRegex(value_re))
         self.value_re = value_re
         self._is_instance = type(self.expected) not in classtypes()
 
@@ -435,8 +435,7 @@ class MatchesException(Matcher):
                 return Mismatch('%s has different arguments to %s.' % (
                         _error_repr(other[1]), _error_repr(self.expected)))
         elif self.value_re is not None:
-            str_exc_value = str(other[1])
-            return self.value_re.match(str_exc_value)
+            return self.value_re.match(other[1])
 
     def __str__(self):
         if self._is_instance:
