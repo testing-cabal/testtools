@@ -1,15 +1,17 @@
 # Copyright (c) 2010-2011 testtools developers. See LICENSE for details.
 
+import operator
+
 from testtools import TestCase
 from testtools.helpers import (
     try_import,
     try_imports,
     )
 from testtools.matchers import (
-    AfterPreproccessing,
+    AllMatch,
+    AfterPreprocessing,
     Equals,
     Is,
-    MatchesListwise,
     Not,
     )
 from testtools.tests.helpers import (
@@ -165,38 +167,35 @@ import testtools.runtest
 import testtools.testcase
 
 
+def StackHidden(is_hidden):
+    return AllMatch(
+        AfterPreprocessing(
+            operator.attrgetter('__unittest'), Equals(is_hidden)))
+
+
 class TestStackHiding(TestCase):
 
+    modules = [
+        testtools.matchers,
+        testtools.runtest,
+        testtools.testcase,
+        ]
+
     def test_hidden_by_default(self):
-        self.assertEqual(True, getattr(testtools.matchers, '__unittest'))
-        self.assertEqual(True, getattr(testtools.runtest, '__unittest'))
-        self.assertEqual(True, getattr(testtools.testcase, '__unittest'))
+        self.assertThat(self.modules, StackHidden(True))
 
     def test_show_stack(self):
         current_state = getattr(testtools.matchers, '__unittest')
         hide_testtools_stack(False)
-        self.assertEqual(False, getattr(testtools.matchers, '__unittest'))
-        self.assertEqual(False, getattr(testtools.runtest, '__unittest'))
-        self.assertEqual(False, getattr(testtools.testcase, '__unittest'))
+        self.assertThat(self.modules, StackHidden(False))
         hide_testtools_stack(current_state)
 
     def test_fixture(self):
         current_state = getattr(testtools.matchers, '__unittest')
         fixture = StackHidingFixture(not current_state)
         with fixture:
-            self.assertEqual(
-                not current_state, getattr(testtools.matchers, '__unittest'))
-            self.assertEqual(
-                not current_state, getattr(testtools.runtest, '__unittest'))
-            self.assertEqual(
-                not current_state, getattr(testtools.testcase, '__unittest'))
-        self.assertEqual(
-            current_state, getattr(testtools.matchers, '__unittest'))
-        self.assertEqual(
-            current_state, getattr(testtools.runtest, '__unittest'))
-        self.assertEqual(
-            current_state, getattr(testtools.testcase, '__unittest'))
-
+            self.assertThat(self.modules, StackHidden(not current_state))
+        self.assertThat(self.modules, StackHidden(current_state))
 
 
 def test_suite():
