@@ -10,6 +10,7 @@ from testtools.matchers import (
     Is,
     Not,
     )
+from testtools.tests.helpers import hide_testtools_stack
 
 
 def check_error_callback(test, function, arg, expected_error_count,
@@ -152,6 +153,26 @@ class TestTryImports(TestCase):
         check_error_callback(self, try_imports,
             ['os.path'],
             0, True)
+
+
+import testtools.matchers
+import testtools.runtest
+import testtools.testcase
+
+class TestStackHiding(TestCase):
+
+    def test_hidden_by_default(self):
+        self.assertEqual(True, getattr(testtools.matchers, '__unittest'))
+        self.assertEqual(True, getattr(testtools.runtest, '__unittest'))
+        self.assertEqual(True, getattr(testtools.testcase, '__unittest'))
+
+    def test_show_stack(self):
+        current_state = getattr(testtools.matchers, '__unittest')
+        hide_testtools_stack(False)
+        self.assertEqual(False, getattr(testtools.matchers, '__unittest'))
+        self.assertEqual(False, getattr(testtools.runtest, '__unittest'))
+        self.assertEqual(False, getattr(testtools.testcase, '__unittest'))
+        hide_testtools_stack(current_state)
 
 
 def test_suite():

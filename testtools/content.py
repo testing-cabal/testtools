@@ -236,8 +236,3 @@ def attach_file(detailed, path, name=None, content_type=None,
     content_object = content_from_file(
         path, content_type, chunk_size, buffer_now)
     detailed.addDetail(name, content_object)
-
-
-# Signal that this is part of the testing framework, and that code from this
-# should not normally appear in tracebacks.
-__unittest = True

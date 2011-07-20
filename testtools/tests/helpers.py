@@ -10,6 +10,7 @@ __all__ = [
     ]
 
 from testtools import TestResult
+from testtools.helpers import try_import
 
 
 # GZ 2010-08-12: Don't do this, pointlessly creates an exc_info cycle
@@ -66,3 +67,14 @@ class LoggingResult(TestResult):
     def time(self, a_datetime):
         self._events.append(('time', a_datetime))
         super(LoggingResult, self).time(a_datetime)
+
+
+def hide_testtools_stack(should_hide=True):
+    modules = [
+        'testtools.matchers',
+        'testtools.runtest',
+        'testtools.testcase',
+        ]
+    for module_name in modules:
+        module = try_import(module_name)
+        setattr(module, '__unittest', should_hide)
