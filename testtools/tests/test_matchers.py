@@ -268,7 +268,7 @@ class TestMatchesExceptionTypeReInterface(TestCase, TestMatchersInterface):
 class TestMatchesExceptionTypeMatcherInterface(TestCase, TestMatchersInterface):
 
     matches_matcher = MatchesException(
-        ValueError, AfterPreproccessing(str, Equals('foo')))
+        ValueError, AfterPreprocessing(str, Equals('foo')))
     error_foo = make_error(ValueError, 'foo')
     error_sub = make_error(UnicodeError, 'foo')
     error_bar = make_error(ValueError, 'bar')
