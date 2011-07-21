@@ -41,7 +41,8 @@ Improvements
   (Jonathan Lange)
 
 * Hide testtools's own stack frames when displaying tracebacks, making it
-  easier for test authors to focus on their errors.  (Jonathan Lange, #788974)
+  easier for test authors to focus on their errors.
+  (Jonathan Lange, Martin [gz], #788974)
 
 * Less boilerplate displayed in test failures and errors.
   (Jonathan Lange, #660852)
