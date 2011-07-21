@@ -14,7 +14,8 @@ from testtools.compat import (
     StringIO,
     )
 from testtools.matchers import (
-    AfterPreproccessing,
+    AfterPreprocessing,
+    AllMatch,
     Annotate,
     AnnotatedMismatch,
     Equals,
@@ -254,11 +255,33 @@ class TestMatchesExceptionTypeReInterface(TestCase, TestMatchersInterface):
 
     str_examples = [
         ("MatchesException(%r)" % Exception,
-         MatchesException(Exception))
+         MatchesException(Exception, 'fo.'))
         ]
     describe_examples = [
-        ('"bar" does not match "fo.".',
+        # XXX: This is kind of a crappy message. Need to change
+        # AfterPreproccessing.
+        ("'bar' does not match 'fo.': after <type 'str'> on ValueError('bar',)",
          error_bar, MatchesException(ValueError, "fo.")),
+        ]
+
+
+class TestMatchesExceptionTypeMatcherInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = MatchesException(
+        ValueError, AfterPreprocessing(str, Equals('foo')))
+    error_foo = make_error(ValueError, 'foo')
+    error_sub = make_error(UnicodeError, 'foo')
+    error_bar = make_error(ValueError, 'bar')
+    matches_matches = [error_foo, error_sub]
+    matches_mismatches = [error_bar]
+
+    str_examples = [
+        ("MatchesException(%r)" % Exception,
+         MatchesException(Exception, Equals('foo')))
+        ]
+    describe_examples = [
+        ("5 != ValueError('bar',)",
+         error_bar, MatchesException(ValueError, Equals(5))),
         ]
 
 
@@ -618,7 +641,7 @@ class TestMatchesRegex(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ("'a|b' did not match 'c'", 'c', MatchesRegex('a|b')),
+        ("'c' does not match 'a|b'", 'c', MatchesRegex('a|b')),
         ]
 
 
@@ -698,24 +721,24 @@ class TestMatchesSetwise(TestCase):
                 re.S))
 
 
-class TestAfterPreproccessing(TestCase, TestMatchersInterface):
+class TestAfterPreprocessing(TestCase, TestMatchersInterface):
 
     def parity(x):
         return x % 2
 
-    matches_matcher = AfterPreproccessing(parity, Equals(1))
+    matches_matcher = AfterPreprocessing(parity, Equals(1))
     matches_matches = [3, 5]
     matches_mismatches = [2]
 
     str_examples = [
-        ("AfterPreproccessing(<function parity>, Equals(1))",
-         AfterPreproccessing(parity, Equals(1))),
+        ("AfterPreprocessing(<function parity>, Equals(1))",
+         AfterPreprocessing(parity, Equals(1))),
         ]
 
     describe_examples = [
-        ("1 != 0: after <function parity>",
+        ("1 != 0: after <function parity> on 2",
          2,
-         AfterPreproccessing(parity, Equals(1))),
+         AfterPreprocessing(parity, Equals(1))),
         ]
 
 
@@ -737,6 +760,33 @@ class TestMismatchDecorator(TestCase):
         self.assertEqual(
             '<testtools.matchers.MismatchDecorator(%r)>' % (x,),
             repr(decorated))
+
+
+class TestAllMatch(TestCase, TestMatchersInterface):
+
+    matches_matcher = AllMatch(LessThan(10))
+    matches_matches = [
+        [9, 9, 9],
+        (9, 9),
+        iter([9, 9, 9, 9, 9]),
+        ]
+    matches_mismatches = [
+        [11, 9, 9],
+        iter([9, 12, 9, 11]),
+        ]
+
+    str_examples = [
+        ("AllMatch(LessThan(12))", AllMatch(LessThan(12))),
+        ]
+
+    describe_examples = [
+        ('Differences: [\n'
+         '10 is not > 11\n'
+         '10 is not > 10\n'
+         ']',
+         [11, 9, 10],
+         AllMatch(LessThan(10))),
+        ]
 
 
 def test_suite():

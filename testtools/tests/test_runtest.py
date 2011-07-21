@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2010 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2011 testtools developers. See LICENSE for details.
 
 """Tests for the RunTest single test execution logic."""
 
@@ -10,7 +10,7 @@ from testtools import (
     TestResult,
     )
 from testtools.matchers import MatchesException, Is, Raises
-from testtools.tests.helpers import ExtendedTestResult
+from testtools.testresult.doubles import ExtendedTestResult
 
 
 class TestRunTest(TestCase):

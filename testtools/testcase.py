@@ -118,21 +118,19 @@ def _copy_content(content_object):
     return content.Content(content_object.content_type, content_callback)
 
 
-def gather_details(source, target):
-    """Merge the details from `source` into `target`.
+def gather_details(source_dict, target_dict):
+    """Merge the details from `source_dict` into `target_dict`.
 
-    :param source: A *detailed* object from which details will be gathered.
-    :param target: A *detailed* object into which details will be gathered.
+    :param source_dict: A dictionary of details will be gathered.
+    :param target_dict: A dictionary into which details will be gathered.
     """
-    source_details = source.getDetails()
-    target_details = target.getDetails()
-    for name, content_object in source_details.items():
+    for name, content_object in source_dict.items():
         new_name = name
         disambiguator = itertools.count(1)
-        while new_name in target_details:
+        while new_name in target_dict:
             new_name = '%s-%d' % (name, advance_iterator(disambiguator))
         name = new_name
-        target.addDetail(name, _copy_content(content_object))
+        target_dict[name] = _copy_content(content_object)
 
 
 class TestCase(unittest.TestCase):
@@ -582,11 +580,12 @@ class TestCase(unittest.TestCase):
         try:
             fixture.setUp()
         except:
-            gather_details(fixture, self)
+            gather_details(fixture.getDetails(), self.getDetails())
             raise
         else:
             self.addCleanup(fixture.cleanUp)
-            self.addCleanup(gather_details, fixture, self)
+            self.addCleanup(
+                gather_details, fixture.getDetails(), self.getDetails())
             return fixture
 
     def setUp(self):
@@ -777,3 +776,8 @@ class ExpectedException:
             raise AssertionError('"%s" does not match "%s".' %
                                  (str(exc_value), self.value_re))
         return True
+
+
+# Signal that this is part of the testing framework, and that code from this
+# should not normally appear in tracebacks.
+__unittest = True

@@ -4,6 +4,21 @@ testtools NEWS
 NEXT
 ~~~~
 
+Changes
+-------
+
+* ``AfterPreproccessing`` renamed to ``AfterPreprocessing``, which is a more
+  correct spelling.  Old name preserved for backwards compatibility, but is
+  now deprecated.  Please stop using it.
+  (Jonathan Lange, #813460)
+
+* ``gather_details`` takes two dicts, rather than two detailed objects.
+  (Jonathan Lange, #801027)
+
+* ``MatchesRegex`` mismatch now says "<value> does not match <regex>" rather
+  than "<regex> did not match <value>"
+
+
 Improvements
 ------------
 
@@ -20,8 +35,17 @@ Improvements
 * Correctly display non-ASCII unicode output on terminals that claim to have a
   unicode encoding. (Martin [gz], #804122)
 
+* ``FixtureSuite`` added, allows test suites to run with a given fixture.
+  (Jonathan Lange)
+
+* Hide testtools's own stack frames when displaying tracebacks, making it
+  easier for test authors to focus on their errors.  (Jonathan Lange, #788974)
+
 * Less boilerplate displayed in test failures and errors.
   (Jonathan Lange, #660852)
+
+* ``MatchesException`` now allows you to match exceptions against any matcher,
+  rather than just regular expressions.  (Jonathan Lange, #791889)
 
 * ``MatchesStructure.byEquality`` added to make the common case of matching
   many attributes by equality much easier.  ``MatchesStructure.byMatcher``
@@ -31,7 +55,14 @@ Improvements
 * New convenience assertions, ``assertIsNone`` and ``assertIsNotNone``.
   (Christian Kampka)
 
-* New matcher, ``GreaterThan``. (Christian Kampka)
+* New matchers:
+
+  * ``AllMatch`` matches many values against a single matcher.
+    (Jonathan Lange, #615108)
+
+  * ``GreaterThan``. (Christian Kampka)
+
+* New helper, ``safe_hasattr`` added. (Jonathan Lange)
 
 
 0.9.11

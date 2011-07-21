@@ -23,12 +23,14 @@ from testtools.matchers import (
     MatchesException,
     Raises,
     )
-from testtools.tests.helpers import (
-    an_exc_info,
-    LoggingResult,
+from testtools.testresult.doubles import (
     Python26TestResult,
     Python27TestResult,
     ExtendedTestResult,
+    )
+from testtools.tests.helpers import (
+    an_exc_info,
+    LoggingResult,
     )
 try:
     exec('from __future__ import with_statement')

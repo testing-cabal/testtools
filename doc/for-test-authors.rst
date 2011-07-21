@@ -485,7 +485,7 @@ example::
       def HasFileContent(content):
           def _read(path):
               return open(path).read()
-          return AfterPreproccessing(_read, Equals(content))
+          return AfterPreprocessing(_read, Equals(content))
       self.assertThat('/tmp/foo.txt', PathHasFileContent("Hello world!"))
 
 
@@ -537,6 +537,21 @@ For example::
 
   def test_matches_any_example(self):
       self.assertThat(42, MatchesAny(Equals(5), Not(Equals(6))))
+
+
+AllMatch
+~~~~~~~~
+
+Matches many values against a single matcher.  Can be used to make sure that
+many things all meet the same condition::
+
+  def test_all_match_example(self):
+      self.assertThat([2, 3, 5, 7], AllMatch(LessThan(10)))
+
+If the match fails, then all of the values that fail to match will be included
+in the error message.
+
+In some ways, this is the converse of MatchesAll_.
 
 
 MatchesListwise
@@ -741,7 +756,6 @@ When the test runs, testtools will show you something like this::
   arbitrary-color-name: {{{blue}}}
 
   Traceback (most recent call last):
-    ...
     File "exampletest.py", line 8, in test_thingy
       1 / 0 # Gratuitous error!
   ZeroDivisionError: integer division or modulo by zero
@@ -1130,6 +1144,14 @@ You can do::
   StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
 
 
+Safe attribute testing
+----------------------
+
+``hasattr`` is broken_ on many versions of Python.  testtools provides
+``safe_hasattr``, which can be used to safely test whether an object has a
+particular attribute.
+
+
 .. _testrepository: https://launchpad.net/testrepository
 .. _Trial: http://twistedmatrix.com/documents/current/core/howto/testing.html
 .. _nose: http://somethingaboutorange.com/mrl/projects/nose/
@@ -1144,3 +1166,4 @@ You can do::
 .. _`testtools API docs`: http://mumak.net/testtools/apidocs/
 .. _Distutils: http://docs.python.org/library/distutils.html
 .. _`setup configuration`: http://docs.python.org/distutils/configfile.html
+.. _broken: http://chipaca.com/post/3210673069/hasattr-17-less-harmful
