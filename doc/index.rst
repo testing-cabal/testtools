@@ -21,6 +21,7 @@ Contents:
    for-test-authors
    for-framework-folk
    hacking
+   news
 
 Indices and tables
 ==================
