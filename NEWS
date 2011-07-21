@@ -1,6 +1,8 @@
 testtools NEWS
 ++++++++++++++
 
+Changes and improvements to testtools_, grouped by release.
+
 NEXT
 ~~~~
 
@@ -636,3 +638,6 @@ Improvements
   a test success will now be reported. Previously an error was reported but
   production experience has shown that this is too disruptive for projects that
   are using skips: they cannot get a clean run on down-level result objects.
+
+
+.. _testtools: http://pypi.python.org/pypi/testtools
