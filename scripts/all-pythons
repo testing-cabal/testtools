@@ -1,5 +1,11 @@
 #!/usr/bin/python
 
+"""Run the testtools test suite for all supported Pythons.
+
+Prints output as a subunit test suite. If anything goes to stderr, that is
+treated as a test error. If a Python is not available, then it is skipped.
+"""
+
 from datetime import datetime
 import os
 import subprocess
