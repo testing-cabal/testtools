@@ -30,8 +30,11 @@ ROOT = os.path.dirname(os.path.dirname(__file__))
 
 
 def run_for_python(version, result):
-    result.time(now())
+    # XXX: This could probably be broken up and put into subunit.
     python = 'python%s' % (version,)
+    # XXX: Correct API, but subunit doesn't support it. :(
+    # result.tags(set(python), set())
+    result.time(now())
     test = PlaceHolder(''.join(c for c in python if c != '.'))
     process = subprocess.Popen(
         '%s -c pass' % (python,), shell=True,
@@ -45,7 +48,7 @@ def run_for_python(version, result):
         return
 
     env = os.environ.copy()
-    if env['PYTHONPATH']:
+    if env.get('PYTHONPATH', None):
         env['PYTHONPATH'] = os.pathsep.join([ROOT, env['PYTHONPATH']])
     else:
         env['PYTHONPATH'] = ROOT
@@ -71,6 +74,8 @@ def run_for_python(version, result):
            })
         result.stopTest(test)
     result.time(now())
+    # XXX: Correct API, but subunit doesn't support it. :(
+    #result.tags(set(), set(python))
 
 
 def now():
