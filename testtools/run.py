@@ -163,7 +163,7 @@ class TestProgram(object):
                 lines = source.readlines()
             finally:
                 source.close()
-            test_ids = set(line.strip() for line in lines)
+            test_ids = set(line.strip().decode('utf-8') for line in lines)
             filtered = unittest.TestSuite()
             for test in iterate_tests(self.test):
                 if test.id() in test_ids:
