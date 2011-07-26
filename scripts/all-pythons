@@ -60,6 +60,8 @@ def run_for_python(version, result):
         cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
     _make_stream_binary(process.stdout)
     _make_stream_binary(process.stderr)
+    # XXX: This buffers everything. Bad for memory, bad for getting progress
+    # on jenkins.
     output, error = process.communicate()
     protocol.readFrom(BytesIO(output))
     if error:
