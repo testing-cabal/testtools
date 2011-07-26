@@ -284,3 +284,10 @@ def _format_exc_info(eclass, evalue, tb, limit=None):
     else:
         list.append("%s\n" % sclass)
     return list
+
+
+def reraise(exc_class, exc_obj, exc_tb, _marker=object()):
+    """Re-raise an exception received from sys.exc_info() or similar."""
+    if getattr(exc_class, 'with_traceback', _marker) is _marker:
+        raise exc_class(exc_obj).with_traceback(exc_tb)
+    raise exc_class, exc_obj, exc_tb
