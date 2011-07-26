@@ -14,6 +14,7 @@ fixtures = try_import('fixtures')
 import testtools
 from testtools import TestCase
 from testtools.distutilscmd import TestCommand
+from testtools.matchers import MatchesRegex
 
 
 if fixtures:
@@ -61,11 +62,13 @@ class TestCommandTest(TestCase):
         cmd = dist.reinitialize_command('test')
         cmd.runner.stdout = stream
         dist.run_command('test')
-        self.assertEqual(_b("""Tests running...
+        self.assertThat(
+            stream.getvalue(),
+            MatchesRegex(_b("""Tests running...
 
-Ran 2 tests in 0.000s
+Ran 2 tests in \\d.\\d\\d\\ds
 OK
-"""), stream.getvalue())
+""")))
 
     def test_test_suite(self):
         self.useFixture(SampleTestFixture())
@@ -81,11 +84,13 @@ OK
         cmd = dist.reinitialize_command('test')
         cmd.runner.stdout = stream
         dist.run_command('test')
-        self.assertEqual(_b("""Tests running...
+        self.assertThat(
+            stream.getvalue(),
+            MatchesRegex(_b("""Tests running...
 
-Ran 2 tests in 0.000s
+Ran 2 tests in \\d.\\d\\d\\ds
 OK
-"""), stream.getvalue())
+""")))
 
 
 def test_suite():
