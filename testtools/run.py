@@ -158,7 +158,7 @@ class TestProgram(object):
             # OptimisingTestSuite.add, but with a standard protocol).
             # This is needed because the load_tests hook allows arbitrary
             # suites, even if that is rarely used.
-            source = file(self.load_list, 'rb')
+            source = open(self.load_list, 'rb')
             try:
                 lines = source.readlines()
             finally:

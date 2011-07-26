@@ -4,9 +4,12 @@
 
 from distutils.dist import Distribution
 
-from testtools.helpers import try_import, try_imports
+from testtools.compat import (
+    _b,
+    BytesIO,
+    )
+from testtools.helpers import try_import
 fixtures = try_import('fixtures')
-StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
 
 import testtools
 from testtools import TestCase
@@ -19,7 +22,7 @@ if fixtures:
 
         def __init__(self):
             self.package = fixtures.PythonPackage(
-            'runexample', [('__init__.py', """
+            'runexample', [('__init__.py', _b("""
 from testtools import TestCase
 
 class TestFoo(TestCase):
@@ -30,7 +33,7 @@ class TestFoo(TestCase):
 def test_suite():
     from unittest import TestLoader
     return TestLoader().loadTestsFromName(__name__)
-""")])
+"""))])
 
         def setUp(self):
             super(SampleTestFixture, self).setUp()
@@ -48,7 +51,7 @@ class TestCommandTest(TestCase):
 
     def test_test_module(self):
         self.useFixture(SampleTestFixture())
-        stream = StringIO()
+        stream = BytesIO()
         dist = Distribution()
         dist.script_name = 'setup.py'
         dist.script_args = ['test']
@@ -58,15 +61,15 @@ class TestCommandTest(TestCase):
         cmd = dist.reinitialize_command('test')
         cmd.runner.stdout = stream
         dist.run_command('test')
-        self.assertEqual("""Tests running...
+        self.assertEqual(_b("""Tests running...
 
 Ran 2 tests in 0.000s
 OK
-""", stream.getvalue())
+"""), stream.getvalue())
 
     def test_test_suite(self):
         self.useFixture(SampleTestFixture())
-        stream = StringIO()
+        stream = BytesIO()
         dist = Distribution()
         dist.script_name = 'setup.py'
         dist.script_args = ['test']
@@ -78,11 +81,11 @@ OK
         cmd = dist.reinitialize_command('test')
         cmd.runner.stdout = stream
         dist.run_command('test')
-        self.assertEqual("""Tests running...
+        self.assertEqual(_b("""Tests running...
 
 Ran 2 tests in 0.000s
 OK
-""", stream.getvalue())
+"""), stream.getvalue())
 
 
 def test_suite():

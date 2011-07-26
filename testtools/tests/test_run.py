@@ -2,7 +2,10 @@
 
 """Tests for the test runner logic."""
 
-from testtools.compat import StringIO
+from testtools.compat import (
+    _b,
+    StringIO,
+    )
 from testtools.helpers import try_import
 fixtures = try_import('fixtures')
 
@@ -16,7 +19,7 @@ if fixtures:
 
         def __init__(self):
             self.package = fixtures.PythonPackage(
-            'runexample', [('__init__.py', """
+            'runexample', [('__init__.py', _b("""
 from testtools import TestCase
 
 class TestFoo(TestCase):
@@ -27,7 +30,7 @@ class TestFoo(TestCase):
 def test_suite():
     from unittest import TestLoader
     return TestLoader().loadTestsFromName(__name__)
-""")])
+"""))])
 
         def setUp(self):
             super(SampleTestFixture, self).setUp()
@@ -60,10 +63,10 @@ testtools.runexample.TestFoo.test_quux
         tempname = tempdir.path + '/tests.list'
         f = open(tempname, 'wb')
         try:
-            f.write("""
+            f.write(_b("""
 testtools.runexample.TestFoo.test_bar
 testtools.runexample.missingtest
-""")
+"""))
         finally:
             f.close()
         run.main(['prog', '-l', '--load-list', tempname,
