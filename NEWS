@@ -67,6 +67,8 @@ Improvements
 
 * New helper, ``safe_hasattr`` added. (Jonathan Lange)
 
+* ``reraise`` added to ``testtools.compat``. (Jonathan Lange)
+
 
 0.9.11
 ~~~~~~

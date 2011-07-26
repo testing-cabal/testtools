@@ -7,8 +7,14 @@ __all__ = [
     '_b',
     '_u',
     'advance_iterator',
+    'all',
+    'BytesIO',
+    'classtypes',
+    'isbaseexception',
+    'istext',
     'str_is_unicode',
     'StringIO',
+    'reraise',
     'unicode_output_stream',
     ]
 
@@ -24,6 +30,14 @@ from testtools.helpers import try_imports
 
 BytesIO = try_imports(['StringIO.StringIO', 'io.BytesIO'])
 StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
+
+try:
+    from testtools import _compat2x as _compat
+    _compat
+except SyntaxError:
+    from testtools import _compat3x as _compat
+
+reraise = _compat.reraise
 
 
 __u_doc = """A function version of the 'u' prefix.
