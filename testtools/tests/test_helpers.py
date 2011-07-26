@@ -235,8 +235,11 @@ class TestStackHiding(TestCase):
     def test_fixture(self):
         current_state = is_stack_hidden()
         fixture = StackHidingFixture(not current_state)
-        with fixture:
+        fixture.setUp()
+        try:
             self.assertThat(self.modules, StackHidden(not current_state))
+        finally:
+            fixture.cleanUp()
         self.assertThat(self.modules, StackHidden(current_state))
 
 
