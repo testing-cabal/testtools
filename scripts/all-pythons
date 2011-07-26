@@ -32,7 +32,7 @@ ROOT = os.path.dirname(os.path.dirname(__file__))
 def run_for_python(version, result):
     result.time(now())
     python = 'python%s' % (version,)
-    test = PlaceHolder(python)
+    test = PlaceHolder(''.join(c for c in python if c != '.'))
     process = subprocess.Popen(
         '%s -c pass' % (python,), shell=True,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
