@@ -22,6 +22,7 @@ Contents:
    for-framework-folk
    hacking
    Changes to testtools <news>
+   API reference documentation <http://mumak.net/testtools/apidocs/>
 
 Indices and tables
 ==================
