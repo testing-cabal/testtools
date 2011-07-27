@@ -421,7 +421,7 @@ class MatchesException(Matcher):
         Matcher.__init__(self)
         self.expected = exception
         if istext(value_re):
-            value_re = AfterPreproccessing(str, MatchesRegex(value_re))
+            value_re = AfterPreproccessing(str, MatchesRegex(value_re), False)
         self.value_re = value_re
         self._is_instance = type(self.expected) not in classtypes()
 
