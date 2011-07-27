@@ -20,6 +20,8 @@ Changes
 * ``MatchesRegex`` mismatch now says "<value> does not match <regex>" rather
   than "<regex> did not match <value>"
 
+* Tests that run with ``AsynchronousDeferredRunTest`` now have the ``reactor``
+  attribute set to the running reactor. (Jonathan Lange, #720749)
 
 Improvements
 ------------
