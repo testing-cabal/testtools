@@ -736,9 +736,10 @@ class TestAfterPreprocessing(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ("1 != 0: after <function parity> on 2",
-         2,
+        ("1 != 0: after <function parity> on 2", 2,
          AfterPreprocessing(parity, Equals(1))),
+        ("1 != 0", 2,
+         AfterPreprocessing(parity, Equals(1), annotate=False)),
         ]
 
 

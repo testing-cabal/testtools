@@ -824,9 +824,19 @@ class AfterPreprocessing(object):
           return AfterPreprocessing(_read, Equals(content))
     """
 
-    def __init__(self, preprocessor, matcher):
+    def __init__(self, preprocessor, matcher, annotate=True):
+        """Create an AfterPreprocessing matcher.
+
+        :param preprocessor: A function called with the matchee before
+            matching.
+        :param matcher: What to match the preprocessed matchee against.
+        :param annotate: Whether or not to annotate the matcher with
+            something explaining how we transformed the matchee. Defaults
+            to True.
+        """
         self.preprocessor = preprocessor
         self.matcher = matcher
+        self.annotate = annotate
 
     def _str_preprocessor(self):
         if isinstance(self.preprocessor, types.FunctionType):
@@ -839,9 +849,13 @@ class AfterPreprocessing(object):
 
     def match(self, value):
         after = self.preprocessor(value)
-        return Annotate(
-            "after %s on %r" % (self._str_preprocessor(), value),
-            self.matcher).match(after)
+        if self.annotate:
+            matcher = Annotate(
+                "after %s on %r" % (self._str_preprocessor(), value),
+                self.matcher)
+        else:
+            matcher = self.matcher
+        return matcher.match(after)
 
 # This is the old, deprecated. spelling of the name, kept for backwards
 # compatibility.
