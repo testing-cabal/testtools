@@ -36,6 +36,18 @@ class TestExpectedException(TestCase):
         else:
             self.fail('AssertionError not raised.')
 
+    def test_raise_on_general_mismatch(self):
+        matcher = AfterPreprocessing(str, Equals('test'))
+        value_error = ValueError('mismatch')
+        try:
+            with ExpectedException(ValueError, matcher):
+                raise value_error
+        except AssertionError:
+            e = sys.exc_info()[1]
+            self.assertEqual(matcher.match(value_error).describe(), str(e))
+        else:
+            self.fail('AssertionError not raised.')
+
     def test_raise_on_error_mismatch(self):
         try:
             with ExpectedException(TypeError, 'tes.'):
