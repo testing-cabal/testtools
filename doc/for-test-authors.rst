@@ -160,9 +160,10 @@ particular errors.  ``ExpectedException`` does just that.  For example::
           silly.square('orange')
 
 The first argument to ``ExpectedException`` is the type of exception you
-expect to see raised.  The second argument is an optional regular expression,
-if provided, the ``str()`` of the raised exception must match the regular
-expression.
+expect to see raised.  The second argument is optional, and can be either a
+regular expression or a matcher. If it is a regular expression, the ``str()``
+of the raised exception must match the regular expression. If it is a matcher,
+then the raised exception object must match it.
 
 
 assertIn, assertNotIn
