@@ -1,15 +1,21 @@
-# Copyright (c) 2008 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
 
 """Helpers for tests."""
 
-import sys
-
-__metaclass__ = type
 __all__ = [
     'LoggingResult',
     ]
 
+import sys
+
+from fixtures import FunctionFixture
+
 from testtools import TestResult
+from testtools.helpers import (
+    safe_hasattr,
+    try_import,
+    )
+from testtools import runtest
 
 
 # GZ 2010-08-12: Don't do this, pointlessly creates an exc_info cycle
@@ -67,6 +73,30 @@ class LoggingResult(TestResult):
         self._events.append(('time', a_datetime))
         super(LoggingResult, self).time(a_datetime)
 
-# Note, the following three classes are different to LoggingResult by
-# being fully defined exact matches rather than supersets.
-from testtools.testresult.doubles import *
+
+def is_stack_hidden():
+    return safe_hasattr(runtest, '__unittest')
+
+
+def hide_testtools_stack(should_hide=True):
+    modules = [
+        'testtools.matchers',
+        'testtools.runtest',
+        'testtools.testcase',
+        ]
+    result = is_stack_hidden()
+    for module_name in modules:
+        module = try_import(module_name)
+        if should_hide:
+            setattr(module, '__unittest', True)
+        else:
+            try:
+                delattr(module, '__unittest')
+            except AttributeError:
+                # Attribute already doesn't exist. Our work here is done.
+                pass
+    return result
+
+
+StackHidingFixture = lambda x: FunctionFixture(
+    lambda: hide_testtools_stack(x), hide_testtools_stack)

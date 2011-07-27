@@ -198,3 +198,8 @@ class RunTest(object):
                 self._exceptions.append(e)
                 return self.exception_caught
         raise e
+
+
+# Signal that this is part of the testing framework, and that code from this
+# should not normally appear in tracebacks.
+__unittest = True

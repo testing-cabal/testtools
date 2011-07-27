@@ -182,5 +182,13 @@ ConcurrentTestSuite uses the helper to get a number of separate runnable
 objects with a run(result), runs them all in threads using the
 ThreadsafeForwardingResult to coalesce their activity.
 
+FixtureSuite
+------------
+
+A test suite that sets up a fixture_ before running any tests, and then tears
+it down after all of the tests are run. The fixture is *not* made available to
+any of the tests.
+
 .. _`testtools API docs`: http://mumak.net/testtools/apidocs/
 .. _unittest: http://docs.python.org/library/unittest.html
+.. _fixture: http://pypi.python.org/pypi/fixtures

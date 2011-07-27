@@ -1,4 +1,4 @@
-# Copyright (c) 2010 testtools developers. See LICENSE for details.
+# Copyright (c) 2010-2011 testtools developers. See LICENSE for details.
 
 """Tests for the DeferredRunTest single test execution logic."""
 
@@ -14,7 +14,6 @@ from testtools.content import (
     text_content,
     )
 from testtools.helpers import try_import
-from testtools.tests.helpers import ExtendedTestResult
 from testtools.matchers import (
     Equals,
     KeysEqual,
@@ -22,6 +21,7 @@ from testtools.matchers import (
     Raises,
     )
 from testtools.runtest import RunTest
+from testtools.testresult.doubles import ExtendedTestResult
 from testtools.tests.test_spinner import NeedsTwistedTestCase
 
 assert_fails_with = try_import('testtools.deferredruntest.assert_fails_with')
