@@ -383,11 +383,11 @@ class TestTestResult(TestCase):
             result.errors[0][1],
             DocTestMatches(
                 'Traceback (most recent call last):\n'
-                '  File "testtools...runtest.py", line ..., in _run_user\n'
+                '  File "...testtools...runtest.py", line ..., in _run_user\n'
                 '    return fn(*args, **kwargs)\n'
-                '  File "testtools...testcase.py", line ..., in _run_test_method\n'
+                '  File "...testtools...testcase.py", line ..., in _run_test_method\n'
                 '    return self._get_test_method()()\n'
-                '  File "testtools...tests...test_testresult.py", line ..., in error\n'
+                '  File "...testtools...tests...test_testresult.py", line ..., in error\n'
                 '    1/0\n'
                 'ZeroDivisionError: ...\n',
                 doctest.ELLIPSIS | doctest.REPORT_UDIFF))
@@ -395,13 +395,17 @@ class TestTestResult(TestCase):
     def test_traceback_formatting_with_stack_hidden(self):
         result = self.makeResult()
         test = make_erroring_test()
-        with StackHidingFixture(True):
+        fixture = StackHidingFixture(True)
+        fixture.setUp()
+        try:
             test.run(result)
+        finally:
+            fixture.cleanUp()
         self.assertThat(
             result.errors[0][1],
             DocTestMatches(
                 'Traceback (most recent call last):\n'
-                '  File "testtools/tests/test_testresult.py", line ..., in error\n'
+                '  File "...testtools...tests...test_testresult.py", line ..., in error\n'
                 '    1/0\n'
                 'ZeroDivisionError: ...\n',
                 doctest.ELLIPSIS))
@@ -595,13 +599,17 @@ class TestTextTestResult(TestCase):
             DocTestMatches("...\nFAILED (failures=1)\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_shows_details(self):
-        with StackHidingFixture(True):
+        fixture = StackHidingFixture(True)
+        fixture.setUp()
+        try:
             self.result.startTestRun()
             make_erroring_test().run(self.result)
             make_unexpectedly_successful_test().run(self.result)
             make_failing_test().run(self.result)
             self.reset_output()
             self.result.stopTestRun()
+        finally:
+            fixture.cleanUp()
         self.assertThat(self.getvalue(),
             DocTestMatches("""...======================================================================
 ERROR: testtools.tests.test_testresult.Test.error

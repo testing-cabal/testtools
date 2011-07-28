@@ -18,6 +18,7 @@ from testtools import (
     skipUnless,
     testcase,
     )
+from testtools.compat import _b
 from testtools.matchers import (
     Equals,
     MatchesException,
@@ -714,7 +715,7 @@ class TestWithDetails(TestCase):
 
     def get_content(self):
         return content.Content(
-            content.ContentType("text", "foo"), lambda: ['foo'])
+            content.ContentType("text", "foo"), lambda: [_b('foo')])
 
 
 class TestExpectedFailure(TestWithDetails):

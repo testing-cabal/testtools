@@ -10,10 +10,10 @@ Steps:
  5. Create a new 'next' milestone
  6. Mark all "Fix committed" bugs in the milestone as "Fix released"
 
-Assumes that NEWS is in the same directory, that the release sections are
+Assumes that NEWS is in the parent directory, that the release sections are
 underlined with '~' and the subsections are underlined with '-'.
 
-Assumes that this file is in the top-level of a testtools tree that has
+Assumes that this file is in the 'scripts' directory a testtools tree that has
 already had a tarball built and uploaded with 'python setup.py sdist upload
 --sign'.
 """
@@ -71,7 +71,9 @@ LOG = configure_logging()
 
 def get_path(relpath):
     """Get the absolute path for something relative to this file."""
-    return os.path.abspath(os.path.join(os.path.dirname(__file__), relpath))
+    return os.path.abspath(
+        os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), relpath))
 
 
 def assign_fix_committed_to_next(testtools, next_milestone):
