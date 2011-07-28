@@ -16,7 +16,6 @@ __all__ = [
 
 import copy
 import itertools
-import re
 import sys
 import types
 import unittest
@@ -29,6 +28,7 @@ from testtools.compat import advance_iterator
 from testtools.matchers import (
     Annotate,
     Equals,
+    MatchesException,
     Is,
     Not,
     )
@@ -754,7 +754,7 @@ class ExpectedException:
     exception is raised, an AssertionError will be raised.
     """
 
-    def __init__(self, exc_type, value_re):
+    def __init__(self, exc_type, value_re=None):
         """Construct an `ExpectedException`.
 
         :param exc_type: The type of exception to expect.
@@ -772,9 +772,11 @@ class ExpectedException:
             raise AssertionError('%s not raised.' % self.exc_type.__name__)
         if exc_type != self.exc_type:
             return False
-        if not re.match(self.value_re, str(exc_value)):
-            raise AssertionError('"%s" does not match "%s".' %
-                                 (str(exc_value), self.value_re))
+        if self.value_re:
+            matcher = MatchesException(self.exc_type, self.value_re)
+            mismatch = matcher.match((exc_type, exc_value, traceback))
+            if mismatch:
+                raise AssertionError(mismatch.describe())
         return True
 
 

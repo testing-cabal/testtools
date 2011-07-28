@@ -258,10 +258,8 @@ class TestMatchesExceptionTypeReInterface(TestCase, TestMatchersInterface):
          MatchesException(Exception, 'fo.'))
         ]
     describe_examples = [
-        # XXX: This is kind of a crappy message. Need to change
-        # AfterPreproccessing.
-        ("'bar' does not match 'fo.': after %r on %r"
-         % (str, error_bar[1]), error_bar, MatchesException(ValueError, "fo.")),
+        ("'bar' does not match 'fo.'",
+         error_bar, MatchesException(ValueError, "fo.")),
         ]
 
 
@@ -736,9 +734,10 @@ class TestAfterPreprocessing(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ("1 != 0: after <function parity> on 2",
-         2,
+        ("1 != 0: after <function parity> on 2", 2,
          AfterPreprocessing(parity, Equals(1))),
+        ("1 != 0", 2,
+         AfterPreprocessing(parity, Equals(1), annotate=False)),
         ]
 
 
