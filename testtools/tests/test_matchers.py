@@ -278,7 +278,7 @@ class TestMatchesExceptionTypeMatcherInterface(TestCase, TestMatchersInterface):
          MatchesException(Exception, Equals('foo')))
         ]
     describe_examples = [
-        ("5 != ValueError('bar',)",
+        ("5 != %r" % (error_bar[1],),
          error_bar, MatchesException(ValueError, Equals(5))),
         ]
 

@@ -7,6 +7,7 @@ from testtools import (
     content,
     content_type,
     )
+from testtools.compat import _b, _u
 from testtools.helpers import try_import
 from testtools.testresult.doubles import (
     ExtendedTestResult,
@@ -52,7 +53,7 @@ class TestFixtureSupport(TestCase):
             def setUp(self):
                 fixtures.Fixture.setUp(self)
                 self.addCleanup(delattr, self, 'content')
-                self.content = ['content available until cleanUp']
+                self.content = [_b('content available until cleanUp')]
                 self.addDetail('content',
                     content.Content(content_type.UTF8_TEXT, self.get_content))
             def get_content(self):
@@ -63,13 +64,13 @@ class TestFixtureSupport(TestCase):
                 self.useFixture(fixture)
                 # Add a colliding detail (both should show up)
                 self.addDetail('content',
-                    content.Content(content_type.UTF8_TEXT, lambda:['foo']))
+                    content.Content(content_type.UTF8_TEXT, lambda:[_b('foo')]))
         result = ExtendedTestResult()
         SimpleTest('test_foo').run(result)
         self.assertEqual('addSuccess', result._events[-2][0])
         details = result._events[-2][2]
         self.assertEqual(['content', 'content-1'], sorted(details.keys()))
-        self.assertEqual('foo', ''.join(details['content'].iter_text()))
+        self.assertEqual('foo', _u('').join(details['content'].iter_text()))
         self.assertEqual('content available until cleanUp',
             ''.join(details['content-1'].iter_text()))
 

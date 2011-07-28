@@ -94,5 +94,8 @@ class FixtureSuite(unittest.TestSuite):
         self._fixture = fixture
 
     def run(self, result):
-        with self._fixture:
+        self._fixture.setUp()
+        try:
             super(FixtureSuite, self).run(result)
+        finally:
+            self._fixture.cleanUp()
