@@ -258,7 +258,7 @@ class TestMatchesExceptionTypeReInterface(TestCase, TestMatchersInterface):
          MatchesException(Exception, 'fo.'))
         ]
     describe_examples = [
-        ("'bar' does not match 'fo.'",
+        ("'bar' does not match /fo./",
          error_bar, MatchesException(ValueError, "fo.")),
         ]
 
@@ -639,7 +639,8 @@ class TestMatchesRegex(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ("'c' does not match 'a|b'", 'c', MatchesRegex('a|b')),
+        ("'c' does not match /a|b/", 'c', MatchesRegex('a|b')),
+        ("'c' does not match /a\d/", 'c', MatchesRegex(r'a\d')),
         ]
 
 

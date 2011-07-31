@@ -17,8 +17,9 @@ Changes
 * ``gather_details`` takes two dicts, rather than two detailed objects.
   (Jonathan Lange, #801027)
 
-* ``MatchesRegex`` mismatch now says "<value> does not match <regex>" rather
-  than "<regex> did not match <value>"
+* ``MatchesRegex`` mismatch now says "<value> does not match /<regex>/" rather
+  than "<regex> did not match <value>". The regular expression contains fewer
+  backslashes too. (Jonathan Lange, #818079)
 
 * Tests that run with ``AsynchronousDeferredRunTest`` now have the ``reactor``
   attribute set to the running reactor. (Jonathan Lange, #720749)

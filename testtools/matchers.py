@@ -730,7 +730,8 @@ class MatchesRegex(object):
 
     def match(self, value):
         if not re.match(self.pattern, value, self.flags):
-            return Mismatch("%r does not match %r" % (value, self.pattern))
+            return Mismatch("%r does not match /%s/" % (
+                    value, self.pattern))
 
 
 class MatchesSetwise(object):

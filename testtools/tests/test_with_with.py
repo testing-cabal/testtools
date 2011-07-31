@@ -32,7 +32,7 @@ class TestExpectedException(TestCase):
                 raise ValueError('mismatch')
         except AssertionError:
             e = sys.exc_info()[1]
-            self.assertEqual("'mismatch' does not match 'tes.'", str(e))
+            self.assertEqual("'mismatch' does not match /tes./", str(e))
         else:
             self.fail('AssertionError not raised.')
 
