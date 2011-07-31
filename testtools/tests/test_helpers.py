@@ -16,7 +16,6 @@ from testtools.tests.helpers import (
     hide_testtools_stack,
     is_stack_hidden,
     safe_hasattr,
-    StackHidingFixture,
     )
 
 
@@ -231,16 +230,6 @@ class TestStackHiding(TestCase):
     def test_show_stack(self):
         hide_testtools_stack(False)
         self.assertThat(self.modules, StackHidden(False))
-
-    def test_fixture(self):
-        current_state = is_stack_hidden()
-        fixture = StackHidingFixture(not current_state)
-        fixture.setUp()
-        try:
-            self.assertThat(self.modules, StackHidden(not current_state))
-        finally:
-            fixture.cleanUp()
-        self.assertThat(self.modules, StackHidden(current_state))
 
 
 def test_suite():

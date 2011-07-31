@@ -6,15 +6,16 @@ __metaclass__ = type
 
 import unittest
 
-from fixtures import FunctionFixture
-
 from testtools import (
     ConcurrentTestSuite,
     iterate_tests,
     TestCase,
     )
+from testtools.helpers import try_import
 from testtools.testsuite import FixtureSuite
 from testtools.tests.helpers import LoggingResult
+
+FunctionFixture = try_import('fixtures.FunctionFixture')
 
 
 class TestConcurrentTestSuiteRun(TestCase):
@@ -48,6 +49,11 @@ class TestConcurrentTestSuiteRun(TestCase):
 
 
 class TestFixtureSuite(TestCase):
+
+    def setUp(self):
+        super(TestFixtureSuite, self).setUp()
+        if FunctionFixture is None:
+            self.skip("Need fixtures")
 
     def test_fixture_suite(self):
         log = []

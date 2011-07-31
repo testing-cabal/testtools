@@ -46,7 +46,7 @@ from testtools.matchers import (
 from testtools.tests.helpers import (
     an_exc_info,
     LoggingResult,
-    StackHidingFixture,
+    run_with_stack_hidden,
     )
 from testtools.testresult.doubles import (
     Python26TestResult,
@@ -395,12 +395,7 @@ class TestTestResult(TestCase):
     def test_traceback_formatting_with_stack_hidden(self):
         result = self.makeResult()
         test = make_erroring_test()
-        fixture = StackHidingFixture(True)
-        fixture.setUp()
-        try:
-            test.run(result)
-        finally:
-            fixture.cleanUp()
+        run_with_stack_hidden(True, test.run, result)
         self.assertThat(
             result.errors[0][1],
             DocTestMatches(
@@ -599,17 +594,14 @@ class TestTextTestResult(TestCase):
             DocTestMatches("...\nFAILED (failures=1)\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_shows_details(self):
-        fixture = StackHidingFixture(True)
-        fixture.setUp()
-        try:
+        def run_tests():
             self.result.startTestRun()
             make_erroring_test().run(self.result)
             make_unexpectedly_successful_test().run(self.result)
             make_failing_test().run(self.result)
             self.reset_output()
             self.result.stopTestRun()
-        finally:
-            fixture.cleanUp()
+        run_with_stack_hidden(True, run_tests)
         self.assertThat(self.getvalue(),
             DocTestMatches("""...======================================================================
 ERROR: testtools.tests.test_testresult.Test.error
