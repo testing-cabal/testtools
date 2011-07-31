@@ -13,7 +13,7 @@ class FullStackTestSuite(TestSuite):
     def run(self, result):
         was_hidden = hide_testtools_stack(False)
         try:
-            return super(TestSuite, self).run(result)
+            return super(FullStackTestSuite, self).run(result)
         finally:
             hide_testtools_stack(was_hidden)
 
