@@ -392,7 +392,7 @@ class TestCase(unittest.TestCase):
 
         :param matchee: An object to match with matcher.
         :param matcher: An object meeting the testtools.Matcher protocol.
-        :raises self.failureException: When matcher does not match thing.
+        :raises MismatchError: When matcher does not match thing.
         """
         # XXX: Should this take an optional 'message' parameter? Would kind of
         # make sense. The hamcrest one does.

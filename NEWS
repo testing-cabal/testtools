@@ -14,6 +14,12 @@ Changes
   now deprecated.  Please stop using it.
   (Jonathan Lange, #813460)
 
+* ``assertThat`` raises ``MismatchError`` instead of
+  ``TestCase.failureException``.  ``MismatchError`` is a subclass of
+  ``AssertionError``, so in most cases this change will not matter. However,
+  if ``self.failureException`` has been set to a non-default value, then
+  mismatches will become test errors rather than test failures.
+
 * ``gather_details`` takes two dicts, rather than two detailed objects.
   (Jonathan Lange, #801027)
 
