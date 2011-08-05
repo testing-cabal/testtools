@@ -167,17 +167,17 @@ class _NonManglingOutputChecker(doctest.OutputChecker):
     result may well not be destined for printing to stdout, this is no good
     for us. To get a unicode return as before, the method is monkey patched if
     `doctest._encoding` exists.
-   
+
     Python 3 has a different problem. For some reason both inputs are encoded
     to ascii with 'backslashreplace', making an escaped string matches its
     unescaped form. Overriding the offending `OutputChecker._toAscii` method
     is sufficient to revert this.
     """
-    
+
     def _toAscii(self, s):
         """Return `s` unchanged rather than mangling it to ascii"""
         return s
-    
+
     # Only do this overriding hackery if doctest has a broken _input function
     if getattr(doctest, "_encoding", None) is not None:
         from types import FunctionType as __F
