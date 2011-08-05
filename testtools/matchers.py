@@ -129,6 +129,33 @@ class Mismatch(object):
             id(self), self.__dict__)
 
 
+class MismatchError(AssertionError):
+    """Raised when a mismatch occurs."""
+
+    # This class exists to work around
+    # <https://bugs.launchpad.net/testtools/+bug/804127>.  It provides a
+    # guaranteed way of getting a readable exception, no matter what crazy
+    # characters are in the matchee, matcher or mismatch.
+
+    def __init__(self, matchee, matcher, mismatch, verbose=False):
+        # Have to use old-style upcalling for Python 2.4 and 2.5
+        # compatibility.
+        AssertionError.__init__(self)
+        self.matchee = matchee
+        self.matcher = matcher
+        self.mismatch = mismatch
+        self.verbose = verbose
+
+    def __str__(self):
+        difference = self.mismatch.describe()
+        if self.verbose:
+            return (
+                'Match failed. Matchee: "%s"\nMatcher: %s\nDifference: %s\n'
+                % (self.matchee, self.matcher, difference))
+        else:
+            return difference
+
+
 class MismatchDecorator(object):
     """Decorate a ``Mismatch``.
 

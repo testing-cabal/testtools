@@ -29,6 +29,7 @@ from testtools.matchers import (
     Annotate,
     Equals,
     MatchesException,
+    MismatchError,
     Is,
     Not,
     )
@@ -406,13 +407,7 @@ class TestCase(unittest.TestCase):
                 full_name = "%s-%d" % (name, suffix)
                 suffix += 1
             self.addDetail(full_name, content)
-        if verbose:
-            message = (
-                'Match failed. Matchee: "%s"\nMatcher: %s\nDifference: %s\n'
-                % (matchee, matcher, mismatch.describe()))
-        else:
-            message = mismatch.describe()
-        self.fail(message)
+        raise MismatchError(matchee, matcher, mismatch, verbose)
 
     def defaultTestResult(self):
         return TestResult()

@@ -12,6 +12,8 @@ from testtools import (
     )
 from testtools.compat import (
     StringIO,
+    to_text,
+    _u,
     )
 from testtools.matchers import (
     AfterPreprocessing,
@@ -36,6 +38,7 @@ from testtools.matchers import (
     MatchesStructure,
     Mismatch,
     MismatchDecorator,
+    MismatchError,
     Not,
     NotEquals,
     Raises,
@@ -59,6 +62,62 @@ class TestMismatch(TestCase):
         self.assertThat(mismatch.describe,
             Raises(MatchesException(NotImplementedError)))
         self.assertEqual({}, mismatch.get_details())
+
+
+class TestMismatchError(TestCase):
+
+    def test_is_assertion_error(self):
+        # MismatchError is an AssertionError, so that most of the time, it
+        # looks like a test failure, rather than an error.
+        def raise_mismatch_error():
+            raise MismatchError(2, Equals(3), Equals(3).match(2))
+        self.assertRaises(AssertionError, raise_mismatch_error)
+
+    def test_default_description_is_mismatch(self):
+        mismatch = Equals(3).match(2)
+        e = MismatchError(2, Equals(3), mismatch)
+        self.assertEqual(mismatch.describe(), str(e))
+
+    def test_default_description_unicode(self):
+        matchee = _u('\xa7')
+        matcher = Equals(_u('a'))
+        mismatch = matcher.match(matchee)
+        e = MismatchError(matchee, matcher, mismatch)
+        self.assertEqual(mismatch.describe(), str(e))
+
+    def test_verbose_description(self):
+        matchee = 2
+        matcher = Equals(3)
+        mismatch = matcher.match(2)
+        e = MismatchError(matchee, matcher, mismatch, True)
+        expected = (
+            'Match failed. Matchee: "%s"\n'
+            'Matcher: %s\n'
+            'Difference: %s\n' % (
+                matchee,
+                matcher,
+                matcher.match(matchee).describe(),
+                ))
+        self.assertEqual(expected, str(e))
+
+    def test_verbose_unicode(self):
+        # When assertThat is given matchees or matchers that contain non-ASCII
+        # unicode strings, we can still provide a meaningful error.
+        matchee = _u('\xa7')
+        matcher = Equals(_u('a'))
+        mismatch = matcher.match(matchee)
+        expected = (
+            'Match failed. Matchee: "%s"\n'
+            'Matcher: %s\n'
+            'Difference: %s\n' % (
+                matchee,
+                matcher,
+                mismatch.describe(),
+                ))
+        e = MismatchError(matchee, matcher, mismatch, True)
+        # XXX: Using to_text rather than str because, on Python 2, str will
+        # raise UnicodeEncodeError.
+        self.assertEqual(expected, to_text(e))
 
 
 class TestMatchersInterface(object):
