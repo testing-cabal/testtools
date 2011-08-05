@@ -18,7 +18,11 @@ from testtools import (
     skipUnless,
     testcase,
     )
-from testtools.compat import _b
+from testtools.compat import (
+    _b,
+    _exception_to_text,
+    _u,
+    )
 from testtools.matchers import (
     Equals,
     MatchesException,
@@ -481,6 +485,24 @@ class TestAssertions(TestCase):
                 ))
         self.assertFails(
             expected, self.assertThat, matchee, matcher, verbose=True)
+
+    def test_assertThat_verbose_unicode(self):
+        # When assertThat is given matchees or matchers that contain non-ASCII
+        # unicode strings, we can still provide a meaningful error.
+        matchee = _u('\xa7')
+        matcher = Equals(_u('a'))
+        expected = (
+            'Match failed. Matchee: "%s"\n'
+            'Matcher: %s\n'
+            'Difference: %s\n' % (
+                matchee,
+                matcher,
+                matcher.match(matchee).describe(),
+                ))
+        e = self.assertRaises(
+            self.failureException, self.assertThat, matchee, matcher,
+            verbose=True)
+        self.assertEqual(expected, _exception_to_text(e))
 
     def test_assertEqual_nice_formatting(self):
         message = "These things ought not be equal."
