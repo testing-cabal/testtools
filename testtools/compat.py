@@ -143,8 +143,13 @@ def unicode_output_stream(stream):
                 stream.newlines, stream.line_buffering)
         except AttributeError:
             pass
-    return writer(stream, "replace")    
+    return writer(stream, "replace")
 
+
+try:
+    to_text = unicode
+except NameError:
+    to_text = str
 
 # The default source encoding is actually "iso-8859-1" until Python 2.5 but
 # using non-ascii causes a deprecation warning in 2.4 and it's cleaner to
@@ -214,7 +219,7 @@ def _get_exception_encoding():
 def _exception_to_text(evalue):
     """Try hard to get a sensible text value out of an exception instance"""
     try:
-        return unicode(evalue)
+        return to_text(evalue)
     except KeyboardInterrupt:
         raise
     except:
