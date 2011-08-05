@@ -35,7 +35,10 @@ Improvements
 * All public matchers are now in ``testtools.matchers.__all__``.
   (Jonathan Lange, #784859)
 
-* assertThat output is much less verbose, displaying only what the mismatch
+* ``assertThat`` can actually display mismatches and matchers that contain
+  extended unicode characters. (Jonathan Lange, Martin [gz], #804127)
+
+* ``assertThat`` output is much less verbose, displaying only what the mismatch
   tells us to display. Old-style verbose output can be had by passing
   ``verbose=True`` to assertThat. (Jonathan Lange, #675323, #593190)
 
