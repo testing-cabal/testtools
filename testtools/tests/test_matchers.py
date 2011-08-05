@@ -120,13 +120,12 @@ class TestDocTestMatchesInterfaceUnicode(TestCase, TestMatchersInterface):
     matches_matches = [_u("\xa7"), _u("\xa7 more\n")]
     matches_mismatches = ["\\xa7", _u("more \xa7"), _u("\n\xa7")]
 
-    str_examples = [("DocTestMatches(%s'\\xa7\\n')" % (
-            ["u", ""][str_is_unicode]),
+    str_examples = [("DocTestMatches(%r)" % (_u("\xa7\n"),),
         DocTestMatches(_u("\xa7"))),
         ]
 
     describe_examples = [(
-        "Expected:\n    \\xa7\nGot:\n    a",
+        _u("Expected:\n    \xa7\nGot:\n    a\n"),
         "a",
         DocTestMatches(_u("\xa7"), doctest.ELLIPSIS))]
 
