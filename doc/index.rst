@@ -15,12 +15,14 @@ also ports recent unittest changes all the way back to Python 2.4.
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    overview
    for-test-authors
    for-framework-folk
    hacking
+   Changes to testtools <news>
+   API reference documentation <http://mumak.net/testtools/apidocs/>
 
 Indices and tables
 ==================

@@ -160,9 +160,10 @@ particular errors.  ``ExpectedException`` does just that.  For example::
           silly.square('orange')
 
 The first argument to ``ExpectedException`` is the type of exception you
-expect to see raised.  The second argument is an optional regular expression,
-if provided, the ``str()`` of the raised exception must match the regular
-expression.
+expect to see raised.  The second argument is optional, and can be either a
+regular expression or a matcher. If it is a regular expression, the ``str()``
+of the raised exception must match the regular expression. If it is a matcher,
+then the raised exception object must match it.
 
 
 assertIn, assertNotIn
@@ -485,7 +486,7 @@ example::
       def HasFileContent(content):
           def _read(path):
               return open(path).read()
-          return AfterPreproccessing(_read, Equals(content))
+          return AfterPreprocessing(_read, Equals(content))
       self.assertThat('/tmp/foo.txt', PathHasFileContent("Hello world!"))
 
 
@@ -539,6 +540,21 @@ For example::
       self.assertThat(42, MatchesAny(Equals(5), Not(Equals(6))))
 
 
+AllMatch
+~~~~~~~~
+
+Matches many values against a single matcher.  Can be used to make sure that
+many things all meet the same condition::
+
+  def test_all_match_example(self):
+      self.assertThat([2, 3, 5, 7], AllMatch(LessThan(10)))
+
+If the match fails, then all of the values that fail to match will be included
+in the error message.
+
+In some ways, this is the converse of MatchesAll_.
+
+
 MatchesListwise
 ~~~~~~~~~~~~~~~
 
@@ -582,6 +598,16 @@ It's much easier to understand in Python than in English::
       foo.a = 1
       foo.b = 2
       matcher = MatchesStructure(a=Equals(1), b=Equals(2))
+      self.assertThat(foo, matcher)
+
+Since all of the matchers used were ``Equals``, we could also write this using
+the ``byEquality`` helper::
+
+  def test_matches_structure_example(self):
+      foo = Foo()
+      foo.a = 1
+      foo.b = 2
+      matcher = MatchesStructure.byEquality(a=1, b=2)
       self.assertThat(foo, matcher)
 
 ``MatchesStructure.from_example`` takes an object and a list of attributes and
@@ -728,21 +754,16 @@ When the test runs, testtools will show you something like this::
   ======================================================================
   ERROR: exampletest.TestSomething.test_thingy
   ----------------------------------------------------------------------
-  Text attachment: arbitrary-color-name
-  ------------
-  blue
-  ------------
-  Text attachment: traceback
-  ------------
+  arbitrary-color-name: {{{blue}}}
+
   Traceback (most recent call last):
-    ...
     File "exampletest.py", line 8, in test_thingy
       1 / 0 # Gratuitous error!
   ZeroDivisionError: integer division or modulo by zero
   ------------
   Ran 1 test in 0.030s
 
-As you can see, the detail is included as a "Text attachment", here saying
+As you can see, the detail is included as an attachment, here saying
 that our arbitrary-color-name is "blue".
 
 
@@ -1124,6 +1145,14 @@ You can do::
   StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
 
 
+Safe attribute testing
+----------------------
+
+``hasattr`` is broken_ on many versions of Python.  testtools provides
+``safe_hasattr``, which can be used to safely test whether an object has a
+particular attribute.
+
+
 .. _testrepository: https://launchpad.net/testrepository
 .. _Trial: http://twistedmatrix.com/documents/current/core/howto/testing.html
 .. _nose: http://somethingaboutorange.com/mrl/projects/nose/
@@ -1138,3 +1167,4 @@ You can do::
 .. _`testtools API docs`: http://mumak.net/testtools/apidocs/
 .. _Distutils: http://docs.python.org/library/distutils.html
 .. _`setup configuration`: http://docs.python.org/distutils/configfile.html
+.. _broken: http://chipaca.com/post/3210673069/hasattr-17-less-harmful

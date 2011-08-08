@@ -18,17 +18,20 @@ from testtools import (
     skipUnless,
     testcase,
     )
+from testtools.compat import _b
 from testtools.matchers import (
     Equals,
     MatchesException,
     Raises,
     )
-from testtools.tests.helpers import (
-    an_exc_info,
-    LoggingResult,
+from testtools.testresult.doubles import (
     Python26TestResult,
     Python27TestResult,
     ExtendedTestResult,
+    )
+from testtools.tests.helpers import (
+    an_exc_info,
+    LoggingResult,
     )
 try:
     exec('from __future__ import with_statement')
@@ -456,9 +459,28 @@ class TestAssertions(TestCase):
         self.assertEqual([
             ('match', "foo"),
             ('describe_diff', "foo"),
-            ('__str__',),
             ], calls)
         self.assertFalse(result.wasSuccessful())
+
+    def test_assertThat_output(self):
+        matchee = 'foo'
+        matcher = Equals('bar')
+        expected = matcher.match(matchee).describe()
+        self.assertFails(expected, self.assertThat, matchee, matcher)
+
+    def test_assertThat_verbose_output(self):
+        matchee = 'foo'
+        matcher = Equals('bar')
+        expected = (
+            'Match failed. Matchee: "%s"\n'
+            'Matcher: %s\n'
+            'Difference: %s\n' % (
+                matchee,
+                matcher,
+                matcher.match(matchee).describe(),
+                ))
+        self.assertFails(
+            expected, self.assertThat, matchee, matcher, verbose=True)
 
     def test_assertEqual_nice_formatting(self):
         message = "These things ought not be equal."
@@ -467,20 +489,11 @@ class TestAssertions(TestCase):
              'Major': 'A military officer, ranked below colonel',
              'Blair': 'To shout loudly',
              'Brown': 'The colour of healthy human faeces'}
-        expected_error = '\n'.join(
-            [message,
-             'not equal:',
-             'a = %s' % pformat(a),
-             'b = %s' % pformat(b),
-             ''])
         expected_error = '\n'.join([
-            'Match failed. Matchee: "%r"' % b,
-            'Matcher: Annotate(%r, Equals(%r))' % (message, a),
-            'Difference: !=:',
+            '!=:',
             'reference = %s' % pformat(a),
             'actual = %s' % pformat(b),
             ': ' + message,
-            ''
             ])
         self.assertFails(expected_error, self.assertEqual, a, b, message)
         self.assertFails(expected_error, self.assertEquals, a, b, message)
@@ -489,12 +502,7 @@ class TestAssertions(TestCase):
     def test_assertEqual_formatting_no_message(self):
         a = "cat"
         b = "dog"
-        expected_error = '\n'.join([
-            'Match failed. Matchee: "dog"',
-            'Matcher: Equals(\'cat\')',
-            'Difference: \'cat\' != \'dog\'',
-            ''
-            ])
+        expected_error = "'cat' != 'dog'"
         self.assertFails(expected_error, self.assertEqual, a, b)
         self.assertFails(expected_error, self.assertEquals, a, b)
         self.assertFails(expected_error, self.failUnlessEqual, a, b)
@@ -502,24 +510,14 @@ class TestAssertions(TestCase):
     def test_assertIsNone(self):
         self.assertIsNone(None)
 
-        expected_error = '\n'.join([
-            'Match failed. Matchee: "0"',
-            'Matcher: Is(None)',
-            'Difference: None is not 0',
-            ''
-            ])
+        expected_error = 'None is not 0'
         self.assertFails(expected_error, self.assertIsNone, 0)
 
     def test_assertIsNotNone(self):
         self.assertIsNotNone(0)
         self.assertIsNotNone("0")
 
-        expected_error = '\n'.join([
-            'Match failed. Matchee: "None"',
-            'Matcher: Not(Is(None))',
-            'Difference: None matches Is(None)',
-            ''
-            ])
+        expected_error = 'None matches Is(None)'
         self.assertFails(expected_error, self.assertIsNotNone, None)
 
 
@@ -717,7 +715,7 @@ class TestWithDetails(TestCase):
 
     def get_content(self):
         return content.Content(
-            content.ContentType("text", "foo"), lambda: ['foo'])
+            content.ContentType("text", "foo"), lambda: [_b('foo')])
 
 
 class TestExpectedFailure(TestWithDetails):

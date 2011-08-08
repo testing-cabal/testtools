@@ -12,7 +12,8 @@ $ python -c 'import testtools.matchers; print testtools.matchers.__all__'
 
 __metaclass__ = type
 __all__ = [
-    'AfterPreproccessing',
+    'AfterPreprocessing',
+    'AllMatch',
     'Annotate',
     'DocTestMatches',
     'EndsWith',
@@ -299,13 +300,20 @@ class _BinaryMismatch(Mismatch):
         self._mismatch_string = mismatch_string
         self.other = other
 
+    def _format(self, thing):
+        # Blocks of text with newlines are formatted as triple-quote
+        # strings. Everything else is pretty-printed.
+        if istext(thing) and '\n' in thing:
+            return '"""\\\n%s"""' % (thing,)
+        return pformat(thing)
+
     def describe(self):
         left = repr(self.expected)
         right = repr(self.other)
         if len(left) + len(right) > 70:
             return "%s:\nreference = %s\nactual = %s\n" % (
-                self._mismatch_string, pformat(self.expected),
-                pformat(self.other))
+                self._mismatch_string, self._format(self.expected),
+                self._format(self.other))
         else:
             return "%s %s %s" % (left, self._mismatch_string,right)
 
@@ -443,11 +451,15 @@ class MatchesException(Matcher):
             are checked. If a type is given only the type of the exception is
             checked.
         :param value_re: If 'exception' is a type, and the matchee exception
-            is of the right type, then the 'str()' of the matchee exception
-            is matched against this regular expression.
+            is of the right type, then match against this.  If value_re is a
+            string, then assume value_re is a regular expression and match
+            the str() of the exception against it.  Otherwise, assume value_re
+            is a matcher, and match the exception against it.
         """
         Matcher.__init__(self)
         self.expected = exception
+        if istext(value_re):
+            value_re = AfterPreproccessing(str, MatchesRegex(value_re), False)
         self.value_re = value_re
         self._is_instance = type(self.expected) not in classtypes()
 
@@ -464,11 +476,7 @@ class MatchesException(Matcher):
                 return Mismatch('%s has different arguments to %s.' % (
                         _error_repr(other[1]), _error_repr(self.expected)))
         elif self.value_re is not None:
-            str_exc_value = str(other[1])
-            if not re.match(self.value_re, str_exc_value):
-                return Mismatch(
-                    '"%s" does not match "%s".'
-                    % (str_exc_value, self.value_re))
+            return self.value_re.match(other[1])
 
     def __str__(self):
         if self._is_instance:
@@ -673,6 +681,13 @@ class MatchesStructure(object):
 
     `fromExample` allows the creation of a matcher from a prototype object and
     then modified versions can be created with `update`.
+
+    `byEquality` creates a matcher in much the same way as the constructor,
+    except that the matcher for each of the attributes is assumed to be
+    `Equals`.
+
+    `byMatcher` creates a similar matcher to `byEquality`, but you get to pick
+    the matcher, rather than just using `Equals`.
     """
 
     def __init__(self, **kwargs):
@@ -681,6 +696,25 @@ class MatchesStructure(object):
         :param kwargs: A mapping of attributes to matchers.
         """
         self.kws = kwargs
+
+    @classmethod
+    def byEquality(cls, **kwargs):
+        """Matches an object where the attributes equal the keyword values.
+
+        Similar to the constructor, except that the matcher is assumed to be
+        Equals.
+        """
+        return cls.byMatcher(Equals, **kwargs)
+
+    @classmethod
+    def byMatcher(cls, matcher, **kwargs):
+        """Matches an object where the attributes match the keyword values.
+
+        Similar to the constructor, except that the provided matcher is used
+        to match all of the values.
+        """
+        return cls(
+            **dict((name, matcher(value)) for name, value in kwargs.items()))
 
     @classmethod
     def fromExample(cls, example, *attributes):
@@ -734,7 +768,8 @@ class MatchesRegex(object):
 
     def match(self, value):
         if not re.match(self.pattern, value, self.flags):
-            return Mismatch("%r did not match %r" % (self.pattern, value))
+            return Mismatch("%r does not match /%s/" % (
+                    value, self.pattern))
 
 
 class MatchesSetwise(object):
@@ -816,7 +851,7 @@ class MatchesSetwise(object):
                     ).match(not_matched[:common_length])
 
 
-class AfterPreproccessing(object):
+class AfterPreprocessing(object):
     """Matches if the value matches after passing through a function.
 
     This can be used to aid in creating trivial matchers as functions, for
@@ -825,12 +860,22 @@ class AfterPreproccessing(object):
       def PathHasFileContent(content):
           def _read(path):
               return open(path).read()
-          return AfterPreproccessing(_read, Equals(content))
+          return AfterPreprocessing(_read, Equals(content))
     """
 
-    def __init__(self, preprocessor, matcher):
+    def __init__(self, preprocessor, matcher, annotate=True):
+        """Create an AfterPreprocessing matcher.
+
+        :param preprocessor: A function called with the matchee before
+            matching.
+        :param matcher: What to match the preprocessed matchee against.
+        :param annotate: Whether or not to annotate the matcher with
+            something explaining how we transformed the matchee. Defaults
+            to True.
+        """
         self.preprocessor = preprocessor
         self.matcher = matcher
+        self.annotate = annotate
 
     def _str_preprocessor(self):
         if isinstance(self.preprocessor, types.FunctionType):
@@ -838,11 +883,43 @@ class AfterPreproccessing(object):
         return str(self.preprocessor)
 
     def __str__(self):
-        return "AfterPreproccessing(%s, %s)" % (
+        return "AfterPreprocessing(%s, %s)" % (
             self._str_preprocessor(), self.matcher)
 
     def match(self, value):
-        value = self.preprocessor(value)
-        return Annotate(
-            "after %s" % self._str_preprocessor(),
-            self.matcher).match(value)
+        after = self.preprocessor(value)
+        if self.annotate:
+            matcher = Annotate(
+                "after %s on %r" % (self._str_preprocessor(), value),
+                self.matcher)
+        else:
+            matcher = self.matcher
+        return matcher.match(after)
+
+# This is the old, deprecated. spelling of the name, kept for backwards
+# compatibility.
+AfterPreproccessing = AfterPreprocessing
+
+
+class AllMatch(object):
+    """Matches if all provided values match the given matcher."""
+
+    def __init__(self, matcher):
+        self.matcher = matcher
+
+    def __str__(self):
+        return 'AllMatch(%s)' % (self.matcher,)
+
+    def match(self, values):
+        mismatches = []
+        for value in values:
+            mismatch = self.matcher.match(value)
+            if mismatch:
+                mismatches.append(mismatch)
+        if mismatches:
+            return MismatchesAll(mismatches)
+
+
+# Signal that this is part of the testing framework, and that code from this
+# should not normally appear in tracebacks.
+__unittest = True

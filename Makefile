@@ -1,6 +1,6 @@
 # See README for copyright and licensing details.
 
-PYTHON=python3
+PYTHON=python
 SOURCES=$(shell find testtools -name "*.py")
 
 check:
@@ -22,6 +22,7 @@ prerelease:
 
 release:
 	./setup.py sdist upload --sign
+	$(PYTHON) scripts/_lp_release.py
 
 snapshot: prerelease
 	./setup.py sdist
@@ -35,7 +36,11 @@ apidocs:
 		--docformat=restructuredtext --project-name=testtools \
 		--project-url=https://launchpad.net/testtools
 
-docs: docs-sphinx
+doc/news.rst:
+	ln -s ../NEWS doc/news.rst
+
+docs: doc/news.rst docs-sphinx
+	rm doc/news.rst
 
 docs-sphinx: html-sphinx
 

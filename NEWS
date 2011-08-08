@@ -1,8 +1,28 @@
 testtools NEWS
 ++++++++++++++
 
+Changes and improvements to testtools_, grouped by release.
+
 NEXT
 ~~~~
+
+Changes
+-------
+
+* ``AfterPreproccessing`` renamed to ``AfterPreprocessing``, which is a more
+  correct spelling.  Old name preserved for backwards compatibility, but is
+  now deprecated.  Please stop using it.
+  (Jonathan Lange, #813460)
+
+* ``gather_details`` takes two dicts, rather than two detailed objects.
+  (Jonathan Lange, #801027)
+
+* ``MatchesRegex`` mismatch now says "<value> does not match /<regex>/" rather
+  than "<regex> did not match <value>". The regular expression contains fewer
+  backslashes too. (Jonathan Lange, #818079)
+
+* Tests that run with ``AsynchronousDeferredRunTest`` now have the ``reactor``
+  attribute set to the running reactor. (Jonathan Lange, #720749)
 
 Improvements
 ------------
@@ -10,10 +30,51 @@ Improvements
 * All public matchers are now in ``testtools.matchers.__all__``.
   (Jonathan Lange, #784859)
 
+* assertThat output is much less verbose, displaying only what the mismatch
+  tells us to display. Old-style verbose output can be had by passing
+  ``verbose=True`` to assertThat. (Jonathan Lange, #675323, #593190)
+
+* Automated the Launchpad part of the release process.
+  (Jonathan Lange, #623486)
+
+* Correctly display non-ASCII unicode output on terminals that claim to have a
+  unicode encoding. (Martin [gz], #804122)
+
+* ``ExpectedException`` now matches any exception of the given type by
+  default, and also allows specifying a ``Matcher`` rather than a mere regular
+  expression. (Jonathan Lange, #791889)
+
+* ``FixtureSuite`` added, allows test suites to run with a given fixture.
+  (Jonathan Lange)
+
+* Hide testtools's own stack frames when displaying tracebacks, making it
+  easier for test authors to focus on their errors.
+  (Jonathan Lange, Martin [gz], #788974)
+
+* Less boilerplate displayed in test failures and errors.
+  (Jonathan Lange, #660852)
+
+* ``MatchesException`` now allows you to match exceptions against any matcher,
+  rather than just regular expressions.  (Jonathan Lange, #791889)
+
+* ``MatchesStructure.byEquality`` added to make the common case of matching
+  many attributes by equality much easier.  ``MatchesStructure.byMatcher``
+  added in case folk want to match by things other than equality.
+  (Jonathan Lange)
+
 * New convenience assertions, ``assertIsNone`` and ``assertIsNotNone``.
   (Christian Kampka)
 
-* New matcher, ``GreaterThan``. (Christian Kampka)
+* New matchers:
+
+  * ``AllMatch`` matches many values against a single matcher.
+    (Jonathan Lange, #615108)
+
+  * ``GreaterThan``. (Christian Kampka)
+
+* New helper, ``safe_hasattr`` added. (Jonathan Lange)
+
+* ``reraise`` added to ``testtools.compat``. (Jonathan Lange)
 
 
 0.9.11
@@ -587,3 +648,6 @@ Improvements
   a test success will now be reported. Previously an error was reported but
   production experience has shown that this is too disruptive for projects that
   are using skips: they cannot get a clean run on down-level result objects.
+
+
+.. _testtools: http://pypi.python.org/pypi/testtools

@@ -16,7 +16,6 @@ __all__ = [
 
 import copy
 import itertools
-import re
 import sys
 import types
 import unittest
@@ -29,6 +28,7 @@ from testtools.compat import advance_iterator
 from testtools.matchers import (
     Annotate,
     Equals,
+    MatchesException,
     Is,
     Not,
     )
@@ -118,21 +118,19 @@ def _copy_content(content_object):
     return content.Content(content_object.content_type, content_callback)
 
 
-def gather_details(source, target):
-    """Merge the details from `source` into `target`.
+def gather_details(source_dict, target_dict):
+    """Merge the details from `source_dict` into `target_dict`.
 
-    :param source: A *detailed* object from which details will be gathered.
-    :param target: A *detailed* object into which details will be gathered.
+    :param source_dict: A dictionary of details will be gathered.
+    :param target_dict: A dictionary into which details will be gathered.
     """
-    source_details = source.getDetails()
-    target_details = target.getDetails()
-    for name, content_object in source_details.items():
+    for name, content_object in source_dict.items():
         new_name = name
         disambiguator = itertools.count(1)
-        while new_name in target_details:
+        while new_name in target_dict:
             new_name = '%s-%d' % (name, advance_iterator(disambiguator))
         name = new_name
-        target.addDetail(name, _copy_content(content_object))
+        target_dict[name] = _copy_content(content_object)
 
 
 class TestCase(unittest.TestCase):
@@ -388,7 +386,7 @@ class TestCase(unittest.TestCase):
             self.fail("%s not raised, %r returned instead." % (excName, ret))
     failUnlessRaises = assertRaises
 
-    def assertThat(self, matchee, matcher):
+    def assertThat(self, matchee, matcher, verbose=False):
         """Assert that matchee is matched by matcher.
 
         :param matchee: An object to match with matcher.
@@ -396,7 +394,7 @@ class TestCase(unittest.TestCase):
         :raises self.failureException: When matcher does not match thing.
         """
         # XXX: Should this take an optional 'message' parameter? Would kind of
-        # make sense.
+        # make sense. The hamcrest one does.
         mismatch = matcher.match(matchee)
         if not mismatch:
             return
@@ -408,8 +406,13 @@ class TestCase(unittest.TestCase):
                 full_name = "%s-%d" % (name, suffix)
                 suffix += 1
             self.addDetail(full_name, content)
-        self.fail('Match failed. Matchee: "%s"\nMatcher: %s\nDifference: %s\n'
-            % (matchee, matcher, mismatch.describe()))
+        if verbose:
+            message = (
+                'Match failed. Matchee: "%s"\nMatcher: %s\nDifference: %s\n'
+                % (matchee, matcher, mismatch.describe()))
+        else:
+            message = mismatch.describe()
+        self.fail(message)
 
     def defaultTestResult(self):
         return TestResult()
@@ -577,11 +580,12 @@ class TestCase(unittest.TestCase):
         try:
             fixture.setUp()
         except:
-            gather_details(fixture, self)
+            gather_details(fixture.getDetails(), self.getDetails())
             raise
         else:
             self.addCleanup(fixture.cleanUp)
-            self.addCleanup(gather_details, fixture, self)
+            self.addCleanup(
+                gather_details, fixture.getDetails(), self.getDetails())
             return fixture
 
     def setUp(self):
@@ -750,7 +754,7 @@ class ExpectedException:
     exception is raised, an AssertionError will be raised.
     """
 
-    def __init__(self, exc_type, value_re):
+    def __init__(self, exc_type, value_re=None):
         """Construct an `ExpectedException`.
 
         :param exc_type: The type of exception to expect.
@@ -768,7 +772,14 @@ class ExpectedException:
             raise AssertionError('%s not raised.' % self.exc_type.__name__)
         if exc_type != self.exc_type:
             return False
-        if not re.match(self.value_re, str(exc_value)):
-            raise AssertionError('"%s" does not match "%s".' %
-                                 (str(exc_value), self.value_re))
+        if self.value_re:
+            matcher = MatchesException(self.exc_type, self.value_re)
+            mismatch = matcher.match((exc_type, exc_value, traceback))
+            if mismatch:
+                raise AssertionError(mismatch.describe())
         return True
+
+
+# Signal that this is part of the testing framework, and that code from this
+# should not normally appear in tracebacks.
+__unittest = True

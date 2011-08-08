@@ -2,7 +2,20 @@
 
 # See README for copyright and licensing details.
 
-import unittest
+from unittest import TestSuite
+
+from testtools.tests.helpers import hide_testtools_stack
+
+
+class FullStackTestSuite(TestSuite):
+    """A version of TestSuite that guarantees full stack is shown."""
+
+    def run(self, result):
+        was_hidden = hide_testtools_stack(False)
+        try:
+            return super(FullStackTestSuite, self).run(result)
+        finally:
+            hide_testtools_stack(was_hidden)
 
 
 def test_suite():
@@ -19,9 +32,9 @@ def test_suite():
         test_run,
         test_runtest,
         test_spinner,
+        test_testcase,
         test_testresult,
         test_testsuite,
-        test_testtools,
         )
     modules = [
         test_compat,
@@ -36,9 +49,9 @@ def test_suite():
         test_run,
         test_runtest,
         test_spinner,
+        test_testcase,
         test_testresult,
         test_testsuite,
-        test_testtools,
         ]
     suites = map(lambda x: x.test_suite(), modules)
-    return unittest.TestSuite(suites)
+    return FullStackTestSuite(suites)

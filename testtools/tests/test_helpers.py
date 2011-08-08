@@ -6,9 +6,16 @@ from testtools.helpers import (
     try_imports,
     )
 from testtools.matchers import (
+    AllMatch,
+    AfterPreprocessing,
     Equals,
     Is,
     Not,
+    )
+from testtools.tests.helpers import (
+    hide_testtools_stack,
+    is_stack_hidden,
+    safe_hasattr,
     )
 
 
@@ -37,6 +44,37 @@ def check_error_callback(test, function, arg, expected_error_count,
         else:
             test.assertThat(result, Is(None))
     test.assertEquals(len(cb_calls), expected_error_count)
+
+
+class TestSafeHasattr(TestCase):
+
+    def test_attribute_not_there(self):
+        class Foo(object):
+            pass
+        self.assertEqual(False, safe_hasattr(Foo(), 'anything'))
+
+    def test_attribute_there(self):
+        class Foo(object):
+            pass
+        foo = Foo()
+        foo.attribute = None
+        self.assertEqual(True, safe_hasattr(foo, 'attribute'))
+
+    def test_property_there(self):
+        class Foo(object):
+            @property
+            def attribute(self):
+                return None
+        foo = Foo()
+        self.assertEqual(True, safe_hasattr(foo, 'attribute'))
+
+    def test_property_raises(self):
+        class Foo(object):
+            @property
+            def attribute(self):
+                1/0
+        foo = Foo()
+        self.assertRaises(ZeroDivisionError, safe_hasattr, foo, 'attribute')
 
 
 class TestTryImport(TestCase):
@@ -152,6 +190,46 @@ class TestTryImports(TestCase):
         check_error_callback(self, try_imports,
             ['os.path'],
             0, True)
+
+
+import testtools.matchers
+import testtools.runtest
+import testtools.testcase
+
+
+def StackHidden(is_hidden):
+    return AllMatch(
+        AfterPreprocessing(
+            lambda module: safe_hasattr(module, '__unittest'),
+            Equals(is_hidden)))
+
+
+class TestStackHiding(TestCase):
+
+    modules = [
+        testtools.matchers,
+        testtools.runtest,
+        testtools.testcase,
+        ]
+
+    def setUp(self):
+        super(TestStackHiding, self).setUp()
+        self.addCleanup(hide_testtools_stack, is_stack_hidden())
+
+    def test_shown_during_testtools_testsuite(self):
+        self.assertThat(self.modules, StackHidden(False))
+
+    def test_is_stack_hidden_consistent_true(self):
+        hide_testtools_stack(True)
+        self.assertEqual(True, is_stack_hidden())
+
+    def test_is_stack_hidden_consistent_false(self):
+        hide_testtools_stack(False)
+        self.assertEqual(False, is_stack_hidden())
+
+    def test_show_stack(self):
+        hide_testtools_stack(False)
+        self.assertThat(self.modules, StackHidden(False))
 
 
 def test_suite():
