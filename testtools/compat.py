@@ -219,7 +219,7 @@ def _get_exception_encoding():
 def _exception_to_text(evalue):
     """Try hard to get a sensible text value out of an exception instance"""
     try:
-        return to_text(evalue)
+        return unicode(evalue)
     except KeyboardInterrupt:
         raise
     except:

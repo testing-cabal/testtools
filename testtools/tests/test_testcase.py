@@ -20,7 +20,6 @@ from testtools import (
     )
 from testtools.compat import (
     _b,
-    _exception_to_text,
     _u,
     )
 from testtools.matchers import (
@@ -33,6 +32,7 @@ from testtools.testresult.doubles import (
     Python27TestResult,
     ExtendedTestResult,
     )
+from testtools.testresult.real import TestResult
 from testtools.tests.helpers import (
     an_exc_info,
     LoggingResult,
@@ -486,6 +486,19 @@ class TestAssertions(TestCase):
         self.assertFails(
             expected, self.assertThat, matchee, matcher, verbose=True)
 
+    def get_error_string(self, e):
+        error = TestResult()._exc_info_to_unicode((e.__class__, e, None), self)
+        # We aren't at all interested in the traceback.
+        if error.startswith('Traceback (most recent call last):\n'):
+            lines = error.splitlines(True)[1:]
+            for i, line in enumerate(lines):
+                if not line.startswith(' '):
+                    break
+            error = ''.join(lines[i:])
+        # We aren't interested in how the exception type is formatted.
+        exc_class, error = error.split(': ', 1)
+        return error
+
     def test_assertThat_verbose_unicode(self):
         # When assertThat is given matchees or matchers that contain non-ASCII
         # unicode strings, we can still provide a meaningful error.
@@ -494,7 +507,7 @@ class TestAssertions(TestCase):
         expected = (
             'Match failed. Matchee: "%s"\n'
             'Matcher: %s\n'
-            'Difference: %s\n' % (
+            'Difference: %s\n\n' % (
                 matchee,
                 matcher,
                 matcher.match(matchee).describe(),
@@ -502,7 +515,7 @@ class TestAssertions(TestCase):
         e = self.assertRaises(
             self.failureException, self.assertThat, matchee, matcher,
             verbose=True)
-        self.assertEqual(expected, _exception_to_text(e))
+        self.assertEqual(expected, self.get_error_string(e))
 
     def test_assertEqual_nice_formatting(self):
         message = "These things ought not be equal."
