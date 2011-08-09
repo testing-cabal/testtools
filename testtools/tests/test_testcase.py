@@ -487,6 +487,17 @@ class TestAssertions(TestCase):
             expected, self.assertThat, matchee, matcher, verbose=True)
 
     def get_error_string(self, e):
+        """Get the string showing how 'e' would be formatted in test output.
+
+        This is a little bit hacky, since it's designed to give consistent
+        output regardless of Python version.
+
+        In testtools, TestResult._exc_info_to_unicode is the point of dispatch
+        between various different implementations of methods that format
+        exceptions, so that's what we have to call. However, that method cares
+        about stack traces and formats the exception class. We don't care
+        about either of these, so we take its output and parse it a little.
+        """
         error = TestResult()._exc_info_to_unicode((e.__class__, e, None), self)
         # We aren't at all interested in the traceback.
         if error.startswith('Traceback (most recent call last):\n'):
