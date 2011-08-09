@@ -2,8 +2,20 @@
 
 # See README for copyright and licensing details.
 
-from testtools.tests.helpers import StackHidingFixture
-from testtools.testsuite import FixtureSuite
+from unittest import TestSuite
+
+from testtools.tests.helpers import hide_testtools_stack
+
+
+class FullStackTestSuite(TestSuite):
+    """A version of TestSuite that guarantees full stack is shown."""
+
+    def run(self, result):
+        was_hidden = hide_testtools_stack(False)
+        try:
+            return super(FullStackTestSuite, self).run(result)
+        finally:
+            hide_testtools_stack(was_hidden)
 
 
 def test_suite():
@@ -42,4 +54,4 @@ def test_suite():
         test_testsuite,
         ]
     suites = map(lambda x: x.test_suite(), modules)
-    return FixtureSuite(StackHidingFixture(False), suites)
+    return FullStackTestSuite(suites)

@@ -36,7 +36,11 @@ apidocs:
 		--docformat=restructuredtext --project-name=testtools \
 		--project-url=https://launchpad.net/testtools
 
-docs: docs-sphinx
+doc/news.rst:
+	ln -s ../NEWS doc/news.rst
+
+docs: doc/news.rst docs-sphinx
+	rm doc/news.rst
 
 docs-sphinx: html-sphinx
 

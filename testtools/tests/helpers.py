@@ -8,8 +8,6 @@ __all__ = [
 
 import sys
 
-from fixtures import FunctionFixture
-
 from testtools import TestResult
 from testtools.helpers import (
     safe_hasattr,
@@ -98,5 +96,9 @@ def hide_testtools_stack(should_hide=True):
     return result
 
 
-StackHidingFixture = lambda x: FunctionFixture(
-    lambda: hide_testtools_stack(x), hide_testtools_stack)
+def run_with_stack_hidden(should_hide, f, *args, **kwargs):
+    old_should_hide = hide_testtools_stack(should_hide)
+    try:
+        return f(*args, **kwargs)
+    finally:
+        hide_testtools_stack(old_should_hide)
