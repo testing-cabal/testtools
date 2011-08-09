@@ -96,6 +96,13 @@ error.
 These placeholders are best used to log events that occur outside the test
 suite proper, but are still very relevant to its results.
 
+e.g.::
+
+  >>> suite = TestSuite()
+  >>> suite.add(PlaceHolder('I record an event'))
+  >>> suite.run(TextTestResult(verbose=True))
+  I record an event                                                   [OK]
+
 
 Extensions to TestResult
 ========================
