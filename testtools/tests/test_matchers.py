@@ -172,6 +172,22 @@ class TestDocTestMatchesInterface(TestCase, TestMatchersInterface):
         DocTestMatches("Ran 1 tests in ...s", doctest.ELLIPSIS))]
 
 
+class TestDocTestMatchesInterfaceUnicode(TestCase, TestMatchersInterface):
+
+    matches_matcher = DocTestMatches(_u("\xa7..."), doctest.ELLIPSIS)
+    matches_matches = [_u("\xa7"), _u("\xa7 more\n")]
+    matches_mismatches = ["\\xa7", _u("more \xa7"), _u("\n\xa7")]
+
+    str_examples = [("DocTestMatches(%r)" % (_u("\xa7\n"),),
+        DocTestMatches(_u("\xa7"))),
+        ]
+
+    describe_examples = [(
+        _u("Expected:\n    \xa7\nGot:\n    a\n"),
+        "a",
+        DocTestMatches(_u("\xa7"), doctest.ELLIPSIS))]
+
+
 class TestDocTestMatchesSpecific(TestCase):
 
     def test___init__simple(self):
@@ -317,7 +333,7 @@ class TestMatchesExceptionTypeReInterface(TestCase, TestMatchersInterface):
          MatchesException(Exception, 'fo.'))
         ]
     describe_examples = [
-        ("'bar' does not match 'fo.'",
+        ("'bar' does not match /fo./",
          error_bar, MatchesException(ValueError, "fo.")),
         ]
 
@@ -698,7 +714,8 @@ class TestMatchesRegex(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ("'c' does not match 'a|b'", 'c', MatchesRegex('a|b')),
+        ("'c' does not match /a|b/", 'c', MatchesRegex('a|b')),
+        ("'c' does not match /a\d/", 'c', MatchesRegex(r'a\d')),
         ]
 
 
