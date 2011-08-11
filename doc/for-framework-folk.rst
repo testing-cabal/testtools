@@ -79,6 +79,31 @@ instance to one with a new name.  This is helpful for implementing test
 parameterization.
 
 
+Test placeholders
+=================
+
+Sometimes, it's useful to be able to add things to a test suite that are not
+actually tests.  For example, you might wish to represents import failures
+that occur during test discovery as tests, so that your test result object
+doesn't have to do special work to handle them nicely.
+
+testtools provides two such objects, called "placeholders": ``PlaceHolder``
+and ``ErrorHolder``.  ``PlaceHolder`` takes a test id and an optional
+description.  When it's run, it succeeds.  ``ErrorHolder`` takes a test id,
+and error and an optional short description.  When it's run, it reports that
+error.
+
+These placeholders are best used to log events that occur outside the test
+suite proper, but are still very relevant to its results.
+
+e.g.::
+
+  >>> suite = TestSuite()
+  >>> suite.add(PlaceHolder('I record an event'))
+  >>> suite.run(TextTestResult(verbose=True))
+  I record an event                                                   [OK]
+
+
 Extensions to TestResult
 ========================
 

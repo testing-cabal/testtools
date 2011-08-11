@@ -43,6 +43,8 @@ Improvements
 * ``DocTestMatches`` correctly handles unicode output from examples, rather
   than raising an error. (Martin [gz], #764170)
 
+* ``ErrorHolder`` and ``PlaceHolder`` added to docs. (Jonathan Lange, #816597)
+
 * ``ExpectedException`` now matches any exception of the given type by
   default, and also allows specifying a ``Matcher`` rather than a mere regular
   expression. (Jonathan Lange, #791889)
