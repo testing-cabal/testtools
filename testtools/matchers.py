@@ -21,6 +21,7 @@ __all__ = [
     'Equals',
     'GreaterThan',
     'Is',
+    'IsInstance',
     'KeysEqual',
     'LessThan',
     'MatchesAll',
@@ -357,6 +358,42 @@ class Is(_BinaryComparison):
 
     comparator = operator.is_
     mismatch_string = 'is not'
+
+
+class IsInstance(object):
+    """Matcher that wraps isinstance."""
+
+    def __init__(self, *types):
+        self.types = tuple(types)
+
+    def __str__(self):
+        return "%s(%s)" % (self.__class__.__name__,
+                ', '.join(type.__name__ for type in self.types))
+
+    def match(self, other):
+        if isinstance(other, self.types):
+            return None
+        return NotAnInstance(other, self.types)
+
+
+class NotAnInstance(Mismatch):
+
+    def __init__(self, matchee, types):
+        """Create a NotAnInstance Mismatch.
+
+        :param matchee: the thing which is not an instance of any of types.
+        :param types: A tuple of the types which were expected.
+        """
+        self.matchee = matchee
+        self.types = types
+
+    def describe(self):
+        if len(self.types) == 1:
+            typestr = self.types[0].__name__
+        else:
+            typestr = 'any of (%s)' % ', '.join(type.__name__ for type in
+                    self.types)
+        return "'%s' is not an instance of %s" % (self.matchee, typestr)
 
 
 class LessThan(_BinaryComparison):

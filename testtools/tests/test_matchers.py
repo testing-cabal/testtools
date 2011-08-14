@@ -27,6 +27,7 @@ from testtools.matchers import (
     EndsWith,
     KeysEqual,
     Is,
+    IsInstance,
     LessThan,
     GreaterThan,
     MatchesAny,
@@ -178,6 +179,26 @@ class TestIsInterface(TestCase, TestMatchersInterface):
     str_examples = [("Is(2)", Is(2))]
 
     describe_examples = [("1 is not 2", 2, Is(1))]
+
+
+class TestIsInstanceInterface(TestCase, TestMatchersInterface):
+
+    class Foo:pass
+
+    matches_matcher = IsInstance(Foo)
+    matches_matches = [Foo()]
+    matches_mismatches = [object(), 1, Foo]
+
+    str_examples = [
+            ("IsInstance(str)", IsInstance(str)),
+            ("IsInstance(str, int)", IsInstance(str, int)),
+            ]
+
+    describe_examples = [
+            ("'foo' is not an instance of int", 'foo', IsInstance(int)),
+            ("'foo' is not an instance of any of (int, type)", 'foo',
+             IsInstance(int, type)),
+            ]
 
 
 class TestLessThanInterface(TestCase, TestMatchersInterface):

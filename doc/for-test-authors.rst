@@ -312,6 +312,17 @@ Matches if two items are identical.  For example::
       self.assertThat(foo, Is(foo))
 
 
+Is
+~~~
+
+Adapts isinstance() to use as a matcher.  For example::
+
+  def test_isinstance_example(self):
+      class MyClass:pass
+      self.assertThat(MyClass(), IsInstance(MyClass))
+      self.assertThat(MyClass(), IsInstance(MyClass, str))
+
+
 The raises helper
 ~~~~~~~~~~~~~~~~~
 
