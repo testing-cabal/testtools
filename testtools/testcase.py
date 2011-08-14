@@ -349,9 +349,8 @@ class TestCase(unittest.TestCase):
 
     def assertNotIn(self, needle, haystack):
         """Assert that needle is not in haystack."""
-        # XXX: Re-implement with matchers.
-        if needle in haystack:
-            self.fail('%r in %r' % (needle, haystack))
+        matcher = Not(Contains(needle))
+        self.assertThat(haystack, matcher)
 
     def assertIsInstance(self, obj, klass, msg=None):
         # XXX: Re-implement with matchers.

@@ -332,9 +332,10 @@ class TestAssertions(TestCase):
     def test_assertNotIn_failure(self):
         # assertNotIn(needle, haystack) fails the test when 'needle' is in
         # 'haystack'.
-        self.assertFails('3 in [1, 2, 3]', self.assertNotIn, 3, [1, 2, 3])
+        self.assertFails('[1, 2, 3] matches Contains(3)', self.assertNotIn,
+            3, [1, 2, 3])
         self.assertFails(
-            '%r in %r' % ('foo', 'foo bar baz'),
+            "'foo bar baz' matches Contains('foo')",
             self.assertNotIn, 'foo', 'foo bar baz')
 
     def test_assertIsInstance(self):
