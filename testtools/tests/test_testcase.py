@@ -418,16 +418,17 @@ class TestAssertions(TestCase):
     def test_assertIsNot_fails(self):
         # assertIsNot raises assertion errors if one object is identical to
         # another.
-        self.assertFails('None is None', self.assertIsNot, None, None)
+        self.assertFails('None matches Is(None)', self.assertIsNot, None, None)
         some_list = [42]
         self.assertFails(
-            '[42] is [42]', self.assertIsNot, some_list, some_list)
+            '[42] matches Is([42])', self.assertIsNot, some_list, some_list)
 
     def test_assertIsNot_fails_with_message(self):
         # assertIsNot raises assertion errors if one object is identical to
         # another, and includes a user-supplied message if it's provided.
         self.assertFails(
-            'None is None: foo bar', self.assertIsNot, None, None, "foo bar")
+            'None matches Is(None): foo bar', self.assertIsNot, None, None,
+            "foo bar")
 
     def test_assertThat_matches_clean(self):
         class Matcher(object):

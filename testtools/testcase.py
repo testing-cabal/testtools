@@ -339,19 +339,13 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message describing the error.
         """
-        # XXX: Re-implement with matchers.
-        if message:
-            message = ': ' + message
-        if expected is not observed:
-            self.fail('%r is not %r%s' % (expected, observed, message))
+        matcher = Annotate.if_message(message, Is(expected))
+        self.assertThat(observed, matcher)
 
     def assertIsNot(self, expected, observed, message=''):
         """Assert that 'expected' is not 'observed'."""
-        # XXX: Re-implement with matchers.
-        if message:
-            message = ': ' + message
-        if expected is observed:
-            self.fail('%r is %r%s' % (expected, observed, message))
+        matcher = Annotate.if_message(message, Not(Is(expected)))
+        self.assertThat(observed, matcher)
 
     def assertNotIn(self, needle, haystack):
         """Assert that needle is not in haystack."""
