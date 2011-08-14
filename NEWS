@@ -65,6 +65,9 @@ Improvements
 * ``MatchesException`` now allows you to match exceptions against any matcher,
   rather than just regular expressions.  (Jonathan Lange, #791889)
 
+* ``MatchesException`` now permits a tuple of types rather than a single type
+  (when using the type matching mode).  (Robert Collins)
+
 * ``MatchesStructure.byEquality`` added to make the common case of matching
   many attributes by equality much easier.  ``MatchesStructure.byMatcher``
   added in case folk want to match by things other than equality.

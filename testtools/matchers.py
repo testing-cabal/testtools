@@ -502,7 +502,8 @@ class MatchesException(Matcher):
         :param exception: Either an exception instance or type.
             If an instance is given, the type and arguments of the exception
             are checked. If a type is given only the type of the exception is
-            checked.
+            checked. If a tuple is given, then as with isinstance, any of the
+            types in the tuple matching is sufficient to match.
         :param value_re: If 'exception' is a type, and the matchee exception
             is of the right type, then match against this.  If value_re is a
             string, then assume value_re is a regular expression and match
@@ -514,7 +515,7 @@ class MatchesException(Matcher):
         if istext(value_re):
             value_re = AfterPreproccessing(str, MatchesRegex(value_re), False)
         self.value_re = value_re
-        self._is_instance = type(self.expected) not in classtypes()
+        self._is_instance = type(self.expected) not in classtypes() + (tuple,)
 
     def match(self, other):
         if type(other) != tuple:
@@ -689,16 +690,19 @@ class Raises(Matcher):
         # Catch all exceptions: Raises() should be able to match a
         # KeyboardInterrupt or SystemExit.
         except:
+            exc_info = sys.exc_info()
             if self.exception_matcher:
-                mismatch = self.exception_matcher.match(sys.exc_info())
+                mismatch = self.exception_matcher.match(exc_info)
                 if not mismatch:
+                    del exc_info
                     return
             else:
                 mismatch = None
             # The exception did not match, or no explicit matching logic was
             # performed. If the exception is a non-user exception (that is, not
             # a subclass of Exception on Python 2.5+) then propogate it.
-            if isbaseexception(sys.exc_info()[1]):
+            if isbaseexception(exc_info[1]):
+                del exc_info
                 raise
             return mismatch
 

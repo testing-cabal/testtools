@@ -29,10 +29,12 @@ from testtools.matchers import (
     Annotate,
     Contains,
     Equals,
+    MatchesAll,
     MatchesException,
     Is,
     IsInstance,
     Not,
+    Raises,
     )
 from testtools.monkey import patch
 from testtools.runtest import RunTest
@@ -368,14 +370,19 @@ class TestCase(unittest.TestCase):
            deemed to have suffered an error, exactly as for an
            unexpected exception.
         """
-        # XXX: Re-implement with matchers.
-        try:
-            ret = callableObj(*args, **kwargs)
-        except excClass:
-            return sys.exc_info()[1]
-        else:
-            excName = self._formatTypes(excClass)
-            self.fail("%s not raised, %r returned instead." % (excName, ret))
+        class ReRaiseOtherTypes(object):
+            def match(self, matchee):
+                if not issubclass(matchee[0], excClass):
+                    raise matchee[0], matchee[1], matchee[2]
+        class CaptureMatchee(object):
+            def match(self, matchee):
+                self.matchee = matchee[1]
+        capture = CaptureMatchee()
+        matcher = Raises(MatchesAll(ReRaiseOtherTypes(),
+                MatchesException(excClass), capture))
+
+        self.assertThat(lambda:callableObj(*args, **kwargs), matcher)
+        return capture.matchee
     failUnlessRaises = assertRaises
 
     def assertThat(self, matchee, matcher, message='', verbose=False):
@@ -426,6 +433,7 @@ class TestCase(unittest.TestCase):
         be removed. This separation preserves the original intent of the test
         while it is in the expectFailure mode.
         """
+        # TODO: implement with matchers.
         self._add_reason(reason)
         try:
             predicate(*args, **kwargs)

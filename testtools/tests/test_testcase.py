@@ -2,6 +2,7 @@
 
 """Tests for extensions to the base test library."""
 
+from doctest import ELLIPSIS
 from pprint import pformat
 import sys
 import unittest
@@ -21,6 +22,7 @@ from testtools import (
 from testtools.compat import _b
 from testtools.matchers import (
     Annotate,
+    DocTestMatches,
     Equals,
     MatchesException,
     Raises,
@@ -245,16 +247,8 @@ class TestAssertions(TestCase):
         # assertRaises raises self.failureException when it's passed a
         # callable that raises no error.
         ret = ('orange', 42)
-        try:
-            self.assertRaises(RuntimeError, lambda: ret)
-        except self.failureException:
-            # We expected assertRaises to raise this exception.
-            e = sys.exc_info()[1]
-            self.assertEqual(
-                '%s not raised, %r returned instead.'
-                % (self._formatTypes(RuntimeError), ret), str(e))
-        else:
-            self.fail('Expected assertRaises to fail, but it did not.')
+        self.assertFails("<function <lambda> at ...> returned ('orange', 42)",
+            self.assertRaises, RuntimeError, lambda: ret)
 
     def test_assertRaises_fails_when_different_error_raised(self):
         # assertRaises re-raises an exception that it didn't expect.
@@ -299,15 +293,14 @@ class TestAssertions(TestCase):
         failure = self.assertRaises(
             self.failureException,
             self.assertRaises, expectedExceptions, lambda: None)
-        self.assertEqual(
-            '%s not raised, None returned instead.'
-            % self._formatTypes(expectedExceptions), str(failure))
+        self.assertFails('<function <lambda> at ...> returned None',
+            self.assertRaises, expectedExceptions, lambda: None)
 
     def assertFails(self, message, function, *args, **kwargs):
         """Assert that function raises a failure with the given message."""
         failure = self.assertRaises(
             self.failureException, function, *args, **kwargs)
-        self.assertEqual(message, str(failure))
+        self.assertThat(failure, DocTestMatches(message, ELLIPSIS))
 
     def test_assertIn_success(self):
         # assertIn(needle, haystack) asserts that 'needle' is in 'haystack'.
