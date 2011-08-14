@@ -75,6 +75,8 @@ Improvements
   * ``AllMatch`` matches many values against a single matcher.
     (Jonathan Lange, #615108)
 
+  * ``Contains``. (Robert Collins)
+
   * ``GreaterThan``. (Christian Kampka)
 
 * New helper, ``safe_hasattr`` added. (Jonathan Lange)

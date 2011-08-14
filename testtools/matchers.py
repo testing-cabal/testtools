@@ -242,6 +242,21 @@ class DocTestMismatch(Mismatch):
         return self.matcher._describe_difference(self.with_nl)
 
 
+class DoesNotContain(Mismatch):
+
+    def __init__(self, matchee, needle):
+        """Create a DoesNotContain Mismatch.
+
+        :param matchee: the object that did not contain needle.
+        :param needle: the needle that 'matchee' was expected to contain.
+        """
+        self.matchee = matchee
+        self.needle = needle
+
+    def describe(self):
+        return "%r not present in %r" % (self.needle, self.matchee)
+
+
 class DoesNotStartWith(Mismatch):
 
     def __init__(self, matchee, expected):
@@ -482,6 +497,29 @@ class MatchesException(Matcher):
         if self._is_instance:
             return "MatchesException(%s)" % _error_repr(self.expected)
         return "MatchesException(%s)" % repr(self.expected)
+
+
+class Contains(Matcher):
+    """Checks whether something is container in another thing."""
+
+    def __init__(self, needle):
+        """Create a Contains Matcher.
+
+        :param needle: the thing that needs to be contained by matchees.
+        """
+        self.needle = needle
+
+    def __str__(self):
+        return "Contains(%r)" % (self.needle,)
+
+    def match(self, matchee):
+        try:
+            if self.needle not in matchee:
+                return DoesNotContain(matchee, self.needle)
+        except TypeError:
+            # e.g. 1 in 2 will raise TypeError
+            return DoesNotContain(matchee, self.needle)
+        return None
 
 
 class StartsWith(Matcher):

@@ -19,6 +19,7 @@ from testtools.matchers import (
     AllMatch,
     Annotate,
     AnnotatedMismatch,
+    Contains,
     Equals,
     DocTestMatches,
     DoesNotEndWith,
@@ -209,6 +210,20 @@ class TestGreaterThanInterface(TestCase, TestMatchersInterface):
         ('5 is not < 4', 4, GreaterThan(5)),
         ('4 is not < 4', 4, GreaterThan(4)),
         ]
+
+
+class TestContainsInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = Contains('foo')
+    matches_matches = ['foo', 'afoo', 'fooa']
+    matches_mismatches = ['f', 'fo', 'oo', 'faoo', 'foao']
+
+    str_examples = [
+        ("Contains(1)", Contains(1)),
+        ("Contains('foo')", Contains('foo')),
+        ]
+
+    describe_examples = [("1 not present in 2", 2, Contains(1))]
 
 
 def make_error(type, *args, **kwargs):
