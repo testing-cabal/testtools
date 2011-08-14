@@ -31,6 +31,7 @@ from testtools.matchers import (
     Equals,
     MatchesException,
     Is,
+    IsInstance,
     Not,
     )
 from testtools.monkey import patch
@@ -353,12 +354,11 @@ class TestCase(unittest.TestCase):
         self.assertThat(haystack, matcher)
 
     def assertIsInstance(self, obj, klass, msg=None):
-        # XXX: Re-implement with matchers.
-        if msg is None:
-            msg = '%r is not an instance of %s' % (
-                obj, self._formatTypes(klass))
-        if not isinstance(obj, klass):
-            self.fail(msg)
+        if isinstance(klass, tuple):
+            matcher = IsInstance(*klass)
+        else:
+            matcher = IsInstance(klass)
+        self.assertThat(obj, matcher, msg)
 
     def assertRaises(self, excClass, callableObj, *args, **kwargs):
         """Fail unless an exception of class excClass is thrown
