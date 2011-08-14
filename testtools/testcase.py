@@ -305,8 +305,8 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message to include in the error.
         """
-        matcher = Annotate.if_message(message, Equals(expected))
-        self.assertThat(observed, matcher)
+        matcher = Equals(expected)
+        self.assertThat(observed, matcher, message)
 
     failUnlessEqual = assertEquals = assertEqual
 
@@ -320,8 +320,8 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message describing the error.
         """
-        matcher = Annotate.if_message(message, Is(None))
-        self.assertThat(observed, matcher)
+        matcher = Is(None)
+        self.assertThat(observed, matcher, message)
 
     def assertIsNotNone(self, observed, message=''):
         """Assert that 'observed' is not equal to None.
@@ -329,8 +329,8 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message describing the error.
         """
-        matcher = Annotate.if_message(message, Not(Is(None)))
-        self.assertThat(observed, matcher)
+        matcher = Not(Is(None))
+        self.assertThat(observed, matcher, message)
 
     def assertIs(self, expected, observed, message=''):
         """Assert that 'expected' is 'observed'.
@@ -339,13 +339,13 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message describing the error.
         """
-        matcher = Annotate.if_message(message, Is(expected))
-        self.assertThat(observed, matcher)
+        matcher = Is(expected)
+        self.assertThat(observed, matcher, message)
 
     def assertIsNot(self, expected, observed, message=''):
         """Assert that 'expected' is not 'observed'."""
-        matcher = Annotate.if_message(message, Not(Is(expected)))
-        self.assertThat(observed, matcher)
+        matcher = Not(Is(expected))
+        self.assertThat(observed, matcher, message)
 
     def assertNotIn(self, needle, haystack):
         """Assert that needle is not in haystack."""
