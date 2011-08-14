@@ -374,6 +374,16 @@ substring.  For example::
       self.assertThat('underground', EndsWith('und'))
 
 
+Contains
+~~~~~~~~
+
+This matcher checks to see if the given thing contains the thing in the
+matcher.  For example::
+
+  def test_contains_example(self):
+      self.assertThat('abc', Contains('b'))
+
+
 MatchesException
 ~~~~~~~~~~~~~~~~
 

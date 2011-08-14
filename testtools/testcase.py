@@ -27,6 +27,7 @@ from testtools import (
 from testtools.compat import advance_iterator
 from testtools.matchers import (
     Annotate,
+    Contains,
     Equals,
     MatchesException,
     Is,
@@ -311,9 +312,7 @@ class TestCase(unittest.TestCase):
 
     def assertIn(self, needle, haystack):
         """Assert that needle is in haystack."""
-        # XXX: Re-implement with matchers.
-        if needle not in haystack:
-            self.fail('%r not in %r' % (needle, haystack))
+        self.assertThat(haystack, Contains(needle))
 
     def assertIsNone(self, observed, message=''):
         """Assert that 'observed' is equal to None.

@@ -15,6 +15,7 @@ __all__ = [
     'AfterPreprocessing',
     'AllMatch',
     'Annotate',
+    'Contains',
     'DocTestMatches',
     'EndsWith',
     'Equals',
