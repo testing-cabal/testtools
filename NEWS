@@ -34,6 +34,9 @@ Improvements
   tells us to display. Old-style verbose output can be had by passing
   ``verbose=True`` to assertThat. (Jonathan Lange, #675323, #593190)
 
+* assertThat accepts a message which will be used to annotate the matcher. This
+  can be given as a third parameter or as a keyword parameter. (Robert Collins)
+
 * Automated the Launchpad part of the release process.
   (Jonathan Lange, #623486)
 

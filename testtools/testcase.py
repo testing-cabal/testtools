@@ -379,7 +379,7 @@ class TestCase(unittest.TestCase):
             self.fail("%s not raised, %r returned instead." % (excName, ret))
     failUnlessRaises = assertRaises
 
-    def assertThat(self, matchee, matcher, verbose=False):
+    def assertThat(self, matchee, matcher, message='', verbose=False):
         """Assert that matchee is matched by matcher.
 
         :param matchee: An object to match with matcher.
@@ -388,6 +388,7 @@ class TestCase(unittest.TestCase):
         """
         # XXX: Should this take an optional 'message' parameter? Would kind of
         # make sense. The hamcrest one does.
+        matcher = Annotate.if_message(message, matcher)
         mismatch = matcher.match(matchee)
         if not mismatch:
             return

@@ -484,6 +484,11 @@ common operation.  For example::
   def test_annotate_example_2(self):
       self.assertThat("orange", PoliticallyEquals("yellow"))
 
+You can have assertThat perform the annotation for you as a convenience::
+
+  def test_annotate_example_3(self):
+      self.assertThat("orange", Equals("yellow"), "Death to the aristos!")
+
 
 AfterPreprocessing
 ~~~~~~~~~~~~~~~~~~

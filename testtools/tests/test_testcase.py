@@ -20,6 +20,7 @@ from testtools import (
     )
 from testtools.compat import _b
 from testtools.matchers import (
+    Annotate,
     Equals,
     MatchesException,
     Raises,
@@ -468,6 +469,12 @@ class TestAssertions(TestCase):
         matcher = Equals('bar')
         expected = matcher.match(matchee).describe()
         self.assertFails(expected, self.assertThat, matchee, matcher)
+
+    def test_assertThat_message_is_annotated(self):
+        matchee = 'foo'
+        matcher = Equals('bar')
+        expected = Annotate('woo', matcher).match(matchee).describe()
+        self.assertFails(expected, self.assertThat, matchee, matcher, 'woo')
 
     def test_assertThat_verbose_output(self):
         matchee = 'foo'
