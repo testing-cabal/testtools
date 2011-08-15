@@ -244,7 +244,7 @@ class TestContainsInterface(TestCase, TestMatchersInterface):
         ("Contains('foo')", Contains('foo')),
         ]
 
-    describe_examples = [("1 not present in 2", 2, Contains(1))]
+    describe_examples = [("1 not in 2", 2, Contains(1))]
 
 
 def make_error(type, *args, **kwargs):

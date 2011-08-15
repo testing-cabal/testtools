@@ -256,7 +256,7 @@ class DoesNotContain(Mismatch):
         self.needle = needle
 
     def describe(self):
-        return "%r not present in %r" % (self.needle, self.matchee)
+        return "%r not in %r" % (self.needle, self.matchee)
 
 
 class DoesNotStartWith(Mismatch):
