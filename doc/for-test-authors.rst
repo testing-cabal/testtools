@@ -312,6 +312,17 @@ Matches if two items are identical.  For example::
       self.assertThat(foo, Is(foo))
 
 
+IsInstance
+~~~~~~~~~~
+
+Adapts isinstance() to use as a matcher.  For example::
+
+  def test_isinstance_example(self):
+      class MyClass:pass
+      self.assertThat(MyClass(), IsInstance(MyClass))
+      self.assertThat(MyClass(), IsInstance(MyClass, str))
+
+
 The raises helper
 ~~~~~~~~~~~~~~~~~
 
@@ -372,6 +383,16 @@ substring.  For example::
   def test_starts_and_ends_with_example(self):
       self.assertThat('underground', StartsWith('und'))
       self.assertThat('underground', EndsWith('und'))
+
+
+Contains
+~~~~~~~~
+
+This matcher checks to see if the given thing contains the thing in the
+matcher.  For example::
+
+  def test_contains_example(self):
+      self.assertThat('abc', Contains('b'))
 
 
 MatchesException
@@ -473,6 +494,11 @@ common operation.  For example::
 
   def test_annotate_example_2(self):
       self.assertThat("orange", PoliticallyEquals("yellow"))
+
+You can have assertThat perform the annotation for you as a convenience::
+
+  def test_annotate_example_3(self):
+      self.assertThat("orange", Equals("yellow"), "Death to the aristos!")
 
 
 AfterPreprocessing

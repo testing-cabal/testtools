@@ -19,6 +19,7 @@ from testtools.matchers import (
     AllMatch,
     Annotate,
     AnnotatedMismatch,
+    Contains,
     Equals,
     DocTestMatches,
     DoesNotEndWith,
@@ -26,6 +27,7 @@ from testtools.matchers import (
     EndsWith,
     KeysEqual,
     Is,
+    IsInstance,
     LessThan,
     GreaterThan,
     MatchesAny,
@@ -179,6 +181,26 @@ class TestIsInterface(TestCase, TestMatchersInterface):
     describe_examples = [("1 is not 2", 2, Is(1))]
 
 
+class TestIsInstanceInterface(TestCase, TestMatchersInterface):
+
+    class Foo:pass
+
+    matches_matcher = IsInstance(Foo)
+    matches_matches = [Foo()]
+    matches_mismatches = [object(), 1, Foo]
+
+    str_examples = [
+            ("IsInstance(str)", IsInstance(str)),
+            ("IsInstance(str, int)", IsInstance(str, int)),
+            ]
+
+    describe_examples = [
+            ("'foo' is not an instance of int", 'foo', IsInstance(int)),
+            ("'foo' is not an instance of any of (int, type)", 'foo',
+             IsInstance(int, type)),
+            ]
+
+
 class TestLessThanInterface(TestCase, TestMatchersInterface):
 
     matches_matcher = LessThan(4)
@@ -209,6 +231,20 @@ class TestGreaterThanInterface(TestCase, TestMatchersInterface):
         ('5 is not < 4', 4, GreaterThan(5)),
         ('4 is not < 4', 4, GreaterThan(4)),
         ]
+
+
+class TestContainsInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = Contains('foo')
+    matches_matches = ['foo', 'afoo', 'fooa']
+    matches_mismatches = ['f', 'fo', 'oo', 'faoo', 'foao']
+
+    str_examples = [
+        ("Contains(1)", Contains(1)),
+        ("Contains('foo')", Contains('foo')),
+        ]
+
+    describe_examples = [("1 not in 2", 2, Contains(1))]
 
 
 def make_error(type, *args, **kwargs):

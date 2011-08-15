@@ -34,6 +34,9 @@ Improvements
   tells us to display. Old-style verbose output can be had by passing
   ``verbose=True`` to assertThat. (Jonathan Lange, #675323, #593190)
 
+* assertThat accepts a message which will be used to annotate the matcher. This
+  can be given as a third parameter or as a keyword parameter. (Robert Collins)
+
 * Automated the Launchpad part of the release process.
   (Jonathan Lange, #623486)
 
@@ -62,6 +65,9 @@ Improvements
 * ``MatchesException`` now allows you to match exceptions against any matcher,
   rather than just regular expressions.  (Jonathan Lange, #791889)
 
+* ``MatchesException`` now permits a tuple of types rather than a single type
+  (when using the type matching mode).  (Robert Collins)
+
 * ``MatchesStructure.byEquality`` added to make the common case of matching
   many attributes by equality much easier.  ``MatchesStructure.byMatcher``
   added in case folk want to match by things other than equality.
@@ -74,6 +80,8 @@ Improvements
 
   * ``AllMatch`` matches many values against a single matcher.
     (Jonathan Lange, #615108)
+
+  * ``Contains``. (Robert Collins)
 
   * ``GreaterThan``. (Christian Kampka)
 
