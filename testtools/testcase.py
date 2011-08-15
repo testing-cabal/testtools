@@ -24,7 +24,10 @@ from testtools import (
     content,
     try_import,
     )
-from testtools.compat import advance_iterator
+from testtools.compat import (
+    advance_iterator,
+    reraise,
+    )
 from testtools.matchers import (
     Annotate,
     Contains,
@@ -373,7 +376,7 @@ class TestCase(unittest.TestCase):
         class ReRaiseOtherTypes(object):
             def match(self, matchee):
                 if not issubclass(matchee[0], excClass):
-                    raise matchee[0], matchee[1], matchee[2]
+                    reraise(*matchee)
         class CaptureMatchee(object):
             def match(self, matchee):
                 self.matchee = matchee[1]
@@ -381,7 +384,7 @@ class TestCase(unittest.TestCase):
         matcher = Raises(MatchesAll(ReRaiseOtherTypes(),
                 MatchesException(excClass), capture))
 
-        self.assertThat(lambda:callableObj(*args, **kwargs), matcher)
+        self.assertThat(lambda: callableObj(*args, **kwargs), matcher)
         return capture.matchee
     failUnlessRaises = assertRaises
 
@@ -392,8 +395,6 @@ class TestCase(unittest.TestCase):
         :param matcher: An object meeting the testtools.Matcher protocol.
         :raises self.failureException: When matcher does not match thing.
         """
-        # XXX: Should this take an optional 'message' parameter? Would kind of
-        # make sense. The hamcrest one does.
         matcher = Annotate.if_message(message, matcher)
         mismatch = matcher.match(matchee)
         if not mismatch:

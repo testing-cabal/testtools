@@ -312,8 +312,8 @@ Matches if two items are identical.  For example::
       self.assertThat(foo, Is(foo))
 
 
-Is
-~~~
+IsInstance
+~~~~~~~~~~
 
 Adapts isinstance() to use as a matcher.  For example::
 
