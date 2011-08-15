@@ -4,19 +4,6 @@
 
 from unittest import TestSuite
 
-from testtools.tests.helpers import hide_testtools_stack
-
-
-class FullStackTestSuite(TestSuite):
-    """A version of TestSuite that guarantees full stack is shown."""
-
-    def run(self, result):
-        was_hidden = hide_testtools_stack(False)
-        try:
-            return super(FullStackTestSuite, self).run(result)
-        finally:
-            hide_testtools_stack(was_hidden)
-
 
 def test_suite():
     from testtools.tests import (
@@ -54,4 +41,4 @@ def test_suite():
         test_testsuite,
         ]
     suites = map(lambda x: x.test_suite(), modules)
-    return FullStackTestSuite(suites)
+    return TestSuite(suites)

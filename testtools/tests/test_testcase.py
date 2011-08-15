@@ -34,6 +34,7 @@ from testtools.testresult.doubles import (
     )
 from testtools.tests.helpers import (
     an_exc_info,
+    FullStackRunTest,
     LoggingResult,
     )
 try:
@@ -45,6 +46,8 @@ else:
 
 
 class TestPlaceHolder(TestCase):
+
+    run_test_with = FullStackRunTest
 
     def makePlaceHolder(self, test_id="foo", short_description=None):
         return PlaceHolder(test_id, short_description)
@@ -119,6 +122,8 @@ class TestPlaceHolder(TestCase):
 
 
 class TestErrorHolder(TestCase):
+
+    run_test_with = FullStackRunTest
 
     def makeException(self):
         try:
@@ -208,6 +213,8 @@ class TestErrorHolder(TestCase):
 class TestEquality(TestCase):
     """Test ``TestCase``'s equality implementation."""
 
+    run_test_with = FullStackRunTest
+
     def test_identicalIsEqual(self):
         # TestCase's are equal if they are identical.
         self.assertEqual(self, self)
@@ -220,6 +227,8 @@ class TestEquality(TestCase):
 
 class TestAssertions(TestCase):
     """Test assertions in TestCase."""
+
+    run_test_with = FullStackRunTest
 
     def raiseError(self, exceptionFactory, *args, **kwargs):
         raise exceptionFactory(*args, **kwargs)
@@ -527,6 +536,8 @@ class TestAssertions(TestCase):
 class TestAddCleanup(TestCase):
     """Tests for TestCase.addCleanup."""
 
+    run_test_with = FullStackRunTest
+
     class LoggingTest(TestCase):
         """A test that logs calls to setUp, runTest and tearDown."""
 
@@ -692,6 +703,8 @@ class TestAddCleanup(TestCase):
 
 class TestWithDetails(TestCase):
 
+    run_test_with = FullStackRunTest
+
     def assertDetailsProvided(self, case, expected_outcome, expected_keys):
         """Assert that when case is run, details are provided to the result.
 
@@ -723,6 +736,8 @@ class TestWithDetails(TestCase):
 
 class TestExpectedFailure(TestWithDetails):
     """Tests for expected failures and unexpected successess."""
+
+    run_test_with = FullStackRunTest
 
     def make_unexpected_case(self):
         class Case(TestCase):
@@ -787,6 +802,8 @@ class TestExpectedFailure(TestWithDetails):
 class TestUniqueFactories(TestCase):
     """Tests for getUniqueString and getUniqueInteger."""
 
+    run_test_with = FullStackRunTest
+
     def test_getUniqueInteger(self):
         # getUniqueInteger returns an integer that increments each time you
         # call it.
@@ -815,6 +832,8 @@ class TestUniqueFactories(TestCase):
 class TestCloneTestWithNewId(TestCase):
     """Tests for clone_test_with_new_id."""
 
+    run_test_with = FullStackRunTest
+
     def test_clone_test_with_new_id(self):
         class FooTestCase(TestCase):
             def test_foo(self):
@@ -841,6 +860,8 @@ class TestCloneTestWithNewId(TestCase):
 
 
 class TestDetailsProvided(TestWithDetails):
+
+    run_test_with = FullStackRunTest
 
     def test_addDetail(self):
         mycontent = self.get_content()
@@ -945,6 +966,8 @@ class TestDetailsProvided(TestWithDetails):
 
 class TestSetupTearDown(TestCase):
 
+    run_test_with = FullStackRunTest
+
     def test_setUpNotCalled(self):
         class DoesnotcallsetUp(TestCase):
             def setUp(self):
@@ -968,6 +991,8 @@ class TestSetupTearDown(TestCase):
 
 class TestSkipping(TestCase):
     """Tests for skipping of tests functionality."""
+
+    run_test_with = FullStackRunTest
 
     def test_skip_causes_skipException(self):
         self.assertThat(lambda:self.skip("Skip this test"),
@@ -1070,6 +1095,8 @@ class TestSkipping(TestCase):
 
 class TestOnException(TestCase):
 
+    run_test_with = FullStackRunTest
+
     def test_default_works(self):
         events = []
         class Case(TestCase):
@@ -1103,6 +1130,8 @@ class TestOnException(TestCase):
 
 
 class TestPatchSupport(TestCase):
+
+    run_test_with = FullStackRunTest
 
     class Case(TestCase):
         def test(self):
@@ -1161,6 +1190,9 @@ class TestPatchSupport(TestCase):
 
 
 class TestTestCaseSuper(TestCase):
+
+    run_test_with = FullStackRunTest
+
     def test_setup_uses_super(self):
         class OtherBaseCase(unittest.TestCase):
             setup_called = False

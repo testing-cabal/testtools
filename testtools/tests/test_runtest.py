@@ -11,9 +11,12 @@ from testtools import (
     )
 from testtools.matchers import MatchesException, Is, Raises
 from testtools.testresult.doubles import ExtendedTestResult
+from testtools.tests.helpers import FullStackRunTest
 
 
 class TestRunTest(TestCase):
+
+    run_tests_with = FullStackRunTest
 
     def make_case(self):
         class Case(TestCase):
