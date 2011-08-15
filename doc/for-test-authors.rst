@@ -636,11 +636,11 @@ the ``byEquality`` helper::
       matcher = MatchesStructure.byEquality(a=1, b=2)
       self.assertThat(foo, matcher)
 
-``MatchesStructure.from_example`` takes an object and a list of attributes and
+``MatchesStructure.fromExample`` takes an object and a list of attributes and
 creates a ``MatchesStructure`` matcher where each attribute of the matched
 object must equal each attribute of the example object.  For example::
 
-      matcher = MatchesStructure.from_example(foo, 'a', 'b')
+      matcher = MatchesStructure.fromExample(foo, 'a', 'b')
 
 is exactly equivalent to ``matcher`` in the previous example.
 
