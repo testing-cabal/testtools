@@ -44,6 +44,12 @@ Take particular care to make sure the *intent* of each test is clear.
 
 You can run tests with ``make check``.
 
+By default, testtools hides many levels of its own stack when running tests.
+This is for the convenience of users, who do not care about how, say, assert
+methods are implemented. However, when writing tests for testtools itself, it
+is often useful to see all levels of the stack. To do this, add
+``run_tests_with = FullStackRunTest`` to the top of a test's class definition.
+
 
 Documentation
 -------------
@@ -71,18 +77,17 @@ API.  Unstable APIs like ``testtools.matchers`` and
 Tests belong in ``testtools/tests/``.
 
 
-Commiting to trunk
-------------------
+Committing to trunk
+-------------------
 
 Testtools is maintained using bzr, with its trunk at lp:testtools. This gives
 every contributor the ability to commit their work to their own branches.
 However permission must be granted to allow contributors to commit to the trunk
 branch.
 
-Commit access to trunk is obtained by joining the testtools-devs Launchpad
-team. Membership in this team is contingent on obeying the testtools
-contribution policy, including assigning copyright of all the work one creates
-and places in trunk to Jonathan Lange.
+Commit access to trunk is obtained by joining the testtools-committers
+Launchpad team. Membership in this team is contingent on obeying the testtools
+contribution policy, see `Copyright Assignment`_ above.
 
 
 Code Review
@@ -93,7 +98,7 @@ branch in launchpad, and submit it for merging to lp:testtools. It will then
 be reviewed before it can be merged to trunk. It will be reviewed by someone:
 
 * not the author
-* a committer (member of the `~testtools-dev`_ team)
+* a committer (member of the `~testtools-committers`_ team)
 
 As a special exception, while the testtools committers team is small and prone
 to blocking, a merge request from a committer that has not been reviewed after

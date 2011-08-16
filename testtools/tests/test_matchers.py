@@ -45,12 +45,15 @@ from testtools.matchers import (
     raises,
     StartsWith,
     )
+from testtools.tests.helpers import FullStackRunTest
 
 # Silence pyflakes.
 Matcher
 
 
 class TestMismatch(TestCase):
+
+    run_tests_with = FullStackRunTest
 
     def test_constructor_arguments(self):
         mismatch = Mismatch("some description", {'detail': "things"})
@@ -65,6 +68,8 @@ class TestMismatch(TestCase):
 
 
 class TestMatchersInterface(object):
+
+    run_tests_with = FullStackRunTest
 
     def test_matches_match(self):
         matcher = self.matches_matcher
@@ -133,6 +138,8 @@ class TestDocTestMatchesInterfaceUnicode(TestCase, TestMatchersInterface):
 
 
 class TestDocTestMatchesSpecific(TestCase):
+
+    run_tests_with = FullStackRunTest
 
     def test___init__simple(self):
         matcher = DocTestMatches("foo")
@@ -447,6 +454,8 @@ class TestAnnotate(TestCase, TestMatchersInterface):
 
 class TestAnnotatedMismatch(TestCase):
 
+    run_tests_with = FullStackRunTest
+
     def test_forwards_details(self):
         x = Mismatch('description', {'foo': 'bar'})
         annotated = AnnotatedMismatch("annotation", x)
@@ -488,6 +497,8 @@ class TestRaisesExceptionMatcherInterface(TestCase, TestMatchersInterface):
 
 class TestRaisesBaseTypes(TestCase):
 
+    run_tests_with = FullStackRunTest
+
     def raiser(self):
         raise KeyboardInterrupt('foo')
 
@@ -521,6 +532,8 @@ class TestRaisesBaseTypes(TestCase):
 
 class TestRaisesConvenience(TestCase):
 
+    run_tests_with = FullStackRunTest
+
     def test_exc_type(self):
         self.assertThat(lambda: 1/0, raises(ZeroDivisionError))
 
@@ -533,12 +546,16 @@ class TestRaisesConvenience(TestCase):
 
 class DoesNotStartWithTests(TestCase):
 
+    run_tests_with = FullStackRunTest
+
     def test_describe(self):
         mismatch = DoesNotStartWith("fo", "bo")
         self.assertEqual("'fo' does not start with 'bo'.", mismatch.describe())
 
 
 class StartsWithTests(TestCase):
+
+    run_tests_with = FullStackRunTest
 
     def test_str(self):
         matcher = StartsWith("bar")
@@ -565,12 +582,16 @@ class StartsWithTests(TestCase):
 
 class DoesNotEndWithTests(TestCase):
 
+    run_tests_with = FullStackRunTest
+
     def test_describe(self):
         mismatch = DoesNotEndWith("fo", "bo")
         self.assertEqual("'fo' does not end with 'bo'.", mismatch.describe())
 
 
 class EndsWithTests(TestCase):
+
+    run_tests_with = FullStackRunTest
 
     def test_str(self):
         matcher = EndsWith("bar")
@@ -606,6 +627,8 @@ def run_doctest(obj, name):
 
 
 class TestMatchesListwise(TestCase):
+
+    run_tests_with = FullStackRunTest
 
     def test_docstring(self):
         failure_count, output = run_doctest(
@@ -698,6 +721,8 @@ class TestMatchesRegex(TestCase, TestMatchersInterface):
 
 
 class TestMatchesSetwise(TestCase):
+
+    run_tests_with = FullStackRunTest
 
     def assertMismatchWithDescriptionMatching(self, value, matcher,
                                               description_matcher):
@@ -796,6 +821,8 @@ class TestAfterPreprocessing(TestCase, TestMatchersInterface):
 
 
 class TestMismatchDecorator(TestCase):
+
+    run_tests_with = FullStackRunTest
 
     def test_forwards_description(self):
         x = Mismatch("description", {'foo': 'bar'})
