@@ -112,6 +112,13 @@ else:
         return isinstance(exception, (KeyboardInterrupt, SystemExit))
 
 
+def text_repr(text, multiline=False):
+    """Rich repr for `text` returning unicode, triple quoted if `multiline`"""
+    if multiline:
+        raise NotImplementedError
+    return repr(text)
+
+
 def unicode_output_stream(stream):
     """Get wrapper for given stream that writes any unicode without exception
 

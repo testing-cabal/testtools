@@ -16,6 +16,7 @@ from testtools.compat import (
     _get_source_encoding,
     _u,
     str_is_unicode,
+    text_repr,
     unicode_output_stream,
     )
 from testtools.matchers import (
@@ -260,6 +261,119 @@ class TestUnicodeOutputStream(testtools.TestCase):
                 Not(Raises(MatchesException(TypeError))))
         soutwrapper.write(self.uni)
         self.assertEqual("pa???n", sout.getvalue())
+
+
+class TestTextRepr(testtools.TestCase):
+    """Ensure in extending repr, basic behaviours are not being broken"""
+
+    ascii_examples = (
+        # Single character examples
+        #  C0 control codes should be escaped except multiline \n
+        ("\x00", "'\\x00'", "'''\\\n\\x00'''"),
+        ("\b", "'\\x08'", "'''\\\n\\x08'''"),
+        ("\t", "'\\t'", "'''\\\n\\t'''"),
+        ("\n", "'\\n'", "'''\\\n\n'''"),
+        ("\r", "'\\r'", "'''\\\n\\r'''"),
+        #  Quotes and backslash should match normal repr behaviour
+        ('"', "'\"'", "'''\\\n\"'''"),
+        ("'", "\"'\"", "'''\\\n\\''''"),
+        ("\\", "'\\\\'", "'''\\\n\\\\'''"),
+        #  DEL is also unprintable and should be escaped
+        ("\x7F", "'\\x7f'", "'''\\\n\\x7f'''"),
+
+        # Character combinations that need double checking
+        ("\r\n", "'\\r\\n'", "'''\\\n\\r\n'''"),
+        ("\"'", "'\"\\''", "'''\\\n\"\\''''"),
+        ("'\"", "'\\'\"'", "'''\\\n'\"'''"),
+        ("\\n", "'\\\\n'", "'''\\\n\\\n'''"),
+        ("\\\n", "'\\\\\\n'", "'''\\\n\\\\\n'''"),
+        ("\\'''", "\"\\\\'''\"", "'''\\\n\\\\\\'\\'\\''''"),
+        )
+
+    # Bytes with the high bit set should always be escaped
+    bytes_examples = (
+        (_b("\x80"), "'\\x80'", "'''\\\n\\x80'''"),
+        (_b("\xA0"), "'\\xa0'", "'''\\\n\\xa0'''"),
+        (_b("\xC0"), "'\\xc0'", "'''\\\n\\xc0'''"),
+        (_b("\xFF"), "'\\xff'", "'''\\\n\\xff'''"),
+        (_b("\xC2\xA7"), "'\\xc2\\xa7'", "'''\\\n\\xc2\\xa7'''"),
+        )
+
+    # Unicode doesn't escape printable characters as per the Python 3 model
+    unicode_examples = (
+        # C1 codes are unprintable
+        (_u("\x80"), "'\\x80'", "'''\\\n\\x80'''"),
+        (_u("\x9F"), "'\\x9f'", "'''\\\n\\x9f'''"),
+        # No-break space is unprintable
+        (_u("\xA0"), "'\\xa0'", "'''\\\n\\xa0'''"),
+        # Letters latin alphabets are printable
+        (_u("\xA1"), "'\xa1'", "'''\\\n\xa1'''"),
+        (_u("\xFF"), "'\xff'", "'''\\\n\xff'''"),
+        (_u("\u0100"), "'\u0100'", "'''\\\n\u0100'''"),
+        # Line and paragraph seperators are unprintable
+        (_u("\u2028"), "'\\u2028'", "'''\\\n\\u2028'''"),
+        (_u("\u2029"), "'\\u2029'", "'''\\\n\\u2029'''"),
+        # Unpaired surrogates are unprintable
+        (_u("\uD800"), "'\\ud800'", "'''\\\n\\ud800'''"),
+        (_u("\uDFFF"), "'\\udfff'", "'''\\\n\\udfff'''"),
+        # Unprintable general categories not fully tested: Cc, Cf, Co, Cn, Zs
+        )
+
+    b_prefix = repr(_b(""))[:-2]
+    u_prefix = repr(_u(""))[:-2]
+
+    def test_ascii_examples_bytes(self):
+        for s, expected, _ in self.ascii_examples:
+            b = _b(s)
+            actual = text_repr(b)
+            # Add self.assertIsInstance check?
+            self.assertEqual(actual, self.b_prefix + expected)
+            self.assertEqual(eval(actual), b)
+
+    def test_ascii_examples_unicode(self):
+        for s, expected, _ in self.ascii_examples:
+            u = _u(s)
+            actual = text_repr(u)
+            self.assertEqual(actual, self.u_prefix + expected)
+            self.assertEqual(eval(actual), u)
+
+    def test_ascii_examples_multiline_bytes(self):
+        for s, _, expected in self.ascii_examples:
+            b = _b(s)
+            actual = text_repr(b, multiline=True)
+            self.assertEqual(actual, self.b_prefix + expected)
+            self.assertEqual(eval(actual), b)
+
+    def test_ascii_examples_multiline_unicode(self):
+        for s, _, expected in self.ascii_examples:
+            u = _u(s)
+            actual = text_repr(u, multiline=True)
+            self.assertEqual(actual, self.u_prefix + expected)
+            self.assertEqual(eval(actual), u)
+
+    def test_bytes_examples(self):
+        for b, expected, _ in self.bytes_examples:
+            actual = text_repr(b)
+            self.assertEqual(actual, self.b_prefix + expected)
+            self.assertEqual(eval(actual), b)
+
+    def test_bytes_examples_multiline(self):
+        for b, _, expected in self.bytes_examples:
+            actual = text_repr(b, multiline=True)
+            self.assertEqual(actual, self.b_prefix + expected)
+            self.assertEqual(eval(actual), b)
+
+    def test_unicode_examples(self):
+        for u, expected, _ in self.unicode_examples:
+            actual = text_repr(u)
+            self.assertEqual(actual, self.u_prefix + expected)
+            self.assertEqual(eval(actual), u)
+
+    def test_unicode_examples_multiline(self):
+        for u, _, expected in self.unicode_examples:
+            actual = text_repr(u, multiline=True)
+            self.assertEqual(actual, self.u_prefix + expected)
+            self.assertEqual(eval(actual), u)
 
 
 def test_suite():
