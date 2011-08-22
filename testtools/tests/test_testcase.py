@@ -476,7 +476,7 @@ class TestAssertions(TestCase):
         matchee = 'foo'
         matcher = Equals('bar')
         expected = (
-            'Match failed. Matchee: "%s"\n'
+            'Match failed. Matchee: %r\n'
             'Matcher: %s\n'
             'Difference: %s\n' % (
                 matchee,
@@ -516,10 +516,10 @@ class TestAssertions(TestCase):
         matchee = _u('\xa7')
         matcher = Equals(_u('a'))
         expected = (
-            'Match failed. Matchee: "%s"\n'
+            'Match failed. Matchee: %s\n'
             'Matcher: %s\n'
             'Difference: %s\n\n' % (
-                matchee,
+                repr(matchee).replace("\\xa7", matchee),
                 matcher,
                 matcher.match(matchee).describe(),
                 ))

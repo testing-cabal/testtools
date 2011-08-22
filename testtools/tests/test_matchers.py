@@ -12,6 +12,7 @@ from testtools import (
     )
 from testtools.compat import (
     StringIO,
+    text_repr,
     to_text,
     _u,
     )
@@ -91,7 +92,7 @@ class TestMismatchError(TestCase):
         mismatch = matcher.match(2)
         e = MismatchError(matchee, matcher, mismatch, True)
         expected = (
-            'Match failed. Matchee: "%s"\n'
+            'Match failed. Matchee: %r\n'
             'Matcher: %s\n'
             'Difference: %s\n' % (
                 matchee,
@@ -107,10 +108,10 @@ class TestMismatchError(TestCase):
         matcher = Equals(_u('a'))
         mismatch = matcher.match(matchee)
         expected = (
-            'Match failed. Matchee: "%s"\n'
+            'Match failed. Matchee: %s\n'
             'Matcher: %s\n'
             'Difference: %s\n' % (
-                matchee,
+                text_repr(matchee),
                 matcher,
                 mismatch.describe(),
                 ))

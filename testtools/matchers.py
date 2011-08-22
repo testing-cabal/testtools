@@ -48,6 +48,7 @@ from testtools.compat import (
     _error_repr,
     isbaseexception,
     istext,
+    text_repr
     )
 
 
@@ -149,9 +150,13 @@ class MismatchError(AssertionError):
     def __str__(self):
         difference = self.mismatch.describe()
         if self.verbose:
+            if istext(self.matchee):
+                matchee = text_repr(self.matchee)
+            else:
+                matchee = repr(self.matchee)
             return (
-                'Match failed. Matchee: "%s"\nMatcher: %s\nDifference: %s\n'
-                % (self.matchee, self.matcher, difference))
+                'Match failed. Matchee: %s\nMatcher: %s\nDifference: %s\n'
+                % (matchee, self.matcher, difference))
         else:
             return difference
 
