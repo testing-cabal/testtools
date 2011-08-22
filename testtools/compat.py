@@ -217,11 +217,6 @@ def unicode_output_stream(stream):
     return writer(stream, "replace")
 
 
-try:
-    to_text = unicode
-except NameError:
-    to_text = str
-
 # The default source encoding is actually "iso-8859-1" until Python 2.5 but
 # using non-ascii causes a deprecation warning in 2.4 and it's cleaner to
 # treat all versions the same way

@@ -14,7 +14,6 @@ from testtools.compat import (
     StringIO,
     str_is_unicode,
     text_repr,
-    to_text,
     _u,
     )
 from testtools.matchers import (
