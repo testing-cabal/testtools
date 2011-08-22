@@ -12,6 +12,7 @@ from testtools import (
     )
 from testtools.compat import (
     StringIO,
+    str_is_unicode,
     text_repr,
     to_text,
     _u,
@@ -116,9 +117,15 @@ class TestMismatchError(TestCase):
                 mismatch.describe(),
                 ))
         e = MismatchError(matchee, matcher, mismatch, True)
-        # XXX: Using to_text rather than str because, on Python 2, str will
-        # raise UnicodeEncodeError.
-        self.assertEqual(expected, to_text(e))
+        if str_is_unicode:
+            actual = str(e)
+        else:
+            actual = unicode(e)
+            # Using str() should still work, and return ascii only
+            self.assertEqual(
+                expected.replace(matchee, matchee.encode("unicode-escape")),
+                str(e).decode("ascii"))
+        self.assertEqual(expected, actual)
 
 
 class TestMatchersInterface(object):

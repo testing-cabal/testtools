@@ -48,6 +48,7 @@ from testtools.compat import (
     _error_repr,
     isbaseexception,
     istext,
+    str_is_unicode,
     text_repr
     )
 
@@ -159,6 +160,13 @@ class MismatchError(AssertionError):
                 % (matchee, self.matcher, difference))
         else:
             return difference
+
+    if not str_is_unicode:
+
+        __unicode__ = __str__
+
+        def __str__(self):
+            return self.__unicode__().encode("ascii", "backslashreplace")
 
 
 class MismatchDecorator(object):
