@@ -47,6 +47,7 @@ from testtools.compat import (
     classtypes,
     _error_repr,
     isbaseexception,
+    _isbytes,
     istext,
     str_is_unicode,
     text_repr
@@ -151,7 +152,9 @@ class MismatchError(AssertionError):
     def __str__(self):
         difference = self.mismatch.describe()
         if self.verbose:
-            if istext(self.matchee):
+            # GZ 2011-08-24: Smelly API? Better to take any object and special
+            #                case text inside?
+            if istext(self.matchee) or _isbytes(self.matchee):
                 matchee = text_repr(self.matchee)
             else:
                 matchee = repr(self.matchee)
@@ -345,6 +348,8 @@ class _BinaryMismatch(Mismatch):
         # strings. Everything else is pretty-printed.
         if istext(thing):
             return text_repr(thing, multiline='\n' in thing)
+        elif _isbytes(thing):
+            return text_repr(thing, multiline=0xA in thing)
         return pformat(thing)
 
     def describe(self):

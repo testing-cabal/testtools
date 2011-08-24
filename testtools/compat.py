@@ -53,6 +53,7 @@ appropriately and the no-op _u for Python 3 lets it through, in Python
 """
 
 if sys.version_info > (3, 0):
+    import builtins
     def _u(s):
         return s
     _r = ascii
@@ -60,12 +61,14 @@ if sys.version_info > (3, 0):
         """A byte literal."""
         return s.encode("latin-1")
     advance_iterator = next
+    # GZ 2011-08-24: Seems istext() is easy to misuse and makes for bad code.
     def istext(x):
         return isinstance(x, str)
     def classtypes():
         return (type,)
     str_is_unicode = True
 else:
+    import __builtin__ as builtins
     def _u(s):
         # The double replace mangling going on prepares the string for
         # unicode-escape - \foo is preserved, \u and \U are decoded.
@@ -111,6 +114,17 @@ else:
         <http://docs.python.org/release/2.5.4/lib/module-exceptions.html>
         """
         return isinstance(exception, (KeyboardInterrupt, SystemExit))
+
+
+# GZ 2011-08-24: Using isinstance checks like this encourages bad interfaces,
+#                there should be better ways to write code needing this.
+if not issubclass(getattr(builtins, "bytes", str), str):
+    def _isbytes(x):
+        return isinstance(x, bytes)
+else:
+    # Never return True on Pythons that provide the name but not the real type
+    def _isbytes(x):
+        return False
 
 
 def _slow_escape(text):
