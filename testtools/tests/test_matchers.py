@@ -14,6 +14,7 @@ from testtools.compat import (
     StringIO,
     str_is_unicode,
     text_repr,
+    _b,
     _u,
     )
 from testtools.matchers import (
@@ -21,6 +22,7 @@ from testtools.matchers import (
     AllMatch,
     Annotate,
     AnnotatedMismatch,
+    _BinaryMismatch,
     Equals,
     DocTestMatches,
     DoesNotEndWith,
@@ -125,6 +127,63 @@ class TestMismatchError(TestCase):
                 expected.replace(matchee, matchee.encode("unicode-escape")),
                 str(e).decode("ascii"))
         self.assertEqual(expected, actual)
+
+
+class Test_BinaryMismatch(TestCase):
+    """Mismatches from binary comparisons need useful describe output"""
+
+    _long_string = "This is a longish multiline non-ascii string\n\xa7"
+    _long_b = _b(_long_string)
+    _long_u = _u(_long_string)
+
+    def test_short_objects(self):
+        o1, o2 = object(), object()
+        mismatch = _BinaryMismatch(o1, "!~", o2)
+        self.assertEqual(mismatch.describe(), "%r !~ %r" % (o1, o2))
+
+    def test_short_mixed_strings(self):
+        b, u = _b("\xa7"), _u("\xa7")
+        mismatch = _BinaryMismatch(b, "!~", u)
+        self.assertEqual(mismatch.describe(), "%r !~ %r" % (b, u))
+
+    def test_long_bytes(self):
+        one_line_b = self._long_b.replace(_b("\n"), _b(" "))
+        mismatch = _BinaryMismatch(one_line_b, "!~", self._long_b)
+        self.assertEqual(mismatch.describe(),
+            "%s:\nreference = %s\nactual = %s\n" % ("!~",
+                text_repr(one_line_b),
+                text_repr(self._long_b, multiline=True)))
+
+    def test_long_unicode(self):
+        one_line_u = self._long_u.replace("\n", " ")
+        mismatch = _BinaryMismatch(one_line_u, "!~", self._long_u)
+        self.assertEqual(mismatch.describe(),
+            "%s:\nreference = %s\nactual = %s\n" % ("!~",
+                text_repr(one_line_u),
+                text_repr(self._long_u, multiline=True)))
+
+    def test_long_mixed_strings(self):
+        mismatch = _BinaryMismatch(self._long_b, "!~", self._long_u)
+        self.assertEqual(mismatch.describe(),
+            "%s:\nreference = %s\nactual = %s\n" % ("!~",
+                text_repr(self._long_b, multiline=True),
+                text_repr(self._long_u, multiline=True)))
+
+    def test_long_bytes_and_object(self):
+        obj = object()
+        mismatch = _BinaryMismatch(self._long_b, "!~", obj)
+        self.assertEqual(mismatch.describe(),
+            "%s:\nreference = %s\nactual = %s\n" % ("!~",
+                text_repr(self._long_b, multiline=True),
+                repr(obj)))
+
+    def test_long_unicode_and_object(self):
+        obj = object()
+        mismatch = _BinaryMismatch(self._long_u, "!~", obj)
+        self.assertEqual(mismatch.describe(),
+            "%s:\nreference = %s\nactual = %s\n" % ("!~",
+                text_repr(self._long_u, multiline=True),
+                repr(obj)))
 
 
 class TestMatchersInterface(object):

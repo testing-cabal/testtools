@@ -553,6 +553,21 @@ class TestAssertions(TestCase):
         self.assertFails(expected_error, self.assertEquals, a, b)
         self.assertFails(expected_error, self.failUnlessEqual, a, b)
 
+    def test_assertEqual_non_ascii_str_with_newlines(self):
+        message = _u("Be careful mixing unicode and bytes")
+        a = "a\n\xa7\n"
+        b = "Just a longish string so the more verbose output form is used."
+        expected_error = '\n'.join([
+            '!=:',
+            "reference = '''\\",
+            'a',
+            repr('\xa7')[1:-1],
+            "'''",
+            'actual = %r' % (b,),
+            ': ' + message,
+            ])
+        self.assertFails(expected_error, self.assertEqual, a, b, message)
+
     def test_assertIsNone(self):
         self.assertIsNone(None)
 

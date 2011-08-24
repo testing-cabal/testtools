@@ -343,8 +343,8 @@ class _BinaryMismatch(Mismatch):
     def _format(self, thing):
         # Blocks of text with newlines are formatted as triple-quote
         # strings. Everything else is pretty-printed.
-        if istext(thing) and '\n' in thing:
-            return '"""\\\n%s"""' % (thing,)
+        if istext(thing):
+            return text_repr(thing, multiline='\n' in thing)
         return pformat(thing)
 
     def describe(self):
@@ -355,7 +355,7 @@ class _BinaryMismatch(Mismatch):
                 self._mismatch_string, self._format(self.expected),
                 self._format(self.other))
         else:
-            return "%s %s %s" % (left, self._mismatch_string,right)
+            return "%s %s %s" % (left, self._mismatch_string, right)
 
 
 class Equals(_BinaryComparison):
