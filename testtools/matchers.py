@@ -282,7 +282,12 @@ class DocTestMismatch(Mismatch):
         self.with_nl = with_nl
 
     def describe(self):
-        return self.matcher._describe_difference(self.with_nl)
+        s = self.matcher._describe_difference(self.with_nl)
+        if str_is_unicode or isinstance(s, unicode):
+            return s
+        # GZ 2011-08-24: This is actually pretty bogus, most C0 codes should
+        #                be escaped, in addition to non-ascii bytes.
+        return s.decode("latin1").encode("ascii", "backslashreplace")
 
 
 class DoesNotStartWith(Mismatch):
