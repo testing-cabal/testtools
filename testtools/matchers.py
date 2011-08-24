@@ -813,8 +813,12 @@ class MatchesRegex(object):
 
     def match(self, value):
         if not re.match(self.pattern, value, self.flags):
+            pattern = self.pattern
+            if not isinstance(pattern, str_is_unicode and str or unicode):
+                pattern = pattern.decode("latin1")
+            pattern = pattern.encode("unicode_escape").decode("ascii")
             return Mismatch("%r does not match /%s/" % (
-                    value, self.pattern))
+                    value, pattern.replace("\\\\", "\\")))
 
 
 class MatchesSetwise(object):
