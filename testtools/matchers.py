@@ -540,7 +540,7 @@ class StartsWith(Matcher):
         self.expected = expected
 
     def __str__(self):
-        return "Starts with '%s'." % self.expected
+        return "StartsWith(%r)" % (self.expected,)
 
     def match(self, matchee):
         if not matchee.startswith(self.expected):
@@ -559,7 +559,7 @@ class EndsWith(Matcher):
         self.expected = expected
 
     def __str__(self):
-        return "Ends with '%s'." % self.expected
+        return "EndsWith(%r)" % (self.expected,)
 
     def match(self, matchee):
         if not matchee.endswith(self.expected):

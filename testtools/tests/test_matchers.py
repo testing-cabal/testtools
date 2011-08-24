@@ -645,7 +645,17 @@ class StartsWithTests(TestCase):
 
     def test_str(self):
         matcher = StartsWith("bar")
-        self.assertEqual("Starts with 'bar'.", str(matcher))
+        self.assertEqual("StartsWith('bar')", str(matcher))
+
+    def test_str_with_bytes(self):
+        b = _b("\xA7")
+        matcher = StartsWith(b)
+        self.assertEqual("StartsWith(%r)" % (b,), str(matcher))
+
+    def test_str_with_unicode(self):
+        u = _u("\xA7")
+        matcher = StartsWith(u)
+        self.assertEqual("StartsWith(%r)" % (u,), str(matcher))
 
     def test_match(self):
         matcher = StartsWith("bar")
@@ -692,7 +702,17 @@ class EndsWithTests(TestCase):
 
     def test_str(self):
         matcher = EndsWith("bar")
-        self.assertEqual("Ends with 'bar'.", str(matcher))
+        self.assertEqual("EndsWith('bar')", str(matcher))
+
+    def test_str_with_bytes(self):
+        b = _b("\xA7")
+        matcher = EndsWith(b)
+        self.assertEqual("EndsWith(%r)" % (b,), str(matcher))
+
+    def test_str_with_unicode(self):
+        u = _u("\xA7")
+        matcher = EndsWith(u)
+        self.assertEqual("EndsWith(%r)" % (u,), str(matcher))
 
     def test_match(self):
         matcher = EndsWith("arf")
