@@ -625,6 +625,21 @@ class DoesNotStartWithTests(TestCase):
         mismatch = DoesNotStartWith("fo", "bo")
         self.assertEqual("'fo' does not start with 'bo'.", mismatch.describe())
 
+    def test_describe_non_ascii_unicode(self):
+        string = _u("A\xA7")
+        suffix = _u("B\xA7")
+        mismatch = DoesNotStartWith(string, suffix)
+        self.assertEqual("%s does not start with %s." % (
+            text_repr(string), text_repr(suffix)),
+            mismatch.describe())
+
+    def test_describe_non_ascii_bytes(self):
+        string = _b("A\xA7")
+        suffix = _b("B\xA7")
+        mismatch = DoesNotStartWith(string, suffix)
+        self.assertEqual("%r does not start with %r." % (string, suffix),
+            mismatch.describe())
+
 
 class StartsWithTests(TestCase):
 
@@ -656,6 +671,21 @@ class DoesNotEndWithTests(TestCase):
     def test_describe(self):
         mismatch = DoesNotEndWith("fo", "bo")
         self.assertEqual("'fo' does not end with 'bo'.", mismatch.describe())
+
+    def test_describe_non_ascii_unicode(self):
+        string = _u("A\xA7")
+        suffix = _u("B\xA7")
+        mismatch = DoesNotEndWith(string, suffix)
+        self.assertEqual("%s does not end with %s." % (
+            text_repr(string), text_repr(suffix)),
+            mismatch.describe())
+
+    def test_describe_non_ascii_bytes(self):
+        string = _b("A\xA7")
+        suffix = _b("B\xA7")
+        mismatch = DoesNotEndWith(string, suffix)
+        self.assertEqual("%r does not end with %r." % (string, suffix),
+            mismatch.describe())
 
 
 class EndsWithTests(TestCase):

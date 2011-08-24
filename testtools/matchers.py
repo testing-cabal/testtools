@@ -297,8 +297,8 @@ class DoesNotStartWith(Mismatch):
         self.expected = expected
 
     def describe(self):
-        return "'%s' does not start with '%s'." % (
-            self.matchee, self.expected)
+        return "%s does not start with %s." % (
+            text_repr(self.matchee), text_repr(self.expected))
 
 
 class DoesNotEndWith(Mismatch):
@@ -313,8 +313,8 @@ class DoesNotEndWith(Mismatch):
         self.expected = expected
 
     def describe(self):
-        return "'%s' does not end with '%s'." % (
-            self.matchee, self.expected)
+        return "%s does not end with %s." % (
+            text_repr(self.matchee), text_repr(self.expected))
 
 
 class _BinaryComparison(object):
