@@ -144,7 +144,7 @@ def _slow_escape(text):
             if o < 32 or 126 < o < 161:
                 output.append(c.encode("unicode-escape"))
             elif o == 92:
-                # Seperate due to bug in unicode-escape codec in Python 2.4
+                # Separate due to bug in unicode-escape codec in Python 2.4
                 output.append("\\\\")
             else:
                 output.append(c)
