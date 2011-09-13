@@ -103,6 +103,8 @@ class Mismatch(object):
         """Describe the mismatch.
 
         This should be either a human-readable string or castable to a string.
+        In particular, is should either be plain ascii or unicode on Python 2,
+        and care should be taken to escape control characters.
         """
         try:
             return self._description
