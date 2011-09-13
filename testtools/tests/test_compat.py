@@ -354,6 +354,16 @@ class TestTextRepr(testtools.TestCase):
             self.assertEqual(actual, self.u_prefix + expected)
             self.assertEqual(eval(actual), u)
 
+    def test_ascii_examples_defaultline_bytes(self):
+        for s, one, multi in self.ascii_examples:
+            expected = "\n" in s and multi or one
+            self.assertEqual(text_repr(_b(s)), self.b_prefix + expected)
+
+    def test_ascii_examples_defaultline_unicode(self):
+        for s, one, multi in self.ascii_examples:
+            expected = "\n" in s and multi or one
+            self.assertEqual(text_repr(_u(s)), self.u_prefix + expected)
+
     def test_bytes_examples_oneline(self):
         for b, expected, _ in self.bytes_examples:
             actual = text_repr(b, multiline=False)
