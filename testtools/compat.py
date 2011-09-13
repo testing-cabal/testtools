@@ -157,16 +157,20 @@ def _slow_escape(text):
     return "".join(output)
 
 
-def text_repr(text, multiline=False):
+def text_repr(text, multiline=None):
     """Rich repr for `text` returning unicode, triple quoted if `multiline`"""
     is_py3k = sys.version_info > (3, 0)
+    nl = _isbytes(text) and bytes((0xA,)) or "\n"
+    if multiline is None:
+        multiline = nl in text
     if not multiline and (is_py3k or not str_is_unicode and type(text) is str):
         # Use normal repr for single line of unicode on Python 3 or bytes
         return repr(text)
     prefix = repr(text[:0])[:-2]
     if multiline:
+        # To escape multiline strings, split and process each line in turn,
+        # making sure that quotes are not escaped. 
         if is_py3k:
-            nl = isinstance(text, bytes) and bytes([10]) or "\n"
             offset = len(prefix) + 1
             lines = []
             for l in text.split(nl):
@@ -178,6 +182,8 @@ def text_repr(text, multiline=False):
                 for l in text.split("\n")]
         else:
             lines = [_slow_escape(l) for l in text.split("\n")]
+        # Combine the escaped lines and append two of the closing quotes,
+        # then iterate over the result to escape triple quotes correctly.
         _semi_done = "\n".join(lines) + "''"
         p = 0
         while True:
@@ -188,6 +194,8 @@ def text_repr(text, multiline=False):
             p += 2
         return "".join([prefix, "'''\\\n", _semi_done, "'"])
     escaped_text = _slow_escape(text)
+    # Determine which quote character to use and if one gets prefixed with a
+    # backslash following the same logic Python uses for repr() on strings
     quote = "'"
     if "'" in text:
         if '"' in text:

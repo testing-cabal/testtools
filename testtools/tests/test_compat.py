@@ -325,18 +325,18 @@ class TestTextRepr(testtools.TestCase):
     b_prefix = repr(_b(""))[:-2]
     u_prefix = repr(_u(""))[:-2]
 
-    def test_ascii_examples_bytes(self):
+    def test_ascii_examples_oneline_bytes(self):
         for s, expected, _ in self.ascii_examples:
             b = _b(s)
-            actual = text_repr(b)
+            actual = text_repr(b, multiline=False)
             # Add self.assertIsInstance check?
             self.assertEqual(actual, self.b_prefix + expected)
             self.assertEqual(eval(actual), b)
 
-    def test_ascii_examples_unicode(self):
+    def test_ascii_examples_oneline_unicode(self):
         for s, expected, _ in self.ascii_examples:
             u = _u(s)
-            actual = text_repr(u)
+            actual = text_repr(u, multiline=False)
             self.assertEqual(actual, self.u_prefix + expected)
             self.assertEqual(eval(actual), u)
 
@@ -354,9 +354,9 @@ class TestTextRepr(testtools.TestCase):
             self.assertEqual(actual, self.u_prefix + expected)
             self.assertEqual(eval(actual), u)
 
-    def test_bytes_examples(self):
+    def test_bytes_examples_oneline(self):
         for b, expected, _ in self.bytes_examples:
-            actual = text_repr(b)
+            actual = text_repr(b, multiline=False)
             self.assertEqual(actual, self.b_prefix + expected)
             self.assertEqual(eval(actual), b)
 
@@ -366,9 +366,9 @@ class TestTextRepr(testtools.TestCase):
             self.assertEqual(actual, self.b_prefix + expected)
             self.assertEqual(eval(actual), b)
 
-    def test_unicode_examples(self):
+    def test_unicode_examples_oneline(self):
         for u, expected, _ in self.unicode_examples:
-            actual = text_repr(u)
+            actual = text_repr(u, multiline=False)
             self.assertEqual(actual, self.u_prefix + expected)
             self.assertEqual(eval(actual), u)
 

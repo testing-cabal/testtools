@@ -157,7 +157,7 @@ class MismatchError(AssertionError):
             # GZ 2011-08-24: Smelly API? Better to take any object and special
             #                case text inside?
             if istext(self.matchee) or _isbytes(self.matchee):
-                matchee = text_repr(self.matchee)
+                matchee = text_repr(self.matchee, multiline=False)
             else:
                 matchee = repr(self.matchee)
             return (
@@ -353,10 +353,8 @@ class _BinaryMismatch(Mismatch):
     def _format(self, thing):
         # Blocks of text with newlines are formatted as triple-quote
         # strings. Everything else is pretty-printed.
-        if istext(thing):
-            return text_repr(thing, multiline='\n' in thing)
-        elif _isbytes(thing):
-            return text_repr(thing, multiline=0xA in thing)
+        if istext(thing) or _isbytes(thing):
+            return text_repr(thing)
         return pformat(thing)
 
     def describe(self):
