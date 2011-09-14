@@ -24,14 +24,21 @@ from testtools import (
     content,
     try_import,
     )
-from testtools.compat import advance_iterator
+from testtools.compat import (
+    advance_iterator,
+    reraise,
+    )
 from testtools.matchers import (
     Annotate,
+    Contains,
     Equals,
+    MatchesAll,
     MatchesException,
     MismatchError,
     Is,
+    IsInstance,
     Not,
+    Raises,
     )
 from testtools.monkey import patch
 from testtools.runtest import RunTest
@@ -305,16 +312,14 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message to include in the error.
         """
-        matcher = Annotate.if_message(message, Equals(expected))
-        self.assertThat(observed, matcher)
+        matcher = Equals(expected)
+        self.assertThat(observed, matcher, message)
 
     failUnlessEqual = assertEquals = assertEqual
 
     def assertIn(self, needle, haystack):
         """Assert that needle is in haystack."""
-        # XXX: Re-implement with matchers.
-        if needle not in haystack:
-            self.fail('%r not in %r' % (needle, haystack))
+        self.assertThat(haystack, Contains(needle))
 
     def assertIsNone(self, observed, message=''):
         """Assert that 'observed' is equal to None.
@@ -322,8 +327,8 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message describing the error.
         """
-        matcher = Annotate.if_message(message, Is(None))
-        self.assertThat(observed, matcher)
+        matcher = Is(None)
+        self.assertThat(observed, matcher, message)
 
     def assertIsNotNone(self, observed, message=''):
         """Assert that 'observed' is not equal to None.
@@ -331,8 +336,8 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message describing the error.
         """
-        matcher = Annotate.if_message(message, Not(Is(None)))
-        self.assertThat(observed, matcher)
+        matcher = Not(Is(None))
+        self.assertThat(observed, matcher, message)
 
     def assertIs(self, expected, observed, message=''):
         """Assert that 'expected' is 'observed'.
@@ -341,33 +346,25 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message describing the error.
         """
-        # XXX: Re-implement with matchers.
-        if message:
-            message = ': ' + message
-        if expected is not observed:
-            self.fail('%r is not %r%s' % (expected, observed, message))
+        matcher = Is(expected)
+        self.assertThat(observed, matcher, message)
 
     def assertIsNot(self, expected, observed, message=''):
         """Assert that 'expected' is not 'observed'."""
-        # XXX: Re-implement with matchers.
-        if message:
-            message = ': ' + message
-        if expected is observed:
-            self.fail('%r is %r%s' % (expected, observed, message))
+        matcher = Not(Is(expected))
+        self.assertThat(observed, matcher, message)
 
     def assertNotIn(self, needle, haystack):
         """Assert that needle is not in haystack."""
-        # XXX: Re-implement with matchers.
-        if needle in haystack:
-            self.fail('%r in %r' % (needle, haystack))
+        matcher = Not(Contains(needle))
+        self.assertThat(haystack, matcher)
 
     def assertIsInstance(self, obj, klass, msg=None):
-        # XXX: Re-implement with matchers.
-        if msg is None:
-            msg = '%r is not an instance of %s' % (
-                obj, self._formatTypes(klass))
-        if not isinstance(obj, klass):
-            self.fail(msg)
+        if isinstance(klass, tuple):
+            matcher = IsInstance(*klass)
+        else:
+            matcher = IsInstance(klass)
+        self.assertThat(obj, matcher, msg)
 
     def assertRaises(self, excClass, callableObj, *args, **kwargs):
         """Fail unless an exception of class excClass is thrown
@@ -377,25 +374,29 @@ class TestCase(unittest.TestCase):
            deemed to have suffered an error, exactly as for an
            unexpected exception.
         """
-        # XXX: Re-implement with matchers.
-        try:
-            ret = callableObj(*args, **kwargs)
-        except excClass:
-            return sys.exc_info()[1]
-        else:
-            excName = self._formatTypes(excClass)
-            self.fail("%s not raised, %r returned instead." % (excName, ret))
+        class ReRaiseOtherTypes(object):
+            def match(self, matchee):
+                if not issubclass(matchee[0], excClass):
+                    reraise(*matchee)
+        class CaptureMatchee(object):
+            def match(self, matchee):
+                self.matchee = matchee[1]
+        capture = CaptureMatchee()
+        matcher = Raises(MatchesAll(ReRaiseOtherTypes(),
+                MatchesException(excClass), capture))
+
+        self.assertThat(lambda: callableObj(*args, **kwargs), matcher)
+        return capture.matchee
     failUnlessRaises = assertRaises
 
-    def assertThat(self, matchee, matcher, verbose=False):
+    def assertThat(self, matchee, matcher, message='', verbose=False):
         """Assert that matchee is matched by matcher.
 
         :param matchee: An object to match with matcher.
         :param matcher: An object meeting the testtools.Matcher protocol.
         :raises MismatchError: When matcher does not match thing.
         """
-        # XXX: Should this take an optional 'message' parameter? Would kind of
-        # make sense. The hamcrest one does.
+        matcher = Annotate.if_message(message, matcher)
         mismatch = matcher.match(matchee)
         if not mismatch:
             return
@@ -428,6 +429,7 @@ class TestCase(unittest.TestCase):
         be removed. This separation preserves the original intent of the test
         while it is in the expectFailure mode.
         """
+        # TODO: implement with matchers.
         self._add_reason(reason)
         try:
             predicate(*args, **kwargs)

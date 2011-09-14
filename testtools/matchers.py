@@ -15,11 +15,13 @@ __all__ = [
     'AfterPreprocessing',
     'AllMatch',
     'Annotate',
+    'Contains',
     'DocTestMatches',
     'EndsWith',
     'Equals',
     'GreaterThan',
     'Is',
+    'IsInstance',
     'KeysEqual',
     'LessThan',
     'MatchesAll',
@@ -292,6 +294,21 @@ class DocTestMismatch(Mismatch):
         return s.decode("latin1").encode("ascii", "backslashreplace")
 
 
+class DoesNotContain(Mismatch):
+
+    def __init__(self, matchee, needle):
+        """Create a DoesNotContain Mismatch.
+
+        :param matchee: the object that did not contain needle.
+        :param needle: the needle that 'matchee' was expected to contain.
+        """
+        self.matchee = matchee
+        self.needle = needle
+
+    def describe(self):
+        return "%r not in %r" % (self.needle, self.matchee)
+
+
 class DoesNotStartWith(Mismatch):
 
     def __init__(self, matchee, expected):
@@ -391,6 +408,42 @@ class Is(_BinaryComparison):
 
     comparator = operator.is_
     mismatch_string = 'is not'
+
+
+class IsInstance(object):
+    """Matcher that wraps isinstance."""
+
+    def __init__(self, *types):
+        self.types = tuple(types)
+
+    def __str__(self):
+        return "%s(%s)" % (self.__class__.__name__,
+                ', '.join(type.__name__ for type in self.types))
+
+    def match(self, other):
+        if isinstance(other, self.types):
+            return None
+        return NotAnInstance(other, self.types)
+
+
+class NotAnInstance(Mismatch):
+
+    def __init__(self, matchee, types):
+        """Create a NotAnInstance Mismatch.
+
+        :param matchee: the thing which is not an instance of any of types.
+        :param types: A tuple of the types which were expected.
+        """
+        self.matchee = matchee
+        self.types = types
+
+    def describe(self):
+        if len(self.types) == 1:
+            typestr = self.types[0].__name__
+        else:
+            typestr = 'any of (%s)' % ', '.join(type.__name__ for type in
+                    self.types)
+        return "'%s' is not an instance of %s" % (self.matchee, typestr)
 
 
 class LessThan(_BinaryComparison):
@@ -499,7 +552,8 @@ class MatchesException(Matcher):
         :param exception: Either an exception instance or type.
             If an instance is given, the type and arguments of the exception
             are checked. If a type is given only the type of the exception is
-            checked.
+            checked. If a tuple is given, then as with isinstance, any of the
+            types in the tuple matching is sufficient to match.
         :param value_re: If 'exception' is a type, and the matchee exception
             is of the right type, then match against this.  If value_re is a
             string, then assume value_re is a regular expression and match
@@ -511,7 +565,7 @@ class MatchesException(Matcher):
         if istext(value_re):
             value_re = AfterPreproccessing(str, MatchesRegex(value_re), False)
         self.value_re = value_re
-        self._is_instance = type(self.expected) not in classtypes()
+        self._is_instance = type(self.expected) not in classtypes() + (tuple,)
 
     def match(self, other):
         if type(other) != tuple:
@@ -532,6 +586,29 @@ class MatchesException(Matcher):
         if self._is_instance:
             return "MatchesException(%s)" % _error_repr(self.expected)
         return "MatchesException(%s)" % repr(self.expected)
+
+
+class Contains(Matcher):
+    """Checks whether something is container in another thing."""
+
+    def __init__(self, needle):
+        """Create a Contains Matcher.
+
+        :param needle: the thing that needs to be contained by matchees.
+        """
+        self.needle = needle
+
+    def __str__(self):
+        return "Contains(%r)" % (self.needle,)
+
+    def match(self, matchee):
+        try:
+            if self.needle not in matchee:
+                return DoesNotContain(matchee, self.needle)
+        except TypeError:
+            # e.g. 1 in 2 will raise TypeError
+            return DoesNotContain(matchee, self.needle)
+        return None
 
 
 class StartsWith(Matcher):
@@ -663,16 +740,19 @@ class Raises(Matcher):
         # Catch all exceptions: Raises() should be able to match a
         # KeyboardInterrupt or SystemExit.
         except:
+            exc_info = sys.exc_info()
             if self.exception_matcher:
-                mismatch = self.exception_matcher.match(sys.exc_info())
+                mismatch = self.exception_matcher.match(exc_info)
                 if not mismatch:
+                    del exc_info
                     return
             else:
                 mismatch = None
             # The exception did not match, or no explicit matching logic was
             # performed. If the exception is a non-user exception (that is, not
             # a subclass of Exception on Python 2.5+) then propogate it.
-            if isbaseexception(sys.exc_info()[1]):
+            if isbaseexception(exc_info[1]):
+                del exc_info
                 raise
             return mismatch
 

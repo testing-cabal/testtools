@@ -13,6 +13,7 @@ from testtools.matchers import (
     Not,
     )
 from testtools.tests.helpers import (
+    FullStackRunTest,
     hide_testtools_stack,
     is_stack_hidden,
     safe_hasattr,
@@ -211,6 +212,8 @@ class TestStackHiding(TestCase):
         testtools.runtest,
         testtools.testcase,
         ]
+
+    run_tests_with = FullStackRunTest
 
     def setUp(self):
         super(TestStackHiding, self).setUp()

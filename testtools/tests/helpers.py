@@ -102,3 +102,10 @@ def run_with_stack_hidden(should_hide, f, *args, **kwargs):
         return f(*args, **kwargs)
     finally:
         hide_testtools_stack(old_should_hide)
+
+
+
+class FullStackRunTest(runtest.RunTest):
+
+    def _run_user(self, fn, *args, **kwargs):
+        return run_with_stack_hidden(False, fn, *args, **kwargs)

@@ -23,6 +23,7 @@ from testtools.matchers import (
     Annotate,
     AnnotatedMismatch,
     _BinaryMismatch,
+    Contains,
     Equals,
     DocTestMatches,
     DoesNotEndWith,
@@ -30,6 +31,7 @@ from testtools.matchers import (
     EndsWith,
     KeysEqual,
     Is,
+    IsInstance,
     LessThan,
     GreaterThan,
     MatchesAny,
@@ -48,12 +50,15 @@ from testtools.matchers import (
     raises,
     StartsWith,
     )
+from testtools.tests.helpers import FullStackRunTest
 
 # Silence pyflakes.
 Matcher
 
 
 class TestMismatch(TestCase):
+
+    run_tests_with = FullStackRunTest
 
     def test_constructor_arguments(self):
         mismatch = Mismatch("some description", {'detail': "things"})
@@ -188,6 +193,8 @@ class Test_BinaryMismatch(TestCase):
 
 class TestMatchersInterface(object):
 
+    run_tests_with = FullStackRunTest
+
     def test_matches_match(self):
         matcher = self.matches_matcher
         matches = self.matches_matches
@@ -256,6 +263,8 @@ class TestDocTestMatchesInterfaceUnicode(TestCase, TestMatchersInterface):
 
 class TestDocTestMatchesSpecific(TestCase):
 
+    run_tests_with = FullStackRunTest
+
     def test___init__simple(self):
         matcher = DocTestMatches("foo")
         self.assertEqual("foo\n", matcher.want)
@@ -320,6 +329,26 @@ class TestIsInterface(TestCase, TestMatchersInterface):
     describe_examples = [("1 is not 2", 2, Is(1))]
 
 
+class TestIsInstanceInterface(TestCase, TestMatchersInterface):
+
+    class Foo:pass
+
+    matches_matcher = IsInstance(Foo)
+    matches_matches = [Foo()]
+    matches_mismatches = [object(), 1, Foo]
+
+    str_examples = [
+            ("IsInstance(str)", IsInstance(str)),
+            ("IsInstance(str, int)", IsInstance(str, int)),
+            ]
+
+    describe_examples = [
+            ("'foo' is not an instance of int", 'foo', IsInstance(int)),
+            ("'foo' is not an instance of any of (int, type)", 'foo',
+             IsInstance(int, type)),
+            ]
+
+
 class TestLessThanInterface(TestCase, TestMatchersInterface):
 
     matches_matcher = LessThan(4)
@@ -350,6 +379,20 @@ class TestGreaterThanInterface(TestCase, TestMatchersInterface):
         ('5 is not < 4', 4, GreaterThan(5)),
         ('4 is not < 4', 4, GreaterThan(4)),
         ]
+
+
+class TestContainsInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = Contains('foo')
+    matches_matches = ['foo', 'afoo', 'fooa']
+    matches_mismatches = ['f', 'fo', 'oo', 'faoo', 'foao']
+
+    str_examples = [
+        ("Contains(1)", Contains(1)),
+        ("Contains('foo')", Contains('foo')),
+        ]
+
+    describe_examples = [("1 not in 2", 2, Contains(1))]
 
 
 def make_error(type, *args, **kwargs):
@@ -552,6 +595,8 @@ class TestAnnotate(TestCase, TestMatchersInterface):
 
 class TestAnnotatedMismatch(TestCase):
 
+    run_tests_with = FullStackRunTest
+
     def test_forwards_details(self):
         x = Mismatch('description', {'foo': 'bar'})
         annotated = AnnotatedMismatch("annotation", x)
@@ -593,6 +638,8 @@ class TestRaisesExceptionMatcherInterface(TestCase, TestMatchersInterface):
 
 class TestRaisesBaseTypes(TestCase):
 
+    run_tests_with = FullStackRunTest
+
     def raiser(self):
         raise KeyboardInterrupt('foo')
 
@@ -626,6 +673,8 @@ class TestRaisesBaseTypes(TestCase):
 
 class TestRaisesConvenience(TestCase):
 
+    run_tests_with = FullStackRunTest
+
     def test_exc_type(self):
         self.assertThat(lambda: 1/0, raises(ZeroDivisionError))
 
@@ -637,6 +686,8 @@ class TestRaisesConvenience(TestCase):
 
 
 class DoesNotStartWithTests(TestCase):
+
+    run_tests_with = FullStackRunTest
 
     def test_describe(self):
         mismatch = DoesNotStartWith("fo", "bo")
@@ -659,6 +710,8 @@ class DoesNotStartWithTests(TestCase):
 
 
 class StartsWithTests(TestCase):
+
+    run_tests_with = FullStackRunTest
 
     def test_str(self):
         matcher = StartsWith("bar")
@@ -695,6 +748,8 @@ class StartsWithTests(TestCase):
 
 class DoesNotEndWithTests(TestCase):
 
+    run_tests_with = FullStackRunTest
+
     def test_describe(self):
         mismatch = DoesNotEndWith("fo", "bo")
         self.assertEqual("'fo' does not end with 'bo'.", mismatch.describe())
@@ -716,6 +771,8 @@ class DoesNotEndWithTests(TestCase):
 
 
 class EndsWithTests(TestCase):
+
+    run_tests_with = FullStackRunTest
 
     def test_str(self):
         matcher = EndsWith("bar")
@@ -761,6 +818,8 @@ def run_doctest(obj, name):
 
 
 class TestMatchesListwise(TestCase):
+
+    run_tests_with = FullStackRunTest
 
     def test_docstring(self):
         failure_count, output = run_doctest(
@@ -860,6 +919,8 @@ class TestMatchesRegex(TestCase, TestMatchersInterface):
 
 class TestMatchesSetwise(TestCase):
 
+    run_tests_with = FullStackRunTest
+
     def assertMismatchWithDescriptionMatching(self, value, matcher,
                                               description_matcher):
         mismatch = matcher.match(value)
@@ -957,6 +1018,8 @@ class TestAfterPreprocessing(TestCase, TestMatchersInterface):
 
 
 class TestMismatchDecorator(TestCase):
+
+    run_tests_with = FullStackRunTest
 
     def test_forwards_description(self):
         x = Mismatch("description", {'foo': 'bar'})

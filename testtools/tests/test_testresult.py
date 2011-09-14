@@ -45,6 +45,7 @@ from testtools.matchers import (
     )
 from testtools.tests.helpers import (
     an_exc_info,
+    FullStackRunTest,
     LoggingResult,
     run_with_stack_hidden,
     )
@@ -266,11 +267,15 @@ class StartTestRunContract(FallbackContract):
 
 class TestTestResultContract(TestCase, StartTestRunContract):
 
+    run_test_with = FullStackRunTest
+
     def makeResult(self):
         return TestResult()
 
 
 class TestMultiTestResultContract(TestCase, StartTestRunContract):
+
+    run_test_with = FullStackRunTest
 
     def makeResult(self):
         return MultiTestResult(TestResult(), TestResult())
@@ -278,11 +283,15 @@ class TestMultiTestResultContract(TestCase, StartTestRunContract):
 
 class TestTextTestResultContract(TestCase, StartTestRunContract):
 
+    run_test_with = FullStackRunTest
+
     def makeResult(self):
         return TextTestResult(StringIO())
 
 
 class TestThreadSafeForwardingResultContract(TestCase, StartTestRunContract):
+
+    run_test_with = FullStackRunTest
 
     def makeResult(self):
         result_semaphore = threading.Semaphore(1)
@@ -322,6 +331,8 @@ class TestAdaptedPython27TestResultContract(TestCase, DetailsContract):
 
 class TestTestResult(TestCase):
     """Tests for 'TestResult'."""
+
+    run_tests_with = FullStackRunTest
 
     def makeResult(self):
         """Make an arbitrary result for testing."""
