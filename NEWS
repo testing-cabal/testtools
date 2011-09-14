@@ -14,6 +14,12 @@ Changes
   now deprecated.  Please stop using it.
   (Jonathan Lange, #813460)
 
+* ``assertThat`` raises ``MismatchError`` instead of
+  ``TestCase.failureException``.  ``MismatchError`` is a subclass of
+  ``AssertionError``, so in most cases this change will not matter. However,
+  if ``self.failureException`` has been set to a non-default value, then
+  mismatches will become test errors rather than test failures.
+
 * ``gather_details`` takes two dicts, rather than two detailed objects.
   (Jonathan Lange, #801027)
 
@@ -30,7 +36,10 @@ Improvements
 * All public matchers are now in ``testtools.matchers.__all__``.
   (Jonathan Lange, #784859)
 
-* assertThat output is much less verbose, displaying only what the mismatch
+* ``assertThat`` can actually display mismatches and matchers that contain
+  extended unicode characters. (Jonathan Lange, Martin [gz], #804127)
+
+* ``assertThat`` output is much less verbose, displaying only what the mismatch
   tells us to display. Old-style verbose output can be had by passing
   ``verbose=True`` to assertThat. (Jonathan Lange, #675323, #593190)
 
