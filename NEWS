@@ -3,8 +3,20 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
-NEXT
-~~~~
+0.9.12
+~~~~~~
+
+This is a very big release.  We've made huge improvements on three fronts:
+ 1. Test failures are way nicer and easier to read
+ 2. Matchers and ``assertThat`` are much more convenient to use
+ 3. Correct handling of extended unicode characters
+
+We've trimmed off the fat from the stack trace you get when tests fail, we've
+cut out the bits of error messages that just didn't help, we've made it easier
+to annotate mismatch failures, to compare complex objects and to match raised
+exceptions.
+
+Testing code was never this fun.
 
 Changes
 -------
@@ -43,8 +55,9 @@ Improvements
   tells us to display. Old-style verbose output can be had by passing
   ``verbose=True`` to assertThat. (Jonathan Lange, #675323, #593190)
 
-* assertThat accepts a message which will be used to annotate the matcher. This
-  can be given as a third parameter or as a keyword parameter. (Robert Collins)
+* ``assertThat`` accepts a message which will be used to annotate the matcher.
+  This can be given as a third parameter or as a keyword parameter.
+  (Robert Collins)
 
 * Automated the Launchpad part of the release process.
   (Jonathan Lange, #623486)
