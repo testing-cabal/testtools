@@ -433,7 +433,7 @@ class TestTestResult(TestCase):
                 'Traceback (most recent call last):\n'
                 '  File "...testtools...tests...test_testresult.py", line ..., in mismatch\n'
                 '    self.assertEqual(1, 2)\n'
-                'MismatchError: 1 != 2\n',
+                '...MismatchError: 1 != 2\n',
                 doctest.ELLIPSIS))
 
 
