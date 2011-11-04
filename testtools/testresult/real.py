@@ -159,14 +159,14 @@ class TestResult(unittest.TestResult):
         else:
             format_exception = _format_exc_info
 
-        if test.failureException and issubclass(exctype, test.failureException):
+        if test.failureException and isinstance(value, test.failureException):
             # Skip assert*() traceback levels
             length = self._count_relevant_tb_levels(tb)
             msgLines = format_exception(exctype, value, tb, length)
         else:
             msgLines = format_exception(exctype, value, tb)
 
-        if self.buffer:
+        if getattr(self, 'buffer', None):
             output = sys.stdout.getvalue()
             error = sys.stderr.getvalue()
             if output:
