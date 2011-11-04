@@ -159,7 +159,7 @@ class TestResult(unittest.TestResult):
         else:
             format_exception = _format_exc_info
 
-        if exctype is test.failureException:
+        if test.failureException and issubclass(exctype, test.failureException):
             # Skip assert*() traceback levels
             length = self._count_relevant_tb_levels(tb)
             msgLines = format_exception(exctype, value, tb, length)
