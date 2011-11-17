@@ -6,8 +6,12 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
-Changes
--------
+Improvements
+------------
+
+* Actually hide all of the testtools stack for assertion failures. The
+  previous release promised clean stack, but now we actually provide it.
+  (Jonathan Lange, #854769)
 
 * Failed equality assertions now line up. (Jonathan Lange, #879339)
 
