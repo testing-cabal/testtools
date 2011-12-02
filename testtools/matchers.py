@@ -20,6 +20,7 @@ __all__ = [
     'DocTestMatches',
     'EndsWith',
     'Equals',
+    'FileContains',
     'GreaterThan',
     'Is',
     'IsInstance',
@@ -1111,7 +1112,6 @@ class DirExists(Matcher):
 
 # TODO: Add equivalent for FileExists.
 
-# TODO: Tests for all of these.
 # TODO: End user documentation for all of these.
 
 
@@ -1125,7 +1125,7 @@ class DirContains(Matcher):
         self.filenames = filenames
 
     def match(self, path):
-        mismatch = DirContains().match(path)
+        mismatch = DirExists().match(path)
         if mismatch is not None:
             return mismatch
         return Equals(sorted(self.filenames)).match(sorted(os.listdir(path)))

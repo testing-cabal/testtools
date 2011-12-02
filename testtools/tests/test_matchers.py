@@ -27,12 +27,14 @@ from testtools.matchers import (
     AnnotatedMismatch,
     _BinaryMismatch,
     Contains,
+    DirContains,
     DirExists,
     DocTestMatches,
     DoesNotEndWith,
     DoesNotStartWith,
     EndsWith,
     Equals,
+    FileContains,
     KeysEqual,
     Is,
     IsInstance,
@@ -1071,12 +1073,25 @@ class TestAllMatch(TestCase, TestMatchersInterface):
         ]
 
 
-class TestPathExists(TestCase):
+class PathHelpers(object):
 
     def mkdtemp(self):
         directory = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, directory)
         return directory
+
+    def create_file(self, filename, contents=''):
+        fp = open(filename, 'w')
+        try:
+            fp.write(contents)
+        finally:
+            fp.close()
+
+    def touch(self, filename):
+        return self.create_file(filename)
+
+
+class TestPathExists(TestCase, PathHelpers):
 
     def test_exists(self):
         tempdir = self.mkdtemp()
@@ -1090,12 +1105,7 @@ class TestPathExists(TestCase):
             "%s does not exist." % doesntexist, Equals(mismatch.describe()))
 
 
-class TestDirExists(TestCase):
-
-    def mkdtemp(self):
-        directory = tempfile.mkdtemp()
-        self.addCleanup(shutil.rmtree, directory)
-        return directory
+class TestDirExists(TestCase, PathHelpers):
 
     def test_exists(self):
         tempdir = self.mkdtemp()
@@ -1103,20 +1113,72 @@ class TestDirExists(TestCase):
 
     def test_not_exists(self):
         doesntexist = os.path.join(self.mkdtemp(), 'doesntexist')
-        mismatch = PathExists().match(doesntexist)
+        mismatch = DirExists().match(doesntexist)
         self.assertThat(doesntexist, Equals(mismatch.path))
         self.assertThat(
-            "%s does not exist." % doesntexist, Equals(mismatch.describe()))
+            PathExists().match(doesntexist).describe(),
+            Equals(mismatch.describe()))
 
     def test_not_a_directory(self):
         tempdir = self.mkdtemp()
         filename = os.path.join(tempdir, 'foo')
-        fp = open(filename, 'w')
-        try:
-            fp.write('foo')
-        finally:
-            fp.close()
+        self.touch(filename)
         self.assertThat(tempdir, DirExists())
+
+
+class TestDirContains(TestCase, PathHelpers):
+
+    def test_empty(self):
+        tempdir = self.mkdtemp()
+        self.assertThat(tempdir, DirContains([]))
+
+    def test_not_exists(self):
+        doesntexist = os.path.join(self.mkdtemp(), 'doesntexist')
+        mismatch = DirContains([]).match(doesntexist)
+        self.assertThat(doesntexist, Equals(mismatch.path))
+        self.assertThat(
+            PathExists().match(doesntexist).describe(),
+            Equals(mismatch.describe()))
+
+    def test_contains_files(self):
+        tempdir = self.mkdtemp()
+        self.touch(os.path.join(tempdir, 'foo'))
+        self.touch(os.path.join(tempdir, 'bar'))
+        self.assertThat(tempdir, DirContains(['bar', 'foo']))
+
+    def test_does_not_contain_files(self):
+        tempdir = self.mkdtemp()
+        self.touch(os.path.join(tempdir, 'foo'))
+        mismatch = DirContains(['bar', 'foo']).match(tempdir)
+        self.assertThat(
+            Equals(['bar', 'foo']).match(['foo']).describe(),
+            Equals(mismatch.describe()))
+
+
+class TestFileContains(TestCase, PathHelpers):
+
+    def test_not_exists(self):
+        doesntexist = os.path.join(self.mkdtemp(), 'doesntexist')
+        mismatch = FileContains('').match(doesntexist)
+        self.assertThat(doesntexist, Equals(mismatch.path))
+        self.assertThat(
+            PathExists().match(doesntexist).describe(),
+            Equals(mismatch.describe()))
+
+    def test_contains(self):
+        tempdir = self.mkdtemp()
+        filename = os.path.join(tempdir, 'foo')
+        self.create_file(filename, 'Hello World!')
+        self.assertThat(filename, FileContains('Hello World!'))
+
+    def test_does_not_contain(self):
+        tempdir = self.mkdtemp()
+        filename = os.path.join(tempdir, 'foo')
+        self.create_file(filename, 'Goodbye Cruel World!')
+        mismatch = FileContains('Hello World!').match(filename)
+        self.assertThat(
+            Equals('Hello World!').match('Goodbye Cruel World!').describe(),
+            Equals(mismatch.describe()))
 
 
 def test_suite():
