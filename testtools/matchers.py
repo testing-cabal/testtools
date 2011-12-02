@@ -16,6 +16,7 @@ __all__ = [
     'AllMatch',
     'Annotate',
     'Contains',
+    'DirExists',
     'DocTestMatches',
     'EndsWith',
     'Equals',
@@ -33,6 +34,7 @@ __all__ = [
     'MatchesStructure',
     'NotEquals',
     'Not',
+    'PathExists',
     'Raises',
     'raises',
     'StartsWith',
@@ -42,6 +44,7 @@ import doctest
 import operator
 from pprint import pformat
 import re
+import os
 import sys
 import types
 
@@ -1052,6 +1055,101 @@ class AllMatch(object):
                 mismatches.append(mismatch)
         if mismatches:
             return MismatchesAll(mismatches)
+
+
+class PathMismatch(Mismatch):
+    """Base mismatch for path mismatches."""
+
+    def __init__(self, path):
+        self.path = path
+
+
+class PathDoesntExistMismatch(PathMismatch):
+    """A mismatch for a path that does not exist."""
+
+    def describe(self):
+        return "%s does not exist." % self.path
+
+
+class PathIsNotDirectoryMismatch(PathMismatch):
+    """A mismatch for a path that's not a directory."""
+
+    def describe(self):
+        return "%s is not a directory." % self.path
+
+
+class PathExists(Matcher):
+    """Matches if the given path exists.
+
+    Use like this::
+
+      assertThat('/some/path', PathExists())
+    """
+
+    def match(self, path):
+        if not os.path.exists(path):
+            return PathDoesntExistMismatch(path)
+
+    def __str__(self):
+        return "Path exists"
+
+
+class DirExists(Matcher):
+    """Matches if the given path exists and is a directory."""
+
+    def match(self, path):
+        # XXX: Should this use And?
+        mismatch = PathExists().match(path)
+        if mismatch is not None:
+            return mismatch
+        if not os.path.isdir(path):
+            return PathIsNotDirectoryMismatch(path)
+
+    def __str__(self):
+        return "Path exists and is a directory"
+
+
+# TODO: Add equivalent for FileExists.
+
+# TODO: Tests for all of these.
+# TODO: End user documentation for all of these.
+
+
+class DirContains(Matcher):
+    """Matches if the given directory contains files with the given names.
+
+    That is, is the directory listing exactly equal to the given files?
+    """
+
+    def __init__(self, filenames):
+        self.filenames = filenames
+
+    def match(self, path):
+        mismatch = DirContains().match(path)
+        if mismatch is not None:
+            return mismatch
+        return Equals(sorted(self.filenames)).match(sorted(os.listdir(path)))
+
+
+class FileContains(Matcher):
+    """Matches if the given file has the specified contents."""
+
+    def __init__(self, contents):
+        self.contents = contents
+
+    def match(self, path):
+        mismatch = PathExists().match(path)
+        if mismatch is not None:
+            return mismatch
+        with open(path) as f:
+            actual_contents = f.read()
+            return Equals(self.contents).match(actual_contents)
+
+    def __str__(self):
+        return "File at path exists and contains %s" % self.contents
+
+
+# TODO: Add IsSamePath and HasPermissions from test_tasks.
 
 
 # Signal that this is part of the testing framework, and that code from this

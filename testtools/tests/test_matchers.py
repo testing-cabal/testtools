@@ -4,7 +4,10 @@
 
 import doctest
 import re
+import os
+import shutil
 import sys
+import tempfile
 
 from testtools import (
     Matcher, # check that Matcher is exposed at the top level for docs.
@@ -24,11 +27,12 @@ from testtools.matchers import (
     AnnotatedMismatch,
     _BinaryMismatch,
     Contains,
-    Equals,
+    DirExists,
     DocTestMatches,
     DoesNotEndWith,
     DoesNotStartWith,
     EndsWith,
+    Equals,
     KeysEqual,
     Is,
     IsInstance,
@@ -46,6 +50,7 @@ from testtools.matchers import (
     MismatchError,
     Not,
     NotEquals,
+    PathExists,
     Raises,
     raises,
     StartsWith,
@@ -1064,6 +1069,54 @@ class TestAllMatch(TestCase, TestMatchersInterface):
          [11, 9, 10],
          AllMatch(LessThan(10))),
         ]
+
+
+class TestPathExists(TestCase):
+
+    def mkdtemp(self):
+        directory = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, directory)
+        return directory
+
+    def test_exists(self):
+        tempdir = self.mkdtemp()
+        self.assertThat(tempdir, PathExists())
+
+    def test_not_exists(self):
+        doesntexist = os.path.join(self.mkdtemp(), 'doesntexist')
+        mismatch = PathExists().match(doesntexist)
+        self.assertThat(doesntexist, Equals(mismatch.path))
+        self.assertThat(
+            "%s does not exist." % doesntexist, Equals(mismatch.describe()))
+
+
+class TestDirExists(TestCase):
+
+    def mkdtemp(self):
+        directory = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, directory)
+        return directory
+
+    def test_exists(self):
+        tempdir = self.mkdtemp()
+        self.assertThat(tempdir, DirExists())
+
+    def test_not_exists(self):
+        doesntexist = os.path.join(self.mkdtemp(), 'doesntexist')
+        mismatch = PathExists().match(doesntexist)
+        self.assertThat(doesntexist, Equals(mismatch.path))
+        self.assertThat(
+            "%s does not exist." % doesntexist, Equals(mismatch.describe()))
+
+    def test_not_a_directory(self):
+        tempdir = self.mkdtemp()
+        filename = os.path.join(tempdir, 'foo')
+        fp = open(filename, 'w')
+        try:
+            fp.write('foo')
+        finally:
+            fp.close()
+        self.assertThat(tempdir, DirExists())
 
 
 def test_suite():
