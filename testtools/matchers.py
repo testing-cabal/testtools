@@ -1127,9 +1127,6 @@ def FileExists():
         first_only=True)
 
 
-# TODO: End user documentation for all of these.
-
-
 class DirContains(Matcher):
     """Matches if the given directory contains files with the given names.
 
