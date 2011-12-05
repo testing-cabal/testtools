@@ -541,10 +541,14 @@ class TestMatchesAllInterface(TestCase, TestMatchersInterface):
         ("MatchesAll(NotEquals(1), NotEquals(2))",
          MatchesAll(NotEquals(1), NotEquals(2)))]
 
-    describe_examples = [("""Differences: [
+    describe_examples = [
+        ("""Differences: [
 1 == 1
 ]""",
-                          1, MatchesAll(NotEquals(1), NotEquals(2)))]
+         1, MatchesAll(NotEquals(1), NotEquals(2))),
+        ("1 == 1", 1,
+         MatchesAll(NotEquals(2), NotEquals(1), Equals(3), first_only=True)),
+        ]
 
 
 class TestKeysEqual(TestCase, TestMatchersInterface):
