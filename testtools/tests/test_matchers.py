@@ -12,6 +12,7 @@ import tempfile
 
 from testtools import (
     Matcher, # check that Matcher is exposed at the top level for docs.
+    skipIf,
     TestCase,
     )
 from testtools.compat import (
@@ -58,6 +59,7 @@ from testtools.matchers import (
     PathExists,
     Raises,
     raises,
+    SamePath,
     StartsWith,
     TarballContains,
     )
@@ -1255,6 +1257,29 @@ class TestTarballContains(TestCase, PathHelpers):
         self.assertEqual(
             mismatch.describe(),
             Equals(['c', 'd']).match(['a', 'b']).describe())
+
+
+class TestSamePath(TestCase, PathHelpers):
+
+    def test_same_string(self):
+        self.assertThat('foo', SamePath('foo'))
+
+    def test_relative_and_absolute(self):
+        path = 'foo'
+        abspath = os.path.abspath(path)
+        self.assertThat(path, SamePath(abspath))
+        self.assertThat(abspath, SamePath(path))
+
+    def test_real_path(self):
+        symlink = getattr(os, 'symlink', None)
+        skipIf(symlink is None, "No symlink support")
+        tempdir = self.mkdtemp()
+        source = os.path.join(tempdir, 'source')
+        self.touch(source)
+        target = os.path.join(tempdir, 'target')
+        symlink(source, target)
+        self.assertThat(source, SamePath(target))
+        self.assertThat(target, SamePath(source))
 
 
 def test_suite():

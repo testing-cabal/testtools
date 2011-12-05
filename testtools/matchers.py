@@ -40,6 +40,7 @@ __all__ = [
     'PathExists',
     'Raises',
     'raises',
+    'SamePath',
     'StartsWith',
     'TarballContains',
     ]
@@ -1180,7 +1181,18 @@ class TarballContains(Matcher):
             tarball.close()
 
 
-# TODO: Add IsSamePath and HasPermissions from test_tasks.
+class SamePath(Matcher):
+
+    def __init__(self, path):
+        super(SamePath, self).__init__()
+        self.path = path
+
+    def match(self, other_path):
+        f = lambda x: os.path.abspath(os.path.realpath(x))
+        return Equals(f(self.path)).match(f(other_path))
+
+
+# TODO: Add HasPermissions from test_tasks.
 
 
 # Signal that this is part of the testing framework, and that code from this
