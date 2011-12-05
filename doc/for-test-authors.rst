@@ -492,7 +492,7 @@ then::
 
 will match, but::
 
-  self.assertThat('foo', DirContains(['a', 'b'])
+  self.assertThat('foo', DirContains(['a', 'b']))
 
 will not.
 
