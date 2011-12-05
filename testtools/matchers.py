@@ -41,6 +41,7 @@ __all__ = [
     'Raises',
     'raises',
     'StartsWith',
+    'TarballContains',
     ]
 
 import doctest
@@ -49,6 +50,7 @@ from pprint import pformat
 import re
 import os
 import sys
+import tarfile
 import types
 
 from testtools.compat import (
@@ -1158,6 +1160,24 @@ class FileContains(Matcher):
 
     def __str__(self):
         return "File at path exists and contains %s" % self.contents
+
+
+class TarballContains(Matcher):
+    """Matches if the given tarball contains the given paths.
+
+    Uses TarFile.getnames() to get the paths out of the tarball.
+    """
+
+    def __init__(self, paths):
+        super(TarballContains, self).__init__()
+        self.paths = paths
+
+    def match(self, tarball_path):
+        tarball = tarfile.open(tarball_path)
+        try:
+            return Equals(sorted(self.paths)).match(sorted(tarball.getnames()))
+        finally:
+            tarball.close()
 
 
 # TODO: Add IsSamePath and HasPermissions from test_tasks.

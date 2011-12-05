@@ -7,6 +7,7 @@ import re
 import os
 import shutil
 import sys
+import tarfile
 import tempfile
 
 from testtools import (
@@ -58,6 +59,7 @@ from testtools.matchers import (
     Raises,
     raises,
     StartsWith,
+    TarballContains,
     )
 from testtools.tests.helpers import FullStackRunTest
 
@@ -1224,6 +1226,35 @@ class TestMatchesPredicate(TestCase, TestMatchersInterface):
     describe_examples = [
         ('7 is not even', 7, MatchesPredicate(is_even, "%s is not even")),
         ]
+
+
+class TestTarballContains(TestCase, PathHelpers):
+
+    def test_match(self):
+        tempdir = self.mkdtemp()
+        in_temp_dir = lambda x: os.path.join(tempdir, x)
+        self.touch(in_temp_dir('a'))
+        self.touch(in_temp_dir('b'))
+        tarball = tarfile.open(in_temp_dir('foo.tar.gz'), 'w')
+        tarball.add(in_temp_dir('a'), 'a')
+        tarball.add(in_temp_dir('b'), 'b')
+        tarball.close()
+        self.assertThat(
+            in_temp_dir('foo.tar.gz'), TarballContains(['b', 'a']))
+
+    def test_mismatch(self):
+        tempdir = self.mkdtemp()
+        in_temp_dir = lambda x: os.path.join(tempdir, x)
+        self.touch(in_temp_dir('a'))
+        self.touch(in_temp_dir('b'))
+        tarball = tarfile.open(in_temp_dir('foo.tar.gz'), 'w')
+        tarball.add(in_temp_dir('a'), 'a')
+        tarball.add(in_temp_dir('b'), 'b')
+        tarball.close()
+        mismatch = TarballContains(['d', 'c']).match(in_temp_dir('foo.tar.gz'))
+        self.assertEqual(
+            mismatch.describe(),
+            Equals(['c', 'd']).match(['a', 'b']).describe())
 
 
 def test_suite():
