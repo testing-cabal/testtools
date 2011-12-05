@@ -21,6 +21,7 @@ __all__ = [
     'EndsWith',
     'Equals',
     'FileContains',
+    'FileExists',
     'GreaterThan',
     'Is',
     'IsInstance',
@@ -1072,6 +1073,13 @@ class PathDoesntExistMismatch(PathMismatch):
         return "%s does not exist." % self.path
 
 
+class PathIsNotFileMismatch(PathMismatch):
+    """A mismatch for a path that's not a file."""
+
+    def describe(self):
+        return "%s is not a file." % self.path
+
+
 class PathIsNotDirectoryMismatch(PathMismatch):
     """A mismatch for a path that's not a directory."""
 
@@ -1110,7 +1118,16 @@ class DirExists(Matcher):
         return "Path exists and is a directory"
 
 
-# TODO: Add equivalent for FileExists.
+class FileExists(Matcher):
+    """Matches if the given path exists and is a file."""
+
+    def match(self, path):
+        mismatch = PathExists().match(path)
+        if mismatch is not None:
+            return mismatch
+        if not os.path.isfile(path):
+            return PathIsNotFileMismatch(path)
+
 
 # TODO: End user documentation for all of these.
 

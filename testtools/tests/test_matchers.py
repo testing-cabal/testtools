@@ -35,6 +35,7 @@ from testtools.matchers import (
     EndsWith,
     Equals,
     FileContains,
+    FileExists,
     KeysEqual,
     Is,
     IsInstance,
@@ -1120,10 +1121,36 @@ class TestDirExists(TestCase, PathHelpers):
             Equals(mismatch.describe()))
 
     def test_not_a_directory(self):
-        tempdir = self.mkdtemp()
-        filename = os.path.join(tempdir, 'foo')
+        filename = os.path.join(self.mkdtemp(), 'foo')
         self.touch(filename)
-        self.assertThat(tempdir, DirExists())
+        mismatch = DirExists().match(filename)
+        self.assertThat(filename, Equals(mismatch.path))
+        self.assertThat(
+            "%s is not a directory." % filename, Equals(mismatch.describe()))
+
+
+class TestFileExists(TestCase, PathHelpers):
+
+    def test_exists(self):
+        tempdir = self.mkdtemp()
+        filename = os.path.join(tempdir, 'filename')
+        self.touch(filename)
+        self.assertThat(filename, FileExists())
+
+    def test_not_exists(self):
+        doesntexist = os.path.join(self.mkdtemp(), 'doesntexist')
+        mismatch = FileExists().match(doesntexist)
+        self.assertThat(doesntexist, Equals(mismatch.path))
+        self.assertThat(
+            PathExists().match(doesntexist).describe(),
+            Equals(mismatch.describe()))
+
+    def test_not_a_file(self):
+        tempdir = self.mkdtemp()
+        mismatch = FileExists().match(tempdir)
+        self.assertThat(tempdir, Equals(mismatch.path))
+        self.assertThat(
+            "%s is not a file." % tempdir, Equals(mismatch.describe()))
 
 
 class TestDirContains(TestCase, PathHelpers):
