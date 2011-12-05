@@ -821,6 +821,12 @@ class MatchesListwise(object):
     """
 
     def __init__(self, matchers, first_only=False):
+        """Construct a MatchesListwise matcher.
+
+        :param matchers: A list of matcher that the matched values must match.
+        :param first_only: If True, then only report the first mismatch,
+            otherwise report all of them. Defaults to False.
+        """
         self.matchers = matchers
         self.first_only = first_only
 
