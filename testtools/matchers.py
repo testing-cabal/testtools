@@ -1085,73 +1085,30 @@ class AllMatch(object):
             return MismatchesAll(mismatches)
 
 
-class PathMismatch(Mismatch):
-    """Base mismatch for path mismatches."""
-
-    def __init__(self, path):
-        self.path = path
-
-
-class PathDoesntExistMismatch(PathMismatch):
-    """A mismatch for a path that does not exist."""
-
-    def describe(self):
-        return "%s does not exist." % self.path
-
-
-class PathIsNotFileMismatch(PathMismatch):
-    """A mismatch for a path that's not a file."""
-
-    def describe(self):
-        return "%s is not a file." % self.path
-
-
-class PathIsNotDirectoryMismatch(PathMismatch):
-    """A mismatch for a path that's not a directory."""
-
-    def describe(self):
-        return "%s is not a directory." % self.path
-
-
-class PathExists(Matcher):
+def PathExists():
     """Matches if the given path exists.
 
     Use like this::
 
       assertThat('/some/path', PathExists())
     """
-
-    def match(self, path):
-        if not os.path.exists(path):
-            return PathDoesntExistMismatch(path)
-
-    def __str__(self):
-        return "Path exists"
+    return MatchesPredicate(os.path.exists, "%s does not exist.")
 
 
-class DirExists(Matcher):
-    """Matches if the given path exists and is a directory."""
-
-    def match(self, path):
-        mismatch = PathExists().match(path)
-        if mismatch is not None:
-            return mismatch
-        if not os.path.isdir(path):
-            return PathIsNotDirectoryMismatch(path)
-
-    def __str__(self):
-        return "Path exists and is a directory"
+def DirExists():
+    """Matches if the path exists and is a directory."""
+    return MatchesAll(
+        PathExists(),
+        MatchesPredicate(os.path.isdir, "%s is not a directory."),
+        first_only=True)
 
 
-class FileExists(Matcher):
+def FileExists():
     """Matches if the given path exists and is a file."""
-
-    def match(self, path):
-        mismatch = PathExists().match(path)
-        if mismatch is not None:
-            return mismatch
-        if not os.path.isfile(path):
-            return PathIsNotFileMismatch(path)
+    return MatchesAll(
+        PathExists(),
+        MatchesPredicate(os.path.isfile, "%s is not a file."),
+        first_only=True)
 
 
 # TODO: End user documentation for all of these.
