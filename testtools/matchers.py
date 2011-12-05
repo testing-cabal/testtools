@@ -815,10 +815,14 @@ class MatchesListwise(object):
     1 != 2
     2 != 1
     ]
+    >>> matcher = MatchesListwise([Equals(1), Equals(2)], first_only=True)
+    >>> print (matcher.match([3, 4]).describe())
+    1 != 3
     """
 
-    def __init__(self, matchers):
+    def __init__(self, matchers, first_only=False):
         self.matchers = matchers
+        self.first_only = first_only
 
     def match(self, values):
         mismatches = []
@@ -829,6 +833,8 @@ class MatchesListwise(object):
         for matcher, value in zip(self.matchers, values):
             mismatch = matcher.match(value)
             if mismatch:
+                if self.first_only:
+                    return mismatch
                 mismatches.append(mismatch)
         if mismatches:
             return MismatchesAll(mismatches)
