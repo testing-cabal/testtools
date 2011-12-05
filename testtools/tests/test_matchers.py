@@ -38,6 +38,7 @@ from testtools.matchers import (
     Equals,
     FileContains,
     FileExists,
+    HasPermissions,
     KeysEqual,
     Is,
     IsInstance,
@@ -1280,6 +1281,16 @@ class TestSamePath(TestCase, PathHelpers):
         symlink(source, target)
         self.assertThat(source, SamePath(target))
         self.assertThat(target, SamePath(source))
+
+
+class TestHasPermissions(TestCase, PathHelpers):
+
+    def test_match(self):
+        tempdir = self.mkdtemp()
+        filename = os.path.join(tempdir, 'filename')
+        self.touch(filename)
+        permissions = oct(os.stat(filename).st_mode)[-4:]
+        self.assertThat(filename, HasPermissions(permissions))
 
 
 def test_suite():

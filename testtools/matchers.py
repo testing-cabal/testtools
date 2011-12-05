@@ -23,6 +23,7 @@ __all__ = [
     'FileContains',
     'FileExists',
     'GreaterThan',
+    'HasPermissions',
     'Is',
     'IsInstance',
     'KeysEqual',
@@ -1155,9 +1156,12 @@ class FileContains(Matcher):
         mismatch = PathExists().match(path)
         if mismatch is not None:
             return mismatch
-        with open(path) as f:
+        f = open(path)
+        try:
             actual_contents = f.read()
             return Equals(self.contents).match(actual_contents)
+        finally:
+            f.close()
 
     def __str__(self):
         return "File at path exists and contains %s" % self.contents
@@ -1182,6 +1186,11 @@ class TarballContains(Matcher):
 
 
 class SamePath(Matcher):
+    """Matches if two paths are the same.
+
+    That is, the paths are equal, or they point to the same file but in
+    different ways.  The paths do not have to exist.
+    """
 
     def __init__(self, path):
         super(SamePath, self).__init__()
@@ -1192,7 +1201,24 @@ class SamePath(Matcher):
         return Equals(f(self.path)).match(f(other_path))
 
 
-# TODO: Add HasPermissions from test_tasks.
+class HasPermissions(Matcher):
+    """Matches if a file has the given permissions.
+
+    Permissions are specified and matched as a four-digit octal string.
+    """
+
+    def __init__(self, octal_permissions):
+        """Construct a HasPermissions matcher.
+
+        :param octal_permissions: A four digit octal string, representing the
+            intended access permissions. e.g. '0775' for rwxrwxr-x.
+        """
+        super(HasPermissions, self).__init__()
+        self.octal_permissions = octal_permissions
+
+    def match(self, filename):
+        permissions = oct(os.stat(filename).st_mode)[-4:]
+        return Equals(self.octal_permissions).match(permissions)
 
 
 # Signal that this is part of the testing framework, and that code from this
