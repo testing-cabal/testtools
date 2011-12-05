@@ -31,6 +31,7 @@ __all__ = [
     'MatchesAny',
     'MatchesException',
     'MatchesListwise',
+    'MatchesPredicate',
     'MatchesRegex',
     'MatchesSetwise',
     'MatchesStructure',
@@ -388,6 +389,21 @@ class _BinaryMismatch(Mismatch):
                 self._format(self.other))
         else:
             return "%s %s %s" % (left, self._mismatch_string, right)
+
+
+class MatchesPredicate(Matcher):
+
+    def __init__(self, predicate, message):
+        self.predicate = predicate
+        self.message = message
+
+    def __str__(self):
+        return '%s(%r, %r)' % (
+            self.__class__.__name__, self.predicate, self.message)
+
+    def match(self, x):
+        if not self.predicate(x):
+            return Mismatch(self.message % x)
 
 
 class Equals(_BinaryComparison):
@@ -1117,7 +1133,6 @@ class DirExists(Matcher):
     """Matches if the given path exists and is a directory."""
 
     def match(self, path):
-        # XXX: Should this use And?
         mismatch = PathExists().match(path)
         if mismatch is not None:
             return mismatch
