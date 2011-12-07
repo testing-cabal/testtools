@@ -1177,6 +1177,19 @@ class TestDirContains(TestCase, PathHelpers):
         self.touch(os.path.join(tempdir, 'bar'))
         self.assertThat(tempdir, DirContains(['bar', 'foo']))
 
+    def test_matcher(self):
+        tempdir = self.mkdtemp()
+        self.touch(os.path.join(tempdir, 'foo'))
+        self.touch(os.path.join(tempdir, 'bar'))
+        self.assertThat(tempdir, DirContains(matcher=Contains('bar')))
+
+    def test_neither_specified(self):
+        self.assertRaises(AssertionError, DirContains)
+
+    def test_both_specified(self):
+        self.assertRaises(
+            AssertionError, DirContains, filenames=[], matcher=Contains('a'))
+
     def test_does_not_contain_files(self):
         tempdir = self.mkdtemp()
         self.touch(os.path.join(tempdir, 'foo'))
@@ -1200,6 +1213,20 @@ class TestFileContains(TestCase, PathHelpers):
         filename = os.path.join(tempdir, 'foo')
         self.create_file(filename, 'Hello World!')
         self.assertThat(filename, FileContains('Hello World!'))
+
+    def test_matcher(self):
+        tempdir = self.mkdtemp()
+        filename = os.path.join(tempdir, 'foo')
+        self.create_file(filename, 'Hello World!')
+        self.assertThat(
+            filename, FileContains(matcher=DocTestMatches('Hello World!')))
+
+    def test_neither_specified(self):
+        self.assertRaises(AssertionError, FileContains)
+
+    def test_both_specified(self):
+        self.assertRaises(
+            AssertionError, FileContains, contents=[], matcher=Contains('a'))
 
     def test_does_not_contain(self):
         tempdir = self.mkdtemp()

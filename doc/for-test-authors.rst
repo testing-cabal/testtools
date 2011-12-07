@@ -499,6 +499,11 @@ will not.
 The matcher sorts both the input and the list of names we get back from the
 filesystem.
 
+You can use this in a more advanced way, and match the sorted directory
+listing against an arbitrary matcher::
+
+  self.assertThat('foo', DirContains(matcher=Contains('a')))
+
 
 FileContains
 ~~~~~~~~~~~~
@@ -509,6 +514,11 @@ called ``greetings.txt`` with the contents, ``Hello World!``::
   self.assertThat('greetings.txt', FileContains("Hello World!"))
 
 will match.
+
+You can also use this in a more advanced way, and match the contents of the
+file against an arbitrary matcher::
+
+  self.assertThat('greetings.txt', FileContains(matcher=Contains('!')))
 
 
 HasPermissions

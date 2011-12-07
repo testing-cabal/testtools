@@ -396,8 +396,26 @@ class _BinaryMismatch(Mismatch):
 
 
 class MatchesPredicate(Matcher):
+    """Match if a given function returns True.
+
+    It is reasonably common to want to make a very simple matcher based on a
+    function that you already have that returns True or False given a single
+    argument (i.e. a predicate function).  This matcher makes it very easy to
+    do so. e.g.::
+
+      IsEven = MatchesPredicate(lambda x: x % 2 == 0, '%s is not even')
+      self.assertThat(4, IsEven)
+    """
 
     def __init__(self, predicate, message):
+        """Create a ``MatchesPredicate`` matcher.
+
+        :param predicate: A function that takes a single argument and returns
+            a value that will be interpreted as a boolean.
+        :param message: A message to describe a mismatch.  It will be formatted
+            with '%' and be given whatever was passed to ``match()``. Thus, it
+            needs to contain exactly one thing like '%s', '%d' or '%f'.
+        """
         self.predicate = predicate
         self.message = message
 
@@ -1133,21 +1151,64 @@ class DirContains(Matcher):
     That is, is the directory listing exactly equal to the given files?
     """
 
-    def __init__(self, filenames):
-        self.filenames = filenames
+    def __init__(self, filenames=None, matcher=None):
+        """Construct a ``DirContains`` matcher.
+
+        Can be used in a basic mode where the whole directory listing is
+        matched against an expected directory listing (by passing
+        ``filenames``).  Can also be used in a more advanced way where the
+        whole directory listing is matched against an arbitrary matcher (by
+        passing ``matcher`` instead).
+
+        :param filenames: If specified, match the sorted directory listing
+            against this list of filenames, sorted.
+        :param matcher: If specified, match the sorted directory listing
+            against this matcher.
+        """
+        if filenames == matcher == None:
+            raise AssertionError(
+                "Must provide one of `filenames` or `matcher`.")
+        if None not in (filenames, matcher):
+            raise AssertionError(
+                "Must provide either `filenames` or `matcher`, not both.")
+        if filenames is None:
+            self.matcher = matcher
+        else:
+            self.matcher = Equals(sorted(filenames))
 
     def match(self, path):
         mismatch = DirExists().match(path)
         if mismatch is not None:
             return mismatch
-        return Equals(sorted(self.filenames)).match(sorted(os.listdir(path)))
+        return self.matcher.match(sorted(os.listdir(path)))
 
 
 class FileContains(Matcher):
     """Matches if the given file has the specified contents."""
 
-    def __init__(self, contents):
-        self.contents = contents
+    def __init__(self, contents=None, matcher=None):
+        """Construct a ``FileContains`` matcher.
+
+        Can be used in a basic mode where the file contents are compared for
+        equality against the expected file contents (by passing ``contents``).
+        Can also be used in a more advanced way where the file contents are
+        matched against an arbitrary matcher (by passing ``matcher`` instead).
+
+        :param contents: If specified, match the contents of the file with
+            these contents.
+        :param matcher: If specified, match the contents of the file against
+            this matcher.
+        """
+        if contents == matcher == None:
+            raise AssertionError(
+                "Must provide one of `contents` or `matcher`.")
+        if None not in (contents, matcher):
+            raise AssertionError(
+                "Must provide either `contents` or `matcher`, not both.")
+        if matcher is None:
+            self.matcher = Equals(contents)
+        else:
+            self.matcher = matcher
 
     def match(self, path):
         mismatch = PathExists().match(path)
@@ -1156,7 +1217,7 @@ class FileContains(Matcher):
         f = open(path)
         try:
             actual_contents = f.read()
-            return Equals(self.contents).match(actual_contents)
+            return self.matcher.match(actual_contents)
         finally:
             f.close()
 
