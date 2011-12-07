@@ -1151,14 +1151,30 @@ class DirContains(Matcher):
     That is, is the directory listing exactly equal to the given files?
     """
 
-    def __init__(self, filenames):
-        self.filenames = filenames
+    def __init__(self, filenames=None, matcher=None):
+        """Construct a ``DirContains`` matcher.
+
+        :param filenames: If specified, match the sorted directory listing
+            against this list of filenames, sorted.
+        :param matcher: If specified, match the sorted directory listing
+            against this matcher.
+        """
+        if filenames == matcher == None:
+            raise AssertionError(
+                "Must provide one of `filenames` or `matcher`.")
+        if None not in (filenames, matcher):
+            raise AssertionError(
+                "Must provide either `filenames` or `matcher`, not both.")
+        if filenames is None:
+            self.matcher = matcher
+        else:
+            self.matcher = Equals(sorted(filenames))
 
     def match(self, path):
         mismatch = DirExists().match(path)
         if mismatch is not None:
             return mismatch
-        return Equals(sorted(self.filenames)).match(sorted(os.listdir(path)))
+        return self.matcher.match(sorted(os.listdir(path)))
 
 
 class FileContains(Matcher):
