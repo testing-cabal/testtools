@@ -1234,13 +1234,20 @@ class TarballContains(Matcher):
     def __init__(self, paths):
         super(TarballContains, self).__init__()
         self.paths = paths
+        self.path_matcher = Equals(sorted(self.paths))
 
     def match(self, tarball_path):
-        tarball = tarfile.open(tarball_path)
+        # Open underlying file first to ensure it's always closed:
+        # <http://bugs.python.org/issue10233>
+        f = open(tarball_path, "rb")
         try:
-            return Equals(sorted(self.paths)).match(sorted(tarball.getnames()))
+            tarball = tarfile.open(tarball_path, fileobj=f)
+            try:
+                return self.path_matcher.match(sorted(tarball.getnames()))
+            finally:
+                tarball.close()
         finally:
-            tarball.close()
+            f.close()
 
 
 class SamePath(Matcher):
