@@ -1299,13 +1299,14 @@ class TestSamePath(TestCase, PathHelpers):
         self.assertThat(abspath, SamePath(path))
 
     def test_real_path(self):
-        symlink = getattr(os, 'symlink', None)
-        skipIf(symlink is None, "No symlink support")
         tempdir = self.mkdtemp()
         source = os.path.join(tempdir, 'source')
         self.touch(source)
         target = os.path.join(tempdir, 'target')
-        symlink(source, target)
+        try:
+            os.symlink(source, target)
+        except (AttributeError, NotImplementedError):
+            self.skip("No symlink support")
         self.assertThat(source, SamePath(target))
         self.assertThat(target, SamePath(source))
 
