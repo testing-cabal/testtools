@@ -1163,8 +1163,10 @@ class TestNonAsciiResults(TestCase):
         _u("\u5357\u7121"), # In ISO 2022 encodings
         _u("\xa7\xa7\xa7"), # In ISO 8859 encodings
         )
+    
+    _is_pypy = "__pypy__" in sys.builtin_module_names
     # Everything but Jython shows syntax errors on the current character
-    _error_on_character = os.name != "java"
+    _error_on_character = os.name != "java" and not _is_pypy
 
     def _run(self, stream, test):
         """Run the test, the same as in testtools.run but not to stdout"""
@@ -1412,6 +1414,9 @@ class TestNonAsciiResults(TestCase):
         self._write_module("bad", "euc_jp",
             "# coding: euc_jp\n$ = 0 # %s\n" % text)
         textoutput = self._run_external_case()
+        # pypy uses cpython's multibyte codecs so has their behavior here
+        if self._is_pypy:
+            self._error_on_character = True
         self.assertIn(self._as_output(_u(
             #'bad.py", line 2\n'
             '    $ = 0 # %s\n'
