@@ -95,7 +95,7 @@ class TestDetectEncoding(testtools.TestCase):
             "\xef\xbb\xbfimport sys\n",
             ))
         self._check_encoding("utf-8", (
-            "\xef\xbb\xbf# File encoding: UTF-8\n",
+            "\xef\xbb\xbf# File encoding: utf-8\n",
             ))
         self._check_encoding("utf-8", (
             '\xef\xbb\xbf"""Module docstring\n',
