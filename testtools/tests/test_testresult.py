@@ -133,6 +133,12 @@ class Python26Contract(object):
         result.stopTest(self)
         self.assertTrue(result.wasSuccessful())
 
+    def test_tags(self):
+        # tags() does not fail the test run.
+        result = self.makeResult()
+        result.startTest(self)
+        result.tags(set([]), set([]))
+
 
 class Python27Contract(Python26Contract):
 
@@ -186,7 +192,7 @@ class Python27Contract(Python26Contract):
 
 
 class DetailsContract(Python27Contract):
-    """Tests for the contract of TestResults."""
+    """Tests for the details API of TestResults."""
 
     def test_addExpectedFailure_details(self):
         # Calling addExpectedFailure(test, details=xxx) completes ok.
@@ -223,27 +229,6 @@ class DetailsContract(Python27Contract):
         result = self.makeResult()
         result.startTest(self)
         result.addSuccess(self, details={})
-
-    def test_test_scope_tags(self):
-        # Calling tags(new_tags, gone_tags) completes ok when in a test.
-        result = self.makeResult()
-        result.startTest(self)
-        result.tags(set([]), set([]))
-
-    def test_test_scope_tags_adds_tags(self):
-        # Calling tags(new_tags, gone_tags) adds tags when in a test.
-        result = self.makeResult()
-        result.startTest(self)
-        result.tags(set(['foo', 'bar']), set([]))
-        self.assertEqual(set(['foo', 'bar']), result.current_tags)
-
-    def test_test_scope_tags_removes_tags(self):
-        # Calling tags(new_tags, gone_tags) adds tags when in a test.
-        result = self.makeResult()
-        result.startTest(self)
-        result.tags(set(['foo', 'bar']), set([]))
-        result.tags(set([]), set(['foo']))
-        self.assertEqual(set(['bar']), result.current_tags)
 
 
 class FallbackContract(DetailsContract):
