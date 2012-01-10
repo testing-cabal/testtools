@@ -210,6 +210,7 @@ class TestResult(unittest.TestResult):
         # -- Start: As per python 2.7 --
         self.expectedFailures = []
         self.unexpectedSuccesses = []
+        self._tags = set()
         # -- End:   As per python 2.7 --
 
     def stopTestRun(self):
@@ -245,6 +246,8 @@ class TestResult(unittest.TestResult):
         :param new_tags: A set of tags to be added to the stream.
         :param gone_tags: A set of tags to be removed from the stream.
         """
+        self._tags.update(new_tags)
+        self._tags.difference_update(gone_tags)
 
 
 class MultiTestResult(TestResult):
@@ -307,13 +310,6 @@ class MultiTestResult(TestResult):
         """
         return all(self._dispatch('wasSuccessful'))
 
-    def tags(self, new_tags, gone_tags):
-        """Add and remove tags from the test.
-
-        :param new_tags: A set of tags to be added to the stream.
-        :param gone_tags: A set of tags to be removed from the stream.
-        """
-
 
 class TextTestResult(TestResult):
     """A TestResult which outputs activity to a text stream."""
@@ -367,13 +363,6 @@ class TextTestResult(TestResult):
             self.stream.write(", ".join(details))
             self.stream.write(")\n")
         super(TextTestResult, self).stopTestRun()
-
-    def tags(self, new_tags, gone_tags):
-        """Add and remove tags from the test.
-
-        :param new_tags: A set of tags to be added to the stream.
-        :param gone_tags: A set of tags to be removed from the stream.
-        """
 
 
 class ThreadsafeForwardingResult(TestResult):
@@ -473,14 +462,10 @@ class ThreadsafeForwardingResult(TestResult):
         return self.result.wasSuccessful()
 
     def tags(self, new_tags, gone_tags):
-        """Add and remove tags from the test.
-
-        :param new_tags: A set of tags to be added to the stream.
-        :param gone_tags: A set of tags to be removed from the stream.
-        """
+        """See `TestResult`."""
         self.semaphore.acquire()
         try:
-            self.result.tags(new_tags, gone_tags)
+            super(ThreadsafeForwardingResult, self).tags(new_tags, gone_tags)
         finally:
             self.semaphore.release()
 
