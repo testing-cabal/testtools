@@ -52,6 +52,11 @@ Improvements
 
   * ``TarballContains`` matches the contents of a tarball.  (Jonathan Lange)
 
+* ``MultiTestResult`` supports the ``tags`` method.
+  (Graham Binns, Francesco Banconi, #914279)
+
+* ``ThreadsafeForwardingResult`` supports the ``tags`` method.
+  (Graham Binns, Francesco Banconi, #914279)
 
 0.9.12
 ~~~~~~

@@ -133,6 +133,12 @@ class Python26Contract(object):
         result.stopTest(self)
         self.assertTrue(result.wasSuccessful())
 
+    def test_tags(self):
+        # tags() does not fail the test run.
+        result = self.makeResult()
+        result.startTest(self)
+        result.tags(set([]), set([]))
+
 
 class Python27Contract(Python26Contract):
 
@@ -186,7 +192,7 @@ class Python27Contract(Python26Contract):
 
 
 class DetailsContract(Python27Contract):
-    """Tests for the contract of TestResults."""
+    """Tests for the details API of TestResults."""
 
     def test_addExpectedFailure_details(self):
         # Calling addExpectedFailure(test, details=xxx) completes ok.
@@ -531,6 +537,14 @@ class TestMultiTestResult(TestCase):
         result = multi_result.stopTestRun()
         self.assertEqual(('foo', 'foo'), result)
 
+    def test_tags(self):
+        # Calling `tags` on a `MultiTestResult` calls `tags` on all its
+        # `TestResult`s.
+        added_tags = set(['foo', 'bar'])
+        removed_tags = set(['eggs'])
+        self.multiResult.tags(added_tags, removed_tags)
+        self.assertResultLogsEqual([('tags', added_tags, removed_tags)])
+
     def test_time(self):
         # the time call is dispatched, not eaten by the base class
         self.multiResult.time('foo')
@@ -744,6 +758,24 @@ class TestThreadSafeForwardingResult(TestCase):
             ('stopTest', self),
             ], self.target._events)
 
+    def test_tags_helper(self):
+       expected = set(['present']), set(['missing', 'going'])
+       input = set(['present']), set(['missing'])
+       self.assertEqual(
+            expected, self.result1._merge_tags(input, set(), set(['going'])))
+       expected = set(['present']), set(['missing', 'going'])
+       input = set(['present', 'going']), set(['missing'])
+       self.assertEqual(
+            expected, self.result1._merge_tags(input, set(), set(['going'])))
+       expected = set(['coming', 'present']), set(['missing'])
+       input = set(['present']), set(['missing'])
+       self.assertEqual(
+            expected, self.result1._merge_tags(input, set(['coming']), set()))
+       expected = set(['coming', 'present']), set(['missing'])
+       input = set(['present']), set(['coming', 'missing'])
+       self.assertEqual(
+            expected, self.result1._merge_tags(input, set(['coming']), set()))
+
 
 class TestExtendedToOriginalResultDecoratorBase(TestCase):
 
@@ -947,16 +979,16 @@ class TestExtendedToOriginalResultDecorator(
 
     def test_tags_py26(self):
         self.make_26_result()
-        self.converter.tags(1, 2)
+        self.converter.tags(set([1]), set([2]))
 
     def test_tags_py27(self):
         self.make_27_result()
-        self.converter.tags(1, 2)
+        self.converter.tags(set([1]), set([2]))
 
     def test_tags_pyextended(self):
         self.make_extended_result()
-        self.converter.tags(1, 2)
-        self.assertEqual([('tags', 1, 2)], self.result._events)
+        self.converter.tags(set([1]), set([2]))
+        self.assertEqual([('tags', set([1]), set([2]))], self.result._events)
 
     def test_time_py26(self):
         self.make_26_result()

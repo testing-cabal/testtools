@@ -16,6 +16,7 @@ class LoggingBase(object):
         self._events = []
         self.shouldStop = False
         self._was_successful = True
+        self.current_tags = set()
 
 
 class Python26TestResult(LoggingBase):
@@ -43,6 +44,10 @@ class Python26TestResult(LoggingBase):
 
     def wasSuccessful(self):
         return self._was_successful
+
+    def tags(self, new_tags, gone_tags):
+        self.current_tags.update(new_tags)
+        self.current_tags.difference_update(gone_tags)
 
 
 class Python27TestResult(Python26TestResult):
@@ -102,6 +107,7 @@ class ExtendedTestResult(Python27TestResult):
         self._was_successful = True
 
     def tags(self, new_tags, gone_tags):
+        super(ExtendedTestResult, self).tags(new_tags, gone_tags)
         self._events.append(('tags', new_tags, gone_tags))
 
     def time(self, time):

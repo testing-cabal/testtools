@@ -67,6 +67,10 @@ class LoggingResult(TestResult):
         self._events.append('done')
         super(LoggingResult, self).done()
 
+    def tags(self, new_tags, gone_tags):
+        self._events.append(('tags', new_tags, gone_tags))
+        super(LoggingResult, self).tags(new_tags, gone_tags)
+
     def time(self, a_datetime):
         self._events.append(('time', a_datetime))
         super(LoggingResult, self).time(a_datetime)

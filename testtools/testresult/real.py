@@ -210,6 +210,7 @@ class TestResult(unittest.TestResult):
         # -- Start: As per python 2.7 --
         self.expectedFailures = []
         self.unexpectedSuccesses = []
+        self.current_tags = set()
         # -- End:   As per python 2.7 --
 
     def stopTestRun(self):
@@ -238,6 +239,15 @@ class TestResult(unittest.TestResult):
 
         deprecated in favour of stopTestRun.
         """
+
+    def tags(self, new_tags, gone_tags):
+        """Add and remove tags from the test.
+
+        :param new_tags: A set of tags to be added to the stream.
+        :param gone_tags: A set of tags to be removed from the stream.
+        """
+        self.current_tags.update(new_tags)
+        self.current_tags.difference_update(gone_tags)
 
 
 class MultiTestResult(TestResult):
@@ -286,6 +296,9 @@ class MultiTestResult(TestResult):
 
     def stopTestRun(self):
         return self._dispatch('stopTestRun')
+
+    def tags(self, new_tags, gone_tags):
+        return self._dispatch('tags', new_tags, gone_tags)
 
     def time(self, a_datetime):
         return self._dispatch('time', a_datetime)
@@ -382,22 +395,37 @@ class ThreadsafeForwardingResult(TestResult):
         TestResult.__init__(self)
         self.result = ExtendedToOriginalDecorator(target)
         self.semaphore = semaphore
+        self._test_start = None
+        self._global_tags = set(), set()
+        self._test_tags = set(), set()
 
     def __repr__(self):
         return '<%s %r>' % (self.__class__.__name__, self.result)
+
+    def _not_empty_tags(self, tags):
+        return bool(tags[0] and tags[1])
 
     def _add_result_with_semaphore(self, method, test, *args, **kwargs):
         self.semaphore.acquire()
         try:
             self.result.time(self._test_start)
-            self.result.startTest(test)
-            self.result.time(self._now())
+            if self._not_empty_tags(self._global_tags):
+                self.result.tags(*self._global_tags)
             try:
-                method(test, *args, **kwargs)
+                self.result.startTest(test)
+                self.result.time(self._now())
+                if self._not_empty_tags(self._test_tags):
+                    self.result.tags(*self._test_tags)
+                try:
+                    method(test, *args, **kwargs)
+                finally:
+                    self.result.stopTest(test)
             finally:
-                self.result.stopTest(test)
+                if self._not_empty_tags(self._global_tags):
+                    self.result.tags(*reversed(self._global_tags))
         finally:
             self.semaphore.release()
+        self._test_start = None
 
     def addError(self, test, err=None, details=None):
         self._add_result_with_semaphore(self.result.addError,
@@ -450,6 +478,24 @@ class ThreadsafeForwardingResult(TestResult):
 
     def wasSuccessful(self):
         return self.result.wasSuccessful()
+
+    def tags(self, new_tags, gone_tags):
+        """See `TestResult`."""
+        if self._test_start is not None:
+            self._test_tags = self._merge_tags(
+                self._test_tags, new_tags, gone_tags)
+        else:
+            self._global_tags = self._merge_tags(
+                self._global_tags, new_tags, gone_tags)
+
+    def _merge_tags(self, existing, new_tags, gone_tags):
+        result_new = set(existing[0])
+        result_gone = set(existing[1])
+        result_new.update(new_tags)
+        result_new.difference_update(gone_tags)
+        result_gone.update(gone_tags)
+        result_gone.difference_update(new_tags)
+        return result_new, result_gone
 
 
 class ExtendedToOriginalDecorator(object):
