@@ -239,6 +239,13 @@ class TestResult(unittest.TestResult):
         deprecated in favour of stopTestRun.
         """
 
+    def tags(self, new_tags, gone_tags):
+        """Add and remove tags from the test.
+
+        :param new_tags: A set of tags to be added to the stream.
+        :param gone_tags: A set of tags to be removed from the stream.
+        """
+
 
 class MultiTestResult(TestResult):
     """A test result that dispatches to many test results."""
@@ -300,6 +307,13 @@ class MultiTestResult(TestResult):
         """
         return all(self._dispatch('wasSuccessful'))
 
+    def tags(self, new_tags, gone_tags):
+        """Add and remove tags from the test.
+
+        :param new_tags: A set of tags to be added to the stream.
+        :param gone_tags: A set of tags to be removed from the stream.
+        """
+
 
 class TextTestResult(TestResult):
     """A TestResult which outputs activity to a text stream."""
@@ -353,6 +367,13 @@ class TextTestResult(TestResult):
             self.stream.write(", ".join(details))
             self.stream.write(")\n")
         super(TextTestResult, self).stopTestRun()
+
+    def tags(self, new_tags, gone_tags):
+        """Add and remove tags from the test.
+
+        :param new_tags: A set of tags to be added to the stream.
+        :param gone_tags: A set of tags to be removed from the stream.
+        """
 
 
 class ThreadsafeForwardingResult(TestResult):
@@ -450,6 +471,18 @@ class ThreadsafeForwardingResult(TestResult):
 
     def wasSuccessful(self):
         return self.result.wasSuccessful()
+
+    def tags(self, new_tags, gone_tags):
+        """Add and remove tags from the test.
+
+        :param new_tags: A set of tags to be added to the stream.
+        :param gone_tags: A set of tags to be removed from the stream.
+        """
+        self.semaphore.acquire()
+        try:
+            self.result.tags(new_tags, gone_tags)
+        finally:
+            self.semaphore.release()
 
 
 class ExtendedToOriginalDecorator(object):

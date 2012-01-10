@@ -224,6 +224,14 @@ class DetailsContract(Python27Contract):
         result.startTest(self)
         result.addSuccess(self, details={})
 
+    def test_test_scope_tags(self):
+        # Calling tags(new_tags, gone_tags) completes ok when in a test.
+        result = self.makeResult()
+        result.startTest(self)
+        result.tags(set([]), set([]))
+        result.addSuccess(self, details={})
+
+
 
 class FallbackContract(DetailsContract):
     """When we fallback we take our policy choice to map calls.
