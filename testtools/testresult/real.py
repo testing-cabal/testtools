@@ -210,7 +210,7 @@ class TestResult(unittest.TestResult):
         # -- Start: As per python 2.7 --
         self.expectedFailures = []
         self.unexpectedSuccesses = []
-        self._tags = set()
+        self.current_tags = set()
         # -- End:   As per python 2.7 --
 
     def stopTestRun(self):
@@ -246,8 +246,8 @@ class TestResult(unittest.TestResult):
         :param new_tags: A set of tags to be added to the stream.
         :param gone_tags: A set of tags to be removed from the stream.
         """
-        self._tags.update(new_tags)
-        self._tags.difference_update(gone_tags)
+        self.current_tags.update(new_tags)
+        self.current_tags.difference_update(gone_tags)
 
 
 class MultiTestResult(TestResult):
@@ -296,6 +296,9 @@ class MultiTestResult(TestResult):
 
     def stopTestRun(self):
         return self._dispatch('stopTestRun')
+
+    def tags(self, new_tags, gone_tags):
+        return self._dispatch('tags', new_tags, gone_tags)
 
     def time(self, a_datetime):
         return self._dispatch('time', a_datetime)

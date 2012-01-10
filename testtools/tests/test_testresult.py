@@ -229,8 +229,21 @@ class DetailsContract(Python27Contract):
         result = self.makeResult()
         result.startTest(self)
         result.tags(set([]), set([]))
-        result.addSuccess(self, details={})
 
+    def test_test_scope_tags_adds_tags(self):
+        # Calling tags(new_tags, gone_tags) adds tags when in a test.
+        result = self.makeResult()
+        result.startTest(self)
+        result.tags(set(['foo', 'bar']), set([]))
+        self.assertEqual(set(['foo', 'bar']), result.current_tags)
+
+    def test_test_scope_tags_removes_tags(self):
+        # Calling tags(new_tags, gone_tags) adds tags when in a test.
+        result = self.makeResult()
+        result.startTest(self)
+        result.tags(set(['foo', 'bar']), set([]))
+        result.tags(set([]), set(['foo']))
+        self.assertEqual(set(['bar']), result.current_tags)
 
 
 class FallbackContract(DetailsContract):
@@ -538,6 +551,14 @@ class TestMultiTestResult(TestCase):
         multi_result = MultiTestResult(Result([]), Result([]))
         result = multi_result.stopTestRun()
         self.assertEqual(('foo', 'foo'), result)
+
+    def test_tags(self):
+        # Calling `tags` on a `MultiTestResult` calls `tags` on all its
+        # `TestResult`s.
+        added_tags = set(['foo', 'bar'])
+        removed_tags = set(['eggs'])
+        self.multiResult.tags(added_tags, removed_tags)
+        self.assertResultLogsEqual([('tags', added_tags, removed_tags)])
 
     def test_time(self):
         # the time call is dispatched, not eaten by the base class
@@ -955,16 +976,16 @@ class TestExtendedToOriginalResultDecorator(
 
     def test_tags_py26(self):
         self.make_26_result()
-        self.converter.tags(1, 2)
+        self.converter.tags(set([1]), set([2]))
 
     def test_tags_py27(self):
         self.make_27_result()
-        self.converter.tags(1, 2)
+        self.converter.tags(set([1]), set([2]))
 
     def test_tags_pyextended(self):
         self.make_extended_result()
-        self.converter.tags(1, 2)
-        self.assertEqual([('tags', 1, 2)], self.result._events)
+        self.converter.tags(set([1]), set([2]))
+        self.assertEqual([('tags', set([1]), set([2]))], self.result._events)
 
     def test_time_py26(self):
         self.make_26_result()
