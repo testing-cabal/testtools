@@ -406,6 +406,7 @@ class ThreadsafeForwardingResult(TestResult):
         return bool(tags[0] and tags[1])
 
     def _add_result_with_semaphore(self, method, test, *args, **kwargs):
+        now = self._now()
         self.semaphore.acquire()
         try:
             self.result.time(self._test_start)
@@ -413,7 +414,7 @@ class ThreadsafeForwardingResult(TestResult):
                 self.result.tags(*self._global_tags)
             try:
                 self.result.startTest(test)
-                self.result.time(self._now())
+                self.result.time(now)
                 if self._not_empty_tags(self._test_tags):
                     self.result.tags(*self._test_tags)
                 try:

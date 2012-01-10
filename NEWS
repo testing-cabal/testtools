@@ -58,6 +58,10 @@ Improvements
 * ``ThreadsafeForwardingResult`` supports the ``tags`` method.
   (Graham Binns, Francesco Banconi, #914279)
 
+* ``ThreadsafeForwardingResult`` no longer includes semaphore acquisition time
+  in the test duration (for implicitly timed test runs).
+  (Robert Collins, #914362)
+
 0.9.12
 ~~~~~~
 
