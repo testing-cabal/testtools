@@ -25,6 +25,7 @@ from testtools.compat import (
     )
 from testtools.matchers import (
     Annotate,
+    Contains,
     DocTestMatches,
     Equals,
     MatchesException,
@@ -308,6 +309,17 @@ class TestAssertions(TestCase):
             self.assertRaises, expectedExceptions, lambda: None)
         self.assertFails('<function <lambda> at ...> returned None',
             self.assertRaises, expectedExceptions, lambda: None)
+
+    def test_assertRaises_function_repr_in_exception(self):
+        # When assertRaises fails, it includes the repr of the invoked
+        # function in the error message, so it's easy to locate the problem.
+        def foo():
+            """An arbitrary function."""
+            pass
+        self.assertThat(
+            lambda: self.assertRaises(Exception, foo),
+            Raises(
+                MatchesException(self.failureException, '.*%r.*' % (foo,))))
 
     def assertFails(self, message, function, *args, **kwargs):
         """Assert that function raises a failure with the given message."""

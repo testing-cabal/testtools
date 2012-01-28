@@ -384,8 +384,13 @@ class TestCase(unittest.TestCase):
         capture = CaptureMatchee()
         matcher = Raises(MatchesAll(ReRaiseOtherTypes(),
                 MatchesException(excClass), capture))
-
-        self.assertThat(lambda: callableObj(*args, **kwargs), matcher)
+        class OurCallable(object):
+            """Wrapper around callableObj to ensure good repr."""
+            def __call__(self):
+                return callableObj(*args, **kwargs)
+            def __repr__(self):
+                return repr(callableObj)
+        self.assertThat(OurCallable(), matcher)
         return capture.matchee
     failUnlessRaises = assertRaises
 
