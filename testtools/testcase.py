@@ -28,6 +28,7 @@ from testtools.compat import (
     advance_iterator,
     reraise,
     )
+from testtools.helpers import Nullary
 from testtools.matchers import (
     Annotate,
     Contains,
@@ -384,13 +385,8 @@ class TestCase(unittest.TestCase):
         capture = CaptureMatchee()
         matcher = Raises(MatchesAll(ReRaiseOtherTypes(),
                 MatchesException(excClass), capture))
-        class OurCallable(object):
-            """Wrapper around callableObj to ensure good repr."""
-            def __call__(self):
-                return callableObj(*args, **kwargs)
-            def __repr__(self):
-                return repr(callableObj)
-        self.assertThat(OurCallable(), matcher)
+        our_callable = Nullary(callableObj, *args, **kwargs)
+        self.assertThat(our_callable, matcher)
         return capture.matchee
     failUnlessRaises = assertRaises
 

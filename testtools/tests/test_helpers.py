@@ -2,6 +2,7 @@
 
 from testtools import TestCase
 from testtools.helpers import (
+    Nullary,
     try_import,
     try_imports,
     )
@@ -233,6 +234,38 @@ class TestStackHiding(TestCase):
     def test_show_stack(self):
         hide_testtools_stack(False)
         self.assertThat(self.modules, StackHidden(False))
+
+
+class TestNullary(TestCase):
+
+    def test_repr(self):
+        # The repr() of nullary is the same as the repr() of the wrapped
+        # function.
+        def foo():
+            pass
+        wrapped = Nullary(foo)
+        self.assertEqual(repr(wrapped), repr(foo))
+
+    def test_called_with_arguments(self):
+        # The function is called with the arguments given to Nullary's
+        # constructor.
+        l = []
+        def foo(*args, **kwargs):
+            l.append((args, kwargs))
+        wrapped = Nullary(foo, 1, 2, a="b")
+        wrapped()
+        self.assertEqual(l, [((1, 2), {'a': 'b'})])
+
+    def test_returns_wrapped(self):
+        # Calling Nullary returns whatever the function returns.
+        ret = object()
+        wrapped = Nullary(lambda: ret)
+        self.assertIs(ret, wrapped())
+
+    def test_raises(self):
+        # If the function raises, so does Nullary when called.
+        wrapped = Nullary(lambda: 1/0)
+        self.assertRaises(ZeroDivisionError, wrapped)
 
 
 def test_suite():

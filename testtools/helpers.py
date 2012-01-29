@@ -85,3 +85,22 @@ def safe_hasattr(obj, attr, _marker=object()):
     properties.
     """
     return getattr(obj, attr, _marker) is not _marker
+
+
+class Nullary(object):
+    """Turn a callable into a nullary callable.
+
+    The advantage of this over ``lambda: f(*args, **kwargs)`` is that it
+    preserves the ``repr()`` of ``f``.
+    """
+
+    def __init__(self, callable_object, *args, **kwargs):
+        self._callable_object = callable_object
+        self._args = args
+        self._kwargs = kwargs
+
+    def __call__(self):
+        return self._callable_object(*self._args, **self._kwargs)
+
+    def __repr__(self):
+        return repr(self._callable_object)
