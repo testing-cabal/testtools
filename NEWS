@@ -31,6 +31,9 @@ Improvements
   and not continue looking for other possible mismatches.
   (Jonathan Lange)
 
+* New helper, ``Nullary`` that turns callables with arguments into ones that
+  don't take arguments.  (Jonathan Lange)
+
 * New matchers:
 
   * ``DirContains`` matches the contents of a directory.
