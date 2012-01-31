@@ -384,8 +384,8 @@ class TestCase(unittest.TestCase):
         capture = CaptureMatchee()
         matcher = Raises(MatchesAll(ReRaiseOtherTypes(),
                 MatchesException(excClass), capture))
-
-        self.assertThat(lambda: callableObj(*args, **kwargs), matcher)
+        our_callable = Nullary(callableObj, *args, **kwargs)
+        self.assertThat(our_callable, matcher)
         return capture.matchee
     failUnlessRaises = assertRaises
 
@@ -775,6 +775,25 @@ class ExpectedException:
             if mismatch:
                 raise AssertionError(mismatch.describe())
         return True
+
+
+class Nullary(object):
+    """Turn a callable into a nullary callable.
+
+    The advantage of this over ``lambda: f(*args, **kwargs)`` is that it
+    preserves the ``repr()`` of ``f``.
+    """
+
+    def __init__(self, callable_object, *args, **kwargs):
+        self._callable_object = callable_object
+        self._args = args
+        self._kwargs = kwargs
+
+    def __call__(self):
+        return self._callable_object(*self._args, **self._kwargs)
+
+    def __repr__(self):
+        return repr(self._callable_object)
 
 
 # Signal that this is part of the testing framework, and that code from this

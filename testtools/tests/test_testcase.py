@@ -25,11 +25,13 @@ from testtools.compat import (
     )
 from testtools.matchers import (
     Annotate,
+    Contains,
     DocTestMatches,
     Equals,
     MatchesException,
     Raises,
     )
+from testtools.testcase import Nullary
 from testtools.testresult.doubles import (
     Python26TestResult,
     Python27TestResult,
@@ -308,6 +310,17 @@ class TestAssertions(TestCase):
             self.assertRaises, expectedExceptions, lambda: None)
         self.assertFails('<function <lambda> at ...> returned None',
             self.assertRaises, expectedExceptions, lambda: None)
+
+    def test_assertRaises_function_repr_in_exception(self):
+        # When assertRaises fails, it includes the repr of the invoked
+        # function in the error message, so it's easy to locate the problem.
+        def foo():
+            """An arbitrary function."""
+            pass
+        self.assertThat(
+            lambda: self.assertRaises(Exception, foo),
+            Raises(
+                MatchesException(self.failureException, '.*%r.*' % (foo,))))
 
     def assertFails(self, message, function, *args, **kwargs):
         """Assert that function raises a failure with the given message."""
@@ -1281,6 +1294,38 @@ class TestTestCaseSuper(TestCase):
         test.setUp()
         test.tearDown()
         self.assertTrue(test.teardown_called)
+
+
+class TestNullary(TestCase):
+
+    def test_repr(self):
+        # The repr() of nullary is the same as the repr() of the wrapped
+        # function.
+        def foo():
+            pass
+        wrapped = Nullary(foo)
+        self.assertEqual(repr(wrapped), repr(foo))
+
+    def test_called_with_arguments(self):
+        # The function is called with the arguments given to Nullary's
+        # constructor.
+        l = []
+        def foo(*args, **kwargs):
+            l.append((args, kwargs))
+        wrapped = Nullary(foo, 1, 2, a="b")
+        wrapped()
+        self.assertEqual(l, [((1, 2), {'a': 'b'})])
+
+    def test_returns_wrapped(self):
+        # Calling Nullary returns whatever the function returns.
+        ret = object()
+        wrapped = Nullary(lambda: ret)
+        self.assertIs(ret, wrapped())
+
+    def test_raises(self):
+        # If the function raises, so does Nullary when called.
+        wrapped = Nullary(lambda: 1/0)
+        self.assertRaises(ZeroDivisionError, wrapped)
 
 
 def test_suite():
