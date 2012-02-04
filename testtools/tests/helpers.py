@@ -1,10 +1,6 @@
 # Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
 
-"""Helpers for tests.
-
-This module is internal to testtools. Unlike the rest of testtools its
-contents & API are liable to change without warning.
-"""
+"""Helpers for tests."""
 
 __all__ = [
     'LoggingResult',

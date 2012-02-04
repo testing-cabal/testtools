@@ -36,9 +36,6 @@ class UTC(datetime.tzinfo):
 
 utc = UTC()
 
-STDOUT_LINE = '\nStdout:\n%s'
-STDERR_LINE = '\nStderr:\n%s'
-
 
 class TestResult(unittest.TestResult):
     """Subclass of unittest.TestResult extending the protocol for flexability.
