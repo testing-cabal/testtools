@@ -15,10 +15,13 @@ import sys
 from testtools import TestResult
 from testtools.helpers import (
     safe_hasattr,
-    try_import,
     )
+from testtools.content import TracebackContent
 from testtools import runtest
 
+
+# Importing to preserve compatibility.
+safe_hasattr
 
 # GZ 2010-08-12: Don't do this, pointlessly creates an exc_info cycle
 try:
@@ -81,26 +84,12 @@ class LoggingResult(TestResult):
 
 
 def is_stack_hidden():
-    return safe_hasattr(runtest, '__unittest')
+    return TracebackContent.HIDE_INTERNAL_STACK
 
 
 def hide_testtools_stack(should_hide=True):
-    modules = [
-        'testtools.matchers',
-        'testtools.runtest',
-        'testtools.testcase',
-        ]
-    result = is_stack_hidden()
-    for module_name in modules:
-        module = try_import(module_name)
-        if should_hide:
-            setattr(module, '__unittest', True)
-        else:
-            try:
-                delattr(module, '__unittest')
-            except AttributeError:
-                # Attribute already doesn't exist. Our work here is done.
-                pass
+    result = TracebackContent.HIDE_INTERNAL_STACK
+    TracebackContent.HIDE_INTERNAL_STACK = should_hide
     return result
 
 
@@ -110,7 +99,6 @@ def run_with_stack_hidden(should_hide, f, *args, **kwargs):
         return f(*args, **kwargs)
     finally:
         hide_testtools_stack(old_should_hide)
-
 
 
 class FullStackRunTest(runtest.RunTest):

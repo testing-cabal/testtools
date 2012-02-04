@@ -123,6 +123,11 @@ class TracebackContent(Content):
     provide room for other languages to format their tracebacks differently.
     """
 
+    # Whether or not to hide layers of the stack trace that are
+    # unittest/testtools internal code.  Defaults to True since the
+    # system-under-test is rarely unittest or testtools.
+    HIDE_INTERNAL_STACK = True
+
     def __init__(self, err, test):
         """Create a TracebackContent for err."""
         if err is None:
@@ -140,8 +145,9 @@ class TracebackContent(Content):
         """
         exctype, value, tb = err
         # Skip test runner traceback levels
-        while tb and self._is_relevant_tb_level(tb):
-            tb = tb.tb_next
+        if self.HIDE_INTERNAL_STACK:
+            while tb and self._is_relevant_tb_level(tb):
+                tb = tb.tb_next
 
         # testtools customization. When str is unicode (e.g. IronPython,
         # Python 3), traceback.format_exception returns unicode. For Python 2,
@@ -151,7 +157,7 @@ class TracebackContent(Content):
         else:
             format_exception = _format_exc_info
 
-        if (test.failureException
+        if (self.HIDE_INTERNAL_STACK and test.failureException
             and isinstance(value, test.failureException)):
             # Skip assert*() traceback levels
             length = self._count_relevant_tb_levels(tb)
