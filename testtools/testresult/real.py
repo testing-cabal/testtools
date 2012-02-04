@@ -118,7 +118,7 @@ class TestResult(unittest.TestResult):
             if reason is None:
                 reason = 'No reason given'
             else:
-                reason = ''.join(reason.iter_text())
+                reason = reason.as_text()
         skip_list = self.skip_reasons.setdefault(reason, [])
         skip_list.append(test)
 
@@ -563,7 +563,7 @@ class ExtendedToOriginalDecorator(object):
             except TypeError:
                 # extract the reason if it's available
                 try:
-                    reason = ''.join(details['reason'].iter_text())
+                    reason = details['reason'].as_text()
                 except KeyError:
                     reason = _details_to_str(details)
         return addSkip(test, reason)
@@ -712,7 +712,7 @@ def _details_to_str(details, special=None):
         if content.content_type.type != 'text':
             binary_attachments.append((key, content.content_type))
             continue
-        text = _u('').join(content.iter_text()).strip()
+        text = content.as_text().strip()
         if not text:
             empty_attachments.append(key)
             continue
