@@ -24,6 +24,9 @@ Improvements
 * ``assertRaises`` now includes the ``repr`` of the callable that failed to raise
   properly. (Jonathan Lange, #881052)
 
+* Asynchronous tests no longer hang when run with trial.
+  (Jonathan Lange, #926189)
+
 * Failed equality assertions now line up. (Jonathan Lange, #879339)
 
 * ``MatchesAll`` and ``MatchesListwise`` both take a ``first_only`` keyword
