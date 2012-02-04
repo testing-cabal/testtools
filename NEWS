@@ -32,6 +32,9 @@ Improvements
 
 * Failed equality assertions now line up. (Jonathan Lange, #879339)
 
+* ``FullStackRunTest`` no longer aborts the test run if a test raises an
+  error.  (Jonathan Lange)
+
 * ``MatchesAll`` and ``MatchesListwise`` both take a ``first_only`` keyword
   argument.  If True, they will report only on the first mismatch they find,
   and not continue looking for other possible mismatches.
