@@ -27,6 +27,9 @@ Improvements
 * Asynchronous tests no longer hang when run with trial.
   (Jonathan Lange, #926189)
 
+* ``Content`` objects now have an ``as_text`` method to convert their contents
+  to Unicode text.  (Jonathan Lange)
+
 * Failed equality assertions now line up. (Jonathan Lange, #879339)
 
 * ``MatchesAll`` and ``MatchesListwise`` both take a ``first_only`` keyword
