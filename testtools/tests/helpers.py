@@ -104,4 +104,6 @@ def run_with_stack_hidden(should_hide, f, *args, **kwargs):
 class FullStackRunTest(runtest.RunTest):
 
     def _run_user(self, fn, *args, **kwargs):
-        return run_with_stack_hidden(False, fn, *args, **kwargs)
+        return run_with_stack_hidden(
+            False,
+            super(FullStackRunTest, self)._run_user, fn, *args, **kwargs)
