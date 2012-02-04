@@ -15,7 +15,7 @@ import codecs
 import os
 
 from testtools import try_import
-from testtools.compat import _b
+from testtools.compat import _b, _u
 from testtools.content_type import ContentType, UTF8_TEXT
 from testtools.testresult import TestResult
 
@@ -62,6 +62,15 @@ class Content(object):
     def __eq__(self, other):
         return (self.content_type == other.content_type and
             _join_b(self.iter_bytes()) == _join_b(other.iter_bytes()))
+
+    def as_text(self):
+        """Return all of the content as text.
+
+        This is only valid where ``iter_text`` is.  It will load all of the
+        content into memory.  Where this is a concern, use ``iter_text``
+        instead.
+        """
+        return _u('').join(self.iter_text())
 
     def iter_bytes(self):
         """Iterate over bytestrings of the serialised content."""
