@@ -1,4 +1,4 @@
-# Copyright (c) 2010-2011 testtools developers. See LICENSE for details.
+# Copyright (c) 2010-2012 testtools developers. See LICENSE for details.
 
 from testtools import TestCase
 from testtools.helpers import (
@@ -6,8 +6,6 @@ from testtools.helpers import (
     try_imports,
     )
 from testtools.matchers import (
-    AllMatch,
-    AfterPreprocessing,
     Equals,
     Is,
     Not,

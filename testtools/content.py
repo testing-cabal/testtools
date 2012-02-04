@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2011 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
 
 """Content - a MIME-like Content object."""
 
