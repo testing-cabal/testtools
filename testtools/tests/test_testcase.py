@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
 
 """Tests for extensions to the base test library."""
 
@@ -23,9 +23,9 @@ from testtools.compat import (
     _b,
     _u,
     )
+from testtools.content import TracebackContent
 from testtools.matchers import (
     Annotate,
-    Contains,
     DocTestMatches,
     Equals,
     MatchesException,
@@ -37,7 +37,6 @@ from testtools.testresult.doubles import (
     Python27TestResult,
     ExtendedTestResult,
     )
-from testtools.testresult.real import TestResult
 from testtools.tests.helpers import (
     an_exc_info,
     FullStackRunTest,
@@ -305,7 +304,7 @@ class TestAssertions(TestCase):
         # a callable that doesn't raise an exception, then fail with an
         # appropriate error message.
         expectedExceptions = (RuntimeError, ZeroDivisionError)
-        failure = self.assertRaises(
+        self.assertRaises(
             self.failureException,
             self.assertRaises, expectedExceptions, lambda: None)
         self.assertFails('<function <lambda> at ...> returned None',
@@ -523,7 +522,7 @@ class TestAssertions(TestCase):
         about stack traces and formats the exception class. We don't care
         about either of these, so we take its output and parse it a little.
         """
-        error = TestResult()._exc_info_to_unicode((e.__class__, e, None), self)
+        error = TracebackContent((e.__class__, e, None), self).as_text()
         # We aren't at all interested in the traceback.
         if error.startswith('Traceback (most recent call last):\n'):
             lines = error.splitlines(True)[1:]
@@ -1085,7 +1084,7 @@ class TestSkipping(TestCase):
         case.run(result)
         self.assertEqual('addSkip', result._events[1][0])
         self.assertEqual('no reason given.',
-            ''.join(result._events[1][2]['reason'].iter_text()))
+            result._events[1][2]['reason'].as_text())
 
     def test_skipException_in_setup_calls_result_addSkip(self):
         class TestThatRaisesInSetUp(TestCase):

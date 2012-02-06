@@ -1,4 +1,4 @@
-# Copyright (c) 2008 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
 
 """Test results and related things."""
 
@@ -12,10 +12,10 @@ __all__ = [
 
 import datetime
 import sys
-import traceback
 import unittest
 
-from testtools.compat import all, _format_exc_info, str_is_unicode, _u
+from testtools.compat import all, str_is_unicode, _u
+from testtools.content import TracebackContent
 
 # From http://docs.python.org/library/datetime.html
 _ZERO = datetime.timedelta(0)
@@ -35,9 +35,6 @@ class UTC(datetime.tzinfo):
         return _ZERO
 
 utc = UTC()
-
-STDOUT_LINE = '\nStdout:\n%s'
-STDERR_LINE = '\nStderr:\n%s'
 
 
 class TestResult(unittest.TestResult):
@@ -118,7 +115,7 @@ class TestResult(unittest.TestResult):
             if reason is None:
                 reason = 'No reason given'
             else:
-                reason = ''.join(reason.iter_text())
+                reason = reason.as_text()
         skip_list = self.skip_reasons.setdefault(reason, [])
         skip_list.append(test)
 
@@ -141,48 +138,10 @@ class TestResult(unittest.TestResult):
         """
         return not (self.errors or self.failures or self.unexpectedSuccesses)
 
-    def _exc_info_to_unicode(self, err, test):
-        """Converts a sys.exc_info()-style tuple of values into a string.
-
-        Copied from Python 2.7's unittest.TestResult._exc_info_to_string.
-        """
-        exctype, value, tb = err
-        # Skip test runner traceback levels
-        while tb and self._is_relevant_tb_level(tb):
-            tb = tb.tb_next
-
-        # testtools customization. When str is unicode (e.g. IronPython,
-        # Python 3), traceback.format_exception returns unicode. For Python 2,
-        # it returns bytes. We need to guarantee unicode.
-        if str_is_unicode:
-            format_exception = traceback.format_exception
-        else:
-            format_exception = _format_exc_info
-
-        if test.failureException and isinstance(value, test.failureException):
-            # Skip assert*() traceback levels
-            length = self._count_relevant_tb_levels(tb)
-            msgLines = format_exception(exctype, value, tb, length)
-        else:
-            msgLines = format_exception(exctype, value, tb)
-
-        if getattr(self, 'buffer', None):
-            output = sys.stdout.getvalue()
-            error = sys.stderr.getvalue()
-            if output:
-                if not output.endswith('\n'):
-                    output += '\n'
-                msgLines.append(STDOUT_LINE % output)
-            if error:
-                if not error.endswith('\n'):
-                    error += '\n'
-                msgLines.append(STDERR_LINE % error)
-        return ''.join(msgLines)
-
     def _err_details_to_string(self, test, err=None, details=None):
         """Convert an error in exc_info form or a contents dict to a string."""
         if err is not None:
-            return self._exc_info_to_unicode(err, test)
+            return TracebackContent(err, test).as_text()
         return _details_to_str(details, special='traceback')
 
     def _now(self):
@@ -563,7 +522,7 @@ class ExtendedToOriginalDecorator(object):
             except TypeError:
                 # extract the reason if it's available
                 try:
-                    reason = ''.join(details['reason'].iter_text())
+                    reason = details['reason'].as_text()
                 except KeyError:
                     reason = _details_to_str(details)
         return addSkip(test, reason)
@@ -712,7 +671,7 @@ def _details_to_str(details, special=None):
         if content.content_type.type != 'text':
             binary_attachments.append((key, content.content_type))
             continue
-        text = _u('').join(content.iter_text()).strip()
+        text = content.as_text().strip()
         if not text:
             empty_attachments.append(key)
             continue

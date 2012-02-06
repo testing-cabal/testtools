@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
 
 import os
 import tempfile
@@ -86,6 +86,12 @@ class TestContent(TestCase):
         iso_version = text.encode("ISO-8859-1")
         content = Content(content_type, lambda: [iso_version])
         self.assertEqual([text], list(content.iter_text()))
+
+    def test_as_text(self):
+        content_type = ContentType("text", "strange", {"charset": "utf8"})
+        content = Content(
+            content_type, lambda: [_u("bytes\xea").encode("utf8")])
+        self.assertEqual(_u("bytes\xea"), content.as_text())
 
     def test_from_file(self):
         fd, path = tempfile.mkstemp()
