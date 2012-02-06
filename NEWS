@@ -3,8 +3,16 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
+
 NEXT
 ~~~~
+
+
+0.9.13
+~~~~~~
+
+Plenty of new matchers and quite a few critical bug fixes (especially to do
+with stack traces from failed assertions).  A net win for all.
 
 Changes
 -------
