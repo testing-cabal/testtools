@@ -13,7 +13,6 @@ from testtools import (
 from testtools.content import (
     text_content,
     )
-from testtools.deferredruntest import run_with_log_observers
 from testtools.helpers import try_import
 from testtools.matchers import (
     Equals,
@@ -747,9 +746,10 @@ class TestAssertFailsWith(NeedsTwistedTestCase):
             lambda x: self.fail("Should not have succeeded"), check_result)
 
 
-class TestRunWithLogObservers(TestCase):
+class TestRunWithLogObservers(NeedsTwistedTestCase):
 
     def test_restores_observers(self):
+        from testtools.deferredruntest import run_with_log_observers
         from twisted.python import log
         # Make sure there's at least one observer.  This reproduces bug
         # #926189.
