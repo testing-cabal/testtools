@@ -144,6 +144,11 @@ class TestResult(unittest.TestResult):
             return TracebackContent(err, test).as_text()
         return _details_to_str(details, special='traceback')
 
+    def _exc_info_to_unicode(self, err, test):
+        # Deprecated.  Only present because subunit upcalls to it.  See
+        # <https://bugs.launchpad.net/testtools/+bug/929063>.
+        return TracebackContent(err, test).as_text()
+
     def _now(self):
         """Return the current 'test time'.
 
