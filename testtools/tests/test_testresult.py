@@ -35,6 +35,7 @@ from testtools.content import (
     Content,
     content_from_stream,
     text_content,
+    TracebackContent,
     )
 from testtools.content_type import ContentType, UTF8_TEXT
 from testtools.matchers import (
@@ -441,6 +442,18 @@ class TestTestResult(TestCase):
                 '    self.assertEqual(1, 2)\n'
                 '...MismatchError: 1 != 2\n',
                 doctest.ELLIPSIS))
+
+    def test_exc_info_to_unicode(self):
+        # subunit upcalls to TestResult._exc_info_to_unicode, so we need to
+        # make sure that it's there.
+        #
+        # See <https://bugs.launchpad.net/testtools/+bug/929063>.
+        test = make_erroring_test()
+        exc_info = make_exception_info(RuntimeError, "foo")
+        result = self.makeResult()
+        text_traceback = result._exc_info_to_unicode(exc_info, test)
+        self.assertEqual(
+            TracebackContent(exc_info, test).as_text(), text_traceback)
 
 
 class TestMultiTestResult(TestCase):
