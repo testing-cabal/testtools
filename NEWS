@@ -8,6 +8,16 @@ NEXT
 ~~~~
 
 
+0.9.14
+~~~~~~
+
+Our sister project, `subunit <https://launchpad.net/subunit>`_, was using a
+private API that was deleted in the 0.9.13 release.  This release restores
+that API in order to smooth out the upgrade path.
+
+If you don't use subunit, then this release won't matter very much to you.
+
+
 0.9.13
 ~~~~~~
 
