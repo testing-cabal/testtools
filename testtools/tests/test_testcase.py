@@ -198,19 +198,6 @@ class TestErrorHolder(TestCase):
              ('addError', test, test._details),
              ('stopTest', test)], log)
 
-    def test_supplies_details(self):
-        details = {'quux':None}
-        error = self.makeException()
-        test = ErrorHolder('foo', error, details=details)
-        result = ExtendedTestResult()
-        test.run(result)
-        self.assertEqual(
-            [('startTest', test),
-             ('addError', test, details),
-             ('stopTest', test)],
-            result._events)
-        self.assertTrue('traceback' in details)
-
     def test_call_is_run(self):
         # A PlaceHolder can be called, in which case it behaves like run.
         test = self.makePlaceHolder()
