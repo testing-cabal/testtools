@@ -7,6 +7,14 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Changes
+-------
+
+* ``PlaceHolder`` and ``ErrorHolder`` now support being given result details.
+  (Robert Collins)
+
+* ``ErrorHolder`` is now just a function - all the logic is in ``PlaceHolder``.
+  (Robert Collins)
 
 0.9.14
 ~~~~~~

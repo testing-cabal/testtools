@@ -77,16 +77,21 @@ class TestPlaceHolder(TestCase):
         # repr(placeholder) shows you how the object was constructed.
         test = PlaceHolder("test id")
         self.assertEqual(
-            "<testtools.testcase.PlaceHolder(%s)>" % repr(test.id()),
-            repr(test))
+            "<testtools.testcase.PlaceHolder('addSuccess', %s, {})>" % repr(
+            test.id()), repr(test))
 
     def test_repr_with_description(self):
         # repr(placeholder) shows you how the object was constructed.
         test = PlaceHolder("test id", "description")
         self.assertEqual(
-            "<testtools.testcase.PlaceHolder(%r, %r)>" % (
-                test.id(), test.shortDescription()),
-            repr(test))
+            "<testtools.testcase.PlaceHolder('addSuccess', %r, {}, %r)>" % (
+            test.id(), test.shortDescription()), repr(test))
+
+    def test_repr_custom_outcome(self):
+        test = PlaceHolder("test id", outcome='addSkip')
+        self.assertEqual(
+            "<testtools.testcase.PlaceHolder('addSkip', %r, {})>" % (
+            test.id()), repr(test))
 
     def test_counts_as_one_test(self):
         # A placeholder test counts as one test.
@@ -106,6 +111,17 @@ class TestPlaceHolder(TestCase):
         self.assertEqual(
             [('startTest', test), ('addSuccess', test), ('stopTest', test)],
             log)
+
+    def test_supplies_details(self):
+        details = {'quux':None}
+        test = PlaceHolder('foo', details=details)
+        result = ExtendedTestResult()
+        test.run(result)
+        self.assertEqual(
+            [('startTest', test),
+             ('addSuccess', test, details),
+             ('stopTest', test)],
+            result._events)
 
     def test_call_is_run(self):
         # A PlaceHolder can be called, in which case it behaves like run.
@@ -127,6 +143,8 @@ class TestPlaceHolder(TestCase):
 
 
 class TestErrorHolder(TestCase):
+    # Note that these tests exist because ErrorHolder exists - it could be
+    # deprecated and dropped at this point.
 
     run_test_with = FullStackRunTest
 
@@ -158,23 +176,6 @@ class TestErrorHolder(TestCase):
         test = ErrorHolder("test id", self.makeException(), "description")
         self.assertEqual("description", test.shortDescription())
 
-    def test_repr_just_id(self):
-        # repr(placeholder) shows you how the object was constructed.
-        error = self.makeException()
-        test = ErrorHolder("test id", error)
-        self.assertEqual(
-            "<testtools.testcase.ErrorHolder(%r, %r)>" % (test.id(), error),
-            repr(test))
-
-    def test_repr_with_description(self):
-        # repr(placeholder) shows you how the object was constructed.
-        error = self.makeException()
-        test = ErrorHolder("test id", error, "description")
-        self.assertEqual(
-            "<testtools.testcase.ErrorHolder(%r, %r, %r)>" % (
-                test.id(), error, test.shortDescription()),
-            repr(test))
-
     def test_counts_as_one_test(self):
         # A placeholder test counts as one test.
         test = self.makePlaceHolder()
@@ -186,15 +187,29 @@ class TestErrorHolder(TestCase):
         self.assertEqual(test.id(), str(test))
 
     def test_runs_as_error(self):
-        # When run, a PlaceHolder test records a success.
+        # When run, an ErrorHolder test records an error.
         error = self.makeException()
         test = self.makePlaceHolder(error=error)
-        log = []
-        test.run(LoggingResult(log))
+        result = ExtendedTestResult()
+        log = result._events
+        test.run(result)
         self.assertEqual(
             [('startTest', test),
-             ('addError', test, error),
+             ('addError', test, test._details),
              ('stopTest', test)], log)
+
+    def test_supplies_details(self):
+        details = {'quux':None}
+        error = self.makeException()
+        test = ErrorHolder('foo', error, details=details)
+        result = ExtendedTestResult()
+        test.run(result)
+        self.assertEqual(
+            [('startTest', test),
+             ('addError', test, details),
+             ('stopTest', test)],
+            result._events)
+        self.assertTrue('traceback' in details)
 
     def test_call_is_run(self):
         # A PlaceHolder can be called, in which case it behaves like run.
