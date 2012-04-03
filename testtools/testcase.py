@@ -304,9 +304,7 @@ class TestCase(unittest.TestCase):
         self.__exception_handlers.append(handler)
 
     def _add_reason(self, reason):
-        self.addDetail('reason', content.Content(
-            content.ContentType('text', 'plain'),
-            lambda: [reason.encode('utf8')]))
+        self.addDetail('reason', content.text_content(reason))
 
     def assertEqual(self, expected, observed, message=''):
         """Assert that 'expected' is equal to 'observed'.
