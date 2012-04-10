@@ -134,12 +134,6 @@ class Python26Contract(object):
         result.stopTest(self)
         self.assertTrue(result.wasSuccessful())
 
-    def test_tags(self):
-        # tags() does not fail the test run.
-        result = self.makeResult()
-        result.startTest(self)
-        result.tags(set([]), set([]))
-
 
 class Python27Contract(Python26Contract):
 
