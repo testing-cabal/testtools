@@ -3,8 +3,10 @@
 """Tag support."""
 
 
-def new_tag_context():
-    return set()
+def new_tag_context(parent=None):
+    if parent is None:
+        return set()
+    return set(parent)
 
 
 def get_current_tags(tag_context):

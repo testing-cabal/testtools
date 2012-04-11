@@ -31,6 +31,29 @@ class TestTags(TestCase):
         tag_context = tags.change_tags(tag_context, set(), set(['foo']))
         self.assertEqual(set(), tags.get_current_tags(tag_context))
 
+    def test_child_context(self):
+        parent = tags.new_tag_context()
+        parent = tags.change_tags(parent, set(['foo']), set())
+        child = tags.new_tag_context(parent)
+        self.assertEqual(
+            tags.get_current_tags(parent), tags.get_current_tags(child))
+
+    def test_add_to_child(self):
+        parent = tags.new_tag_context()
+        parent = tags.change_tags(parent, set(['foo']), set())
+        child = tags.new_tag_context(parent)
+        child = tags.change_tags(child, set(['bar']), set())
+        self.assertEqual(set(['foo', 'bar']), tags.get_current_tags(child))
+        self.assertEqual(set(['foo']), tags.get_current_tags(parent))
+
+    def test_remove_in_child(self):
+        parent = tags.new_tag_context()
+        parent = tags.change_tags(parent, set(['foo']), set())
+        child = tags.new_tag_context(parent)
+        child = tags.change_tags(child, set(), set(['foo']))
+        self.assertEqual(set(), tags.get_current_tags(child))
+        self.assertEqual(set(['foo']), tags.get_current_tags(parent))
+
 
 def test_suite():
     from unittest import TestLoader
