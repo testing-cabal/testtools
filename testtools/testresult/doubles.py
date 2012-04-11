@@ -109,6 +109,14 @@ class ExtendedTestResult(Python27TestResult):
         self._was_successful = True
         self._tags = TagContext()
 
+    def startTest(self, test):
+        super(ExtendedTestResult, self).startTest(test)
+        self._tags = TagContext(self._tags)
+
+    def stopTest(self, test):
+        self._tags = self._tags.get_parent()
+        super(ExtendedTestResult, self).stopTest(test)
+
     @property
     def current_tags(self):
         return self._tags.get_current_tags()

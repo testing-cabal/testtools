@@ -184,6 +184,14 @@ class TestResult(unittest.TestResult):
         New in python 2.7
         """
 
+    def startTest(self, test):
+        super(TestResult, self).startTest(test)
+        self._tags = TagContext(self._tags)
+
+    def stopTest(self, test):
+        self._tags = self._tags.get_parent()
+        super(TestResult, self).stopTest(test)
+
     @property
     def current_tags(self):
         """The currently set tags."""
@@ -236,9 +244,11 @@ class MultiTestResult(TestResult):
             for result in self._results)
 
     def startTest(self, test):
+        super(MultiTestResult, self).startTest(test)
         return self._dispatch('startTest', test)
 
     def stopTest(self, test):
+        super(MultiTestResult, self).stopTest(test)
         return self._dispatch('stopTest', test)
 
     def addError(self, test, error=None, details=None):
@@ -603,6 +613,7 @@ class ExtendedToOriginalDecorator(object):
         return self.decorated.shouldStop
 
     def startTest(self, test):
+        self._tags = TagContext(self._tags)
         return self.decorated.startTest(test)
 
     def startTestRun(self):
@@ -616,6 +627,7 @@ class ExtendedToOriginalDecorator(object):
         return self.decorated.stop()
 
     def stopTest(self, test):
+        self._tags = self._tags.get_parent()
         return self.decorated.stopTest(test)
 
     def stopTestRun(self):
