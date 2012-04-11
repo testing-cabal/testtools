@@ -9,57 +9,72 @@ from testtools import tags
 
 class TestTags(TestCase):
 
+    def new_tag_context(self):
+        return tags.new_tag_context()
+
+    def change_tags(self, tag_context, new_tags, gone_tags):
+        return tags.change_tags(tag_context, new_tags, gone_tags)
+
+    def get_current_tags(self, tag_context):
+        return tags.get_current_tags(tag_context)
+
+    def push_tag_context(self, parent):
+        return tags.new_tag_context(parent)
+
+    def pop_tag_context(self, child):
+        return tags.get_parent_context(child)
+
     def test_no_tags(self):
-        tag_context = tags.new_tag_context()
-        self.assertEqual(set(), tags.get_current_tags(tag_context))
+        tag_context = self.new_tag_context()
+        self.assertEqual(set(), self.get_current_tags(tag_context))
 
     def test_add_tag(self):
-        tag_context = tags.new_tag_context()
-        tag_context = tags.change_tags(tag_context, set(['foo']), set())
-        self.assertEqual(set(['foo']), tags.get_current_tags(tag_context))
+        tag_context = self.new_tag_context()
+        tag_context = self.change_tags(tag_context, set(['foo']), set())
+        self.assertEqual(set(['foo']), self.get_current_tags(tag_context))
 
     def test_add_tag_twice(self):
-        tag_context = tags.new_tag_context()
-        tag_context = tags.change_tags(tag_context, set(['foo']), set())
-        tag_context = tags.change_tags(tag_context, set(['bar']), set())
+        tag_context = self.new_tag_context()
+        tag_context = self.change_tags(tag_context, set(['foo']), set())
+        tag_context = self.change_tags(tag_context, set(['bar']), set())
         self.assertEqual(
-            set(['foo', 'bar']), tags.get_current_tags(tag_context))
+            set(['foo', 'bar']), self.get_current_tags(tag_context))
 
     def test_remove_tag(self):
-        tag_context = tags.new_tag_context()
-        tag_context = tags.change_tags(tag_context, set(['foo']), set())
-        tag_context = tags.change_tags(tag_context, set(), set(['foo']))
-        self.assertEqual(set(), tags.get_current_tags(tag_context))
+        tag_context = self.new_tag_context()
+        tag_context = self.change_tags(tag_context, set(['foo']), set())
+        tag_context = self.change_tags(tag_context, set(), set(['foo']))
+        self.assertEqual(set(), self.get_current_tags(tag_context))
 
     def test_child_context(self):
-        parent = tags.new_tag_context()
-        parent = tags.change_tags(parent, set(['foo']), set())
-        child = tags.new_tag_context(parent)
+        parent = self.new_tag_context()
+        parent = self.change_tags(parent, set(['foo']), set())
+        child = self.push_tag_context(parent)
         self.assertEqual(
-            tags.get_current_tags(parent), tags.get_current_tags(child))
+            self.get_current_tags(parent), self.get_current_tags(child))
 
     def test_add_to_child(self):
-        parent = tags.new_tag_context()
-        parent = tags.change_tags(parent, set(['foo']), set())
-        child = tags.new_tag_context(parent)
-        child = tags.change_tags(child, set(['bar']), set())
-        self.assertEqual(set(['foo', 'bar']), tags.get_current_tags(child))
-        self.assertEqual(set(['foo']), tags.get_current_tags(parent))
+        parent = self.new_tag_context()
+        parent = self.change_tags(parent, set(['foo']), set())
+        child = self.push_tag_context(parent)
+        child = self.change_tags(child, set(['bar']), set())
+        self.assertEqual(set(['foo', 'bar']), self.get_current_tags(child))
+        self.assertEqual(set(['foo']), self.get_current_tags(parent))
 
     def test_remove_in_child(self):
-        parent = tags.new_tag_context()
-        parent = tags.change_tags(parent, set(['foo']), set())
-        child = tags.new_tag_context(parent)
-        child = tags.change_tags(child, set(), set(['foo']))
-        self.assertEqual(set(), tags.get_current_tags(child))
-        self.assertEqual(set(['foo']), tags.get_current_tags(parent))
+        parent = self.new_tag_context()
+        parent = self.change_tags(parent, set(['foo']), set())
+        child = self.push_tag_context(parent)
+        child = self.change_tags(child, set(), set(['foo']))
+        self.assertEqual(set(), self.get_current_tags(child))
+        self.assertEqual(set(['foo']), self.get_current_tags(parent))
 
-    def test_get_parent_context(self):
-        parent = tags.new_tag_context()
-        parent = tags.change_tags(parent, set(['foo']), set())
-        child = tags.new_tag_context(parent)
-        child = tags.change_tags(child, set(), set(['foo']))
-        child_parent = tags.get_parent_context(child)
+    def test_pop_tag_context(self):
+        parent = self.new_tag_context()
+        parent = self.change_tags(parent, set(['foo']), set())
+        child = self.push_tag_context(parent)
+        child = self.change_tags(child, set(), set(['foo']))
+        child_parent = self.pop_tag_context(child)
         self.assertEqual(parent, child_parent)
 
 
