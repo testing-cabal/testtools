@@ -20,9 +20,7 @@ def get_parent_context(tag_context):
 
 
 def change_tags(tag_context, new_tags, gone_tags):
-    tags = set(tag_context[-1])
-    tags.update(new_tags)
-    tags.difference_update(gone_tags)
-    new_context = get_parent_context(tag_context)
-    new_context.append(tags)
+    new_context = list(tag_context)
+    new_context[-1].update(new_tags)
+    new_context[-1].difference_update(gone_tags)
     return new_context
