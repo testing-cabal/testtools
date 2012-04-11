@@ -653,13 +653,14 @@ class TestByTestResult(TestResult):
 
     def stopTest(self, test):
         self._stop_time = self._now()
+        tags = set(self.current_tags)
         super(TestByTestResult, self).stopTest(test)
         self._on_test(
             test=test,
             status=self._status,
             start_time=self._start_time,
             stop_time=self._stop_time,
-            tags=self.current_tags,
+            tags=tags,
             details=self._details)
 
     def _err_to_details(self, test, err, details):

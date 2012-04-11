@@ -1620,14 +1620,20 @@ class TestByTestResultTests(TestCase):
         self.result.stopTest(self)
         self.assertCalled(status='success', details=details)
 
-    def test_tags(self):
-        if not getattr(self.result, 'tags', None):
-            self.skipTest("No tags in testtools")
+    def test_global_tags(self):
         self.result.tags(['foo'], [])
         self.result.startTest(self)
         self.result.addSuccess(self)
         self.result.stopTest(self)
         self.assertCalled(status='success', tags=set(['foo']))
+
+    def test_local_tags(self):
+        self.result.tags(['foo'], [])
+        self.result.startTest(self)
+        self.result.tags(['bar'], [])
+        self.result.addSuccess(self)
+        self.result.stopTest(self)
+        self.assertCalled(status='success', tags=set(['foo', 'bar']))
 
     def test_add_error(self):
         self.result.startTest(self)
