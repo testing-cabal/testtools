@@ -9,6 +9,9 @@ __all__ = [
     ]
 
 
+from testtools.tags import TagContext
+
+
 class LoggingBase(object):
     """Basic support for logging of results."""
 
@@ -69,7 +72,7 @@ class ExtendedTestResult(Python27TestResult):
 
     def __init__(self):
         super(ExtendedTestResult, self).__init__()
-        self.current_tags = set()
+        self._tags = TagContext()
 
     def addError(self, test, err=None, details=None):
         self._was_successful = False
@@ -104,10 +107,14 @@ class ExtendedTestResult(Python27TestResult):
     def startTestRun(self):
         super(ExtendedTestResult, self).startTestRun()
         self._was_successful = True
+        self._tags = TagContext()
+
+    @property
+    def current_tags(self):
+        return self._tags.get_current_tags()
 
     def tags(self, new_tags, gone_tags):
-        self.current_tags.update(new_tags)
-        self.current_tags.difference_update(gone_tags)
+        self._tags.change_tags(new_tags, gone_tags)
         self._events.append(('tags', new_tags, gone_tags))
 
     def time(self, time):

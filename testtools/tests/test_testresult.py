@@ -197,6 +197,18 @@ class TagsContract(Python27Contract):
         result.tags(set(['foo']), set())
         self.assertEqual(set(['foo']), result.current_tags)
 
+    def test_removing_tags(self):
+        result = self.makeResult()
+        result.tags(set(['foo']), set())
+        result.tags(set(), set(['foo']))
+        self.assertEqual(set(), result.current_tags)
+
+    def test_startTestRun_resets_tags(self):
+        result = self.makeResult()
+        result.tags(set(['foo']), set())
+        result.startTestRun()
+        self.assertEqual(set(), result.current_tags)
+
 
 class DetailsContract(TagsContract):
     """Tests for the details API of TestResults."""

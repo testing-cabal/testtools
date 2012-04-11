@@ -484,7 +484,7 @@ class ExtendedToOriginalDecorator(object):
 
     def __init__(self, decorated):
         self.decorated = decorated
-        self._current_tags = set()
+        self._tags = TagContext()
 
     def __repr__(self):
         return '<%s %r>' % (self.__class__.__name__, self.decorated)
@@ -583,7 +583,8 @@ class ExtendedToOriginalDecorator(object):
 
     @property
     def current_tags(self):
-        return getattr(self.decorated, 'current_tags', self._current_tags)
+        return getattr(
+            self.decorated, 'current_tags', self._tags.get_current_tags())
 
     def done(self):
         try:
@@ -605,6 +606,7 @@ class ExtendedToOriginalDecorator(object):
         return self.decorated.startTest(test)
 
     def startTestRun(self):
+        self._tags = TagContext()
         try:
             return self.decorated.startTestRun()
         except AttributeError:
@@ -627,8 +629,7 @@ class ExtendedToOriginalDecorator(object):
         if method is not None:
             return method(new_tags, gone_tags)
         else:
-            self._current_tags.update(new_tags)
-            self._current_tags.difference_update(gone_tags)
+            self._tags.change_tags(new_tags, gone_tags)
 
     def time(self, a_datetime):
         method = getattr(self.decorated, 'time', None)
