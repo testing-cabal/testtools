@@ -17,6 +17,7 @@ __all__ = [
     'TestCase',
     'TestCommand',
     'TestResult',
+    'TestResultDecorator',
     'TextTestResult',
     'RunTest',
     'skip',
@@ -56,6 +57,7 @@ from testtools.testresult import (
     ExtendedToOriginalDecorator,
     MultiTestResult,
     TestResult,
+    TestResultDecorator,
     TextTestResult,
     ThreadsafeForwardingResult,
     )

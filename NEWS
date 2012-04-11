@@ -16,6 +16,12 @@ Changes
 * ``ErrorHolder`` is now just a function - all the logic is in ``PlaceHolder``.
   (Robert Collins)
 
+Improvements
+------------
+
+* ``TestResultDecorator`` brought over from subunit.  (Jonathan Lange)
+
+
 0.9.14
 ~~~~~~
 

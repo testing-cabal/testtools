@@ -6,6 +6,7 @@ __all__ = [
     'ExtendedToOriginalDecorator',
     'MultiTestResult',
     'TestResult',
+    'TestResultDecorator',
     'TextTestResult',
     'ThreadsafeForwardingResult',
     ]
@@ -14,6 +15,7 @@ from testtools.testresult.real import (
     ExtendedToOriginalDecorator,
     MultiTestResult,
     TestResult,
+    TestResultDecorator,
     TextTestResult,
     ThreadsafeForwardingResult,
     )
