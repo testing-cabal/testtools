@@ -186,7 +186,19 @@ class Python27Contract(Python26Contract):
         result.stopTestRun()
 
 
-class DetailsContract(Python27Contract):
+class TagsContract(Python27Contract):
+
+    def test_no_tags_by_default(self):
+        result = self.makeResult()
+        self.assertEqual(frozenset(), result.current_tags)
+
+    def test_adding_tags(self):
+        result = self.makeResult()
+        result.tags(set(['foo']), set())
+        self.assertEqual(set(['foo']), result.current_tags)
+
+
+class DetailsContract(TagsContract):
     """Tests for the details API of TestResults."""
 
     def test_addExpectedFailure_details(self):

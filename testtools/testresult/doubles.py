@@ -67,6 +67,10 @@ class Python27TestResult(Python26TestResult):
 class ExtendedTestResult(Python27TestResult):
     """A test result like the proposed extended unittest result API."""
 
+    def __init__(self):
+        super(ExtendedTestResult, self).__init__()
+        self.current_tags = set()
+
     def addError(self, test, err=None, details=None):
         self._was_successful = False
         self._events.append(('addError', test, err or details))
@@ -102,6 +106,8 @@ class ExtendedTestResult(Python27TestResult):
         self._was_successful = True
 
     def tags(self, new_tags, gone_tags):
+        self.current_tags.update(new_tags)
+        self.current_tags.difference_update(gone_tags)
         self._events.append(('tags', new_tags, gone_tags))
 
     def time(self, time):

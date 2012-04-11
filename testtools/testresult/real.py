@@ -16,6 +16,7 @@ import unittest
 
 from testtools.compat import all, str_is_unicode, _u
 from testtools.content import TracebackContent
+from testtools.tags import TagContext
 
 # From http://docs.python.org/library/datetime.html
 _ZERO = datetime.timedelta(0)
@@ -171,10 +172,10 @@ class TestResult(unittest.TestResult):
         super(TestResult, self).__init__()
         self.skip_reasons = {}
         self.__now = None
+        self._tags = TagContext()
         # -- Start: As per python 2.7 --
         self.expectedFailures = []
         self.unexpectedSuccesses = []
-        self.current_tags = set()
         # -- End:   As per python 2.7 --
 
     def stopTestRun(self):
@@ -182,6 +183,19 @@ class TestResult(unittest.TestResult):
 
         New in python 2.7
         """
+
+    @property
+    def current_tags(self):
+        """The currently set tags."""
+        return self._tags.get_current_tags()
+
+    def tags(self, new_tags, gone_tags):
+        """Add and remove tags from the test.
+
+        :param new_tags: A set of tags to be added to the stream.
+        :param gone_tags: A set of tags to be removed from the stream.
+        """
+        self._tags.change_tags(new_tags, gone_tags)
 
     def time(self, a_datetime):
         """Provide a timestamp to represent the current time.
@@ -204,21 +218,12 @@ class TestResult(unittest.TestResult):
         deprecated in favour of stopTestRun.
         """
 
-    def tags(self, new_tags, gone_tags):
-        """Add and remove tags from the test.
-
-        :param new_tags: A set of tags to be added to the stream.
-        :param gone_tags: A set of tags to be removed from the stream.
-        """
-        self.current_tags.update(new_tags)
-        self.current_tags.difference_update(gone_tags)
-
 
 class MultiTestResult(TestResult):
     """A test result that dispatches to many test results."""
 
     def __init__(self, *results):
-        TestResult.__init__(self)
+        super(MultiTestResult, self).__init__()
         self._results = list(map(ExtendedToOriginalDecorator, results))
 
     def __repr__(self):
@@ -256,12 +261,14 @@ class MultiTestResult(TestResult):
         return self._dispatch('addUnexpectedSuccess', test, details=details)
 
     def startTestRun(self):
+        super(MultiTestResult, self).startTestRun()
         return self._dispatch('startTestRun')
 
     def stopTestRun(self):
         return self._dispatch('stopTestRun')
 
     def tags(self, new_tags, gone_tags):
+        super(MultiTestResult, self).tags(new_tags, gone_tags)
         return self._dispatch('tags', new_tags, gone_tags)
 
     def time(self, a_datetime):
@@ -417,6 +424,7 @@ class ThreadsafeForwardingResult(TestResult):
             test, details=details)
 
     def startTestRun(self):
+        super(ThreadsafeForwardingResult, self).startTestRun()
         self.semaphore.acquire()
         try:
             self.result.startTestRun()
@@ -446,6 +454,7 @@ class ThreadsafeForwardingResult(TestResult):
 
     def tags(self, new_tags, gone_tags):
         """See `TestResult`."""
+        super(ThreadsafeForwardingResult, self).tags(new_tags, gone_tags)
         if self._test_start is not None:
             self._test_tags = self._merge_tags(
                 self._test_tags, new_tags, gone_tags)
@@ -475,6 +484,7 @@ class ExtendedToOriginalDecorator(object):
 
     def __init__(self, decorated):
         self.decorated = decorated
+        self._current_tags = set()
 
     def __repr__(self):
         return '<%s %r>' % (self.__class__.__name__, self.decorated)
@@ -571,6 +581,10 @@ class ExtendedToOriginalDecorator(object):
             _StringException(_details_to_str(details, special='traceback')),
             None)
 
+    @property
+    def current_tags(self):
+        return getattr(self.decorated, 'current_tags', self._current_tags)
+
     def done(self):
         try:
             return self.decorated.done()
@@ -610,9 +624,11 @@ class ExtendedToOriginalDecorator(object):
 
     def tags(self, new_tags, gone_tags):
         method = getattr(self.decorated, 'tags', None)
-        if method is None:
-            return
-        return method(new_tags, gone_tags)
+        if method is not None:
+            return method(new_tags, gone_tags)
+        else:
+            self._current_tags.update(new_tags)
+            self._current_tags.difference_update(gone_tags)
 
     def time(self, a_datetime):
         method = getattr(self.decorated, 'time', None)
