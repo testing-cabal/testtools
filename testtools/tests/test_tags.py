@@ -54,6 +54,14 @@ class TestTags(TestCase):
         self.assertEqual(set(), tags.get_current_tags(child))
         self.assertEqual(set(['foo']), tags.get_current_tags(parent))
 
+    def test_get_parent_context(self):
+        parent = tags.new_tag_context()
+        parent = tags.change_tags(parent, set(['foo']), set())
+        child = tags.new_tag_context(parent)
+        child = tags.change_tags(child, set(), set(['foo']))
+        child_parent = tags.get_parent_context(child)
+        self.assertEqual(parent, child_parent)
+
 
 def test_suite():
     from unittest import TestLoader
