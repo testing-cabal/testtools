@@ -10,19 +10,20 @@ from testtools import tags
 class TestTags(TestCase):
 
     def new_tag_context(self):
-        return tags.new_tag_context()
+        return tags.TagContext()
 
     def change_tags(self, tag_context, new_tags, gone_tags):
-        return tags.change_tags(tag_context, new_tags, gone_tags)
+        tag_context.change_tags(new_tags, gone_tags)
+        return tag_context
 
     def get_current_tags(self, tag_context):
-        return tags.get_current_tags(tag_context)
+        return tag_context.get_current_tags()
 
     def push_tag_context(self, parent):
-        return tags.new_tag_context(parent)
+        return tags.TagContext(parent)
 
     def pop_tag_context(self, child):
-        return tags.get_parent_context(child)
+        return child.get_parent()
 
     def test_no_tags(self):
         tag_context = self.new_tag_context()
@@ -76,25 +77,6 @@ class TestTags(TestCase):
         child = self.change_tags(child, set(), set(['foo']))
         child_parent = self.pop_tag_context(child)
         self.assertEqual(parent, child_parent)
-
-
-class TestTagContext(TestTags):
-
-    def new_tag_context(self):
-        return tags.TagContext()
-
-    def change_tags(self, tag_context, new_tags, gone_tags):
-        tag_context.change_tags(new_tags, gone_tags)
-        return tag_context
-
-    def get_current_tags(self, tag_context):
-        return tag_context.get_current_tags()
-
-    def push_tag_context(self, parent):
-        return tags.TagContext(parent)
-
-    def pop_tag_context(self, child):
-        return child.get_parent()
 
 
 def test_suite():
