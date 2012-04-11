@@ -249,7 +249,7 @@ class TagsContract(Python27Contract):
         self.assertEqual(set(), result.current_tags)
 
     def test_tags_removed_in_test_are_restored(self):
-        # Tags removed during tests are restorted once that test has finished.
+        # Tags removed during tests are restored once that test has finished.
         result = self.makeResult()
         result.startTestRun()
         result.tags(set(['foo']), set())
