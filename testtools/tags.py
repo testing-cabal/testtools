@@ -14,8 +14,7 @@ def get_current_tags(tag_context):
 
 
 def change_tags(tag_context, new_tags, gone_tags):
-    new_context = new_tag_context()
-    new_context.update(tag_context)
+    new_context = set(tag_context)
     new_context.update(new_tags)
     new_context.difference_update(gone_tags)
     return new_context
