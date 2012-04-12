@@ -134,12 +134,6 @@ class Python26Contract(object):
         result.stopTest(self)
         self.assertTrue(result.wasSuccessful())
 
-    def test_tags(self):
-        # tags() does not fail the test run.
-        result = self.makeResult()
-        result.startTest(self)
-        result.tags(set([]), set([]))
-
 
 class Python27Contract(Python26Contract):
 
@@ -192,7 +186,81 @@ class Python27Contract(Python26Contract):
         result.stopTestRun()
 
 
-class DetailsContract(Python27Contract):
+class TagsContract(Python27Contract):
+    """Tests to ensure correct tagging behaviour.
+
+    See the subunit docs for guidelines on how this is supposed to work.
+    """
+
+    def test_no_tags_by_default(self):
+        # Results initially have no tags.
+        result = self.makeResult()
+        self.assertEqual(frozenset(), result.current_tags)
+
+    def test_adding_tags(self):
+        # Tags are added using 'tags' and thus become visible in
+        # 'current_tags'.
+        result = self.makeResult()
+        result.tags(set(['foo']), set())
+        self.assertEqual(set(['foo']), result.current_tags)
+
+    def test_removing_tags(self):
+        # Tags are removed using 'tags'.
+        result = self.makeResult()
+        result.tags(set(['foo']), set())
+        result.tags(set(), set(['foo']))
+        self.assertEqual(set(), result.current_tags)
+
+    def test_startTestRun_resets_tags(self):
+        # startTestRun makes a new test run, and thus clears all the tags.
+        result = self.makeResult()
+        result.tags(set(['foo']), set())
+        result.startTestRun()
+        self.assertEqual(set(), result.current_tags)
+
+    def test_add_tags_within_test(self):
+        # Tags can be added after a test has run.
+        result = self.makeResult()
+        result.startTestRun()
+        result.tags(set(['foo']), set())
+        result.startTest(self)
+        result.tags(set(['bar']), set())
+        self.assertEqual(set(['foo', 'bar']), result.current_tags)
+
+    def test_tags_added_in_test_are_reverted(self):
+        # Tags added during a test run are then reverted once that test has
+        # finished.
+        result = self.makeResult()
+        result.startTestRun()
+        result.tags(set(['foo']), set())
+        result.startTest(self)
+        result.tags(set(['bar']), set())
+        result.addSuccess(self)
+        result.stopTest(self)
+        self.assertEqual(set(['foo']), result.current_tags)
+
+    def test_tags_removed_in_test(self):
+        # Tags can be removed during tests.
+        result = self.makeResult()
+        result.startTestRun()
+        result.tags(set(['foo']), set())
+        result.startTest(self)
+        result.tags(set(), set(['foo']))
+        self.assertEqual(set(), result.current_tags)
+
+    def test_tags_removed_in_test_are_restored(self):
+        # Tags removed during tests are restored once that test has finished.
+        result = self.makeResult()
+        result.startTestRun()
+        result.tags(set(['foo']), set())
+        result.startTest(self)
+        result.tags(set(), set(['foo']))
+        result.addSuccess(self)
+        result.stopTest(self)
+        self.assertEqual(set(['foo']), result.current_tags)
+
+
+class DetailsContract(TagsContract):
     """Tests for the details API of TestResults."""
 
     def test_addExpectedFailure_details(self):

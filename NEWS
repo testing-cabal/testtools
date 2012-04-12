@@ -16,6 +16,17 @@ Changes
 * ``ErrorHolder`` is now just a function - all the logic is in ``PlaceHolder``.
   (Robert Collins)
 
+* ``TestResult`` and all other ``TestResult``-like objects in testtools
+  distinguish between global tags and test-local tags, as per the subunit
+  specification.  (Jonathan Lange)
+
+Improvements
+------------
+
+* All ``TestResult`` wrappers now correctly forward ``current_tags`` from
+  their wrapped results, meaning that ``current_tags`` can always be relied
+  upon to return the currently active tags on a test result.
+
 0.9.14
 ~~~~~~
 
