@@ -189,7 +189,7 @@ class TestResult(unittest.TestResult):
         self._tags = TagContext(self._tags)
 
     def stopTest(self, test):
-        self._tags = self._tags.get_parent()
+        self._tags = self._tags.parent
         super(TestResult, self).stopTest(test)
 
     @property
@@ -627,7 +627,7 @@ class ExtendedToOriginalDecorator(object):
         return self.decorated.stop()
 
     def stopTest(self, test):
-        self._tags = self._tags.get_parent()
+        self._tags = self._tags.parent
         return self.decorated.stopTest(test)
 
     def stopTestRun(self):
