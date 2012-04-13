@@ -18,6 +18,7 @@ __all__ = [
     'TestCommand',
     'TestByTestResult',
     'TestResult',
+    'TestResultDecorator',
     'TextTestResult',
     'RunTest',
     'skip',
@@ -58,6 +59,7 @@ from testtools.testresult import (
     MultiTestResult,
     TestByTestResult,
     TestResult,
+    TestResultDecorator,
     TextTestResult,
     ThreadsafeForwardingResult,
     )

@@ -19,6 +19,7 @@ from testtools import (
     MultiTestResult,
     TestCase,
     TestResult,
+    TestResultDecorator,
     TestByTestResult,
     TextTestResult,
     ThreadsafeForwardingResult,
@@ -410,6 +411,14 @@ class TestAdaptedPython27TestResultContract(TestCase, DetailsContract):
 
     def makeResult(self):
         return ExtendedToOriginalDecorator(Python27TestResult())
+
+
+class TestTestResultDecoratorContract(TestCase, StartTestRunContract):
+
+    run_test_with = FullStackRunTest
+
+    def makeResult(self):
+        return TestResultDecorator(TestResult())
 
 
 class TestTestResult(TestCase):

@@ -7,6 +7,7 @@ __all__ = [
     'ExtendedToOriginalDecorator',
     'MultiTestResult',
     'TestResult',
+    'TestResultDecorator',
     'ThreadsafeForwardingResult',
     ]
 
@@ -654,6 +655,75 @@ class ExtendedToOriginalDecorator(object):
 
     def wasSuccessful(self):
         return self.decorated.wasSuccessful()
+
+
+class TestResultDecorator(object):
+    """General pass-through decorator.
+
+    This provides a base that other TestResults can inherit from to
+    gain basic forwarding functionality.
+    """
+
+    def __init__(self, decorated):
+        """Create a TestResultDecorator forwarding to decorated."""
+        self.decorated = decorated
+
+    def startTest(self, test):
+        return self.decorated.startTest(test)
+
+    def startTestRun(self):
+        return self.decorated.startTestRun()
+
+    def stopTest(self, test):
+        return self.decorated.stopTest(test)
+
+    def stopTestRun(self):
+        return self.decorated.stopTestRun()
+
+    def addError(self, test, err=None, details=None):
+        return self.decorated.addError(test, err, details=details)
+
+    def addFailure(self, test, err=None, details=None):
+        return self.decorated.addFailure(test, err, details=details)
+
+    def addSuccess(self, test, details=None):
+        return self.decorated.addSuccess(test, details=details)
+
+    def addSkip(self, test, reason=None, details=None):
+        return self.decorated.addSkip(test, reason, details=details)
+
+    def addExpectedFailure(self, test, err=None, details=None):
+        return self.decorated.addExpectedFailure(test, err, details=details)
+
+    def addUnexpectedSuccess(self, test, details=None):
+        return self.decorated.addUnexpectedSuccess(test, details=details)
+
+    def progress(self, offset, whence):
+        return self.decorated.progress(offset, whence)
+
+    def wasSuccessful(self):
+        return self.decorated.wasSuccessful()
+
+    @property
+    def current_tags(self):
+        return self.decorated.current_tags
+
+    @property
+    def shouldStop(self):
+        return self.decorated.shouldStop
+
+    def stop(self):
+        return self.decorated.stop()
+
+    @property
+    def testsRun(self):
+        return self.decorated.testsRun
+
+    def tags(self, new_tags, gone_tags):
+        return self.decorated.tags(new_tags, gone_tags)
+
+    def time(self, a_datetime):
+        return self.decorated.time(a_datetime)
 
 
 class TestByTestResult(TestResult):
