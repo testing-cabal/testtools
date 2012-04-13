@@ -858,7 +858,7 @@ class TestThreadSafeForwardingResult(TestCase):
         changing_tags = set(), set(['going'])
         expected = set(['present']), set(['missing', 'going'])
         self.assertEqual(
-            expected, result._merge_tags(current_tags, *changing_tags))
+            expected, result._merge_tags(current_tags, changing_tags))
 
     def test_merge_incoming_gone_tag_with_current_new_tag(self):
         # If one of the incoming "gone" tags is one of the existing "new"
@@ -868,7 +868,7 @@ class TestThreadSafeForwardingResult(TestCase):
         changing_tags = set(), set(['going'])
         expected = set(['present']), set(['missing', 'going'])
         self.assertEqual(
-            expected, result._merge_tags(current_tags, *changing_tags))
+            expected, result._merge_tags(current_tags, changing_tags))
 
     def test_merge_unseen_new_tag(self):
         [result], events = self.make_results(1)
@@ -876,7 +876,7 @@ class TestThreadSafeForwardingResult(TestCase):
         changing_tags = set(['coming']), set()
         expected = set(['coming', 'present']), set(['missing'])
         self.assertEqual(
-            expected, result._merge_tags(current_tags, *changing_tags))
+            expected, result._merge_tags(current_tags, changing_tags))
 
     def test_merge_incoming_new_tag_with_current_gone_tag(self):
         # If one of the incoming "new" tags is currently marked as "gone",
@@ -886,7 +886,7 @@ class TestThreadSafeForwardingResult(TestCase):
         changing_tags = set(['coming']), set()
         expected = set(['coming', 'present']), set(['missing'])
         self.assertEqual(
-            expected, result._merge_tags(current_tags, *changing_tags))
+            expected, result._merge_tags(current_tags, changing_tags))
 
 
 class TestExtendedToOriginalResultDecoratorBase(TestCase):

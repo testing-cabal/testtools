@@ -471,12 +471,12 @@ class ThreadsafeForwardingResult(TestResult):
         super(ThreadsafeForwardingResult, self).tags(new_tags, gone_tags)
         if self._test_start is not None:
             self._test_tags = self._merge_tags(
-                self._test_tags, new_tags, gone_tags)
+                self._test_tags, (new_tags, gone_tags))
         else:
             self._global_tags = self._merge_tags(
-                self._global_tags, new_tags, gone_tags)
+                self._global_tags, (new_tags, gone_tags))
 
-    def _merge_tags(self, existing, new_tags, gone_tags):
+    def _merge_tags(self, existing, (new_tags, gone_tags)):
         result_new = set(existing[0])
         result_gone = set(existing[1])
         result_new.update(new_tags)
