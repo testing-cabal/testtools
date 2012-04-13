@@ -850,21 +850,21 @@ class TestThreadSafeForwardingResult(TestCase):
             ], self.target._events)
 
     def test_tags_helper(self):
-       expected = set(['present']), set(['missing', 'going'])
-       input = set(['present']), set(['missing'])
-       self.assertEqual(
+        expected = set(['present']), set(['missing', 'going'])
+        input = set(['present']), set(['missing'])
+        self.assertEqual(
             expected, self.result1._merge_tags(input, set(), set(['going'])))
-       expected = set(['present']), set(['missing', 'going'])
-       input = set(['present', 'going']), set(['missing'])
-       self.assertEqual(
+        expected = set(['present']), set(['missing', 'going'])
+        input = set(['present', 'going']), set(['missing'])
+        self.assertEqual(
             expected, self.result1._merge_tags(input, set(), set(['going'])))
-       expected = set(['coming', 'present']), set(['missing'])
-       input = set(['present']), set(['missing'])
-       self.assertEqual(
+        expected = set(['coming', 'present']), set(['missing'])
+        input = set(['present']), set(['missing'])
+        self.assertEqual(
             expected, self.result1._merge_tags(input, set(['coming']), set()))
-       expected = set(['coming', 'present']), set(['missing'])
-       input = set(['present']), set(['coming', 'missing'])
-       self.assertEqual(
+        expected = set(['coming', 'present']), set(['missing'])
+        input = set(['present']), set(['coming', 'missing'])
+        self.assertEqual(
             expected, self.result1._merge_tags(input, set(['coming']), set()))
 
 
