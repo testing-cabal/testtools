@@ -865,6 +865,39 @@ class TestThreadSafeForwardingResult(TestCase):
             ('stopTest', self),
             ], events)
 
+    def test_only_one_test_at_a_time(self):
+        # Even if there are multiple ThreadsafeForwardingResults forwarding to
+        # the same target result, the target result only receives the complete
+        # events for one test at a time.
+        [result1, result2], events = self.make_results(2)
+        test1, test2 = self, make_test()
+        start_time1 = datetime.datetime.utcfromtimestamp(1.489)
+        end_time1 = datetime.datetime.utcfromtimestamp(2.476)
+        start_time2 = datetime.datetime.utcfromtimestamp(3.489)
+        end_time2 = datetime.datetime.utcfromtimestamp(4.489)
+        result1.time(start_time1)
+        result2.time(start_time2)
+        result1.startTest(test1)
+        result2.startTest(test2)
+        result1.time(end_time1)
+        result2.time(end_time2)
+        result2.addSuccess(test2)
+        result1.addSuccess(test1)
+        self.assertEqual([
+            # test2 finishes first, and so is flushed first.
+            ('time', start_time2),
+            ('startTest', test2),
+            ('time', end_time2),
+            ('addSuccess', test2),
+            ('stopTest', test2),
+            # test1 finishes next, and thus follows.
+            ('time', start_time1),
+            ('startTest', test1),
+            ('time', end_time1),
+            ('addSuccess', test1),
+            ('stopTest', test1),
+            ], events)
+
 
 class TestMergeTags(TestCase):
 
