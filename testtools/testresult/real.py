@@ -387,7 +387,7 @@ class ThreadsafeForwardingResult(TestResult):
     def __repr__(self):
         return '<%s %r>' % (self.__class__.__name__, self.result)
 
-    def _not_empty_tags(self, tags):
+    def _any_tags(self, tags):
         return bool(tags[0] or tags[1])
 
     def _add_result_with_semaphore(self, method, test, *args, **kwargs):
@@ -395,19 +395,19 @@ class ThreadsafeForwardingResult(TestResult):
         self.semaphore.acquire()
         try:
             self.result.time(self._test_start)
-            if self._not_empty_tags(self._global_tags):
+            if self._any_tags(self._global_tags):
                 self.result.tags(*self._global_tags)
             try:
                 self.result.startTest(test)
                 self.result.time(now)
-                if self._not_empty_tags(self._test_tags):
+                if self._any_tags(self._test_tags):
                     self.result.tags(*self._test_tags)
                 try:
                     method(test, *args, **kwargs)
                 finally:
                     self.result.stopTest(test)
             finally:
-                if self._not_empty_tags(self._global_tags):
+                if self._any_tags(self._global_tags):
                     self.result.tags(*reversed(self._global_tags))
         finally:
             self.semaphore.release()
