@@ -20,12 +20,17 @@ Changes
   distinguish between global tags and test-local tags, as per the subunit
   specification.  (Jonathan Lange)
 
+
 Improvements
 ------------
 
 * All ``TestResult`` wrappers now correctly forward ``current_tags`` from
   their wrapped results, meaning that ``current_tags`` can always be relied
   upon to return the currently active tags on a test result.
+
+* ``TestByTestResult``, a ``TestResult`` that calls a method once per test,
+  added.  (Jonathan Lange)
+
 
 0.9.14
 ~~~~~~
