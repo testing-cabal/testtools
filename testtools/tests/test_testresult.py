@@ -833,6 +833,25 @@ class TestThreadSafeForwardingResult(TestCase):
              ('tags', set(['dog', 'bar', 'baz']), set(['cat', 'foo', 'qux'])),
              ], events)
 
+    def test_local_tags(self):
+        # Any tags set within a test context are forwarded in that test
+        # context when the result is finally forwarded.
+        [result], events = self.make_results(1)
+        result.time(1)
+        result.startTest(self)
+        result.tags(set(['foo']), set([]))
+        result.tags(set(), set(['bar']))
+        result.time(2)
+        result.addSuccess(self)
+        self.assertEqual(
+            [('time', 1),
+             ('startTest', self),
+             ('time', 2),
+             ('tags', set(['foo']), set(['bar'])),
+             ('addSuccess', self),
+             ('stopTest', self),
+             ], events)
+
     def test_startTestRun(self):
         [result1, result2], events = self.make_results(2)
         result1.startTestRun()
