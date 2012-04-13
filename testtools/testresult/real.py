@@ -388,7 +388,7 @@ class ThreadsafeForwardingResult(TestResult):
         return '<%s %r>' % (self.__class__.__name__, self.result)
 
     def _not_empty_tags(self, tags):
-        return bool(tags[0] and tags[1])
+        return bool(tags[0] or tags[1])
 
     def _add_result_with_semaphore(self, method, test, *args, **kwargs):
         now = self._now()

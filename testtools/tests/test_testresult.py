@@ -793,25 +793,44 @@ class TestThreadSafeForwardingResult(TestCase):
         result.tags(set(['foo']), set(['bar']))
         self.assertEqual([], events)
 
-    def test_global_tags(self):
+    def test_global_tags_simple(self):
         # Tags specified outside of a test result are global. When a test's
         # results are finally forwarded, we send through these global tags
         # *as* global tags, and also send a tags command at the end of the
         # test that undoes it.
         [result], events = self.make_results(1)
-        result.tags(set(['foo']), set(['bar']))
+        result.tags(set(['foo']), set())
         result.time(1)
         result.startTest(self)
         result.time(2)
         result.addSuccess(self)
         self.assertEqual(
             [('time', 1),
-             ('tags', set(['foo']), set(['bar'])),
+             ('tags', set(['foo']), set()),
              ('startTest', self),
              ('time', 2),
              ('addSuccess', self),
              ('stopTest', self),
-             ('tags', set(['bar']), set(['foo'])),
+             ('tags', set(), set(['foo'])),
+             ], events)
+
+    def test_global_tags_complex(self):
+        # Multiple calls to tags() in a global context are merged together.
+        [result], events = self.make_results(1)
+        result.tags(set(['foo', 'bar']), set(['baz', 'qux']))
+        result.tags(set(['cat', 'qux']), set(['bar', 'dog']))
+        result.time(1)
+        result.startTest(self)
+        result.time(2)
+        result.addSuccess(self)
+        self.assertEqual(
+            [('time', 1),
+             ('tags', set(['cat', 'foo', 'qux']), set(['dog', 'bar', 'baz'])),
+             ('startTest', self),
+             ('time', 2),
+             ('addSuccess', self),
+             ('stopTest', self),
+             ('tags', set(['dog', 'bar', 'baz']), set(['cat', 'foo', 'qux'])),
              ], events)
 
     def test_startTestRun(self):
