@@ -816,6 +816,9 @@ class TestThreadSafeForwardingResult(TestCase):
 
     def test_global_tags_complex(self):
         # Multiple calls to tags() in a global context are merged together.
+        # Strictly speaking they could also be forwarded as multiple tags()
+        # calls.  The key thing is that they are not sent until the test is
+        # done.
         [result], events = self.make_results(1)
         result.tags(set(['foo', 'bar']), set(['baz', 'qux']))
         result.tags(set(['cat', 'qux']), set(['bar', 'dog']))
@@ -835,7 +838,9 @@ class TestThreadSafeForwardingResult(TestCase):
 
     def test_local_tags(self):
         # Any tags set within a test context are forwarded in that test
-        # context when the result is finally forwarded.
+        # context when the result is finally forwarded.  This means that the
+        # tags for the test are part of the atomic message communicating
+        # everything about that test.
         [result], events = self.make_results(1)
         result.time(1)
         result.startTest(self)
@@ -853,18 +858,24 @@ class TestThreadSafeForwardingResult(TestCase):
              ], events)
 
     def test_startTestRun(self):
+        # Calls to startTestRun are not batched, because we are only
+        # interested in sending tests atomically, not the whole run.
         [result1, result2], events = self.make_results(2)
         result1.startTestRun()
         result2.startTestRun()
         self.assertEqual(["startTestRun", "startTestRun"], events)
 
     def test_stopTestRun(self):
+        # Calls to stopTestRun are not batched, because we are only
+        # interested in sending tests atomically, not the whole run.
         [result1, result2], events = self.make_results(2)
         result1.stopTestRun()
         result2.stopTestRun()
         self.assertEqual(["stopTestRun", "stopTestRun"], events)
 
-    def test_forward_add_error(self):
+    def test_forward_addError(self):
+        # Once we receive an addError event, we forward all of the events for
+        # that test, as we now know that test is complete.
         [result], events = self.make_results(1)
         exc_info = make_exception_info(RuntimeError, 'error')
         start_time = datetime.datetime.utcfromtimestamp(1.489)
@@ -881,7 +892,9 @@ class TestThreadSafeForwardingResult(TestCase):
             ('stopTest', self),
             ], events)
 
-    def test_forward_add_failure(self):
+    def test_forward_addFailure(self):
+        # Once we receive an addFailure event, we forward all of the events
+        # for that test, as we now know that test is complete.
         [result], events = self.make_results(1)
         exc_info = make_exception_info(AssertionError, 'failure')
         start_time = datetime.datetime.utcfromtimestamp(2.489)
@@ -898,7 +911,9 @@ class TestThreadSafeForwardingResult(TestCase):
             ('stopTest', self),
             ], events)
 
-    def test_forward_add_skip(self):
+    def test_forward_addSkip(self):
+        # Once we receive an addSkip event, we forward all of the events for
+        # that test, as we now know that test is complete.
         [result], events = self.make_results(1)
         reason = _u("Skipped for some reason")
         start_time = datetime.datetime.utcfromtimestamp(4.489)
@@ -915,7 +930,9 @@ class TestThreadSafeForwardingResult(TestCase):
             ('stopTest', self),
             ], events)
 
-    def test_forward_add_success(self):
+    def test_forward_addSuccess(self):
+        # Once we receive an addSuccess event, we forward all of the events
+        # for that test, as we now know that test is complete.
         [result], events = self.make_results(1)
         start_time = datetime.datetime.utcfromtimestamp(6.489)
         end_time = datetime.datetime.utcfromtimestamp(7.476)

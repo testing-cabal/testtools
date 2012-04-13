@@ -356,26 +356,30 @@ class TextTestResult(TestResult):
 class ThreadsafeForwardingResult(TestResult):
     """A TestResult which ensures the target does not receive mixed up calls.
 
-    This is used when receiving test results from multiple sources, and batches
-    up all the activity for a single test into a thread-safe batch where all
-    other ThreadsafeForwardingResult objects sharing the same semaphore will be
-    locked out.
+    Multiple ``ThreadsafeForwardingResult``s can forward to the same target
+    result, and that target result will only ever receive the complete set of
+    events for one test at a time.
 
-    Typical use of ThreadsafeForwardingResult involves creating one
-    ThreadsafeForwardingResult per thread in a ConcurrentTestSuite. These
-    forward to the TestResult that the ConcurrentTestSuite run method was
-    called with.
+    This is enforced using a semaphore, which further guarantees that tests
+    will be sent atomically even if the ``ThreadsafeForwardingResult``s are in
+    different threads.
 
-    target.done() is called once for each ThreadsafeForwardingResult that
-    forwards to the same target. If the target's done() takes special action,
-    care should be taken to accommodate this.
+    ``ThreadsafeForwardingResult`` is typically used by
+    ``ConcurrentTestSuite``, which creates one ``ThreadsafeForwardingResult``
+    per thread, each of which wraps of the TestResult that
+    ``ConcurrentTestSuite.run()`` is called with.
+
+    target.startTestRun() and target.stopTestRun() are called once for each
+    ThreadsafeForwardingResult that forwards to the same target. If the target
+    takes special action on these events, it should take care to accommodate
+    this.
     """
 
     def __init__(self, target, semaphore):
         """Create a ThreadsafeForwardingResult forwarding to target.
 
-        :param target: A TestResult.
-        :param semaphore: A threading.Semaphore with limit 1.
+        :param target: A ``TestResult``.
+        :param semaphore: A ``threading.Semaphore`` with limit 1.
         """
         TestResult.__init__(self)
         self.result = ExtendedToOriginalDecorator(target)
