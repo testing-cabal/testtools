@@ -6,6 +6,7 @@ __metaclass__ = type
 __all__ = [
     'ExtendedToOriginalDecorator',
     'MultiTestResult',
+    'Tagger',
     'TestResult',
     'TestResultDecorator',
     'ThreadsafeForwardingResult',
@@ -724,6 +725,24 @@ class TestResultDecorator(object):
 
     def time(self, a_datetime):
         return self.decorated.time(a_datetime)
+
+
+class Tagger(TestResultDecorator):
+    """Tag each test individually."""
+
+    def __init__(self, decorated, new_tags, gone_tags):
+        """Wrap 'decorated' such that each test is tagged.
+
+        :param new_tags: Tags to be added for each test.
+        :param gone_tags: Tags to be removed for each test.
+        """
+        super(Tagger, self).__init__(decorated)
+        self._new_tags = set(new_tags)
+        self._gone_tags = set(gone_tags)
+
+    def startTest(self, test):
+        super(Tagger, self).startTest(test)
+        self.tags(self._new_tags, self._gone_tags)
 
 
 class TestByTestResult(TestResult):

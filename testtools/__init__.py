@@ -14,6 +14,7 @@ __all__ = [
     'MultiTestResult',
     'PlaceHolder',
     'run_test_with',
+    'Tagger',
     'TestCase',
     'TestCommand',
     'TestByTestResult',
@@ -57,6 +58,7 @@ from testtools.testcase import (
 from testtools.testresult import (
     ExtendedToOriginalDecorator,
     MultiTestResult,
+    Tagger,
     TestByTestResult,
     TestResult,
     TestResultDecorator,
