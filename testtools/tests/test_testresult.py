@@ -798,55 +798,69 @@ class TestThreadSafeForwardingResult(TestCase):
         result2.stopTestRun()
         self.assertEqual(["stopTestRun", "stopTestRun"], events)
 
-    def test_forwarding_methods(self):
-        # error, failure, skip and success are forwarded in batches.
+    def test_forward_add_error(self):
         [result], events = self.make_results(1)
-        exc_info1 = make_exception_info(RuntimeError, 'error')
-        starttime1 = datetime.datetime.utcfromtimestamp(1.489)
-        endtime1 = datetime.datetime.utcfromtimestamp(51.476)
-        result.time(starttime1)
+        exc_info = make_exception_info(RuntimeError, 'error')
+        start_time = datetime.datetime.utcfromtimestamp(1.489)
+        end_time = datetime.datetime.utcfromtimestamp(51.476)
+        result.time(start_time)
         result.startTest(self)
-        result.time(endtime1)
-        result.addError(self, exc_info1)
-        exc_info2 = make_exception_info(AssertionError, 'failure')
-        starttime2 = datetime.datetime.utcfromtimestamp(2.489)
-        endtime2 = datetime.datetime.utcfromtimestamp(3.476)
-        result.time(starttime2)
-        result.startTest(self)
-        result.time(endtime2)
-        result.addFailure(self, exc_info2)
-        reason = _u("Skipped for some reason")
-        starttime3 = datetime.datetime.utcfromtimestamp(4.489)
-        endtime3 = datetime.datetime.utcfromtimestamp(5.476)
-        result.time(starttime3)
-        result.startTest(self)
-        result.time(endtime3)
-        result.addSkip(self, reason)
-        starttime4 = datetime.datetime.utcfromtimestamp(6.489)
-        endtime4 = datetime.datetime.utcfromtimestamp(7.476)
-        result.time(starttime4)
-        result.startTest(self)
-        result.time(endtime4)
-        result.addSuccess(self)
+        result.time(end_time)
+        result.addError(self, exc_info)
         self.assertEqual([
-            ('time', starttime1),
+            ('time', start_time),
             ('startTest', self),
-            ('time', endtime1),
-            ('addError', self, exc_info1),
+            ('time', end_time),
+            ('addError', self, exc_info),
             ('stopTest', self),
-            ('time', starttime2),
+            ], events)
+
+    def test_forward_add_failure(self):
+        [result], events = self.make_results(1)
+        exc_info = make_exception_info(AssertionError, 'failure')
+        start_time = datetime.datetime.utcfromtimestamp(2.489)
+        end_time = datetime.datetime.utcfromtimestamp(3.476)
+        result.time(start_time)
+        result.startTest(self)
+        result.time(end_time)
+        result.addFailure(self, exc_info)
+        self.assertEqual([
+            ('time', start_time),
             ('startTest', self),
-            ('time', endtime2),
-            ('addFailure', self, exc_info2),
+            ('time', end_time),
+            ('addFailure', self, exc_info),
             ('stopTest', self),
-            ('time', starttime3),
+            ], events)
+
+    def test_forward_add_skip(self):
+        [result], events = self.make_results(1)
+        reason = _u("Skipped for some reason")
+        start_time = datetime.datetime.utcfromtimestamp(4.489)
+        end_time = datetime.datetime.utcfromtimestamp(5.476)
+        result.time(start_time)
+        result.startTest(self)
+        result.time(end_time)
+        result.addSkip(self, reason)
+        self.assertEqual([
+            ('time', start_time),
             ('startTest', self),
-            ('time', endtime3),
+            ('time', end_time),
             ('addSkip', self, reason),
             ('stopTest', self),
-            ('time', starttime4),
+            ], events)
+
+    def test_forward_add_success(self):
+        [result], events = self.make_results(1)
+        start_time = datetime.datetime.utcfromtimestamp(6.489)
+        end_time = datetime.datetime.utcfromtimestamp(7.476)
+        result.time(start_time)
+        result.startTest(self)
+        result.time(end_time)
+        result.addSuccess(self)
+        self.assertEqual([
+            ('time', start_time),
             ('startTest', self),
-            ('time', endtime4),
+            ('time', end_time),
             ('addSuccess', self),
             ('stopTest', self),
             ], events)
