@@ -786,6 +786,34 @@ class TestThreadSafeForwardingResult(TestCase):
         result.stopTest(self)
         self.assertEqual([], events)
 
+    def test_tags_not_forwarded(self):
+        # Tags need to be batched for each test, so they aren't forwarded
+        # until a test runs.
+        [result], events = self.make_results(1)
+        result.tags(set(['foo']), set(['bar']))
+        self.assertEqual([], events)
+
+    def test_global_tags(self):
+        # Tags specified outside of a test result are global. When a test's
+        # results are finally forwarded, we send through these global tags
+        # *as* global tags, and also send a tags command at the end of the
+        # test that undoes it.
+        [result], events = self.make_results(1)
+        result.tags(set(['foo']), set(['bar']))
+        result.time(1)
+        result.startTest(self)
+        result.time(2)
+        result.addSuccess(self)
+        self.assertEqual(
+            [('time', 1),
+             ('tags', set(['foo']), set(['bar'])),
+             ('startTest', self),
+             ('time', 2),
+             ('addSuccess', self),
+             ('stopTest', self),
+             ('tags', set(['bar']), set(['foo'])),
+             ], events)
+
     def test_startTestRun(self):
         [result1, result2], events = self.make_results(2)
         result1.startTestRun()
