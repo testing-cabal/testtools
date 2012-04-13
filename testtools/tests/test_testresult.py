@@ -769,39 +769,37 @@ UNEXPECTED SUCCESS: testtools.tests.test_testresult.Test.succeeded
 class TestThreadSafeForwardingResult(TestCase):
     """Tests for `TestThreadSafeForwardingResult`."""
 
-    def setUp(self):
-        super(TestThreadSafeForwardingResult, self).setUp()
-        self.target = LoggingResult([])
-
     def make_results(self, n):
+        events = []
+        target = LoggingResult(events)
         semaphore = threading.Semaphore(1)
         return [
-            ThreadsafeForwardingResult(self.target, semaphore)
-            for i in range(n)]
+            ThreadsafeForwardingResult(target, semaphore)
+            for i in range(n)], events
 
     def test_nonforwarding_methods(self):
         # startTest and stopTest are not forwarded because they need to be
         # batched.
-        [result] = self.make_results(1)
+        [result], events = self.make_results(1)
         result.startTest(self)
         result.stopTest(self)
-        self.assertEqual([], self.target._events)
+        self.assertEqual([], events)
 
     def test_startTestRun(self):
-        [result1, result2] = self.make_results(2)
+        [result1, result2], events = self.make_results(2)
         result1.startTestRun()
         result2.startTestRun()
-        self.assertEqual(["startTestRun", "startTestRun"], self.target._events)
+        self.assertEqual(["startTestRun", "startTestRun"], events)
 
     def test_stopTestRun(self):
-        [result1, result2] = self.make_results(2)
+        [result1, result2], events = self.make_results(2)
         result1.stopTestRun()
         result2.stopTestRun()
-        self.assertEqual(["stopTestRun", "stopTestRun"], self.target._events)
+        self.assertEqual(["stopTestRun", "stopTestRun"], events)
 
     def test_forwarding_methods(self):
         # error, failure, skip and success are forwarded in batches.
-        [result] = self.make_results(1)
+        [result], events = self.make_results(1)
         exc_info1 = make_exception_info(RuntimeError, 'error')
         starttime1 = datetime.datetime.utcfromtimestamp(1.489)
         endtime1 = datetime.datetime.utcfromtimestamp(51.476)
@@ -850,10 +848,10 @@ class TestThreadSafeForwardingResult(TestCase):
             ('time', endtime4),
             ('addSuccess', self),
             ('stopTest', self),
-            ], self.target._events)
+            ], events)
 
     def test_tags_helper(self):
-        [result] = self.make_results(1)
+        [result], events = self.make_results(1)
         expected = set(['present']), set(['missing', 'going'])
         input = set(['present']), set(['missing'])
         self.assertEqual(
