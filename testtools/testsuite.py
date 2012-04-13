@@ -46,6 +46,10 @@ class ConcurrentTestSuite(unittest.TestSuite):
         super(ConcurrentTestSuite, self).__init__([suite])
         self.make_tests = make_tests
 
+    def _wrap_result(self, thread_safe_result, thread_number):
+        """Override this if you want to wrap the per-thread result."""
+        return thread_safe_result
+
     def run(self, result):
         """Run the tests concurrently.
 
@@ -63,12 +67,10 @@ class ConcurrentTestSuite(unittest.TestSuite):
         try:
             threads = {}
             queue = Queue()
-            result_semaphore = threading.Semaphore(1)
-            for test in tests:
-                # XXX: Put this in self._wrap_result.  Pass in which test it
-                # is.
-                process_result = testtools.ThreadsafeForwardingResult(result,
-                    result_semaphore)
+            semaphore = threading.Semaphore(1)
+            for i, test in enumerate(tests):
+                process_result = self._wrap_result(
+                    testtools.ThreadsafeForwardingResult(result, semaphore), i)
                 reader_thread = threading.Thread(
                     target=self._run_test, args=(test, process_result, queue))
                 threads[test] = reader_thread, process_result

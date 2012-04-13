@@ -4,12 +4,14 @@
 
 __metaclass__ = type
 
+import threading
 import unittest
 
 from testtools import (
     ConcurrentTestSuite,
     iterate_tests,
     TestCase,
+    ThreadsafeForwardingResult,
     )
 from testtools.helpers import try_import
 from testtools.testsuite import FixtureSuite
@@ -41,6 +43,28 @@ class TestConcurrentTestSuiteRun(TestCase):
         self.assertIsInstance(test1, Sample)
         self.assertIsInstance(test2, Sample)
         self.assertNotEqual(test1.id(), test2.id())
+
+    def test_wrap_result(self):
+        # ConcurrentTestSuite has a hook for wrapping the per-thread result.
+        wrap_log = []
+        class MyConcurrentSuite(ConcurrentTestSuite):
+            def _wrap_result(self, thread_safe_result, thread_number):
+                wrap_log.append(
+                    (thread_safe_result.result.decorated, thread_number))
+                return thread_safe_result
+        result_log = []
+        result = LoggingResult(result_log)
+        test1 = Sample('test_method1')
+        test2 = Sample('test_method2')
+        original_suite = unittest.TestSuite([test1, test2])
+        suite = MyConcurrentSuite(original_suite, self.split_suite)
+        suite.run(result)
+        self.assertEqual(
+            [(result, 0),
+             (result, 1),
+             ], wrap_log)
+        # Smoke test to make sure everything ran OK.
+        self.assertNotEqual([], result_log)
 
     def split_suite(self, suite):
         tests = list(iterate_tests(suite))
