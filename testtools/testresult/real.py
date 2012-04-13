@@ -470,20 +470,21 @@ class ThreadsafeForwardingResult(TestResult):
         """See `TestResult`."""
         super(ThreadsafeForwardingResult, self).tags(new_tags, gone_tags)
         if self._test_start is not None:
-            self._test_tags = self._merge_tags(
+            self._test_tags = _merge_tags(
                 self._test_tags, (new_tags, gone_tags))
         else:
-            self._global_tags = self._merge_tags(
+            self._global_tags = _merge_tags(
                 self._global_tags, (new_tags, gone_tags))
 
-    def _merge_tags(self, existing, (new_tags, gone_tags)):
-        result_new = set(existing[0])
-        result_gone = set(existing[1])
-        result_new.update(new_tags)
-        result_new.difference_update(gone_tags)
-        result_gone.update(gone_tags)
-        result_gone.difference_update(new_tags)
-        return result_new, result_gone
+
+def _merge_tags(existing, (new_tags, gone_tags)):
+    result_new = set(existing[0])
+    result_gone = set(existing[1])
+    result_new.update(new_tags)
+    result_new.difference_update(gone_tags)
+    result_gone.update(gone_tags)
+    result_gone.difference_update(new_tags)
+    return result_new, result_gone
 
 
 class ExtendedToOriginalDecorator(object):
