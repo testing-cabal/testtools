@@ -850,24 +850,43 @@ class TestThreadSafeForwardingResult(TestCase):
             ('stopTest', self),
             ], events)
 
-    def test_tags_helper(self):
+    def test_merge_unseen_gone_tag(self):
+        # If an incoming "gone" tag isn't currently tagged one way or the
+        # other, add it to the "gone" tags.
         [result], events = self.make_results(1)
+        current_tags = set(['present']), set(['missing'])
+        changing_tags = set(), set(['going'])
         expected = set(['present']), set(['missing', 'going'])
-        input = set(['present']), set(['missing'])
         self.assertEqual(
-            expected, result._merge_tags(input, set(), set(['going'])))
+            expected, result._merge_tags(current_tags, *changing_tags))
+
+    def test_merge_incoming_gone_tag_with_current_new_tag(self):
+        # If one of the incoming "gone" tags is one of the existing "new"
+        # tags, then it overrides the "new" tag, leaving it marked as "gone".
+        [result], events = self.make_results(1)
+        current_tags = set(['present', 'going']), set(['missing'])
+        changing_tags = set(), set(['going'])
         expected = set(['present']), set(['missing', 'going'])
-        input = set(['present', 'going']), set(['missing'])
         self.assertEqual(
-            expected, result._merge_tags(input, set(), set(['going'])))
+            expected, result._merge_tags(current_tags, *changing_tags))
+
+    def test_merge_unseen_new_tag(self):
+        [result], events = self.make_results(1)
+        current_tags = set(['present']), set(['missing'])
+        changing_tags = set(['coming']), set()
         expected = set(['coming', 'present']), set(['missing'])
-        input = set(['present']), set(['missing'])
         self.assertEqual(
-            expected, result._merge_tags(input, set(['coming']), set()))
+            expected, result._merge_tags(current_tags, *changing_tags))
+
+    def test_merge_incoming_new_tag_with_current_gone_tag(self):
+        # If one of the incoming "new" tags is currently marked as "gone",
+        # then it overrides the "gone" tag, leaving it marked as "new".
+        [result], events = self.make_results(1)
+        current_tags = set(['present']), set(['coming', 'missing'])
+        changing_tags = set(['coming']), set()
         expected = set(['coming', 'present']), set(['missing'])
-        input = set(['present']), set(['coming', 'missing'])
         self.assertEqual(
-            expected, result._merge_tags(input, set(['coming']), set()))
+            expected, result._merge_tags(current_tags, *changing_tags))
 
 
 class TestExtendedToOriginalResultDecoratorBase(TestCase):
