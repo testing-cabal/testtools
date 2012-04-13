@@ -65,6 +65,8 @@ class ConcurrentTestSuite(unittest.TestSuite):
             queue = Queue()
             result_semaphore = threading.Semaphore(1)
             for test in tests:
+                # XXX: Put this in self._wrap_result.  Pass in which test it
+                # is.
                 process_result = testtools.ThreadsafeForwardingResult(result,
                     result_semaphore)
                 reader_thread = threading.Thread(
