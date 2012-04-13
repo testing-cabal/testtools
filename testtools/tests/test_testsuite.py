@@ -4,14 +4,12 @@
 
 __metaclass__ = type
 
-import threading
 import unittest
 
 from testtools import (
     ConcurrentTestSuite,
     iterate_tests,
     TestCase,
-    ThreadsafeForwardingResult,
     )
 from testtools.helpers import try_import
 from testtools.testsuite import FixtureSuite
