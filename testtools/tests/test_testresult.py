@@ -771,61 +771,64 @@ class TestThreadSafeForwardingResult(TestCase):
 
     def setUp(self):
         super(TestThreadSafeForwardingResult, self).setUp()
-        self.result_semaphore = threading.Semaphore(1)
         self.target = LoggingResult([])
-        self.result1 = ThreadsafeForwardingResult(self.target,
-            self.result_semaphore)
+
+    def make_results(self, n):
+        semaphore = threading.Semaphore(1)
+        return [
+            ThreadsafeForwardingResult(self.target, semaphore)
+            for i in range(n)]
 
     def test_nonforwarding_methods(self):
         # startTest and stopTest are not forwarded because they need to be
         # batched.
-        self.result1.startTest(self)
-        self.result1.stopTest(self)
+        [result] = self.make_results(1)
+        result.startTest(self)
+        result.stopTest(self)
         self.assertEqual([], self.target._events)
 
     def test_startTestRun(self):
-        self.result1.startTestRun()
-        self.result2 = ThreadsafeForwardingResult(self.target,
-            self.result_semaphore)
-        self.result2.startTestRun()
+        [result1, result2] = self.make_results(2)
+        result1.startTestRun()
+        result2.startTestRun()
         self.assertEqual(["startTestRun", "startTestRun"], self.target._events)
 
     def test_stopTestRun(self):
-        self.result1.stopTestRun()
-        self.result2 = ThreadsafeForwardingResult(self.target,
-            self.result_semaphore)
-        self.result2.stopTestRun()
+        [result1, result2] = self.make_results(2)
+        result1.stopTestRun()
+        result2.stopTestRun()
         self.assertEqual(["stopTestRun", "stopTestRun"], self.target._events)
 
     def test_forwarding_methods(self):
         # error, failure, skip and success are forwarded in batches.
+        [result] = self.make_results(1)
         exc_info1 = make_exception_info(RuntimeError, 'error')
         starttime1 = datetime.datetime.utcfromtimestamp(1.489)
         endtime1 = datetime.datetime.utcfromtimestamp(51.476)
-        self.result1.time(starttime1)
-        self.result1.startTest(self)
-        self.result1.time(endtime1)
-        self.result1.addError(self, exc_info1)
+        result.time(starttime1)
+        result.startTest(self)
+        result.time(endtime1)
+        result.addError(self, exc_info1)
         exc_info2 = make_exception_info(AssertionError, 'failure')
         starttime2 = datetime.datetime.utcfromtimestamp(2.489)
         endtime2 = datetime.datetime.utcfromtimestamp(3.476)
-        self.result1.time(starttime2)
-        self.result1.startTest(self)
-        self.result1.time(endtime2)
-        self.result1.addFailure(self, exc_info2)
+        result.time(starttime2)
+        result.startTest(self)
+        result.time(endtime2)
+        result.addFailure(self, exc_info2)
         reason = _u("Skipped for some reason")
         starttime3 = datetime.datetime.utcfromtimestamp(4.489)
         endtime3 = datetime.datetime.utcfromtimestamp(5.476)
-        self.result1.time(starttime3)
-        self.result1.startTest(self)
-        self.result1.time(endtime3)
-        self.result1.addSkip(self, reason)
+        result.time(starttime3)
+        result.startTest(self)
+        result.time(endtime3)
+        result.addSkip(self, reason)
         starttime4 = datetime.datetime.utcfromtimestamp(6.489)
         endtime4 = datetime.datetime.utcfromtimestamp(7.476)
-        self.result1.time(starttime4)
-        self.result1.startTest(self)
-        self.result1.time(endtime4)
-        self.result1.addSuccess(self)
+        result.time(starttime4)
+        result.startTest(self)
+        result.time(endtime4)
+        result.addSuccess(self)
         self.assertEqual([
             ('time', starttime1),
             ('startTest', self),
@@ -850,22 +853,23 @@ class TestThreadSafeForwardingResult(TestCase):
             ], self.target._events)
 
     def test_tags_helper(self):
+        [result] = self.make_results(1)
         expected = set(['present']), set(['missing', 'going'])
         input = set(['present']), set(['missing'])
         self.assertEqual(
-            expected, self.result1._merge_tags(input, set(), set(['going'])))
+            expected, result._merge_tags(input, set(), set(['going'])))
         expected = set(['present']), set(['missing', 'going'])
         input = set(['present', 'going']), set(['missing'])
         self.assertEqual(
-            expected, self.result1._merge_tags(input, set(), set(['going'])))
+            expected, result._merge_tags(input, set(), set(['going'])))
         expected = set(['coming', 'present']), set(['missing'])
         input = set(['present']), set(['missing'])
         self.assertEqual(
-            expected, self.result1._merge_tags(input, set(['coming']), set()))
+            expected, result._merge_tags(input, set(['coming']), set()))
         expected = set(['coming', 'present']), set(['missing'])
         input = set(['present']), set(['coming', 'missing'])
         self.assertEqual(
-            expected, self.result1._merge_tags(input, set(['coming']), set()))
+            expected, result._merge_tags(input, set(['coming']), set()))
 
 
 class TestExtendedToOriginalResultDecoratorBase(TestCase):
