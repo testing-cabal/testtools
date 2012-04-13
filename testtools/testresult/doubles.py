@@ -114,7 +114,7 @@ class ExtendedTestResult(Python27TestResult):
         self._tags = TagContext(self._tags)
 
     def stopTest(self, test):
-        self._tags = self._tags.get_parent()
+        self._tags = self._tags.parent
         super(ExtendedTestResult, self).stopTest(test)
 
     @property

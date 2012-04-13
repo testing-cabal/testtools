@@ -70,13 +70,13 @@ class TestTags(TestCase):
         self.assertEqual(set(), child.get_current_tags())
         self.assertEqual(set(['foo']), parent.get_current_tags())
 
-    def test_get_parent(self):
+    def test_parent(self):
         # The parent can be retrieved from a child context.
         parent = TagContext()
         parent.change_tags(set(['foo']), set())
         child = TagContext(parent)
         child.change_tags(set(), set(['foo']))
-        self.assertEqual(parent, child.get_parent())
+        self.assertEqual(parent, child.parent)
 
 
 def test_suite():

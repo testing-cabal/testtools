@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
 
 """Extensions to the standard Python unittest library."""
 
@@ -16,6 +16,7 @@ __all__ = [
     'run_test_with',
     'TestCase',
     'TestCommand',
+    'TestByTestResult',
     'TestResult',
     'TestResultDecorator',
     'TextTestResult',
@@ -56,6 +57,7 @@ from testtools.testcase import (
 from testtools.testresult import (
     ExtendedToOriginalDecorator,
     MultiTestResult,
+    TestByTestResult,
     TestResult,
     TestResultDecorator,
     TextTestResult,

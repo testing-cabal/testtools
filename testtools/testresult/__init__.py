@@ -1,10 +1,11 @@
-# Copyright (c) 2009 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
 
 """Test result objects."""
 
 __all__ = [
     'ExtendedToOriginalDecorator',
     'MultiTestResult',
+    'TestByTestResult',
     'TestResult',
     'TestResultDecorator',
     'TextTestResult',
@@ -14,6 +15,7 @@ __all__ = [
 from testtools.testresult.real import (
     ExtendedToOriginalDecorator,
     MultiTestResult,
+    TestByTestResult,
     TestResult,
     TestResultDecorator,
     TextTestResult,

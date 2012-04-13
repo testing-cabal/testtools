@@ -13,7 +13,7 @@ class TagContext(object):
             are current on the parent at the time of construction are current
             in this context.
         """
-        self._parent = parent
+        self.parent = parent
         self._tags = set()
         if parent:
             self._tags.update(parent.get_current_tags())
@@ -21,10 +21,6 @@ class TagContext(object):
     def get_current_tags(self):
         """Return any current tags."""
         return set(self._tags)
-
-    def get_parent(self):
-        """Return the parent.  If no parent, return None."""
-        return self._parent
 
     def change_tags(self, new_tags, gone_tags):
         """Change the tags on this context.
