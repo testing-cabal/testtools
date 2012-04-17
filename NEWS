@@ -23,7 +23,11 @@ Changes
 Improvements
 ------------
 
-* ``TestResultDecorator`` brought over from subunit.  (Jonathan Lange)
+* ``ConcurrentTestSuite`` now takes an optional ``wrap_result`` parameter
+  that can be used to wrap the ``ThreadsafeForwardingResult``s created by
+  the suite.  (Jonathan Lange)
+
+* ``testresultdecorator`` brought over from subunit.  (Jonathan Lange)
 
 * All ``TestResult`` wrappers now correctly forward ``current_tags`` from
   their wrapped results, meaning that ``current_tags`` can always be relied
