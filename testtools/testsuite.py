@@ -33,7 +33,7 @@ def iterate_tests(test_suite_or_case):
 class ConcurrentTestSuite(unittest.TestSuite):
     """A TestSuite whose run() calls out to a concurrency strategy."""
 
-    def __init__(self, suite, make_tests):
+    def __init__(self, suite, make_tests, wrap_result=None):
         """Create a ConcurrentTestSuite to execute suite.
 
         :param suite: A suite to run concurrently.
@@ -42,9 +42,16 @@ class ConcurrentTestSuite(unittest.TestSuite):
             sub-suites. make_tests must take a suite, and return an iterable
             of TestCase-like object, each of which must have a run(result)
             method.
+        :param wrap_result: An optional function that takes a thread-safe
+            result and a thread number and must return a ``TestResult``
+            object. If not provided, then ``ConcurrentTestSuite`` will just
+            use a ``ThreadsafeForwardingResult`` wrapped around the result
+            passed to ``run()``.
         """
         super(ConcurrentTestSuite, self).__init__([suite])
         self.make_tests = make_tests
+        if wrap_result:
+            self._wrap_result = wrap_result
 
     def _wrap_result(self, thread_safe_result, thread_number):
         """Override this if you want to wrap the per-thread result."""
