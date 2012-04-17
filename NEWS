@@ -27,6 +27,9 @@ Improvements
   that can be used to wrap the ``ThreadsafeForwardingResult``s created by
   the suite.  (Jonathan Lange)
 
+* ``Tagger`` added.  It's a new ``TestResult`` that tags all tests sent to
+  it with a particular set of tags.  (Jonathan Lange)
+
 * ``testresultdecorator`` brought over from subunit.  (Jonathan Lange)
 
 * All ``TestResult`` wrappers now correctly forward ``current_tags`` from

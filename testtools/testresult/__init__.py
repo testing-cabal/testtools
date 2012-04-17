@@ -5,6 +5,7 @@
 __all__ = [
     'ExtendedToOriginalDecorator',
     'MultiTestResult',
+    'Tagger',
     'TestByTestResult',
     'TestResult',
     'TestResultDecorator',
@@ -15,6 +16,7 @@ __all__ = [
 from testtools.testresult.real import (
     ExtendedToOriginalDecorator,
     MultiTestResult,
+    Tagger,
     TestByTestResult,
     TestResult,
     TestResultDecorator,

@@ -17,6 +17,7 @@ import warnings
 from testtools import (
     ExtendedToOriginalDecorator,
     MultiTestResult,
+    Tagger,
     TestCase,
     TestResult,
     TestResultDecorator,
@@ -1964,6 +1965,30 @@ class TestByTestResultTests(TestCase):
               'details': None},
              ],
             self.log)
+
+
+class TestTagger(TestCase):
+
+    def test_tags_tests(self):
+        result = ExtendedTestResult()
+        tagger = Tagger(result, set(['foo']), set(['bar']))
+        test1, test2 = self, make_test()
+        tagger.startTest(test1)
+        tagger.addSuccess(test1)
+        tagger.stopTest(test1)
+        tagger.startTest(test2)
+        tagger.addSuccess(test2)
+        tagger.stopTest(test2)
+        self.assertEqual(
+            [('startTest', test1),
+             ('tags', set(['foo']), set(['bar'])),
+             ('addSuccess', test1),
+             ('stopTest', test1),
+             ('startTest', test2),
+             ('tags', set(['foo']), set(['bar'])),
+             ('addSuccess', test2),
+             ('stopTest', test2),
+             ], result._events)
 
 
 def test_suite():
