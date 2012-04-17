@@ -59,6 +59,7 @@ from testtools.testresult.doubles import (
     )
 from testtools.testresult.real import (
     _details_to_str,
+    _merge_tags,
     utc,
     )
 
@@ -769,103 +770,253 @@ UNEXPECTED SUCCESS: testtools.tests.test_testresult.Test.succeeded
 class TestThreadSafeForwardingResult(TestCase):
     """Tests for `TestThreadSafeForwardingResult`."""
 
-    def setUp(self):
-        super(TestThreadSafeForwardingResult, self).setUp()
-        self.result_semaphore = threading.Semaphore(1)
-        self.target = LoggingResult([])
-        self.result1 = ThreadsafeForwardingResult(self.target,
-            self.result_semaphore)
+    def make_results(self, n):
+        events = []
+        target = LoggingResult(events)
+        semaphore = threading.Semaphore(1)
+        return [
+            ThreadsafeForwardingResult(target, semaphore)
+            for i in range(n)], events
 
     def test_nonforwarding_methods(self):
         # startTest and stopTest are not forwarded because they need to be
         # batched.
-        self.result1.startTest(self)
-        self.result1.stopTest(self)
-        self.assertEqual([], self.target._events)
+        [result], events = self.make_results(1)
+        result.startTest(self)
+        result.stopTest(self)
+        self.assertEqual([], events)
+
+    def test_tags_not_forwarded(self):
+        # Tags need to be batched for each test, so they aren't forwarded
+        # until a test runs.
+        [result], events = self.make_results(1)
+        result.tags(set(['foo']), set(['bar']))
+        self.assertEqual([], events)
+
+    def test_global_tags_simple(self):
+        # Tags specified outside of a test result are global. When a test's
+        # results are finally forwarded, we send through these global tags
+        # *as* global tags, and also send a tags command at the end of the
+        # test that undoes it.
+        [result], events = self.make_results(1)
+        result.tags(set(['foo']), set())
+        result.time(1)
+        result.startTest(self)
+        result.time(2)
+        result.addSuccess(self)
+        self.assertEqual(
+            [('time', 1),
+             ('tags', set(['foo']), set()),
+             ('startTest', self),
+             ('time', 2),
+             ('addSuccess', self),
+             ('stopTest', self),
+             ('tags', set(), set(['foo'])),
+             ], events)
+
+    def test_global_tags_complex(self):
+        # Multiple calls to tags() in a global context are merged together.
+        # Strictly speaking they could also be forwarded as multiple tags()
+        # calls.  The key thing is that they are not sent until the test is
+        # done.
+        [result], events = self.make_results(1)
+        result.tags(set(['foo', 'bar']), set(['baz', 'qux']))
+        result.tags(set(['cat', 'qux']), set(['bar', 'dog']))
+        result.time(1)
+        result.startTest(self)
+        result.time(2)
+        result.addSuccess(self)
+        self.assertEqual(
+            [('time', 1),
+             ('tags', set(['cat', 'foo', 'qux']), set(['dog', 'bar', 'baz'])),
+             ('startTest', self),
+             ('time', 2),
+             ('addSuccess', self),
+             ('stopTest', self),
+             ('tags', set(['dog', 'bar', 'baz']), set(['cat', 'foo', 'qux'])),
+             ], events)
+
+    def test_local_tags(self):
+        # Any tags set within a test context are forwarded in that test
+        # context when the result is finally forwarded.  This means that the
+        # tags for the test are part of the atomic message communicating
+        # everything about that test.
+        [result], events = self.make_results(1)
+        result.time(1)
+        result.startTest(self)
+        result.tags(set(['foo']), set([]))
+        result.tags(set(), set(['bar']))
+        result.time(2)
+        result.addSuccess(self)
+        self.assertEqual(
+            [('time', 1),
+             ('startTest', self),
+             ('time', 2),
+             ('tags', set(['foo']), set(['bar'])),
+             ('addSuccess', self),
+             ('stopTest', self),
+             ], events)
 
     def test_startTestRun(self):
-        self.result1.startTestRun()
-        self.result2 = ThreadsafeForwardingResult(self.target,
-            self.result_semaphore)
-        self.result2.startTestRun()
-        self.assertEqual(["startTestRun", "startTestRun"], self.target._events)
+        # Calls to startTestRun are not batched, because we are only
+        # interested in sending tests atomically, not the whole run.
+        [result1, result2], events = self.make_results(2)
+        result1.startTestRun()
+        result2.startTestRun()
+        self.assertEqual(["startTestRun", "startTestRun"], events)
 
     def test_stopTestRun(self):
-        self.result1.stopTestRun()
-        self.result2 = ThreadsafeForwardingResult(self.target,
-            self.result_semaphore)
-        self.result2.stopTestRun()
-        self.assertEqual(["stopTestRun", "stopTestRun"], self.target._events)
+        # Calls to stopTestRun are not batched, because we are only
+        # interested in sending tests atomically, not the whole run.
+        [result1, result2], events = self.make_results(2)
+        result1.stopTestRun()
+        result2.stopTestRun()
+        self.assertEqual(["stopTestRun", "stopTestRun"], events)
 
-    def test_forwarding_methods(self):
-        # error, failure, skip and success are forwarded in batches.
-        exc_info1 = make_exception_info(RuntimeError, 'error')
-        starttime1 = datetime.datetime.utcfromtimestamp(1.489)
-        endtime1 = datetime.datetime.utcfromtimestamp(51.476)
-        self.result1.time(starttime1)
-        self.result1.startTest(self)
-        self.result1.time(endtime1)
-        self.result1.addError(self, exc_info1)
-        exc_info2 = make_exception_info(AssertionError, 'failure')
-        starttime2 = datetime.datetime.utcfromtimestamp(2.489)
-        endtime2 = datetime.datetime.utcfromtimestamp(3.476)
-        self.result1.time(starttime2)
-        self.result1.startTest(self)
-        self.result1.time(endtime2)
-        self.result1.addFailure(self, exc_info2)
-        reason = _u("Skipped for some reason")
-        starttime3 = datetime.datetime.utcfromtimestamp(4.489)
-        endtime3 = datetime.datetime.utcfromtimestamp(5.476)
-        self.result1.time(starttime3)
-        self.result1.startTest(self)
-        self.result1.time(endtime3)
-        self.result1.addSkip(self, reason)
-        starttime4 = datetime.datetime.utcfromtimestamp(6.489)
-        endtime4 = datetime.datetime.utcfromtimestamp(7.476)
-        self.result1.time(starttime4)
-        self.result1.startTest(self)
-        self.result1.time(endtime4)
-        self.result1.addSuccess(self)
+    def test_forward_addError(self):
+        # Once we receive an addError event, we forward all of the events for
+        # that test, as we now know that test is complete.
+        [result], events = self.make_results(1)
+        exc_info = make_exception_info(RuntimeError, 'error')
+        start_time = datetime.datetime.utcfromtimestamp(1.489)
+        end_time = datetime.datetime.utcfromtimestamp(51.476)
+        result.time(start_time)
+        result.startTest(self)
+        result.time(end_time)
+        result.addError(self, exc_info)
         self.assertEqual([
-            ('time', starttime1),
+            ('time', start_time),
             ('startTest', self),
-            ('time', endtime1),
-            ('addError', self, exc_info1),
+            ('time', end_time),
+            ('addError', self, exc_info),
             ('stopTest', self),
-            ('time', starttime2),
+            ], events)
+
+    def test_forward_addFailure(self):
+        # Once we receive an addFailure event, we forward all of the events
+        # for that test, as we now know that test is complete.
+        [result], events = self.make_results(1)
+        exc_info = make_exception_info(AssertionError, 'failure')
+        start_time = datetime.datetime.utcfromtimestamp(2.489)
+        end_time = datetime.datetime.utcfromtimestamp(3.476)
+        result.time(start_time)
+        result.startTest(self)
+        result.time(end_time)
+        result.addFailure(self, exc_info)
+        self.assertEqual([
+            ('time', start_time),
             ('startTest', self),
-            ('time', endtime2),
-            ('addFailure', self, exc_info2),
+            ('time', end_time),
+            ('addFailure', self, exc_info),
             ('stopTest', self),
-            ('time', starttime3),
+            ], events)
+
+    def test_forward_addSkip(self):
+        # Once we receive an addSkip event, we forward all of the events for
+        # that test, as we now know that test is complete.
+        [result], events = self.make_results(1)
+        reason = _u("Skipped for some reason")
+        start_time = datetime.datetime.utcfromtimestamp(4.489)
+        end_time = datetime.datetime.utcfromtimestamp(5.476)
+        result.time(start_time)
+        result.startTest(self)
+        result.time(end_time)
+        result.addSkip(self, reason)
+        self.assertEqual([
+            ('time', start_time),
             ('startTest', self),
-            ('time', endtime3),
+            ('time', end_time),
             ('addSkip', self, reason),
             ('stopTest', self),
-            ('time', starttime4),
+            ], events)
+
+    def test_forward_addSuccess(self):
+        # Once we receive an addSuccess event, we forward all of the events
+        # for that test, as we now know that test is complete.
+        [result], events = self.make_results(1)
+        start_time = datetime.datetime.utcfromtimestamp(6.489)
+        end_time = datetime.datetime.utcfromtimestamp(7.476)
+        result.time(start_time)
+        result.startTest(self)
+        result.time(end_time)
+        result.addSuccess(self)
+        self.assertEqual([
+            ('time', start_time),
             ('startTest', self),
-            ('time', endtime4),
+            ('time', end_time),
             ('addSuccess', self),
             ('stopTest', self),
-            ], self.target._events)
+            ], events)
 
-    def test_tags_helper(self):
-       expected = set(['present']), set(['missing', 'going'])
-       input = set(['present']), set(['missing'])
-       self.assertEqual(
-            expected, self.result1._merge_tags(input, set(), set(['going'])))
-       expected = set(['present']), set(['missing', 'going'])
-       input = set(['present', 'going']), set(['missing'])
-       self.assertEqual(
-            expected, self.result1._merge_tags(input, set(), set(['going'])))
-       expected = set(['coming', 'present']), set(['missing'])
-       input = set(['present']), set(['missing'])
-       self.assertEqual(
-            expected, self.result1._merge_tags(input, set(['coming']), set()))
-       expected = set(['coming', 'present']), set(['missing'])
-       input = set(['present']), set(['coming', 'missing'])
-       self.assertEqual(
-            expected, self.result1._merge_tags(input, set(['coming']), set()))
+    def test_only_one_test_at_a_time(self):
+        # Even if there are multiple ThreadsafeForwardingResults forwarding to
+        # the same target result, the target result only receives the complete
+        # events for one test at a time.
+        [result1, result2], events = self.make_results(2)
+        test1, test2 = self, make_test()
+        start_time1 = datetime.datetime.utcfromtimestamp(1.489)
+        end_time1 = datetime.datetime.utcfromtimestamp(2.476)
+        start_time2 = datetime.datetime.utcfromtimestamp(3.489)
+        end_time2 = datetime.datetime.utcfromtimestamp(4.489)
+        result1.time(start_time1)
+        result2.time(start_time2)
+        result1.startTest(test1)
+        result2.startTest(test2)
+        result1.time(end_time1)
+        result2.time(end_time2)
+        result2.addSuccess(test2)
+        result1.addSuccess(test1)
+        self.assertEqual([
+            # test2 finishes first, and so is flushed first.
+            ('time', start_time2),
+            ('startTest', test2),
+            ('time', end_time2),
+            ('addSuccess', test2),
+            ('stopTest', test2),
+            # test1 finishes next, and thus follows.
+            ('time', start_time1),
+            ('startTest', test1),
+            ('time', end_time1),
+            ('addSuccess', test1),
+            ('stopTest', test1),
+            ], events)
+
+
+class TestMergeTags(TestCase):
+
+    def test_merge_unseen_gone_tag(self):
+        # If an incoming "gone" tag isn't currently tagged one way or the
+        # other, add it to the "gone" tags.
+        current_tags = set(['present']), set(['missing'])
+        changing_tags = set(), set(['going'])
+        expected = set(['present']), set(['missing', 'going'])
+        self.assertEqual(
+            expected, _merge_tags(current_tags, changing_tags))
+
+    def test_merge_incoming_gone_tag_with_current_new_tag(self):
+        # If one of the incoming "gone" tags is one of the existing "new"
+        # tags, then it overrides the "new" tag, leaving it marked as "gone".
+        current_tags = set(['present', 'going']), set(['missing'])
+        changing_tags = set(), set(['going'])
+        expected = set(['present']), set(['missing', 'going'])
+        self.assertEqual(
+            expected, _merge_tags(current_tags, changing_tags))
+
+    def test_merge_unseen_new_tag(self):
+        current_tags = set(['present']), set(['missing'])
+        changing_tags = set(['coming']), set()
+        expected = set(['coming', 'present']), set(['missing'])
+        self.assertEqual(
+            expected, _merge_tags(current_tags, changing_tags))
+
+    def test_merge_incoming_new_tag_with_current_gone_tag(self):
+        # If one of the incoming "new" tags is currently marked as "gone",
+        # then it overrides the "gone" tag, leaving it marked as "new".
+        current_tags = set(['present']), set(['coming', 'missing'])
+        changing_tags = set(['coming']), set()
+        expected = set(['coming', 'present']), set(['missing'])
+        self.assertEqual(
+            expected, _merge_tags(current_tags, changing_tags))
 
 
 class TestExtendedToOriginalResultDecoratorBase(TestCase):

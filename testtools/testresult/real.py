@@ -356,26 +356,30 @@ class TextTestResult(TestResult):
 class ThreadsafeForwardingResult(TestResult):
     """A TestResult which ensures the target does not receive mixed up calls.
 
-    This is used when receiving test results from multiple sources, and batches
-    up all the activity for a single test into a thread-safe batch where all
-    other ThreadsafeForwardingResult objects sharing the same semaphore will be
-    locked out.
+    Multiple ``ThreadsafeForwardingResult``s can forward to the same target
+    result, and that target result will only ever receive the complete set of
+    events for one test at a time.
 
-    Typical use of ThreadsafeForwardingResult involves creating one
-    ThreadsafeForwardingResult per thread in a ConcurrentTestSuite. These
-    forward to the TestResult that the ConcurrentTestSuite run method was
-    called with.
+    This is enforced using a semaphore, which further guarantees that tests
+    will be sent atomically even if the ``ThreadsafeForwardingResult``s are in
+    different threads.
 
-    target.done() is called once for each ThreadsafeForwardingResult that
-    forwards to the same target. If the target's done() takes special action,
-    care should be taken to accommodate this.
+    ``ThreadsafeForwardingResult`` is typically used by
+    ``ConcurrentTestSuite``, which creates one ``ThreadsafeForwardingResult``
+    per thread, each of which wraps of the TestResult that
+    ``ConcurrentTestSuite.run()`` is called with.
+
+    target.startTestRun() and target.stopTestRun() are called once for each
+    ThreadsafeForwardingResult that forwards to the same target. If the target
+    takes special action on these events, it should take care to accommodate
+    this.
     """
 
     def __init__(self, target, semaphore):
         """Create a ThreadsafeForwardingResult forwarding to target.
 
-        :param target: A TestResult.
-        :param semaphore: A threading.Semaphore with limit 1.
+        :param target: A ``TestResult``.
+        :param semaphore: A ``threading.Semaphore`` with limit 1.
         """
         TestResult.__init__(self)
         self.result = ExtendedToOriginalDecorator(target)
@@ -387,27 +391,27 @@ class ThreadsafeForwardingResult(TestResult):
     def __repr__(self):
         return '<%s %r>' % (self.__class__.__name__, self.result)
 
-    def _not_empty_tags(self, tags):
-        return bool(tags[0] and tags[1])
+    def _any_tags(self, tags):
+        return bool(tags[0] or tags[1])
 
     def _add_result_with_semaphore(self, method, test, *args, **kwargs):
         now = self._now()
         self.semaphore.acquire()
         try:
             self.result.time(self._test_start)
-            if self._not_empty_tags(self._global_tags):
+            if self._any_tags(self._global_tags):
                 self.result.tags(*self._global_tags)
             try:
                 self.result.startTest(test)
                 self.result.time(now)
-                if self._not_empty_tags(self._test_tags):
+                if self._any_tags(self._test_tags):
                     self.result.tags(*self._test_tags)
                 try:
                     method(test, *args, **kwargs)
                 finally:
                     self.result.stopTest(test)
             finally:
-                if self._not_empty_tags(self._global_tags):
+                if self._any_tags(self._global_tags):
                     self.result.tags(*reversed(self._global_tags))
         finally:
             self.semaphore.release()
@@ -470,20 +474,21 @@ class ThreadsafeForwardingResult(TestResult):
         """See `TestResult`."""
         super(ThreadsafeForwardingResult, self).tags(new_tags, gone_tags)
         if self._test_start is not None:
-            self._test_tags = self._merge_tags(
-                self._test_tags, new_tags, gone_tags)
+            self._test_tags = _merge_tags(
+                self._test_tags, (new_tags, gone_tags))
         else:
-            self._global_tags = self._merge_tags(
-                self._global_tags, new_tags, gone_tags)
+            self._global_tags = _merge_tags(
+                self._global_tags, (new_tags, gone_tags))
 
-    def _merge_tags(self, existing, new_tags, gone_tags):
-        result_new = set(existing[0])
-        result_gone = set(existing[1])
-        result_new.update(new_tags)
-        result_new.difference_update(gone_tags)
-        result_gone.update(gone_tags)
-        result_gone.difference_update(new_tags)
-        return result_new, result_gone
+
+def _merge_tags(existing, (new_tags, gone_tags)):
+    result_new = set(existing[0])
+    result_gone = set(existing[1])
+    result_new.update(new_tags)
+    result_new.difference_update(gone_tags)
+    result_gone.update(gone_tags)
+    result_gone.difference_update(new_tags)
+    return result_new, result_gone
 
 
 class ExtendedToOriginalDecorator(object):
