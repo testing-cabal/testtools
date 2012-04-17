@@ -54,7 +54,11 @@ class ConcurrentTestSuite(unittest.TestSuite):
             self._wrap_result = wrap_result
 
     def _wrap_result(self, thread_safe_result, thread_number):
-        """Override this if you want to wrap the per-thread result."""
+        """Wrap a thread-safe result before sending it test results.
+
+        You can either override this in a subclass or pass your own
+        ``wrap_result`` in to the constructor.  The latter is preferred.
+        """
         return thread_safe_result
 
     def run(self, result):
