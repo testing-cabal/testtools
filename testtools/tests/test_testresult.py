@@ -17,6 +17,7 @@ import warnings
 from testtools import (
     ExtendedToOriginalDecorator,
     MultiTestResult,
+    PlaceHolder,
     Tagger,
     TestCase,
     TestResult,
@@ -856,6 +857,36 @@ class TestThreadSafeForwardingResult(TestCase):
              ('tags', set(['foo']), set(['bar'])),
              ('addSuccess', self),
              ('stopTest', self),
+             ], events)
+
+    def test_local_tags_dont_leak(self):
+        # A tag set during a test is local to that test and is not set during
+        # the tests that follow.
+        [result], events = self.make_results(1)
+        a, b = PlaceHolder('a'), PlaceHolder('b')
+        result.time(1)
+        result.startTest(a)
+        result.tags(set(['foo']), set([]))
+        result.time(2)
+        result.addSuccess(a)
+        result.stopTest(a)
+        result.time(3)
+        result.startTest(b)
+        result.time(4)
+        result.addSuccess(b)
+        result.stopTest(b)
+        self.assertEqual(
+            [('time', 1),
+             ('startTest', a),
+             ('time', 2),
+             ('tags', set(['foo']), set()),
+             ('addSuccess', a),
+             ('stopTest', a),
+             ('time', 3),
+             ('startTest', b),
+             ('time', 4),
+             ('addSuccess', b),
+             ('stopTest', b),
              ], events)
 
     def test_startTestRun(self):

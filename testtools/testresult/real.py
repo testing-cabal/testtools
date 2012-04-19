@@ -407,6 +407,7 @@ class ThreadsafeForwardingResult(TestResult):
                 self.result.time(now)
                 if self._any_tags(self._test_tags):
                     self.result.tags(*self._test_tags)
+                    self._test_tags = set(), set()
                 try:
                     method(test, *args, **kwargs)
                 finally:

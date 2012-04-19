@@ -43,6 +43,9 @@ Improvements
   only one of ``new_tags`` or ``gone_tags`` are specified.
   (Jonathan Lange, #980263)
 
+* ``ThreadsafeForwardingResult`` no longer leaks local tags from one test
+  into all future tests run.  (Jonathan Lange, #985613)
+
 * ``ThreadsafeForwardingResult`` has many, many more tests.  (Jonathan Lange)
 
 
