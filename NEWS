@@ -20,6 +20,9 @@ Changes
   distinguish between global tags and test-local tags, as per the subunit
   specification.  (Jonathan Lange)
 
+* This is the **last** release of testtools that supports Python 2.4.  If this
+  matters to you, I pity you.  (Jonathan Lange)
+
 Improvements
 ------------
 
