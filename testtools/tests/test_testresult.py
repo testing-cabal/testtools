@@ -32,6 +32,7 @@ from testtools.compat import (
     _get_exception_encoding,
     _r,
     _u,
+    advance_iterator,
     str_is_unicode,
     StringIO,
     )
@@ -1846,7 +1847,8 @@ class TestByTestResultTests(TestCase):
         super(TestByTestResultTests, self).setUp()
         self.log = []
         self.result = TestByTestResult(self.on_test)
-        self.result._now = iter(range(5)).next
+        now = iter(range(5))
+        self.result._now = lambda: advance_iterator(now)
 
     def assertCalled(self, **kwargs):
         defaults = {
