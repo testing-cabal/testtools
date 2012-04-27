@@ -23,6 +23,8 @@ Changes
 Improvements
 ------------
 
+* API documentation corrections. (Raphaël Badin)
+
 * ``ConcurrentTestSuite`` now takes an optional ``wrap_result`` parameter
   that can be used to wrap the ``ThreadsafeForwardingResult``s created by
   the suite.  (Jonathan Lange)

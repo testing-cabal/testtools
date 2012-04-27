@@ -642,7 +642,7 @@ class MatchesException(Matcher):
 
 
 class Contains(Matcher):
-    """Checks whether something is container in another thing."""
+    """Checks whether something is contained in another thing."""
 
     def __init__(self, needle):
         """Create a Contains Matcher.
@@ -684,7 +684,7 @@ class StartsWith(Matcher):
 
 
 class EndsWith(Matcher):
-    """Checks whether one string starts with another."""
+    """Checks whether one string ends with another."""
 
     def __init__(self, expected):
         """Create a EndsWith Matcher.
