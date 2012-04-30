@@ -16,6 +16,7 @@ __all__ = [
     'AllMatch',
     'Annotate',
     'Contains',
+    'ContainsAll',
     'DirExists',
     'DocTestMatches',
     'EndsWith',
@@ -662,6 +663,11 @@ class Contains(Matcher):
             # e.g. 1 in 2 will raise TypeError
             return DoesNotContain(matchee, self.needle)
         return None
+
+
+def ContainsAll(items):
+    """Checks whether a list of things is contained in another thing."""
+    return MatchesAll(*[Contains(item) for item in items], first_only=False)
 
 
 class StartsWith(Matcher):

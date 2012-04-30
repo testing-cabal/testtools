@@ -12,7 +12,6 @@ import tempfile
 
 from testtools import (
     Matcher, # check that Matcher is exposed at the top level for docs.
-    skipIf,
     TestCase,
     )
 from testtools.compat import (
@@ -29,6 +28,7 @@ from testtools.matchers import (
     AnnotatedMismatch,
     _BinaryMismatch,
     Contains,
+    ContainsAll,
     DirContains,
     DirExists,
     DocTestMatches,
@@ -407,6 +407,23 @@ class TestContainsInterface(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [("1 not in 2", 2, Contains(1))]
+
+
+class TestContainsAllInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = ContainsAll(['foo', 'bar'])
+    matches_matches = ['foobar', 'foozbar', 'bar foo']
+    matches_mismatches = ['f', 'foo', 'foob', 'baz']
+
+    str_examples = [(
+        "MatchesAll(Contains('foo'), Contains('bar'))",
+        ContainsAll(['foo', 'bar'])),
+        ]
+
+    describe_examples = [("""Differences: [
+'baz' not in 'foo'
+]""",
+    'foo', ContainsAll(['foo', 'baz']))]
 
 
 def make_error(type, *args, **kwargs):
