@@ -412,8 +412,8 @@ class TestContainsInterface(TestCase, TestMatchersInterface):
 class TestContainsAllInterface(TestCase, TestMatchersInterface):
 
     matches_matcher = ContainsAll(['foo', 'bar'])
-    matches_matches = ['foobar', 'foozbar', 'bar foo']
-    matches_mismatches = ['f', 'foo', 'foob', 'baz']
+    matches_matches = [['foo', 'bar'], ['foo', 'z', 'bar'], ['bar', 'foo']]
+    matches_mismatches = [['f', 'g'], ['foo', 'baz'], []]
 
     str_examples = [(
         "MatchesAll(Contains('foo'), Contains('bar'))",

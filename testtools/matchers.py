@@ -666,8 +666,13 @@ class Contains(Matcher):
 
 
 def ContainsAll(items):
-    """Checks whether a list of things is contained in another thing."""
-    return MatchesAll(*[Contains(item) for item in items], first_only=False)
+    """Make a matcher that checks whether a list of things is contained
+    in another thing.
+
+    The matcher effectively checks that the provided sequence is a subset of
+    the matchee.
+    """
+    return MatchesAll(*map(Contains, items), first_only=False)
 
 
 class StartsWith(Matcher):
