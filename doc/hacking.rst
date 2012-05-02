@@ -8,9 +8,10 @@ Coding style
 In general, follow `PEP 8`_ except where consistency with the standard
 library's unittest_ module would suggest otherwise.
 
-testtools supports Python 2.4 and later, including Python 3, so avoid any
-2.5-only features like the ``with`` statement.
-
+testtools currently supports Python 2.4 and later, including Python 3, so avoid
+any 2.5-only features like the ``with`` statement. The next release will change
+this policy to supporting on versions of Python which are maintained by the
+Python community (e.g. receive security updates).
 
 Copyright assignment
 --------------------

@@ -20,6 +20,12 @@ Changes
   distinguish between global tags and test-local tags, as per the subunit
   specification.  (Jonathan Lange)
 
+* This is the **last** release of testtools that supports Python 2.4 or 2.5.
+  These releases are no longer supported by the Python community and do not
+  receive security updates. If this affects you, you will need to either
+  stay on this release or perform your own backports.
+  (Jonathan Lange, Robert Collins)
+
 Improvements
 ------------
 
