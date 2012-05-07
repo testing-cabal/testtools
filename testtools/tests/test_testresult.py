@@ -799,8 +799,9 @@ class TestThreadSafeForwardingResult(TestCase):
     def test_global_tags_simple(self):
         # Tags specified outside of a test result are global. When a test's
         # results are finally forwarded, we send through these global tags
-        # *as* global tags, and also send a tags command at the end of the
-        # test that undoes it.
+        # *as* test specific tags, because as a multiplexer there should be no
+        # way for a global tag on an input stream to affect tests from other
+        # streams - we can just always issue test local tags.
         [result], events = self.make_results(1)
         result.tags(set(['foo']), set())
         result.time(1)
@@ -809,19 +810,20 @@ class TestThreadSafeForwardingResult(TestCase):
         result.addSuccess(self)
         self.assertEqual(
             [('time', 1),
-             ('tags', set(['foo']), set()),
              ('startTest', self),
              ('time', 2),
+             ('tags', set(['foo']), set()),
              ('addSuccess', self),
              ('stopTest', self),
-             ('tags', set(), set(['foo'])),
              ], events)
 
     def test_global_tags_complex(self):
-        # Multiple calls to tags() in a global context are merged together.
-        # Strictly speaking they could also be forwarded as multiple tags()
-        # calls.  The key thing is that they are not sent until the test is
-        # done.
+        # Multiple calls to tags() in a global context are buffered until the
+        # next test completes and are issued as part of of the test context,
+        # because they cannot be issued until the output result is locked.
+        # The sample data shows them being merged together, this is, strictly
+        # speaking incidental - they could be issued separately (in-order) and
+        # still be legitimate.
         [result], events = self.make_results(1)
         result.tags(set(['foo', 'bar']), set(['baz', 'qux']))
         result.tags(set(['cat', 'qux']), set(['bar', 'dog']))
@@ -831,12 +833,11 @@ class TestThreadSafeForwardingResult(TestCase):
         result.addSuccess(self)
         self.assertEqual(
             [('time', 1),
-             ('tags', set(['cat', 'foo', 'qux']), set(['dog', 'bar', 'baz'])),
              ('startTest', self),
              ('time', 2),
+             ('tags', set(['cat', 'foo', 'qux']), set(['dog', 'bar', 'baz'])),
              ('addSuccess', self),
              ('stopTest', self),
-             ('tags', set(['dog', 'bar', 'baz']), set(['cat', 'foo', 'qux'])),
              ], events)
 
     def test_local_tags(self):

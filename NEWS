@@ -26,6 +26,12 @@ Changes
   stay on this release or perform your own backports.
   (Jonathan Lange, Robert Collins)
 
+* ``ThreadsafeForwardingResult`` now forwards global tags as test-local tags,
+  making reasoning about the correctness of the multiplexed stream simpler.
+  This preserves the semantic value (what tags apply to a given test) while
+  consuming less stream size (as no negative-tag statement is needed).
+  (Robert Collins, Gary Poster, #986434)
+
 Improvements
 ------------
 

@@ -374,6 +374,10 @@ class ThreadsafeForwardingResult(TestResult):
     ThreadsafeForwardingResult that forwards to the same target. If the target
     takes special action on these events, it should take care to accommodate
     this.
+
+    time() and tags() calls are batched to be adjacent to the test result and
+    in the case of tags() are coerced into test-local scope, avoiding the
+    opportunity for bugs around global state in the target.
     """
 
     def __init__(self, target, semaphore):
@@ -400,21 +404,17 @@ class ThreadsafeForwardingResult(TestResult):
         self.semaphore.acquire()
         try:
             self.result.time(self._test_start)
+            self.result.startTest(test)
+            self.result.time(now)
             if self._any_tags(self._global_tags):
                 self.result.tags(*self._global_tags)
+            if self._any_tags(self._test_tags):
+                self.result.tags(*self._test_tags)
+            self._test_tags = set(), set()
             try:
-                self.result.startTest(test)
-                self.result.time(now)
-                if self._any_tags(self._test_tags):
-                    self.result.tags(*self._test_tags)
-                    self._test_tags = set(), set()
-                try:
-                    method(test, *args, **kwargs)
-                finally:
-                    self.result.stopTest(test)
+                method(test, *args, **kwargs)
             finally:
-                if self._any_tags(self._global_tags):
-                    self.result.tags(*reversed(self._global_tags))
+                self.result.stopTest(test)
         finally:
             self.semaphore.release()
         self._test_start = None
