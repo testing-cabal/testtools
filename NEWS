@@ -6,12 +6,6 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
-Improvements
-------------
-
-* New matcher ``ContainsAll`` (Raphaël Badin)
-
-
 0.9.15
 ~~~~~~
 
