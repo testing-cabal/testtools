@@ -16,6 +16,7 @@ __all__ = [
     'AllMatch',
     'Annotate',
     'Contains',
+    'ContainsAll',
     'DirExists',
     'DocTestMatches',
     'EndsWith',
@@ -662,6 +663,16 @@ class Contains(Matcher):
             # e.g. 1 in 2 will raise TypeError
             return DoesNotContain(matchee, self.needle)
         return None
+
+
+def ContainsAll(items):
+    """Make a matcher that checks whether a list of things is contained
+    in another thing.
+
+    The matcher effectively checks that the provided sequence is a subset of
+    the matchee.
+    """
+    return MatchesAll(*map(Contains, items), first_only=False)
 
 
 class StartsWith(Matcher):
