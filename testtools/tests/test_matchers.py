@@ -60,6 +60,7 @@ from testtools.matchers import (
     PathExists,
     Raises,
     raises,
+    SameMembers,
     SamePath,
     StartsWith,
     TarballContains,
@@ -1098,6 +1099,28 @@ class TestAllMatch(TestCase, TestMatchersInterface):
          ']',
          [11, 9, 10],
          AllMatch(LessThan(10))),
+        ]
+
+
+class TestSameMembers(TestCase, TestMatchersInterface):
+
+    matches_matcher = SameMembers([1, 1, 2, 3])
+    matches_matches = [
+        [1, 1, 2, 3],
+        [3, 1, 2, 1],
+        [3, 2, 1, 1],
+        (2, 3, 1, 1),
+        ]
+    matches_mismatches = [
+        set([1, 2, 3]),
+        [1, 1, 2, 3, 5],
+        'foo',
+        ]
+
+    describe_examples = [
+        ]
+
+    str_examples = [
         ]
 
 
