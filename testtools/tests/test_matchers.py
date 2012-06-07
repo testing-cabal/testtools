@@ -1104,12 +1104,12 @@ class TestAllMatch(TestCase, TestMatchersInterface):
 
 class TestSameMembers(TestCase, TestMatchersInterface):
 
-    matches_matcher = SameMembers([1, 1, 2, 3])
+    matches_matcher = SameMembers([1, 1, 2, 3, {'foo': 'bar'}])
     matches_matches = [
-        [1, 1, 2, 3],
-        [3, 1, 2, 1],
-        [3, 2, 1, 1],
-        (2, 3, 1, 1),
+        [1, 1, 2, 3, {'foo': 'bar'}],
+        [3, {'foo': 'bar'}, 1, 2, 1],
+        [3, 2, 1, {'foo': 'bar'}, 1],
+        (2, {'foo': 'bar'}, 3, 1, 1),
         ]
     matches_mismatches = [
         set([1, 2, 3]),
