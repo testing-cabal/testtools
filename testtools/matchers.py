@@ -1288,6 +1288,9 @@ class SameMembers(Matcher):
         super(SameMembers, self).__init__()
         self.expected = expected
 
+    def __str__(self):
+        return '%s(%r)' % (self.__class__.__name__, self.expected)
+
     def match(self, observed):
         return Equals(sorted(self.expected)).match(sorted(observed))
 

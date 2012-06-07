@@ -1121,6 +1121,7 @@ class TestSameMembers(TestCase, TestMatchersInterface):
         ]
 
     str_examples = [
+        ('SameMembers([1, 2, 3])', SameMembers([1, 2, 3])),
         ]
 
 
