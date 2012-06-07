@@ -1292,7 +1292,11 @@ class SameMembers(Matcher):
         return '%s(%r)' % (self.__class__.__name__, self.expected)
 
     def match(self, observed):
-        return Equals(sorted(self.expected)).match(sorted(observed))
+        expected = sorted(self.expected)
+        observed = sorted(observed)
+        if expected == observed:
+            return
+        return _BinaryMismatch(expected, "elements differ", observed)
 
 
 class HasPermissions(Matcher):
