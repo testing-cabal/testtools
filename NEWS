@@ -9,7 +9,13 @@ NEXT
 Improvements
 ------------
 
-* New matcher ``ContainsAll`` (Raphaël Badin)
+* New matchers:
+
+  * ``ContainsAll`` for asserting one thing is a subset of another
+    (Raphaël Badin)
+
+  * ``SameMembers`` for asserting two iterators have the same members.
+    (Jonathan Lange)
 
 
 0.9.15

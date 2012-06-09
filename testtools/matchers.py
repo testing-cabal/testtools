@@ -1277,6 +1277,28 @@ class SamePath(Matcher):
         return Equals(f(self.path)).match(f(other_path))
 
 
+class SameMembers(Matcher):
+    """Matches if two iterators have the same members.
+
+    This is not the same as set equivalence.  The two iterators must be of the
+    same length and have the same repetitions.
+    """
+
+    def __init__(self, expected):
+        super(SameMembers, self).__init__()
+        self.expected = expected
+
+    def __str__(self):
+        return '%s(%r)' % (self.__class__.__name__, self.expected)
+
+    def match(self, observed):
+        expected = sorted(self.expected)
+        observed = sorted(observed)
+        if expected == observed:
+            return
+        return _BinaryMismatch(expected, "elements differ", observed)
+
+
 class HasPermissions(Matcher):
     """Matches if a file has the given permissions.
 

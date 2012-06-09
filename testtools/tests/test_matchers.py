@@ -60,6 +60,7 @@ from testtools.matchers import (
     PathExists,
     Raises,
     raises,
+    SameMembers,
     SamePath,
     StartsWith,
     TarballContains,
@@ -1098,6 +1099,36 @@ class TestAllMatch(TestCase, TestMatchersInterface):
          ']',
          [11, 9, 10],
          AllMatch(LessThan(10))),
+        ]
+
+
+class TestSameMembers(TestCase, TestMatchersInterface):
+
+    matches_matcher = SameMembers([1, 1, 2, 3, {'foo': 'bar'}])
+    matches_matches = [
+        [1, 1, 2, 3, {'foo': 'bar'}],
+        [3, {'foo': 'bar'}, 1, 2, 1],
+        [3, 2, 1, {'foo': 'bar'}, 1],
+        (2, {'foo': 'bar'}, 3, 1, 1),
+        ]
+    matches_mismatches = [
+        set([1, 2, 3]),
+        [1, 1, 2, 3, 5],
+        'foo',
+        ]
+
+    describe_examples = [
+        (("elements differ:\n"
+          "reference = ['apple', 'banana', 'canteloupe', 'lemon', 'orange', 'watermelon']\n"
+          "actual    = ['apple', 'banana', 'canteloupe', 'lemon', 'orange', 'sparrow']\n"),
+         ['orange', 'apple', 'banana', 'sparrow', 'lemon', 'canteloupe',],
+         SameMembers(
+             ['apple', 'orange', 'canteloupe', 'watermelon',
+              'lemon', 'banana',])),
+        ]
+
+    str_examples = [
+        ('SameMembers([1, 2, 3])', SameMembers([1, 2, 3])),
         ]
 
 
