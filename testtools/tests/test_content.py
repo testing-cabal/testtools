@@ -1,5 +1,6 @@
 # Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
 
+import json
 import os
 import tempfile
 import unittest
@@ -15,6 +16,7 @@ from testtools.content import (
     Content,
     content_from_file,
     content_from_stream,
+    json_content,
     TracebackContent,
     text_content,
     )
@@ -149,6 +151,13 @@ class TestContent(TestCase):
         data = _u("some data")
         expected = Content(UTF8_TEXT, lambda: [data.encode('utf8')])
         self.assertEqual(expected, text_content(data))
+
+    def test_json_content(self):
+        data = {'foo': 'bar'}
+        expected = Content(
+            ContentType('application', 'json', {'charset': 'utf8'}),
+            lambda: [json.dumps(data)])
+        self.assertEqual(expected, json_content(data))
 
 
 class TestTracebackContent(TestCase):

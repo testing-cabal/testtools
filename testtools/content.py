@@ -12,6 +12,7 @@ __all__ = [
     ]
 
 import codecs
+import json
 import os
 import sys
 import traceback
@@ -187,6 +188,13 @@ class TracebackContent(Content):
             length += 1
             tb = tb.tb_next
         return length
+
+
+def json_content(data):
+    """Create a JSON `Content` object from JSON-encodeable data."""
+    return Content(
+        ContentType('application', 'json', {'charset': 'utf8'}),
+        lambda: [json.dumps(data)])
 
 
 def text_content(text):
