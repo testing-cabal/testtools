@@ -19,7 +19,7 @@ import traceback
 
 from testtools import try_import
 from testtools.compat import _b, _format_exc_info, str_is_unicode, _u
-from testtools.content_type import ContentType, UTF8_TEXT
+from testtools.content_type import ContentType, JSON, UTF8_TEXT
 
 
 functools = try_import('functools')
@@ -192,9 +192,7 @@ class TracebackContent(Content):
 
 def json_content(data):
     """Create a JSON `Content` object from JSON-encodeable data."""
-    return Content(
-        ContentType('application', 'json', {'charset': 'utf8'}),
-        lambda: [json.dumps(data)])
+    return Content(JSON, lambda: [json.dumps(data)])
 
 
 def text_content(text):
@@ -203,7 +201,6 @@ def text_content(text):
     This is useful for adding details which are short strings.
     """
     return Content(UTF8_TEXT, lambda: [text.encode('utf8')])
-
 
 
 def maybe_wrap(wrapper, func):

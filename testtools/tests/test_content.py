@@ -16,6 +16,7 @@ from testtools.content import (
     Content,
     content_from_file,
     content_from_stream,
+    JSON,
     json_content,
     TracebackContent,
     text_content,
@@ -154,9 +155,7 @@ class TestContent(TestCase):
 
     def test_json_content(self):
         data = {'foo': 'bar'}
-        expected = Content(
-            ContentType('application', 'json', {'charset': 'utf8'}),
-            lambda: [json.dumps(data)])
+        expected = Content(JSON, lambda: [json.dumps(data)])
         self.assertEqual(expected, json_content(data))
 
 
