@@ -9,6 +9,8 @@ NEXT
 Improvements
 ------------
 
+* New content helper, ``json_content`` (Jonathan Lange)
+
 * New matchers:
 
   * ``ContainsAll`` for asserting one thing is a subset of another

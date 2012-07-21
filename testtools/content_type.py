@@ -36,6 +36,6 @@ class ContentType(object):
         return "%s/%s%s" % (self.type, self.subtype, params)
 
 
-JSON = ContentType('application', 'json', {'charset': 'utf8'})
+JSON = ContentType('application', 'json')
 
 UTF8_TEXT = ContentType('text', 'plain', {'charset': 'utf8'})
