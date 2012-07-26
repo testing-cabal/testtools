@@ -19,6 +19,8 @@ Improvements
   * ``SameMembers`` for asserting two iterators have the same members.
     (Jonathan Lange)
 
+* Reraising of exceptions in Python 3 is more reliable. (Martin [gz])
+
 
 0.9.15
 ~~~~~~
