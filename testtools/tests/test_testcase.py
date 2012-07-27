@@ -263,7 +263,8 @@ class TestAssertions(TestCase):
         # assertRaises raises self.failureException when it's passed a
         # callable that raises no error.
         ret = ('orange', 42)
-        self.assertFails("<function <lambda> at ...> returned ('orange', 42)",
+        self.assertFails(
+            "<function ...<lambda> at ...> returned ('orange', 42)",
             self.assertRaises, RuntimeError, lambda: ret)
 
     def test_assertRaises_fails_when_different_error_raised(self):
@@ -309,7 +310,7 @@ class TestAssertions(TestCase):
         self.assertRaises(
             self.failureException,
             self.assertRaises, expectedExceptions, lambda: None)
-        self.assertFails('<function <lambda> at ...> returned None',
+        self.assertFails('<function ...<lambda> at ...> returned None',
             self.assertRaises, expectedExceptions, lambda: None)
 
     def test_assertRaises_function_repr_in_exception(self):
