@@ -155,7 +155,7 @@ class TestContent(TestCase):
 
     def test_json_content(self):
         data = {'foo': 'bar'}
-        expected = Content(JSON, lambda: [json.dumps(data)])
+        expected = Content(JSON, lambda: [_b('{"foo": "bar"}')])
         self.assertEqual(expected, json_content(data))
 
 
