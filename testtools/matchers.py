@@ -1319,6 +1319,35 @@ class HasPermissions(Matcher):
         return Equals(self.octal_permissions).match(permissions)
 
 
+class Dict(Matcher):
+    """Match a dict."""
+
+    def __init__(self, dict_of_matchers):
+        super(Dict, self).__init__()
+        self._matchers = dict_of_matchers
+
+    def __str__(self):
+        matchers = ["%r: %s" % (k, v) for k, v in self._matchers.items()]
+        return 'Dict({%s})' % ', '.join(matchers)
+
+    def match(self, observed):
+        observed_keys = set(observed.keys())
+        expected_keys = set(self._matchers.keys())
+        mismatches = []
+        missing_keys = expected_keys - observed_keys
+        if missing_keys:
+            mismatches.append(Mismatch("Missing keys"))
+        extra_keys = observed_keys - expected_keys
+        if extra_keys:
+            mismatches.append(Mismatch("Extra keys"))
+        for key in observed_keys & expected_keys:
+            matcher = self._matchers[key]
+            mismatch = matcher.match(observed[key])
+            if mismatch:
+                mismatches.append(mismatch)
+        if mismatches:
+            return MismatchesAll(mismatches)
+
 # Signal that this is part of the testing framework, and that code from this
 # should not normally appear in tracebacks.
 __unittest = True

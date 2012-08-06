@@ -29,6 +29,7 @@ from testtools.matchers import (
     _BinaryMismatch,
     Contains,
     ContainsAll,
+    Dict,
     DirContains,
     DirExists,
     DocTestMatches,
@@ -1367,6 +1368,54 @@ class TestHasPermissions(TestCase, PathHelpers):
         self.touch(filename)
         permissions = oct(os.stat(filename).st_mode)[-4:]
         self.assertThat(filename, HasPermissions(permissions))
+
+
+class TestDict(TestCase, TestMatchersInterface):
+
+    matches_matcher = Dict(
+        {'foo': Equals('bar'), 'baz': Not(Equals('qux'))})
+
+    matches_matches = [
+        {'foo': 'bar', 'baz': None},
+        {'foo': 'bar', 'baz': 'quux'},
+        ]
+    matches_mismatches = [
+        {},
+        {'foo': 'bar', 'baz': 'qux'},
+        {'foo': 'bop', 'baz': 'qux'},
+        {'foo': 'bar', 'baz': 'quux', 'cat': 'dog'},
+        {'foo': 'bar', 'cat': 'dog'},
+        ]
+
+    str_examples = [
+        ("Dict({'foo': %s, 'baz': %s})" % (Equals('bar'), Not(Equals('qux'))),
+         Dict({'foo': Equals('bar'), 'baz': Not(Equals('qux'))})),
+        ]
+
+    describe_examples = [
+        ("Differences: [\n"
+         "Missing keys\n"
+         "]",
+         {}, matches_matcher),
+        ("Differences: [\n"
+         "'qux' matches Equals('qux')\n"
+         "]",
+         {'foo': 'bar', 'baz': 'qux'}, matches_matcher),
+        ("Differences: [\n"
+         "'bar' != 'bop'\n"
+         "'qux' matches Equals('qux')"
+         "\n]",
+         {'foo': 'bop', 'baz': 'qux'}, matches_matcher),
+        ("Differences: [\n"
+         "Extra keys\n"
+         "]",
+         {'foo': 'bar', 'baz': 'quux', 'cat': 'dog'}, matches_matcher),
+        ("Differences: [\n"
+         "Missing keys\n"
+         "Extra keys\n"
+         "]",
+         {'foo': 'bar', 'cat': 'dog'}, matches_matcher),
+        ]
 
 
 def test_suite():
