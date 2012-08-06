@@ -1343,6 +1343,32 @@ def _intersect_dicts(a, b):
         )
 
 
+class PrefixMismatch(MismatchDecorator):
+
+    def __init__(self, prefix, mismatch):
+        super(PrefixMismatch, self).__init__(mismatch)
+        self.prefix = prefix
+
+    def describe(self):
+        return '%s: %s' % (self.prefix, self.original.describe())
+
+
+class DictMismatches(Mismatch):
+    """A mismatch with a dict of child mismatches."""
+
+    def __init__(self, mismatches, details=None):
+        super(DictMismatches, self).__init__(None, details=details)
+        self.mismatches = mismatches
+
+    def describe(self):
+        lines = ['{']
+        lines.extend(
+            ['  %r: %s,' % (key, mismatch.describe())
+             for (key, mismatch) in sorted(self.mismatches.items())])
+        lines.append('}')
+        return '\n'.join(lines)
+
+
 class Dict(Matcher):
     """Match a dict."""
 
@@ -1358,29 +1384,24 @@ class Dict(Matcher):
         missing, common, extra = _intersect_dicts(self._matchers, observed)
         mismatches = []
         if missing:
-            lines = sorted(["  %r: %s" % (k, v) for k, v in missing.items()])
-            lines.append('')
+            missing = dict((k, Mismatch(str(v))) for k, v in missing.items())
             mismatches.append(
-                Mismatch("Missing keys: {\n%s}" % ',\n'.join(lines)))
+                PrefixMismatch('Missing keys', DictMismatches(missing)))
         if extra:
-            lines = sorted([
-                "  %r: %r" % (k, v) for k, v in extra.items()])
-            lines.append('')
+            extra = dict((k, Mismatch(repr(v))) for k, v in extra.items())
             mismatches.append(
-                Mismatch("Extra keys: {\n%s}" % ',\n'.join(lines)))
+                PrefixMismatch("Extra keys", DictMismatches(extra)))
         differences = {}
         for key, (matcher, value) in common.items():
             mismatch = matcher.match(value)
             if mismatch:
                 differences[key] = mismatch
         if differences:
-            lines = sorted([
-                "  %r: %s" % (k, v.describe()) for (k, v) in differences.items()])
-            lines.append('')
             mismatches.append(
-                Mismatch("Differences: {\n%s}" % ',\n'.join(lines)))
+                PrefixMismatch("Differences", DictMismatches(differences)))
         if mismatches:
             return MismatchesAll(mismatches, wrap=False)
+
 
 # Signal that this is part of the testing framework, and that code from this
 # should not normally appear in tracebacks.
