@@ -1358,6 +1358,8 @@ class DictMismatches(Mismatch):
 
     def __init__(self, mismatches, details=None):
         super(DictMismatches, self).__init__(None, details=details)
+        # XXX: Maybe we should strip out 'None' values, either here, in the
+        # describe() or in a helper.
         self.mismatches = mismatches
 
     def describe(self):
@@ -1381,9 +1383,13 @@ class Dict(Matcher):
         return 'Dict({%s})' % ', '.join(matchers)
 
     def match(self, observed):
+        # XXX: This checks for dict equality.  Would be nice to have one for
+        # super-dict and sub-dict.  Wonder how much code we can make them
+        # share.
         missing, common, extra = _intersect_dicts(self._matchers, observed)
         mismatches = {}
         if missing:
+            # XXX: A 'map' for dict values would help all of these things.
             missing = dict((k, Mismatch(str(v))) for k, v in missing.items())
             mismatches['Missing keys'] = DictMismatches(missing)
         if extra:
@@ -1396,6 +1402,7 @@ class Dict(Matcher):
                 differences[key] = mismatch
         if differences:
             mismatches["Differences"] = DictMismatches(differences)
+        # XXX: Consider just using a DictMismatches here rather than prefix
         mismatches = [PrefixMismatch(k, v) for (k, v) in mismatches.items()]
         if mismatches:
             return MismatchesAll(mismatches, wrap=False)
