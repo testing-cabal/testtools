@@ -1336,10 +1336,20 @@ class Dict(Matcher):
         mismatches = []
         missing_keys = expected_keys - observed_keys
         if missing_keys:
-            mismatches.append(Mismatch("Missing keys"))
+            missing_keys = sorted([
+                "  %r: %s" % (k, v) for k, v in self._matchers.items()
+                if k in missing_keys])
+            missing_keys.append('')
+            mismatches.append(
+                Mismatch("Missing keys: {\n%s}" % ',\n'.join(missing_keys)))
         extra_keys = observed_keys - expected_keys
         if extra_keys:
-            mismatches.append(Mismatch("Extra keys"))
+            extra_keys = sorted([
+                "  %r: %r" % (k, v) for k, v in observed.items()
+                if k in extra_keys])
+            extra_keys.append('')
+            mismatches.append(
+                Mismatch("Extra keys: {\n%s}" % ',\n'.join(extra_keys)))
         for key in observed_keys & expected_keys:
             matcher = self._matchers[key]
             mismatch = matcher.match(observed[key])
