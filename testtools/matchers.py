@@ -1382,23 +1382,21 @@ class Dict(Matcher):
 
     def match(self, observed):
         missing, common, extra = _intersect_dicts(self._matchers, observed)
-        mismatches = []
+        mismatches = {}
         if missing:
             missing = dict((k, Mismatch(str(v))) for k, v in missing.items())
-            mismatches.append(
-                PrefixMismatch('Missing keys', DictMismatches(missing)))
+            mismatches['Missing keys'] = DictMismatches(missing)
         if extra:
             extra = dict((k, Mismatch(repr(v))) for k, v in extra.items())
-            mismatches.append(
-                PrefixMismatch("Extra keys", DictMismatches(extra)))
+            mismatches["Extra keys"] = DictMismatches(extra)
         differences = {}
         for key, (matcher, value) in common.items():
             mismatch = matcher.match(value)
             if mismatch:
                 differences[key] = mismatch
         if differences:
-            mismatches.append(
-                PrefixMismatch("Differences", DictMismatches(differences)))
+            mismatches["Differences"] = DictMismatches(differences)
+        mismatches = [PrefixMismatch(k, v) for (k, v) in mismatches.items()]
         if mismatches:
             return MismatchesAll(mismatches, wrap=False)
 
