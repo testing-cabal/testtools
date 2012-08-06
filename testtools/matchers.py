@@ -558,14 +558,18 @@ class MatchesAll(object):
 class MismatchesAll(Mismatch):
     """A mismatch with many child mismatches."""
 
-    def __init__(self, mismatches):
+    def __init__(self, mismatches, wrap=True):
         self.mismatches = mismatches
+        self._wrap = wrap
 
     def describe(self):
-        descriptions = ["Differences: ["]
+        descriptions = []
+        if self._wrap:
+            descriptions = ["Differences: ["]
         for mismatch in self.mismatches:
             descriptions.append(mismatch.describe())
-        descriptions.append("]")
+        if self._wrap:
+            descriptions.append("]")
         return '\n'.join(descriptions)
 
 
@@ -1356,7 +1360,7 @@ class Dict(Matcher):
             if mismatch:
                 mismatches.append(mismatch)
         if mismatches:
-            return MismatchesAll(mismatches)
+            return MismatchesAll(mismatches, wrap=False)
 
 # Signal that this is part of the testing framework, and that code from this
 # should not normally appear in tracebacks.

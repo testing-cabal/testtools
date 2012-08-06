@@ -1393,36 +1393,26 @@ class TestDict(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ("Differences: [\n"
-         "Missing keys: {\n"
+        ("Missing keys: {\n"
          "  'baz': Not(Equals('qux')),\n"
          "  'foo': Equals('bar'),\n"
-         "}\n"
-         "]",
+         "}",
          {}, matches_matcher),
-        ("Differences: [\n"
-         "'qux' matches Equals('qux')\n"
-         "]",
+        ("'qux' matches Equals('qux')",
          {'foo': 'bar', 'baz': 'qux'}, matches_matcher),
-        ("Differences: [\n"
-         "'bar' != 'bop'\n"
-         "'qux' matches Equals('qux')"
-         "\n]",
+        ("'bar' != 'bop'\n"
+         "'qux' matches Equals('qux')",
          {'foo': 'bop', 'baz': 'qux'}, matches_matcher),
-        ("Differences: [\n"
-         "Extra keys: {\n"
+        ("Extra keys: {\n"
          "  'cat': 'dog',\n"
-         "}\n"
-         "]",
+         "}",
          {'foo': 'bar', 'baz': 'quux', 'cat': 'dog'}, matches_matcher),
-        ("Differences: [\n"
-         "Missing keys: {\n"
+        ("Missing keys: {\n"
          "  'baz': Not(Equals('qux')),\n"
          "}\n"
          "Extra keys: {\n"
          "  'cat': 'dog',\n"
-         "}\n"
-         "]",
+         "}",
          {'foo': 'bar', 'cat': 'dog'}, matches_matcher),
         ]
 
