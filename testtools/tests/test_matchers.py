@@ -1398,10 +1398,14 @@ class TestDict(TestCase, TestMatchersInterface):
          "  'foo': Equals('bar'),\n"
          "}",
          {}, matches_matcher),
-        ("'qux' matches Equals('qux')",
+        ("Differences: {\n"
+         "  'baz': 'qux' matches Equals('qux'),\n"
+         "}",
          {'foo': 'bar', 'baz': 'qux'}, matches_matcher),
-        ("'bar' != 'bop'\n"
-         "'qux' matches Equals('qux')",
+        ("Differences: {\n"
+         "  'baz': 'qux' matches Equals('qux'),\n"
+         "  'foo': 'bar' != 'bop',\n"
+         "}",
          {'foo': 'bop', 'baz': 'qux'}, matches_matcher),
         ("Extra keys: {\n"
          "  'cat': 'dog',\n"

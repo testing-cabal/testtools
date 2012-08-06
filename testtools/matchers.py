@@ -1358,21 +1358,27 @@ class Dict(Matcher):
         missing, common, extra = _intersect_dicts(self._matchers, observed)
         mismatches = []
         if missing:
-            missing_lines = sorted([
-                "  %r: %s" % (k, v) for k, v in missing.items()])
-            missing_lines.append('')
+            lines = sorted(["  %r: %s" % (k, v) for k, v in missing.items()])
+            lines.append('')
             mismatches.append(
-                Mismatch("Missing keys: {\n%s}" % ',\n'.join(missing_lines)))
+                Mismatch("Missing keys: {\n%s}" % ',\n'.join(lines)))
         if extra:
-            extra_lines = sorted([
+            lines = sorted([
                 "  %r: %r" % (k, v) for k, v in extra.items()])
-            extra_lines.append('')
+            lines.append('')
             mismatches.append(
-                Mismatch("Extra keys: {\n%s}" % ',\n'.join(extra_lines)))
+                Mismatch("Extra keys: {\n%s}" % ',\n'.join(lines)))
+        differences = {}
         for key, (matcher, value) in common.items():
             mismatch = matcher.match(value)
             if mismatch:
-                mismatches.append(mismatch)
+                differences[key] = mismatch
+        if differences:
+            lines = sorted([
+                "  %r: %s" % (k, v.describe()) for (k, v) in differences.items()])
+            lines.append('')
+            mismatches.append(
+                Mismatch("Differences: {\n%s}" % ',\n'.join(lines)))
         if mismatches:
             return MismatchesAll(mismatches, wrap=False)
 
