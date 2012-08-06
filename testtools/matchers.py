@@ -1323,6 +1323,26 @@ class HasPermissions(Matcher):
         return Equals(self.octal_permissions).match(permissions)
 
 
+def _intersect_sets(a, b):
+    """Return things in a only, things in both, things in b only."""
+    return a - b, a & b, b - a
+
+
+def _intersect_dicts(a, b):
+    """Return three dicts, each representing one area of a Venn diagram.
+
+    That is, return a dict of things that have keys in a but not b, a dict of
+    things that have keys in both mapping to a tuple of a's value and b's
+    value, and a dict of things in b but not in a.
+    """
+    a_only, common, b_only = _intersect_sets(set(a.keys()), set(b.keys()))
+    return (
+        dict((k, a[k]) for k in a_only),
+        dict((k, (a[k], b[k])) for k in common),
+        dict((k, b[k]) for k in b_only),
+        )
+
+
 class Dict(Matcher):
     """Match a dict."""
 
@@ -1335,28 +1355,22 @@ class Dict(Matcher):
         return 'Dict({%s})' % ', '.join(matchers)
 
     def match(self, observed):
-        observed_keys = set(observed.keys())
-        expected_keys = set(self._matchers.keys())
+        missing, common, extra = _intersect_dicts(self._matchers, observed)
         mismatches = []
-        missing_keys = expected_keys - observed_keys
-        if missing_keys:
-            missing_keys = sorted([
-                "  %r: %s" % (k, v) for k, v in self._matchers.items()
-                if k in missing_keys])
-            missing_keys.append('')
+        if missing:
+            missing_lines = sorted([
+                "  %r: %s" % (k, v) for k, v in missing.items()])
+            missing_lines.append('')
             mismatches.append(
-                Mismatch("Missing keys: {\n%s}" % ',\n'.join(missing_keys)))
-        extra_keys = observed_keys - expected_keys
-        if extra_keys:
-            extra_keys = sorted([
-                "  %r: %r" % (k, v) for k, v in observed.items()
-                if k in extra_keys])
-            extra_keys.append('')
+                Mismatch("Missing keys: {\n%s}" % ',\n'.join(missing_lines)))
+        if extra:
+            extra_lines = sorted([
+                "  %r: %r" % (k, v) for k, v in extra.items()])
+            extra_lines.append('')
             mismatches.append(
-                Mismatch("Extra keys: {\n%s}" % ',\n'.join(extra_keys)))
-        for key in observed_keys & expected_keys:
-            matcher = self._matchers[key]
-            mismatch = matcher.match(observed[key])
+                Mismatch("Extra keys: {\n%s}" % ',\n'.join(extra_lines)))
+        for key, (matcher, value) in common.items():
+            mismatch = matcher.match(value)
             if mismatch:
                 mismatches.append(mismatch)
         if mismatches:
