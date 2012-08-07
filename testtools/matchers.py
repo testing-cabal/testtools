@@ -1418,6 +1418,23 @@ class _MatchCommonKeys(Matcher):
             return DictMismatches(mismatches)
 
 
+class _OnlyHasKeys(Matcher):
+
+    def __init__(self, expected_keys, format_value=repr):
+        super(_OnlyHasKeys, self).__init__()
+        self.expected_keys = set(expected_keys)
+        self.format_value = format_value
+
+    def match(self, observed):
+        observed_keys = set(observed.keys())
+        extra_keys = observed_keys - self.expected_keys
+        if extra_keys:
+            extras = dict(
+                (k, Mismatch(self.format_value(observed[k])))
+                for k in extra_keys)
+            return DictMismatches(extras)
+
+
 class Dict(Matcher):
     """Match a dictionary by its values.
 
@@ -1443,18 +1460,13 @@ class Dict(Matcher):
         return 'Dict({%s})' % ', '.join(matchers)
 
     def match(self, observed):
-        missing, common, extra = _intersect_dicts(self._matchers, observed)
-        mismatch_rules = {
-            'Missing': (missing, lambda v: Mismatch(str(v))),
-            'Extra': (extra, lambda v: Mismatch(repr(v))),
-            }
-        mismatches = {}
-        for label, (data, rule) in mismatch_rules.items():
-            m = filter_values(bool, map_values(rule, data))
-            if m:
-                mismatches[label] = DictMismatches(m)
-        mismatches = [PrefixMismatch(k, v)
-                      for (k, v) in sorted(mismatches.items())]
+        mismatches = []
+        extras = _OnlyHasKeys(self._matchers.keys()).match(observed)
+        if extras:
+            mismatches.append(PrefixMismatch('Extra', extras))
+        missing = _OnlyHasKeys(observed.keys(), str).match(self._matchers)
+        if missing:
+            mismatches.append(PrefixMismatch('Missing', missing))
         differences = _MatchCommonKeys(self._matchers).match(observed)
         if differences:
             mismatches.append(PrefixMismatch('Differences', differences))
