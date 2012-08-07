@@ -1343,8 +1343,6 @@ class DictMismatches(Mismatch):
 
     def __init__(self, mismatches, details=None):
         super(DictMismatches, self).__init__(None, details=details)
-        # XXX: Maybe we should strip out 'None' values, either here, in the
-        # describe() or in a helper.
         self.mismatches = mismatches
 
     def describe(self):
@@ -1387,7 +1385,6 @@ class Dict(Matcher):
             mismatches["Extra"] = DictMismatches(extra)
         if differences:
             mismatches["Differences"] = DictMismatches(differences)
-        # XXX: Consider just using a DictMismatches here rather than prefix
         mismatches = [PrefixMismatch(k, v) for (k, v) in mismatches.items()]
         if mismatches:
             return MismatchesAll(mismatches, wrap=False)
