@@ -1355,7 +1355,12 @@ class DictMismatches(Mismatch):
 
 
 class Dict(Matcher):
-    """Match a dict."""
+    """Match a dictionary by its values.
+
+    Specify a dictionary of matchers.  A dict will match this if it has keys
+    that match this dictionary of matchers, and if the values for each key
+    match the matchers.
+    """
 
     # XXX: Kind of like MatchesListwise.  Our core Python data type matcher
     # things are a bit of a mess.
@@ -1388,6 +1393,37 @@ class Dict(Matcher):
             mismatches['Missing'] = DictMismatches(missing)
         if extra:
             mismatches["Extra"] = DictMismatches(extra)
+        if differences:
+            mismatches["Differences"] = DictMismatches(differences)
+        mismatches = [PrefixMismatch(k, v) for (k, v) in mismatches.items()]
+        if mismatches:
+            return MismatchesAll(mismatches, wrap=False)
+
+
+class SubDict(Matcher):
+    """Match a dictionary for which this is a sub-dictionary.
+
+    Does not check for strict sub-dictionary.  That is, equal dictionaries
+    match.
+    """
+
+    def __init__(self, dict_of_matchers):
+        super(SubDict, self).__init__()
+        self._matchers = dict_of_matchers
+
+    def __str__(self):
+        matchers = ["%r: %s" % (k, v) for k, v in self._matchers.items()]
+        return 'SubDict({%s})' % ', '.join(matchers)
+
+    def match(self, observed):
+        missing, common, extra = _intersect_dicts(self._matchers, observed)
+        mismatches = {}
+        missing = map_values(lambda v: Mismatch(str(v)), missing)
+        differences = map_values(
+            lambda (matcher, value): matcher.match(value), common)
+        differences = filter_values(bool, differences)
+        if missing:
+            mismatches['Missing'] = DictMismatches(missing)
         if differences:
             mismatches["Differences"] = DictMismatches(differences)
         mismatches = [PrefixMismatch(k, v) for (k, v) in mismatches.items()]

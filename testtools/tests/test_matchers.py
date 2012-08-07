@@ -64,6 +64,7 @@ from testtools.matchers import (
     SameMembers,
     SamePath,
     StartsWith,
+    SubDict,
     TarballContains,
     )
 from testtools.tests.helpers import FullStackRunTest
@@ -1415,6 +1416,52 @@ class TestDict(TestCase, TestMatchersInterface):
          "  'cat': 'dog',\n"
          "}\n"
          "Missing: {\n"
+         "  'baz': Not(Equals('qux')),\n"
+         "}",
+         {'foo': 'bar', 'cat': 'dog'}, matches_matcher),
+        ]
+
+
+class TestSubDict(TestCase, TestMatchersInterface):
+
+    matches_matcher = SubDict(
+        {'foo': Equals('bar'), 'baz': Not(Equals('qux'))})
+
+    matches_matches = [
+        {'foo': 'bar', 'baz': None},
+        {'foo': 'bar', 'baz': 'quux'},
+        {'foo': 'bar', 'baz': 'quux', 'cat': 'dog'},
+        ]
+    matches_mismatches = [
+        {},
+        {'foo': 'bar', 'baz': 'qux'},
+        {'foo': 'bop', 'baz': 'qux'},
+        {'foo': 'bar', 'cat': 'dog'},
+        {'foo': 'bar'},
+        ]
+
+    str_examples = [
+        ("SubDict({'foo': %s, 'baz': %s})" % (
+                Equals('bar'), Not(Equals('qux'))),
+         matches_matcher),
+        ]
+
+    describe_examples = [
+        ("Missing: {\n"
+         "  'baz': Not(Equals('qux')),\n"
+         "  'foo': Equals('bar'),\n"
+         "}",
+         {}, matches_matcher),
+        ("Differences: {\n"
+         "  'baz': 'qux' matches Equals('qux'),\n"
+         "}",
+         {'foo': 'bar', 'baz': 'qux'}, matches_matcher),
+        ("Differences: {\n"
+         "  'baz': 'qux' matches Equals('qux'),\n"
+         "  'foo': 'bar' != 'bop',\n"
+         "}",
+         {'foo': 'bop', 'baz': 'qux'}, matches_matcher),
+        ("Missing: {\n"
          "  'baz': Not(Equals('qux')),\n"
          "}",
          {'foo': 'bar', 'cat': 'dog'}, matches_matcher),
