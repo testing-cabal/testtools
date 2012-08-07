@@ -99,3 +99,8 @@ def map_values(function, dictionary):
 def filter_values(function, dictionary):
     """Filter ``dictionary`` by its values using ``function``."""
     return dict((k, v) for k, v in dictionary.items() if function(v))
+
+
+def dict_subtract(a, b):
+    """Return the part of ``a`` that's not in ``b``."""
+    return dict((k, a[k]) for k in set(a) - set(b))

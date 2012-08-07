@@ -66,6 +66,7 @@ from testtools.compat import (
     text_repr
     )
 from testtools.helpers import (
+    dict_subtract,
     filter_values,
     map_values,
     )
@@ -1404,10 +1405,6 @@ class _MatchCommonKeys(Matcher):
             return DictMismatches(mismatches)
 
 
-def strip_keys(d, keys):
-    return dict((k, d[k]) for k in set(d.keys()) - set(keys))
-
-
 class _SubDictOf(Matcher):
 
     def __init__(self, super_dict, format_value=repr):
@@ -1416,7 +1413,7 @@ class _SubDictOf(Matcher):
         self.format_value = format_value
 
     def match(self, observed):
-        excess = strip_keys(observed, self.super_dict)
+        excess = dict_subtract(observed, self.super_dict)
         return _dict_to_mismatch(
             excess, lambda v: Mismatch(self.format_value(v)))
 
