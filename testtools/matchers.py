@@ -1434,16 +1434,17 @@ class SubDict(Matcher):
 
     def match(self, observed):
         missing, common, extra = _intersect_dicts(self._matchers, observed)
+        mismatch_rules = {
+            'Missing': (missing, lambda v: Mismatch(str(v))),
+            'Differences': (common, lambda (matcher, value): matcher.match(value)),
+            }
         mismatches = {}
-        missing = map_values(lambda v: Mismatch(str(v)), missing)
-        differences = map_values(
-            lambda (matcher, value): matcher.match(value), common)
-        differences = filter_values(bool, differences)
-        if missing:
-            mismatches['Missing'] = DictMismatches(missing)
-        if differences:
-            mismatches["Differences"] = DictMismatches(differences)
-        mismatches = [PrefixMismatch(k, v) for (k, v) in mismatches.items()]
+        for label, (data, rule) in mismatch_rules.items():
+            m = filter_values(bool, map_values(rule, data))
+            if m:
+                mismatches[label] = DictMismatches(m)
+        mismatches = [PrefixMismatch(k, v)
+                      for (k, v) in sorted(mismatches.items())]
         if mismatches:
             return MismatchesAll(mismatches, wrap=False)
 
@@ -1465,16 +1466,17 @@ class SuperDict(Matcher):
 
     def match(self, observed):
         missing, common, extra = _intersect_dicts(self._matchers, observed)
+        mismatch_rules = {
+            'Extra': (extra, lambda v: Mismatch(repr(v))),
+            'Differences': (common, lambda (matcher, value): matcher.match(value)),
+            }
         mismatches = {}
-        extra = map_values(lambda v: Mismatch(repr(v)), extra)
-        differences = map_values(
-            lambda (matcher, value): matcher.match(value), common)
-        differences = filter_values(bool, differences)
-        if extra:
-            mismatches['Extra'] = DictMismatches(extra)
-        if differences:
-            mismatches["Differences"] = DictMismatches(differences)
-        mismatches = [PrefixMismatch(k, v) for (k, v) in mismatches.items()]
+        for label, (data, rule) in mismatch_rules.items():
+            m = filter_values(bool, map_values(rule, data))
+            if m:
+                mismatches[label] = DictMismatches(m)
+        mismatches = [PrefixMismatch(k, v)
+                      for (k, v) in sorted(mismatches.items())]
         if mismatches:
             return MismatchesAll(mismatches, wrap=False)
 
