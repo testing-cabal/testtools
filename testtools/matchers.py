@@ -1431,83 +1431,67 @@ class _SuperDictOf(Matcher):
         return _SubDictOf(super_dict, self.format_value).match(self.sub_dict)
 
 
-class Dict(Matcher):
-    """Match a dictionary by its values.
-
-    Specify a dictionary of matchers.  A dict will match this if it has keys
-    that match this dictionary of matchers, and if the values for each key
-    match the matchers.
-    """
-
-    # XXX: Kind of like MatchesListwise.  Our core Python data type matcher
-    # things are a bit of a mess.
-    #   - names are inconsistent
-    #   - names are hard to guess
-    #   - no systematic approach to what can be matched or how they're matched
-    #   - lots of 'if foo: return Mismatch(...)'
-    #   - no consistent approach to combining mismatches
-
-    def __init__(self, dict_of_matchers):
-        super(Dict, self).__init__()
-        self._matchers = dict_of_matchers
-
-    def __str__(self):
-        matchers = ["%r: %s" % (k, v) for k, v in self._matchers.items()]
-        return 'Dict({%s})' % ', '.join(matchers)
-
-    def match(self, observed):
-        matchers = {
-            'Extra': _SubDictOf(self._matchers),
-            'Missing': _SuperDictOf(self._matchers, format_value=str),
-            'Differences': _MatchCommonKeys(self._matchers),
-            }
-        return MatchesAllDict(matchers).match(observed)
+def _format_matcher_dict(matchers):
+    return '{%s}' % (
+        ', '.join('%r: %s' % (k, v) for k, v in matchers.items()))
 
 
-class SubDict(Matcher):
+class _DictMatcher(Matcher):
     """Match a dictionary for which this is a sub-dictionary.
 
     Does not check for strict sub-dictionary.  That is, equal dictionaries
     match.
     """
 
+    matcher_factories = {}
+
     def __init__(self, dict_of_matchers):
-        super(SubDict, self).__init__()
+        super(_DictMatcher, self).__init__()
         self._matchers = dict_of_matchers
 
     def __str__(self):
-        matchers = ["%r: %s" % (k, v) for k, v in self._matchers.items()]
-        return 'SubDict({%s})' % ', '.join(matchers)
+        return '%s(%s)' % (
+            self.__class__.__name__, _format_matcher_dict(self._matchers))
 
     def match(self, observed):
-        matchers = {
-            'Missing': _SuperDictOf(self._matchers, format_value=str),
-            'Differences': _MatchCommonKeys(self._matchers),
-            }
+        matchers = dict(
+            (k, v(self._matchers)) for k, v in self.matcher_factories.items())
         return MatchesAllDict(matchers).match(observed)
 
 
-class SuperDict(Matcher):
+class Dict(_DictMatcher):
+
+    matcher_factories = {
+        'Extra': _SubDictOf,
+        'Missing': lambda m: _SuperDictOf(m, format_value=str),
+        'Differences': _MatchCommonKeys,
+        }
+
+
+class SubDict(_DictMatcher):
+    """Match a dictionary for which this is a sub-dictionary.
+
+    Does not check for strict sub-dictionary.  That is, equal dictionaries
+    match.
+    """
+
+    matcher_factories = {
+        'Missing': lambda m: _SuperDictOf(m, format_value=str),
+        'Differences': _MatchCommonKeys,
+        }
+
+
+class SuperDict(_DictMatcher):
     """Match a dictionary for which this is a super-dictionary.
 
     Does not check for strict super-dictionary.  That is, equal dictionaries
     match.
     """
 
-    def __init__(self, dict_of_matchers):
-        super(SuperDict, self).__init__()
-        self._matchers = dict_of_matchers
-
-    def __str__(self):
-        matchers = ["%r: %s" % (k, v) for k, v in self._matchers.items()]
-        return 'SuperDict({%s})' % ', '.join(matchers)
-
-    def match(self, observed):
-        matchers = {
-            'Extra': _SubDictOf(self._matchers),
-            'Differences': _MatchCommonKeys(self._matchers),
-            }
-        return MatchesAllDict(matchers).match(observed)
+    matcher_factories = {
+        'Extra': _SubDictOf,
+        'Differences': _MatchCommonKeys,
+        }
 
 
 # Signal that this is part of the testing framework, and that code from this
