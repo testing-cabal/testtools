@@ -1374,6 +1374,9 @@ class DictMismatches(Mismatch):
 class Dict(Matcher):
     """Match a dict."""
 
+    # XXX: Kind of like MatchesListwise.  Our core Python data type matcher
+    # things are a bit of a mess.
+
     def __init__(self, dict_of_matchers):
         super(Dict, self).__init__()
         self._matchers = dict_of_matchers
@@ -1391,10 +1394,10 @@ class Dict(Matcher):
         if missing:
             # XXX: A 'map' for dict values would help all of these things.
             missing = dict((k, Mismatch(str(v))) for k, v in missing.items())
-            mismatches['Missing keys'] = DictMismatches(missing)
+            mismatches['Missing'] = DictMismatches(missing)
         if extra:
             extra = dict((k, Mismatch(repr(v))) for k, v in extra.items())
-            mismatches["Extra keys"] = DictMismatches(extra)
+            mismatches["Extra"] = DictMismatches(extra)
         differences = {}
         for key, (matcher, value) in common.items():
             mismatch = matcher.match(value)

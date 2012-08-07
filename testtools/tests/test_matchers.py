@@ -1393,7 +1393,7 @@ class TestDict(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ("Missing keys: {\n"
+        ("Missing: {\n"
          "  'baz': Not(Equals('qux')),\n"
          "  'foo': Equals('bar'),\n"
          "}",
@@ -1407,15 +1407,15 @@ class TestDict(TestCase, TestMatchersInterface):
          "  'foo': 'bar' != 'bop',\n"
          "}",
          {'foo': 'bop', 'baz': 'qux'}, matches_matcher),
-        ("Extra keys: {\n"
+        ("Extra: {\n"
          "  'cat': 'dog',\n"
          "}",
          {'foo': 'bar', 'baz': 'quux', 'cat': 'dog'}, matches_matcher),
-        ("Missing keys: {\n"
-         "  'baz': Not(Equals('qux')),\n"
-         "}\n"
-         "Extra keys: {\n"
+        ("Extra: {\n"
          "  'cat': 'dog',\n"
+         "}\n"
+         "Missing: {\n"
+         "  'baz': Not(Equals('qux')),\n"
          "}",
          {'foo': 'bar', 'cat': 'dog'}, matches_matcher),
         ]
