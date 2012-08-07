@@ -1389,7 +1389,7 @@ class TestDict(TestCase, TestMatchersInterface):
 
     str_examples = [
         ("Dict({'foo': %s, 'baz': %s})" % (Equals('bar'), Not(Equals('qux'))),
-         Dict({'foo': Equals('bar'), 'baz': Not(Equals('qux'))})),
+         matches_matcher),
         ]
 
     describe_examples = [
