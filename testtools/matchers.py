@@ -747,10 +747,9 @@ class KeysMatch(Matcher):
             )
 
     def match(self, matchee):
-        expected = sorted(self.expected)
-        matched = self.make_matcher(expected).match(sorted(matchee.keys()))
+        matched = self.make_matcher(self.expected).match(matchee.keys())
         if matched:
-            return self.make_mismatch(matched, expected, matchee)
+            return self.make_mismatch(matched, self.expected, matchee)
         return None
 
 
@@ -766,10 +765,10 @@ class KeysEqual(Matcher):
     def _keys_not_equal(self, mismatch, expected, matchee):
         return AnnotatedMismatch(
             'Keys not equal',
-            _BinaryMismatch(expected, 'does not match', matchee))
+            _BinaryMismatch(sorted(expected), 'does not match', matchee))
 
     def match(self, matchee):
-        matcher = KeysMatch(self.expected, Equals, self._keys_not_equal)
+        matcher = KeysMatch(self.expected, SameMembers, self._keys_not_equal)
         return matcher.match(matchee)
 
 
