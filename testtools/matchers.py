@@ -1359,6 +1359,11 @@ class Dict(Matcher):
 
     # XXX: Kind of like MatchesListwise.  Our core Python data type matcher
     # things are a bit of a mess.
+    #   - names are inconsistent
+    #   - names are hard to guess
+    #   - no systematic approach to what can be matched or how they're matched
+    #   - lots of 'if foo: return Mismatch(...)'
+    #   - no consistent approach to combining mismatches
 
     def __init__(self, dict_of_matchers):
         super(Dict, self).__init__()
