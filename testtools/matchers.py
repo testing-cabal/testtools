@@ -573,6 +573,52 @@ class MismatchesAll(Mismatch):
         return '\n'.join(descriptions)
 
 
+class MatchesAllDict(Matcher):
+
+    def __init__(self, matchers):
+        super(MatchesAllDict, self).__init__()
+        self.matchers = matchers
+
+    def __str__(self):
+        return 'MatchesAllDict({%s})' % (
+            ', '.join('%r: %s' % (k, v) for k, v in self.matchers.items()))
+
+    def match(self, observed):
+        mismatches = []
+        for label, matcher in sorted(self.matchers.items()):
+            mismatch = matcher.match(observed)
+            if mismatch:
+                mismatches.append(PrefixMismatch(label, mismatch))
+        if mismatches:
+            return MismatchesAll(mismatches, wrap=False)
+
+
+class DictMismatches(Mismatch):
+    """A mismatch with a dict of child mismatches."""
+
+    def __init__(self, mismatches, details=None):
+        super(DictMismatches, self).__init__(None, details=details)
+        self.mismatches = mismatches
+
+    def describe(self):
+        lines = ['{']
+        lines.extend(
+            ['  %r: %s,' % (key, mismatch.describe())
+             for (key, mismatch) in sorted(self.mismatches.items())])
+        lines.append('}')
+        return '\n'.join(lines)
+
+
+def _dict_to_mismatch(data, to_mismatch=lambda x: x):
+    mismatches = {}
+    for key in data:
+        mismatch = to_mismatch(data[key])
+        if mismatch:
+            mismatches[key] = mismatch
+    if mismatches:
+        return DictMismatches(mismatches)
+
+
 class Not(object):
     """Inverts a matcher."""
 
@@ -1356,22 +1402,6 @@ class PrefixMismatch(MismatchDecorator):
         return '%s: %s' % (self.prefix, self.original.describe())
 
 
-class DictMismatches(Mismatch):
-    """A mismatch with a dict of child mismatches."""
-
-    def __init__(self, mismatches, details=None):
-        super(DictMismatches, self).__init__(None, details=details)
-        self.mismatches = mismatches
-
-    def describe(self):
-        lines = ['{']
-        lines.extend(
-            ['  %r: %s,' % (key, mismatch.describe())
-             for (key, mismatch) in sorted(self.mismatches.items())])
-        lines.append('}')
-        return '\n'.join(lines)
-
-
 class _MatchCommonKeys(Matcher):
 
     def __init__(self, dict_of_matchers):
@@ -1395,22 +1425,6 @@ class _MatchCommonKeys(Matcher):
 
 def strip_keys(d, keys):
     return dict((k, d[k]) for k in set(d.keys()) - set(keys))
-
-
-def _list_to_mismatch(data, to_mismatch=lambda x: x):
-    mismatches = [m for m in map(to_mismatch, data) if m]
-    if mismatches:
-        return MismatchesAll(mismatches, wrap=False)
-
-
-def _dict_to_mismatch(data, to_mismatch=lambda x: x):
-    mismatches = {}
-    for key in data:
-        mismatch = to_mismatch(data[key])
-        if mismatch:
-            mismatches[key] = mismatch
-    if mismatches:
-        return DictMismatches(mismatches)
 
 
 class _SubDictOf(Matcher):
@@ -1467,13 +1481,7 @@ class Dict(Matcher):
             'Missing': _SuperDictOf(self._matchers, format_value=str),
             'Differences': _MatchCommonKeys(self._matchers),
             }
-        mismatches = []
-        for label, matcher in sorted(matchers.items()):
-            mismatch = matcher.match(observed)
-            if mismatch:
-                mismatches.append(PrefixMismatch(label, mismatch))
-        if mismatches:
-            return MismatchesAll(mismatches, wrap=False)
+        return MatchesAllDict(matchers).match(observed)
 
 
 class SubDict(Matcher):
@@ -1496,13 +1504,7 @@ class SubDict(Matcher):
             'Missing': _SuperDictOf(self._matchers, format_value=str),
             'Differences': _MatchCommonKeys(self._matchers),
             }
-        mismatches = []
-        for label, matcher in sorted(matchers.items()):
-            mismatch = matcher.match(observed)
-            if mismatch:
-                mismatches.append(PrefixMismatch(label, mismatch))
-        if mismatches:
-            return MismatchesAll(mismatches, wrap=False)
+        return MatchesAllDict(matchers).match(observed)
 
 
 class SuperDict(Matcher):
@@ -1525,13 +1527,7 @@ class SuperDict(Matcher):
             'Extra': _SubDictOf(self._matchers),
             'Differences': _MatchCommonKeys(self._matchers),
             }
-        mismatches = []
-        for label, matcher in sorted(matchers.items()):
-            mismatch = matcher.match(observed)
-            if mismatch:
-                mismatches.append(PrefixMismatch(label, mismatch))
-        if mismatches:
-            return MismatchesAll(mismatches, wrap=False)
+        return MatchesAllDict(matchers).match(observed)
 
 
 # Signal that this is part of the testing framework, and that code from this

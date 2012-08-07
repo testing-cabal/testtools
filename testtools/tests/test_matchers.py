@@ -47,6 +47,7 @@ from testtools.matchers import (
     GreaterThan,
     MatchesAny,
     MatchesAll,
+    MatchesAllDict,
     MatchesException,
     MatchesListwise,
     MatchesPredicate,
@@ -576,6 +577,21 @@ class TestMatchesAllInterface(TestCase, TestMatchersInterface):
          1, MatchesAll(NotEquals(1), NotEquals(2))),
         ("1 == 1", 1,
          MatchesAll(NotEquals(2), NotEquals(1), Equals(3), first_only=True)),
+        ]
+
+
+class TestMatchesAllDictInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = MatchesAllDict({'a': NotEquals(1), 'b': NotEquals(2)})
+    matches_matches = [3, 4]
+    matches_mismatches = [1, 2]
+
+    str_examples = [
+        ("MatchesAllDict({'a': NotEquals(1), 'b': NotEquals(2)})",
+         matches_matcher)]
+
+    describe_examples = [
+        ("""a: 1 == 1""", 1, matches_matcher),
         ]
 
 
