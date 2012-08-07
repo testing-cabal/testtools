@@ -763,55 +763,26 @@ class EndsWith(Matcher):
         return None
 
 
-
-class KeysMatch(Matcher):
-    """Checks whether a dict has particular keys."""
-
-    def __init__(self, expected, make_matcher, make_mismatch):
-        """Create a `KeysMatch` Matcher.
-
-        :param expected: The keys the dict is expected to have.  If a dict,
-            then we use the keys of that dict, if a collection, we assume it
-            is a collection of expected keys.
-        """
-        try:
-            self.expected = expected.keys()
-        except AttributeError:
-            self.expected = list(expected)
-        self.make_matcher = make_matcher
-        self.make_mismatch = make_mismatch
-
-    def __str__(self):
-        return "KeysMatch(%s, %s, %s)" % (
-            ', '.join(map(repr, self.expected)),
-            self.make_matcher,
-            self.make_mismatch,
-            )
-
-    def match(self, matchee):
-        matched = self.make_matcher(self.expected).match(matchee.keys())
-        if matched:
-            return self.make_mismatch(matched, self.expected, matchee)
-        return None
-
-
 class KeysEqual(Matcher):
 
     def __init__(self, *expected):
         super(KeysEqual, self).__init__()
-        self.expected = expected
+        try:
+            self.expected = expected.keys()
+        except AttributeError:
+            self.expected = list(expected)
 
     def __str__(self):
         return "KeysEqual(%s)" % ', '.join(map(repr, self.expected))
 
-    def _keys_not_equal(self, mismatch, expected, matchee):
-        return AnnotatedMismatch(
-            'Keys not equal',
-            _BinaryMismatch(sorted(expected), 'does not match', matchee))
-
     def match(self, matchee):
-        matcher = KeysMatch(self.expected, SameMembers, self._keys_not_equal)
-        return matcher.match(matchee)
+        expected = sorted(self.expected)
+        matched = Equals(expected).match(sorted(matchee.keys()))
+        if matched:
+            return AnnotatedMismatch(
+                'Keys not equal',
+                _BinaryMismatch(expected, 'does not match', matchee))
+        return None
 
 
 class Annotate(object):
