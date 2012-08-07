@@ -1397,6 +1397,26 @@ def _intersect_dicts(a, b):
         )
 
 
+class _MatchCommonKeys(Matcher):
+
+    def __init__(self, dict_of_matchers):
+        super(_MatchCommonKeys, self).__init__()
+        self._matchers = dict_of_matchers
+
+    def _compare_dicts(self, expected, observed):
+        common_keys = set(expected.keys()) & set(observed.keys())
+        mismatches = {}
+        for key in common_keys:
+            mismatch = expected[key].match(observed[key])
+            if mismatch:
+                mismatches[key] = mismatch
+        return mismatches
+
+    def match(self, observed):
+        mismatches = self._compare_dicts(self._matchers, observed)
+        if mismatches:
+            return DictMismatches(mismatches)
+
 
 class Dict(Matcher):
     """Match a dictionary by its values.
@@ -1427,7 +1447,6 @@ class Dict(Matcher):
         mismatch_rules = {
             'Missing': (missing, lambda v: Mismatch(str(v))),
             'Extra': (extra, lambda v: Mismatch(repr(v))),
-            'Differences': (common, lambda (matcher, value): matcher.match(value)),
             }
         mismatches = {}
         for label, (data, rule) in mismatch_rules.items():
@@ -1436,6 +1455,9 @@ class Dict(Matcher):
                 mismatches[label] = DictMismatches(m)
         mismatches = [PrefixMismatch(k, v)
                       for (k, v) in sorted(mismatches.items())]
+        differences = _MatchCommonKeys(self._matchers).match(observed)
+        if differences:
+            mismatches.append(PrefixMismatch('Differences', differences))
         if mismatches:
             return MismatchesAll(mismatches, wrap=False)
 
