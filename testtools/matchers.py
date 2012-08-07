@@ -66,7 +66,6 @@ from testtools.compat import (
     text_repr
     )
 from testtools.helpers import (
-    _intersect_dicts,
     filter_values,
     map_values,
     )
@@ -1354,6 +1353,28 @@ class DictMismatches(Mismatch):
         return '\n'.join(lines)
 
 
+
+def _intersect_sets(a, b):
+    """Return things in a only, things in both, things in b only."""
+    return a - b, a & b, b - a
+
+
+def _intersect_dicts(a, b):
+    """Return three dicts, each representing one area of a Venn diagram.
+
+    That is, return a dict of things that have keys in a but not b, a dict of
+    things that have keys in both mapping to a tuple of a's value and b's
+    value, and a dict of things in b but not in a.
+    """
+    a_only, common, b_only = _intersect_sets(set(a.keys()), set(b.keys()))
+    return (
+        dict((k, a[k]) for k in a_only),
+        dict((k, (a[k], b[k])) for k in common),
+        dict((k, b[k]) for k in b_only),
+        )
+
+
+
 class Dict(Matcher):
     """Match a dictionary by its values.
 
@@ -1380,19 +1401,18 @@ class Dict(Matcher):
 
     def match(self, observed):
         missing, common, extra = _intersect_dicts(self._matchers, observed)
+        mismatch_rules = {
+            'Missing': (missing, lambda v: Mismatch(str(v))),
+            'Extra': (extra, lambda v: Mismatch(repr(v))),
+            'Differences': (common, lambda (matcher, value): matcher.match(value)),
+            }
         mismatches = {}
-        missing = map_values(lambda v: Mismatch(str(v)), missing)
-        extra = map_values(lambda v: Mismatch(repr(v)), extra)
-        differences = map_values(
-            lambda (matcher, value): matcher.match(value), common)
-        differences = filter_values(bool, differences)
-        if missing:
-            mismatches['Missing'] = DictMismatches(missing)
-        if extra:
-            mismatches["Extra"] = DictMismatches(extra)
-        if differences:
-            mismatches["Differences"] = DictMismatches(differences)
-        mismatches = [PrefixMismatch(k, v) for (k, v) in mismatches.items()]
+        for label, (data, rule) in mismatch_rules.items():
+            m = filter_values(bool, map_values(rule, data))
+            if m:
+                mismatches[label] = DictMismatches(m)
+        mismatches = [PrefixMismatch(k, v)
+                      for (k, v) in sorted(mismatches.items())]
         if mismatches:
             return MismatchesAll(mismatches, wrap=False)
 
