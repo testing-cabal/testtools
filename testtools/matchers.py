@@ -65,6 +65,9 @@ from testtools.compat import (
     str_is_unicode,
     text_repr
     )
+from testtools.helpers import (
+    _intersect_dicts,
+    )
 
 
 class Matcher(object):
@@ -1321,26 +1324,6 @@ class HasPermissions(Matcher):
     def match(self, filename):
         permissions = oct(os.stat(filename).st_mode)[-4:]
         return Equals(self.octal_permissions).match(permissions)
-
-
-def _intersect_sets(a, b):
-    """Return things in a only, things in both, things in b only."""
-    return a - b, a & b, b - a
-
-
-def _intersect_dicts(a, b):
-    """Return three dicts, each representing one area of a Venn diagram.
-
-    That is, return a dict of things that have keys in a but not b, a dict of
-    things that have keys in both mapping to a tuple of a's value and b's
-    value, and a dict of things in b but not in a.
-    """
-    a_only, common, b_only = _intersect_sets(set(a.keys()), set(b.keys()))
-    return (
-        dict((k, a[k]) for k in a_only),
-        dict((k, (a[k], b[k])) for k in common),
-        dict((k, b[k]) for k in b_only),
-        )
 
 
 class PrefixMismatch(MismatchDecorator):
