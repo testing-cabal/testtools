@@ -1437,11 +1437,6 @@ def _format_matcher_dict(matchers):
 
 
 class _DictMatcher(Matcher):
-    """Match a dictionary for which this is a sub-dictionary.
-
-    Does not check for strict sub-dictionary.  That is, equal dictionaries
-    match.
-    """
 
     matcher_factories = {}
 
@@ -1460,6 +1455,11 @@ class _DictMatcher(Matcher):
 
 
 class Dict(_DictMatcher):
+    """Match a dictionary exactly, by its keys.
+
+    Each key in the dictionary must match the matcher for the equivalent key
+    in the dict of matchers.
+    """
 
     matcher_factories = {
         'Extra': _SubDictOf,
