@@ -65,10 +65,6 @@ from testtools.compat import (
     str_is_unicode,
     text_repr
     )
-from testtools.helpers import (
-    filter_values,
-    map_values,
-    )
 
 
 class Matcher(object):
@@ -1376,27 +1372,6 @@ class DictMismatches(Mismatch):
         return '\n'.join(lines)
 
 
-
-def _intersect_sets(a, b):
-    """Return things in a only, things in both, things in b only."""
-    return a - b, a & b, b - a
-
-
-def _intersect_dicts(a, b):
-    """Return three dicts, each representing one area of a Venn diagram.
-
-    That is, return a dict of things that have keys in a but not b, a dict of
-    things that have keys in both mapping to a tuple of a's value and b's
-    value, and a dict of things in b but not in a.
-    """
-    a_only, common, b_only = _intersect_sets(set(a.keys()), set(b.keys()))
-    return (
-        dict((k, a[k]) for k in a_only),
-        dict((k, (a[k], b[k])) for k in common),
-        dict((k, b[k]) for k in b_only),
-        )
-
-
 class _MatchCommonKeys(Matcher):
 
     def __init__(self, dict_of_matchers):
@@ -1418,21 +1393,41 @@ class _MatchCommonKeys(Matcher):
             return DictMismatches(mismatches)
 
 
-class _OnlyHasKeys(Matcher):
+def strip_keys(d, keys):
+    return dict((k, d[k]) for k in set(d.keys()) - set(keys))
 
-    def __init__(self, expected_keys, format_value=repr):
-        super(_OnlyHasKeys, self).__init__()
-        self.expected_keys = set(expected_keys)
+
+def _dict_to_mismatch(d, to_mismatch=lambda x: x):
+    mismatches = {}
+    for key in d:
+        if d[key]:
+            mismatches[key] = to_mismatch(d[key])
+    if mismatches:
+        return DictMismatches(mismatches)
+
+
+class _SubDictOf(Matcher):
+
+    def __init__(self, super_dict, format_value=repr):
+        super(_SubDictOf, self).__init__()
+        self.super_dict = super_dict
         self.format_value = format_value
 
     def match(self, observed):
-        observed_keys = set(observed.keys())
-        extra_keys = observed_keys - self.expected_keys
-        if extra_keys:
-            extras = dict(
-                (k, Mismatch(self.format_value(observed[k])))
-                for k in extra_keys)
-            return DictMismatches(extras)
+        excess = strip_keys(observed, self.super_dict)
+        return _dict_to_mismatch(
+            excess, lambda v: Mismatch(self.format_value(v)))
+
+
+class _SuperDictOf(Matcher):
+
+    def __init__(self, sub_dict, format_value=repr):
+        super(_SuperDictOf, self).__init__()
+        self.sub_dict = sub_dict
+        self.format_value = format_value
+
+    def match(self, super_dict):
+        return _SubDictOf(super_dict, self.format_value).match(self.sub_dict)
 
 
 class Dict(Matcher):
@@ -1461,10 +1456,10 @@ class Dict(Matcher):
 
     def match(self, observed):
         mismatches = []
-        extras = _OnlyHasKeys(self._matchers.keys()).match(observed)
+        extras = _SubDictOf(self._matchers).match(observed)
         if extras:
             mismatches.append(PrefixMismatch('Extra', extras))
-        missing = _OnlyHasKeys(observed.keys(), str).match(self._matchers)
+        missing = _SuperDictOf(self._matchers, format_value=str).match(observed)
         if missing:
             mismatches.append(PrefixMismatch('Missing', missing))
         differences = _MatchCommonKeys(self._matchers).match(observed)
@@ -1490,18 +1485,13 @@ class SubDict(Matcher):
         return 'SubDict({%s})' % ', '.join(matchers)
 
     def match(self, observed):
-        missing, common, extra = _intersect_dicts(self._matchers, observed)
-        mismatch_rules = {
-            'Missing': (missing, lambda v: Mismatch(str(v))),
-            'Differences': (common, lambda (matcher, value): matcher.match(value)),
-            }
-        mismatches = {}
-        for label, (data, rule) in mismatch_rules.items():
-            m = filter_values(bool, map_values(rule, data))
-            if m:
-                mismatches[label] = DictMismatches(m)
-        mismatches = [PrefixMismatch(k, v)
-                      for (k, v) in sorted(mismatches.items())]
+        mismatches = []
+        missing = _SuperDictOf(self._matchers, format_value=str).match(observed)
+        if missing:
+            mismatches.append(PrefixMismatch('Missing', missing))
+        differences = _MatchCommonKeys(self._matchers).match(observed)
+        if differences:
+            mismatches.append(PrefixMismatch('Differences', differences))
         if mismatches:
             return MismatchesAll(mismatches, wrap=False)
 
@@ -1522,18 +1512,13 @@ class SuperDict(Matcher):
         return 'SuperDict({%s})' % ', '.join(matchers)
 
     def match(self, observed):
-        missing, common, extra = _intersect_dicts(self._matchers, observed)
-        mismatch_rules = {
-            'Extra': (extra, lambda v: Mismatch(repr(v))),
-            'Differences': (common, lambda (matcher, value): matcher.match(value)),
-            }
-        mismatches = {}
-        for label, (data, rule) in mismatch_rules.items():
-            m = filter_values(bool, map_values(rule, data))
-            if m:
-                mismatches[label] = DictMismatches(m)
-        mismatches = [PrefixMismatch(k, v)
-                      for (k, v) in sorted(mismatches.items())]
+        mismatches = []
+        extras = _SubDictOf(self._matchers).match(observed)
+        if extras:
+            mismatches.append(PrefixMismatch('Extra', extras))
+        differences = _MatchCommonKeys(self._matchers).match(observed)
+        if differences:
+            mismatches.append(PrefixMismatch('Differences', differences))
         if mismatches:
             return MismatchesAll(mismatches, wrap=False)
 

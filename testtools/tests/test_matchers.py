@@ -64,6 +64,7 @@ from testtools.matchers import (
     SameMembers,
     SamePath,
     StartsWith,
+    _SubDictOf,
     SubDict,
     SuperDict,
     TarballContains,
@@ -1370,6 +1371,24 @@ class TestHasPermissions(TestCase, PathHelpers):
         self.touch(filename)
         permissions = oct(os.stat(filename).st_mode)[-4:]
         self.assertThat(filename, HasPermissions(permissions))
+
+
+class TestSubDictOf(TestCase, TestMatchersInterface):
+
+    matches_matcher = _SubDictOf({'foo': 'bar', 'baz': 'qux'})
+
+    matches_matches = [
+        {'foo': 'bar', 'baz': 'qux'},
+        {'foo': 'bar'},
+        ]
+
+    matches_mismatches = [
+        {'foo': 'bar', 'baz': 'qux', 'cat': 'dog'},
+        {'foo': 'bar', 'cat': 'dog'},
+        ]
+
+    str_examples = []
+    describe_examples = []
 
 
 class TestDict(TestCase, TestMatchersInterface):
