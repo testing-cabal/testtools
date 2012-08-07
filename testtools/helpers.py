@@ -105,3 +105,17 @@ def _intersect_dicts(a, b):
         dict((k, (a[k], b[k])) for k in common),
         dict((k, b[k]) for k in b_only),
         )
+
+
+def map_values(function, dictionary):
+    """Map ``function`` across the values of ``dictionary``.
+
+    :return: A dict with the same keys as ``dictionary``, where the value
+        of each key ``k`` is ``function(dictionary[k])``.
+    """
+    return dict((k, function(dictionary[k])) for k in dictionary)
+
+
+def filter_values(function, dictionary):
+    """Filter ``dictionary`` by its values using ``function``."""
+    return dict((k, v) for k, v in dictionary.items() if function(v))

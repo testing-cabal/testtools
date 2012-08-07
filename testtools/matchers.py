@@ -67,6 +67,8 @@ from testtools.compat import (
     )
 from testtools.helpers import (
     _intersect_dicts,
+    filter_values,
+    map_values,
     )
 
 
@@ -1374,18 +1376,15 @@ class Dict(Matcher):
         # share.
         missing, common, extra = _intersect_dicts(self._matchers, observed)
         mismatches = {}
+        missing = map_values(lambda v: Mismatch(str(v)), missing)
+        extra = map_values(lambda v: Mismatch(repr(v)), extra)
+        differences = map_values(
+            lambda (matcher, value): matcher.match(value), common)
+        differences = filter_values(bool, differences)
         if missing:
-            # XXX: A 'map' for dict values would help all of these things.
-            missing = dict((k, Mismatch(str(v))) for k, v in missing.items())
             mismatches['Missing'] = DictMismatches(missing)
         if extra:
-            extra = dict((k, Mismatch(repr(v))) for k, v in extra.items())
             mismatches["Extra"] = DictMismatches(extra)
-        differences = {}
-        for key, (matcher, value) in common.items():
-            mismatch = matcher.match(value)
-            if mismatch:
-                differences[key] = mismatch
         if differences:
             mismatches["Differences"] = DictMismatches(differences)
         # XXX: Consider just using a DictMismatches here rather than prefix
