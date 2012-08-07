@@ -1397,11 +1397,18 @@ def strip_keys(d, keys):
     return dict((k, d[k]) for k in set(d.keys()) - set(keys))
 
 
-def _dict_to_mismatch(d, to_mismatch=lambda x: x):
+def _list_to_mismatch(data, to_mismatch=lambda x: x):
+    mismatches = [m for m in map(to_mismatch, data) if m]
+    if mismatches:
+        return MismatchesAll(mismatches, wrap=False)
+
+
+def _dict_to_mismatch(data, to_mismatch=lambda x: x):
     mismatches = {}
-    for key in d:
-        if d[key]:
-            mismatches[key] = to_mismatch(d[key])
+    for key in data:
+        mismatch = to_mismatch(data[key])
+        if mismatch:
+            mismatches[key] = mismatch
     if mismatches:
         return DictMismatches(mismatches)
 
@@ -1455,16 +1462,16 @@ class Dict(Matcher):
         return 'Dict({%s})' % ', '.join(matchers)
 
     def match(self, observed):
+        matchers = {
+            'Extra': _SubDictOf(self._matchers),
+            'Missing': _SuperDictOf(self._matchers, format_value=str),
+            'Differences': _MatchCommonKeys(self._matchers),
+            }
         mismatches = []
-        extras = _SubDictOf(self._matchers).match(observed)
-        if extras:
-            mismatches.append(PrefixMismatch('Extra', extras))
-        missing = _SuperDictOf(self._matchers, format_value=str).match(observed)
-        if missing:
-            mismatches.append(PrefixMismatch('Missing', missing))
-        differences = _MatchCommonKeys(self._matchers).match(observed)
-        if differences:
-            mismatches.append(PrefixMismatch('Differences', differences))
+        for label, matcher in sorted(matchers.items()):
+            mismatch = matcher.match(observed)
+            if mismatch:
+                mismatches.append(PrefixMismatch(label, mismatch))
         if mismatches:
             return MismatchesAll(mismatches, wrap=False)
 
@@ -1485,13 +1492,15 @@ class SubDict(Matcher):
         return 'SubDict({%s})' % ', '.join(matchers)
 
     def match(self, observed):
+        matchers = {
+            'Missing': _SuperDictOf(self._matchers, format_value=str),
+            'Differences': _MatchCommonKeys(self._matchers),
+            }
         mismatches = []
-        missing = _SuperDictOf(self._matchers, format_value=str).match(observed)
-        if missing:
-            mismatches.append(PrefixMismatch('Missing', missing))
-        differences = _MatchCommonKeys(self._matchers).match(observed)
-        if differences:
-            mismatches.append(PrefixMismatch('Differences', differences))
+        for label, matcher in sorted(matchers.items()):
+            mismatch = matcher.match(observed)
+            if mismatch:
+                mismatches.append(PrefixMismatch(label, mismatch))
         if mismatches:
             return MismatchesAll(mismatches, wrap=False)
 
@@ -1512,13 +1521,15 @@ class SuperDict(Matcher):
         return 'SuperDict({%s})' % ', '.join(matchers)
 
     def match(self, observed):
+        matchers = {
+            'Extra': _SubDictOf(self._matchers),
+            'Differences': _MatchCommonKeys(self._matchers),
+            }
         mismatches = []
-        extras = _SubDictOf(self._matchers).match(observed)
-        if extras:
-            mismatches.append(PrefixMismatch('Extra', extras))
-        differences = _MatchCommonKeys(self._matchers).match(observed)
-        if differences:
-            mismatches.append(PrefixMismatch('Differences', differences))
+        for label, matcher in sorted(matchers.items()):
+            mismatch = matcher.match(observed)
+            if mismatch:
+                mismatches.append(PrefixMismatch(label, mismatch))
         if mismatches:
             return MismatchesAll(mismatches, wrap=False)
 
