@@ -65,6 +65,10 @@ from testtools.compat import (
     str_is_unicode,
     text_repr
     )
+from testtools.helpers import (
+    filter_values,
+    map_values,
+    )
 
 
 class Matcher(object):
@@ -614,13 +618,11 @@ def LabelledMismatches(mismatches, details=None):
         wrap=False)
 
 
-def _dict_to_mismatch(data, to_mismatch=lambda x: x,
+def _dict_to_mismatch(data, to_mismatch=None,
                       result_mismatch=DictMismatches):
-    mismatches = {}
-    for key in data:
-        mismatch = to_mismatch(data[key])
-        if mismatch:
-            mismatches[key] = mismatch
+    if to_mismatch:
+        data = map_values(to_mismatch, data)
+    mismatches = filter_values(bool, data)
     if mismatches:
         return result_mismatch(mismatches)
 
@@ -982,8 +984,7 @@ class MatchesStructure(object):
         Similar to the constructor, except that the provided matcher is used
         to match all of the values.
         """
-        return cls(
-            **dict((name, matcher(value)) for name, value in kwargs.items()))
+        return cls(**map_values(matcher, kwargs))
 
     @classmethod
     def fromExample(cls, example, *attributes):
