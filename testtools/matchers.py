@@ -588,7 +588,7 @@ class MatchesAllDict(Matcher):
         for label, matcher in sorted(self.matchers.items()):
             mismatch = matcher.match(observed)
             if mismatch:
-                mismatches.append(PrefixMismatch(label, mismatch))
+                mismatches.append(PrefixedMismatch(label, mismatch))
         if mismatches:
             return MismatchesAll(mismatches, wrap=False)
 
@@ -840,16 +840,29 @@ class Annotate(object):
             return AnnotatedMismatch(self.annotation, mismatch)
 
 
-class AnnotatedMismatch(MismatchDecorator):
+class PostfixedMismatch(MismatchDecorator):
     """A mismatch annotated with a descriptive string."""
 
     def __init__(self, annotation, mismatch):
-        super(AnnotatedMismatch, self).__init__(mismatch)
+        super(PostfixedMismatch, self).__init__(mismatch)
         self.annotation = annotation
         self.mismatch = mismatch
 
     def describe(self):
         return '%s: %s' % (self.original.describe(), self.annotation)
+
+
+AnnotatedMismatch = PostfixedMismatch
+
+
+class PrefixedMismatch(MismatchDecorator):
+
+    def __init__(self, prefix, mismatch):
+        super(PrefixedMismatch, self).__init__(mismatch)
+        self.prefix = prefix
+
+    def describe(self):
+        return '%s: %s' % (self.prefix, self.original.describe())
 
 
 class Raises(Matcher):
@@ -1390,16 +1403,6 @@ class HasPermissions(Matcher):
     def match(self, filename):
         permissions = oct(os.stat(filename).st_mode)[-4:]
         return Equals(self.octal_permissions).match(permissions)
-
-
-class PrefixMismatch(MismatchDecorator):
-
-    def __init__(self, prefix, mismatch):
-        super(PrefixMismatch, self).__init__(mismatch)
-        self.prefix = prefix
-
-    def describe(self):
-        return '%s: %s' % (self.prefix, self.original.describe())
 
 
 class _MatchCommonKeys(Matcher):
