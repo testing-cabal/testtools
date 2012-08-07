@@ -584,13 +584,11 @@ class MatchesAllDict(Matcher):
             ', '.join('%r: %s' % (k, v) for k, v in self.matchers.items()))
 
     def match(self, observed):
-        mismatches = []
-        for label, matcher in sorted(self.matchers.items()):
-            mismatch = matcher.match(observed)
-            if mismatch:
-                mismatches.append(PrefixedMismatch(label, mismatch))
-        if mismatches:
-            return MismatchesAll(mismatches, wrap=False)
+        mismatches = {}
+        for label in self.matchers:
+            mismatches[label] = self.matchers[label].match(observed)
+        return _dict_to_mismatch(
+            mismatches, result_mismatch=LabelledMismatches)
 
 
 class DictMismatches(Mismatch):
@@ -609,14 +607,22 @@ class DictMismatches(Mismatch):
         return '\n'.join(lines)
 
 
-def _dict_to_mismatch(data, to_mismatch=lambda x: x):
+def LabelledMismatches(mismatches, details=None):
+    """A collection of mismatches, each labelled."""
+    return MismatchesAll(
+        (PrefixedMismatch(k, v) for (k, v) in sorted(mismatches.items())),
+        wrap=False)
+
+
+def _dict_to_mismatch(data, to_mismatch=lambda x: x,
+                      result_mismatch=DictMismatches):
     mismatches = {}
     for key in data:
         mismatch = to_mismatch(data[key])
         if mismatch:
             mismatches[key] = mismatch
     if mismatches:
-        return DictMismatches(mismatches)
+        return result_mismatch(mismatches)
 
 
 class Not(object):
