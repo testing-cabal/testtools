@@ -1373,11 +1373,7 @@ class SameMembers(Matcher):
         expected_only = [o for o in self.expected if o not in list(observed)]
         if expected_only == observed_only == []:
             return
-        return _BinaryMismatch(
-            self.expected, 'elements differ', observed)
-        return Mismatch(
-            "Missing: %s\nExtra: %s" % (
-                _format(expected_only), _format(observed_only)))
+        return _BinaryMismatch(self.expected, 'elements differ', observed)
 
 
 class HasPermissions(Matcher):
