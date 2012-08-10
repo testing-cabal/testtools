@@ -1369,11 +1369,11 @@ class SameMembers(Matcher):
         return '%s(%r)' % (self.__class__.__name__, self.expected)
 
     def match(self, observed):
-        expected = sorted(self.expected)
-        observed = sorted(observed)
-        if expected == observed:
+        observed_only = [o for o in observed if o not in list(self.expected)]
+        expected_only = [o for o in self.expected if o not in list(observed)]
+        if expected_only == observed_only == []:
             return
-        return _BinaryMismatch(expected, "elements differ", observed)
+        return _BinaryMismatch(self.expected, 'elements differ', observed)
 
 
 class HasPermissions(Matcher):

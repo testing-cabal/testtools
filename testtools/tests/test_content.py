@@ -154,8 +154,8 @@ class TestContent(TestCase):
         self.assertEqual(expected, text_content(data))
 
     def test_json_content(self):
-        data = {'foo': 'bar'}
-        expected = Content(JSON, lambda: [json.dumps(data)])
+        data = {_u('foo'): _u('bar')}
+        expected = Content(JSON, lambda: [json.dumps(data).encode('utf8')])
         self.assertEqual(expected, json_content(data))
 
 

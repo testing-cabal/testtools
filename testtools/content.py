@@ -192,7 +192,7 @@ class TracebackContent(Content):
 
 def json_content(data):
     """Create a JSON `Content` object from JSON-encodeable data."""
-    return Content(JSON, lambda: [json.dumps(data)])
+    return Content(JSON, lambda: [json.dumps(data).encode('utf8')])
 
 
 def text_content(text):
