@@ -29,7 +29,8 @@ from testtools.matchers import (
     _BinaryMismatch,
     Contains,
     ContainsAll,
-    Dict,
+    ContainedByDict,
+    ContainsDict,
     DirContains,
     DirExists,
     DocTestMatches,
@@ -48,6 +49,7 @@ from testtools.matchers import (
     MatchesAny,
     MatchesAll,
     MatchesAllDict,
+    MatchesDict,
     MatchesException,
     MatchesListwise,
     MatchesPredicate,
@@ -66,8 +68,6 @@ from testtools.matchers import (
     SamePath,
     StartsWith,
     _SubDictOf,
-    SubDict,
-    SuperDict,
     TarballContains,
     )
 from testtools.tests.helpers import FullStackRunTest
@@ -1407,9 +1407,9 @@ class TestSubDictOf(TestCase, TestMatchersInterface):
     describe_examples = []
 
 
-class TestDict(TestCase, TestMatchersInterface):
+class TestMatchesDict(TestCase, TestMatchersInterface):
 
-    matches_matcher = Dict(
+    matches_matcher = MatchesDict(
         {'foo': Equals('bar'), 'baz': Not(Equals('qux'))})
 
     matches_matches = [
@@ -1425,7 +1425,8 @@ class TestDict(TestCase, TestMatchersInterface):
         ]
 
     str_examples = [
-        ("Dict({'foo': %s, 'baz': %s})" % (Equals('bar'), Not(Equals('qux'))),
+        ("MatchesDict({'foo': %s, 'baz': %s})" % (
+                Equals('bar'), Not(Equals('qux'))),
          matches_matcher),
         ]
 
@@ -1458,9 +1459,9 @@ class TestDict(TestCase, TestMatchersInterface):
         ]
 
 
-class TestSubDict(TestCase, TestMatchersInterface):
+class TestContainsDict(TestCase, TestMatchersInterface):
 
-    matches_matcher = SubDict(
+    matches_matcher = ContainsDict(
         {'foo': Equals('bar'), 'baz': Not(Equals('qux'))})
 
     matches_matches = [
@@ -1477,7 +1478,7 @@ class TestSubDict(TestCase, TestMatchersInterface):
         ]
 
     str_examples = [
-        ("SubDict({'foo': %s, 'baz': %s})" % (
+        ("ContainsDict({'foo': %s, 'baz': %s})" % (
                 Equals('bar'), Not(Equals('qux'))),
          matches_matcher),
         ]
@@ -1504,9 +1505,9 @@ class TestSubDict(TestCase, TestMatchersInterface):
         ]
 
 
-class TestSuperDict(TestCase, TestMatchersInterface):
+class TestContainedByDict(TestCase, TestMatchersInterface):
 
-    matches_matcher = SuperDict(
+    matches_matcher = ContainedByDict(
         {'foo': Equals('bar'), 'baz': Not(Equals('qux'))})
 
     matches_matches = [
@@ -1523,7 +1524,7 @@ class TestSuperDict(TestCase, TestMatchersInterface):
         ]
 
     str_examples = [
-        ("SuperDict({'foo': %s, 'baz': %s})" % (
+        ("ContainedByDict({'foo': %s, 'baz': %s})" % (
                 Equals('bar'), Not(Equals('qux'))),
          matches_matcher),
         ]

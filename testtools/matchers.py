@@ -579,6 +579,11 @@ class MismatchesAll(Mismatch):
 
 
 class MatchesAllDict(Matcher):
+    """Matches if all of the matchers it is created with match.
+
+    A lot like ``MatchesAll``, but takes a dict of Matchers and labels any
+    mismatches with the key of the dictionary.
+    """
 
     def __init__(self, matchers):
         super(MatchesAllDict, self).__init__()
@@ -1485,7 +1490,7 @@ class _CombinedMatcher(Matcher):
         return MatchesAllDict(matchers).match(observed)
 
 
-class Dict(_CombinedMatcher):
+class MatchesDict(_CombinedMatcher):
     """Match a dictionary exactly, by its keys.
 
     Specify a dictionary mapping keys (often strings) to matchers.  This is
@@ -1503,7 +1508,7 @@ class Dict(_CombinedMatcher):
     format_expected = lambda self, expected: _format_matcher_dict(expected)
 
 
-class SubDict(_CombinedMatcher):
+class ContainsDict(_CombinedMatcher):
     """Match a dictionary for that contains a specified sub-dictionary.
 
     Specify a dictionary mapping keys (often strings) to matchers.  This is
@@ -1526,7 +1531,7 @@ class SubDict(_CombinedMatcher):
     format_expected = lambda self, expected: _format_matcher_dict(expected)
 
 
-class SuperDict(_CombinedMatcher):
+class ContainedByDict(_CombinedMatcher):
     """Match a dictionary for which this is a super-dictionary.
 
     Specify a dictionary mapping keys (often strings) to matchers.  This is
