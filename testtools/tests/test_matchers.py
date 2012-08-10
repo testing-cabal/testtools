@@ -1134,6 +1134,7 @@ class TestSameMembers(TestCase, TestMatchersInterface):
     matches_mismatches = [
         set([1, 2, 3]),
         [1, 1, 2, 3, 5],
+        [1, 2, 3, {'foo': 'bar'}],
         'foo',
         ]
 

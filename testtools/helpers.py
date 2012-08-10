@@ -1,4 +1,4 @@
-# Copyright (c) 2010-2011 testtools developers. See LICENSE for details.
+# Copyright (c) 2010-2012 testtools developers. See LICENSE for details.
 
 __all__ = [
     'safe_hasattr',
@@ -104,3 +104,16 @@ def filter_values(function, dictionary):
 def dict_subtract(a, b):
     """Return the part of ``a`` that's not in ``b``."""
     return dict((k, a[k]) for k in set(a) - set(b))
+
+
+def list_subtract(a, b):
+    """Return a list ``a`` without the elements of ``b``.
+
+    If a particular value is in ``a`` twice and ``b`` once then the returned
+    list then that value will appear once in the returned list.
+    """
+    a_only = list(a)
+    for x in b:
+        if x in a_only:
+            a_only.remove(x)
+    return a_only

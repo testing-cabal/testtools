@@ -68,6 +68,7 @@ from testtools.compat import (
 from testtools.helpers import (
     dict_subtract,
     filter_values,
+    list_subtract,
     map_values,
     )
 
@@ -1372,8 +1373,8 @@ class SameMembers(Matcher):
         return '%s(%r)' % (self.__class__.__name__, self.expected)
 
     def match(self, observed):
-        observed_only = [o for o in observed if o not in list(self.expected)]
-        expected_only = [o for o in self.expected if o not in list(observed)]
+        expected_only = list_subtract(self.expected, observed)
+        observed_only = list_subtract(observed, self.expected)
         if expected_only == observed_only == []:
             return
         return PostfixedMismatch(
