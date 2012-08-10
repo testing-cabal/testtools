@@ -68,6 +68,7 @@ from testtools.compat import (
 from testtools.helpers import (
     dict_subtract,
     filter_values,
+    list_subtract,
     map_values,
     )
 
@@ -215,6 +216,16 @@ class MismatchDecorator(object):
 
     def get_details(self):
         return self.original.get_details()
+
+
+def _format(thing):
+    """
+    Blocks of text with newlines are formatted as triple-quote
+    strings. Everything else is pretty-printed.
+    """
+    if istext(thing) or _isbytes(thing):
+        return text_repr(thing)
+    return pformat(thing)
 
 
 class _NonManglingOutputChecker(doctest.OutputChecker):
@@ -383,20 +394,13 @@ class _BinaryMismatch(Mismatch):
         self._mismatch_string = mismatch_string
         self.other = other
 
-    def _format(self, thing):
-        # Blocks of text with newlines are formatted as triple-quote
-        # strings. Everything else is pretty-printed.
-        if istext(thing) or _isbytes(thing):
-            return text_repr(thing)
-        return pformat(thing)
-
     def describe(self):
         left = repr(self.expected)
         right = repr(self.other)
         if len(left) + len(right) > 70:
             return "%s:\nreference = %s\nactual    = %s\n" % (
-                self._mismatch_string, self._format(self.expected),
-                self._format(self.other))
+                self._mismatch_string, _format(self.expected),
+                _format(self.other))
         else:
             return "%s %s %s" % (left, self._mismatch_string, right)
 
@@ -1369,11 +1373,14 @@ class SameMembers(Matcher):
         return '%s(%r)' % (self.__class__.__name__, self.expected)
 
     def match(self, observed):
-        observed_only = [o for o in observed if o not in list(self.expected)]
-        expected_only = [o for o in self.expected if o not in list(observed)]
+        expected_only = list_subtract(self.expected, observed)
+        observed_only = list_subtract(observed, self.expected)
         if expected_only == observed_only == []:
             return
-        return _BinaryMismatch(self.expected, 'elements differ', observed)
+        return PostfixedMismatch(
+            "\nmissing:    %s\nextra:      %s" % (
+                _format(expected_only), _format(observed_only)),
+            _BinaryMismatch(self.expected, 'elements differ', observed))
 
 
 class HasPermissions(Matcher):

@@ -1134,13 +1134,18 @@ class TestSameMembers(TestCase, TestMatchersInterface):
     matches_mismatches = [
         set([1, 2, 3]),
         [1, 1, 2, 3, 5],
+        [1, 2, 3, {'foo': 'bar'}],
         'foo',
         ]
 
     describe_examples = [
         (("elements differ:\n"
           "reference = ['apple', 'orange', 'canteloupe', 'watermelon', 'lemon', 'banana']\n"
-          "actual    = ['orange', 'apple', 'banana', 'sparrow', 'lemon', 'canteloupe']\n"),
+          "actual    = ['orange', 'apple', 'banana', 'sparrow', 'lemon', 'canteloupe']\n"
+          ": \n"
+          "missing:    ['watermelon']\n"
+          "extra:      ['sparrow']"
+          ),
          ['orange', 'apple', 'banana', 'sparrow', 'lemon', 'canteloupe',],
          SameMembers(
              ['apple', 'orange', 'canteloupe', 'watermelon',
