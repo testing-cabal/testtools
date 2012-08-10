@@ -29,6 +29,8 @@ from testtools.matchers import (
     _BinaryMismatch,
     Contains,
     ContainsAll,
+    ContainedByDict,
+    ContainsDict,
     DirContains,
     DirExists,
     DocTestMatches,
@@ -46,6 +48,8 @@ from testtools.matchers import (
     GreaterThan,
     MatchesAny,
     MatchesAll,
+    MatchesAllDict,
+    MatchesDict,
     MatchesException,
     MatchesListwise,
     MatchesPredicate,
@@ -63,6 +67,7 @@ from testtools.matchers import (
     SameMembers,
     SamePath,
     StartsWith,
+    _SubDictOf,
     TarballContains,
     )
 from testtools.tests.helpers import FullStackRunTest
@@ -572,6 +577,21 @@ class TestMatchesAllInterface(TestCase, TestMatchersInterface):
          1, MatchesAll(NotEquals(1), NotEquals(2))),
         ("1 == 1", 1,
          MatchesAll(NotEquals(2), NotEquals(1), Equals(3), first_only=True)),
+        ]
+
+
+class TestMatchesAllDictInterface(TestCase, TestMatchersInterface):
+
+    matches_matcher = MatchesAllDict({'a': NotEquals(1), 'b': NotEquals(2)})
+    matches_matches = [3, 4]
+    matches_mismatches = [1, 2]
+
+    str_examples = [
+        ("MatchesAllDict({'a': NotEquals(1), 'b': NotEquals(2)})",
+         matches_matcher)]
+
+    describe_examples = [
+        ("""a: 1 == 1""", 1, matches_matcher),
         ]
 
 
@@ -1367,6 +1387,163 @@ class TestHasPermissions(TestCase, PathHelpers):
         self.touch(filename)
         permissions = oct(os.stat(filename).st_mode)[-4:]
         self.assertThat(filename, HasPermissions(permissions))
+
+
+class TestSubDictOf(TestCase, TestMatchersInterface):
+
+    matches_matcher = _SubDictOf({'foo': 'bar', 'baz': 'qux'})
+
+    matches_matches = [
+        {'foo': 'bar', 'baz': 'qux'},
+        {'foo': 'bar'},
+        ]
+
+    matches_mismatches = [
+        {'foo': 'bar', 'baz': 'qux', 'cat': 'dog'},
+        {'foo': 'bar', 'cat': 'dog'},
+        ]
+
+    str_examples = []
+    describe_examples = []
+
+
+class TestMatchesDict(TestCase, TestMatchersInterface):
+
+    matches_matcher = MatchesDict(
+        {'foo': Equals('bar'), 'baz': Not(Equals('qux'))})
+
+    matches_matches = [
+        {'foo': 'bar', 'baz': None},
+        {'foo': 'bar', 'baz': 'quux'},
+        ]
+    matches_mismatches = [
+        {},
+        {'foo': 'bar', 'baz': 'qux'},
+        {'foo': 'bop', 'baz': 'qux'},
+        {'foo': 'bar', 'baz': 'quux', 'cat': 'dog'},
+        {'foo': 'bar', 'cat': 'dog'},
+        ]
+
+    str_examples = [
+        ("MatchesDict({'foo': %s, 'baz': %s})" % (
+                Equals('bar'), Not(Equals('qux'))),
+         matches_matcher),
+        ]
+
+    describe_examples = [
+        ("Missing: {\n"
+         "  'baz': Not(Equals('qux')),\n"
+         "  'foo': Equals('bar'),\n"
+         "}",
+         {}, matches_matcher),
+        ("Differences: {\n"
+         "  'baz': 'qux' matches Equals('qux'),\n"
+         "}",
+         {'foo': 'bar', 'baz': 'qux'}, matches_matcher),
+        ("Differences: {\n"
+         "  'baz': 'qux' matches Equals('qux'),\n"
+         "  'foo': 'bar' != 'bop',\n"
+         "}",
+         {'foo': 'bop', 'baz': 'qux'}, matches_matcher),
+        ("Extra: {\n"
+         "  'cat': 'dog',\n"
+         "}",
+         {'foo': 'bar', 'baz': 'quux', 'cat': 'dog'}, matches_matcher),
+        ("Extra: {\n"
+         "  'cat': 'dog',\n"
+         "}\n"
+         "Missing: {\n"
+         "  'baz': Not(Equals('qux')),\n"
+         "}",
+         {'foo': 'bar', 'cat': 'dog'}, matches_matcher),
+        ]
+
+
+class TestContainsDict(TestCase, TestMatchersInterface):
+
+    matches_matcher = ContainsDict(
+        {'foo': Equals('bar'), 'baz': Not(Equals('qux'))})
+
+    matches_matches = [
+        {'foo': 'bar', 'baz': None},
+        {'foo': 'bar', 'baz': 'quux'},
+        {'foo': 'bar', 'baz': 'quux', 'cat': 'dog'},
+        ]
+    matches_mismatches = [
+        {},
+        {'foo': 'bar', 'baz': 'qux'},
+        {'foo': 'bop', 'baz': 'qux'},
+        {'foo': 'bar', 'cat': 'dog'},
+        {'foo': 'bar'},
+        ]
+
+    str_examples = [
+        ("ContainsDict({'foo': %s, 'baz': %s})" % (
+                Equals('bar'), Not(Equals('qux'))),
+         matches_matcher),
+        ]
+
+    describe_examples = [
+        ("Missing: {\n"
+         "  'baz': Not(Equals('qux')),\n"
+         "  'foo': Equals('bar'),\n"
+         "}",
+         {}, matches_matcher),
+        ("Differences: {\n"
+         "  'baz': 'qux' matches Equals('qux'),\n"
+         "}",
+         {'foo': 'bar', 'baz': 'qux'}, matches_matcher),
+        ("Differences: {\n"
+         "  'baz': 'qux' matches Equals('qux'),\n"
+         "  'foo': 'bar' != 'bop',\n"
+         "}",
+         {'foo': 'bop', 'baz': 'qux'}, matches_matcher),
+        ("Missing: {\n"
+         "  'baz': Not(Equals('qux')),\n"
+         "}",
+         {'foo': 'bar', 'cat': 'dog'}, matches_matcher),
+        ]
+
+
+class TestContainedByDict(TestCase, TestMatchersInterface):
+
+    matches_matcher = ContainedByDict(
+        {'foo': Equals('bar'), 'baz': Not(Equals('qux'))})
+
+    matches_matches = [
+        {},
+        {'foo': 'bar'},
+        {'foo': 'bar', 'baz': 'quux'},
+        {'baz': 'quux'},
+        ]
+    matches_mismatches = [
+        {'foo': 'bar', 'baz': 'quux', 'cat': 'dog'},
+        {'foo': 'bar', 'baz': 'qux'},
+        {'foo': 'bop', 'baz': 'qux'},
+        {'foo': 'bar', 'cat': 'dog'},
+        ]
+
+    str_examples = [
+        ("ContainedByDict({'foo': %s, 'baz': %s})" % (
+                Equals('bar'), Not(Equals('qux'))),
+         matches_matcher),
+        ]
+
+    describe_examples = [
+        ("Differences: {\n"
+         "  'baz': 'qux' matches Equals('qux'),\n"
+         "}",
+         {'foo': 'bar', 'baz': 'qux'}, matches_matcher),
+        ("Differences: {\n"
+         "  'baz': 'qux' matches Equals('qux'),\n"
+         "  'foo': 'bar' != 'bop',\n"
+         "}",
+         {'foo': 'bop', 'baz': 'qux'}, matches_matcher),
+        ("Extra: {\n"
+         "  'cat': 'dog',\n"
+         "}",
+         {'foo': 'bar', 'cat': 'dog'}, matches_matcher),
+        ]
 
 
 def test_suite():

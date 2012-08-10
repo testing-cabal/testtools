@@ -85,3 +85,22 @@ def safe_hasattr(obj, attr, _marker=object()):
     properties.
     """
     return getattr(obj, attr, _marker) is not _marker
+
+
+def map_values(function, dictionary):
+    """Map ``function`` across the values of ``dictionary``.
+
+    :return: A dict with the same keys as ``dictionary``, where the value
+        of each key ``k`` is ``function(dictionary[k])``.
+    """
+    return dict((k, function(dictionary[k])) for k in dictionary)
+
+
+def filter_values(function, dictionary):
+    """Filter ``dictionary`` by its values using ``function``."""
+    return dict((k, v) for k, v in dictionary.items() if function(v))
+
+
+def dict_subtract(a, b):
+    """Return the part of ``a`` that's not in ``b``."""
+    return dict((k, a[k]) for k in set(a) - set(b))
