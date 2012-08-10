@@ -1456,23 +1456,28 @@ def _format_matcher_dict(matchers):
         ', '.join('%r: %s' % (k, v) for k, v in matchers.items()))
 
 
-class _DictMatcher(Matcher):
+class _CombinedMatcher(Matcher):
     """Many matchers labelled and combined into one uber-matcher.
 
     Subclass this and then specify a dict of matcher factories that take a
     single 'expected' value and return a matcher.  The subclass will match
     only if all of the matchers made from factories match.
+
+    Not **entirely** dissimilar from ``MatchesAll``.
     """
 
     matcher_factories = {}
 
     def __init__(self, expected):
-        super(_DictMatcher, self).__init__()
+        super(_CombinedMatcher, self).__init__()
         self._expected = expected
+
+    def format_expected(self, expected):
+        return repr(expected)
 
     def __str__(self):
         return '%s(%s)' % (
-            self.__class__.__name__, _format_matcher_dict(self._expected))
+            self.__class__.__name__, self.format_expected(self._expected))
 
     def match(self, observed):
         matchers = dict(
@@ -1480,7 +1485,7 @@ class _DictMatcher(Matcher):
         return MatchesAllDict(matchers).match(observed)
 
 
-class Dict(_DictMatcher):
+class Dict(_CombinedMatcher):
     """Match a dictionary exactly, by its keys.
 
     Specify a dictionary mapping keys (often strings) to matchers.  This is
@@ -1495,8 +1500,10 @@ class Dict(_DictMatcher):
         'Differences': _MatchCommonKeys,
         }
 
+    format_expected = lambda self, expected: _format_matcher_dict(expected)
 
-class SubDict(_DictMatcher):
+
+class SubDict(_CombinedMatcher):
     """Match a dictionary for that contains a specified sub-dictionary.
 
     Specify a dictionary mapping keys (often strings) to matchers.  This is
@@ -1516,8 +1523,10 @@ class SubDict(_DictMatcher):
         'Differences': _MatchCommonKeys,
         }
 
+    format_expected = lambda self, expected: _format_matcher_dict(expected)
 
-class SuperDict(_DictMatcher):
+
+class SuperDict(_CombinedMatcher):
     """Match a dictionary for which this is a super-dictionary.
 
     Specify a dictionary mapping keys (often strings) to matchers.  This is
@@ -1536,6 +1545,8 @@ class SuperDict(_DictMatcher):
         'Extra': _SubDictOf,
         'Differences': _MatchCommonKeys,
         }
+
+    format_expected = lambda self, expected: _format_matcher_dict(expected)
 
 
 # Signal that this is part of the testing framework, and that code from this
