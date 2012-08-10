@@ -1466,17 +1466,17 @@ class _DictMatcher(Matcher):
 
     matcher_factories = {}
 
-    def __init__(self, dict_of_matchers):
+    def __init__(self, expected):
         super(_DictMatcher, self).__init__()
-        self._matchers = dict_of_matchers
+        self._expected = expected
 
     def __str__(self):
         return '%s(%s)' % (
-            self.__class__.__name__, _format_matcher_dict(self._matchers))
+            self.__class__.__name__, _format_matcher_dict(self._expected))
 
     def match(self, observed):
         matchers = dict(
-            (k, v(self._matchers)) for k, v in self.matcher_factories.items())
+            (k, v(self._expected)) for k, v in self.matcher_factories.items())
         return MatchesAllDict(matchers).match(observed)
 
 
