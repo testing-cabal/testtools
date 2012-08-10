@@ -217,6 +217,16 @@ class MismatchDecorator(object):
         return self.original.get_details()
 
 
+def _format(thing):
+    """
+    Blocks of text with newlines are formatted as triple-quote
+    strings. Everything else is pretty-printed.
+    """
+    if istext(thing) or _isbytes(thing):
+        return text_repr(thing)
+    return pformat(thing)
+
+
 class _NonManglingOutputChecker(doctest.OutputChecker):
     """Doctest checker that works with unicode rather than mangling strings
 
@@ -383,20 +393,13 @@ class _BinaryMismatch(Mismatch):
         self._mismatch_string = mismatch_string
         self.other = other
 
-    def _format(self, thing):
-        # Blocks of text with newlines are formatted as triple-quote
-        # strings. Everything else is pretty-printed.
-        if istext(thing) or _isbytes(thing):
-            return text_repr(thing)
-        return pformat(thing)
-
     def describe(self):
         left = repr(self.expected)
         right = repr(self.other)
         if len(left) + len(right) > 70:
             return "%s:\nreference = %s\nactual    = %s\n" % (
-                self._mismatch_string, self._format(self.expected),
-                self._format(self.other))
+                self._mismatch_string, _format(self.expected),
+                _format(self.other))
         else:
             return "%s %s %s" % (left, self._mismatch_string, right)
 
