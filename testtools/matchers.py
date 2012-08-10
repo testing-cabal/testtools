@@ -1392,6 +1392,18 @@ class HasPermissions(Matcher):
 
 
 class _MatchCommonKeys(Matcher):
+    """Match on keys in a dictionary.
+
+    Given a dictionary where the values are matchers, this will look for
+    common keys in the matched dictionary and match if and only if all common
+    keys match the given matchers.
+
+    Thus::
+
+      >>> structure = {'a': Equals('x'), 'b': Equals('y')}
+      >>> _MatchCommonKeys(structure).match({'a': 'x', 'c': 'z'})
+      None
+    """
 
     def __init__(self, dict_of_matchers):
         super(_MatchCommonKeys, self).__init__()
@@ -1413,6 +1425,7 @@ class _MatchCommonKeys(Matcher):
 
 
 class _SubDictOf(Matcher):
+    """Matches if the matched dict only has keys that are in given dict."""
 
     def __init__(self, super_dict, format_value=repr):
         super(_SubDictOf, self).__init__()
@@ -1426,6 +1439,8 @@ class _SubDictOf(Matcher):
 
 
 class _SuperDictOf(Matcher):
+    """Matches if all of the keys in the given dict are in the matched dict.
+    """
 
     def __init__(self, sub_dict, format_value=repr):
         super(_SuperDictOf, self).__init__()
@@ -1442,6 +1457,12 @@ def _format_matcher_dict(matchers):
 
 
 class _DictMatcher(Matcher):
+    """Many matchers labelled and combined into one uber-matcher.
+
+    Subclass this and then specify a dict of matcher factories that take a
+    single 'expected' value and return a matcher.  The subclass will match
+    only if all of the matchers made from factories match.
+    """
 
     matcher_factories = {}
 
@@ -1462,8 +1483,10 @@ class _DictMatcher(Matcher):
 class Dict(_DictMatcher):
     """Match a dictionary exactly, by its keys.
 
-    Each key in the dictionary must match the matcher for the equivalent key
-    in the dict of matchers.
+    Specify a dictionary mapping keys (often strings) to matchers.  This is
+    the 'expected' dict.  Any dictionary that matches this must have exactly
+    the same keys, and the values must match the corresponding matchers in the
+    expected dict.
     """
 
     matcher_factories = {
@@ -1474,7 +1497,15 @@ class Dict(_DictMatcher):
 
 
 class SubDict(_DictMatcher):
-    """Match a dictionary for which this is a sub-dictionary.
+    """Match a dictionary for that contains a specified sub-dictionary.
+
+    Specify a dictionary mapping keys (often strings) to matchers.  This is
+    the 'expected' dict.  Any dictionary that matches this must have **at
+    least** these keys, and the values must match the corresponding matchers
+    in the expected dict.  Dictionaries that have more keys will also match.
+
+    In other words, any matching dictionary must contain the dictionary given
+    to the constructor.
 
     Does not check for strict sub-dictionary.  That is, equal dictionaries
     match.
@@ -1488,6 +1519,14 @@ class SubDict(_DictMatcher):
 
 class SuperDict(_DictMatcher):
     """Match a dictionary for which this is a super-dictionary.
+
+    Specify a dictionary mapping keys (often strings) to matchers.  This is
+    the 'expected' dict.  Any dictionary that matches this must have **only**
+    these keys, and the values must match the corresponding matchers in the
+    expected dict.  Dictionaries that have fewer keys can also match.
+
+    In other words, any matching dictionary must be contained by the
+    dictionary given to the constructor.
 
     Does not check for strict super-dictionary.  That is, equal dictionaries
     match.
