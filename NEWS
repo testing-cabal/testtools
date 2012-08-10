@@ -3,8 +3,13 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
-NEXT
-~~~~
+0.9.16
+~~~~~~
+
+Some new matchers and a new content helper for JSON content.
+
+This is the first release of testtools to drop support for Python 2.4 and 2.5.
+If you need support for either of those versions, please use testtools 0.9.15.
 
 Improvements
 ------------
