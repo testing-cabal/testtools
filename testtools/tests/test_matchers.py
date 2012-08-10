@@ -1140,7 +1140,11 @@ class TestSameMembers(TestCase, TestMatchersInterface):
     describe_examples = [
         (("elements differ:\n"
           "reference = ['apple', 'orange', 'canteloupe', 'watermelon', 'lemon', 'banana']\n"
-          "actual    = ['orange', 'apple', 'banana', 'sparrow', 'lemon', 'canteloupe']\n"),
+          "actual    = ['orange', 'apple', 'banana', 'sparrow', 'lemon', 'canteloupe']\n"
+          ": \n"
+          "missing:    ['watermelon']\n"
+          "extra:      ['sparrow']"
+          ),
          ['orange', 'apple', 'banana', 'sparrow', 'lemon', 'canteloupe',],
          SameMembers(
              ['apple', 'orange', 'canteloupe', 'watermelon',
