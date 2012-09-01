@@ -102,3 +102,9 @@ from ._core import (
     SameMembers,
     _SubDictOf,
     )
+
+# XXX: Probably want to split into:
+# - the core system -- what makes matchers tick.
+# - standard matchers -- things like equality, endswith etc.
+# - filesystem matchers
+# - matchers that combine other matchers
