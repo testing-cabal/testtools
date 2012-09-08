@@ -7,7 +7,7 @@ from testtools.compat import (
     _u,
     )
 
-from testtools.matchers import (
+from testtools.matchers._basic import (
     _BinaryMismatch,
     Contains,
     DoesNotEndWith,
