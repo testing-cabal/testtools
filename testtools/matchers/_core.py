@@ -10,9 +10,11 @@ Bundled matchers are listed in __all__: a list can be obtained by running
 $ python -c 'import testtools.matchers; print testtools.matchers.__all__'
 """
 
-__metaclass__ = type
 __all__ = [
-    'MatchesPredicate',
+    'Matcher',
+    'Mismatch',
+    'MismatchDecorator',
+    'MismatchError',
     ]
 
 from testtools.compat import (
