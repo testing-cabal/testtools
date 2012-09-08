@@ -13,10 +13,7 @@ $ python -c 'import testtools.matchers; print testtools.matchers.__all__'
 __metaclass__ = type
 __all__ = [
     'MatchesPredicate',
-    'MatchesRegex',
     ]
-
-import re
 
 from testtools.compat import (
     _isbytes,
@@ -202,35 +199,6 @@ class MatchesPredicate(Matcher):
     def match(self, x):
         if not self.predicate(x):
             return Mismatch(self.message % x)
-
-
-class MatchesRegex(object):
-    """Matches if the matchee is matched by a regular expression."""
-
-    def __init__(self, pattern, flags=0):
-        self.pattern = pattern
-        self.flags = flags
-
-    def __str__(self):
-        args = ['%r' % self.pattern]
-        flag_arg = []
-        # dir() sorts the attributes for us, so we don't need to do it again.
-        for flag in dir(re):
-            if len(flag) == 1:
-                if self.flags & getattr(re, flag):
-                    flag_arg.append('re.%s' % flag)
-        if flag_arg:
-            args.append('|'.join(flag_arg))
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(args))
-
-    def match(self, value):
-        if not re.match(self.pattern, value, self.flags):
-            pattern = self.pattern
-            if not isinstance(pattern, str_is_unicode and str or unicode):
-                pattern = pattern.decode("latin1")
-            pattern = pattern.encode("unicode_escape").decode("ascii")
-            return Mismatch("%r does not match /%s/" % (
-                    value, pattern.replace("\\\\", "\\")))
 
 
 # Signal that this is part of the testing framework, and that code from this

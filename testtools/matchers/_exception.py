@@ -14,8 +14,8 @@ from testtools.compat import (
     isbaseexception,
     istext,
     )
+from ._basic import MatchesRegex
 from ._core import (
-    MatchesRegex,
     Matcher,
     Mismatch,
     )

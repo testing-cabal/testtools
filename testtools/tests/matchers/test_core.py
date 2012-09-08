@@ -2,8 +2,6 @@
 
 """Tests for matchers."""
 
-import re
-
 from testtools import (
     Matcher, # check that Matcher is exposed at the top level for docs.
     TestCase,
@@ -11,14 +9,12 @@ from testtools import (
 from testtools.compat import (
     str_is_unicode,
     text_repr,
-    _b,
     _u,
     )
 from testtools.matchers import (
     Equals,
     MatchesException,
     MatchesPredicate,
-    MatchesRegex,
     Mismatch,
     MismatchDecorator,
     MismatchError,
@@ -145,30 +141,6 @@ class TestMatchersInterface(object):
             mismatch = matcher.match(matchee)
             details = mismatch.get_details()
             self.assertEqual(dict(details), details)
-
-
-class TestMatchesRegex(TestCase, TestMatchersInterface):
-
-    matches_matcher = MatchesRegex('a|b')
-    matches_matches = ['a', 'b']
-    matches_mismatches = ['c']
-
-    str_examples = [
-        ("MatchesRegex('a|b')", MatchesRegex('a|b')),
-        ("MatchesRegex('a|b', re.M)", MatchesRegex('a|b', re.M)),
-        ("MatchesRegex('a|b', re.I|re.M)", MatchesRegex('a|b', re.I|re.M)),
-        ("MatchesRegex(%r)" % (_b("\xA7"),), MatchesRegex(_b("\xA7"))),
-        ("MatchesRegex(%r)" % (_u("\xA7"),), MatchesRegex(_u("\xA7"))),
-        ]
-
-    describe_examples = [
-        ("'c' does not match /a|b/", 'c', MatchesRegex('a|b')),
-        ("'c' does not match /a\d/", 'c', MatchesRegex(r'a\d')),
-        ("%r does not match /\\s+\\xa7/" % (_b('c'),),
-            _b('c'), MatchesRegex(_b("\\s+\xA7"))),
-        ("%r does not match /\\s+\\xa7/" % (_u('c'),),
-            _u('c'), MatchesRegex(_u("\\s+\xA7"))),
-        ]
 
 
 class TestMismatchDecorator(TestCase):

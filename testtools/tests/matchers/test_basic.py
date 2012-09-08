@@ -1,5 +1,7 @@
 # Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
 
+import re
+
 from testtools import TestCase
 from testtools.compat import (
     text_repr,
@@ -18,6 +20,7 @@ from testtools.matchers._basic import (
     IsInstance,
     LessThan,
     GreaterThan,
+    MatchesRegex,
     NotEquals,
     SameMembers,
     StartsWith,
@@ -340,6 +343,30 @@ class TestSameMembers(TestCase, TestMatchersInterface):
 
     str_examples = [
         ('SameMembers([1, 2, 3])', SameMembers([1, 2, 3])),
+        ]
+
+
+class TestMatchesRegex(TestCase, TestMatchersInterface):
+
+    matches_matcher = MatchesRegex('a|b')
+    matches_matches = ['a', 'b']
+    matches_mismatches = ['c']
+
+    str_examples = [
+        ("MatchesRegex('a|b')", MatchesRegex('a|b')),
+        ("MatchesRegex('a|b', re.M)", MatchesRegex('a|b', re.M)),
+        ("MatchesRegex('a|b', re.I|re.M)", MatchesRegex('a|b', re.I|re.M)),
+        ("MatchesRegex(%r)" % (_b("\xA7"),), MatchesRegex(_b("\xA7"))),
+        ("MatchesRegex(%r)" % (_u("\xA7"),), MatchesRegex(_u("\xA7"))),
+        ]
+
+    describe_examples = [
+        ("'c' does not match /a|b/", 'c', MatchesRegex('a|b')),
+        ("'c' does not match /a\d/", 'c', MatchesRegex(r'a\d')),
+        ("%r does not match /\\s+\\xa7/" % (_b('c'),),
+            _b('c'), MatchesRegex(_b("\\s+\xA7"))),
+        ("%r does not match /\\s+\\xa7/" % (_u('c'),),
+            _u('c'), MatchesRegex(_u("\\s+\xA7"))),
         ]
 
 

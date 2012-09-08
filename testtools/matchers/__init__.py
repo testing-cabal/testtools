@@ -50,7 +50,6 @@ __all__ = [
 
 from ._core import (
     MatchesPredicate,
-    MatchesRegex,
     )
 
 from ._basic import (
@@ -61,6 +60,7 @@ from ._basic import (
     Is,
     IsInstance,
     LessThan,
+    MatchesRegex,
     NotEquals,
     StartsWith,
     )
