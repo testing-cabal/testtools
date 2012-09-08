@@ -3,9 +3,6 @@
 import sys
 
 from testtools import TestCase
-from testtools.tests.helpers import FullStackRunTest
-from testtools.tests.matchers.test_core import TestMatchersInterface
-
 from testtools.matchers import (
     AfterPreprocessing,
     Equals,
@@ -15,6 +12,9 @@ from testtools.matchers._exception import (
     Raises,
     raises,
     )
+from testtools.tests.helpers import FullStackRunTest
+from testtools.tests.matchers.helpers import TestMatchersInterface
+
 
 def make_error(type, *args, **kwargs):
     try:

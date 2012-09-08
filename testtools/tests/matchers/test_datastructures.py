@@ -6,8 +6,6 @@ import sys
 
 from testtools import TestCase
 from testtools.compat import StringIO
-from testtools.tests.helpers import FullStackRunTest
-from testtools.tests.matchers.test_core import TestMatchersInterface
 from testtools.matchers import (
     Annotate,
     Equals,
@@ -21,6 +19,8 @@ from testtools.matchers._datastructures import (
     MatchesStructure,
     MatchesSetwise,
     )
+from testtools.tests.helpers import FullStackRunTest
+from testtools.tests.matchers.helpers import TestMatchersInterface
 
 
 def run_doctest(obj, name):

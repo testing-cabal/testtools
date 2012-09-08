@@ -8,7 +8,6 @@ from testtools.compat import (
     _b,
     _u,
     )
-
 from testtools.matchers._basic import (
     _BinaryMismatch,
     Contains,
@@ -26,7 +25,7 @@ from testtools.matchers._basic import (
     StartsWith,
     )
 from testtools.tests.helpers import FullStackRunTest
-from testtools.tests.matchers.test_core import TestMatchersInterface
+from testtools.tests.matchers.helpers import TestMatchersInterface
 
 
 class Test_BinaryMismatch(TestCase):

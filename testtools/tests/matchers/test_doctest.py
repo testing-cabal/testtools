@@ -8,10 +8,10 @@ from testtools.compat import (
     _b,
     _u,
     )
-from testtools.tests.matchers.test_core import TestMatchersInterface
-from testtools.tests.helpers import FullStackRunTest
-
 from testtools.matchers._doctest import DocTestMatches
+from testtools.tests.helpers import FullStackRunTest
+from testtools.tests.matchers.helpers import TestMatchersInterface
+
 
 
 class TestDocTestMatchesInterface(TestCase, TestMatchersInterface):

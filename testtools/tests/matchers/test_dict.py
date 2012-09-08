@@ -1,5 +1,4 @@
 from testtools import TestCase
-
 from testtools.matchers import (
     Equals,
     NotEquals,
@@ -13,7 +12,7 @@ from testtools.matchers._dict import (
     MatchesDict,
     _SubDictOf,
     )
-from testtools.tests.matchers.test_core import TestMatchersInterface
+from testtools.tests.matchers.helpers import TestMatchersInterface
 
 
 class TestMatchesAllDictInterface(TestCase, TestMatchersInterface):

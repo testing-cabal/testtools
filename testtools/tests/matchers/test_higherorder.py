@@ -1,9 +1,14 @@
 # Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
 
 from testtools import TestCase
-from testtools.tests.helpers import FullStackRunTest
-from testtools.tests.matchers.test_core import TestMatchersInterface
-from testtools.matchers._core import Mismatch
+from testtools.matchers import (
+    DocTestMatches,
+    Equals,
+    LessThan,
+    MatchesStructure,
+    Mismatch,
+    NotEquals,
+    )
 from testtools.matchers._higherorder import (
     AfterPreprocessing,
     AllMatch,
@@ -14,13 +19,8 @@ from testtools.matchers._higherorder import (
     MatchesPredicate,
     Not,
     )
-from testtools.matchers import (
-    DocTestMatches,
-    Equals,
-    LessThan,
-    MatchesStructure,
-    NotEquals,
-    )
+from testtools.tests.helpers import FullStackRunTest
+from testtools.tests.matchers.helpers import TestMatchersInterface
 
 
 class TestAllMatch(TestCase, TestMatchersInterface):
