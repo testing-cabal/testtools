@@ -15,8 +15,8 @@ __all__ = [
 import os
 import tarfile
 
+from ._basic import Equals
 from ._core import (
-    Equals,
     Matcher,
     MatchesAll,
     MatchesPredicate,

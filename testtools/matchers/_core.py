@@ -15,16 +15,9 @@ __all__ = [
     'AfterPreprocessing',
     'AllMatch',
     'Annotate',
-    'Contains',
     'ContainsAll',
     'DocTestMatches',
-    'EndsWith',
-    'Equals',
-    'GreaterThan',
-    'Is',
-    'IsInstance',
     'KeysEqual',
-    'LessThan',
     'MatchesAll',
     'MatchesAny',
     'MatchesException',
@@ -33,16 +26,12 @@ __all__ = [
     'MatchesRegex',
     'MatchesSetwise',
     'MatchesStructure',
-    'NotEquals',
     'Not',
     'Raises',
     'raises',
-    'StartsWith',
     ]
 
 import doctest
-import operator
-from pprint import pformat
 import re
 import sys
 import types
@@ -59,7 +48,6 @@ from testtools.compat import (
 from testtools.helpers import (
     dict_subtract,
     filter_values,
-    list_subtract,
     map_values,
     )
 
@@ -209,16 +197,6 @@ class MismatchDecorator(object):
         return self.original.get_details()
 
 
-def _format(thing):
-    """
-    Blocks of text with newlines are formatted as triple-quote
-    strings. Everything else is pretty-printed.
-    """
-    if istext(thing) or _isbytes(thing):
-        return text_repr(thing)
-    return pformat(thing)
-
-
 class _NonManglingOutputChecker(doctest.OutputChecker):
     """Doctest checker that works with unicode rather than mangling strings
 
@@ -312,90 +290,6 @@ class DocTestMismatch(Mismatch):
         return s.decode("latin1").encode("ascii", "backslashreplace")
 
 
-class DoesNotContain(Mismatch):
-
-    def __init__(self, matchee, needle):
-        """Create a DoesNotContain Mismatch.
-
-        :param matchee: the object that did not contain needle.
-        :param needle: the needle that 'matchee' was expected to contain.
-        """
-        self.matchee = matchee
-        self.needle = needle
-
-    def describe(self):
-        return "%r not in %r" % (self.needle, self.matchee)
-
-
-class DoesNotStartWith(Mismatch):
-
-    def __init__(self, matchee, expected):
-        """Create a DoesNotStartWith Mismatch.
-
-        :param matchee: the string that did not match.
-        :param expected: the string that 'matchee' was expected to start with.
-        """
-        self.matchee = matchee
-        self.expected = expected
-
-    def describe(self):
-        return "%s does not start with %s." % (
-            text_repr(self.matchee), text_repr(self.expected))
-
-
-class DoesNotEndWith(Mismatch):
-
-    def __init__(self, matchee, expected):
-        """Create a DoesNotEndWith Mismatch.
-
-        :param matchee: the string that did not match.
-        :param expected: the string that 'matchee' was expected to end with.
-        """
-        self.matchee = matchee
-        self.expected = expected
-
-    def describe(self):
-        return "%s does not end with %s." % (
-            text_repr(self.matchee), text_repr(self.expected))
-
-
-class _BinaryComparison(object):
-    """Matcher that compares an object to another object."""
-
-    def __init__(self, expected):
-        self.expected = expected
-
-    def __str__(self):
-        return "%s(%r)" % (self.__class__.__name__, self.expected)
-
-    def match(self, other):
-        if self.comparator(other, self.expected):
-            return None
-        return _BinaryMismatch(self.expected, self.mismatch_string, other)
-
-    def comparator(self, expected, other):
-        raise NotImplementedError(self.comparator)
-
-
-class _BinaryMismatch(Mismatch):
-    """Two things did not match."""
-
-    def __init__(self, expected, mismatch_string, other):
-        self.expected = expected
-        self._mismatch_string = mismatch_string
-        self.other = other
-
-    def describe(self):
-        left = repr(self.expected)
-        right = repr(self.other)
-        if len(left) + len(right) > 70:
-            return "%s:\nreference = %s\nactual    = %s\n" % (
-                self._mismatch_string, _format(self.expected),
-                _format(self.other))
-        else:
-            return "%s %s %s" % (left, self._mismatch_string, right)
-
-
 class MatchesPredicate(Matcher):
     """Match if a given function returns True.
 
@@ -427,81 +321,6 @@ class MatchesPredicate(Matcher):
     def match(self, x):
         if not self.predicate(x):
             return Mismatch(self.message % x)
-
-
-class Equals(_BinaryComparison):
-    """Matches if the items are equal."""
-
-    comparator = operator.eq
-    mismatch_string = '!='
-
-
-class NotEquals(_BinaryComparison):
-    """Matches if the items are not equal.
-
-    In most cases, this is equivalent to ``Not(Equals(foo))``. The difference
-    only matters when testing ``__ne__`` implementations.
-    """
-
-    comparator = operator.ne
-    mismatch_string = '=='
-
-
-class Is(_BinaryComparison):
-    """Matches if the items are identical."""
-
-    comparator = operator.is_
-    mismatch_string = 'is not'
-
-
-class IsInstance(object):
-    """Matcher that wraps isinstance."""
-
-    def __init__(self, *types):
-        self.types = tuple(types)
-
-    def __str__(self):
-        return "%s(%s)" % (self.__class__.__name__,
-                ', '.join(type.__name__ for type in self.types))
-
-    def match(self, other):
-        if isinstance(other, self.types):
-            return None
-        return NotAnInstance(other, self.types)
-
-
-class NotAnInstance(Mismatch):
-
-    def __init__(self, matchee, types):
-        """Create a NotAnInstance Mismatch.
-
-        :param matchee: the thing which is not an instance of any of types.
-        :param types: A tuple of the types which were expected.
-        """
-        self.matchee = matchee
-        self.types = types
-
-    def describe(self):
-        if len(self.types) == 1:
-            typestr = self.types[0].__name__
-        else:
-            typestr = 'any of (%s)' % ', '.join(type.__name__ for type in
-                    self.types)
-        return "'%s' is not an instance of %s" % (self.matchee, typestr)
-
-
-class LessThan(_BinaryComparison):
-    """Matches if the item is less than the matchers reference object."""
-
-    comparator = operator.__lt__
-    mismatch_string = 'is not >'
-
-
-class GreaterThan(_BinaryComparison):
-    """Matches if the item is greater than the matchers reference object."""
-
-    comparator = operator.__gt__
-    mismatch_string = 'is not <'
 
 
 class MatchesAny(object):
@@ -701,29 +520,6 @@ class MatchesException(Matcher):
         return "MatchesException(%s)" % repr(self.expected)
 
 
-class Contains(Matcher):
-    """Checks whether something is contained in another thing."""
-
-    def __init__(self, needle):
-        """Create a Contains Matcher.
-
-        :param needle: the thing that needs to be contained by matchees.
-        """
-        self.needle = needle
-
-    def __str__(self):
-        return "Contains(%r)" % (self.needle,)
-
-    def match(self, matchee):
-        try:
-            if self.needle not in matchee:
-                return DoesNotContain(matchee, self.needle)
-        except TypeError:
-            # e.g. 1 in 2 will raise TypeError
-            return DoesNotContain(matchee, self.needle)
-        return None
-
-
 def ContainsAll(items):
     """Make a matcher that checks whether a list of things is contained
     in another thing.
@@ -731,45 +527,8 @@ def ContainsAll(items):
     The matcher effectively checks that the provided sequence is a subset of
     the matchee.
     """
+    from ._basic import Contains
     return MatchesAll(*map(Contains, items), first_only=False)
-
-
-class StartsWith(Matcher):
-    """Checks whether one string starts with another."""
-
-    def __init__(self, expected):
-        """Create a StartsWith Matcher.
-
-        :param expected: the string that matchees should start with.
-        """
-        self.expected = expected
-
-    def __str__(self):
-        return "StartsWith(%r)" % (self.expected,)
-
-    def match(self, matchee):
-        if not matchee.startswith(self.expected):
-            return DoesNotStartWith(matchee, self.expected)
-        return None
-
-
-class EndsWith(Matcher):
-    """Checks whether one string ends with another."""
-
-    def __init__(self, expected):
-        """Create a EndsWith Matcher.
-
-        :param expected: the string that matchees should end with.
-        """
-        self.expected = expected
-
-    def __str__(self):
-        return "EndsWith(%r)" % (self.expected,)
-
-    def match(self, matchee):
-        if not matchee.endswith(self.expected):
-            return DoesNotEndWith(matchee, self.expected)
-        return None
 
 
 class KeysEqual(Matcher):
@@ -792,6 +551,7 @@ class KeysEqual(Matcher):
         return "KeysEqual(%s)" % ', '.join(map(repr, self.expected))
 
     def match(self, matchee):
+        from ._basic import _BinaryMismatch, Equals
         expected = sorted(self.expected)
         matched = Equals(expected).match(sorted(matchee.keys()))
         if matched:
@@ -914,6 +674,7 @@ class MatchesListwise(object):
 
     More easily explained by example than in words:
 
+    >>> from ._basic import Equals
     >>> MatchesListwise([Equals(1)]).match([1])
     >>> MatchesListwise([Equals(1), Equals(2)]).match([1, 2])
     >>> print (MatchesListwise([Equals(1), Equals(2)]).match([2, 1]).describe())
@@ -937,6 +698,7 @@ class MatchesListwise(object):
         self.first_only = first_only
 
     def match(self, values):
+        from ._basic import Equals
         mismatches = []
         length_mismatch = Annotate(
             "Length mismatch", Equals(len(self.matchers))).match(len(values))
@@ -983,6 +745,7 @@ class MatchesStructure(object):
         Similar to the constructor, except that the matcher is assumed to be
         Equals.
         """
+        from ._basic import Equals
         return cls.byMatcher(Equals, **kwargs)
 
     @classmethod
@@ -996,6 +759,7 @@ class MatchesStructure(object):
 
     @classmethod
     def fromExample(cls, example, *attributes):
+        from ._basic import Equals
         kwargs = {}
         for attr in attributes:
             kwargs[attr] = Equals(getattr(example, attr))
@@ -1200,31 +964,6 @@ class AllMatch(object):
                 mismatches.append(mismatch)
         if mismatches:
             return MismatchesAll(mismatches)
-
-
-class SameMembers(Matcher):
-    """Matches if two iterators have the same members.
-
-    This is not the same as set equivalence.  The two iterators must be of the
-    same length and have the same repetitions.
-    """
-
-    def __init__(self, expected):
-        super(SameMembers, self).__init__()
-        self.expected = expected
-
-    def __str__(self):
-        return '%s(%r)' % (self.__class__.__name__, self.expected)
-
-    def match(self, observed):
-        expected_only = list_subtract(self.expected, observed)
-        observed_only = list_subtract(observed, self.expected)
-        if expected_only == observed_only == []:
-            return
-        return PostfixedMismatch(
-            "\nmissing:    %s\nextra:      %s" % (
-                _format(expected_only), _format(observed_only)),
-            _BinaryMismatch(self.expected, 'elements differ', observed))
 
 
 class _MatchCommonKeys(Matcher):

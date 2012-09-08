@@ -52,16 +52,9 @@ from ._core import (
     AfterPreprocessing,
     AllMatch,
     Annotate,
-    Contains,
     ContainsAll,
     DocTestMatches,
-    EndsWith,
-    Equals,
-    GreaterThan,
-    Is,
-    IsInstance,
     KeysEqual,
-    LessThan,
     MatchesAll,
     MatchesAny,
     MatchesException,
@@ -70,13 +63,22 @@ from ._core import (
     MatchesRegex,
     MatchesSetwise,
     MatchesStructure,
-    NotEquals,
     Not,
     Raises,
     raises,
-    StartsWith,
     )
 
+from ._basic import (
+    Contains,
+    EndsWith,
+    Equals,
+    GreaterThan,
+    Is,
+    IsInstance,
+    LessThan,
+    NotEquals,
+    StartsWith,
+    )
 from ._filesystem import (
     DirExists,
     FileContains,
@@ -90,22 +92,25 @@ from ._filesystem import (
 # XXX: Compatibility imports.
 from ._core import (
     AnnotatedMismatch,
-    _BinaryMismatch,
     ContainedByDict,
     ContainsDict,
-    DoesNotEndWith,
-    DoesNotStartWith,
     Matcher,
     MatchesAllDict,
     MatchesDict,
     Mismatch,
     MismatchDecorator,
     MismatchError,
-    SameMembers,
     _SubDictOf,
     )
 from ._filesystem import (
     DirContains,
+    )
+
+from ._basic import (
+    _BinaryMismatch,
+    DoesNotEndWith,
+    DoesNotStartWith,
+    SameMembers,
     )
 
 # XXX: Probably want to split into:
