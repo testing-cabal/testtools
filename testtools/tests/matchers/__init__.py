@@ -8,10 +8,12 @@ def test_suite():
     from testtools.tests.matchers import (
         test_basic,
         test_core,
+        test_filesystem,
         )
     modules = [
         test_basic,
         test_core,
+        test_filesystem,
         ]
     suites = map(lambda x: x.test_suite(), modules)
     return TestSuite(suites)
