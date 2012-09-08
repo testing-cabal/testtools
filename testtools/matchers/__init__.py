@@ -96,34 +96,10 @@ from ._higherorder import (
     Not,
     )
 
-# XXX: Compatibility imports.
+# XXX: These are not explicitly included in __all__.  It's unclear how much of
+# the public interface they really are.
 from ._core import (
     Matcher,
     Mismatch,
-    MismatchDecorator,
     MismatchError,
     )
-from ._dict import (
-    ContainedByDict,
-    ContainsDict,
-    MatchesAllDict,
-    MatchesDict,
-    _SubDictOf,
-    )
-from ._filesystem import (
-    DirContains,
-    )
-from ._higherorder import (
-    AnnotatedMismatch,
-    )
-
-from ._basic import (
-    _BinaryMismatch,
-    DoesNotEndWith,
-    DoesNotStartWith,
-    SameMembers,
-    )
-
-# XXX: Probably want to split into:
-# - the core system -- what makes matchers tick.
-# - matchers that combine other matchers

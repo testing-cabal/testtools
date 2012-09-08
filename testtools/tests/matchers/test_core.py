@@ -14,10 +14,12 @@ from testtools.compat import (
 from testtools.matchers import (
     Equals,
     MatchesException,
+    Raises,
+    )
+from testtools.matchers._core import (
     Mismatch,
     MismatchDecorator,
     MismatchError,
-    Raises,
     )
 from testtools.tests.helpers import FullStackRunTest
 
