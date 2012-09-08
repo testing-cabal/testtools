@@ -11,6 +11,7 @@ from testtools.matchers._higherorder import (
     AnnotatedMismatch,
     MatchesAny,
     MatchesAll,
+    MatchesPredicate,
     Not,
     )
 from testtools.matchers import (
@@ -166,6 +167,26 @@ class TestNotInterface(TestCase, TestMatchersInterface):
         ("Not(Equals('1'))", Not(Equals('1')))]
 
     describe_examples = [('1 matches Equals(1)', 1, Not(Equals(1)))]
+
+
+def is_even(x):
+    return x % 2 == 0
+
+
+class TestMatchesPredicate(TestCase, TestMatchersInterface):
+
+    matches_matcher = MatchesPredicate(is_even, "%s is not even")
+    matches_matches = [2, 4, 6, 8]
+    matches_mismatches = [3, 5, 7, 9]
+
+    str_examples = [
+        ("MatchesPredicate(%r, %r)" % (is_even, "%s is not even"),
+         MatchesPredicate(is_even, "%s is not even")),
+        ]
+
+    describe_examples = [
+        ('7 is not even', 7, MatchesPredicate(is_even, "%s is not even")),
+        ]
 
 
 def test_suite():

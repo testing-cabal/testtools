@@ -48,10 +48,6 @@ __all__ = [
     'TarballContains',
     ]
 
-from ._core import (
-    MatchesPredicate,
-    )
-
 from ._basic import (
     Contains,
     EndsWith,
@@ -96,6 +92,7 @@ from ._higherorder import (
     Annotate,
     MatchesAll,
     MatchesAny,
+    MatchesPredicate,
     Not,
     )
 
