@@ -49,23 +49,8 @@ __all__ = [
     ]
 
 from ._core import (
-    AfterPreprocessing,
-    AllMatch,
-    Annotate,
-    ContainsAll,
-    DocTestMatches,
-    KeysEqual,
-    MatchesAll,
-    MatchesAny,
-    MatchesException,
-    MatchesListwise,
     MatchesPredicate,
     MatchesRegex,
-    MatchesSetwise,
-    MatchesStructure,
-    Not,
-    Raises,
-    raises,
     )
 
 from ._basic import (
@@ -79,6 +64,23 @@ from ._basic import (
     NotEquals,
     StartsWith,
     )
+from ._datastructures import (
+    ContainsAll,
+    MatchesListwise,
+    MatchesSetwise,
+    MatchesStructure,
+    )
+from ._dict import (
+    KeysEqual,
+    )
+from ._doctest import (
+    DocTestMatches,
+    )
+from ._exception import (
+    MatchesException,
+    Raises,
+    raises,
+    )
 from ._filesystem import (
     DirExists,
     FileContains,
@@ -88,22 +90,34 @@ from ._filesystem import (
     SamePath,
     TarballContains,
     )
+from ._higherorder import (
+    AfterPreprocessing,
+    AllMatch,
+    Annotate,
+    MatchesAll,
+    MatchesAny,
+    Not,
+    )
 
 # XXX: Compatibility imports.
 from ._core import (
-    AnnotatedMismatch,
-    ContainedByDict,
-    ContainsDict,
     Matcher,
-    MatchesAllDict,
-    MatchesDict,
     Mismatch,
     MismatchDecorator,
     MismatchError,
+    )
+from ._dict import (
+    ContainedByDict,
+    ContainsDict,
+    MatchesAllDict,
+    MatchesDict,
     _SubDictOf,
     )
 from ._filesystem import (
     DirContains,
+    )
+from ._higherorder import (
+    AnnotatedMismatch,
     )
 
 from ._basic import (
@@ -115,7 +129,4 @@ from ._basic import (
 
 # XXX: Probably want to split into:
 # - the core system -- what makes matchers tick.
-# - standard matchers -- things like equality, endswith etc.
-#   - what's a good name for this?  _basic? _fundamental? _python? _common?
-#     Just pick one.  Rob will disagree with whatever is picked anyway.
 # - matchers that combine other matchers

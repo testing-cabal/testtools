@@ -24,8 +24,8 @@ from ..helpers import list_subtract
 from ._core import (
     Matcher,
     Mismatch,
-    PostfixedMismatch,
     )
+from ._higherorder import PostfixedMismatch
 
 
 def _format(thing):

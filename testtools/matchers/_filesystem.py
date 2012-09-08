@@ -18,9 +18,9 @@ import tarfile
 from ._basic import Equals
 from ._core import (
     Matcher,
-    MatchesAll,
     MatchesPredicate,
     )
+from ._higherorder import MatchesAll
 
 
 def PathExists():
