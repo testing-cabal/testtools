@@ -22,7 +22,6 @@ from testtools.matchers import (
     AllMatch,
     Annotate,
     AnnotatedMismatch,
-    Contains,
     ContainsAll,
     ContainedByDict,
     ContainsDict,
@@ -48,7 +47,6 @@ from testtools.matchers import (
     Raises,
     raises,
     _SubDictOf,
-    TarballContains,
     )
 from testtools.tests.helpers import FullStackRunTest
 
