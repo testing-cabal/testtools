@@ -111,5 +111,6 @@ from ._filesystem import (
 # XXX: Probably want to split into:
 # - the core system -- what makes matchers tick.
 # - standard matchers -- things like equality, endswith etc.
-# - filesystem matchers
+#   - what's a good name for this?  _basic? _fundamental? _python? _common?
+#     Just pick one.  Rob will disagree with whatever is picked anyway.
 # - matchers that combine other matchers
