@@ -54,14 +54,10 @@ from ._core import (
     Annotate,
     Contains,
     ContainsAll,
-    DirExists,
     DocTestMatches,
     EndsWith,
     Equals,
-    FileContains,
-    FileExists,
     GreaterThan,
-    HasPermissions,
     Is,
     IsInstance,
     KeysEqual,
@@ -76,11 +72,18 @@ from ._core import (
     MatchesStructure,
     NotEquals,
     Not,
-    PathExists,
     Raises,
     raises,
-    SamePath,
     StartsWith,
+    )
+
+from ._filesystem import (
+    DirExists,
+    FileContains,
+    FileExists,
+    HasPermissions,
+    PathExists,
+    SamePath,
     TarballContains,
     )
 
@@ -90,7 +93,6 @@ from ._core import (
     _BinaryMismatch,
     ContainedByDict,
     ContainsDict,
-    DirContains,
     DoesNotEndWith,
     DoesNotStartWith,
     Matcher,
@@ -101,6 +103,9 @@ from ._core import (
     MismatchError,
     SameMembers,
     _SubDictOf,
+    )
+from ._filesystem import (
+    DirContains,
     )
 
 # XXX: Probably want to split into:
