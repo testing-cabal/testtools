@@ -16,12 +16,12 @@ import os
 import tarfile
 
 from ._basic import Equals
-from ._core import (
-    Matcher,
-    )
 from ._higherorder import (
     MatchesAll,
     MatchesPredicate,
+    )
+from ._impl import (
+    Matcher,
     )
 
 

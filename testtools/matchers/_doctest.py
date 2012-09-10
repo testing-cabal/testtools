@@ -8,7 +8,7 @@ import doctest
 import re
 
 from ..compat import str_is_unicode
-from ._core import Mismatch
+from ._impl import Mismatch
 
 
 class _NonManglingOutputChecker(doctest.OutputChecker):

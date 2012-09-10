@@ -16,7 +16,7 @@ from testtools.matchers import (
     MatchesException,
     Raises,
     )
-from testtools.matchers._core import (
+from testtools.matchers._impl import (
     Mismatch,
     MismatchDecorator,
     MismatchError,

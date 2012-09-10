@@ -98,7 +98,7 @@ from ._higherorder import (
 
 # XXX: These are not explicitly included in __all__.  It's unclear how much of
 # the public interface they really are.
-from ._core import (
+from ._impl import (
     Matcher,
     Mismatch,
     MismatchError,

@@ -9,12 +9,12 @@ from ..helpers import (
     filter_values,
     map_values,
     )
-from ._core import Matcher, Mismatch
 from ._higherorder import (
     AnnotatedMismatch,
     PrefixedMismatch,
     MismatchesAll,
     )
+from ._impl import Matcher, Mismatch
 
 
 def LabelledMismatches(mismatches, details=None):

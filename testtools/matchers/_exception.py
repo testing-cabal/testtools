@@ -15,11 +15,11 @@ from testtools.compat import (
     istext,
     )
 from ._basic import MatchesRegex
-from ._core import (
+from ._higherorder import AfterPreproccessing
+from ._impl import (
     Matcher,
     Mismatch,
     )
-from ._higherorder import AfterPreproccessing
 
 
 class MatchesException(Matcher):

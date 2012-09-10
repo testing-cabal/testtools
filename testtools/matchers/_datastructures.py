@@ -10,12 +10,12 @@ __all__ = [
 """Matchers that operate with knowledge of Python data structures."""
 
 from ..helpers import map_values
-from ._core import Mismatch
 from ._higherorder import (
     Annotate,
     MatchesAll,
     MismatchesAll,
     )
+from ._impl import Mismatch
 
 
 def ContainsAll(items):

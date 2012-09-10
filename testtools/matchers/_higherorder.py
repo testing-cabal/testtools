@@ -11,7 +11,7 @@ __all__ = [
 
 import types
 
-from ._core import (
+from ._impl import (
     Matcher,
     Mismatch,
     MismatchDecorator,

@@ -24,11 +24,11 @@ from ..compat import (
     text_repr,
     )
 from ..helpers import list_subtract
-from ._core import (
+from ._higherorder import PostfixedMismatch
+from ._impl import (
     Matcher,
     Mismatch,
     )
-from ._higherorder import PostfixedMismatch
 
 
 def _format(thing):
