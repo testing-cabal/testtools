@@ -34,7 +34,7 @@ from testtools.helpers import (
     try_import,
     try_imports,
     )
-from testtools.matchers import (
+from testtools.matchers._impl import (
     Matcher,
     )
 # Shut up, pyflakes. We are importing for documentation, not for namespacing.

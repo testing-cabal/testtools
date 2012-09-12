@@ -6,6 +6,13 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Changes
+-------
+
+* The ``testtools.matchers`` package has been split up.  No change to the
+  public interface.  (Jonathan Lange)
+
+
 0.9.16
 ~~~~~~
 

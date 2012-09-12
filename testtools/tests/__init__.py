@@ -7,6 +7,7 @@ from unittest import TestSuite
 
 def test_suite():
     from testtools.tests import (
+        matchers,
         test_compat,
         test_content,
         test_content_type,
@@ -14,7 +15,6 @@ def test_suite():
         test_distutilscmd,
         test_fixturesupport,
         test_helpers,
-        test_matchers,
         test_monkey,
         test_run,
         test_runtest,
@@ -25,6 +25,7 @@ def test_suite():
         test_testsuite,
         )
     modules = [
+        matchers,
         test_compat,
         test_content,
         test_content_type,
@@ -32,7 +33,6 @@ def test_suite():
         test_distutilscmd,
         test_fixturesupport,
         test_helpers,
-        test_matchers,
         test_monkey,
         test_run,
         test_runtest,
