@@ -96,7 +96,7 @@ Cross-Python compatibility
 --------------------------
 
 testtools gives you the very latest in unit testing technology in a way that
-will work with Python 2.4, 2.5, 2.6, 2.7 and 3.1. The next release of testtools
-will change that to support versions that are maintained by the Python
-community instead, to allow the use of modern language features within
-testtools.
+will work with Python 2.6, 2.7 and 3.1.
+
+If you wish to use testtools with Python 2.4 or 2.5, then please use testtools
+0.9.15.
