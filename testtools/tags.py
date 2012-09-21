@@ -9,9 +9,9 @@ class TagContext(object):
     def __init__(self, parent=None):
         """Create a new TagContext.
 
-        :parent: If provided, uses this as the parent context.  Any tags that
-            are current on the parent at the time of construction are current
-            in this context.
+        :param parent: If provided, uses this as the parent context.  Any tags
+            that are current on the parent at the time of construction are
+            current in this context.
         """
         self.parent = parent
         self._tags = set()
