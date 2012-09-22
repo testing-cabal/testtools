@@ -357,12 +357,12 @@ class TextTestResult(TestResult):
 class ThreadsafeForwardingResult(TestResult):
     """A TestResult which ensures the target does not receive mixed up calls.
 
-    Multiple ``ThreadsafeForwardingResult``s can forward to the same target
+    Multiple ``ThreadsafeForwardingResults`` can forward to the same target
     result, and that target result will only ever receive the complete set of
     events for one test at a time.
 
     This is enforced using a semaphore, which further guarantees that tests
-    will be sent atomically even if the ``ThreadsafeForwardingResult``s are in
+    will be sent atomically even if the ``ThreadsafeForwardingResults`` are in
     different threads.
 
     ``ThreadsafeForwardingResult`` is typically used by
