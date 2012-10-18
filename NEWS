@@ -12,6 +12,11 @@ Changes
 * The ``testtools.matchers`` package has been split up.  No change to the
   public interface.  (Jonathan Lange)
 
+Improvements
+------------
+
+* ``python -m testtools.run discover . --list`` now works. (Robert Collins)
+
 
 0.9.16
 ~~~~~~
