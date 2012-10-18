@@ -6,6 +6,13 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+0.9.17
+~~~~~~
+
+This release brings better discover support and Python3.x improvements. There
+are still some test failures on Python3.3 but they are cosmetic - the library
+is as usable there as on any other Python 3 release.
+
 Changes
 -------
 
