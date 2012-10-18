@@ -17,6 +17,8 @@ Improvements
 
 * ``python -m testtools.run discover . --list`` now works. (Robert Collins)
 
+* Correctly handling of bytes vs text in JSON content type. (Martin [gz])
+
 
 0.9.16
 ~~~~~~

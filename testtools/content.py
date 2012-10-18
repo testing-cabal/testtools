@@ -190,9 +190,13 @@ class TracebackContent(Content):
         return length
 
 
-def json_content(data):
+def json_content(json_data):
     """Create a JSON `Content` object from JSON-encodeable data."""
-    return Content(JSON, lambda: [json.dumps(data).encode('utf8')])
+    data = json.dumps(json_data)
+    if str_is_unicode:
+        # The json module perversely returns native str not bytes
+        data = data.encode('utf8')
+    return Content(JSON, lambda: [data])
 
 
 def text_content(text):

@@ -1579,7 +1579,9 @@ class TestNonAsciiResults(TestCase):
         textoutput = self._test_external_case(
             modulelevel="import os",
             testline="os.mkdir('/')")
-        if os.name != "nt" or sys.version_info < (2, 5):
+        if sys.version_info > (3, 3):
+            self.assertIn(self._as_output("PermissionError: "), textoutput)
+        elif os.name != "nt" or sys.version_info < (2, 5):
             self.assertIn(self._as_output("OSError: "), textoutput)
         else:
             self.assertIn(self._as_output("WindowsError: "), textoutput)
