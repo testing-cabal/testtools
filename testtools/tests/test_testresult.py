@@ -1692,11 +1692,9 @@ class TestNonAsciiResults(TestCase):
         finally:
             f.close()
         textoutput = self._run_external_case()
-        if sys.version_info > (3, 3):
-            error = 'TypeError'
-        else:
-            error = 'SyntaxError'
-        self.assertIn(self._as_output("\n%s: " % (error,)), textoutput)
+        matches_error = MatchesAny(
+            Contains('\nTypeError: '), Contains('\nSyntaxError: '))
+        self.assertThat(textoutput, matches_error)
 
     def test_syntax_error_line_iso_8859_1(self):
         """Syntax error on a latin-1 line shows the line decoded"""
