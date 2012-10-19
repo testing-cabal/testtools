@@ -48,11 +48,16 @@ class TestKeysEqual(TestCase, TestMatchersInterface):
         ("KeysEqual('foo', 'bar')", KeysEqual('foo', 'bar')),
         ]
 
-    describe_examples = [
-        ("['bar', 'foo'] does not match {'baz': 2, 'foo': 0, 'bar': 1}: "
-         "Keys not equal",
-         {'foo': 0, 'bar': 1, 'baz': 2}, KeysEqual('foo', 'bar')),
-        ]
+    describe_examples = []
+
+    def test_description(self):
+        matchee = {'foo': 0, 'bar': 1, 'baz': 2}
+        mismatch = KeysEqual('foo', 'bar').match(matchee)
+        description = mismatch.describe()
+        self.assertThat(
+            description, Equals(
+                "['bar', 'foo'] does not match %r: Keys not equal"
+                % (matchee,)))
 
 
 class TestSubDictOf(TestCase, TestMatchersInterface):
@@ -91,8 +96,8 @@ class TestMatchesDict(TestCase, TestMatchersInterface):
         ]
 
     str_examples = [
-        ("MatchesDict({'foo': %s, 'baz': %s})" % (
-                Equals('bar'), Not(Equals('qux'))),
+        ("MatchesDict({'baz': %s, 'foo': %s})" % (
+                Not(Equals('qux')), Equals('bar')),
          matches_matcher),
         ]
 
@@ -144,8 +149,8 @@ class TestContainsDict(TestCase, TestMatchersInterface):
         ]
 
     str_examples = [
-        ("ContainsDict({'foo': %s, 'baz': %s})" % (
-                Equals('bar'), Not(Equals('qux'))),
+        ("ContainsDict({'baz': %s, 'foo': %s})" % (
+                Not(Equals('qux')), Equals('bar')),
          matches_matcher),
         ]
 
@@ -190,8 +195,8 @@ class TestContainedByDict(TestCase, TestMatchersInterface):
         ]
 
     str_examples = [
-        ("ContainedByDict({'foo': %s, 'baz': %s})" % (
-                Equals('bar'), Not(Equals('qux'))),
+        ("ContainedByDict({'baz': %s, 'foo': %s})" % (
+                Not(Equals('qux')), Equals('bar')),
          matches_matcher),
         ]
 

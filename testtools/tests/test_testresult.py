@@ -1471,7 +1471,7 @@ class TestNonAsciiResults(TestCase):
         _u("\u5357\u7121"), # In ISO 2022 encodings
         _u("\xa7\xa7\xa7"), # In ISO 8859 encodings
         )
-    
+
     _is_pypy = "__pypy__" in sys.builtin_module_names
     # Everything but Jython shows syntax errors on the current character
     _error_on_character = os.name != "java" and not _is_pypy
@@ -1574,17 +1574,21 @@ class TestNonAsciiResults(TestCase):
             self.assertNotIn, self._as_output("\a\a\a"), textoutput)
         self.assertIn(self._as_output(_u("\uFFFD\uFFFD\uFFFD")), textoutput)
 
+    def _get_local_os_error(self):
+        if sys.version_info > (3, 3):
+            return "FileExistsError"
+        elif os.name != "nt" or sys.version_info < (2, 5):
+            return "OSError"
+        else:
+            return "WindowsError"
+
     def test_os_error(self):
         """Locale error messages from the OS shouldn't break anything"""
         textoutput = self._test_external_case(
             modulelevel="import os",
             testline="os.mkdir('/')")
-        if sys.version_info > (3, 3):
-            self.assertIn(self._as_output("PermissionError: "), textoutput)
-        elif os.name != "nt" or sys.version_info < (2, 5):
-            self.assertIn(self._as_output("OSError: "), textoutput)
-        else:
-            self.assertIn(self._as_output("WindowsError: "), textoutput)
+        error = self._get_local_os_error()
+        self.assertIn(self._as_output("%s: " % (error,)), textoutput)
 
     def test_assertion_text_shift_jis(self):
         """A terminal raw backslash in an encoded string is weird but fine"""
@@ -1686,7 +1690,11 @@ class TestNonAsciiResults(TestCase):
         finally:
             f.close()
         textoutput = self._run_external_case()
-        self.assertIn(self._as_output("\nSyntaxError: "), textoutput)
+        if sys.version_info > (3, 3):
+            error = 'TypeError'
+        else:
+            error = 'SyntaxError'
+        self.assertIn(self._as_output("\n%s: " % (error,)), textoutput)
 
     def test_syntax_error_line_iso_8859_1(self):
         """Syntax error on a latin-1 line shows the line decoded"""
