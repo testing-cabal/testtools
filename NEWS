@@ -6,6 +6,14 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+
+0.9.18
+~~~~~~
+
+Due to an oversight, release 0.9.18 did not contain the new
+``testtools.matchers`` package and was thus completely broken.  This release
+corrects that, returning us all to normality.
+
 0.9.17
 ~~~~~~
 
