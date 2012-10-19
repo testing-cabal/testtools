@@ -36,8 +36,7 @@ class MatchesAllDict(Matcher):
         self.matchers = matchers
 
     def __str__(self):
-        return 'MatchesAllDict({%s})' % (
-            ', '.join('%r: %s' % (k, v) for k, v in self.matchers.items()))
+        return 'MatchesAllDict(%s)' % (_format_matcher_dict(self.matchers),)
 
     def match(self, observed):
         mismatches = {}
@@ -134,7 +133,7 @@ class _SuperDictOf(Matcher):
 
 def _format_matcher_dict(matchers):
     return '{%s}' % (
-        ', '.join('%r: %s' % (k, v) for k, v in matchers.items()))
+        ', '.join(sorted('%r: %s' % (k, v) for k, v in matchers.items())))
 
 
 class _CombinedMatcher(Matcher):
