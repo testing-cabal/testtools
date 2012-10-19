@@ -44,8 +44,10 @@ from testtools.content import (
     )
 from testtools.content_type import ContentType, UTF8_TEXT
 from testtools.matchers import (
+    Contains,
     DocTestMatches,
     Equals,
+    MatchesAny,
     MatchesException,
     Raises,
     )
@@ -1574,21 +1576,21 @@ class TestNonAsciiResults(TestCase):
             self.assertNotIn, self._as_output("\a\a\a"), textoutput)
         self.assertIn(self._as_output(_u("\uFFFD\uFFFD\uFFFD")), textoutput)
 
-    def _get_local_os_error(self):
+    def _local_os_error_matcher(self):
         if sys.version_info > (3, 3):
-            return "FileExistsError"
+            return MatchesAny(Contains("FileExistsError: "),
+                              Contains("PermissionError: "))
         elif os.name != "nt" or sys.version_info < (2, 5):
-            return "OSError"
+            return Contains(self._as_output("OSError: "))
         else:
-            return "WindowsError"
+            return Contains(self._as_output("WindowsError: "))
 
     def test_os_error(self):
         """Locale error messages from the OS shouldn't break anything"""
         textoutput = self._test_external_case(
             modulelevel="import os",
             testline="os.mkdir('/')")
-        error = self._get_local_os_error()
-        self.assertIn(self._as_output("%s: " % (error,)), textoutput)
+        self.assertThat(textoutput, self._local_os_error_matcher())
 
     def test_assertion_text_shift_jis(self):
         """A terminal raw backslash in an encoded string is weird but fine"""
