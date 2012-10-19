@@ -3,8 +3,14 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
-NEXT
-~~~~
+0.9.19
+~~~~~~
+
+How embarrassing!  Three releases in two days.
+
+We've worked out the kinks and have confirmation from our downstreams that
+this is all good.  Should be the last release for a little while.  Please
+ignore 0.9.18 and 0.9.17.
 
 Improvements
 ------------
