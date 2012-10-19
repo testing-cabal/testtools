@@ -72,5 +72,10 @@ setup(name='testtools',
       long_description=get_long_description(),
       version=get_version(),
       classifiers=["License :: OSI Approved :: MIT License"],
-      packages=['testtools', 'testtools.testresult', 'testtools.tests'],
+      packages=[
+        'testtools',
+        'testtools.matchers',
+        'testtools.testresult',
+        'testtools.tests',
+        ],
       cmdclass={'test': testtools.TestCommand})
