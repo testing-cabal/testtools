@@ -6,6 +6,26 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* New, powerful matchers that match items in a dictionary:
+
+  - ``MatchesDict``, match every key in a dictionary with a key in a
+    dictionary of matchers.  For when the set of expected keys is equal to the
+    set of observed keys.
+
+  - ``ContainsDict``, every key in a dictionary of matchers must be
+    found in a dictionary, and the values for those keys must match.  For when
+    the set of expected keys is a subset of the set of observed keys.
+
+  - ``ContainedByDict``, every key in a dictionary must be found in
+    a dictionary of matchers.  For when the set of expected keys is a superset
+    of the set of observed keys.
+
+  The names are a little confusing, sorry.  We're still trying to figure out
+  how to present the concept in the simplest way possible.
+
 
 0.9.19
 ~~~~~~

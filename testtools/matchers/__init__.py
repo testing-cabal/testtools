@@ -18,6 +18,8 @@ __all__ = [
     'Annotate',
     'Contains',
     'ContainsAll',
+    'ContainedByDict',
+    'ContainsDict',
     'DirExists',
     'DocTestMatches',
     'EndsWith',
@@ -32,6 +34,7 @@ __all__ = [
     'LessThan',
     'MatchesAll',
     'MatchesAny',
+    'MatchesDict',
     'MatchesException',
     'MatchesListwise',
     'MatchesPredicate',
@@ -67,7 +70,10 @@ from ._datastructures import (
     MatchesStructure,
     )
 from ._dict import (
+    ContainedByDict,
+    ContainsDict,
     KeysEqual,
+    MatchesDict,
     )
 from ._doctest import (
     DocTestMatches,
