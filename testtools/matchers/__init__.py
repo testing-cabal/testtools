@@ -20,6 +20,7 @@ __all__ = [
     'ContainsAll',
     'ContainedByDict',
     'ContainsDict',
+    'DirContains',
     'DirExists',
     'DocTestMatches',
     'EndsWith',
@@ -84,6 +85,7 @@ from ._exception import (
     raises,
     )
 from ._filesystem import (
+    DirContains,
     DirExists,
     FileContains,
     FileExists,
