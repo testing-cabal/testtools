@@ -79,4 +79,5 @@ setup(name='testtools',
         'testtools.tests',
         'testtools.tests.matchers',
         ],
-      cmdclass={'test': testtools.TestCommand})
+      cmdclass={'test': testtools.TestCommand},
+      zip_safe=False)
