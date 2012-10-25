@@ -6,6 +6,12 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* ``DirContains`` correctly exposed, after being accidentally hidden in the
+  great matcher re-organization of 0.9.17.  (Jonathan Lange)
+
 
 0.9.20
 ~~~~~~
