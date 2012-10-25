@@ -3,8 +3,10 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
-NEXT
-~~~~
+0.9.20
+~~~~~~
+
+Three new matchers that'll rock your world.
 
 Improvements
 ------------
