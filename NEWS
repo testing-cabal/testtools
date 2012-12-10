@@ -6,6 +6,12 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* ``content_from_file`` and ``content_from_stream`` now accept seek_offset and
+  seek_whence parameters allowing them to be used to grab less than the full
+  stream, or to be used with StringIO streams. (Robert Collins, #1088693)
 
 0.9.21
 ~~~~~~

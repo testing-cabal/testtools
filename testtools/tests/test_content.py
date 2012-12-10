@@ -125,6 +125,27 @@ class TestContent(TestCase):
         self.assertThat(
             ''.join(content.iter_text()), Equals('some data'))
 
+    def test_from_file_with_simple_seek(self):
+        f = tempfile.NamedTemporaryFile()
+        f.write('some data')
+        f.flush()
+        self.addCleanup(f.close)
+        content = content_from_file(
+            f.name, UTF8_TEXT, chunk_size=50, seek_offset=5)
+        self.assertThat(
+            list(content.iter_bytes()), Equals(['data']))
+
+    def test_from_file_with_whence_seek(self):
+        f = tempfile.NamedTemporaryFile()
+        f.write('some data')
+        f.flush()
+        self.addCleanup(f.close)
+        content = content_from_file(
+            f.name, UTF8_TEXT, chunk_size=50, seek_offset=-4, seek_whence=2)
+        self.assertThat(
+            list(content.iter_bytes()), Equals(['data']))
+
+
     def test_from_stream(self):
         data = StringIO('some data')
         content = content_from_stream(data, UTF8_TEXT, chunk_size=2)
@@ -147,6 +168,20 @@ class TestContent(TestCase):
         os.write(fd, _b('more data'))
         self.assertThat(
             ''.join(content.iter_text()), Equals('some data'))
+
+    def test_from_stream_with_simple_seek(self):
+        data = StringIO('some data')
+        content = content_from_stream(
+            data, UTF8_TEXT, chunk_size=50, seek_offset=5)
+        self.assertThat(
+            list(content.iter_bytes()), Equals(['data']))
+
+    def test_from_stream_with_whence_seek(self):
+        data = StringIO('some data')
+        content = content_from_stream(
+            data, UTF8_TEXT, chunk_size=50, seek_offset=-4, seek_whence=2)
+        self.assertThat(
+            list(content.iter_bytes()), Equals(['data']))
 
     def test_from_text(self):
         data = _u("some data")
