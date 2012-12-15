@@ -6,6 +6,13 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* ``AnyMatch`` added, a new matcher that matches when any item in a collection
+  matches the given matcher.  (Jonathan Lange)
+
+
 0.9.22
 ~~~~~~
 
