@@ -12,6 +12,10 @@ Improvements
 * ``AnyMatch`` added, a new matcher that matches when any item in a collection
   matches the given matcher.  (Jonathan Lange)
 
+* Spelling corrections to documentation.  (Vincent Ladeuil)
+
+* ``TestProgram`` now has a sane default for its ``testRunner`` argument.
+  (Vincent Ladeuil)
 
 0.9.22
 ~~~~~~

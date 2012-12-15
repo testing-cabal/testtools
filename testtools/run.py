@@ -307,7 +307,7 @@ class TestProgram(object):
             and getattr(unittest, 'installHandler', None) is not None):
             unittest.installHandler()
         if self.testRunner is None:
-            self.testRunner = runner.TextTestRunner
+            self.testRunner = TestToolsTestRunner(sys.stdout)
         if isinstance(self.testRunner, classtypes()):
             try:
                 testRunner = self.testRunner(verbosity=self.verbosity,
