@@ -35,12 +35,17 @@ else:
 class TestToolsTestRunner(object):
     """ A thunk object to support unittest.TestProgram."""
 
-    def __init__(self, stdout):
-        self.stdout = stdout
+    def __init__(self, verbosity=None, failfast=None, buffer=None):
+        """Create a TestToolsTestRunner.
+
+        :param verbosity: Ignored.
+        :param failfast: Stop running tests at the first failure.
+        :param buffer: Ignored.
+        """
 
     def run(self, test):
         "Run the given test case or test suite."
-        result = TextTestResult(unicode_output_stream(self.stdout))
+        result = TextTestResult(unicode_output_stream(sys.stdout))
         result.startTestRun()
         try:
             return test.run(result)
@@ -325,8 +330,8 @@ class TestProgram(object):
 ################
 
 def main(argv, stdout):
-    runner = TestToolsTestRunner(stdout)
-    program = TestProgram(argv=argv, testRunner=runner, stdout=stdout)
+    program = TestProgram(argv=argv, testRunner=TestToolsTestRunner,
+        stdout=stdout)
 
 if __name__ == '__main__':
     main(sys.argv, sys.stdout)

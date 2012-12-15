@@ -52,7 +52,7 @@ class TestCommandTest(TestCase):
 
     def test_test_module(self):
         self.useFixture(SampleTestFixture())
-        stream = BytesIO()
+        runner_stdout = self.useFixture(fixtures.DetailStream('stdout')).stream
         dist = Distribution()
         dist.script_name = 'setup.py'
         dist.script_args = ['test']
@@ -60,10 +60,10 @@ class TestCommandTest(TestCase):
         dist.command_options = {
             'test': {'test_module': ('command line', 'testtools.runexample')}}
         cmd = dist.reinitialize_command('test')
-        cmd.runner.stdout = stream
-        dist.run_command('test')
+        with fixtures.MonkeyPatch('sys.stdout', runner_stdout):
+            dist.run_command('test')
         self.assertThat(
-            stream.getvalue(),
+            runner_stdout.getvalue(),
             MatchesRegex(_b("""Tests running...
 
 Ran 2 tests in \\d.\\d\\d\\ds
@@ -72,7 +72,7 @@ OK
 
     def test_test_suite(self):
         self.useFixture(SampleTestFixture())
-        stream = BytesIO()
+        runner_stdout = self.useFixture(fixtures.DetailStream('stdout')).stream
         dist = Distribution()
         dist.script_name = 'setup.py'
         dist.script_args = ['test']
@@ -82,10 +82,10 @@ OK
                 'test_suite': (
                     'command line', 'testtools.runexample.test_suite')}}
         cmd = dist.reinitialize_command('test')
-        cmd.runner.stdout = stream
-        dist.run_command('test')
+        with fixtures.MonkeyPatch('sys.stdout', runner_stdout):
+            dist.run_command('test')
         self.assertThat(
-            stream.getvalue(),
+            runner_stdout.getvalue(),
             MatchesRegex(_b("""Tests running...
 
 Ran 2 tests in \\d.\\d\\d\\ds

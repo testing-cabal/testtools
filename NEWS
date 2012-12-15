@@ -6,6 +6,13 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Changes
+-------
+
+* ``run.TestToolsTestRunner`` now accepts the verbosity, buffer and failfast
+  arguments the upstream python TestProgram code wants to give it, making it
+  possible to support them in a compatible fashion. (Robert Collins)
+
 0.9.22
 ~~~~~~
 
