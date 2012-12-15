@@ -42,10 +42,12 @@ class TestToolsTestRunner(object):
         :param failfast: Stop running tests at the first failure.
         :param buffer: Ignored.
         """
+        self.failfast = failfast
 
     def run(self, test):
         "Run the given test case or test suite."
-        result = TextTestResult(unicode_output_stream(sys.stdout))
+        result = TextTestResult(
+            unicode_output_stream(sys.stdout), failfast=self.failfast)
         result.startTestRun()
         try:
             return test.run(result)

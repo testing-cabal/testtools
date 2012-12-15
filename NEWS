@@ -13,6 +13,13 @@ Changes
   arguments the upstream python TestProgram code wants to give it, making it
   possible to support them in a compatible fashion. (Robert Collins)
 
+Improvements
+------------
+
+* ``testtools.run`` now supports the ``-f`` or ``--failfast`` parameter.
+  Previously it was advertised in the help but ignored.
+  (Robert Collins, #1090582)
+
 0.9.22
 ~~~~~~
 
