@@ -17,6 +17,8 @@ Improvements
 * ``TestProgram`` now has a sane default for its ``testRunner`` argument.
   (Vincent Ladeuil)
 
+* The test suite passes on Python 3 again. (Robert Collins)
+
 0.9.22
 ~~~~~~
 
