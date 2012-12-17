@@ -6,8 +6,19 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Changes
+-------
+
+* ``run.TestToolsTestRunner`` now accepts the verbosity, buffer and failfast
+  arguments the upstream python TestProgram code wants to give it, making it
+  possible to support them in a compatible fashion. (Robert Collins)
+
 Improvements
 ------------
+
+* ``testtools.run`` now supports the ``-f`` or ``--failfast`` parameter.
+  Previously it was advertised in the help but ignored.
+  (Robert Collins, #1090582)
 
 * ``AnyMatch`` added, a new matcher that matches when any item in a collection
   matches the given matcher.  (Jonathan Lange)
