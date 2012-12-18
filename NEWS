@@ -9,6 +9,12 @@ NEXT
 Changes
 -------
 
+* ``testtools.run discover`` will now sort the tests it discovered. This is a 
+  workaround for http://bugs.python.org/issue16709. Non-standard test suites
+  are preserved, and their ``sort_tests()`` method called (if they have such an
+  attribute). ``testtools.testsuite.sorted_tests(suite, True)`` can be used by
+  such suites to do a local sort. (Robert Collins, #1091512)
+
 * ``ThreadsafeForwardingResult`` now defines a stub ``progress`` method, which
   fixes ``testr run`` of streams containing progress markers (by discarding the 
   progress data). (Robert Collins, #1019165)
