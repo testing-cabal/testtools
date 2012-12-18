@@ -14,7 +14,7 @@ import sys
 
 from testtools import TextTestResult
 from testtools.compat import classtypes, istext, unicode_output_stream
-from testtools.testsuite import iterate_tests
+from testtools.testsuite import iterate_tests, sorted_tests
 
 
 defaultTestLoader = unittest.defaultTestLoader
@@ -75,6 +75,8 @@ class TestToolsTestRunner(object):
 #  - --load-list has been added which can reduce the tests used (should be
 #    upstreamed).
 #  - The limitation of using getopt is declared to the user.
+#  - http://bugs.python.org/issue16709 is worked around, by sorting tests when
+#    discover is used.
 
 FAILFAST     = "  -f, --failfast   Stop on first failure\n"
 CATCHBREAK   = "  -c, --catch      Catch control-C and display results\n"
@@ -307,7 +309,17 @@ class TestProgram(object):
         top_level_dir = options.top
 
         loader = Loader()
-        self.test = loader.discover(start_dir, pattern, top_level_dir)
+        # See http://bugs.python.org/issue16709
+        # While sorting here is intrusive, its better than being random.
+        # Rules for the sort:
+        # - standard suites are flattened, and the resulting tests sorted by
+        #   id.
+        # - non-standard suites are preserved as-is, and sorted into position
+        #   by the first test found by iterating the suite.
+        # We do this by a DSU process: flatten and grab a key, sort, strip the
+        # keys.
+        loaded = loader.discover(start_dir, pattern, top_level_dir)
+        self.test = sorted_tests(loaded)
 
     def runTests(self):
         if (self.catchbreak

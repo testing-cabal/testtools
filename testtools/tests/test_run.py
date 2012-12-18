@@ -57,6 +57,27 @@ class TestRun(TestCase):
 testtools.runexample.TestFoo.test_quux
 """, out.getvalue())
 
+    def test_run_orders_tests(self):
+        self.useFixture(SampleTestFixture())
+        out = StringIO()
+        # We load two tests - one that exists and one that doesn't, and we
+        # should get the one that exists and neither the one that doesn't nor
+        # the unmentioned one that does.
+        tempdir = self.useFixture(fixtures.TempDir())
+        tempname = tempdir.path + '/tests.list'
+        f = open(tempname, 'wb')
+        try:
+            f.write(_b("""
+testtools.runexample.TestFoo.test_bar
+testtools.runexample.missingtest
+"""))
+        finally:
+            f.close()
+        run.main(['prog', '-l', '--load-list', tempname,
+            'testtools.runexample.test_suite'], out)
+        self.assertEqual("""testtools.runexample.TestFoo.test_bar
+""", out.getvalue())
+
     def test_run_load_list(self):
         self.useFixture(SampleTestFixture())
         out = StringIO()
