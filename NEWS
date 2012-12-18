@@ -6,6 +6,13 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Changes
+-------
+
+* ``ThreadsafeForwardingResult`` now defines a stub ``progress`` method, which
+  fixes ``testr run`` of streams containing progress markers (by discarding the 
+  progress data). (Robert Collins, #1019165)
+
 0.9.23
 ~~~~~~
 

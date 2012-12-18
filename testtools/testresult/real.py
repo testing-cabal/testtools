@@ -471,6 +471,9 @@ class ThreadsafeForwardingResult(TestResult):
         self._add_result_with_semaphore(self.result.addUnexpectedSuccess,
             test, details=details)
 
+    def progress(self, offset, whence):
+        pass
+
     def startTestRun(self):
         super(ThreadsafeForwardingResult, self).startTestRun()
         self.semaphore.acquire()
