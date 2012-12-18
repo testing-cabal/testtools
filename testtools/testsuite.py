@@ -124,7 +124,7 @@ def _flatten_tests(suite_or_case, unpack_outer=False):
     try:
         tests = iter(suite_or_case)
     except TypeError:
-        # Not iterable, assume its a test case.
+        # Not iterable, assume it's a test case.
         return [(suite_or_case.id(), suite_or_case)]
     if (type(suite_or_case) in (unittest.TestSuite,) or
         unpack_outer):
