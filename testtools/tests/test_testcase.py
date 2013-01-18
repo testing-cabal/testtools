@@ -23,7 +23,10 @@ from testtools.compat import (
     _b,
     _u,
     )
-from testtools.content import TracebackContent
+from testtools.content import (
+    text_content,
+    TracebackContent,
+    )
 from testtools.matchers import (
     Annotate,
     DocTestMatches,
@@ -607,6 +610,18 @@ class TestAssertions(TestCase):
 
         expected_error = 'None matches Is(None)'
         self.assertFails(expected_error, self.assertIsNotNone, None)
+
+
+    def test_fail_preserves_traceback_detail(self):
+        class Test(TestCase):
+            def test(self):
+                self.addDetail('traceback', text_content('foo'))
+                self.fail('bar')
+        test = Test('test')
+        result = ExtendedTestResult()
+        test.run(result)
+        self.assertEqual(set(['traceback', 'traceback-1']),
+            set(result._events[1][2].keys()))
 
 
 class TestAddCleanup(TestCase):

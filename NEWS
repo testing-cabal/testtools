@@ -17,6 +17,13 @@ Changes
 * Testtools now uses setuptools rather than distutils so that we can document
   the extras dependency. (Robert Collins)
 
+Improvements
+------------
+
+* Testtools will no longer override test code registered details called
+  'traceback' when reporting caught exceptions from test code.
+  (Robert Collins, #812793)
+
 0.9.24
 ~~~~~~
 

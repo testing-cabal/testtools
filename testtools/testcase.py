@@ -506,9 +506,12 @@ class TestCase(unittest.TestCase):
     def _report_traceback(self, exc_info, tb_label='traceback'):
         id_gen = self._traceback_id_gens.setdefault(
             tb_label, itertools.count(0))
-        tb_id = advance_iterator(id_gen)
-        if tb_id:
-            tb_label = '%s-%d' % (tb_label, tb_id)
+        while True:
+            tb_id = advance_iterator(id_gen)
+            if tb_id:
+                tb_label = '%s-%d' % (tb_label, tb_id)
+            if tb_label not in self.getDetails():
+                break
         self.addDetail(tb_label, content.TracebackContent(exc_info, self))
 
     @staticmethod
