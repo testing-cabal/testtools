@@ -17,7 +17,8 @@ import os
 import sys
 import traceback
 
-from testtools import try_import
+from extras import try_import
+
 from testtools.compat import _b, _format_exc_info, str_is_unicode, _u
 from testtools.content_type import ContentType, JSON, UTF8_TEXT
 

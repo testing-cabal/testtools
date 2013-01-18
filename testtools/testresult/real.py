@@ -16,12 +16,13 @@ import datetime
 import sys
 import unittest
 
+from extras import safe_hasattr
+
 from testtools.compat import all, str_is_unicode, _u
 from testtools.content import (
     text_content,
     TracebackContent,
     )
-from testtools.helpers import safe_hasattr
 from testtools.tags import TagContext
 
 # From http://docs.python.org/library/datetime.html

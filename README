@@ -36,6 +36,9 @@ Required Dependencies
 If you would like to use testtools for earlier Python's, please use testtools
 0.9.15.
 
+ * extras (helpers that we intend to push into Python itself in the near
+   future).
+
 
 Optional Dependencies
 ---------------------

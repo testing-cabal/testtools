@@ -9,12 +9,12 @@ __all__ = [
   'sorted_tests',
   ]
 
-from testtools.helpers import safe_hasattr, try_imports
-
-Queue = try_imports(['Queue.Queue', 'queue.Queue'])
-
 import threading
 import unittest
+
+from extras import safe_hasattr, try_imports
+
+Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
 import testtools
 

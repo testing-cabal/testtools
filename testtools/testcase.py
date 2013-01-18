@@ -20,9 +20,10 @@ import sys
 import types
 import unittest
 
+from extras import try_import
+
 from testtools import (
     content,
-    try_import,
     )
 from testtools.compat import (
     advance_iterator,

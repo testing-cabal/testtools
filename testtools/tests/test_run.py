@@ -4,11 +4,12 @@
 
 from unittest import TestSuite
 
+from extras import try_import
+
 from testtools.compat import (
     _b,
     StringIO,
     )
-from testtools.helpers import try_import
 fixtures = try_import('fixtures')
 
 import testtools

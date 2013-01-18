@@ -6,6 +6,17 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Changes
+-------
+
+* Testtools now depends on extras, a small library split out from it to contain
+  generally useful non-testing facilities. Since extras has been around for a
+  couple of testtools releases now, we're making this into a hard dependency of
+  testtools. (Robert Collins)
+
+* Testtools now uses setuptools rather than distutils so that we can document
+  the extras dependency. (Robert Collins)
+
 0.9.24
 ~~~~~~
 

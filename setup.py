@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Distutils installer for testtools."""
 
-from distutils.core import setup
+from setuptools import setup
 import email
 import os
 
@@ -82,4 +82,8 @@ setup(name='testtools',
         'testtools.tests.matchers',
         ],
       cmdclass={'test': testtools.TestCommand},
-      zip_safe=False)
+      zip_safe=False,
+      install_requires=[
+        'extras',
+        ],
+      )

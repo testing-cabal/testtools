@@ -6,13 +6,14 @@ __metaclass__ = type
 
 import unittest
 
+from extras import try_import
+
 from testtools import (
     ConcurrentTestSuite,
     iterate_tests,
     PlaceHolder,
     TestCase,
     )
-from testtools.helpers import try_import
 from testtools.testsuite import FixtureSuite, iterate_tests, sorted_tests
 from testtools.tests.helpers import LoggingResult
 

@@ -5,6 +5,8 @@
 import os
 import signal
 
+from extras import try_import
+
 from testtools import (
     skipIf,
     TestCase,
@@ -13,7 +15,6 @@ from testtools import (
 from testtools.content import (
     text_content,
     )
-from testtools.helpers import try_import
 from testtools.matchers import (
     Equals,
     KeysEqual,

@@ -1288,7 +1288,7 @@ Conditional imports
 -------------------
 
 Lots of the time we would like to conditionally import modules.  testtools
-needs to do this itself, and graciously extends the ability to its users.
+uses the small library extras to do this. This used to be part of testtools.
 
 Instead of::
 
@@ -1317,9 +1317,9 @@ You can do::
 Safe attribute testing
 ----------------------
 
-``hasattr`` is broken_ on many versions of Python.  testtools provides
-``safe_hasattr``, which can be used to safely test whether an object has a
-particular attribute.
+``hasattr`` is broken_ on many versions of Python. The helper ``safe_hasattr``
+can be used to safely test whether an object has a particular attribute. Like
+``try_import`` this used to be in testtools but is now in extras.
 
 
 Nullary callables

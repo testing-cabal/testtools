@@ -15,6 +15,8 @@ import threading
 from unittest import TestSuite
 import warnings
 
+from extras import safe_hasattr
+
 from testtools import (
     ExtendedToOriginalDecorator,
     MultiTestResult,
@@ -44,7 +46,6 @@ from testtools.content import (
     TracebackContent,
     )
 from testtools.content_type import ContentType, UTF8_TEXT
-from testtools.helpers import safe_hasattr
 from testtools.matchers import (
     Contains,
     DocTestMatches,

@@ -27,7 +27,7 @@ import sys
 import traceback
 import unicodedata
 
-from testtools.helpers import try_imports
+from extras import try_imports
 
 BytesIO = try_imports(['StringIO.StringIO', 'io.BytesIO'])
 StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])

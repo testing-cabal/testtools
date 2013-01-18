@@ -30,10 +30,12 @@ __all__ = [
     'try_imports',
     ]
 
-from testtools.helpers import (
+# Compat - removal announced in 0.9.25.
+from extras import (
     try_import,
     try_imports,
     )
+
 from testtools.matchers._impl import (
     Matcher,
     )

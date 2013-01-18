@@ -8,10 +8,9 @@ __all__ = [
 
 import sys
 
+from extras import safe_hasattr
+
 from testtools import TestResult
-from testtools.helpers import (
-    safe_hasattr,
-    )
 from testtools.content import TracebackContent
 from testtools import runtest
 

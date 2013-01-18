@@ -2,13 +2,14 @@
 
 import unittest
 
+from extras import try_import
+
 from testtools import (
     TestCase,
     content,
     content_type,
     )
 from testtools.compat import _b, _u
-from testtools.helpers import try_import
 from testtools.testresult.doubles import (
     ExtendedTestResult,
     )

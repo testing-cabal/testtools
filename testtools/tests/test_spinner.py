@@ -5,11 +5,12 @@
 import os
 import signal
 
+from extras import try_import
+
 from testtools import (
     skipIf,
     TestCase,
     )
-from testtools.helpers import try_import
 from testtools.matchers import (
     Equals,
     Is,
