@@ -6,6 +6,12 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* We have a simpler release process in future - see doc/hacking.rst.
+  (Robert Collins)
+
 0.9.26
 ~~~~~~
 

@@ -123,13 +123,9 @@ Release tasks
 -------------
 
 #. Choose a version number, say X.Y.Z
-#. Branch from trunk to testtools-X.Y.Z
 #. In testtools-X.Y.Z, ensure __init__ has version ``(X, Y, Z, 'final', 0)``
-#. Replace NEXT in NEWS with the version number X.Y.Z, adjusting the reST.
+#. Under NEXT in NEWS add a heading with the version number X.Y.Z.
 #. Possibly write a blurb into NEWS.
-#. Replace any additional references to NEXT with the version being
-   released. (There should be none other than the ones in these release tasks
-   which should not be replaced).
 #. Commit the changes.
 #. Tag the release, bzr tag testtools-X.Y.Z
 #. Run 'make release', this:
@@ -138,9 +134,9 @@ Release tasks
    #. Makes a release on Launchpad and uploads the tarball
    #. Marks all the Fix Committed bugs as Fix Released
    #. Creates a new milestone
-#. Merge the release branch testtools-X.Y.Z into trunk. Before the commit,
-   add a NEXT heading to the top of NEWS and bump the version in __init__.py
+#. Change __version__ in __init__.py to the probable next version.
    e.g. to ``(X, Y, Z+1, 'dev', 0)``.
+#. Commit 'Opening X.Y.Z+1 for development.'
 #. Push trunk to Launchpad
 #. If a new series has been created (e.g. 0.10.0), make the series on Launchpad.
 
