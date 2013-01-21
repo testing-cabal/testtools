@@ -6,6 +6,16 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Brown paper bag fix: failed to document the need for setup to be able to use
+extras. Compounded by pip not supporting setup_requires.
+
+Changes
+-------
+
+* setup.py now can generate egg_info even if extras is not available.
+  Also lists extras in setup_requires for easy_install.
+  (Robert Collins, #1102464)
+
 0.9.25
 ~~~~~~
 

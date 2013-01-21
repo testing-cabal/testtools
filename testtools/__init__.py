@@ -31,50 +31,56 @@ __all__ = [
     ]
 
 # Compat - removal announced in 0.9.25.
-from extras import (
-    try_import,
-    try_imports,
-    )
+try:
+    from extras import (
+        try_import,
+        try_imports,
+        )
+except ImportError:
+    # Support reading __init__ for __version__ without extras, because pip does
+    # not support setup_requires.
+    pass
+else:
 
-from testtools.matchers._impl import (
-    Matcher,
-    )
+    from testtools.matchers._impl import (
+        Matcher,
+        )
 # Shut up, pyflakes. We are importing for documentation, not for namespacing.
-Matcher
+    Matcher
 
-from testtools.runtest import (
-    MultipleExceptions,
-    RunTest,
-    )
-from testtools.testcase import (
-    ErrorHolder,
-    ExpectedException,
-    PlaceHolder,
-    TestCase,
-    clone_test_with_new_id,
-    run_test_with,
-    skip,
-    skipIf,
-    skipUnless,
-    )
-from testtools.testresult import (
-    ExtendedToOriginalDecorator,
-    MultiTestResult,
-    Tagger,
-    TestByTestResult,
-    TestResult,
-    TestResultDecorator,
-    TextTestResult,
-    ThreadsafeForwardingResult,
-    )
-from testtools.testsuite import (
-    ConcurrentTestSuite,
-    FixtureSuite,
-    iterate_tests,
-    )
-from testtools.distutilscmd import (
-    TestCommand,
-)
+    from testtools.runtest import (
+        MultipleExceptions,
+        RunTest,
+        )
+    from testtools.testcase import (
+        ErrorHolder,
+        ExpectedException,
+        PlaceHolder,
+        TestCase,
+        clone_test_with_new_id,
+        run_test_with,
+        skip,
+        skipIf,
+        skipUnless,
+        )
+    from testtools.testresult import (
+        ExtendedToOriginalDecorator,
+        MultiTestResult,
+        Tagger,
+        TestByTestResult,
+        TestResult,
+        TestResultDecorator,
+        TextTestResult,
+        ThreadsafeForwardingResult,
+        )
+    from testtools.testsuite import (
+        ConcurrentTestSuite,
+        FixtureSuite,
+        iterate_tests,
+        )
+    from testtools.distutilscmd import (
+        TestCommand,
+        )
 
 # same format as sys.version_info: "A tuple containing the five components of
 # the version number: major, minor, micro, releaselevel, and serial. All

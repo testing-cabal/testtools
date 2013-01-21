@@ -6,11 +6,17 @@ import email
 import os
 
 import testtools
+cmd_class = {}
+if getattr(testtools, 'TestCommand', None) is not None:
+    cmd_class['test'] = testtools.TestCommand
 
 
 def get_revno():
-    import bzrlib.errors
-    import bzrlib.workingtree
+    try:
+        import bzrlib.errors
+        import bzrlib.workingtree
+    except ImportError:
+        return None
     try:
         t = bzrlib.workingtree.WorkingTree.open_containing(__file__)[0]
     except (bzrlib.errors.NotBranchError, bzrlib.errors.NoWorkingTree):
@@ -81,7 +87,7 @@ setup(name='testtools',
         'testtools.tests',
         'testtools.tests.matchers',
         ],
-      cmdclass={'test': testtools.TestCommand},
+      cmdclass=cmd_class,
       zip_safe=False,
       install_requires=[
         'extras',
