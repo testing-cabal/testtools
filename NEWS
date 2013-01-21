@@ -6,6 +6,9 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+0.9.26
+~~~~~~
+
 Brown paper bag fix: failed to document the need for setup to be able to use
 extras. Compounded by pip not supporting setup_requires.
 
