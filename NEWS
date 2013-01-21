@@ -9,6 +9,11 @@ NEXT
 Changes
 -------
 
+* ``python -m testtools.run --load-list`` will now preserve any custom suites
+  (such as ``testtools.FixtureSuite`` or ``testresources.OptimisingTestSuite``)
+  rather than flattening them.
+  (Robert Collins, #827175)
+
 * Testtools now depends on extras, a small library split out from it to contain
   generally useful non-testing facilities. Since extras has been around for a
   couple of testtools releases now, we're making this into a hard dependency of

@@ -21,6 +21,10 @@ API docs`_.
 Extensions to TestCase
 ======================
 
+In addition to the ``TestCase`` specific methods, we have extensions for
+``TestSuite`` that also apply to ``TestCase`` (because ``TestCase`` and
+``TestSuite`` follow the Composite pattern).
+
 Custom exception handling
 -------------------------
 
@@ -220,7 +224,10 @@ FixtureSuite
 
 A test suite that sets up a fixture_ before running any tests, and then tears
 it down after all of the tests are run. The fixture is *not* made available to
-any of the tests.
+any of the tests due to there being no standard channel for suites to pass
+information to the tests they contain (and we don't have enough data on what
+such a channel would need to achieve to design a good one yet - or even decide
+if it is a good idea).
 
 sorted_tests
 ------------
@@ -229,9 +236,21 @@ Given the composite structure of TestSuite / TestCase, sorting tests is
 problematic - you can't tell what functionality is embedded into custom Suite
 implementations. In order to deliver consistent test orders when using test
 discovery (see http://bugs.python.org/issue16709), testtools flattens and
-sorts tests that have the standard TestSuite, defines a new method sort_tests,
-which can be used by non-standard TestSuites to know when they should sort
-their tests.
+sorts tests that have the standard TestSuite, and defines a new method
+sort_tests, which can be used by non-standard TestSuites to know when they
+should sort their tests. An example implementation can be seen at
+``FixtureSuite.sorted_tests``.
+
+filter_by_ids
+-------------
+
+Similarly to ``sorted_tests`` running a subset of tests is problematic - the
+standard run interface provides no way to limit what runs. Rather than
+confounding the two problems (selection and execution) we defined a method
+that filters the tests in a suite (or a case) by their unique test id.
+If you a writing custom wrapping suites, consider implementing filter_by_ids
+to support this (though most wrappers that subclass ``unittest.TestSuite`` will
+work just fine [see ``testtools.testsuite.filter_by_ids`` for details.]
 
 .. _`testtools API docs`: http://mumak.net/testtools/apidocs/
 .. _unittest: http://docs.python.org/library/unittest.html

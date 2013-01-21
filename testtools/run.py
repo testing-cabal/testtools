@@ -14,7 +14,7 @@ import sys
 
 from testtools import TextTestResult
 from testtools.compat import classtypes, istext, unicode_output_stream
-from testtools.testsuite import iterate_tests, sorted_tests
+from testtools.testsuite import filter_by_ids, iterate_tests, sorted_tests
 
 
 defaultTestLoader = unittest.defaultTestLoader
@@ -173,11 +173,7 @@ class TestProgram(object):
             finally:
                 source.close()
             test_ids = set(line.strip().decode('utf-8') for line in lines)
-            filtered = unittest.TestSuite()
-            for test in iterate_tests(self.test):
-                if test.id() in test_ids:
-                    filtered.addTest(test)
-            self.test = filtered
+            self.test = filter_by_ids(self.test, test_ids)
         if not self.listtests:
             self.runTests()
         else:
