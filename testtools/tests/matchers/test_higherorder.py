@@ -239,6 +239,8 @@ class TestMatchesPredicateWithParams(TestCase, TestMatchersInterface):
             between, "{0} is not between {1} and {2}", "1, 2"),
          MatchesPredicateWithParams(
             between, "{0} is not between {1} and {2}")(1, 2)),
+        ("Between(1, 2)", MatchesPredicateWithParams(
+            between, "{0} is not between {1} and {2}", "Between")(1, 2)),
         ]
 
     describe_examples = [

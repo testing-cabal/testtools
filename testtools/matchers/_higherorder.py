@@ -289,7 +289,7 @@ class MatchesPredicate(Matcher):
             return Mismatch(self.message % x)
 
 
-def MatchesPredicateWithParams(predicate, message):
+def MatchesPredicateWithParams(predicate, message, name=None):
     """Match if a given parameterised function returns True.
 
     It is reasonably common to want to make a very simple matcher based on a
@@ -308,15 +308,20 @@ def MatchesPredicateWithParams(predicate, message):
     parameter. Any additional parameters supplied when constructing a matcher
     are supplied to the predicate as additional parameters when checking for a
     match.
+
+    :param predicate: The predicate function.
+    :param message: A format string for describing mis-matches.
+    :param name: Optional replacement name for the matcher.
     """
     def construct_matcher(*args, **kwargs):
-        return _MatchesPredicateWithParams(predicate, message, *args, **kwargs)
+        return _MatchesPredicateWithParams(
+            predicate, message, name, *args, **kwargs)
     return construct_matcher
 
 
 class _MatchesPredicateWithParams(Matcher):
 
-    def __init__(self, predicate, message, *args, **kwargs):
+    def __init__(self, predicate, message, name, *args, **kwargs):
         """Create a ``MatchesPredicateWithParams`` matcher.
 
         :param predicate: A function that takes an object to match and
@@ -334,9 +339,12 @@ class _MatchesPredicateWithParams(Matcher):
             To format a keyword arg::
 
                 "{0} is not a {type_to_check}"
+        :param name: What name to use for the matcher class. Pass None to use
+            the default.
         """
         self.predicate = predicate
         self.message = message
+        self.name = name
         self.args = args
         self.kwargs = kwargs
 
@@ -344,8 +352,12 @@ class _MatchesPredicateWithParams(Matcher):
         args = [str(arg) for arg in self.args]
         kwargs = ["%s=%s" % item for item in self.kwargs.items()]
         args = ", ".join(args + kwargs)
-        return 'MatchesPredicateWithParams(%r, %r)(%s)' % (
-            self.predicate, self.message, args)
+        if self.name is None:
+            name = 'MatchesPredicateWithParams(%r, %r)' % (
+                self.predicate, self.message)
+        else:
+            name = self.name
+        return '%s(%s)' % (name, args)
 
     def match(self, x):
         if not self.predicate(x, *self.args, **self.kwargs):

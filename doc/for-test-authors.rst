@@ -521,6 +521,14 @@ file against an arbitrary matcher::
   self.assertThat('greetings.txt', FileContains(matcher=Contains('!')))
 
 
+HasLength
+~~~~~~~~~
+
+Check the length of a collection.  For example::
+
+  self.assertThat([1, 2, 3], HasLength(2))
+
+
 HasPermissions
 ~~~~~~~~~~~~~~
 
