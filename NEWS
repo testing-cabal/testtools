@@ -9,6 +9,9 @@ NEXT
 Improvements
 ------------
 
+* New matcher ``MatchesPredicateWithParams`` make it still easier to create
+  adhoc matchers. (Robert Collins)
+
 * We have a simpler release process in future - see doc/hacking.rst.
   (Robert Collins)
 

@@ -39,6 +39,7 @@ __all__ = [
     'MatchesException',
     'MatchesListwise',
     'MatchesPredicate',
+    'MatchesPredicateWithParams',
     'MatchesRegex',
     'MatchesSetwise',
     'MatchesStructure',
@@ -101,6 +102,7 @@ from ._higherorder import (
     MatchesAll,
     MatchesAny,
     MatchesPredicate,
+    MatchesPredicateWithParams,
     Not,
     )
 

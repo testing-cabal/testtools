@@ -287,3 +287,67 @@ class MatchesPredicate(Matcher):
     def match(self, x):
         if not self.predicate(x):
             return Mismatch(self.message % x)
+
+
+def MatchesPredicateWithParams(predicate, message):
+    """Match if a given parameterised function returns True.
+
+    It is reasonably common to want to make a very simple matcher based on a
+    function that you already have that returns True or False given some
+    arguments. This matcher makes it very easy to do so. e.g.::
+
+      HasLength = MatchesPredicate(
+          lambda x, y: len(x) == y, 'len({0}) is not {1}')
+      self.assertThat([1, 2], HasLength(3))
+
+    Note that unlike MatchesPredicate MatchesPredicateWithParams returns a
+    factory which you then customise to use by constructing an actual matcher
+    from it.
+
+    The predicate function should take the object to match as its first
+    parameter. Any additional parameters supplied when constructing a matcher
+    are supplied to the predicate as additional parameters when checking for a
+    match.
+    """
+    def construct_matcher(*args, **kwargs):
+        return _MatchesPredicateWithParams(predicate, message, *args, **kwargs)
+    return construct_matcher
+
+
+class _MatchesPredicateWithParams(Matcher):
+
+    def __init__(self, predicate, message, *args, **kwargs):
+        """Create a ``MatchesPredicateWithParams`` matcher.
+
+        :param predicate: A function that takes an object to match and
+            additional params as given in *args and **kwargs. The result of the
+            function will be interpreted as a boolean to determine a match.
+        :param message: A message to describe a mismatch.  It will be formatted
+            with .format() and be given a tuple containing whatever was passed
+            to ``match()`` + *args in *args, and whatever was passed to
+            **kwargs as its **kwargs.
+
+            For instance, to format a single parameter::
+
+                "{0} is not a {1}"
+
+            To format a keyword arg::
+
+                "{0} is not a {type_to_check}"
+        """
+        self.predicate = predicate
+        self.message = message
+        self.args = args
+        self.kwargs = kwargs
+
+    def __str__(self):
+        args = [str(arg) for arg in self.args]
+        kwargs = ["%s=%s" % item for item in self.kwargs.items()]
+        args = ", ".join(args + kwargs)
+        return 'MatchesPredicateWithParams(%r, %r)(%s)' % (
+            self.predicate, self.message, args)
+
+    def match(self, x):
+        if not self.predicate(x, *self.args, **self.kwargs):
+            return Mismatch(
+                self.message.format(*((x,) + self.args), **self.kwargs))

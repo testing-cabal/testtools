@@ -780,6 +780,35 @@ Which will produce the error message::
   MismatchError: 42 is not prime.
 
 
+MatchesPredicateWithParams
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Sometimes you can't use a trivial predicate and instead need to pass in some
+parameters each time. In that case, MatchesPredicateWithParams is your go-to
+tool for creating adhoc matchers. MatchesPredicateWithParams takes a predicate
+function and message and returns a factory to produce matchers from that. The
+predicate needs to return a boolean (or any truthy object), and accept the
+object to match + whatever was passed into the factory.
+
+For example, you might have an ``divisible`` function and want to make a
+matcher based on it::
+
+  def test_divisible_numbers(self):
+      IsDisivibleBy = MatchesPredicateWithParams(
+          divisible, '{0} is not divisible by {1}')
+      self.assertThat(7, IsDivisibleBy(1))
+      self.assertThat(7, IsDivisibleBy(7))
+      self.assertThat(7, IsDivisibleBy(2)))
+      # This will fail.
+
+Which will produce the error message::
+
+  Traceback (most recent call last):
+    File "...", line ..., in test_divisible
+      self.assertThat(7, IsDivisibleBy(2))
+  MismatchError: 7 is not divisible by 2.
+
+
 Raises
 ~~~~~~
 
