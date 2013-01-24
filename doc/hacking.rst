@@ -123,7 +123,7 @@ Release tasks
 -------------
 
 #. Choose a version number, say X.Y.Z
-#. In testtools-X.Y.Z, ensure __init__ has version ``(X, Y, Z, 'final', 0)``
+#. In trunk, ensure __init__ has version ``(X, Y, Z, 'final', 0)``
 #. Under NEXT in NEWS add a heading with the version number X.Y.Z.
 #. Possibly write a blurb into NEWS.
 #. Commit the changes.
