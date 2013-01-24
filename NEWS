@@ -9,6 +9,12 @@ NEXT
 Improvements
 ------------
 
+* New matcher ``HasLength`` for matching the length of a collection.
+  (Robert Collins)
+
+* New matcher ``MatchesPredicateWithParams`` make it still easier to create
+  ad hoc matchers. (Robert Collins)
+
 * We have a simpler release process in future - see doc/hacking.rst.
   (Robert Collins)
 

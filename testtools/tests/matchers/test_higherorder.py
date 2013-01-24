@@ -18,6 +18,7 @@ from testtools.matchers._higherorder import (
     MatchesAny,
     MatchesAll,
     MatchesPredicate,
+    MatchesPredicateWithParams,
     Not,
     )
 from testtools.tests.helpers import FullStackRunTest
@@ -219,6 +220,32 @@ class TestMatchesPredicate(TestCase, TestMatchersInterface):
 
     describe_examples = [
         ('7 is not even', 7, MatchesPredicate(is_even, "%s is not even")),
+        ]
+
+
+def between(x, low, high):
+    return low < x < high
+
+
+class TestMatchesPredicateWithParams(TestCase, TestMatchersInterface):
+
+    matches_matcher = MatchesPredicateWithParams(
+        between, "{0} is not between {1} and {2}")(1, 9)
+    matches_matches = [2, 4, 6, 8]
+    matches_mismatches = [0, 1, 9, 10]
+
+    str_examples = [
+        ("MatchesPredicateWithParams(%r, %r)(%s)" % (
+            between, "{0} is not between {1} and {2}", "1, 2"),
+         MatchesPredicateWithParams(
+            between, "{0} is not between {1} and {2}")(1, 2)),
+        ("Between(1, 2)", MatchesPredicateWithParams(
+            between, "{0} is not between {1} and {2}", "Between")(1, 2)),
+        ]
+
+    describe_examples = [
+        ('1 is not between 2 and 3', 1, MatchesPredicateWithParams(
+            between, "{0} is not between {1} and {2}")(2, 3)),
         ]
 
 

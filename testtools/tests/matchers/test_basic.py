@@ -19,6 +19,7 @@ from testtools.matchers._basic import (
     IsInstance,
     LessThan,
     GreaterThan,
+    HasLength,
     MatchesRegex,
     NotEquals,
     SameMembers,
@@ -366,6 +367,21 @@ class TestMatchesRegex(TestCase, TestMatchersInterface):
             _b('c'), MatchesRegex(_b("\\s+\xA7"))),
         ("%r does not match /\\s+\\xa7/" % (_u('c'),),
             _u('c'), MatchesRegex(_u("\\s+\xA7"))),
+        ]
+
+
+class TestHasLength(TestCase, TestMatchersInterface):
+
+    matches_matcher = HasLength(2)
+    matches_matches = [[1, 2]]
+    matches_mismatches = [[], [1], [3, 2, 1]]
+
+    str_examples = [
+        ("HasLength(2)", HasLength(2)),
+        ]
+
+    describe_examples = [
+        ("len([]) != 1", [], HasLength(1)),
         ]
 
 

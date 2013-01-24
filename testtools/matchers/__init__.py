@@ -28,6 +28,7 @@ __all__ = [
     'FileContains',
     'FileExists',
     'GreaterThan',
+    'HasLength',
     'HasPermissions',
     'Is',
     'IsInstance',
@@ -39,6 +40,7 @@ __all__ = [
     'MatchesException',
     'MatchesListwise',
     'MatchesPredicate',
+    'MatchesPredicateWithParams',
     'MatchesRegex',
     'MatchesSetwise',
     'MatchesStructure',
@@ -57,6 +59,7 @@ from ._basic import (
     EndsWith,
     Equals,
     GreaterThan,
+    HasLength,
     Is,
     IsInstance,
     LessThan,
@@ -101,6 +104,7 @@ from ._higherorder import (
     MatchesAll,
     MatchesAny,
     MatchesPredicate,
+    MatchesPredicateWithParams,
     Not,
     )
 

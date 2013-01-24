@@ -5,6 +5,7 @@ __all__ = [
     'EndsWith',
     'Equals',
     'GreaterThan',
+    'HasLength',
     'Is',
     'IsInstance',
     'LessThan',
@@ -24,7 +25,10 @@ from ..compat import (
     text_repr,
     )
 from ..helpers import list_subtract
-from ._higherorder import PostfixedMismatch
+from ._higherorder import (
+    MatchesPredicateWithParams,
+    PostfixedMismatch,
+    )
 from ._impl import (
     Matcher,
     Mismatch,
@@ -313,3 +317,10 @@ class MatchesRegex(object):
             pattern = pattern.encode("unicode_escape").decode("ascii")
             return Mismatch("%r does not match /%s/" % (
                     value, pattern.replace("\\\\", "\\")))
+
+
+def has_len(x, y):
+    return len(x) == y
+
+
+HasLength = MatchesPredicateWithParams(has_len, "len({0}) != {1}", "HasLength")
