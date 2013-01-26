@@ -3,7 +3,7 @@ include Makefile
 include MANIFEST.in
 include NEWS
 include README
-include .bzrignore
+include .gitignore
 graft doc
 graft doc/_static
 graft doc/_templates
