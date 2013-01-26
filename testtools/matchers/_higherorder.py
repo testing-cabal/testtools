@@ -298,6 +298,7 @@ def MatchesPredicateWithParams(predicate, message, name=None):
 
       HasLength = MatchesPredicate(
           lambda x, y: len(x) == y, 'len({0}) is not {1}')
+      # This assertion will fail, as 'len([1, 2]) == 3' is False.
       self.assertThat([1, 2], HasLength(3))
 
     Note that unlike MatchesPredicate MatchesPredicateWithParams returns a
@@ -325,12 +326,13 @@ class _MatchesPredicateWithParams(Matcher):
         """Create a ``MatchesPredicateWithParams`` matcher.
 
         :param predicate: A function that takes an object to match and
-            additional params as given in *args and **kwargs. The result of the
-            function will be interpreted as a boolean to determine a match.
+            additional params as given in ``*args`` and ``**kwargs``. The
+            result of the function will be interpreted as a boolean to
+            determine a match.
         :param message: A message to describe a mismatch.  It will be formatted
             with .format() and be given a tuple containing whatever was passed
-            to ``match()`` + *args in *args, and whatever was passed to
-            **kwargs as its **kwargs.
+            to ``match()`` + ``*args`` in ``*args``, and whatever was passed to
+            ``**kwargs`` as its ``**kwargs``.
 
             For instance, to format a single parameter::
 

@@ -524,9 +524,13 @@ file against an arbitrary matcher::
 HasLength
 ~~~~~~~~~
 
-Check the length of a collection.  For example::
+Check the length of a collection.  The following assertion will fail::
 
   self.assertThat([1, 2, 3], HasLength(2))
+
+But this one won't::
+
+  self.assertThat([1, 2, 3], HasLength(3))
 
 
 HasPermissions
