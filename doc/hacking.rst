@@ -127,7 +127,7 @@ Release tasks
 #. Under NEXT in NEWS add a heading with the version number X.Y.Z.
 #. Possibly write a blurb into NEWS.
 #. Commit the changes.
-#. Tag the release
+#. Tag the release, ``git tag -s testtools-X.Y.Z``
 #. Run 'make release', this:
    #. Creates a source distribution and uploads to PyPI
    #. Ensures all Fix Committed bugs are in the release milestone
@@ -138,7 +138,7 @@ Release tasks
    e.g. to ``(X, Y, Z+1, 'dev', 0)``.
 #. Commit 'Opening X.Y.Z+1 for development.'
 #. If a new series has been created (e.g. 0.10.0), make the series on Launchpad.
-#. Push trunk to Github
+#. Push trunk to Github, ``git push --tags origin master``
 
 .. _PEP 8: http://www.python.org/dev/peps/pep-0008/
 .. _unittest: http://docs.python.org/library/unittest.html
