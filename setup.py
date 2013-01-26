@@ -50,7 +50,7 @@ def get_long_description():
 setup(name='testtools',
       author='Jonathan M. Lange',
       author_email='jml+testtools@mumak.net',
-      url='https://launchpad.net/testtools',
+      url='https://github.com/testing-cabal/testtools',
       description=('Extensions to the Python standard library unit testing '
                    'framework'),
       long_description=get_long_description(),
