@@ -1,4 +1,4 @@
-# See README for copyright and licensing details.
+# Copyright (c) 2008-2013 testtools developers. See LICENSE for details.
 
 PYTHON=python
 SOURCES=$(shell find testtools -name "*.py")
