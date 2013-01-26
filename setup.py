@@ -11,20 +11,6 @@ if getattr(testtools, 'TestCommand', None) is not None:
     cmd_class['test'] = testtools.TestCommand
 
 
-def get_revno():
-    try:
-        import bzrlib.errors
-        import bzrlib.workingtree
-    except ImportError:
-        return None
-    try:
-        t = bzrlib.workingtree.WorkingTree.open_containing(__file__)[0]
-    except (bzrlib.errors.NotBranchError, bzrlib.errors.NoWorkingTree):
-        return None
-    else:
-        return t.branch.revno()
-
-
 def get_version_from_pkg_info():
     """Get the version from PKG-INFO file if we can."""
     pkg_info_path = os.path.join(os.path.dirname(__file__), 'PKG-INFO')
@@ -49,18 +35,10 @@ def get_version():
     pkg_info_version = get_version_from_pkg_info()
     if pkg_info_version:
         return pkg_info_version
-    revno = get_revno()
-    if revno is None:
-        # Apparently if we just say "snapshot" then distribute won't accept it
-        # as satisfying versioned dependencies. This is a problem for the
-        # daily build version.
-        return "snapshot-%s" % (version,)
-    if phase == 'alpha':
-        # No idea what the next version will be
-        return 'next-r%s' % revno
-    else:
-        # Preserve the version number but give it a revno prefix
-        return version + '-r%s' % revno
+    # Apparently if we just say "snapshot" then distribute won't accept it
+    # as satisfying versioned dependencies. This is a problem for the
+    # daily build version.
+    return "snapshot-%s" % (version,)
 
 
 def get_long_description():
