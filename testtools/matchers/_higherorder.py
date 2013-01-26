@@ -298,6 +298,7 @@ def MatchesPredicateWithParams(predicate, message, name=None):
 
       HasLength = MatchesPredicate(
           lambda x, y: len(x) == y, 'len({0}) is not {1}')
+      # This assertion will fail, as 'len([1, 2]) == 3' is False.
       self.assertThat([1, 2], HasLength(3))
 
     Note that unlike MatchesPredicate MatchesPredicateWithParams returns a
