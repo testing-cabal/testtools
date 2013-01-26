@@ -145,4 +145,4 @@ Release tasks
 .. _MIT license: http://www.opensource.org/licenses/mit-license.php
 .. _Sphinx: http://sphinx.pocoo.org/
 .. _restructuredtext: http://docutils.sourceforge.net/rst.html
-.. _testing cabal: https://github.com/organizations/testing-cabal/
+.. _testing-cabal: https://github.com/organizations/testing-cabal/
