@@ -684,11 +684,6 @@ def ErrorHolder(test_id, error, short_description=None, details=None):
         details=details, outcome='addError', error=error)
 
 
-# Python 2.4 did not know how to copy functions.
-if types.FunctionType not in copy._copy_dispatch:
-    copy._copy_dispatch[types.FunctionType] = copy._copy_immutable
-
-
 def clone_test_with_new_id(test, new_id):
     """Copy a `TestCase`, and give the copied test a new id.
 
