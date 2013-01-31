@@ -715,7 +715,7 @@ def clone_test_with_new_id(test, new_id):
 def attr(*args):
     """Decorator for adding attributes to WithAttributes.
 
-    :param *args: The name of attributes to add.
+    :param args: The name of attributes to add.
     :return: A callable that when applied to a WithAttributes will
         alter its id to enumerate the added attributes.
     """
