@@ -1,6 +1,7 @@
+# Copyright (c) 2008-2013 testtools developers. See LICENSE for details.
+
 """Tests for testtools itself."""
 
-# See README for copyright and licensing details.
 
 from unittest import TestSuite
 

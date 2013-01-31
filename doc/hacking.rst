@@ -63,7 +63,7 @@ Source layout
 -------------
 
 The top-level directory contains the ``testtools/`` package directory, and
-miscellaneous files like ``README`` and ``setup.py``.
+miscellaneous files like ``README.rst`` and ``setup.py``.
 
 The ``testtools/`` directory is the Python package itself.  It is separated
 into submodules for internal clarity, but all public APIs should be “promoted”
