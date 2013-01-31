@@ -34,7 +34,11 @@ from testtools.matchers import (
     MatchesException,
     Raises,
     )
-from testtools.testcase import Nullary
+from testtools.testcase import (
+    attr,
+    Nullary,
+    WithAttributes,
+    )
 from testtools.testresult.doubles import (
     Python26TestResult,
     Python27TestResult,
@@ -1343,6 +1347,43 @@ class TestNullary(TestCase):
         # If the function raises, so does Nullary when called.
         wrapped = Nullary(lambda: 1/0)
         self.assertRaises(ZeroDivisionError, wrapped)
+
+
+class TestAttributes(TestCase):
+
+    def test_simple_attr(self):
+        # Adding an attr to a test changes its id().
+        class MyTest(WithAttributes, TestCase):
+            @attr('foo')
+            def test_bar(self):
+                pass
+        case = MyTest('test_bar')
+        self.assertEqual('testtools.tests.test_testcase.MyTest.test_bar[foo]',
+            case.id())
+
+    def test_multiple_attributes(self):
+        class MyTest(WithAttributes, TestCase):
+            # Not sorted here, forward or backwards.
+            @attr('foo', 'quux', 'bar')
+            def test_bar(self):
+                pass
+        case = MyTest('test_bar')
+        self.assertEqual(
+            'testtools.tests.test_testcase.MyTest.test_bar[bar,foo,quux]',
+            case.id())
+
+    def test_multiple_attr_decorators(self):
+        class MyTest(WithAttributes, TestCase):
+            # Not sorted here, forward or backwards.
+            @attr('bar')
+            @attr('quux')
+            @attr('foo')
+            def test_bar(self):
+                pass
+        case = MyTest('test_bar')
+        self.assertEqual(
+            'testtools.tests.test_testcase.MyTest.test_bar[bar,foo,quux]',
+            case.id())
 
 
 def test_suite():

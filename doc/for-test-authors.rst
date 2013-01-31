@@ -1321,6 +1321,29 @@ details of certain variables don't actually matter.
 See pages 419-423 of `xUnit Test Patterns`_ by Gerard Meszaros for a detailed
 discussion of creation methods.
 
+Test attributes
+---------------
+
+Inspired by the ``nosetests`` ``attr`` plugin, testtools provides support for
+marking up test methods with attributes, which are then exposed in the test
+id and can be used when filtering tests by id. (e.g. via ``--load-list``).
+
+  from testtools.testcase import attr, WithAttributes
+  
+  class AnnotatedTests(WithAttributes, TestCase):
+
+      @attr('simple')
+      def test_one(self):
+          pass
+      
+      @attr('more', 'than', 'one)
+      def test_two(self):
+          pass
+
+      @attr('or')
+      @attr('stacked')
+      def test_three(self):
+          pass
 
 General helpers
 ===============
