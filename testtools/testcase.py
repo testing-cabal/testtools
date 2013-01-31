@@ -4,6 +4,7 @@
 
 __metaclass__ = type
 __all__ = [
+    'attr',
     'clone_test_with_new_id',
     'ExpectedException',
     'gather_details',
@@ -20,7 +21,10 @@ import sys
 import types
 import unittest
 
-from extras import try_import
+from extras import (
+    safe_hasattr,
+    try_import,
+    )
 
 from testtools import (
     content,
@@ -684,15 +688,66 @@ def ErrorHolder(test_id, error, short_description=None, details=None):
         details=details, outcome='addError', error=error)
 
 
+def _clone_test_id_callback(test, callback):
+    """Copy a `TestCase`, and make it call callback for its id().
+
+    This is only expected to be used on tests that have been constructed but
+    not executed.
+
+    :param test: A TestCase instance.
+    :param callback: A callable that takes no parameters and returns a string.
+    :return: A copy.copy of the test with id=callback.
+    """
+    newTest = copy.copy(test)
+    newTest.id = callback
+    return newTest
+
+
 def clone_test_with_new_id(test, new_id):
     """Copy a `TestCase`, and give the copied test a new id.
 
     This is only expected to be used on tests that have been constructed but
     not executed.
     """
-    newTest = copy.copy(test)
-    newTest.id = lambda: new_id
-    return newTest
+    return _clone_test_id_callback(test, lambda: new_id)
+
+
+def attr(*args):
+    """Decorator for adding attributes to WithAttributes.
+
+    :param *args: The name of attributes to add.
+    :return: A callable that when applied to a WithAttributes will
+        alter its id to enumerate the added attributes.
+    """
+    def decorate(fn):
+        if not safe_hasattr(fn, '__testtools_attrs'):
+            fn.__testtools_attrs = set()
+        fn.__testtools_attrs.update(args)
+        return fn
+    return decorate
+
+
+class WithAttributes(object):
+    """A mix-in class for modifying test id by attributes.
+
+    e.g.
+    >>> class MyTest(WithAttributes, TestCase):
+    ...    @attr('foo')
+    ...    def test_bar(self):
+    ...        pass
+    >>> MyTest('test_bar').id()
+    testtools.testcase.MyTest/test_bar[foo]
+    """
+
+    def id(self):
+        orig = super(WithAttributes, self).id()
+        # Depends on testtools.TestCase._get_test_method, be nice to support
+        # plain unittest.
+        fn = self._get_test_method()
+        attributes = getattr(fn, '__testtools_attrs', None)
+        if not attributes:
+            return orig
+        return orig + '[' + ','.join(sorted(attributes)) + ']'
 
 
 def skip(reason):

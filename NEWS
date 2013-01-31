@@ -6,6 +6,14 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* New ``testtools.testcase.attr`` and ``testtools.testcase.WithAttributes``
+  helpers allow marking up test case methods with simple labels. This permits
+  filtering tests with more granularity than organising them into modules and
+  test classes. (Robert Collins)
+
 0.9.27
 ~~~~~~
 
