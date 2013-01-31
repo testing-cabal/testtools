@@ -78,13 +78,13 @@ Tests belong in ``testtools/tests/``.
 Committing to trunk
 -------------------
 
-Testtools is maintained using bzr, with its trunk at lp:testtools. This gives
-every contributor the ability to commit their work to their own branches.
-However permission must be granted to allow contributors to commit to the trunk
-branch.
+Testtools is maintained using git, with its master repo at https://github.com
+/testing-cabal/testtools. This gives every contributor the ability to commit
+their work to their own branches. However permission must be granted to allow
+contributors to commit to the trunk branch.
 
-Commit access to trunk is obtained by joining the testtools-committers
-Launchpad team. Membership in this team is contingent on obeying the testtools
+Commit access to trunk is obtained by joining the `testing-cabal`_, either as an
+Owner or a Committer. Commit access is contingent on obeying the testtools
 contribution policy, see `Copyright Assignment`_ above.
 
 
@@ -92,16 +92,16 @@ Code Review
 -----------
 
 All code must be reviewed before landing on trunk. The process is to create a
-branch in launchpad, and submit it for merging to lp:testtools. It will then
-be reviewed before it can be merged to trunk. It will be reviewed by someone:
+branch on Github, and make a pull request into trunk. It will then be reviewed
+before it can be merged to trunk. It will be reviewed by someone:
 
 * not the author
-* a committer (member of the `~testtools-committers`_ team)
+* a committer
 
-As a special exception, while the testtools committers team is small and prone
-to blocking, a merge request from a committer that has not been reviewed after
-24 hours may be merged by that committer. When the team is larger this policy
-will be revisited.
+As a special exception, since there are few testtools committers and thus
+reviews are prone to blocking, a pull request from a committer that has not been
+reviewed after 24 hours may be merged by that committer. When the team is larger
+this policy will be revisited.
 
 Code reviewers should look for the quality of what is being submitted,
 including conformance with this HACKING file.
@@ -127,7 +127,7 @@ Release tasks
 #. Under NEXT in NEWS add a heading with the version number X.Y.Z.
 #. Possibly write a blurb into NEWS.
 #. Commit the changes.
-#. Tag the release, bzr tag testtools-X.Y.Z
+#. Tag the release, ``git tag -s testtools-X.Y.Z``
 #. Run 'make release', this:
    #. Creates a source distribution and uploads to PyPI
    #. Ensures all Fix Committed bugs are in the release milestone
@@ -137,13 +137,12 @@ Release tasks
 #. Change __version__ in __init__.py to the probable next version.
    e.g. to ``(X, Y, Z+1, 'dev', 0)``.
 #. Commit 'Opening X.Y.Z+1 for development.'
-#. Push trunk to Launchpad
 #. If a new series has been created (e.g. 0.10.0), make the series on Launchpad.
+#. Push trunk to Github, ``git push --tags origin master``
 
 .. _PEP 8: http://www.python.org/dev/peps/pep-0008/
 .. _unittest: http://docs.python.org/library/unittest.html
-.. _~testtools-committers: https://launchpad.net/~testtools-committers
 .. _MIT license: http://www.opensource.org/licenses/mit-license.php
 .. _Sphinx: http://sphinx.pocoo.org/
 .. _restructuredtext: http://docutils.sourceforge.net/rst.html
-
+.. _testing-cabal: https://github.com/organizations/testing-cabal/

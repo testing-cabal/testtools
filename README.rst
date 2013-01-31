@@ -55,8 +55,8 @@ Bug reports and patches
 -----------------------
 
 Please report bugs using Launchpad at <https://bugs.launchpad.net/testtools>.
-Patches can also be submitted via Launchpad, or mailed to the author.  You can
-mail the author directly at jml@mumak.net.
+Patches should be submitted as Github pull requests, or mailed to the authors.
+See ``doc/hacking.rst`` for more details.
 
 There's no mailing list for this project yet, however the testing-in-python
 mailing list may be a useful resource:
