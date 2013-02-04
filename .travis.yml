@@ -1,0 +1,15 @@
+language: python
+
+python:
+  - "2.6"
+  - "2.7"
+  - "3.2"
+  - "3.3"
+  - "pypy"
+
+install:
+  - pip install -q --use-mirrors fixtures extras
+  - python setup.py -q install
+
+script:
+  - python -m testtools.run testtools.tests.test_suite
