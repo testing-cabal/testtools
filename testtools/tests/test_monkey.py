@@ -52,7 +52,7 @@ class MonkeyPatcherTest(TestCase):
         # patch.
         self.monkey_patcher.add_patch(self.test_object, 'foo', 'haha')
         self.monkey_patcher.patch()
-        self.assertEquals(self.test_object.foo, 'haha')
+        self.assertEquals(self.test_object.foo, 'hoho')
 
     def test_patch_non_existing(self):
         # Patching a non-existing attribute sets it to the value defined in
