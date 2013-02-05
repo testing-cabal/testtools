@@ -6,6 +6,15 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+0.9.28
+~~~~~~
+
+Testtools has moved VCS - https://github.com/testing-cabal/testtools/ is
+the new home. Bug tracking is still on Launchpad, and releases are on Pypi.
+
+We made this change to take advantage of the richer ecosystem of tools around
+Git, and to lower the barrier for new contributors.
+
 Improvements
 ------------
 
