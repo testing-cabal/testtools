@@ -6,6 +6,12 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* ``testtools.compat.unicode_output_stream`` was wrapping a stream encoder
+  around ``io.StringIO`` objects, which was incorrect. (Robert Collins)
+
 0.9.28
 ~~~~~~
 

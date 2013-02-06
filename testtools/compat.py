@@ -19,6 +19,7 @@ __all__ = [
     ]
 
 import codecs
+import io
 import linecache
 import locale
 import os
@@ -215,8 +216,10 @@ def unicode_output_stream(stream):
     The wrapper only allows unicode to be written, not non-ascii bytestrings,
     which is a good thing to ensure sanity and sanitation.
     """
-    if sys.platform == "cli":
-        # Best to never encode before writing in IronPython
+    if sys.platform == "cli" or isinstance(stream, io.StringIO):
+        # Best to never encode before writing in IronPython, or if it is
+        # already a StringIO [which in the io library has no encoding
+        # attribute).
         return stream
     try:
         writer = codecs.getwriter(stream.encoding or "")
