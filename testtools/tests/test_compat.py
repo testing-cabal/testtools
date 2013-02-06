@@ -2,6 +2,7 @@
 
 """Tests for miscellaneous compatibility functions"""
 
+import io
 import linecache
 import os
 import sys
@@ -256,12 +257,16 @@ class TestUnicodeOutputStream(testtools.TestCase):
             newio = True
         sout = StringIO()
         soutwrapper = unicode_output_stream(sout)
-        if newio:
-            self.expectFailure("Python 3 StringIO expects text not bytes",
-                self.assertThat, lambda: soutwrapper.write(self.uni),
-                Not(Raises(MatchesException(TypeError))))
         soutwrapper.write(self.uni)
-        self.assertEqual("pa???n", sout.getvalue())
+        if newio:
+            self.assertEqual(self.uni, sout.getvalue())
+        else:
+            self.assertEqual("pa???n", sout.getvalue())
+
+    def test_io_stringio(self):
+        # io.StringIO only accepts unicode so should be returned as itself.
+        s = io.StringIO()
+        self.assertEqual(s, unicode_output_stream(s))
 
 
 class TestTextRepr(testtools.TestCase):
