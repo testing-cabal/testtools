@@ -13,6 +13,9 @@ Improvements
   around ``io.StringIO`` and ``io.TextIOWrapper`` objects, which was incorrect.
   (Robert Collins)
 
+* Report the name of the source file for setUp and tearDown upcall errors.
+  (Monty Taylor)
+
 0.9.28
 ~~~~~~
 
