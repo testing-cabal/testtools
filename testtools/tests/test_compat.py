@@ -22,6 +22,7 @@ from testtools.compat import (
     unicode_output_stream,
     )
 from testtools.matchers import (
+    Is,
     MatchesException,
     Not,
     Raises,
@@ -267,6 +268,20 @@ class TestUnicodeOutputStream(testtools.TestCase):
         # io.StringIO only accepts unicode so should be returned as itself.
         s = io.StringIO()
         self.assertEqual(s, unicode_output_stream(s))
+
+    def test_io_bytesio(self):
+        # io.BytesIO only accepts bytes so should be wrapped.
+        bytes_io = io.BytesIO()
+        self.assertThat(bytes_io, Not(Is(unicode_output_stream(bytes_io))))
+        # Will error if s was not wrapped properly.
+        unicode_output_stream(bytes_io).write(_u('foo'))
+
+    def test_io_textwrapper(self):
+        # textwrapper is unicode, should be returned as itself.
+        text_io = io.TextIOWrapper(io.BytesIO())
+        self.assertThat(unicode_output_stream(text_io), Is(text_io))
+        # To be sure...
+        unicode_output_stream(text_io).write(_u('foo'))
 
 
 class TestTextRepr(testtools.TestCase):
