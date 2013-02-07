@@ -216,16 +216,15 @@ def unicode_output_stream(stream):
     The wrapper only allows unicode to be written, not non-ascii bytestrings,
     which is a good thing to ensure sanity and sanitation.
     """
-    if sys.platform == "cli" or isinstance(stream, io.StringIO):
+    if (sys.platform == "cli" or
+        isinstance(stream, (io.TextIOWrapper, io.StringIO))):
         # Best to never encode before writing in IronPython, or if it is
-        # already a StringIO [which in the io library has no encoding
+        # already a TextIO [which in the io library has no encoding
         # attribute).
         return stream
     try:
         writer = codecs.getwriter(stream.encoding or "")
     except (AttributeError, LookupError):
-        # GZ 2010-06-16: Python 3 StringIO ends up here, but probably needs
-        #                different handling as it doesn't want bytestrings
         return codecs.getwriter("ascii")(stream, "replace")
     if writer.__module__.rsplit(".", 1)[1].startswith("utf"):
         # The current stream has a unicode encoding so no error handler is needed
