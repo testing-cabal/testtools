@@ -12,6 +12,9 @@ Improvements
 * ``testtools.compat.unicode_output_stream`` was wrapping a stream encoder
   around ``io.StringIO`` objects, which was incorrect. (Robert Collins)
 
+* Report the name of the source file for setUp and tearDown upcall errors.
+  (Monty Taylor)
+
 0.9.28
 ~~~~~~
 
