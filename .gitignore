@@ -7,7 +7,7 @@ TAGS
 apidocs
 _trial_temp
 doc/_build
-./.testrepository
+.testrepository
 ./testtools.egg-info
 *.pyc
 *.swp
