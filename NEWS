@@ -29,6 +29,9 @@ Improvements
   a particular result object is used even if the runner running the test doesn't
   know to use it. (Robert Collins)
 
+* New test support class ``testtools.testresult.doubles.StreamResult``, which
+  captures all the StreamResult events. (Robert Collins)
+
 * ``PlaceHolder`` can now hold tags, and applies them before, and removes them
   after, the test. (Robert Collins)
 

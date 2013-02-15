@@ -66,6 +66,7 @@ from testtools.testresult.doubles import (
     Python26TestResult,
     Python27TestResult,
     ExtendedTestResult,
+    StreamResult as LoggingStreamResult,
     )
 from testtools.testresult.real import (
     _details_to_str,
@@ -508,6 +509,48 @@ class TestBaseStreamResultContract(TestCase, TestStreamResultContract):
 
     def _make_result(self):
         return StreamResult()
+
+
+class TestDoubleStreamResultContract(TestCase, TestStreamResultContract):
+
+    def _make_result(self):
+        return LoggingStreamResult()
+
+
+class TestDoubleStreamResultEvents(TestCase):
+
+    def test_startTestRun(self):
+        result = LoggingStreamResult()
+        result.startTestRun()
+        self.assertEqual([('startTestRun',)], result._events)
+
+    def test_stopTestRun(self):
+        result = LoggingStreamResult()
+        result.startTestRun()
+        result.stopTestRun()
+        self.assertEqual([('startTestRun',), ('stopTestRun',)], result._events)
+
+    def test_file(self):
+        result = LoggingStreamResult()
+        result.startTestRun()
+        now = datetime.datetime.now(utc)
+        result.status(file_name="foo", file_bytes="bar", eof=True, mime_type="text/json",
+            test_id="id", route_code='abc', timestamp=now)
+        self.assertEqual(
+            [('startTestRun',),
+             ('status', 'id', None, None, True, 'foo', 'bar', True, 'text/json', 'abc', now)],
+            result._events)
+
+    def test_status(self):
+        result = LoggingStreamResult()
+        result.startTestRun()
+        now = datetime.datetime.now(utc)
+        result.status("foo", "success", test_tags=set(['tag']),
+            runnable=False, route_code='abc', timestamp=now)
+        self.assertEqual(
+            [('startTestRun',),
+             ('status', 'foo', 'success', set(['tag']), False, None, None, False, None, 'abc', now)],
+            result._events)
 
 
 class TestTestResult(TestCase):
