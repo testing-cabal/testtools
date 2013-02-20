@@ -6,6 +6,16 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* ``ConcurrentTestSuite`` was silently eating exceptions that propagate from
+  the test.run(result) method call. Ignoring them is fine in a normal test
+  runner, but when they happen in a different thread, the thread that called
+  suite.run() is not in the stack anymore, and the exceptions are lost. We now
+  create a synthetic test recording any such exception.
+  (Robert Collins, #1130429)
+
 0.9.29
 ~~~~~~
 
