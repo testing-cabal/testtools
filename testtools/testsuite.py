@@ -10,6 +10,7 @@ __all__ = [
   'sorted_tests',
   ]
 
+import sys
 import threading
 import unittest
 
@@ -99,7 +100,14 @@ class ConcurrentTestSuite(unittest.TestSuite):
 
     def _run_test(self, test, process_result, queue):
         try:
-            test.run(process_result)
+            try:
+                test.run(process_result)
+            except Exception as e:
+                # The run logic itself failed.
+                case = testtools.ErrorHolder(
+                    "broken-runner",
+                    error=sys.exc_info())
+                case.run(process_result)
         finally:
             queue.put(test)
 
