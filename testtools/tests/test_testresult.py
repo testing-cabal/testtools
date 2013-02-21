@@ -7,6 +7,7 @@ __metaclass__ = type
 import codecs
 import datetime
 import doctest
+from itertools import chain, combinations
 import os
 import shutil
 import sys
@@ -21,6 +22,7 @@ from testtools import (
     ExtendedToOriginalDecorator,
     MultiTestResult,
     PlaceHolder,
+    StreamResult,
     Tagger,
     TestCase,
     TestResult,
@@ -444,6 +446,68 @@ class TestTestResultDecoratorContract(TestCase, StartTestRunContract):
 
     def makeResult(self):
         return TestResultDecorator(TestResult())
+
+
+class TestStreamResultContract(object):
+
+    def _make_result(self):
+        raise NotImplementedError(self._make_result)
+
+    def test_startTestRun(self):
+        result = self._make_result()
+        result.startTestRun()
+        result.stopTestRun()
+
+    def test_files(self):
+        # Test parameter combinations when files are being emitted.
+        result = self._make_result()
+        result.startTestRun()
+        self.addCleanup(result.stopTestRun)
+        now = datetime.datetime.now(utc)
+        inputs = list(dict(
+            eof=True,
+            mime_type="text/plain",
+            route_code=_u("1234"),
+            test_id=_u("foo"),
+            timestamp=now,
+            ).items())
+        param_dicts = self._power_set(inputs)
+        for kwargs in param_dicts:
+            result.status(file_name=_u("foo"), file_bytes=_b(""), **kwargs)
+            result.status(file_name=_u("foo"), file_bytes=_b("bar"), **kwargs)
+
+    def test_test_status(self):
+        # Tests non-file attachment parameter combinations.
+        result = self._make_result()
+        result.startTestRun()
+        self.addCleanup(result.stopTestRun)
+        now = datetime.datetime.now(utc)
+        args = [[_u("foo"), s] for s in ['exists', 'inprogress', 'xfail',
+            'uxsuccess', 'success', 'fail', 'skip']]
+        inputs = list(dict(
+            runnable=False,
+            test_tags=set(['quux']),
+            route_code=_u("1234"),
+            timestamp=now,
+            ).items())
+        param_dicts = self._power_set(inputs)
+        for kwargs in param_dicts:
+            for arg in args:
+                result.status(test_id=arg[0], test_status=arg[1], **kwargs)
+
+    def _power_set(self, iterable):
+        "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
+        s = list(iterable)
+        param_dicts = []
+        for ss in chain.from_iterable(combinations(s, r) for r in range(len(s)+1)):
+            param_dicts.append(dict(ss))
+        return param_dicts
+
+
+class TestBaseStreamResultContract(TestCase, TestStreamResultContract):
+
+    def _make_result(self):
+        return StreamResult()
 
 
 class TestTestResult(TestCase):
