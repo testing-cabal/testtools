@@ -43,7 +43,7 @@ class TestContentType(TestCase):
         content_type = ContentType(
             'text', 'plain', {'foo': 'bar', 'baz': 'qux'})
         self.assertThat(
-            repr(content_type), Equals('text/plain; baz="qux", foo="bar"'))
+            repr(content_type), Equals('text/plain; baz="qux"; foo="bar"'))
 
 
 class TestBuiltinContentTypes(TestCase):
