@@ -29,7 +29,7 @@ class ContentType(object):
     def __repr__(self):
         if self.parameters:
             params = '; '
-            params += ', '.join(
+            params += '; '.join(
                 sorted('%s="%s"' % (k, v) for k, v in self.parameters.items()))
         else:
             params = ''

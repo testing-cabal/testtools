@@ -25,6 +25,12 @@ Improvements
 
 A simple bug fix, and better error messages when you don't up-call.
 
+Changes
+-------
+
+* ``testtools.content_type.ContentType`` incorrectly used ',' rather than ';'
+  to separate parameters. (Robert Collins)
+
 Improvements
 ------------
 
