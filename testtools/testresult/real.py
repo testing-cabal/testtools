@@ -6,6 +6,7 @@ __metaclass__ = type
 __all__ = [
     'ExtendedToOriginalDecorator',
     'MultiTestResult',
+    'StreamResult',
     'Tagger',
     'TestResult',
     'TestResultDecorator',
@@ -241,6 +242,123 @@ class TestResult(unittest.TestResult):
         """Called when the test runner is done.
 
         deprecated in favour of stopTestRun.
+        """
+
+
+class StreamResult(object):
+    """A test result for reporting the activity of a test run.
+
+    Typical use
+    -----------
+
+      >>> result = StreamResult()
+      >>> result.startTestRun()
+      >>> try:
+      ...     case.run(result)
+      ... finally:
+      ...     result.stopTestRun()
+
+    The case object will be either a TestCase or a TestSuite, and
+    generally make a sequence of calls like::
+
+      >>> result.status(self.id(), 'inprogress')
+      >>> result.status(self.id(), 'success')
+
+    General concepts
+    ----------------
+
+    StreamResult is built to process events that are emitted by tests during a
+    test run or test enumeration. The test run may be running concurrently, and
+    even be spread out across multiple machines.
+
+    All events are timestamped to prevent network buffering or scheduling
+    latency causing false timing reports. Timestamps are datetime objects in
+    the UTC timezone.
+
+    A route_code is a unicode string that identifies where a particular test
+    run. This is optional in the API but very useful when multiplexing multiple
+    streams together as it allows identification of interactions between tests
+    that were run on the same hardware or in the same test process. Generally
+    actual tests never need to bother with this - it is added and processed
+    by StreamResult's that do multiplexing / run analysis. route_codes are
+    also used to route stdin back to pdb instances.
+
+    The StreamResult base class does no accounting or processing, rather it
+    just provides an empty implementation of every method, suitable for use
+    as a base class regardless of intent.
+    """
+
+    def startTestRun(self):
+        """Start a test run.
+
+        This will prepare the test result to process results (which might imply
+        connecting to a database or remote machine).
+        """
+
+    def stopTestRun(self):
+        """Stop a test run.
+
+        This informs the result that no more test updates will be received. At
+        this point any test ids that have started and not completed can be
+        considered failed-or-hung.
+        """
+
+    def status(self, test_id=None, test_status=None, test_tags=None,
+        runnable=True, file_name=None, file_bytes=None, eof=False,
+        mime_type=None, route_code=None, timestamp=None):
+        """Inform the result about a test status.
+
+        :param test_id: The test whose status is being reported. None to 
+            report status about the test run as a whole.
+        :param test_status: The status for the test. There are two sorts of
+            status - interim and final status events. As many interim events
+            can be generated as desired, but only one final event. After a
+            final status event any further file or status events from the
+            same test_id+route_code may be discarded or associated with a new
+            test by the StreamResult. (But no exception will be thrown).
+            Interim states:
+            * None - no particular status is being reported, or status being
+              reported is not associated with a test (e.g. when reporting on
+              stdout / stderr chatter).
+            * inprogress - the test is currently running. Emitted by tests when
+              they start running and at any intermediary point they might
+              choose to indicate their continual operation.
+            Final states:
+            * exists - the test exists. This is used when a test is not being
+              executed. Typically this is when querying what tests could be run
+              in a test run (which is useful for selecting tests to run).
+            * xfail - the test failed but that was expected. This is purely
+              informative - the test is not considered to be a failure. 
+            * uxsuccess - the test passed but was expected to fail. The test
+              will be considered a failure.
+            * success - the test has finished without error.
+            * fail - the test failed (or errored). The test will be considered
+              a failure.
+            * skip - the test was selected to run but chose to be skipped. E.g.
+              a test dependency was missing. This is purely informative - the
+              test is not considered to be a failure.
+        :param test_tags: Optional set of tags to apply to the test. Tags
+            have no intrinsic meaning - that is up to the test author.
+        :param runnable: Allows status reports to mark that they are for
+            tests which are not able to be explicitly run. For instance,
+            subtests will report themselves as non-runnable.
+        :param file_name: The name for the file_bytes. Any unicode string may
+            be used. While there is no semantic value attached to the name
+            of any attachment, the names 'stdout' and 'stderr' and 'traceback'
+            are recommended for use only for output sent to stdout, stderr and
+            tracebacks of exceptions. When file_name is supplied, file_bytes
+            must be a bytes instance.
+        :param file_bytes: A bytes object containing content for the named
+            file. This can just be a single chunk of the file - emitting
+            another file event with more later. Must be None unleses a
+            file_name is supplied.
+        :param eof: True if this chunk is the last chunk of the file, any
+            additional chunks with the same name should be treated as an error
+            and discarded. Ignored unless file_name has been supplied.
+        :param mime_type: An optional MIME type for the file. stdout and
+            stderr will generally be "text/plain; charset=utf8". If None,
+            defaults to application/octet-stream. Ignores unless file_name
+            has been supplied.
         """
 
 
