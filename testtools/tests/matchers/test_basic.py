@@ -36,8 +36,14 @@ class Test_BinaryMismatch(TestCase):
     _long_b = _b(_long_string)
     _long_u = _u(_long_string)
 
+    class CustomRepr(object):
+        def __init__(self, repr_string):
+            self._repr_string = repr_string
+        def __repr__(self):
+            return _u('<object ') + _u(self._repr_string) + _u('>')
+
     def test_short_objects(self):
-        o1, o2 = object(), object()
+        o1, o2 = self.CustomRepr('a'), self.CustomRepr('b')
         mismatch = _BinaryMismatch(o1, "!~", o2)
         self.assertEqual(mismatch.describe(), "%r !~ %r" % (o1, o2))
 
