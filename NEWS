@@ -29,6 +29,9 @@ Improvements
 * ``PlaceHolder`` can now hold tags, and applies them before, and removes them
   after, the test. (Robert Collins)
 
+* ``PlaceHolder`` can now hold timestamps, and applies them before the test and
+  then before the outcome. (Robert Collins)
+
 0.9.29
 ~~~~~~
 
