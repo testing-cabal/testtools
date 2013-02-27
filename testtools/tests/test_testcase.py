@@ -135,6 +135,21 @@ class TestPlaceHolder(TestCase):
              ],
             result._events)
 
+    def test_supplies_timestamps(self):
+        test = PlaceHolder('foo', details={}, timestamps=["A", "B"])
+        result = ExtendedTestResult()
+        test.run(result)
+        self.assertEqual(
+            [('time', "A"),
+             ('tags', set(), set()),
+             ('startTest', test),
+             ('time', "B"),
+             ('addSuccess', test),
+             ('stopTest', test),
+             ('tags', set(), set()),
+             ],
+            result._events)
+
     def test_call_is_run(self):
         # A PlaceHolder can be called, in which case it behaves like run.
         test = self.makePlaceHolder()
