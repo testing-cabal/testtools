@@ -16,6 +16,10 @@ Improvements
   create a synthetic test recording any such exception.
   (Robert Collins, #1130429)
 
+* The repr of object() on pypy includes the object id, which was breaking a
+  test that accidentally depended on the CPython repr for object().
+  (Jonathan Lange)
+
 0.9.29
 ~~~~~~
 
