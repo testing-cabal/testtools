@@ -5,6 +5,7 @@
 __all__ = [
     'clone_test_with_new_id',
     'ConcurrentTestSuite',
+    'DecorateTestCaseResult',
     'ErrorHolder',
     'ExpectedException',
     'ExtendedToOriginalDecorator',
@@ -53,6 +54,7 @@ else:
         RunTest,
         )
     from testtools.testcase import (
+        DecorateTestCaseResult,
         ErrorHolder,
         ExpectedException,
         PlaceHolder,
