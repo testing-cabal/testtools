@@ -16,6 +16,11 @@ Improvements
   create a synthetic test recording any such exception.
   (Robert Collins, #1130429)
 
+* New ``TestCase`` decorator ``DecorateTestCaseResult`` that adapts the
+  ``TestResult`` or ``StreamResult`` a case will be run with, for ensuring that
+  a particular result object is used even if the runner running the test doesn't
+  know to use it. (Robert Collins)
+
 * ``PlaceHolder`` can now hold tags, and applies them before, and removes them
   after, the test. (Robert Collins)
 

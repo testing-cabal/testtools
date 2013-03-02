@@ -863,6 +863,55 @@ class Nullary(object):
         return repr(self._callable_object)
 
 
+class DecorateTestCaseResult(object):
+    """Decorate a TestCase and permit customisation of the result for runs."""
+
+    def __init__(self, case, callout, before_run=None, after_run=None):
+        """Construct a DecorateTestCaseResult.
+
+        :param case: The case to decorate.
+        :param callout: A callback to call when run/__call__/debug is called.
+            Must take a result parameter and return a result object to be used.
+            For instance: lambda result: result.
+        :param before_run: If set, call this with the decorated result before
+            calling into the decorated run/__call__ method.
+        :param before_run: If set, call this with the decorated result after
+            calling into the decorated run/__call__ method.
+        """
+        self.decorated = case
+        self.callout = callout
+        self.before_run = before_run
+        self.after_run = after_run
+
+    def _run(self, result, run_method):
+        result = self.callout(result)
+        if self.before_run:
+            self.before_run(result)
+        try:
+            return run_method(result)
+        finally:
+            if self.after_run:
+                self.after_run(result)
+
+    def run(self, result=None):
+        self._run(result, self.decorated.run)
+
+    def __call__(self, result=None):
+        self._run(result, self.decorated)
+
+    def __getattr__(self, name):
+        return getattr(self.decorated, name)
+    
+    def __delattr__(self, name):
+        delattr(self.decorated, name)
+
+    def __setattr__(self, name, value):
+        if name == 'decorated':
+            self.__dict__['decorated'] = value
+            return
+        setattr(self.decorated, name, value)
+
+
 # Signal that this is part of the testing framework, and that code from this
 # should not normally appear in tracebacks.
 __unittest = True
