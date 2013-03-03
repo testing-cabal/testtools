@@ -1072,6 +1072,9 @@ class TestSetupTearDown(TestCase):
         result = unittest.TestResult()
         DoesnotcallsetUp('test_method').run(result)
         self.assertEqual(1, len(result.errors))
+        self.assertIn(
+            _u("ValueError: In File: testtools/tests/test_testcase.py"),
+            result.errors[0][1])
 
     def test_tearDownNotCalled(self):
         class DoesnotcalltearDown(TestCase):
@@ -1082,6 +1085,9 @@ class TestSetupTearDown(TestCase):
         result = unittest.TestResult()
         DoesnotcalltearDown('test_method').run(result)
         self.assertEqual(1, len(result.errors))
+        self.assertIn(
+            _u("ValueError: In File: testtools/tests/test_testcase.py"),
+            result.errors[0][1])
 
 
 class TestSkipping(TestCase):
