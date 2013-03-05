@@ -23,6 +23,12 @@ Improvements
 * The error message for setUp and tearDown upcall errors was broken on Python
   3.4. (Monty Taylor, Robert Collins, #1140688)
 
+Improvements
+------------
+
+* ``PlaceHolder`` can now hold tags, and applies them before, and removes them
+  after, the test. (Robert Collins)
+
 0.9.29
 ~~~~~~
 
