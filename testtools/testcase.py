@@ -539,7 +539,8 @@ class TestCase(unittest.TestCase):
                 "TestCase.setUp was not called. Have you upcalled all the "
                 "way up the hierarchy from your setUp? e.g. Call "
                 "super(%s, self).setUp() from your setUp()."
-                % (self.__class__.__file__, self.__class__.__name__))
+                % (sys.modules[self.__class__.__module__].__file__,
+                   self.__class__.__name__))
         return ret
 
     def _run_teardown(self, result):
@@ -556,7 +557,8 @@ class TestCase(unittest.TestCase):
                 "TestCase.tearDown was not called. Have you upcalled all the "
                 "way up the hierarchy from your tearDown? e.g. Call "
                 "super(%s, self).tearDown() from your tearDown()."
-                % (self.__class__.__file__, self.__class__.__name__))
+                % (sys.modules[self.__class__.__module__].__file__,
+                   self.__class__.__name__))
         return ret
 
     def _get_test_method(self):
