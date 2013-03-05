@@ -20,6 +20,9 @@ Improvements
   test that accidentally depended on the CPython repr for object().
   (Jonathan Lange)
 
+* The error message for setUp and tearDown upcall errors was broken on Python
+  3.4. (Monty Taylor, Robert Collins, #1140688)
+
 0.9.29
 ~~~~~~
 

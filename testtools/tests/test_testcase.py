@@ -31,6 +31,7 @@ from testtools.matchers import (
     Annotate,
     DocTestMatches,
     Equals,
+    HasLength,
     MatchesException,
     Raises,
     )
@@ -1071,7 +1072,11 @@ class TestSetupTearDown(TestCase):
                 pass
         result = unittest.TestResult()
         DoesnotcallsetUp('test_method').run(result)
-        self.assertEqual(1, len(result.errors))
+        self.assertThat(result.errors, HasLength(1))
+        self.assertThat(result.errors[0][1],
+            DocTestMatches(
+                "...ValueError...File...testtools/tests/test_testcase.py...",
+                ELLIPSIS))
 
     def test_tearDownNotCalled(self):
         class DoesnotcalltearDown(TestCase):
@@ -1081,7 +1086,11 @@ class TestSetupTearDown(TestCase):
                 pass
         result = unittest.TestResult()
         DoesnotcalltearDown('test_method').run(result)
-        self.assertEqual(1, len(result.errors))
+        self.assertThat(result.errors, HasLength(1))
+        self.assertThat(result.errors[0][1],
+            DocTestMatches(
+                "...ValueError...File...testtools/tests/test_testcase.py...",
+                ELLIPSIS))
 
 
 class TestSkipping(TestCase):
