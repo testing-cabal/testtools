@@ -8,6 +8,7 @@ import sys
 import unittest
 
 from testtools import (
+    DecorateTestCaseResult,
     ErrorHolder,
     MultipleExceptions,
     PlaceHolder,
@@ -117,7 +118,8 @@ class TestPlaceHolder(TestCase):
         log = []
         test.run(LoggingResult(log))
         self.assertEqual(
-            [('startTest', test), ('addSuccess', test), ('stopTest', test)],
+            [('tags', set(), set()), ('startTest', test), ('addSuccess', test),
+             ('stopTest', test), ('tags', set(), set()),],
             log)
 
     def test_supplies_details(self):
@@ -126,9 +128,27 @@ class TestPlaceHolder(TestCase):
         result = ExtendedTestResult()
         test.run(result)
         self.assertEqual(
-            [('startTest', test),
+            [('tags', set(), set()),
+             ('startTest', test),
              ('addSuccess', test, details),
-             ('stopTest', test)],
+             ('stopTest', test),
+             ('tags', set(), set()),
+             ],
+            result._events)
+
+    def test_supplies_timestamps(self):
+        test = PlaceHolder('foo', details={}, timestamps=["A", "B"])
+        result = ExtendedTestResult()
+        test.run(result)
+        self.assertEqual(
+            [('time', "A"),
+             ('tags', set(), set()),
+             ('startTest', test),
+             ('time', "B"),
+             ('addSuccess', test),
+             ('stopTest', test),
+             ('tags', set(), set()),
+             ],
             result._events)
 
     def test_call_is_run(self):
@@ -148,6 +168,19 @@ class TestPlaceHolder(TestCase):
     def test_debug(self):
         # A PlaceHolder can be debugged.
         self.makePlaceHolder().debug()
+
+    def test_supports_tags(self):
+        result = ExtendedTestResult()
+        tags = set(['foo', 'bar'])
+        case = PlaceHolder("foo", tags=tags)
+        case.run(result)
+        self.assertEqual([
+            ('tags', tags, set()),
+            ('startTest', case),
+            ('addSuccess', case),
+            ('stopTest', case),
+            ('tags', set(), tags),
+            ], result._events)
 
 
 class TestErrorHolder(TestCase):
@@ -202,9 +235,11 @@ class TestErrorHolder(TestCase):
         log = result._events
         test.run(result)
         self.assertEqual(
-            [('startTest', test),
+            [('tags', set(), set()),
+             ('startTest', test),
              ('addError', test, test._details),
-             ('stopTest', test)], log)
+             ('stopTest', test),
+             ('tags', set(), set())], log)
 
     def test_call_is_run(self):
         # A PlaceHolder can be called, in which case it behaves like run.
@@ -1393,6 +1428,89 @@ class TestAttributes(TestCase):
         self.assertEqual(
             'testtools.tests.test_testcase.MyTest.test_bar[bar,foo,quux]',
             case.id())
+
+
+class TestDecorateTestCaseResult(TestCase):
+
+    def setUp(self):
+        super(TestDecorateTestCaseResult, self).setUp()
+        self.log = []
+
+    def make_result(self, result):
+        self.log.append(result)
+        return LoggingResult(self.log)
+
+    def test___call__(self):
+        case = DecorateTestCaseResult(PlaceHolder('foo'), self.make_result)
+        case(None)
+        case('something')
+        self.assertEqual([None,
+            ('tags', set(), set()),
+            ('startTest', case.decorated),
+            ('addSuccess', case.decorated),
+            ('stopTest', case.decorated),
+            ('tags', set(), set()),
+            'something',
+            ('tags', set(), set()),
+            ('startTest', case.decorated),
+            ('addSuccess', case.decorated),
+            ('stopTest', case.decorated),
+            ('tags', set(), set())
+            ], self.log)
+
+    def test_run(self):
+        case = DecorateTestCaseResult(PlaceHolder('foo'), self.make_result)
+        case.run(None)
+        case.run('something')
+        self.assertEqual([None,
+            ('tags', set(), set()),
+            ('startTest', case.decorated),
+            ('addSuccess', case.decorated),
+            ('stopTest', case.decorated),
+            ('tags', set(), set()),
+            'something',
+            ('tags', set(), set()),
+            ('startTest', case.decorated),
+            ('addSuccess', case.decorated),
+            ('stopTest', case.decorated),
+            ('tags', set(), set())
+            ], self.log)
+
+    def test_before_after_hooks(self):
+        case = DecorateTestCaseResult(PlaceHolder('foo'), self.make_result,
+            before_run=lambda result: self.log.append('before'),
+            after_run=lambda result: self.log.append('after'))
+        case.run(None)
+        case(None)
+        self.assertEqual([
+            None,
+            'before',
+            ('tags', set(), set()),
+            ('startTest', case.decorated),
+            ('addSuccess', case.decorated),
+            ('stopTest', case.decorated),
+            ('tags', set(), set()),
+            'after',
+            None,
+            'before',
+            ('tags', set(), set()),
+            ('startTest', case.decorated),
+            ('addSuccess', case.decorated),
+            ('stopTest', case.decorated),
+            ('tags', set(), set()),
+            'after',
+            ], self.log)
+
+    def test_other_attribute(self):
+        orig = PlaceHolder('foo')
+        orig.thing = 'fred'
+        case = DecorateTestCaseResult(orig, self.make_result)
+        self.assertEqual('fred', case.thing)
+        self.assertRaises(AttributeError, getattr, case, 'other')
+        case.other = 'barbara'
+        self.assertEqual('barbara', orig.other)
+        del case.thing
+        self.assertRaises(AttributeError, getattr, orig, 'thing')
 
 
 def test_suite():

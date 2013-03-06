@@ -108,6 +108,25 @@ e.g.::
   I record an event                                                   [OK]
 
 
+Test instance decorators
+========================
+
+DecorateTestCaseResult
+----------------------
+
+This object calls out to your code when ``run`` / ``__call__`` are called and
+allows the result object that will be used to run the test to be altered. This
+is very useful when working with a test runner that doesn't know your test case
+requirements. For instance, it can be used to inject a ``unittest2`` compatible
+adapter when someone attempts to run your test suite with a ``TestResult`` that
+does not support ``addSkip`` or other ``unittest2`` methods. Similarly it can
+aid the migration to ``StreamResult``.
+
+e.g.::
+
+ >>> suite = TestSuite()
+ >>> suite = DecorateTestCaseResult(suite, ExtendedToOriginalDecorator)
+
 Extensions to TestResult
 ========================
 

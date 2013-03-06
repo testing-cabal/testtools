@@ -23,6 +23,20 @@ Improvements
 * The error message for setUp and tearDown upcall errors was broken on Python
   3.4. (Monty Taylor, Robert Collins, #1140688)
 
+Improvements
+------------
+
+* New ``TestCase`` decorator ``DecorateTestCaseResult`` that adapts the
+  ``TestResult`` or ``StreamResult`` a case will be run with, for ensuring that
+  a particular result object is used even if the runner running the test doesn't
+  know to use it. (Robert Collins)
+
+* ``PlaceHolder`` can now hold tags, and applies them before, and removes them
+  after, the test. (Robert Collins)
+
+* ``PlaceHolder`` can now hold timestamps, and applies them before the test and
+  then before the outcome. (Robert Collins)
+
 0.9.29
 ~~~~~~
 
