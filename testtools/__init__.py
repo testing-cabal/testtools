@@ -4,6 +4,7 @@
 
 __all__ = [
     'clone_test_with_new_id',
+    'CopyStreamResult',
     'ConcurrentTestSuite',
     'DecorateTestCaseResult',
     'ErrorHolder',
@@ -67,6 +68,7 @@ else:
         skipUnless,
         )
     from testtools.testresult import (
+        CopyStreamResult,
         ExtendedToOriginalDecorator,
         MultiTestResult,
         StreamResult,

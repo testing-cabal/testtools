@@ -3,6 +3,7 @@
 """Test result objects."""
 
 __all__ = [
+    'CopyStreamResult',
     'ExtendedToOriginalDecorator',
     'MultiTestResult',
     'StreamResult',
@@ -15,6 +16,7 @@ __all__ = [
     ]
 
 from testtools.testresult.real import (
+    CopyStreamResult,
     ExtendedToOriginalDecorator,
     MultiTestResult,
     StreamResult,
