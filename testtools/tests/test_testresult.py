@@ -24,6 +24,7 @@ from testtools import (
     MultiTestResult,
     PlaceHolder,
     StreamResult,
+    StreamToDict,
     Tagger,
     TestCase,
     TestResult,
@@ -54,6 +55,7 @@ from testtools.matchers import (
     Contains,
     DocTestMatches,
     Equals,
+    HasLength,
     MatchesAny,
     MatchesException,
     Raises,
@@ -525,6 +527,12 @@ class TestDoubleStreamResultContract(TestCase, TestStreamResultContract):
         return LoggingStreamResult()
 
 
+class TestStreamToDictContract(TestCase, TestStreamResultContract):
+
+    def _make_result(self):
+        return StreamToDict(lambda x:None)
+
+
 class TestDoubleStreamResultEvents(TestCase):
 
     def test_startTestRun(self):
@@ -591,6 +599,92 @@ class TestCopyStreamResultCopies(TestCase):
                 ('status', 'foo', 'success', set(['tag']), False, "foo",
                  b'bar', True, "text/json", 'abc', now)
                 ])))
+
+
+class TestStreamToDict(TestCase):
+
+    def test_hung_test(self):
+        tests = []
+        result = StreamToDict(tests.append)
+        result.startTestRun()
+        result.status('foo', 'inprogress')
+        self.assertEqual([], tests)
+        result.stopTestRun()
+        self.assertEqual([
+            {'id': 'foo', 'tags': set(), 'details': {}, 'status': 'inprogress',
+             'timestamps': [None, None]}
+            ], tests)
+
+    def test_all_terminal_states_reported(self):
+        tests = []
+        result = StreamToDict(tests.append)
+        result.startTestRun()
+        result.status('success', 'success')
+        result.status('skip', 'skip')
+        result.status('exists', 'exists')
+        result.status('fail', 'fail')
+        result.status('xfail', 'xfail')
+        result.status('uxsuccess', 'uxsuccess')
+        self.assertThat(tests, HasLength(6))
+        self.assertEqual(
+            ['success', 'skip', 'exists', 'fail', 'xfail', 'uxsuccess'],
+            [test['id'] for test in tests])
+        result.stopTestRun()
+        self.assertThat(tests, HasLength(6))
+
+    def test_files_reported(self):
+        tests = []
+        result = StreamToDict(tests.append)
+        result.startTestRun()
+        result.status(file_name="some log.txt",
+            file_bytes=_b("1234 log message"), eof=True,
+            mime_type="text/plain; charset=utf8", test_id="foo.bar")
+        result.status(file_name="another file",
+            file_bytes=_b("""Traceback..."""), test_id="foo.bar")
+        result.stopTestRun()
+        self.assertThat(tests, HasLength(1))
+        test = tests[0]
+        self.assertEqual("foo.bar", test['id'])
+        self.assertEqual("unknown", test['status'])
+        details = test['details']
+        self.assertEqual(
+            _u("1234 log message"), details['some log.txt'].as_text())
+        self.assertEqual(
+            _b("Traceback..."),
+            _b('').join(details['another file'].iter_bytes()))
+        self.assertEqual(
+            "application/octet-stream", repr(details['another file'].content_type))
+
+    def test_bad_mime(self):
+        # Testtools was making bad mime types, this tests that the specific
+        # corruption is catered for.
+        tests = []
+        result = StreamToDict(tests.append)
+        result.startTestRun()
+        result.status(file_name="file", file_bytes=b'a',
+            mime_type='text/plain; charset=utf8, language=python',
+            test_id='id')
+        result.stopTestRun()
+        self.assertThat(tests, HasLength(1))
+        test = tests[0]
+        self.assertEqual("id", test['id'])
+        details = test['details']
+        self.assertEqual(_u("a"), details['file'].as_text())
+        self.assertEqual(
+            "text/plain; charset=\"utf8\"",
+            repr(details['file'].content_type))
+
+    def test_timestamps(self):
+        tests = []
+        result = StreamToDict(tests.append)
+        result.startTestRun()
+        result.status(test_id='foo', test_status='inprogress', timestamp="A")
+        result.status(test_id='foo', test_status='success', timestamp="B")
+        result.status(test_id='bar', test_status='inprogress', timestamp="C")
+        result.stopTestRun()
+        self.assertThat(tests, HasLength(2))
+        self.assertEqual(["A", "B"], tests[0]['timestamps'])
+        self.assertEqual(["C", None], tests[1]['timestamps'])
 
 
 class TestTestResult(TestCase):

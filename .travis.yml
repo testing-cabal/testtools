@@ -8,7 +8,7 @@ python:
   - "pypy"
 
 install:
-  - pip install -q --use-mirrors fixtures extras
+  - pip install -q --use-mirrors fixtures extras python-mimeparse
   - python setup.py -q install
 
 script:
