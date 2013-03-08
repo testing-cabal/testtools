@@ -6,6 +6,11 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+A new sort of TestResult, the StreamResult has been added, as a prototype for
+a revised standard library test result API.  Expect this API to change.
+Although we will try to preserve compatibility for early adopters, it is
+experimental and we might need to break it.
+
 Improvements
 ------------
 
@@ -15,6 +20,9 @@ Improvements
   suite.run() is not in the stack anymore, and the exceptions are lost. We now
   create a synthetic test recording any such exception.
   (Robert Collins, #1130429)
+
+* New class ``StreamResult`` which defines the API for the new result type.
+  (Robert Collins)
 
 * New ``TestCase`` decorator ``DecorateTestCaseResult`` that adapts the
   ``TestResult`` or ``StreamResult`` a case will be run with, for ensuring that
@@ -27,12 +35,12 @@ Improvements
 * ``PlaceHolder`` can now hold timestamps, and applies them before the test and
   then before the outcome. (Robert Collins)
 
+* The error message for setUp and tearDown upcall errors was broken on Python
+  3.4. (Monty Taylor, Robert Collins, #1140688)
+
 * The repr of object() on pypy includes the object id, which was breaking a
   test that accidentally depended on the CPython repr for object().
   (Jonathan Lange)
-
-* The error message for setUp and tearDown upcall errors was broken on Python
-  3.4. (Monty Taylor, Robert Collins, #1140688)
 
 0.9.29
 ~~~~~~
