@@ -14,6 +14,7 @@ __all__ = [
     ]
 
 import datetime
+from operator import methodcaller
 import sys
 import unittest
 
@@ -360,6 +361,35 @@ class StreamResult(object):
             defaults to application/octet-stream. Ignores unless file_name
             has been supplied.
         """
+
+
+def domap(*args, **kwargs):
+    return list(map(*args, **kwargs))
+
+
+class CopyStreamResult(StreamResult):
+    """Copies all event it receives to multiple results.
+    
+    This provides an easy facility for combining multiple StreamResults.
+
+    For TestResult the equivalent class was ``MultiTestResult``.
+    """
+
+    def __init__(self, targets):
+        super(CopyStreamResult, self).__init__()
+        self.targets = targets
+
+    def startTestRun(self):
+        super(CopyStreamResult, self).startTestRun()
+        domap(methodcaller('startTestRun'), self.targets)
+
+    def stopTestRun(self):
+        super(CopyStreamResult, self).stopTestRun()
+        domap(methodcaller('stopTestRun'), self.targets)
+
+    def status(self, *args, **kwargs):
+        super(CopyStreamResult, self).status(*args, **kwargs)
+        domap(methodcaller('status', *args, **kwargs), self.targets)
 
 
 class MultiTestResult(TestResult):
