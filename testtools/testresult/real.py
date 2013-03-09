@@ -7,6 +7,7 @@ __all__ = [
     'ExtendedToOriginalDecorator',
     'MultiTestResult',
     'StreamResult',
+    'StreamToDict',
     'Tagger',
     'TestResult',
     'TestResultDecorator',
@@ -18,13 +19,16 @@ from operator import methodcaller
 import sys
 import unittest
 
-from extras import safe_hasattr
+from extras import safe_hasattr, try_import
+parse_mime_type = try_import('mimeparse.parse_mime_type')
 
 from testtools.compat import all, str_is_unicode, _u
 from testtools.content import (
+    Content,
     text_content,
     TracebackContent,
     )
+from testtools.content_type import ContentType
 from testtools.tags import TagContext
 
 # From http://docs.python.org/library/datetime.html
@@ -390,6 +394,101 @@ class CopyStreamResult(StreamResult):
     def status(self, *args, **kwargs):
         super(CopyStreamResult, self).status(*args, **kwargs)
         domap(methodcaller('status', *args, **kwargs), self.targets)
+
+
+class StreamToDict(StreamResult):
+    """A specialised StreamResult that emits a callback as tests complete.
+
+    Top level file attachments are simply discarded. Hung tests are detected
+    by stopTestRun and notified there and then.
+
+    The callback is passed a dict with the following keys:
+    * id: the test id.
+    * tags: The tags for the test. A set of unicode strings.
+    * details: A dict of file attachments - ``testtools.content.Content``
+        objects.
+    * status: One of the StreamResult status codes (including inprogress) or
+        'unknown' (used if only file events for a test were received...)
+    * timestamps: A pair of timestamps - the first one received with this
+      test id, and the one in the event that triggered the notification.
+      Hung tests have a None for the second end event. Timestamps are not
+      compared - their ordering is purely order received in the stream.
+
+    Only the most recent tags observed in the stream are reported.
+    """
+
+    def __init__(self, on_test):
+        """Create a StreamToDict calling on_test on test completions.
+
+        :param on_test: A callback that accepts one parameter - a dict
+            describing a test.
+        """
+        super(StreamToDict, self).__init__()
+        self.on_test = on_test
+        if parse_mime_type is None:
+            raise ImportError("mimeparse module missing.")
+
+    def startTestRun(self):
+        super(StreamToDict, self).startTestRun()
+        self._inprogress = {}
+
+    def status(self, test_id=None, test_status=None, test_tags=None,
+        runnable=True, file_name=None, file_bytes=None, eof=False,
+        mime_type=None, route_code=None, timestamp=None):
+        super(StreamToDict, self).status(test_id, test_status,
+            test_tags=test_tags, runnable=runnable, file_name=file_name,
+            file_bytes=file_bytes, eof=eof, mime_type=mime_type,
+            route_code=route_code, timestamp=timestamp)
+        key = self._ensure_key(test_id, route_code, timestamp)
+        # update fields
+        if not key:
+            return
+        if test_status is not None:
+            self._inprogress[key]['status'] = test_status
+        self._inprogress[key]['timestamps'][1] = timestamp
+        case = self._inprogress[key]
+        if file_name is not None:
+            if file_name not in case['details']:
+                if mime_type is None:
+                    mime_type = 'application/octet-stream'
+                primary, sub, parameters = parse_mime_type(mime_type)
+                if 'charset' in parameters:
+                    if ',' in parameters['charset']:
+                        # testtools was emitting a bad encoding, workaround it,
+                        # Though this does lose data - probably want to drop
+                        # this in a few releases.
+                        parameters['charset'] = parameters['charset'][
+                            :parameters['charset'].find(',')]
+                content_type = ContentType(primary, sub, parameters)
+                content_bytes = []
+                case['details'][file_name] = Content(
+                    content_type, lambda:content_bytes)
+            case['details'][file_name].iter_bytes().append(file_bytes)
+        if test_tags is not None:
+            self._inprogress[key]['tags'] = test_tags
+        # notify completed tests.
+        if test_status not in (None, 'inprogress'):
+            self.on_test(self._inprogress.pop(key))
+    
+    def stopTestRun(self):
+        super(StreamToDict, self).stopTestRun()
+        while self._inprogress:
+            case = self._inprogress.popitem()[1]
+            case['timestamps'][1] = None
+            self.on_test(case)
+
+    def _ensure_key(self, test_id, route_code, timestamp):
+        if test_id is None:
+            return
+        key = (test_id, route_code)
+        if key not in self._inprogress:
+            self._inprogress[key] = {
+                'id': test_id,
+                'tags': set(),
+                'details': {},
+                'status': 'unknown',
+                'timestamps': [timestamp, None]}
+        return key
 
 
 class MultiTestResult(TestResult):

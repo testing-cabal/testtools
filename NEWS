@@ -28,6 +28,10 @@ Improvements
   ``StreamResult`` objects (each of which receives all the events).
   (Robert Collins)
 
+* New support class ``StreamToDict`` which converts a ``StreamResult`` to a
+  series of dicts describing a test. Useful for writing trivial stream
+  analysers. (Robert Collins)
+
 * New ``TestCase`` decorator ``DecorateTestCaseResult`` that adapts the
   ``TestResult`` or ``StreamResult`` a case will be run with, for ensuring that
   a particular result object is used even if the runner running the test doesn't
