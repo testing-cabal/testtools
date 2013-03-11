@@ -181,7 +181,11 @@ TestControl
 
 Lastly we define the ``TestControl`` API which is used to provide the
 ``shouldStop`` and ``stop`` elements from ``TestResult``. Again, see the API
-documentation for ``testtools.TestControl``.
+documentation for ``testtools.TestControl``. ``TestControl`` can be paired with
+a ``StreamFailFast`` to trigger aborting a test run when a failure is observed.
+Aborting multiple workers in a distributed environment requires hooking
+whatever signalling mechanism the distributed environment has up to a
+``TestControl`` in each worker process.
 
 StreamToDict
 ------------
