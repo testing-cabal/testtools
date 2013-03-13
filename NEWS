@@ -28,6 +28,9 @@ Improvements
   ``StreamResult`` objects (each of which receives all the events).
   (Robert Collins)
 
+* New support class ``StreamSummary`` which summarises a ``StreamResult``
+  stream compatibly with ``TestResult`` code. (Robert Collins)
+
 * New support class ``StreamToDict`` which converts a ``StreamResult`` to a
   series of dicts describing a test. Useful for writing trivial stream
   analysers. (Robert Collins)
