@@ -21,6 +21,7 @@ from extras import safe_hasattr
 from testtools import (
     CopyStreamResult,
     ExtendedToOriginalDecorator,
+    ExtendedToStreamDecorator,
     MultiTestResult,
     PlaceHolder,
     StreamFailFast,
@@ -232,18 +233,21 @@ class TagsContract(Python27Contract):
     def test_no_tags_by_default(self):
         # Results initially have no tags.
         result = self.makeResult()
+        result.startTestRun()
         self.assertEqual(frozenset(), result.current_tags)
 
     def test_adding_tags(self):
         # Tags are added using 'tags' and thus become visible in
         # 'current_tags'.
         result = self.makeResult()
+        result.startTestRun()
         result.tags(set(['foo']), set())
         self.assertEqual(set(['foo']), result.current_tags)
 
     def test_removing_tags(self):
         # Tags are removed using 'tags'.
         result = self.makeResult()
+        result.startTestRun()
         result.tags(set(['foo']), set())
         result.tags(set(), set(['foo']))
         self.assertEqual(set(), result.current_tags)
@@ -251,6 +255,7 @@ class TagsContract(Python27Contract):
     def test_startTestRun_resets_tags(self):
         # startTestRun makes a new test run, and thus clears all the tags.
         result = self.makeResult()
+        result.startTestRun()
         result.tags(set(['foo']), set())
         result.startTestRun()
         self.assertEqual(set(), result.current_tags)
@@ -448,6 +453,12 @@ class TestAdaptedPython27TestResultContract(TestCase, DetailsContract):
         return ExtendedToOriginalDecorator(Python27TestResult())
 
 
+class TestAdaptedStreamResult(TestCase, DetailsContract):
+
+    def makeResult(self):
+        return ExtendedToStreamDecorator(StreamResult())
+
+
 class TestTestResultDecoratorContract(TestCase, StartTestRunContract):
 
     run_test_with = FullStackRunTest
@@ -528,6 +539,12 @@ class TestDoubleStreamResultContract(TestCase, TestStreamResultContract):
 
     def _make_result(self):
         return LoggingStreamResult()
+
+
+class TestExtendedToStreamDecoratorContract(TestCase, TestStreamResultContract):
+
+    def _make_result(self):
+        return ExtendedToStreamDecorator(StreamResult())
 
 
 class TestStreamSummaryResultContract(TestCase, TestStreamResultContract):
@@ -701,6 +718,53 @@ class TestStreamToDict(TestCase):
         self.assertEqual(["A", "B"], tests[0]['timestamps'])
         self.assertEqual(["C", None], tests[1]['timestamps'])
 
+
+class TestExtendedToStreamDecorator(TestCase):
+
+    def test_explicit_time(self):
+        log = LoggingStreamResult()
+        result = ExtendedToStreamDecorator(log)
+        result.startTestRun()
+        now = datetime.datetime.now(utc)
+        result.time(now)
+        result.startTest(self)
+        result.addSuccess(self)
+        result.stopTest(self)
+        result.stopTestRun()
+        self.assertEqual([
+            ('startTestRun',),
+            ('status',
+             'testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_explicit_time',
+             'inprogress',
+             None,
+             True,
+             None,
+             None,
+             False,
+             None,
+             None,
+             now),
+            ('status',
+             'testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_explicit_time',
+             'success',
+              set(),
+              True,
+              None,
+              None,
+              False,
+              None,
+              None,
+              now),
+             ('stopTestRun',)], log._events)
+
+    def test_wasSuccessful_after_stopTestRun(self):
+        log = LoggingStreamResult()
+        result = ExtendedToStreamDecorator(log)
+        result.startTestRun()
+        result.status(test_id='foo', test_status='fail')
+        result.stopTestRun()
+        self.assertEqual(False, result.wasSuccessful())
+        
 
 class TestStreamFailFast(TestCase):
 

@@ -5,6 +5,7 @@
 __metaclass__ = type
 __all__ = [
     'ExtendedToOriginalDecorator',
+    'ExtendedToStreamDecorator',
     'MultiTestResult',
     'StreamFailFast',
     'StreamResult',
@@ -25,7 +26,7 @@ import unittest
 from extras import safe_hasattr, try_import
 parse_mime_type = try_import('mimeparse.parse_mime_type')
 
-from testtools.compat import all, str_is_unicode, _u
+from testtools.compat import all, str_is_unicode, _u, _b
 from testtools.content import (
     Content,
     text_content,
@@ -1125,6 +1126,138 @@ class ExtendedToOriginalDecorator(object):
 
     def wasSuccessful(self):
         return self.decorated.wasSuccessful()
+
+
+class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
+    """Permit using old TestResult API code with new StreamResult objects.
+    
+    This decorates a StreamResult and converts old (Python 2.6 / 2.7 /
+    Extended) TestResult API calls into StreamResult calls.
+
+    It also supports regular StreamResult calls, making it safe to wrap around
+    any StreamResult.
+    """
+
+    def __init__(self, decorated):
+        super(ExtendedToStreamDecorator, self).__init__([decorated])
+        # Deal with mismatched base class constructors.
+        TestControl.__init__(self)
+        self._started = False
+
+    def _get_failfast(self):
+        return len(self.targets) == 2
+    def _set_failfast(self, value):
+        if value:
+            if len(self.targets) == 2:
+                return
+            self.targets.append(StreamFailFast(self.stop))
+        else:
+            del self.targets[1:]
+    failfast = property(_get_failfast, _set_failfast)
+
+    def startTest(self, test):
+        if not self._started:
+            self.startTestRun()
+        self.status(test.id(), 'inprogress', timestamp=self._now())
+        self._tags = TagContext(self._tags)
+
+    def stopTest(self, test):
+        self._tags = self._tags.parent
+
+    def addError(self, test, err=None, details=None):
+        self._check_args(err, details)
+        self._convert(test, err, details, 'fail')
+    addFailure = addError
+
+    def _convert(self, test, err, details, status, reason=None):
+        if not self._started:
+            self.startTestRun()
+        test_id = test.id()
+        now = self._now()
+        if err is not None:
+            if details is None:
+                details = {}
+            details['traceback'] = TracebackContent(err, test)
+        if details is not None:
+            for name, content in details.items():
+                mime_type = repr(content.content_type)
+                for file_bytes in content.iter_bytes():
+                    self.status(file_name=name, file_bytes=file_bytes,
+                        mime_type=mime_type, test_id=test_id, timestamp=now)
+                self.status(file_name=name, file_bytes=_b(""), eof=True,
+                    mime_type=mime_type, test_id=test_id, timestamp=now)
+        if reason is not None:
+            self.status(file_name='reason', file_bytes=reason.encode('utf8'),
+                eof=True, mime_type="text/plain; charset=utf8",
+                test_id=test_id, timestamp=now)
+        self.status(test_id, status, test_tags=self.current_tags,
+            timestamp=now)
+
+    def addExpectedFailure(self, test, err=None, details=None):
+        self._check_args(err, details)
+        self._convert(test, err, details, 'xfail')
+
+    def addSkip(self, test, reason=None, details=None):
+        self._convert(test, None, details, 'skip', reason)
+
+    def addUnexpectedSuccess(self, test, details=None):
+        self._convert(test, None, details, 'uxsuccess')
+
+    def addSuccess(self, test, details=None):
+        self._convert(test, None, details, 'success')
+
+    def _check_args(self, err, details):
+        param_count = 0
+        if err is not None:
+            param_count += 1
+        if details is not None:
+            param_count += 1
+        if param_count != 1:
+            raise ValueError("Must pass only one of err '%s' and details '%s"
+                % (err, details))
+
+    def startTestRun(self):
+        super(ExtendedToStreamDecorator, self).startTestRun()
+        self._tags = TagContext()
+        self.shouldStop = False
+        self.__now = None
+        self._started = True
+
+    def stopTest(self, test):
+        self._tags = self._tags.parent
+
+    @property
+    def current_tags(self):
+        """The currently set tags."""
+        return self._tags.get_current_tags()
+
+    def tags(self, new_tags, gone_tags):
+        """Add and remove tags from the test.
+
+        :param new_tags: A set of tags to be added to the stream.
+        :param gone_tags: A set of tags to be removed from the stream.
+        """
+        self._tags.change_tags(new_tags, gone_tags)
+
+    def _now(self):
+        """Return the current 'test time'.
+
+        If the time() method has not been called, this is equivalent to
+        datetime.now(), otherwise its the last supplied datestamp given to the
+        time() method.
+        """
+        if self.__now is None:
+            return datetime.datetime.now(utc)
+        else:
+            return self.__now
+
+    def time(self, a_datetime):
+        self.__now = a_datetime
+
+    def wasSuccessful(self):
+        if not self._started:
+            self.startTestRun()
+        return super(ExtendedToStreamDecorator, self).wasSuccessful()
 
 
 class TestResultDecorator(object):
