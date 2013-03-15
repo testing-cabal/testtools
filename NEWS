@@ -41,6 +41,16 @@ Improvements
 * New support class ``StreamFailFast`` which calls a ``TestControl`` instance
   to abort the test run when a failure is detected. (Robert Collins)
 
+* New support class ``ExtendedToStreamDecorator`` which translates both regular
+  unittest TestResult API calls and the ExtendedTestResult API which testtools
+  has supported into the StreamResult API. ExtendedToStreamDecorator also
+  forwards calls made in the StreamResult API, permitting it to be used
+  anywhere a StreamResult is used. Key TestResult query methods like
+  wasSuccessful and shouldStop are synchronised with the StreamResult API
+  calls, but the detailed statistics like the list of errors are not - a
+  separate consumer will be created to support that.
+  (Robert Collins)
+
 * New ``TestCase`` decorator ``DecorateTestCaseResult`` that adapts the
   ``TestResult`` or ``StreamResult`` a case will be run with, for ensuring that
   a particular result object is used even if the runner running the test doesn't

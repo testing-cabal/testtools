@@ -204,6 +204,15 @@ with the result. e.g.::
     >>> # At stopTestRun() any incomplete buffered tests are announced.
     >>> result.stopTestRun()
 
+ExtendedToStreamDecorator
+-------------------------
+
+This is a hybrid object that combines both the ``Extended`` and ``Stream``
+``TestResult`` APIs into one class, but only emits ``StreamResult`` events.
+This is useful when a ``StreamResult`` stream is desired, but you cannot
+be sure that the tests which will run have been updated to the ``StreamResult``
+API.
+
 ThreadsafeStreamResult
 ----------------------
 
