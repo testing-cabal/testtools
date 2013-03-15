@@ -51,6 +51,11 @@ Improvements
   separate consumer will be created to support that.
   (Robert Collins)
 
+* New support class ``StreamToExtendedDecorator`` which translates
+  ``StreamResult`` API calls into ``ExtendedTestResult`` (or any older
+  ``TestResult``) calls. This permits using un-migrated result objects with
+  new runners / tests. (Robert Collins)
+
 * New ``TestCase`` decorator ``DecorateTestCaseResult`` that adapts the
   ``TestResult`` or ``StreamResult`` a case will be run with, for ensuring that
   a particular result object is used even if the runner running the test doesn't
