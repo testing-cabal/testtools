@@ -213,6 +213,14 @@ This is useful when a ``StreamResult`` stream is desired, but you cannot
 be sure that the tests which will run have been updated to the ``StreamResult``
 API.
 
+StreamToExtendedDecorator
+-------------------------
+
+This is a simple converter that emits the ``ExtendedTestResult`` API in
+response to events from the ``StreamResult`` API. Useful when outputting
+``StreamResult`` events from a ``TestCase`` but the supplied ``TestResult``
+does not support the ``status`` and ``file`` methods.
+
 ThreadsafeStreamResult
 ----------------------
 

@@ -11,6 +11,7 @@ __all__ = [
     'StreamResult',
     'StreamSummary',
     'StreamToDict',
+    'StreamToExtendedDecorator',
     'Tagger',
     'TestControl',
     'TestResult',
@@ -540,7 +541,8 @@ def test_dict_to_case(test_dict):
         from testtools.testcase import PlaceHolder
     outcome = _status_map[test_dict['status']]
     return PlaceHolder(test_dict['id'], outcome=outcome,
-        details=test_dict['details'], tags=test_dict['tags'])
+        details=test_dict['details'], tags=test_dict['tags'],
+        timestamps=test_dict['timestamps'])
 
 
 class StreamSummary(StreamToDict):
@@ -1258,6 +1260,44 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
         if not self._started:
             self.startTestRun()
         return super(ExtendedToStreamDecorator, self).wasSuccessful()
+
+
+class StreamToExtendedDecorator(StreamResult):
+    """Convert StreamResult API calls into ExtendedTestResult calls.
+
+    This will buffer all calls for all concurrently active tests, and
+    then flush each test as they complete.
+
+    Incomplete tests will be flushed as errors when the test run stops.
+
+    Non test file attachments are accumulated into a test called
+    'testtools.extradata' flushed at the end of the run.
+    """
+
+    def __init__(self, decorated):
+        # ExtendedToOriginalDecorator takes care of thunking details back to
+        # exceptions/reasons etc.
+        self.decorated = ExtendedToOriginalDecorator(decorated)
+        # StreamToDict buffers and gives us individual tests.
+        self.hook = StreamToDict(self._handle_tests)
+
+    def status(self, test_id=None, test_status=None, *args, **kwargs):
+        if test_status == 'exists':
+            return
+        self.hook.status(
+            test_id=test_id, test_status=test_status, *args, **kwargs)
+
+    def startTestRun(self):
+        self.decorated.startTestRun()
+        self.hook.startTestRun()
+
+    def stopTestRun(self):
+        self.hook.stopTestRun()
+        self.decorated.stopTestRun()
+
+    def _handle_tests(self, test_dict):
+        case = test_dict_to_case(test_dict)
+        case.run(self.decorated)
 
 
 class TestResultDecorator(object):
