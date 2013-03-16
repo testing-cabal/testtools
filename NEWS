@@ -31,6 +31,9 @@ Improvements
 * New support class ``StreamSummary`` which summarises a ``StreamResult``
   stream compatibly with ``TestResult`` code. (Robert Collins)
 
+* New support class ``StreamTagger`` which adds or removes tags from
+  ``StreamResult`` events. (RobertCollins)
+
 * New support class ``StreamToDict`` which converts a ``StreamResult`` to a
   series of dicts describing a test. Useful for writing trivial stream
   analysers. (Robert Collins)

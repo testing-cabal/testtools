@@ -27,6 +27,7 @@ from testtools import (
     StreamFailFast,
     StreamResult,
     StreamSummary,
+    StreamTagger,
     StreamToDict,
     StreamToExtendedDecorator,
     Tagger,
@@ -563,6 +564,12 @@ class TestStreamSummaryResultContract(TestCase, TestStreamResultContract):
         return StreamSummary()
 
 
+class TestStreamTaggerContract(TestCase, TestStreamResultContract):
+
+    def _make_result(self):
+        return StreamTagger([StreamResult()], add=set(), discard=set())
+
+
 class TestStreamToDictContract(TestCase, TestStreamResultContract):
 
     def _make_result(self):
@@ -647,6 +654,45 @@ class TestCopyStreamResultCopies(TestCase):
                 ('status', 'foo', 'success', set(['tag']), False, "foo",
                  b'bar', True, "text/json", 'abc', now)
                 ])))
+
+
+class TestStreamTagger(TestCase):
+
+    def test_adding(self):
+        log = LoggingStreamResult()
+        result = StreamTagger([log], add=['foo'])
+        result.startTestRun()
+        result.status()
+        result.status(test_tags=set(['bar']))
+        result.status(test_tags=None)
+        result.stopTestRun()
+        self.assertEqual([
+            ('startTestRun',),
+            ('status', None, None, set(['foo']), True, None, None, False, None, None, None),
+            ('status', None, None, set(['foo', 'bar']), True, None, None, False, None, None, None),
+            ('status', None, None, set(['foo']), True, None, None, False, None, None, None),
+            ('stopTestRun',),
+            ], log._events)
+
+    def test_discarding(self):
+        log = LoggingStreamResult()
+        result = StreamTagger([log], discard=['foo'])
+        result.startTestRun()
+        result.status()
+        result.status(test_tags=None)
+        result.status(test_tags=set(['foo']))
+        result.status(test_tags=set(['bar']))
+        result.status(test_tags=set(['foo', 'bar']))
+        result.stopTestRun()
+        self.assertEqual([
+            ('startTestRun',),
+            ('status', None, None, None, True, None, None, False, None, None, None),
+            ('status', None, None, None, True, None, None, False, None, None, None),
+            ('status', None, None, None, True, None, None, False, None, None, None),
+            ('status', None, None, set(['bar']), True, None, None, False, None, None, None),
+            ('status', None, None, set(['bar']), True, None, None, False, None, None, None),
+            ('stopTestRun',),
+            ], log._events)
 
 
 class TestStreamToDict(TestCase):

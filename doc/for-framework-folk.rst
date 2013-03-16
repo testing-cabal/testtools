@@ -187,6 +187,18 @@ Aborting multiple workers in a distributed environment requires hooking
 whatever signalling mechanism the distributed environment has up to a
 ``TestControl`` in each worker process.
 
+StreamTagger
+------------
+
+A ``StreamResult`` filter that adds or removes tags from events::
+
+    >>> from testtools import StreamTagger
+    >>> sink = StreamResult()
+    >>> result = StreamTagger([sink], set(['add']), set(['discard']))
+    >>> result.startTestRun()
+    >>> # Run tests against result here.
+    >>> result.stopTestRun()
+
 StreamToDict
 ------------
 
