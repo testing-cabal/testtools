@@ -6,6 +6,7 @@ __all__ = [
     'clone_test_with_new_id',
     'CopyStreamResult',
     'ConcurrentTestSuite',
+    'ConcurrentStreamTestSuite',
     'DecorateTestCaseResult',
     'ErrorHolder',
     'ExpectedException',
@@ -34,6 +35,7 @@ __all__ = [
     'StreamTagger',
     'StreamToDict',
     'StreamToExtendedDecorator',
+    'StreamToQueue',
     'TestControl',
     'ThreadsafeForwardingResult',
     'TimestampingStreamResult',
@@ -86,6 +88,7 @@ else:
         StreamTagger,
         StreamToDict,
         StreamToExtendedDecorator,
+        StreamToQueue,
         Tagger,
         TestByTestResult,
         TestControl,
@@ -97,6 +100,7 @@ else:
         )
     from testtools.testsuite import (
         ConcurrentTestSuite,
+        ConcurrentStreamTestSuite,
         FixtureSuite,
         iterate_tests,
         )
