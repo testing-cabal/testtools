@@ -18,6 +18,7 @@ __all__ = [
     'TestResult',
     'TestResultDecorator',
     'ThreadsafeForwardingResult',
+    'TimestampingStreamResult',
     ]
 
 import datetime
@@ -1486,6 +1487,23 @@ class TestByTestResult(TestResult):
         super(TestByTestResult, self).addUnexpectedSuccess(test, details)
         self._status = 'success'
         self._details = details
+
+
+class TimestampingStreamResult(CopyStreamResult):
+    """A StreamResult decorator that assigns a timestamp when none is present.
+
+    This is convenient for ensuring events are timestamped.
+    """
+
+    def __init__(self, target):
+        super(TimestampingStreamResult, self).__init__([target])
+
+    def status(self, *args, **kwargs):
+        timestamp = kwargs.pop('timestamp', None)
+        if timestamp is None:
+            timestamp = datetime.datetime.now(utc)
+        super(TimestampingStreamResult, self).status(
+            *args, timestamp=timestamp, **kwargs)
 
 
 class _StringException(Exception):

@@ -62,6 +62,9 @@ Improvements
   ``TestResult``) calls. This permits using un-migrated result objects with
   new runners / tests. (Robert Collins)
 
+* New support class ``TimestampingStreamResult`` which adds a timestamp to
+  events with no timestamp. (Robert Collins)
+
 * New ``TestCase`` decorator ``DecorateTestCaseResult`` that adapts the
   ``TestResult`` or ``StreamResult`` a case will be run with, for ensuring that
   a particular result object is used even if the runner running the test doesn't

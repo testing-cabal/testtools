@@ -241,6 +241,15 @@ at once. Each method takes out a lock around the decorated result to prevent
 race conditions. The ``startTestRun`` and ``stopTestRun`` methods are not
 forwarded to prevent the decorated result having them called multiple times.
 
+TimestampingStreamResult
+------------------------
+
+This is a ``StreamResult`` decorator for adding timestamps to events that lack
+them. This allows writing the simplest possible generators of events and
+passing the events via this decorator to get timestamped data. As long as
+no buffering/queueing or blocking happen before the timestamper sees the event
+the timestamp will be as accurate as if the original event had it.
+
 TestResult.addSkip
 ------------------
 
