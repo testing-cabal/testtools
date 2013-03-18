@@ -21,6 +21,9 @@ Improvements
   create a synthetic test recording any such exception.
   (Robert Collins, #1130429)
 
+* Fixed SyntaxError raised in ``_compat2x.py`` when installing via Python 3.
+  (Will Bond, #941958)
+
 * New class ``StreamResult`` which defines the API for the new result type.
   (Robert Collins)
 

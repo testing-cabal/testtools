@@ -35,7 +35,7 @@ StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
 
 try:
     from testtools import _compat2x as _compat
-except SyntaxError:
+except (SyntaxError, ImportError):
     from testtools import _compat3x as _compat
 
 reraise = _compat.reraise
