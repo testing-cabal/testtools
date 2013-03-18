@@ -38,6 +38,7 @@ from testtools import (
     TestByTestResult,
     TextTestResult,
     ThreadsafeForwardingResult,
+    TimestampingStreamResult,
     testresult,
     )
 from testtools.compat import (
@@ -2673,6 +2674,38 @@ class TestTagger(TestCase):
              ('addSuccess', test2),
              ('stopTest', test2),
              ], result._events)
+
+
+class TestTimestampingStreamResult(TestCase):
+
+    def test_startTestRun(self):
+        result = TimestampingStreamResult(LoggingStreamResult())
+        result.startTestRun()
+        self.assertEqual([('startTestRun',)], result.targets[0]._events)
+
+    def test_stopTestRun(self):
+        result = TimestampingStreamResult(LoggingStreamResult())
+        result.stopTestRun()
+        self.assertEqual([('stopTestRun',)], result.targets[0]._events)
+
+    def test_status_no_timestamp(self):
+        result = TimestampingStreamResult(LoggingStreamResult())
+        result.status(test_id="A", test_status="B", test_tags="C",
+            runnable="D", file_name="E", file_bytes=b"F", eof=True,
+            mime_type="G", route_code="H")
+        events = result.targets[0]._events
+        self.assertThat(events, HasLength(1))
+        self.assertThat(events[0], HasLength(11))
+        self.assertEqual(
+            ("status", "A", "B", "C", "D", "E", b"F", True, "G", "H"),
+            events[0][:10])
+        self.assertNotEqual(None, events[0][10])
+        self.assertIsInstance(events[0][10], datetime.datetime)
+
+    def test_status_timestamp(self):
+        result = TimestampingStreamResult(LoggingStreamResult())
+        result.status(timestamp="F")
+        self.assertEqual("F", result.targets[0]._events[0][10])
 
 
 def test_suite():
