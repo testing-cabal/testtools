@@ -80,6 +80,9 @@ Improvements
   test that accidentally depended on the CPython repr for object().
   (Jonathan Lange)
 
+* Fixed SyntaxError raised in ``_compat2x.py`` when installing via Python 3.
+  (Will Bond, #941958)
+
 0.9.29
 ~~~~~~
 
