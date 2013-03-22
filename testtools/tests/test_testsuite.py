@@ -4,6 +4,8 @@
 
 __metaclass__ = type
 
+import doctest
+from functools import partial
 import sys
 import unittest
 
@@ -11,14 +13,17 @@ from extras import try_import
 
 from testtools import (
     ConcurrentTestSuite,
+    ConcurrentStreamTestSuite,
     iterate_tests,
     PlaceHolder,
     TestByTestResult,
     TestCase,
     )
-from testtools.compat import _u
+from testtools.compat import _b, _u
+from testtools.matchers import DocTestMatches
 from testtools.testsuite import FixtureSuite, iterate_tests, sorted_tests
 from testtools.tests.helpers import LoggingResult
+from testtools.testresult.doubles import StreamResult as LoggingStream
 
 FunctionFixture = try_import('fixtures.FunctionFixture')
 
@@ -29,6 +34,7 @@ class Sample(TestCase):
         pass
     def test_method2(self):
         pass
+
 
 class TestConcurrentTestSuiteRun(TestCase):
 
@@ -87,6 +93,114 @@ class TestConcurrentTestSuiteRun(TestCase):
 
     def split_suite(self, suite):
         return list(iterate_tests(suite))
+
+
+class TestConcurrentStreamTestSuiteRun(TestCase):
+
+    def test_trivial(self):
+        result = LoggingStream()
+        test1 = Sample('test_method1')
+        test2 = Sample('test_method2')
+        cases = lambda:[(test1, '0'), (test2, '1')]
+        suite = ConcurrentStreamTestSuite(cases)
+        suite.run(result)
+        def freeze(set_or_none):
+            if set_or_none is None:
+                return set_or_none
+            return frozenset(set_or_none)
+        # Ignore event order: we're testing the code is all glued together,
+        # which just means we can pump events through and they get route codes
+        # added appropriately.
+        self.assertEqual(set([
+            ('status',
+             'testtools.tests.test_testsuite.Sample.test_method1',
+             'inprogress',
+             None,
+             True,
+             None,
+             None,
+             False,
+             None,
+             '0',
+             None,
+             ),
+            ('status',
+             'testtools.tests.test_testsuite.Sample.test_method1',
+             'success',
+             frozenset(),
+             True,
+             None,
+             None,
+             False,
+             None,
+             '0',
+             None,
+             ),
+            ('status',
+             'testtools.tests.test_testsuite.Sample.test_method2',
+             'inprogress',
+             None,
+             True,
+             None,
+             None,
+             False,
+             None,
+             '1',
+             None,
+             ),
+            ('status',
+             'testtools.tests.test_testsuite.Sample.test_method2',
+             'success',
+             frozenset(),
+             True,
+             None,
+             None,
+             False,
+             None,
+             '1',
+             None,
+             ),
+            ]), set(event[0:3] + (freeze(event[3]),) + event[4:10] + (None,)
+                for event in result._events))
+
+    def test_broken_runner(self):
+        # If the object called breaks, the stream is informed about it
+        # regardless.
+        class BrokenTest(object):
+            # broken - no result parameter!
+            def __call__(self):
+                pass
+            def run(self):
+                pass
+        result = LoggingStream()
+        cases = lambda:[(BrokenTest(), '0')]
+        suite = ConcurrentStreamTestSuite(cases)
+        suite.run(result)
+        events = result._events
+        # Check the traceback loosely.
+        self.assertThat(events[1][6].decode('utf8'), DocTestMatches("""\
+Traceback (most recent call last):
+  File "...testtools/testsuite.py", line ..., in _run_test
+    test.run(process_result)
+TypeError: run() takes ...1 ...argument...2...given...
+""", doctest.ELLIPSIS))
+        events = [event[0:10] + (None,) for event in events]
+        events[1] = events[1][:6] + (None,) + events[1][7:]
+        self.assertEqual([
+            ('status', "broken-runner-'0'", 'inprogress', None, True, None, None, False, None, _u('0'), None),
+            ('status', "broken-runner-'0'", None, None, True, 'traceback', None,
+             False,
+             'text/x-traceback; charset="utf8"; language="python"',
+             '0',
+             None),
+             ('status', "broken-runner-'0'", None, None, True, 'traceback', b'', True,
+              'text/x-traceback; charset="utf8"; language="python"', '0', None),
+             ('status', "broken-runner-'0'", 'fail', set(), True, None, None, False, None, _u('0'), None)
+            ], events)
+
+    def split_suite(self, suite):
+        tests = list(enumerate(iterate_tests(suite)))
+        return [(test, _u(str(pos))) for pos, test in tests]
 
 
 class TestFixtureSuite(TestCase):
