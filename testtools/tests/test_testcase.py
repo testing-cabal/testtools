@@ -302,6 +302,19 @@ class TestAssertions(TestCase):
         # assertRaises asserts that a callable raises a particular exception.
         self.assertRaises(RuntimeError, self.raiseError, RuntimeError)
 
+    def test_assertRaises_exception_w_metaclass(self):
+        # assertRaises works when called for exceptions with custom metaclasses
+        class MyExMeta(type):
+            def __init__(cls, name, bases, dct):
+                """ Do some dummy metaclass stuff """
+                dct.update({'answer': 42})
+                type.__init__(cls, name, bases, dct)
+
+        class MyEx(Exception):
+            __metaclass__ = MyExMeta
+
+        self.assertRaises(MyEx, self.raiseError, MyEx)
+
     def test_assertRaises_fails_when_no_error_raised(self):
         # assertRaises raises self.failureException when it's passed a
         # callable that raises no error.
