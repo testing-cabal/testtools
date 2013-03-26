@@ -13,6 +13,8 @@ experimental and we might need to break it.
 
 Improvements
 ------------
+* ``assertRaises`` works properly for exception classes that have custom 
+  metaclasses
 
 * ``ConcurrentTestSuite`` was silently eating exceptions that propagate from
   the test.run(result) method call. Ignoring them is fine in a normal test
