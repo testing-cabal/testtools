@@ -44,7 +44,9 @@ class MatchesException(Matcher):
         if istext(value_re):
             value_re = AfterPreproccessing(str, MatchesRegex(value_re), False)
         self.value_re = value_re
-        self._is_instance = type(self.expected) not in classtypes() + (tuple,)
+        expected_type = type(self.expected)
+        self._is_instance = not any(issubclass(expected_type, class_type) 
+                for class_type in classtypes() + (tuple,))
 
     def match(self, other):
         if type(other) != tuple:
