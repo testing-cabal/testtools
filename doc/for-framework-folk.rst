@@ -431,6 +431,13 @@ If you a writing custom wrapping suites, consider implementing filter_by_ids
 to support this (though most wrappers that subclass ``unittest.TestSuite`` will
 work just fine [see ``testtools.testsuite.filter_by_ids`` for details.]
 
+Extensions to TestRunner
+========================
+
+To facilitate custom listing of tests, ``testtools.run.TestProgram`` attempts
+to call ``list`` on the ``TestRunner``, falling back to a generic
+implementation if it is not present.
+
 .. _`testtools API docs`: http://mumak.net/testtools/apidocs/
 .. _unittest: http://docs.python.org/library/unittest.html
 .. _fixture: http://pypi.python.org/pypi/fixtures

@@ -91,6 +91,10 @@ Improvements
   partitioning analysis of events or sending feedback encapsulated in
   StreamResult events back to their source. (Robert Collins)
 
+* ``testtools.run.TestProgram`` now supports the ``TestRunner`` taking over
+  responsibility for formatting the output of ``--list-tests``.
+  (Robert Collins)
+
 * The error message for setUp and tearDown upcall errors was broken on Python
   3.4. (Monty Taylor, Robert Collins, #1140688)
 
