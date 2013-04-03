@@ -87,6 +87,10 @@ Improvements
 * ``PlaceHolder`` can now hold timestamps, and applies them before the test and
   then before the outcome. (Robert Collins)
 
+* ``StreamResultRouter`` added. This is useful for demultiplexing - e.g. for
+  partitioning analysis of events or sending feedback encapsulated in
+  StreamResult events back to their source. (Robert Collins)
+
 * The error message for setUp and tearDown upcall errors was broken on Python
   3.4. (Monty Taylor, Robert Collins, #1140688)
 
