@@ -906,8 +906,8 @@ class DecorateTestCaseResult(object):
         delattr(self.decorated, name)
 
     def __setattr__(self, name, value):
-        if name == 'decorated':
-            self.__dict__['decorated'] = value
+        if name in ('decorated', 'callout', 'before_run', 'after_run'):
+            self.__dict__[name] = value
             return
         setattr(self.decorated, name, value)
 
