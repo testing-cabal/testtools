@@ -1312,7 +1312,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
     def startTest(self, test):
         if not self._started:
             self.startTestRun()
-        self.status(test.id(), 'inprogress', timestamp=self._now())
+        self.status(test_id=test.id(), test_status='inprogress', timestamp=self._now())
         self._tags = TagContext(self._tags)
 
     def stopTest(self, test):
@@ -1344,8 +1344,8 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
             self.status(file_name='reason', file_bytes=reason.encode('utf8'),
                 eof=True, mime_type="text/plain; charset=utf8",
                 test_id=test_id, timestamp=now)
-        self.status(test_id, status, test_tags=self.current_tags,
-            timestamp=now)
+        self.status(test_id=test_id, test_status=status,
+            test_tags=self.current_tags, timestamp=now)
 
     def addExpectedFailure(self, test, err=None, details=None):
         self._check_args(err, details)
