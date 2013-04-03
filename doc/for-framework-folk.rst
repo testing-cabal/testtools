@@ -249,6 +249,33 @@ passing the events via this decorator to get timestamped data. As long as
 no buffering/queueing or blocking happen before the timestamper sees the event
 the timestamp will be as accurate as if the original event had it.
 
+StreamResultRouter
+------------------
+
+This is a ``StreamResult`` which forwards events to an arbitrary set of target
+``StreamResult`` objects. Events that have no forwarding rule are passed onto
+an fallback ``StreamResult`` for processing. The mapping can be changed at
+runtime, allowing great flexibility and responsiveness to changes. Because
+The mapping can change dynamically and there could be the same recipient for
+two different maps, ``startTestRun`` and ``stopTestRun`` handling is fine
+grained and up to the user.
+
+If no fallback has been supplied, an unroutable event will raise an exception.
+
+For instance::
+
+    >>> router = StreamResultRouter()
+    >>> sink = doubles.StreamResult()
+    >>> router.add_rule(sink, 'route_code_prefix', route_prefix='0',
+    ...     consume_route=True)
+    >>> router.status(test_id='foo', route_code='0/1', test_status='uxsuccess')
+
+Would remove the ``0/`` from the route_code and forward the event like so::
+
+    >>> sink.status('test_id=foo', route_code='1', test_status='uxsuccess')
+
+See ``pydoc testtools.StreamResultRouter`` for details.
+
 TestResult.addSkip
 ------------------
 
