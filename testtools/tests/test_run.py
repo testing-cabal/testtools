@@ -97,6 +97,20 @@ class TestRun(TestCase):
         if fixtures is None:
             self.skipTest("Need fixtures")
 
+    def test_run_custom_list(self):
+        self.useFixture(SampleTestFixture())
+        tests = []
+        class CaptureList(run.TestToolsTestRunner):
+            def list(self, test):
+                tests.append(set([case.id() for case
+                    in testtools.testsuite.iterate_tests(test)]))
+        out = StringIO()
+        program = run.TestProgram(
+            argv=['prog', '-l', 'testtools.runexample.test_suite'],
+            stdout=out, testRunner=CaptureList)
+        self.assertEqual([set(['testtools.runexample.TestFoo.test_bar',
+            'testtools.runexample.TestFoo.test_quux'])], tests)
+
     def test_run_list(self):
         self.useFixture(SampleTestFixture())
         out = StringIO()

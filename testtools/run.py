@@ -8,9 +8,12 @@ For instance, to run the testtools test suite.
  $ python -m testtools.run testtools.tests.test_suite
 """
 
+from functools import partial
 import os
 import unittest
 import sys
+
+from extras import safe_hasattr
 
 from testtools import TextTestResult
 from testtools.compat import classtypes, istext, unicode_output_stream
@@ -35,14 +38,22 @@ else:
 class TestToolsTestRunner(object):
     """ A thunk object to support unittest.TestProgram."""
 
-    def __init__(self, verbosity=None, failfast=None, buffer=None):
+    def __init__(self, verbosity=None, failfast=None, buffer=None,
+        stdout=None):
         """Create a TestToolsTestRunner.
 
         :param verbosity: Ignored.
         :param failfast: Stop running tests at the first failure.
         :param buffer: Ignored.
+        :param stdout: Stream to use for stdout.
         """
         self.failfast = failfast
+        self.stdout = stdout
+
+    def list(self, test):
+        """List the tests that would be run if test() was run."""
+        for test in iterate_tests(test):
+            self.stdout.write('%s\n' % test.id())
 
     def run(self, test):
         "Run the given test case or test suite."
@@ -177,8 +188,12 @@ class TestProgram(object):
         if not self.listtests:
             self.runTests()
         else:
-            for test in iterate_tests(self.test):
-                stdout.write('%s\n' % test.id())
+            runner = self._get_runner()
+            if safe_hasattr(runner, 'list'):
+                runner.list(self.test)
+            else:
+                for test in iterate_tests(self.test):
+                    stdout.write('%s\n' % test.id())
 
     def usageExit(self, msg=None):
         if msg:
@@ -321,26 +336,32 @@ class TestProgram(object):
         if (self.catchbreak
             and getattr(unittest, 'installHandler', None) is not None):
             unittest.installHandler()
-        if self.testRunner is None:
-            self.testRunner = TestToolsTestRunner
-        if isinstance(self.testRunner, classtypes()):
-            try:
-                testRunner = self.testRunner(verbosity=self.verbosity,
-                                             failfast=self.failfast,
-                                             buffer=self.buffer)
-            except TypeError:
-                # didn't accept the verbosity, buffer or failfast arguments
-                testRunner = self.testRunner()
-        else:
-            # it is assumed to be a TestRunner instance
-            testRunner = self.testRunner
+        testRunner = self._get_runner()
         self.result = testRunner.run(self.test)
         if self.exit:
             sys.exit(not self.result.wasSuccessful())
+
+    def _get_runner(self):
+        if self.testRunner is None:
+            self.testRunner = TestToolsTestRunner
+        try:
+            testRunner = self.testRunner(verbosity=self.verbosity,
+                                         failfast=self.failfast,
+                                         buffer=self.buffer)
+        except TypeError:
+            # didn't accept the verbosity, buffer or failfast arguments
+            try:
+                testRunner = self.testRunner()
+            except TypeError:
+                # it is assumed to be a TestRunner instance
+                testRunner = self.testRunner
+        return testRunner
+
+
 ################
 
 def main(argv, stdout):
-    program = TestProgram(argv=argv, testRunner=TestToolsTestRunner,
+    program = TestProgram(argv=argv, testRunner=partial(TestToolsTestRunner, stdout=stdout),
         stdout=stdout)
 
 if __name__ == '__main__':
