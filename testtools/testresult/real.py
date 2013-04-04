@@ -333,27 +333,30 @@ class StreamResult(object):
             final status event any further file or status events from the
             same test_id+route_code may be discarded or associated with a new
             test by the StreamResult. (But no exception will be thrown).
+
             Interim states:
-            * None - no particular status is being reported, or status being
-              reported is not associated with a test (e.g. when reporting on
-              stdout / stderr chatter).
-            * inprogress - the test is currently running. Emitted by tests when
-              they start running and at any intermediary point they might
-              choose to indicate their continual operation.
+              * None - no particular status is being reported, or status being
+                reported is not associated with a test (e.g. when reporting on
+                stdout / stderr chatter).
+              * inprogress - the test is currently running. Emitted by tests when
+                they start running and at any intermediary point they might
+                choose to indicate their continual operation.
+
             Final states:
-            * exists - the test exists. This is used when a test is not being
-              executed. Typically this is when querying what tests could be run
-              in a test run (which is useful for selecting tests to run).
-            * xfail - the test failed but that was expected. This is purely
-              informative - the test is not considered to be a failure. 
-            * uxsuccess - the test passed but was expected to fail. The test
-              will be considered a failure.
-            * success - the test has finished without error.
-            * fail - the test failed (or errored). The test will be considered
-              a failure.
-            * skip - the test was selected to run but chose to be skipped. E.g.
-              a test dependency was missing. This is purely informative - the
-              test is not considered to be a failure.
+              * exists - the test exists. This is used when a test is not being
+                executed. Typically this is when querying what tests could be run
+                in a test run (which is useful for selecting tests to run).
+              * xfail - the test failed but that was expected. This is purely
+                informative - the test is not considered to be a failure. 
+              * uxsuccess - the test passed but was expected to fail. The test
+                will be considered a failure.
+              * success - the test has finished without error.
+              * fail - the test failed (or errored). The test will be considered
+                a failure.
+              * skip - the test was selected to run but chose to be skipped. E.g.
+                a test dependency was missing. This is purely informative - the
+                test is not considered to be a failure.
+
         :param test_tags: Optional set of tags to apply to the test. Tags
             have no intrinsic meaning - that is up to the test author.
         :param runnable: Allows status reports to mark that they are for
@@ -517,19 +520,16 @@ class StreamResultRouter(StreamResult):
         :param do_start_stop_run: If True then startTestRun and stopTestRun
             events will be passed onto this sink.
 
-        route_code_prefix routes events based on a prefix of the route code in
-        the event. It takes the following arguments::
-        :param route_prefix: A prefix to match on - e.g. '0'.
-        :param consume_route: If True, remove the prefix from the route_code
-            when forwarding events.
-
-        test_id routes events based on the test id::
-        :param test_id: The test id to route on. Use None to select non-test
-            events.
-
-        map may raise errors::
         :raises: ValueError if the policy is unknown
         :raises: TypeError if the policy is given arguments it cannot handle.
+
+        ``route_code_prefix`` routes events based on a prefix of the route 
+        code in the event. It takes a ``route_prefix`` argument to match on 
+        (e.g. '0') and a ``consume_route`` argument, which, if True, removes 
+        the prefix from the ``route_code`` when forwarding events.
+
+        ``test_id`` routes events based on the test id.  It takes a single 
+        argument, ``test_id``.  Use ``None`` to select non-test events.
         """
         policy_method = StreamResultRouter._policies.get(policy, None)
         if not policy_method:
@@ -582,16 +582,17 @@ class StreamToDict(StreamResult):
     by stopTestRun and notified there and then.
 
     The callback is passed a dict with the following keys:
-    * id: the test id.
-    * tags: The tags for the test. A set of unicode strings.
-    * details: A dict of file attachments - ``testtools.content.Content``
+
+      * id: the test id.
+      * tags: The tags for the test. A set of unicode strings.
+      * details: A dict of file attachments - ``testtools.content.Content``
         objects.
-    * status: One of the StreamResult status codes (including inprogress) or
+      * status: One of the StreamResult status codes (including inprogress) or
         'unknown' (used if only file events for a test were received...)
-    * timestamps: A pair of timestamps - the first one received with this
-      test id, and the one in the event that triggered the notification.
-      Hung tests have a None for the second end event. Timestamps are not
-      compared - their ordering is purely order received in the stream.
+      * timestamps: A pair of timestamps - the first one received with this
+        test id, and the one in the event that triggered the notification.
+        Hung tests have a None for the second end event. Timestamps are not
+        compared - their ordering is purely order received in the stream.
 
     Only the most recent tags observed in the stream are reported.
     """
@@ -774,7 +775,7 @@ class StreamSummary(StreamToDict):
 class TestControl(object):
     """Controls a running test run, allowing it to be interrupted.
     
-    :attribute shouldStop: If True, tests should not run and should instead
+    :ivar shouldStop: If True, tests should not run and should instead
         return immediately. Similarly a TestSuite should check this between
         each test and if set stop dispatching any new tests and return.
     """
