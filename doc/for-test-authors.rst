@@ -1326,7 +1326,7 @@ Test attributes
 
 Inspired by the ``nosetests`` ``attr`` plugin, testtools provides support for
 marking up test methods with attributes, which are then exposed in the test
-id and can be used when filtering tests by id. (e.g. via ``--load-list``).
+id and can be used when filtering tests by id. (e.g. via ``--load-list``)::
 
   from testtools.testcase import attr, WithAttributes
   
