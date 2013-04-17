@@ -6,6 +6,12 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* ``ExpectedException`` now accepts a msg parameter for describing an error,
+  much the same as assertEquals etc. (Robert Collins)
+
 0.9.30
 ~~~~~~
 

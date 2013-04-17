@@ -163,7 +163,8 @@ The first argument to ``ExpectedException`` is the type of exception you
 expect to see raised.  The second argument is optional, and can be either a
 regular expression or a matcher. If it is a regular expression, the ``str()``
 of the raised exception must match the regular expression. If it is a matcher,
-then the raised exception object must match it.
+then the raised exception object must match it. The optional third argument
+``msg`` will cause the raised error to be annotated with that message.
 
 
 assertIn, assertNotIn
