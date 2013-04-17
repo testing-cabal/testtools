@@ -11,6 +11,7 @@ from testtools import (
 from testtools.matchers import (
     AfterPreprocessing,
     Equals,
+    EndsWith,
     )
 
 
@@ -71,3 +72,17 @@ class TestExpectedException(TestCase):
     def test_pass_on_raise_any_message(self):
         with ExpectedException(ValueError):
             raise ValueError('whatever')
+    
+    def test_annotate(self):
+        def die():
+            with ExpectedException(ValueError, msg="foo"):
+                pass
+        exc = self.assertRaises(AssertionError, die)
+        self.assertThat(exc.args[0], EndsWith(': foo'))
+
+    def test_annotated_matcher(self):
+        def die():
+            with ExpectedException(ValueError, 'bar', msg="foo"):
+                pass
+        exc = self.assertRaises(AssertionError, die)
+        self.assertThat(exc.args[0], EndsWith(': foo'))

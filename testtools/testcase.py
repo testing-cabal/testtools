@@ -818,26 +818,33 @@ class ExpectedException:
     exception is raised, an AssertionError will be raised.
     """
 
-    def __init__(self, exc_type, value_re=None):
+    def __init__(self, exc_type, value_re=None, msg=None):
         """Construct an `ExpectedException`.
 
         :param exc_type: The type of exception to expect.
         :param value_re: A regular expression to match against the
             'str()' of the raised exception.
+        :param msg: An optional message explaining the failure.
         """
         self.exc_type = exc_type
         self.value_re = value_re
+        self.msg = msg
 
     def __enter__(self):
         pass
 
     def __exit__(self, exc_type, exc_value, traceback):
         if exc_type is None:
-            raise AssertionError('%s not raised.' % self.exc_type.__name__)
+            error_msg = '%s not raised.' % self.exc_type.__name__
+            if self.msg:
+                error_msg = error_msg + ' : ' + self.msg
+            raise AssertionError(error_msg)
         if exc_type != self.exc_type:
             return False
         if self.value_re:
             matcher = MatchesException(self.exc_type, self.value_re)
+            if self.msg:
+                matcher = Annotate(self.msg, matcher)
             mismatch = matcher.match((exc_type, exc_value, traceback))
             if mismatch:
                 raise AssertionError(mismatch.describe())
