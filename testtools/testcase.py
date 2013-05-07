@@ -786,7 +786,7 @@ def skip(reason):
 
 
 def skipIf(condition, reason):
-    """Skip a test if the condition is true."""
+    """A decorator to skip a test if the condition is true."""
     if condition:
         return skip(reason)
     def _id(obj):
@@ -795,7 +795,7 @@ def skipIf(condition, reason):
 
 
 def skipUnless(condition, reason):
-    """Skip a test unless the condition is true."""
+    """A decorator to skip a test unless the condition is true."""
     if not condition:
         return skip(reason)
     def _id(obj):
