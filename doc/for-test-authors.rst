@@ -626,7 +626,7 @@ matching. This can be used to aid in creating trivial matchers as functions, for
 example::
 
   def test_after_preprocessing_example(self):
-      def HasFileContent(content):
+      def PathHasFileContent(content):
           def _read(path):
               return open(path).read()
           return AfterPreprocessing(_read, Equals(content))
