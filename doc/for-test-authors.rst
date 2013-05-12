@@ -446,6 +446,18 @@ be able to do, if you think about it::
       self.assertThat('foo', MatchesRegex('fo+'))
 
 
+HasLength
+~~~~~~~~~
+
+Check the length of a collection.  The following assertion will fail::
+
+  self.assertThat([1, 2, 3], HasLength(2))
+
+But this one won't::
+
+  self.assertThat([1, 2, 3], HasLength(3))
+
+
 File- and path-related matchers
 -------------------------------
 
@@ -520,18 +532,6 @@ You can also use this in a more advanced way, and match the contents of the
 file against an arbitrary matcher::
 
   self.assertThat('greetings.txt', FileContains(matcher=Contains('!')))
-
-
-HasLength
-~~~~~~~~~
-
-Check the length of a collection.  The following assertion will fail::
-
-  self.assertThat([1, 2, 3], HasLength(2))
-
-But this one won't::
-
-  self.assertThat([1, 2, 3], HasLength(3))
 
 
 HasPermissions
