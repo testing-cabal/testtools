@@ -30,7 +30,7 @@ class TestMatchesAllDictInterface(TestCase, TestMatchersInterface):
         ]
 
 
-class TestKeysEqual(TestCase, TestMatchersInterface):
+class TestKeysEqualWithList(TestCase, TestMatchersInterface):
 
     matches_matcher = KeysEqual('foo', 'bar')
     matches_matches = [
@@ -58,6 +58,11 @@ class TestKeysEqual(TestCase, TestMatchersInterface):
             description, Equals(
                 "['bar', 'foo'] does not match %r: Keys not equal"
                 % (matchee,)))
+
+
+class TestKeysEqualWithDict(TestKeysEqualWithList):
+
+    matches_matcher = KeysEqual({'foo': 3, 'bar': 4})
 
 
 class TestSubDictOf(TestCase, TestMatchersInterface):
