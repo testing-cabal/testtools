@@ -241,7 +241,7 @@ class KeysEqual(Matcher):
         """
         super(KeysEqual, self).__init__()
         try:
-            self.expected = expected.keys()
+            self.expected = expected[0].keys()
         except AttributeError:
             self.expected = list(expected)
 
