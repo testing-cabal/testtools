@@ -9,6 +9,10 @@ NEXT
 Improvements
 ------------
 
+* Stacktrace filtering no longer hides unittest frames that are surrounded by
+  user frames. We will reenable this when we figure out a better algorithm for
+  retaining meaning. (Robert Collins, #1188420)
+
 * The compatibility code for skipped tests with unittest2 was broken.
   (Robert Collins, #1190951)
 

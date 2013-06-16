@@ -163,7 +163,7 @@ class TracebackContent(Content):
         else:
             format_exception = _format_exc_info
 
-        if (self.HIDE_INTERNAL_STACK and test.failureException
+        if (False and self.HIDE_INTERNAL_STACK and test.failureException
             and isinstance(value, test.failureException)):
             # Skip assert*() traceback levels
             length = self._count_relevant_tb_levels(tb)

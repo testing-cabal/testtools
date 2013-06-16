@@ -1388,6 +1388,7 @@ class TestTextTestResult(TestCase):
             DocTestMatches("...\nFAILED (failures=1)\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_shows_details(self):
+        self.skip("Disabled per bug 1188420")
         def run_tests():
             self.result.startTestRun()
             make_erroring_test().run(self.result)
