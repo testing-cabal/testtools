@@ -56,7 +56,7 @@ wraps = try_import('functools.wraps')
 
 class TestSkipped(Exception):
     """Raised within TestCase.run() when a test is skipped."""
-testSkipped = try_import('unittest2.case.SkipTest', TestSkipped)
+TestSkipped = try_import('unittest2.case.SkipTest', TestSkipped)
 TestSkipped = try_import('unittest.case.SkipTest', TestSkipped)
 
 

@@ -9,6 +9,9 @@ NEXT
 Improvements
 ------------
 
+* The compatibility code for skipped tests with unittest2 was broken.
+  (Robert Collins, #1190951)
+
 * Various documentation improvements (Clint Byrum, Xiao Hanyu).
 
 0.9.31
