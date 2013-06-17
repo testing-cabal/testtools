@@ -122,4 +122,4 @@ else:
 # If the releaselevel is 'final', then the tarball will be major.minor.micro.
 # Otherwise it is major.minor.micro~$(revno).
 
-__version__ = (0, 9, 32, 'final', 0)
+__version__ = (0, 9, 33, 'dev', 0)
