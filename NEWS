@@ -3,8 +3,10 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
-NEXT
-~~~~
+0.9.32
+~~~~~~
+
+Regular maintenance release.  Special thanks to new contributor, Xiao Hanyu!
 
 Improvements
 ------------
