@@ -807,7 +807,7 @@ For example, you might have an ``divisible`` function and want to make a
 matcher based on it::
 
   def test_divisible_numbers(self):
-      IsDisivibleBy = MatchesPredicateWithParams(
+      IsDivisibleBy = MatchesPredicateWithParams(
           divisible, '{0} is not divisible by {1}')
       self.assertThat(7, IsDivisibleBy(1))
       self.assertThat(7, IsDivisibleBy(7))
@@ -880,9 +880,9 @@ returns a non-None value.  For example::
 
   def test_is_divisible_by_example(self):
       # This succeeds, since IsDivisibleBy(5).match(10) returns None.
-      self.assertThat(10, IsDivisbleBy(5))
+      self.assertThat(10, IsDivisibleBy(5))
       # This fails, since IsDivisibleBy(7).match(10) returns a mismatch.
-      self.assertThat(10, IsDivisbleBy(7))
+      self.assertThat(10, IsDivisibleBy(7))
 
 The mismatch is responsible for what sort of error message the failing test
 generates.  Here's an example mismatch::
