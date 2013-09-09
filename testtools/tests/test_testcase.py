@@ -468,6 +468,54 @@ class TestAssertions(TestCase):
         self.assertFails("'42' is not an instance of str: foo",
             self.assertIsInstance, 42, str, "foo")
 
+    def test_assertNotIsInstance(self):
+        # assertNotIsInstance asserts that an object is
+        # not an instance of a class.
+
+        class Foo(object):
+            """Simple class for testing assertIsInstance."""
+
+        foo = Foo()
+        self.assertNotIsInstance(foo, str)
+
+    def test_assertNotIsInstance_multiple_classes(self):
+        # assertNotIsInstance asserts that an object is
+        # not an instance of any of a group of classes.
+
+        class Foo(object):
+            """Simple class for testing assertIsInstance."""
+
+        class Bar(object):
+            """Another simple class for testing assertIsInstance."""
+
+        foo = Foo()
+        self.assertNotIsInstance(foo, (str, dict))
+        self.assertNotIsInstance(Bar(), (str, dict))
+
+    def test_assertNotIsInstance_failure(self):
+        # assertNotIsInstance(obj, klass) fails the test when obj is an
+        # instance of klass.
+
+        self.assertFails(
+            "'42' matches IsInstance(%s)" % self._formatTypes(str),
+            self.assertNotIsInstance, '42', str)
+
+    def test_assertNotIsInstance_failure_multiple_classes(self):
+        # assertNotIsInstance(obj, (klass1, klass2)) fails the test when obj is
+        # an instance of klass1 or klass2.
+
+        self.assertFails(
+            "'42' matches IsInstance(%s)" % self._formatTypes([str, int]),
+            self.assertNotIsInstance, '42', (str, int))
+        self.assertFails(
+            "42 matches IsInstance(%s)" % self._formatTypes([str, int]),
+            self.assertNotIsInstance, 42, (str, int))
+
+    def test_assertIsInstance_overridden_message(self):
+        # assertIsInstance(obj, klass, msg) permits a custom message.
+        self.assertFails("'42' matches IsInstance(str): foo",
+            self.assertNotIsInstance, '42', str, "foo")
+
     def test_assertIs(self):
         # assertIs asserts that an object is identical to another object.
         self.assertIs(None, None)
