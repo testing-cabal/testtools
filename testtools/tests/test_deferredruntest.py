@@ -546,7 +546,7 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
                 self.addCleanup(lambda: 3 / 0)
                 # Dirty the reactor.
                 from twisted.internet.protocol import ServerFactory
-                reactor.listenTCP(0, ServerFactory())
+                reactor.listenTCP(0, ServerFactory(), interface='127.0.0.1')
                 # Unhandled error.
                 defer.maybeDeferred(lambda: 2 / 0)
                 # Actual error.
