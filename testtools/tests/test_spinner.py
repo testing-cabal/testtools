@@ -232,7 +232,7 @@ class TestRunInReactor(NeedsTwistedTestCase):
         from twisted.internet.protocol import ServerFactory
         reactor = self.make_reactor()
         spinner = self.make_spinner(reactor)
-        port = reactor.listenTCP(0, ServerFactory())
+        port = reactor.listenTCP(0, ServerFactory(), interface='127.0.0.1')
         spinner.run(self.make_timeout(), lambda: None)
         results = spinner.get_junk()
         self.assertThat(results, Equals([port]))
@@ -262,7 +262,7 @@ class TestRunInReactor(NeedsTwistedTestCase):
         reactor = self.make_reactor()
         spinner = self.make_spinner(reactor)
         port = spinner.run(
-            self.make_timeout(), reactor.listenTCP, 0, ServerFactory())
+            self.make_timeout(), reactor.listenTCP, 0, ServerFactory(), interface='127.0.0.1')
         self.assertThat(spinner.get_junk(), Equals([port]))
 
     def test_will_not_run_with_previous_junk(self):
@@ -272,7 +272,7 @@ class TestRunInReactor(NeedsTwistedTestCase):
         reactor = self.make_reactor()
         spinner = self.make_spinner(reactor)
         timeout = self.make_timeout()
-        spinner.run(timeout, reactor.listenTCP, 0, ServerFactory())
+        spinner.run(timeout, reactor.listenTCP, 0, ServerFactory(), interface='127.0.0.1')
         self.assertThat(lambda: spinner.run(timeout, lambda: None),
             Raises(MatchesException(_spinner.StaleJunkError)))
 
@@ -283,7 +283,7 @@ class TestRunInReactor(NeedsTwistedTestCase):
         reactor = self.make_reactor()
         spinner = self.make_spinner(reactor)
         timeout = self.make_timeout()
-        port = spinner.run(timeout, reactor.listenTCP, 0, ServerFactory())
+        port = spinner.run(timeout, reactor.listenTCP, 0, ServerFactory(), interface='127.0.0.1')
         junk = spinner.clear_junk()
         self.assertThat(junk, Equals([port]))
         self.assertThat(spinner.get_junk(), Equals([]))

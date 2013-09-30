@@ -16,6 +16,9 @@ Improvements
 * ``AnyMatch`` is now exported properly in ``testtools.matchers``.
   (Robert Collins, Rob Kennedy, github #44)
 
+* Network tests now bind to 127.0.0.1 to avoid (even temporary) network
+  visible ports. (Benedikt Morbach, github #46)
+
 0.9.33
 ~~~~~~
 
