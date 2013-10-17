@@ -155,6 +155,8 @@ class TestCase(unittest.TestCase):
     :ivar exception_handlers: Exceptions to catch from setUp, runTest and
         tearDown. This list is able to be modified at any time and consists of
         (exception_class, handler(case, result, exception_value)) pairs.
+    :ivar _force_failure: Force testtools.RunTest to fail the test, even if
+        all assertions have passed.
     :cvar run_tests_with: A factory to make the ``RunTest`` to run tests with.
         Defaults to ``RunTest``.  The factory is expected to take a test case
         and an optional list of exception handlers.
@@ -408,13 +410,38 @@ class TestCase(unittest.TestCase):
             return
         existing_details = self.getDetails()
         for (name, content) in mismatch.get_details().items():
-            full_name = name
-            suffix = 1
-            while full_name in existing_details:
-                full_name = "%s-%d" % (name, suffix)
-                suffix += 1
-            self.addDetail(full_name, content)
+            self._add_detail_with_unique_name(name, content)
         raise MismatchError(matchee, matcher, mismatch, verbose)
+
+    def expectThat(self, matchee, matcher, message='', verbose=False):
+        """Check that matchee is matched by matcher, but do not fail the test.
+
+        :param matchee: An object to match with matcher.
+        :param matcher: An object meeting the testtools.Matcher protocol.
+        """
+        matcher = Annotate.if_message(message, matcher)
+        mismatch = matcher.match(matchee)
+        if not mismatch:
+            return
+        for (name, value) in mismatch.get_details().items():
+            self._add_detail_with_unique_name(name, value)
+
+        exc = MismatchError(matchee, matcher, mismatch, verbose)
+
+        self._add_detail_with_unique_name(
+            "Failed expectation",
+            content.StackTraceContent("MismatchError: " + str(exc))
+            )
+        self._force_failure = True
+
+    def _add_detail_with_unique_name(self, name, value):
+        existing_details = self.getDetails()
+        full_name = name
+        suffix = 1
+        while full_name in existing_details:
+            full_name = "%s-%d" % (name, suffix)
+            suffix += 1
+        self.addDetail(full_name, value)
 
     def defaultTestResult(self):
         return TestResult()
@@ -908,7 +935,7 @@ class DecorateTestCaseResult(object):
 
     def __getattr__(self, name):
         return getattr(self.decorated, name)
-    
+
     def __delattr__(self, name):
         delattr(self.decorated, name)
 

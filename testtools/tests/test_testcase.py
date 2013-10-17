@@ -569,6 +569,26 @@ class TestAssertions(TestCase):
         self.assertFails(
             expected, self.assertThat, matchee, matcher, verbose=True)
 
+    def test_expectThat_matches_clean(self):
+        class Matcher(object):
+            def match(self, foo):
+                return None
+        self.expectThat("foo", Matcher())
+
+    def test_expectThat_mismatch_fails_test(self):
+        class Test(TestCase):
+            def test(self):
+                self.expectThat("foo", Equals("bar"))
+        result = Test("test").run()
+        self.assertFalse(result.wasSuccessful())
+
+    def test__force_failure_fails_test(self):
+        class Test(TestCase):
+            def test_foo(self):
+                self._force_failure = True
+        result = Test('test_foo').run()
+        self.assertFalse(result.wasSuccessful())
+
     def get_error_string(self, e):
         """Get the string showing how 'e' would be formatted in test output.
 
