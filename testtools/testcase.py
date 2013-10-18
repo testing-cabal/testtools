@@ -408,13 +408,29 @@ class TestCase(unittest.TestCase):
             return
         existing_details = self.getDetails()
         for (name, content) in mismatch.get_details().items():
-            full_name = name
-            suffix = 1
-            while full_name in existing_details:
-                full_name = "%s-%d" % (name, suffix)
-                suffix += 1
-            self.addDetail(full_name, content)
+            self.addDetailUniqueName(name, content)
         raise MismatchError(matchee, matcher, mismatch, verbose)
+
+    def addDetailUniqueName(self, name, content_object):
+        """Add a detail to the test, but ensure it's name is unique.
+
+        This method checks whether ``name`` conflicts with a detail that has
+        already been added to the test. If it does, it will modify ``name`` to
+        avoid the conflict.
+
+        For more details see pydoc testtools.TestResult.
+
+        :param name: The name to give this detail.
+        :param content_object: The content object for this detail. See
+            testtools.content for more detail.
+        """
+        existing_details = self.getDetails()
+        full_name = name
+        suffix = 1
+        while full_name in existing_details:
+            full_name = "%s-%d" % (name, suffix)
+            suffix += 1
+        self.addDetail(full_name, content_object)
 
     def defaultTestResult(self):
         return TestResult()
