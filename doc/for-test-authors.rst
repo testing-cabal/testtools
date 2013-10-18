@@ -288,6 +288,29 @@ Which is roughly equivalent to::
       self.assertNotEqual(result, 50)
 
 
+Expectations and Assertions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A failure in the ``self.assertThat`` method will immediately fail the test.
+Sometimes it is useful to record assertion failures, but keep running the test.
+testtools provides the ``expectThat`` method, which is functionally
+identical to the ``assertThat`` method, except that failures in the
+``expectThat`` method will not prevent the rest of the test from running (the
+test will still fail however). For example::
+
+  from testtools import TestCase
+  from testtools.matchers import Equals, Not
+
+  class TestSquare(TestCase):
+      def test_square(self):
+         result = square(7)
+
+         self.expectThat(result, Not(Equals(50)))
+         self.assertThat(result, Equals(49))
+
+In this example, should the ``expectThat`` call fail, the failure will be
+recorded in the test result, but the test will continue as normal.
+
 Stock matchers
 --------------
 
@@ -1330,13 +1353,13 @@ marking up test methods with attributes, which are then exposed in the test
 id and can be used when filtering tests by id. (e.g. via ``--load-list``)::
 
   from testtools.testcase import attr, WithAttributes
-  
+
   class AnnotatedTests(WithAttributes, TestCase):
 
       @attr('simple')
       def test_one(self):
           pass
-      
+
       @attr('more', 'than', 'one)
       def test_two(self):
           pass

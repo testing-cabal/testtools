@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import tempfile
 import unittest
 
@@ -19,6 +20,7 @@ from testtools.content import (
     content_from_stream,
     JSON,
     json_content,
+    StackTraceContent,
     TracebackContent,
     text_content,
     )
@@ -28,7 +30,9 @@ from testtools.content_type import (
     )
 from testtools.matchers import (
     Equals,
+    EndsWith,
     MatchesException,
+    MatchesRegex,
     Raises,
     raises,
     )
@@ -208,6 +212,32 @@ class TestTracebackContent(TestCase):
         result = unittest.TestResult()
         expected = result._exc_info_to_string(an_exc_info, self)
         self.assertEqual(expected, ''.join(list(content.iter_text())))
+
+
+class TestStackTraceContent(TestCase):
+
+    def test_additional_text_is_shown(self):
+        text = self.getUniqueString()
+        content = StackTraceContent(text)
+        self.assertThat(''.join(list(content.iter_text())), EndsWith(text))
+
+    def test___init___invalid_text_errors(self):
+        self.assertThat(lambda: StackTraceContent(123), raises(TypeError))
+
+    def test___init___invalid_skip_errors(self):
+        self.assertThat(lambda: StackTraceContent('', ''), raises(TypeError))
+
+    def test___init___sets_ivars(self):
+        content = StackTraceContent()
+        content_type = ContentType("text", "x-traceback",
+            {"language": "python", "charset": "utf8"})
+        self.assertEqual(content_type, content.content_type)
+        output = ''.join(list(content.iter_text()))
+        expected_regex = \
+        '  File "(\./)?testtools/tests/test_content\.py", line \d+, in '\
+        'test___init___sets_ivars\s+ content = StackTraceContent\(\)'
+
+        self.assertThat(output, MatchesRegex(expected_regex, re.M))
 
 
 class TestAttachFile(TestCase):

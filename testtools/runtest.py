@@ -135,6 +135,11 @@ class RunTest(object):
                         self._run_cleanups, self.result):
                         failed = True
                 finally:
+                    if getattr(self.case, '_force_failure', None):
+                        def _raise_error():
+                            raise AssertionError("Forced Test Failure")
+                        self._run_user(_raise_error)
+                        failed = True
                     if not failed:
                         self.result.addSuccess(self.case,
                             details=self.case.getDetails())

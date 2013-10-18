@@ -12,6 +12,7 @@ __all__ = [
     ]
 
 import codecs
+import inspect
 import json
 import os
 import sys
@@ -121,7 +122,19 @@ class Content(object):
             self.content_type, _join_b(self.iter_bytes()))
 
 
-class TracebackContent(Content):
+class StackTraceCommon(Content):
+
+    def __init__(self, stack_trace_text):
+        content_type = ContentType('text', 'x-traceback',
+            {"language": "python", "charset": "utf8"})
+        super(StackTraceCommon, self).__init__(
+            content_type, lambda: [stack_trace_text.encode("utf8")])
+
+    def _is_frame_in_unittest(self, frame):
+        return '__unittest' in frame.f_globals
+
+
+class TracebackContent(StackTraceCommon):
     """Content object for tracebacks.
 
     This adapts an exc_info tuple to the Content interface.
@@ -138,11 +151,9 @@ class TracebackContent(Content):
         """Create a TracebackContent for err."""
         if err is None:
             raise ValueError("err may not be None")
-        content_type = ContentType('text', 'x-traceback',
-            {"language": "python", "charset": "utf8"})
+
         value = self._exc_info_to_unicode(err, test)
-        super(TracebackContent, self).__init__(
-            content_type, lambda: [value.encode("utf8")])
+        super(TracebackContent, self).__init__(value)
 
     def _exc_info_to_unicode(self, err, test):
         """Converts a sys.exc_info()-style tuple of values into a string.
@@ -163,13 +174,7 @@ class TracebackContent(Content):
         else:
             format_exception = _format_exc_info
 
-        if (False and self.HIDE_INTERNAL_STACK and test.failureException
-            and isinstance(value, test.failureException)):
-            # Skip assert*() traceback levels
-            length = self._count_relevant_tb_levels(tb)
-            msgLines = format_exception(exctype, value, tb, length)
-        else:
-            msgLines = format_exception(exctype, value, tb)
+        msgLines = format_exception(exctype, value, tb)
 
         if getattr(self, 'buffer', None):
             output = sys.stdout.getvalue()
@@ -185,14 +190,56 @@ class TracebackContent(Content):
         return ''.join(msgLines)
 
     def _is_relevant_tb_level(self, tb):
-        return '__unittest' in tb.tb_frame.f_globals
+        return self._is_frame_in_unittest(tb.tb_frame)
 
-    def _count_relevant_tb_levels(self, tb):
-        length = 0
-        while tb and not self._is_relevant_tb_level(tb):
-            length += 1
-            tb = tb.tb_next
-        return length
+
+class StackTraceContent(StackTraceCommon):
+
+    """Content object for displaying the current stack trace.
+
+    This content object is useful for debugging - any time you wish to add the
+    current python stack, simply create an instance of StackTraceContent and
+    add it as a detail to the test.
+
+    You may also pass in an additional string, which will be appended to the
+    stack trace.
+
+    text/x-traceback;language=python is used for the mime type, in order to
+    provide room for other languages to format their tracebacks differently.
+    """
+
+    def __init__(self, additional_text='', skip=0):
+        """Create a stack trace content object.
+
+        :param skip: The number of stack frames to skip from the top of the
+            stack.
+        :param additional_text: Some text to append to the stack trace.
+        :raises TypeError: if additional_text or skip are the incorrect type.
+        """
+        stack_lines = self._get_stack_lines(skip)
+        if additional_text:
+            stack_lines.append(additional_text)
+        stack = "".join(stack_lines)
+
+        content_type = ContentType('text', 'x-traceback',
+            {"language": "python", "charset": "utf8"})
+        super(StackTraceContent, self).__init__(stack)
+
+    def _get_stack_lines(self, skip):
+        top_frame = inspect.currentframe()
+        for i in range(skip + 2):
+            top_frame = top_frame.f_back
+        # skip any frames that are in the testing framework itself:
+        while top_frame and self._is_frame_in_unittest(top_frame):
+            top_frame = top_frame.f_back
+
+        limit = 0
+        f = top_frame
+        while f and not self._is_frame_in_unittest(f):
+            limit += 1
+            f = f.f_back
+
+        return traceback.format_stack(top_frame, limit)
 
 
 def json_content(json_data):
