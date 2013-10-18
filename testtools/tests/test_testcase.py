@@ -1107,6 +1107,15 @@ class TestDetailsProvided(TestWithDetails):
         self.assertDetailsProvided(Case("test"), "addFailure",
             ["foo", "foo-1", "traceback"])
 
+    def test_addDetailUniqueName_works(self):
+        content = self.get_content()
+        class Case(TestCase):
+            def test(self):
+                self.addDetailUniqueName("foo", content)
+                self.addDetailUniqueName("foo", content)
+        self.assertDetailsProvided(Case("test"), "addSuccess",
+            ["foo", "foo-1"])
+
 
 class TestSetupTearDown(TestCase):
 
