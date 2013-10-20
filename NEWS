@@ -12,6 +12,12 @@ NEXT
 
 Regular maintenance release.  Special thanks to new contributor, Xiao Hanyu!
 
+Changes
+-------
+
+ * ``testttols.compat._format_exc_info`` has been refactored into several
+   smaller functions. (Thomi Richards)
+
 Improvements
 ------------
 

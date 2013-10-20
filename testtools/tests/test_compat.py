@@ -14,6 +14,9 @@ import testtools
 from testtools.compat import (
     _b,
     _detect_encoding,
+    _format_exc_info,
+    _format_exception_only,
+    _format_stack_list,
     _get_source_encoding,
     _u,
     reraise,
@@ -22,7 +25,9 @@ from testtools.compat import (
     unicode_output_stream,
     )
 from testtools.matchers import (
+    Equals,
     Is,
+    IsInstance,
     MatchesException,
     Not,
     Raises,
@@ -445,6 +450,151 @@ class TestReraise(testtools.TestCase):
         except CustomException:
             _exc_info = sys.exc_info()
         self.assertRaises(CustomException, reraise, *_exc_info)
+
+
+class Python2CompatibilityTests(testtools.TestCase):
+
+    def setUp(self):
+        super(Python2CompatibilityTests, self).setUp()
+        if sys.version[0] >= '3':
+            self.skip("These tests are only applicable to python 2.")
+
+
+class TestExceptionFormatting(Python2CompatibilityTests):
+    """Test the _format_exception_only function."""
+
+    def _assert_exception_format(self, eclass, evalue, expected):
+        actual = _format_exception_only(eclass, evalue)
+        self.assertThat(actual, Equals(expected))
+        self.assertThat(''.join(actual), IsInstance(unicode))
+
+    def test_supports_string_exception(self):
+        self._assert_exception_format(
+            "String_Exception",
+            None,
+            [_u("String_Exception\n")]
+        )
+
+    def test_supports_regular_exception(self):
+        self._assert_exception_format(
+            RuntimeError,
+            RuntimeError("Something went wrong"),
+            [_u("RuntimeError: Something went wrong\n")]
+        )
+
+    def test_supports_unprintable_exceptions(self):
+        """Verify support for exception classes that raise an exception when
+        __unicode__ or __str__ is called.
+        """
+        class UnprintableException(Exception):
+
+            def __str__(self):
+                raise Exception()
+
+            def __unicode__(self):
+                raise Exception()
+
+        self._assert_exception_format(
+            UnprintableException,
+            UnprintableException("Foo"),
+            [_u("UnprintableException: <unprintable UnprintableException object>\n")]
+        )
+
+    def test_supports_exceptions_with_no_string_value(self):
+        class NoStringException(Exception):
+
+            def __str__(self):
+                return ""
+
+            def __unicode__(self):
+                return _u("")
+
+        self._assert_exception_format(
+            NoStringException,
+            NoStringException("Foo"),
+            [_u("NoStringException\n")]
+        )
+
+    def test_supports_strange_syntax_error(self):
+        """Test support for syntax errors with unusual number of arguments"""
+        self._assert_exception_format(
+            SyntaxError,
+            SyntaxError("Message"),
+            [_u("SyntaxError: Message\n")]
+        )
+
+    def test_supports_syntax_error(self):
+        self._assert_exception_format(
+            SyntaxError,
+            SyntaxError(
+                "Some Syntax Message",
+                (
+                    "/path/to/file",
+                    12,
+                    2,
+                    "This is the line of code",
+                )
+            ),
+            [
+                _u('  File "/path/to/file", line 12\n'),
+                _u('    This is the line of code\n'),
+                _u('     ^\n'),
+                _u('SyntaxError: Some Syntax Message\n'),
+            ]
+        )
+
+
+class StackListFormattingTests(Python2CompatibilityTests):
+    """Test the _format_stack_list function."""
+
+    def _assert_stack_format(self, stack_lines, expected_output):
+        actual = _format_stack_list(stack_lines)
+        self.assertThat(actual, Equals([expected_output]))
+
+    def test_single_complete_stack_line(self):
+        stack_lines = [(
+            '/path/to/filename',
+            12,
+            'func_name',
+            'some_code()',
+        )]
+        expected = \
+            _u('  File "/path/to/filename", line 12, in func_name\n' \
+               '    some_code()\n')
+
+        self._assert_stack_format(stack_lines, expected)
+
+    def test_single_stack_line_no_code(self):
+        stack_lines = [(
+            '/path/to/filename',
+            12,
+            'func_name',
+            None
+        )]
+        expected = _u('  File "/path/to/filename", line 12, in func_name\n')
+        self._assert_stack_format(stack_lines, expected)
+
+
+class FormatExceptionInfoTests(Python2CompatibilityTests):
+
+    def test_individual_functions_called(self):
+        self.patch(
+            testtools.compat,
+            '_format_stack_list',
+            lambda stack_list: [_u("format stack list called\n")]
+        )
+        self.patch(
+            testtools.compat,
+            '_format_exception_only',
+            lambda etype, evalue: [_u("format exception only called\n")]
+        )
+        result = _format_exc_info(None, None, None)
+        expected = [
+            _u("Traceback (most recent call last):\n"),
+            _u("format stack list called\n"),
+            _u("format exception only called\n"),
+        ]
+        self.assertThat(expected, Equals(result))
 
 
 def test_suite():
