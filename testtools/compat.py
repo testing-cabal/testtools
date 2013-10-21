@@ -170,7 +170,7 @@ def text_repr(text, multiline=None):
     prefix = repr(text[:0])[:-2]
     if multiline:
         # To escape multiline strings, split and process each line in turn,
-        # making sure that quotes are not escaped. 
+        # making sure that quotes are not escaped.
         if is_py3k:
             offset = len(prefix) + 1
             lines = []
@@ -326,31 +326,33 @@ def _exception_to_text(evalue):
     return None
 
 
-# GZ 2010-05-23: This function is huge and horrible and I welcome suggestions
-#                on the best way to break it up
-_TB_HEADER = _u('Traceback (most recent call last):\n')
-def _format_exc_info(eclass, evalue, tb, limit=None):
-    """Format a stack trace and the exception information as unicode
+def _format_stack_list(stack_lines):
+    """Format 'stack_lines' and return a list of unicode strings.
 
-    Compatibility function for Python 2 which ensures each component of a
-    traceback is correctly decoded according to its origins.
-
-    Based on traceback.format_exception and related functions.
+    :param stack_lines: A list of filename, lineno, name, and line variables,
+        probably obtained by calling traceback.extract_tb or
+        traceback.extract_stack.
     """
     fs_enc = sys.getfilesystemencoding()
-    if tb:
-        list = [_TB_HEADER]
-        extracted_list = []
-        for filename, lineno, name, line in traceback.extract_tb(tb, limit):
+    extracted_list = []
+    for filename, lineno, name, line in stack_lines:
             extracted_list.append((
                 filename.decode(fs_enc, "replace"),
                 lineno,
                 name.decode("ascii", "replace"),
                 line and line.decode(
                     _get_source_encoding(filename), "replace")))
-        list.extend(traceback.format_list(extracted_list))
-    else:
-        list = []
+    return traceback.format_list(extracted_list)
+
+
+def _format_exception_only(eclass, evalue):
+    """Format the excption part of a traceback.
+
+    :param eclass: The type of the exception being formatted.
+    :param evalue: The exception instance.
+    :returns: A list of unicode strings.
+    """
+    list = []
     if evalue is None:
         # Is a (deprecated) string exception
         list.append((eclass + "\n").decode("ascii", "replace"))
@@ -379,6 +381,7 @@ def _format_exc_info(eclass, evalue, tb, limit=None):
                 else:
                     line = line.decode("ascii", "replace")
             if filename:
+                fs_enc = sys.getfilesystemencoding()
                 filename = filename.decode(fs_enc, "replace")
             evalue = eclass(msg, (filename, lineno, offset, line))
             list.extend(traceback.format_exception_only(eclass, evalue))
@@ -389,7 +392,24 @@ def _format_exc_info(eclass, evalue, tb, limit=None):
         list.append("%s: %s\n" % (sclass, svalue))
     elif svalue is None:
         # GZ 2010-05-24: Not a great fallback message, but keep for the moment
-        list.append("%s: <unprintable %s object>\n" % (sclass, sclass))
+        list.append(_u("%s: <unprintable %s object>\n" % (sclass, sclass)))
     else:
-        list.append("%s\n" % sclass)
+        list.append(_u("%s\n" % sclass))
     return list
+
+
+_TB_HEADER = _u('Traceback (most recent call last):\n')
+
+
+def _format_exc_info(eclass, evalue, tb, limit=None):
+    """Format a stack trace and the exception information as unicode
+
+    Compatibility function for Python 2 which ensures each component of a
+    traceback is correctly decoded according to its origins.
+
+    Based on traceback.format_exception and related functions.
+    """
+    return [_TB_HEADER] \
+        + _format_stack_list(traceback.extract_tb(tb, limit)) \
+        + _format_exception_only(eclass, evalue)
+
