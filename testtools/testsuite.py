@@ -304,5 +304,5 @@ def filter_by_ids(suite_or_case, test_ids):
 def sorted_tests(suite_or_case, unpack_outer=False):
     """Sort suite_or_case while preserving non-vanilla TestSuites."""
     tests = _flatten_tests(suite_or_case, unpack_outer=unpack_outer)
-    tests.sort()
+    tests = sorted(tests, key=lambda x: x[0])
     return unittest.TestSuite([test for (sort_key, test) in tests])
