@@ -30,6 +30,9 @@ Improvements
 
 * Various documentation improvements (Clint Byrum, Xiao Hanyu).
 
+* Added ``addDetailuniqueName`` method to ``testtools.TestCase`` class. (Thomi
+  Richards)
+
 0.9.31
 ~~~~~~
 
