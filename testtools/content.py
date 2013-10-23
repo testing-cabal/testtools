@@ -19,7 +19,14 @@ import traceback
 
 from extras import try_import
 
-from testtools.compat import _b, _format_exc_info, str_is_unicode, _u
+from testtools.compat import (
+    _b,
+    _format_exception_only,
+    _format_stack_list,
+    _TB_HEADER,
+    _u,
+    str_is_unicode,
+)
 from testtools.content_type import ContentType, JSON, UTF8_TEXT
 
 
@@ -121,10 +128,13 @@ class Content(object):
             self.content_type, _join_b(self.iter_bytes()))
 
 
-class TracebackContent(Content):
-    """Content object for tracebacks.
+class StackLinesContent(Content):
+    """Content object for stack lines.
 
-    This adapts an exc_info tuple to the Content interface.
+    This adapts a list of "preprocessed" stack lines into a content object.
+    The stack lines are most likely produced from ``traceback.extract_stack``
+    or ``traceback.extract_tb``.
+
     text/x-traceback;language=python is used for the mime type, in order to
     provide room for other languages to format their tracebacks differently.
     """
@@ -134,54 +144,82 @@ class TracebackContent(Content):
     # system-under-test is rarely unittest or testtools.
     HIDE_INTERNAL_STACK = True
 
-    def __init__(self, err, test):
-        """Create a TracebackContent for err."""
-        if err is None:
-            raise ValueError("err may not be None")
+    def __init__(self, stack_lines, prefix_content="", postfix_content=""):
+        """Create a StackLinesContent for ``stack_lines``.
+
+        :param stack_lines: A list of preprocessed stack lines, probably
+            obtained by calling ``traceback.extract_stack`` or
+            ``traceback.extract_tb``.
+        :param prefix_content: If specified, a unicode string to prepend to the
+            text content.
+        :param postfix_content: If specified, a unicode string to append to the
+            text content.
+        """
         content_type = ContentType('text', 'x-traceback',
             {"language": "python", "charset": "utf8"})
-        value = self._exc_info_to_unicode(err, test)
-        super(TracebackContent, self).__init__(
+        value = prefix_content + \
+            self._stack_lines_to_unicode(stack_lines) + \
+            postfix_content
+        super(StackLinesContent, self).__init__(
             content_type, lambda: [value.encode("utf8")])
 
-    def _exc_info_to_unicode(self, err, test):
-        """Converts a sys.exc_info()-style tuple of values into a string.
-
-        Copied from Python 2.7's unittest.TestResult._exc_info_to_string.
+    def _stack_lines_to_unicode(self, stack_lines):
+        """Converts a list of pre-processed stack lines into a unicode string.
         """
-        exctype, value, tb = err
-        # Skip test runner traceback levels
-        if self.HIDE_INTERNAL_STACK:
-            while tb and self._is_relevant_tb_level(tb):
-                tb = tb.tb_next
 
         # testtools customization. When str is unicode (e.g. IronPython,
         # Python 3), traceback.format_exception returns unicode. For Python 2,
         # it returns bytes. We need to guarantee unicode.
         if str_is_unicode:
-            format_exception = traceback.format_exception
+            format_stack_lines = traceback.format_list
         else:
-            format_exception = _format_exc_info
+            format_stack_lines = _format_stack_list
 
-        if (False and self.HIDE_INTERNAL_STACK and test.failureException
-            and isinstance(value, test.failureException)):
-            # Skip assert*() traceback levels
-            length = self._count_relevant_tb_levels(tb)
-            msgLines = format_exception(exctype, value, tb, length)
-        else:
-            msgLines = format_exception(exctype, value, tb)
+        msg_lines = format_stack_lines(stack_lines)
 
-        return ''.join(msgLines)
+        return ''.join(msg_lines)
 
-    def _is_relevant_tb_level(self, tb):
-        return '__unittest' in tb.tb_frame.f_globals
 
-    def _count_relevant_tb_levels(self, tb):
-        length = 0
-        while tb and not self._is_relevant_tb_level(tb):
-            length += 1
+def TracebackContent(err, test):
+    """Content object for tracebacks.
+
+    This adapts an exc_info tuple to the Content interface.
+    text/x-traceback;language=python is used for the mime type, in order to
+    provide room for other languages to format their tracebacks differently.
+    """
+    if err is None:
+        raise ValueError("err may not be None")
+
+    exctype, value, tb = err
+    # Skip test runner traceback levels
+    if StackLinesContent.HIDE_INTERNAL_STACK:
+        while tb and '__unittest' in tb.tb_frame.f_globals:
             tb = tb.tb_next
-        return length
+
+    # testtools customization. When str is unicode (e.g. IronPython,
+    # Python 3), traceback.format_exception_only returns unicode. For Python 2,
+    # it returns bytes. We need to guarantee unicode.
+    if str_is_unicode:
+        format_exception_only = traceback.format_exception_only
+    else:
+        format_exception_only = _format_exception_only
+
+    limit = None
+    if (False
+        and StackLinesContent.HIDE_INTERNAL_STACK
+        and test.failureException
+        and isinstance(value, test.failureException)):
+        # Skip assert*() traceback levels
+        limit = 0
+        while tb and not self._is_relevant_tb_level(tb):
+            limit += 1
+            tb = tb.tb_next
+
+    prefix = _TB_HEADER
+    stack_lines = traceback.extract_tb(tb, limit)
+    postfix = ''.join(format_exception_only(exctype, value))
+
+    return StackLinesContent(stack_lines, prefix, postfix)
 
 
 def json_content(json_data):

@@ -11,7 +11,7 @@ import sys
 from extras import safe_hasattr
 
 from testtools import TestResult
-from testtools.content import TracebackContent
+from testtools.content import StackLinesContent
 from testtools import runtest
 
 
@@ -83,12 +83,12 @@ class LoggingResult(TestResult):
 
 
 def is_stack_hidden():
-    return TracebackContent.HIDE_INTERNAL_STACK
+    return StackLinesContent.HIDE_INTERNAL_STACK
 
 
 def hide_testtools_stack(should_hide=True):
-    result = TracebackContent.HIDE_INTERNAL_STACK
-    TracebackContent.HIDE_INTERNAL_STACK = should_hide
+    result = StackLinesContent.HIDE_INTERNAL_STACK
+    StackLinesContent.HIDE_INTERNAL_STACK = should_hide
     return result
 
 
