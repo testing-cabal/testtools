@@ -12,6 +12,8 @@ Improvements
 
 * Added ``addDetailuniqueName`` method to ``testtools.TestCase`` class.
   (Thomi Richards)
+* Removed some unused code from ``testtools.content.TracebackContent``.
+  (Thomi Richards)
 
 0.9.32
 ~~~~~~
