@@ -171,17 +171,6 @@ class TracebackContent(Content):
         else:
             msgLines = format_exception(exctype, value, tb)
 
-        if getattr(self, 'buffer', None):
-            output = sys.stdout.getvalue()
-            error = sys.stderr.getvalue()
-            if output:
-                if not output.endswith('\n'):
-                    output += '\n'
-                msgLines.append(STDOUT_LINE % output)
-            if error:
-                if not error.endswith('\n'):
-                    error += '\n'
-                msgLines.append(STDERR_LINE % error)
         return ''.join(msgLines)
 
     def _is_relevant_tb_level(self, tb):
