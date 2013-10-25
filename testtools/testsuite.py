@@ -304,5 +304,18 @@ def filter_by_ids(suite_or_case, test_ids):
 def sorted_tests(suite_or_case, unpack_outer=False):
     """Sort suite_or_case while preserving non-vanilla TestSuites."""
     tests = _flatten_tests(suite_or_case, unpack_outer=unpack_outer)
-    tests.sort()
+    try:
+        tests.sort()
+    except TypeError:
+        # Duplicate test name can induce TypeError in Python 3.3.
+        # Prompt the duplicate test name when trapped here.
+        seen = set()
+        duplicated = []
+        for (name, test_id) in tests:
+            if name not in seen:
+                seen.add(name)
+            else:
+                sys.stderr.write("Duplicate test name: %s\n" % name)
+        raise
+
     return unittest.TestSuite([test for (sort_key, test) in tests])
