@@ -13,6 +13,11 @@ Improvements
 * ``AnyMatch`` is now exported properly in ``testtools.matchers``.
   (Robert Collins, Rob Kennedy, github #44)
 
+* In Python 3.3, if there are duplicate test ids, tests.sort() will
+  fail and raise TypeError. Detect the duplicate test ids firstly in
+  sorted_tests() to ensure that all test ids are unique.
+  (Kui Shi, #1243922)
+
 * ``json_content`` is now in the ``__all__`` attribute for
   ``testtools.content``. (Robert Collins)
 

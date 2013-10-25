@@ -429,6 +429,8 @@ sort_tests, which can be used by non-standard TestSuites to know when they
 should sort their tests. An example implementation can be seen at
 ``FixtureSuite.sorted_tests``.
 
+If there are duplicate test ids in a suite, ValueError will be raised.
+
 filter_by_ids
 -------------
 

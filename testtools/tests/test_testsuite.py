@@ -224,6 +224,19 @@ class TestFixtureSuite(TestCase):
         suite.run(LoggingResult([]))
         self.assertEqual(['setUp', 1, 2, 'tearDown'], log)
 
+    def test_fixture_suite_sort(self):
+        log = []
+        class Sample(TestCase):
+            def test_one(self):
+                log.append(1)
+            def test_two(self):
+                log.append(2)
+        fixture = FunctionFixture(
+            lambda: log.append('setUp'),
+            lambda fixture: log.append('tearDown'))
+        suite = FixtureSuite(fixture, [Sample('test_one'), Sample('test_one')])
+        self.assertRaises(ValueError, suite.sort_tests)
+
 
 class TestSortedTests(TestCase):
 
@@ -252,6 +265,13 @@ class TestSortedTests(TestCase):
         b = PlaceHolder('b')
         suite = sorted_tests(unittest.TestSuite([b, a]))
         self.assertEqual([a, b], list(iterate_tests(suite)))
+
+    def test_duplicate_simple_suites(self):
+        a = PlaceHolder('a')
+        b = PlaceHolder('b')
+        c = PlaceHolder('a')
+        self.assertRaises(
+            ValueError, sorted_tests, unittest.TestSuite([a, b, c]))
 
 
 def test_suite():
