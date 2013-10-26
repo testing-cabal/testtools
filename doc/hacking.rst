@@ -49,6 +49,21 @@ is often useful to see all levels of the stack. To do this, add
 ``run_tests_with = FullStackRunTest`` to the top of a test's class definition.
 
 
+Discussion
+----------
+
+When submitting a patch, it will help the review process a lot if there's a
+clear explanation of what the change does and why you think the change is a
+good idea.  For crasher bugs, this is generally a no-brainer, but for UI bugs
+& API tweaks, the reason something is an improvement might not be obvious, so
+it's worth spelling out.
+
+If you are thinking of implementing a new feature, you might want to have that
+discussion on the [mailing list](testtools-dev@lists.launchpad.net) before the
+patch goes up for review.  This is not at all mandatory, but getting feedback
+early can help avoid dead ends.
+
+
 Documentation
 -------------
 
