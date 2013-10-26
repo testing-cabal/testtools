@@ -205,6 +205,7 @@ def TracebackContent(err, test):
         format_exception_only = _format_exception_only
 
     limit = None
+    # Disabled due to https://bugs.launchpad.net/testtools/+bug/1188420
     if (False
         and StackLinesContent.HIDE_INTERNAL_STACK
         and test.failureException
