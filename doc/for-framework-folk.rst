@@ -411,6 +411,10 @@ if it is a good idea).
 sorted_tests
 ------------
 
+In Python 3.3, if there are duplicate test ids, tests.sort() will fail and
+raise TypeError. Detect the duplicate test ids firstly in sorted_tests()
+to ensure that all test ids are unique.
+
 Given the composite structure of TestSuite / TestCase, sorting tests is
 problematic - you can't tell what functionality is embedded into custom Suite
 implementations. In order to deliver consistent test orders when using test

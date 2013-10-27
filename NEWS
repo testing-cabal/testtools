@@ -17,6 +17,11 @@ Improvements
 * Added ``testtools.StackLinesContent``: a content object for displaying
   pre-processed stack lines. (Thomi Richards)
 
+* In Python 3.3, if there are duplicate test ids, tests.sort() will
+  fail and raise TypeError. Detect the duplicate test ids firstly in
+  sorted_tests() to ensure that all test ids are unique.
+  (Kui Shi, #1243922)
+
 0.9.32
 ~~~~~~
 
