@@ -12,8 +12,10 @@ Improvements
 
 * Added ``addDetailuniqueName`` method to ``testtools.TestCase`` class.
   (Thomi Richards)
+
 * Removed some unused code from ``testtools.content.TracebackContent``.
   (Thomi Richards)
+
 * Added ``testtools.StackLinesContent``: a content object for displaying
   pre-processed stack lines. (Thomi Richards)
 
