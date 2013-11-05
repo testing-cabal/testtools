@@ -19,6 +19,10 @@ Improvements
 * Added ``testtools.StackLinesContent``: a content object for displaying
   pre-processed stack lines. (Thomi Richards)
 
+* ``StreamSummary`` was calculating testsRun incorrectly: ``exists`` status
+  tests were counted as run tests, but they are not.
+  (Robert Collins, #1203728)
+
 0.9.32
 ~~~~~~
 

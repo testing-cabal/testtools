@@ -947,7 +947,8 @@ class TestStreamSummary(TestCase):
         result.status("baz", "exists")
         result.stopTestRun()
         self.assertEqual(True, result.wasSuccessful())
-        self.assertEqual(3, result.testsRun)
+        # Existence is terminal but doesn't count as 'running' a test.
+        self.assertEqual(2, result.testsRun)
 
     def test_stopTestRun_inprogress_test_fails(self):
         # Tests inprogress at stopTestRun trigger a failure.
