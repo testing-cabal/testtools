@@ -737,9 +737,9 @@ class StreamSummary(StreamToDict):
         return (not self.failures and not self.errors)
 
     def _gather_test(self, test_dict):
-        self.testsRun += 1
         if test_dict['status'] == 'exists':
             return
+        self.testsRun += 1
         case = test_dict_to_case(test_dict)
         self._handle_status[test_dict['status']](case)
 
