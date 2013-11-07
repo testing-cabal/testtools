@@ -7,6 +7,7 @@ __all__ = [
     'Content',
     'content_from_file',
     'content_from_stream',
+    'json_content',
     'text_content',
     'TracebackContent',
     ]
