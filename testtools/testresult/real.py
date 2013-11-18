@@ -377,7 +377,7 @@ class StreamResult(object):
             and discarded. Ignored unless file_name has been supplied.
         :param mime_type: An optional MIME type for the file. stdout and
             stderr will generally be "text/plain; charset=utf8". If None,
-            defaults to application/octet-stream. Ignores unless file_name
+            defaults to application/octet-stream. Ignored unless file_name
             has been supplied.
         """
 
