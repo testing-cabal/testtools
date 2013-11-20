@@ -1243,6 +1243,13 @@ Here are some tips for converting your Trial tests into testtools tests.
   ``AsynchronousDeferredRunTest`` does not.  If you rely on this behavior, use
   ``AsynchronousDeferredRunTestForBrokenTwisted``.
 
+force_failure
+-------------
+
+Setting the ``testtools.TestCase.force_failure`` instance variable to ``True``
+will cause the test to be marked as a failure, but won't stop the test code
+from running (see :ref:`force_failure`).
+
 
 Test helpers
 ============

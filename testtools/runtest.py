@@ -135,6 +135,9 @@ class RunTest(object):
                         self._run_cleanups, self.result):
                         failed = True
                 finally:
+                    if getattr(self.case, 'force_failure', None):
+                        self._run_user(_raise_force_fail_error)
+                        failed = True
                     if not failed:
                         self.result.addSuccess(self.case,
                             details=self.case.getDetails())
@@ -198,6 +201,10 @@ class RunTest(object):
                 self._exceptions.append(e)
                 return self.exception_caught
         raise e
+
+
+def _raise_force_fail_error():
+    raise AssertionError("Forced Test Failure")
 
 
 # Signal that this is part of the testing framework, and that code from this
