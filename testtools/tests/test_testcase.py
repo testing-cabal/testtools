@@ -569,6 +569,16 @@ class TestAssertions(TestCase):
         self.assertFails(
             expected, self.assertThat, matchee, matcher, verbose=True)
 
+    def test__force_failure_fails_test(self):
+        class Test(TestCase):
+            def test_foo(self):
+                self.force_failure = True
+                self.remaining_code_run = True
+        test = Test('test_foo')
+        result = test.run()
+        self.assertFalse(result.wasSuccessful())
+        self.assertTrue(test.remaining_code_run)
+
     def get_error_string(self, e):
         """Get the string showing how 'e' would be formatted in test output.
 

@@ -82,6 +82,15 @@ Test renaming
 instance to one with a new name.  This is helpful for implementing test
 parameterization.
 
+.. _force_failure:
+
+Delayed Test Failure
+--------------------
+
+Setting the ``testtools.TestCase.force_failure`` instance variable to True will
+cause ``testtools.RunTest`` to fail the test case after the test has finished.
+This is useful when you want to cause a test to fail, but don't want to
+prevent the remainder of the test code from being executed.
 
 Test placeholders
 =================
