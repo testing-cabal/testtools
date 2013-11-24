@@ -3,6 +3,7 @@
 """Tests for the test runner logic."""
 
 from unittest import TestSuite
+import sys
 
 from extras import try_import
 fixtures = try_import('fixtures')
@@ -41,6 +42,7 @@ def test_suite():
             self.useFixture(self.package)
             testtools.__path__.append(self.package.base)
             self.addCleanup(testtools.__path__.remove, self.package.base)
+            self.addCleanup(sys.modules.pop, 'testtools.runexample', None)
 
 
 if fixtures and testresources:
