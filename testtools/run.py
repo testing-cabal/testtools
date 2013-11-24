@@ -35,6 +35,31 @@ else:
     have_discover = True
 
 
+def list_test(test):
+    """Return the test ids that would be run if test() was run.
+
+    When things fail to import they can be represented as well, though
+    we use an ugly hack (see http://bugs.python.org/issue19746 for details)
+    to determine that. The difference matters because if a user is
+    filtering tests to run on the returned ids, a failed import can reduce
+    the visible tests but it can be impossible to tell that the selected
+    test would have been one of the imported ones.
+
+    :return: A tuple of test ids that would run and error strings
+        describing things that failed to import.
+    """
+    unittest_import_str = 'unittest.loader.ModuleImportFailure.' 
+    test_ids = []
+    errors = []
+    for test in iterate_tests(test):
+        # to this ugly.
+        if test.id().startswith(unittest_import_str):
+            errors.append(test.id()[len(unittest_import_str):])
+        else:
+            test_ids.append(test.id())
+    return test_ids, errors
+
+
 class TestToolsTestRunner(object):
     """ A thunk object to support unittest.TestProgram."""
 
@@ -52,8 +77,14 @@ class TestToolsTestRunner(object):
 
     def list(self, test):
         """List the tests that would be run if test() was run."""
-        for test in iterate_tests(test):
-            self.stdout.write('%s\n' % test.id())
+        test_ids, errors = list_test(test)
+        for test_id in test_ids:
+            self.stdout.write('%s\n' % test_id)
+        if errors:
+            self.stdout.write('Failed to import\n')
+            for test_id in errors:
+                self.stdout.write('%s\n' % test_id)
+            sys.exit(2)
 
     def run(self, test):
         "Run the given test case or test suite."

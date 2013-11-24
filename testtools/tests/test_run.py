@@ -22,9 +22,13 @@ if fixtures:
     class SampleTestFixture(fixtures.Fixture):
         """Creates testtools.runexample temporarily."""
 
-        def __init__(self):
-            self.package = fixtures.PythonPackage(
-            'runexample', [('__init__.py', _b("""
+        def __init__(self, broken=False):
+            """Create a SampleTestFixture.
+
+            :param broken: If True, the sample file will not be importable.
+            """
+            if not broken:
+                init_contents = _b("""\
 from testtools import TestCase
 
 class TestFoo(TestCase):
@@ -35,7 +39,11 @@ class TestFoo(TestCase):
 def test_suite():
     from unittest import TestLoader
     return TestLoader().loadTestsFromName(__name__)
-"""))])
+""")
+            else:
+                init_contents = b"class not in\n"
+            self.package = fixtures.PythonPackage(
+            'runexample', [('__init__.py', init_contents)])
 
         def setUp(self):
             super(SampleTestFixture, self).setUp()
@@ -127,6 +135,19 @@ class TestRun(TestCase):
             raise AssertionError("-l tried to exit. %r" % exc_info[1])
         self.assertEqual("""testtools.runexample.TestFoo.test_bar
 testtools.runexample.TestFoo.test_quux
+""", out.getvalue())
+
+    def test_run_list_failed_import(self):
+        if not run.have_discover:
+            self.skipTest("Need discover")
+        broken = self.useFixture(SampleTestFixture(broken=True))
+        out = StringIO()
+        exc = self.assertRaises(
+            SystemExit,
+            run.main, ['prog', 'discover', '-l', broken.package.base, '*.py'], out)
+        self.assertEqual(2, exc.args[0])
+        self.assertEqual("""Failed to import
+runexample.__init__
 """, out.getvalue())
 
     def test_run_orders_tests(self):
