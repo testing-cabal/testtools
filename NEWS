@@ -10,11 +10,11 @@ NEXT
 Improvements
 ------------
 
-* ``json_content`` is now in the ``__all__`` attribute for
-  ``testtools.content``. (Robert Collins)
-
 * ``AnyMatch`` is now exported properly in ``testtools.matchers``.
   (Robert Collins, Rob Kennedy, github #44)
+
+* ``json_content`` is now in the ``__all__`` attribute for
+  ``testtools.content``. (Robert Collins)
 
 * Network tests now bind to 127.0.0.1 to avoid (even temporary) network
   visible ports. (Benedikt Morbach, github #46)
