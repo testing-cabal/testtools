@@ -107,16 +107,24 @@ class TestRun(TestCase):
                 tests.append(set([case.id() for case
                     in testtools.testsuite.iterate_tests(test)]))
         out = StringIO()
-        program = run.TestProgram(
-            argv=['prog', '-l', 'testtools.runexample.test_suite'],
-            stdout=out, testRunner=CaptureList)
+        try:
+            program = run.TestProgram(
+                argv=['prog', '-l', 'testtools.runexample.test_suite'],
+                stdout=out, testRunner=CaptureList)
+        except SystemExit:
+            exc_info = sys.exc_info()
+            raise AssertionError("-l tried to exit. %r" % exc_info[1])
         self.assertEqual([set(['testtools.runexample.TestFoo.test_bar',
             'testtools.runexample.TestFoo.test_quux'])], tests)
 
     def test_run_list(self):
         self.useFixture(SampleTestFixture())
         out = StringIO()
-        run.main(['prog', '-l', 'testtools.runexample.test_suite'], out)
+        try:
+            run.main(['prog', '-l', 'testtools.runexample.test_suite'], out)
+        except SystemExit:
+            exc_info = sys.exc_info()
+            raise AssertionError("-l tried to exit. %r" % exc_info[1])
         self.assertEqual("""testtools.runexample.TestFoo.test_bar
 testtools.runexample.TestFoo.test_quux
 """, out.getvalue())
@@ -137,8 +145,12 @@ testtools.runexample.missingtest
 """))
         finally:
             f.close()
-        run.main(['prog', '-l', '--load-list', tempname,
-            'testtools.runexample.test_suite'], out)
+        try:
+            run.main(['prog', '-l', '--load-list', tempname,
+                'testtools.runexample.test_suite'], out)
+        except SystemExit:
+            exc_info = sys.exc_info()
+            raise AssertionError("-l tried to exit. %r" % exc_info[1])
         self.assertEqual("""testtools.runexample.TestFoo.test_bar
 """, out.getvalue())
 
@@ -158,8 +170,12 @@ testtools.runexample.missingtest
 """))
         finally:
             f.close()
-        run.main(['prog', '-l', '--load-list', tempname,
-            'testtools.runexample.test_suite'], out)
+        try:
+            run.main(['prog', '-l', '--load-list', tempname,
+                'testtools.runexample.test_suite'], out)
+        except SystemExit:
+            exc_info = sys.exc_info()
+            raise AssertionError("-l tried to exit. %r" % exc_info[1])
         self.assertEqual("""testtools.runexample.TestFoo.test_bar
 """, out.getvalue())
 
