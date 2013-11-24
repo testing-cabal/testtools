@@ -23,6 +23,11 @@ Improvements
   exiting (2) when an import has failed rather than only signalling through the
   test name. (Robert Collins, #1245672)
 
+* In Python 3.3, if there are duplicate test ids, tests.sort() will
+  fail and raise TypeError. Detect the duplicate test ids firstly in
+  sorted_tests() to ensure that all test ids are unique.
+  (Kui Shi, #1243922)
+
 0.9.33
 ~~~~~~
 
