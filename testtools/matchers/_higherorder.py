@@ -4,6 +4,7 @@ __all__ = [
     'AfterPreprocessing',
     'AllMatch',
     'Annotate',
+    'AnyMatch',
     'MatchesAny',
     'MatchesAll',
     'Not',

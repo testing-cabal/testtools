@@ -13,6 +13,9 @@ Improvements
 * ``json_content`` is now in the ``__all__`` attribute for
   ``testtools.content``. (Robert Collins)
 
+* ``AnyMatch`` is now exported properly in ``testtools.matchers``.
+  (Robert Collins, Rob Kennedy, github #44)
+
 0.9.33
 ~~~~~~
 
