@@ -19,6 +19,10 @@ Improvements
 * Network tests now bind to 127.0.0.1 to avoid (even temporary) network
   visible ports. (Benedikt Morbach, github #46)
 
+* Test listing now explicitly indicates by printing 'Failed to import' and
+  exiting (2) when an import has failed rather than only signalling through the
+  test name. (Robert Collins, #1245672)
+
 0.9.33
 ~~~~~~
 
