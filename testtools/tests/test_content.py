@@ -20,6 +20,7 @@ from testtools.content import (
     JSON,
     json_content,
     StackLinesContent,
+    StacktraceContent,
     TracebackContent,
     text_content,
     )
@@ -252,6 +253,33 @@ class TestTracebackContent(TestCase):
         result = unittest.TestResult()
         expected = result._exc_info_to_string(an_exc_info, self)
         self.assertEqual(expected, ''.join(list(content.iter_text())))
+
+
+class TestStacktraceContent(TestCase):
+
+    def test___init___sets_ivars(self):
+        content = StacktraceContent()
+        content_type = ContentType("text", "x-traceback",
+            {"language": "python", "charset": "utf8"})
+
+        self.assertEqual(content_type, content.content_type)
+
+    def test_prefix_is_used(self):
+        prefix = self.getUniqueString()
+        actual = StacktraceContent(prefix_content=prefix).as_text()
+
+        self.assertTrue(actual.startswith(prefix))
+
+    def test_postfix_is_used(self):
+        postfix = self.getUniqueString()
+        actual = StacktraceContent(postfix_content=postfix).as_text()
+
+        self.assertTrue(actual.endswith(postfix))
+
+    def test_top_frame_is_skipped_when_no_stack_is_specified(self):
+        actual = StacktraceContent().as_text()
+
+        self.assertTrue('testtools/content.py' not in actual)
 
 
 class TestAttachFile(TestCase):

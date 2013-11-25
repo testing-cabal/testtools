@@ -23,6 +23,10 @@ Improvements
   exiting (2) when an import has failed rather than only signalling through the
   test name. (Robert Collins, #1245672)
 
+* Added ``testtools.content.StacktraceContent``, a content object that
+  automatically creates a ``StackLinesContent`` object containing the current
+  stack trace. (Thomi Richards)
+
 0.9.33
 ~~~~~~
 
