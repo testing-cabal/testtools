@@ -303,6 +303,18 @@ def filter_by_ids(suite_or_case, test_ids):
 
 def sorted_tests(suite_or_case, unpack_outer=False):
     """Sort suite_or_case while preserving non-vanilla TestSuites."""
+
+    # Duplicate test id can induce TypeError in Python 3.3.
+    # Detect the duplicate test id, raise exception when found.
+    seen = set()
+    for test_case in iterate_tests(suite_or_case):
+        test_id = test_case.id()
+        if test_id not in seen:
+            seen.add(test_id)
+        else:
+            raise ValueError('Duplicate test id detected: %s' % (test_id,))
+
     tests = _flatten_tests(suite_or_case, unpack_outer=unpack_outer)
     tests.sort()
+
     return unittest.TestSuite([test for (sort_key, test) in tests])
