@@ -13,6 +13,7 @@ __all__ = [
     ]
 
 import codecs
+import inspect
 import json
 import os
 import sys
@@ -222,6 +223,36 @@ def TracebackContent(err, test):
     postfix = ''.join(format_exception_only(exctype, value))
 
     return StackLinesContent(stack_lines, prefix, postfix)
+
+
+def StacktraceContent(prefix_content="", postfix_content=""):
+    """Content object for stack traces.
+
+    This function will create and return a content object that contains a
+    stack trace.
+
+    The mime type is set to 'text/x-traceback;language=python', so other
+    languages can format their stack traces differently.
+
+    :param prefix_content: A unicode string to add before the stack lines.
+    :param postfix_content: A unicode string to add after the stack lines.
+    """
+    stack = inspect.stack()[1:]
+
+    if StackLinesContent.HIDE_INTERNAL_STACK:
+        limit = 1
+        while limit < len(stack) and '__unittest' not in stack[limit][0].f_globals:
+            limit += 1
+    else:
+        limit = -1
+
+    frames_only = [line[0] for line in stack[:limit]]
+    processed_stack = [ ]
+    for frame in reversed(frames_only):
+        filename, line, function, context, _ = inspect.getframeinfo(frame)
+        context = ''.join(context)
+        processed_stack.append((filename, line, function, context))
+    return StackLinesContent(processed_stack, prefix_content, postfix_content)
 
 
 def json_content(json_data):
