@@ -113,7 +113,8 @@ class TestDetectEncoding(testtools.TestCase):
             '\xef\xbb\xbfThose should be latin-1 bytes"""\n'))
         self._check_encoding("utf-8", (
             "\xef\xbb\xbf# Is the coding: utf-8 or coding: euc-jp instead?\n",
-            '"""Module docstring say \xe2\x98\x86"""\n'))
+            '"""Module docstring say \xe2\x98\x86"""\n'),
+            possibly_invalid=True)
 
     def test_multiple_coding_comments(self):
         """Test only the first of multiple coding declarations counts"""
