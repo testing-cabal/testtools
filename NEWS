@@ -19,6 +19,9 @@ Improvements
 * Docs are now built as part of the Travis-CI build, reducing the chance of
   Read The Docs being broken accidentally. (Daniel Watkins, #1158773)
 
+* Added the ``testtools.TestCase.expectThat`` method, which implements
+  delayed assertions. (Thomi Richards)
+
 0.9.34
 ~~~~~~
 

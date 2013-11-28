@@ -401,14 +401,9 @@ class TestCase(unittest.TestCase):
         :param matcher: An object meeting the testtools.Matcher protocol.
         :raises MismatchError: When matcher does not match thing.
         """
-        matcher = Annotate.if_message(message, matcher)
-        mismatch = matcher.match(matchee)
-        if not mismatch:
-            return
-        existing_details = self.getDetails()
-        for (name, content) in mismatch.get_details().items():
-            self.addDetailUniqueName(name, content)
-        raise MismatchError(matchee, matcher, mismatch, verbose)
+        mismatch_error = self._matchHelper(matchee, matcher, message, verbose)
+        if mismatch_error is not None:
+            raise mismatch_error
 
     def addDetailUniqueName(self, name, content_object):
         """Add a detail to the test, but ensure it's name is unique.
@@ -430,6 +425,38 @@ class TestCase(unittest.TestCase):
             full_name = "%s-%d" % (name, suffix)
             suffix += 1
         self.addDetail(full_name, content_object)
+
+    def expectThat(self, matchee, matcher, message='', verbose=False):
+        """Check that matchee is matched by matcher, but delay the assertion failure.
+
+        This method behaves similarly to ``assertThat``, except that a failed
+        match does not exit the test immediately. The rest of the test code will
+        continue to run, and the test will be marked as failing after the test
+        has finished.
+
+        :param matchee: An object to match with matcher.
+        :param matcher: An object meeting the testtools.Matcher protocol.
+        :param message: If specified, show this message with any failed match.
+        """
+        mismatch_error = self._matchHelper(matchee, matcher, message, verbose)
+
+        if mismatch_error is not None:
+            self.addDetailUniqueName(
+                "Failed expectation",
+                content.StacktraceContent(
+                    postfix_content="MismatchError: " + str(mismatch_error)
+                )
+            )
+            self.force_failure = True
+
+    def _matchHelper(self, matchee, matcher, message, verbose):
+        matcher = Annotate.if_message(message, matcher)
+        mismatch = matcher.match(matchee)
+        if not mismatch:
+            return
+        for (name, value) in mismatch.get_details().items():
+            self.addDetailUniqueName(name, value)
+        return MismatchError(matchee, matcher, mismatch, verbose)
 
     def defaultTestResult(self):
         return TestResult()
