@@ -35,6 +35,10 @@ Improvements
   automatically creates a ``StackLinesContent`` object containing the current
   stack trace. (Thomi Richards)
 
+* ``test_compat.TestDetectEncoding.test_bom`` now works on Python 3.3 - the
+  corner case with euc_jp is no longer permitted in Python 3.3 so we can
+  skip it. (Martin [gz], #1251962)
+
 0.9.33
 ~~~~~~
 
