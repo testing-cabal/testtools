@@ -7,8 +7,18 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+0.9.34
+~~~~~~
+
 Improvements
 ------------
+
+* Added ability for ``testtools.TestCase`` instances to force a test to
+  fail, even if no assertions failed. (Thomi Richards)
+
+* Added ``testtools.content.StacktraceContent``, a content object that
+  automatically creates a ``StackLinesContent`` object containing the current
+  stack trace. (Thomi Richards)
 
 * ``AnyMatch`` is now exported properly in ``testtools.matchers``.
   (Robert Collins, Rob Kennedy, github #44)
@@ -27,13 +37,6 @@ Improvements
 * Test listing now explicitly indicates by printing 'Failed to import' and
   exiting (2) when an import has failed rather than only signalling through the
   test name. (Robert Collins, #1245672)
-
-* Added ability for ``testtools.TestCase`` instances to force a test to
-  fail, even if no assertions failed. (Thomi Richards)
-
-* Added ``testtools.content.StacktraceContent``, a content object that
-  automatically creates a ``StackLinesContent`` object containing the current
-  stack trace. (Thomi Richards)
 
 * ``test_compat.TestDetectEncoding.test_bom`` now works on Python 3.3 - the
   corner case with euc_jp is no longer permitted in Python 3.3 so we can
