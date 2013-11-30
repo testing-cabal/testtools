@@ -223,7 +223,8 @@ def release_project(launchpad, project_name, next_milestone_name):
 
 
 def main(args):
-    launchpad = Launchpad.login_with(APP_NAME, SERVICE_ROOT, CACHE_DIR)
+    launchpad = Launchpad.login_with(
+        APP_NAME, SERVICE_ROOT, CACHE_DIR, credentials_file='.lp_creds')
     return release_project(launchpad, PROJECT_NAME, NEXT_MILESTONE_NAME)
 
 
