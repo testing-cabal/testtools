@@ -8,6 +8,7 @@ apidocs
 _trial_temp
 doc/_build
 .testrepository
+.lp_creds
 ./testtools.egg-info
 *.pyc
 *.swp
