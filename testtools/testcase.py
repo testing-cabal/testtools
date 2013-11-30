@@ -29,6 +29,9 @@ from extras import (
 from testtools import (
     content,
     )
+from testtools.assertions import (
+    assert_that,
+)
 from testtools.compat import (
     advance_iterator,
     reraise,
@@ -401,14 +404,13 @@ class TestCase(unittest.TestCase):
         :param matcher: An object meeting the testtools.Matcher protocol.
         :raises MismatchError: When matcher does not match thing.
         """
-        matcher = Annotate.if_message(message, matcher)
-        mismatch = matcher.match(matchee)
-        if not mismatch:
-            return
-        existing_details = self.getDetails()
-        for (name, content) in mismatch.get_details().items():
-            self.addDetailUniqueName(name, content)
-        raise MismatchError(matchee, matcher, mismatch, verbose)
+        try:
+            assert_that(matchee, matcher, message, verbose)
+        except MismatchError as error:
+            mismatch = error.mismatch
+            for (name, content) in mismatch.get_details().items():
+                self.addDetailUniqueName(name, content)
+            raise
 
     def addDetailUniqueName(self, name, content_object):
         """Add a detail to the test, but ensure it's name is unique.
