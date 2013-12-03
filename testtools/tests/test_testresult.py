@@ -2381,11 +2381,6 @@ class TestNonAsciiResults(TestCase):
         self._run(stream, module.Test())
         return stream.getvalue()
 
-    def _silence_deprecation_warnings(self):
-        """Shut up DeprecationWarning for this test only"""
-        warnings.simplefilter("ignore", DeprecationWarning)
-        self.addCleanup(warnings.filters.remove, warnings.filters[0])
-
     def _get_sample_text(self, encoding="unicode_internal"):
         if encoding is None and str_is_unicode:
            encoding = "unicode_internal"
@@ -2520,9 +2515,6 @@ class TestNonAsciiResults(TestCase):
 
     def test_syntax_error_import_binary(self):
         """Importing a binary file shouldn't break SyntaxError formatting"""
-        if sys.version_info < (2, 5):
-            # Python 2.4 assumes the file is latin-1 and tells you off
-            self._silence_deprecation_warnings()
         self._setup_external_case("import bad")
         f = open(os.path.join(self.dir, "bad.py"), "wb")
         try:
