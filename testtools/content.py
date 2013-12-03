@@ -112,18 +112,12 @@ class Content(object):
     def _iter_text(self):
         """Worker for iter_text - does the decoding."""
         encoding = self.content_type.parameters.get('charset', 'ISO-8859-1')
-        try:
-            # 2.5+
-            decoder = codecs.getincrementaldecoder(encoding)()
-            for bytes in self.iter_bytes():
-                yield decoder.decode(bytes)
-            final = decoder.decode(_b(''), True)
-            if final:
-                yield final
-        except AttributeError:
-            # < 2.5
-            bytes = ''.join(self.iter_bytes())
-            yield bytes.decode(encoding)
+        decoder = codecs.getincrementaldecoder(encoding)()
+        for bytes in self.iter_bytes():
+            yield decoder.decode(bytes)
+        final = decoder.decode(_b(''), True)
+        if final:
+            yield final
 
     def __repr__(self):
         return "<Content type=%r, value=%r>" % (
