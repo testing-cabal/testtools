@@ -299,13 +299,12 @@ def content_from_file(path, content_type=None, chunk_size=DEFAULT_CHUNK_SIZE,
     if content_type is None:
         content_type = UTF8_TEXT
     def reader():
-        # This should be try:finally:, but python2.4 makes that hard. When
-        # We drop older python support we can make this use a context manager
-        # for maximum simplicity.
-        stream = open(path, 'rb')
-        for chunk in _iter_chunks(stream, chunk_size, seek_offset, seek_whence):
-            yield chunk
-        stream.close()
+        with open(path, 'rb') as stream:
+            for chunk in _iter_chunks(stream,
+                                      chunk_size,
+                                      seek_offset,
+                                      seek_whence):
+                yield chunk
     return content_from_reader(reader, content_type, buffer_now)
 
 
