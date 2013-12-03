@@ -2491,15 +2491,6 @@ class TestNonAsciiResults(TestCase):
             "UnprintableError: <unprintable UnprintableError object>\n"),
             textoutput)
 
-    def test_string_exception(self):
-        """Raise a string rather than an exception instance if supported"""
-        if sys.version_info > (2, 6):
-            self.skip("No string exceptions in Python 2.6 or later")
-        elif sys.version_info > (2, 5):
-            self._silence_deprecation_warnings()
-        textoutput = self._test_external_case(testline="raise 'plain str'")
-        self.assertIn(self._as_output("\nplain str\n"), textoutput)
-
     def test_non_ascii_dirname(self):
         """Script paths in the traceback can be non-ascii"""
         text, raw = self._get_sample_text(sys.getfilesystemencoding())
