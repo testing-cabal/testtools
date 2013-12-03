@@ -2427,7 +2427,7 @@ class TestNonAsciiResults(TestCase):
         if sys.version_info > (3, 3):
             return MatchesAny(Contains("FileExistsError: "),
                               Contains("PermissionError: "))
-        elif os.name != "nt" or sys.version_info < (2, 5):
+        elif os.name != "nt":
             return Contains(self._as_output("OSError: "))
         else:
             return Contains(self._as_output("WindowsError: "))
