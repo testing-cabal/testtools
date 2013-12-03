@@ -45,7 +45,7 @@ class MatchesException(Matcher):
             value_re = AfterPreproccessing(str, MatchesRegex(value_re), False)
         self.value_re = value_re
         expected_type = type(self.expected)
-        self._is_instance = not any(issubclass(expected_type, class_type) 
+        self._is_instance = not any(issubclass(expected_type, class_type)
                 for class_type in classtypes() + (tuple,))
 
     def match(self, other):

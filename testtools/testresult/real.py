@@ -325,7 +325,7 @@ class StreamResult(object):
         mime_type=None, route_code=None, timestamp=None):
         """Inform the result about a test status.
 
-        :param test_id: The test whose status is being reported. None to 
+        :param test_id: The test whose status is being reported. None to
             report status about the test run as a whole.
         :param test_status: The status for the test. There are two sorts of
             status - interim and final status events. As many interim events
@@ -347,7 +347,7 @@ class StreamResult(object):
                 executed. Typically this is when querying what tests could be run
                 in a test run (which is useful for selecting tests to run).
               * xfail - the test failed but that was expected. This is purely
-                informative - the test is not considered to be a failure. 
+                informative - the test is not considered to be a failure.
               * uxsuccess - the test passed but was expected to fail. The test
                 will be considered a failure.
               * success - the test has finished without error.
@@ -388,7 +388,7 @@ def domap(*args, **kwargs):
 
 class CopyStreamResult(StreamResult):
     """Copies all event it receives to multiple results.
-    
+
     This provides an easy facility for combining multiple StreamResults.
 
     For TestResult the equivalent class was ``MultiTestResult``.
@@ -413,9 +413,9 @@ class CopyStreamResult(StreamResult):
 
 class StreamFailFast(StreamResult):
     """Call the supplied callback if an error is seen in a stream.
-    
+
     An example callback::
-    
+
        def do_something():
            pass
     """
@@ -448,12 +448,12 @@ class StreamResultRouter(StreamResult):
       >>> router.status(test_id='foo', route_code='0/1', test_status='uxsuccess')
 
     StreamResultRouter has no buffering.
-    
+
     When adding routes (and for the fallback) whether to call startTestRun and
     stopTestRun or to not call them is controllable by passing
     'do_start_stop_run'. The default is to call them for the fallback only.
     If a route is added after startTestRun has been called, and
-    do_start_stop_run is True then startTestRun is called immediately on the 
+    do_start_stop_run is True then startTestRun is called immediately on the
     new route sink.
 
     There is no a-priori defined lookup order for routes: if they are ambiguous
@@ -523,12 +523,12 @@ class StreamResultRouter(StreamResult):
         :raises: ValueError if the policy is unknown
         :raises: TypeError if the policy is given arguments it cannot handle.
 
-        ``route_code_prefix`` routes events based on a prefix of the route 
-        code in the event. It takes a ``route_prefix`` argument to match on 
-        (e.g. '0') and a ``consume_route`` argument, which, if True, removes 
+        ``route_code_prefix`` routes events based on a prefix of the route
+        code in the event. It takes a ``route_prefix`` argument to match on
+        (e.g. '0') and a ``consume_route`` argument, which, if True, removes
         the prefix from the ``route_code`` when forwarding events.
 
-        ``test_id`` routes events based on the test id.  It takes a single 
+        ``test_id`` routes events based on the test id.  It takes a single
         argument, ``test_id``.  Use ``None`` to select non-test events.
         """
         policy_method = StreamResultRouter._policies.get(policy, None)
@@ -649,7 +649,7 @@ class StreamToDict(StreamResult):
         # notify completed tests.
         if test_status not in (None, 'inprogress'):
             self.on_test(self._inprogress.pop(key))
-    
+
     def stopTestRun(self):
         super(StreamToDict, self).stopTestRun()
         while self._inprogress:
@@ -700,7 +700,7 @@ def test_dict_to_case(test_dict):
 
 class StreamSummary(StreamToDict):
     """A specialised StreamResult that summarises a stream.
-    
+
     The summary uses the same representation as the original
     unittest.TestResult contract, allowing it to be consumed by any test
     runner.
@@ -774,7 +774,7 @@ class StreamSummary(StreamToDict):
 
 class TestControl(object):
     """Controls a running test run, allowing it to be interrupted.
-    
+
     :ivar shouldStop: If True, tests should not run and should instead
         return immediately. Similarly a TestSuite should check this between
         each test and if set stop dispatching any new tests and return.
@@ -1285,7 +1285,7 @@ class ExtendedToOriginalDecorator(object):
 
 class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
     """Permit using old TestResult API code with new StreamResult objects.
-    
+
     This decorates a StreamResult and converts old (Python 2.6 / 2.7 /
     Extended) TestResult API calls into StreamResult calls.
 
@@ -1477,7 +1477,7 @@ class StreamToQueue(StreamResult):
     queue immediately.
 
     Events are forwarded as a dict with a key ``event`` which is one of
-    ``startTestRun``, ``stopTestRun`` or ``status``. When ``event`` is 
+    ``startTestRun``, ``stopTestRun`` or ``status``. When ``event`` is
     ``status`` the dict also has keys matching the keyword arguments
     of ``StreamResult.status``, otherwise it has one other key ``result`` which
     is the result that invoked ``startTestRun``.

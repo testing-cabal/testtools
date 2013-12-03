@@ -844,7 +844,7 @@ class TestExtendedToStreamDecorator(TestCase):
         result.status(test_id='foo', test_status='fail')
         result.stopTestRun()
         self.assertEqual(False, result.wasSuccessful())
-        
+
 
 class TestStreamFailFast(TestCase):
 
