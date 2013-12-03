@@ -577,12 +577,7 @@ class TestCase(unittest.TestCase):
         return ret
 
     def _get_test_method(self):
-        absent_attr = object()
-        # Python 2.5+
-        method_name = getattr(self, '_testMethodName', absent_attr)
-        if method_name is absent_attr:
-            # Python 2.4
-            method_name = getattr(self, '_TestCase__testMethodName')
+        method_name = getattr(self, '_testMethodName')
         return getattr(self, method_name)
 
     def _run_test_method(self, result):
