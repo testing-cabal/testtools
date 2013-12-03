@@ -26,7 +26,6 @@ from testtools.compat import (
     )
 from testtools.content import (
     text_content,
-    TracebackContent,
     )
 from testtools.matchers import (
     Annotate,
@@ -510,65 +509,6 @@ class TestAssertions(TestCase):
             'None matches Is(None): foo bar', self.assertIsNot, None, None,
             "foo bar")
 
-    def test_assertThat_matches_clean(self):
-        class Matcher(object):
-            def match(self, foo):
-                return None
-        self.assertThat("foo", Matcher())
-
-    def test_assertThat_mismatch_raises_description(self):
-        calls = []
-        class Mismatch(object):
-            def __init__(self, thing):
-                self.thing = thing
-            def describe(self):
-                calls.append(('describe_diff', self.thing))
-                return "object is not a thing"
-            def get_details(self):
-                return {}
-        class Matcher(object):
-            def match(self, thing):
-                calls.append(('match', thing))
-                return Mismatch(thing)
-            def __str__(self):
-                calls.append(('__str__',))
-                return "a description"
-        class Test(TestCase):
-            def test(self):
-                self.assertThat("foo", Matcher())
-        result = Test("test").run()
-        self.assertEqual([
-            ('match', "foo"),
-            ('describe_diff', "foo"),
-            ], calls)
-        self.assertFalse(result.wasSuccessful())
-
-    def test_assertThat_output(self):
-        matchee = 'foo'
-        matcher = Equals('bar')
-        expected = matcher.match(matchee).describe()
-        self.assertFails(expected, self.assertThat, matchee, matcher)
-
-    def test_assertThat_message_is_annotated(self):
-        matchee = 'foo'
-        matcher = Equals('bar')
-        expected = Annotate('woo', matcher).match(matchee).describe()
-        self.assertFails(expected, self.assertThat, matchee, matcher, 'woo')
-
-    def test_assertThat_verbose_output(self):
-        matchee = 'foo'
-        matcher = Equals('bar')
-        expected = (
-            'Match failed. Matchee: %r\n'
-            'Matcher: %s\n'
-            'Difference: %s\n' % (
-                matchee,
-                matcher,
-                matcher.match(matchee).describe(),
-                ))
-        self.assertFails(
-            expected, self.assertThat, matchee, matcher, verbose=True)
-
     def test__force_failure_fails_test(self):
         class Test(TestCase):
             def test_foo(self):
@@ -578,48 +518,6 @@ class TestAssertions(TestCase):
         result = test.run()
         self.assertFalse(result.wasSuccessful())
         self.assertTrue(test.remaining_code_run)
-
-    def get_error_string(self, e):
-        """Get the string showing how 'e' would be formatted in test output.
-
-        This is a little bit hacky, since it's designed to give consistent
-        output regardless of Python version.
-
-        In testtools, TestResult._exc_info_to_unicode is the point of dispatch
-        between various different implementations of methods that format
-        exceptions, so that's what we have to call. However, that method cares
-        about stack traces and formats the exception class. We don't care
-        about either of these, so we take its output and parse it a little.
-        """
-        error = TracebackContent((e.__class__, e, None), self).as_text()
-        # We aren't at all interested in the traceback.
-        if error.startswith('Traceback (most recent call last):\n'):
-            lines = error.splitlines(True)[1:]
-            for i, line in enumerate(lines):
-                if not line.startswith(' '):
-                    break
-            error = ''.join(lines[i:])
-        # We aren't interested in how the exception type is formatted.
-        exc_class, error = error.split(': ', 1)
-        return error
-
-    def test_assertThat_verbose_unicode(self):
-        # When assertThat is given matchees or matchers that contain non-ASCII
-        # unicode strings, we can still provide a meaningful error.
-        matchee = _u('\xa7')
-        matcher = Equals(_u('a'))
-        expected = (
-            'Match failed. Matchee: %s\n'
-            'Matcher: %s\n'
-            'Difference: %s\n\n' % (
-                repr(matchee).replace("\\xa7", matchee),
-                matcher,
-                matcher.match(matchee).describe(),
-                ))
-        e = self.assertRaises(
-            self.failureException, self.assertThat, matchee, matcher,
-            verbose=True)
-        self.assertEqual(expected, self.get_error_string(e))
 
     def test_assertEqual_nice_formatting(self):
         message = "These things ought not be equal."
