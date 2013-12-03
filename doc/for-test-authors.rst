@@ -288,6 +288,24 @@ Which is roughly equivalent to::
       self.assertNotEqual(result, 50)
 
 
+``assert_that`` Function
+------------------------
+
+In addition to ``self.assertThat``, testtools also provides the ``assert_that``
+function in ``testtools.assertions`` (which is what ``self.assertThat`` backs
+on to internally).  This behaves as the method version does::
+
+    class TestSquare(TestCase):
+
+        def test_square():
+            result = square(7)
+            assert_that(result, Equals(49))
+
+        def test_square_silly():
+            result = square(7)
+            assert_that(result, Not(Equals(50)))
+
+
 Stock matchers
 --------------
 
