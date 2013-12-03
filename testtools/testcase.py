@@ -816,8 +816,6 @@ def skipUnless(condition, reason):
 class ExpectedException:
     """A context manager to handle expected exceptions.
 
-    In Python 2.5 or later::
-
       def test_foo(self):
           with ExpectedException(ValueError, 'fo.*'):
               raise ValueError('foo')
