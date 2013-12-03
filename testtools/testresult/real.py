@@ -31,7 +31,7 @@ from extras import safe_hasattr, try_import, try_imports
 parse_mime_type = try_import('mimeparse.parse_mime_type')
 Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
-from testtools.compat import all, str_is_unicode, _u, _b
+from testtools.compat import str_is_unicode, _u, _b
 from testtools.content import (
     Content,
     text_content,

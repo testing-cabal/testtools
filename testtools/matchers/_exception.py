@@ -10,8 +10,6 @@ import sys
 
 from testtools.compat import (
     classtypes,
-    _error_repr,
-    isbaseexception,
     istext,
     )
 from ._basic import MatchesRegex
@@ -20,6 +18,9 @@ from ._impl import (
     Matcher,
     Mismatch,
     )
+
+
+_error_repr = BaseException.__repr__
 
 
 class MatchesException(Matcher):
@@ -104,8 +105,9 @@ class Raises(Matcher):
                 mismatch = None
             # The exception did not match, or no explicit matching logic was
             # performed. If the exception is a non-user exception (that is, not
-            # a subclass of Exception on Python 2.5+) then propogate it.
-            if isbaseexception(exc_info[1]):
+            # a subclass of Exception) then propagate it.
+            if (isinstance(exc_info[1], BaseException)
+                    and not isinstance(exc_info[1], Exception)):
                 del exc_info
                 raise
             return mismatch
