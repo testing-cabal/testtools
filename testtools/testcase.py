@@ -200,9 +200,6 @@ class TestCase(unittest.TestCase):
             (_UnexpectedSuccess, self._report_unexpected_success),
             (Exception, self._report_error),
             ]
-        if sys.version_info < (2, 6):
-            # Catch old-style string exceptions with None as the instance
-            self.exception_handlers.append((type(None), self._report_error))
 
     def __eq__(self, other):
         eq = getattr(unittest.TestCase, '__eq__', None)
