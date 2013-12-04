@@ -210,7 +210,7 @@ class TracebackContent(StackLinesContent):
                                                       postfix)
 
 
-def StacktraceContent(prefix_content="", postfix_content=""):
+class StacktraceContent(StackLinesContent):
     """Content object for stack traces.
 
     This function will create and return a content object that contains a
@@ -222,22 +222,26 @@ def StacktraceContent(prefix_content="", postfix_content=""):
     :param prefix_content: A unicode string to add before the stack lines.
     :param postfix_content: A unicode string to add after the stack lines.
     """
-    stack = inspect.stack()[1:]
+    def __init__(self, prefix_content="", postfix_content=""):
+        stack = inspect.stack()[1:]
 
-    if StackLinesContent.HIDE_INTERNAL_STACK:
-        limit = 1
-        while limit < len(stack) and '__unittest' not in stack[limit][0].f_globals:
-            limit += 1
-    else:
-        limit = -1
+        if StackLinesContent.HIDE_INTERNAL_STACK:
+            limit = 1
+            while (limit < len(stack) and
+                   '__unittest' not in stack[limit][0].f_globals):
+                limit += 1
+        else:
+            limit = -1
 
-    frames_only = [line[0] for line in stack[:limit]]
-    processed_stack = [ ]
-    for frame in reversed(frames_only):
-        filename, line, function, context, _ = inspect.getframeinfo(frame)
-        context = ''.join(context)
-        processed_stack.append((filename, line, function, context))
-    return StackLinesContent(processed_stack, prefix_content, postfix_content)
+        frames_only = [line[0] for line in stack[:limit]]
+        processed_stack = [ ]
+        for frame in reversed(frames_only):
+            filename, line, function, context, _ = inspect.getframeinfo(frame)
+            context = ''.join(context)
+            processed_stack.append((filename, line, function, context))
+        return super(StacktraceContent, self).__init__(processed_stack,
+                                                       prefix_content,
+                                                       postfix_content)
 
 
 def json_content(json_data):
