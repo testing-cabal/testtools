@@ -176,35 +176,38 @@ class StackLinesContent(Content):
         return ''.join(msg_lines)
 
 
-def TracebackContent(err, test):
+class TracebackContent(StackLinesContent):
     """Content object for tracebacks.
 
     This adapts an exc_info tuple to the Content interface.
     text/x-traceback;language=python is used for the mime type, in order to
     provide room for other languages to format their tracebacks differently.
     """
-    if err is None:
-        raise ValueError("err may not be None")
+    def __init__(self, err, test):
+        if err is None:
+            raise ValueError("err may not be None")
 
-    exctype, value, tb = err
-    # Skip test runner traceback levels
-    if StackLinesContent.HIDE_INTERNAL_STACK:
-        while tb and '__unittest' in tb.tb_frame.f_globals:
-            tb = tb.tb_next
+        exctype, value, tb = err
+        # Skip test runner traceback levels
+        if StackLinesContent.HIDE_INTERNAL_STACK:
+            while tb and '__unittest' in tb.tb_frame.f_globals:
+                tb = tb.tb_next
 
-    # testtools customization. When str is unicode (e.g. IronPython,
-    # Python 3), traceback.format_exception_only returns unicode. For Python 2,
-    # it returns bytes. We need to guarantee unicode.
-    if str_is_unicode:
-        format_exception_only = traceback.format_exception_only
-    else:
-        format_exception_only = _format_exception_only
+        # testtools customization. When str is unicode (e.g. IronPython,
+        # Python 3), traceback.format_exception_only returns unicode. For
+        # Python 2, it returns bytes. We need to guarantee unicode.
+        if str_is_unicode:
+            format_exception_only = traceback.format_exception_only
+        else:
+            format_exception_only = _format_exception_only
 
-    prefix = _TB_HEADER
-    stack_lines = traceback.extract_tb(tb)
-    postfix = ''.join(format_exception_only(exctype, value))
+        prefix = _TB_HEADER
+        stack_lines = traceback.extract_tb(tb)
+        postfix = ''.join(format_exception_only(exctype, value))
 
-    return StackLinesContent(stack_lines, prefix, postfix)
+        return super(TracebackContent, self).__init__(stack_lines,
+                                                      prefix,
+                                                      postfix)
 
 
 def StacktraceContent(prefix_content="", postfix_content=""):
