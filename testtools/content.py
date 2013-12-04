@@ -229,25 +229,26 @@ class StacktraceContent(StackLinesContent):
     :param postfix_content: A unicode string to add after the stack lines.
     """
     def __init__(self, prefix_content="", postfix_content=""):
-        stack = inspect.stack()[1:]
-
+        stack = inspect.stack()
+        tb = TracebackFromFrame(stack[1], stack[2:])
         if StackLinesContent.HIDE_INTERNAL_STACK:
-            limit = 1
-            while (limit < len(stack) and
-                   '__unittest' not in stack[limit][0].f_globals):
-                limit += 1
-        else:
-            limit = -1
-
-        frames_only = [line[0] for line in stack[:limit]]
-        processed_stack = [ ]
-        for frame in reversed(frames_only):
-            filename, line, function, context, _ = inspect.getframeinfo(frame)
-            context = ''.join(context)
-            processed_stack.append((filename, line, function, context))
+            while tb and '__unittest' in tb.tb_frame.f_globals:
+                tb = tb.tb_next
+        processed_stack = traceback.extract_tb(tb)
         return super(StacktraceContent, self).__init__(processed_stack,
                                                        prefix_content,
                                                        postfix_content)
+
+
+class TracebackFromFrame(object):
+
+    def __init__(self, frame, remaining_frames=None):
+        self.tb_frame = frame[0]
+        self.tb_lineno = frame[0].f_lineno
+        self.tb_next = None
+        if remaining_frames:
+            self.tb_next = TracebackFromFrame(remaining_frames[0],
+                                              remaining_frames[1:])
 
 
 def json_content(json_data):
