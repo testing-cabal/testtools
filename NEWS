@@ -7,6 +7,12 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Changes
+-------
+
+* Removed a number of code paths where Python 2.4 and Python 2.5 were
+  explicitly handled. (Daniel Watkins)
+
 0.9.34
 ~~~~~~
 

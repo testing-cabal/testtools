@@ -163,12 +163,7 @@ class TestRaisesBaseTypes(TestCase):
         # Exception, it is propogated.
         match_keyb = Raises(MatchesException(KeyboardInterrupt))
         def raise_keyb_from_match():
-            if sys.version_info > (2, 5):
-                matcher = Raises(MatchesException(Exception))
-            else:
-                # On Python 2.4 KeyboardInterrupt is a StandardError subclass
-                # but should propogate from less generic exception matchers
-                matcher = Raises(MatchesException(EnvironmentError))
+            matcher = Raises(MatchesException(Exception))
             matcher.match(self.raiser)
         self.assertThat(raise_keyb_from_match, match_keyb)
 

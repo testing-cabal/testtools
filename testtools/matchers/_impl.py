@@ -114,9 +114,7 @@ class MismatchError(AssertionError):
     # characters are in the matchee, matcher or mismatch.
 
     def __init__(self, matchee, matcher, mismatch, verbose=False):
-        # Have to use old-style upcalling for Python 2.4 and 2.5
-        # compatibility.
-        AssertionError.__init__(self)
+        super(MismatchError, self).__init__()
         self.matchee = matchee
         self.matcher = matcher
         self.mismatch = mismatch

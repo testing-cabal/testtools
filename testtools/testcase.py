@@ -200,9 +200,6 @@ class TestCase(unittest.TestCase):
             (_UnexpectedSuccess, self._report_unexpected_success),
             (Exception, self._report_error),
             ]
-        if sys.version_info < (2, 6):
-            # Catch old-style string exceptions with None as the instance
-            self.exception_handlers.append((type(None), self._report_error))
 
     def __eq__(self, other):
         eq = getattr(unittest.TestCase, '__eq__', None)
@@ -580,12 +577,7 @@ class TestCase(unittest.TestCase):
         return ret
 
     def _get_test_method(self):
-        absent_attr = object()
-        # Python 2.5+
-        method_name = getattr(self, '_testMethodName', absent_attr)
-        if method_name is absent_attr:
-            # Python 2.4
-            method_name = getattr(self, '_TestCase__testMethodName')
+        method_name = getattr(self, '_testMethodName')
         return getattr(self, method_name)
 
     def _run_test_method(self, result):
@@ -823,8 +815,6 @@ def skipUnless(condition, reason):
 
 class ExpectedException:
     """A context manager to handle expected exceptions.
-
-    In Python 2.5 or later::
 
       def test_foo(self):
           with ExpectedException(ValueError, 'fo.*'):

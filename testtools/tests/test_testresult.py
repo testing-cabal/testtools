@@ -844,7 +844,7 @@ class TestExtendedToStreamDecorator(TestCase):
         result.status(test_id='foo', test_status='fail')
         result.stopTestRun()
         self.assertEqual(False, result.wasSuccessful())
-        
+
 
 class TestStreamFailFast(TestCase):
 
@@ -2381,11 +2381,6 @@ class TestNonAsciiResults(TestCase):
         self._run(stream, module.Test())
         return stream.getvalue()
 
-    def _silence_deprecation_warnings(self):
-        """Shut up DeprecationWarning for this test only"""
-        warnings.simplefilter("ignore", DeprecationWarning)
-        self.addCleanup(warnings.filters.remove, warnings.filters[0])
-
     def _get_sample_text(self, encoding="unicode_internal"):
         if encoding is None and str_is_unicode:
            encoding = "unicode_internal"
@@ -2427,7 +2422,7 @@ class TestNonAsciiResults(TestCase):
         if sys.version_info > (3, 3):
             return MatchesAny(Contains("FileExistsError: "),
                               Contains("PermissionError: "))
-        elif os.name != "nt" or sys.version_info < (2, 5):
+        elif os.name != "nt":
             return Contains(self._as_output("OSError: "))
         else:
             return Contains(self._as_output("WindowsError: "))
@@ -2491,15 +2486,6 @@ class TestNonAsciiResults(TestCase):
             "UnprintableError: <unprintable UnprintableError object>\n"),
             textoutput)
 
-    def test_string_exception(self):
-        """Raise a string rather than an exception instance if supported"""
-        if sys.version_info > (2, 6):
-            self.skip("No string exceptions in Python 2.6 or later")
-        elif sys.version_info > (2, 5):
-            self._silence_deprecation_warnings()
-        textoutput = self._test_external_case(testline="raise 'plain str'")
-        self.assertIn(self._as_output("\nplain str\n"), textoutput)
-
     def test_non_ascii_dirname(self):
         """Script paths in the traceback can be non-ascii"""
         text, raw = self._get_sample_text(sys.getfilesystemencoding())
@@ -2529,9 +2515,6 @@ class TestNonAsciiResults(TestCase):
 
     def test_syntax_error_import_binary(self):
         """Importing a binary file shouldn't break SyntaxError formatting"""
-        if sys.version_info < (2, 5):
-            # Python 2.4 assumes the file is latin-1 and tells you off
-            self._silence_deprecation_warnings()
         self._setup_external_case("import bad")
         f = open(os.path.join(self.dir, "bad.py"), "wb")
         try:

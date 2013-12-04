@@ -10,8 +10,6 @@ import sys
 
 from testtools.compat import (
     classtypes,
-    _error_repr,
-    isbaseexception,
     istext,
     )
 from ._basic import MatchesRegex
@@ -20,6 +18,17 @@ from ._impl import (
     Matcher,
     Mismatch,
     )
+
+
+_error_repr = BaseException.__repr__
+
+
+def _is_exception(exc):
+    return isinstance(exc, BaseException)
+
+
+def _is_user_exception(exc):
+    return isinstance(exc, Exception)
 
 
 class MatchesException(Matcher):
@@ -45,7 +54,7 @@ class MatchesException(Matcher):
             value_re = AfterPreproccessing(str, MatchesRegex(value_re), False)
         self.value_re = value_re
         expected_type = type(self.expected)
-        self._is_instance = not any(issubclass(expected_type, class_type) 
+        self._is_instance = not any(issubclass(expected_type, class_type)
                 for class_type in classtypes() + (tuple,))
 
     def match(self, other):
@@ -103,9 +112,10 @@ class Raises(Matcher):
             else:
                 mismatch = None
             # The exception did not match, or no explicit matching logic was
-            # performed. If the exception is a non-user exception (that is, not
-            # a subclass of Exception on Python 2.5+) then propogate it.
-            if isbaseexception(exc_info[1]):
+            # performed. If the exception is a non-user exception then
+            # propagate it.
+            exception = exc_info[1]
+            if _is_exception(exception) and not _is_user_exception(exception):
                 del exc_info
                 raise
             return mismatch
