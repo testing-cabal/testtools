@@ -23,6 +23,14 @@ from ._impl import (
 _error_repr = BaseException.__repr__
 
 
+def _is_exception(exc):
+    return isinstance(exc, BaseException)
+
+
+def _is_user_exception(exc):
+    return isinstance(exc, Exception)
+
+
 class MatchesException(Matcher):
     """Match an exc_info tuple against an exception instance or type."""
 
@@ -104,10 +112,10 @@ class Raises(Matcher):
             else:
                 mismatch = None
             # The exception did not match, or no explicit matching logic was
-            # performed. If the exception is a non-user exception (that is, not
-            # a subclass of Exception) then propagate it.
-            if (isinstance(exc_info[1], BaseException)
-                    and not isinstance(exc_info[1], Exception)):
+            # performed. If the exception is a non-user exception then
+            # propagate it.
+            exception = exc_info[1]
+            if _is_exception(exception) and not _is_user_exception(exception):
                 del exc_info
                 raise
             return mismatch
