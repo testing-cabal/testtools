@@ -153,20 +153,11 @@ class StackLinesContent(Content):
         """
         content_type = ContentType('text', 'x-traceback',
             {"language": "python", "charset": "utf8"})
-        if not stack_lines:
-            stack_lines = self._process_stack_lines()
         value = prefix_content + \
             self._stack_lines_to_unicode(stack_lines) + \
             postfix_content
         super(StackLinesContent, self).__init__(
             content_type, lambda: [value.encode("utf8")])
-
-    def _process_stack_lines(self):
-        tb = self._get_traceback_root()
-        if StackLinesContent.HIDE_INTERNAL_STACK:
-            while tb and '__unittest' in tb.tb_frame.f_globals:
-                tb = tb.tb_next
-        return traceback.extract_tb(tb)
 
     def _stack_lines_to_unicode(self, stack_lines):
         """Converts a list of pre-processed stack lines into a unicode string.
@@ -185,7 +176,23 @@ class StackLinesContent(Content):
         return ''.join(msg_lines)
 
 
-class TracebackContent(StackLinesContent):
+class StackLineProvidingContent(StackLinesContent):
+
+    def __init__(self, prefix, postfix):
+        stack_lines = self._process_stack_lines()
+        super(StackLineProvidingContent, self).__init__(stack_lines,
+                                                        prefix,
+                                                        postfix)
+
+    def _process_stack_lines(self):
+        tb = self._get_traceback_root()
+        if StackLinesContent.HIDE_INTERNAL_STACK:
+            while tb and '__unittest' in tb.tb_frame.f_globals:
+                tb = tb.tb_next
+        return traceback.extract_tb(tb)
+
+
+class TracebackContent(StackLineProvidingContent):
     """Content object for tracebacks.
 
     This adapts an exc_info tuple to the Content interface.
@@ -200,8 +207,7 @@ class TracebackContent(StackLinesContent):
         prefix = _TB_HEADER
         postfix = self._get_postfix()
 
-        return super(TracebackContent, self).__init__(None,
-                                                      prefix,
+        return super(TracebackContent, self).__init__(prefix,
                                                       postfix)
 
     def _get_traceback_root(self):
@@ -220,7 +226,7 @@ class TracebackContent(StackLinesContent):
         return ''.join(format_exception_only(exctype, value))
 
 
-class StacktraceContent(StackLinesContent):
+class StacktraceContent(StackLineProvidingContent):
     """Content object for stack traces.
 
     This function will create and return a content object that contains a
@@ -233,8 +239,7 @@ class StacktraceContent(StackLinesContent):
     :param postfix_content: A unicode string to add after the stack lines.
     """
     def __init__(self, prefix_content="", postfix_content=""):
-        return super(StacktraceContent, self).__init__(None,
-                                                       prefix_content,
+        return super(StacktraceContent, self).__init__(prefix_content,
                                                        postfix_content)
 
     def _get_traceback_root(self):
