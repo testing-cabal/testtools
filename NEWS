@@ -13,6 +13,12 @@ Changes
 * Removed a number of code paths where Python 2.4 and Python 2.5 were
   explicitly handled. (Daniel Watkins)
 
+Improvements
+------------
+
+* Docs are now built as part of the Travis-CI build, reducing the chance of
+  Read The Docs being broken accidentally. (Daniel Watkins, #1158773)
+
 0.9.34
 ~~~~~~
 
