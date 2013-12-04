@@ -153,11 +153,20 @@ class StackLinesContent(Content):
         """
         content_type = ContentType('text', 'x-traceback',
             {"language": "python", "charset": "utf8"})
+        if not stack_lines:
+            stack_lines = self._process_stack_lines()
         value = prefix_content + \
             self._stack_lines_to_unicode(stack_lines) + \
             postfix_content
         super(StackLinesContent, self).__init__(
             content_type, lambda: [value.encode("utf8")])
+
+    def _process_stack_lines(self):
+        tb = self._get_traceback_root()
+        if StackLinesContent.HIDE_INTERNAL_STACK:
+            while tb and '__unittest' in tb.tb_frame.f_globals:
+                tb = tb.tb_next
+        return traceback.extract_tb(tb)
 
     def _stack_lines_to_unicode(self, stack_lines):
         """Converts a list of pre-processed stack lines into a unicode string.
@@ -189,20 +198,15 @@ class TracebackContent(StackLinesContent):
         self.err = err
 
         prefix = _TB_HEADER
-        stack_lines = self._get_stack_lines()
         postfix = self._get_postfix()
 
-        return super(TracebackContent, self).__init__(stack_lines,
+        return super(TracebackContent, self).__init__(None,
                                                       prefix,
                                                       postfix)
 
-    def _get_stack_lines(self):
+    def _get_traceback_root(self):
         _, _, tb = self.err
-        # Skip test runner traceback levels
-        if StackLinesContent.HIDE_INTERNAL_STACK:
-            while tb and '__unittest' in tb.tb_frame.f_globals:
-                tb = tb.tb_next
-        return traceback.extract_tb(tb)
+        return tb
 
     def _get_postfix(self):
         # testtools customization. When str is unicode (e.g. IronPython,
@@ -229,15 +233,15 @@ class StacktraceContent(StackLinesContent):
     :param postfix_content: A unicode string to add after the stack lines.
     """
     def __init__(self, prefix_content="", postfix_content=""):
-        stack = inspect.stack()
-        tb = TracebackFromFrame(stack[1], stack[2:])
-        if StackLinesContent.HIDE_INTERNAL_STACK:
-            while tb and '__unittest' in tb.tb_frame.f_globals:
-                tb = tb.tb_next
-        processed_stack = traceback.extract_tb(tb)
-        return super(StacktraceContent, self).__init__(processed_stack,
+        return super(StacktraceContent, self).__init__(None,
                                                        prefix_content,
                                                        postfix_content)
+
+    def _get_traceback_root(self):
+        stack = inspect.stack()
+        stack = stack[4:]
+        stack = list(reversed(stack))
+        return TracebackFromFrame(stack[0], stack[1:])
 
 
 class TracebackFromFrame(object):
