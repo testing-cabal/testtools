@@ -200,20 +200,8 @@ def TracebackContent(err, test):
     else:
         format_exception_only = _format_exception_only
 
-    limit = None
-    # Disabled due to https://bugs.launchpad.net/testtools/+bug/1188420
-    if (False
-        and StackLinesContent.HIDE_INTERNAL_STACK
-        and test.failureException
-        and isinstance(value, test.failureException)):
-        # Skip assert*() traceback levels
-        limit = 0
-        while tb and not self._is_relevant_tb_level(tb):
-            limit += 1
-            tb = tb.tb_next
-
     prefix = _TB_HEADER
-    stack_lines = traceback.extract_tb(tb, limit)
+    stack_lines = traceback.extract_tb(tb)
     postfix = ''.join(format_exception_only(exctype, value))
 
     return StackLinesContent(stack_lines, prefix, postfix)
