@@ -244,18 +244,20 @@ class StacktraceContent(StackLineProvidingContent):
 
     def _get_traceback_root(self):
         stack = inspect.stack()
-        stack = stack[4:]
-        stack = list(reversed(stack))
-        return TracebackFromStack(stack)
+        stack = self._strip_content_frames_out_of_stack(stack)
+        return FrameTraceback.from_stack(stack)
+
+    def _strip_content_frames_out_of_stack(self, stack):
+        return stack[4:]
 
 
-class TracebackFromStack(object):
+class FrameTraceback(object):
     """
     Presents a stack of frame objects as a traceback object.
 
     :param frames:
-        A list of frame objects comprising a stack (e.g. as returned by
-        ``inspect.stack()``).
+        A list of frame objects comprising a stack, ordered top-to-bottom (the
+        opposite of what inspect.stack() returns).
     """
 
     def __init__(self, frames):
@@ -264,7 +266,18 @@ class TracebackFromStack(object):
         self.tb_lineno = frame[0].f_lineno
         self.tb_next = None
         if remaining_frames:
-            self.tb_next = TracebackFromStack(remaining_frames)
+            self.tb_next = FrameTraceback(remaining_frames)
+
+    @classmethod
+    def from_stack(cls, stack):
+        """
+        Takes a stack and returns a traceback object.
+
+        ``inspect.stack()`` returns a list from bottom-to-top, tracebacks are a
+        linked list from top-to-bottom; this classmethod handles the difference
+        in ordering.
+        """
+        return cls(list(reversed(stack)))
 
 
 def json_content(json_data):
