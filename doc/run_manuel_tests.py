@@ -9,4 +9,5 @@ def test_suite():
     return manuel.testing.TestSuite(m, 'for-test-authors.rst')
 
 if __name__ == '__main__':
-    unittest.TextTestRunner().run(test_suite())
+    result = unittest.TextTestRunner().run(test_suite())
+    assert result.wasSuccessful()
