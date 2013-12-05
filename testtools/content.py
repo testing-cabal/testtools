@@ -246,18 +246,25 @@ class StacktraceContent(StackLineProvidingContent):
         stack = inspect.stack()
         stack = stack[4:]
         stack = list(reversed(stack))
-        return TracebackFromFrame(stack[0], stack[1:])
+        return TracebackFromStack(stack)
 
 
-class TracebackFromFrame(object):
+class TracebackFromStack(object):
+    """
+    Presents a stack of frame objects as a traceback object.
 
-    def __init__(self, frame, remaining_frames=None):
+    :param frames:
+        A list of frame objects comprising a stack (e.g. as returned by
+        ``inspect.stack()``).
+    """
+
+    def __init__(self, frames):
+        frame, remaining_frames = frames[0], frames[1:]
         self.tb_frame = frame[0]
         self.tb_lineno = frame[0].f_lineno
         self.tb_next = None
         if remaining_frames:
-            self.tb_next = TracebackFromFrame(remaining_frames[0],
-                                              remaining_frames[1:])
+            self.tb_next = TracebackFromStack(remaining_frames)
 
 
 def json_content(json_data):
