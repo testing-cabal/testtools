@@ -113,7 +113,7 @@ You can then run::
 
 For more information about the capabilities of the `TestCommand` command see::
 
-	$ python setup.py test --help
+    $ python setup.py test --help
 
 You can use the `setup configuration`_ to specify the default behavior of the
 `TestCommand` command.
