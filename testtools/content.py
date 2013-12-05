@@ -256,7 +256,7 @@ class StacktraceContent(StackLineProvidingContent):
 
     def _strip_content_frames_out_of_stack(self, stack):
         for i, frame in enumerate(stack):
-            if frame[1] != __file__:
+            if not frame[1].endswith('testtools/content.py'):
                 break
         return stack[i:]
 
