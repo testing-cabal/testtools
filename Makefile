@@ -5,7 +5,7 @@ SOURCES=$(shell find testtools -name "*.py")
 
 check:
 	PYTHONPATH=$(PWD) $(PYTHON) -m testtools.run testtools.tests.test_suite
-	PYTHONPATH=$(PWD)/doc $(PYTHON) doc/run_manuel_tests.py
+	(cd doc; $(PYTHON) run_manuel_tests.py)
 
 TAGS: ${SOURCES}
 	ctags -e -R testtools/
