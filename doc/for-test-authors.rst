@@ -30,7 +30,9 @@ that you could easily miss.
 The basics
 ==========
 
-Here's what a basic testtools unit tests look like::
+Here's what a basic testtools unit tests look like:
+
+.. code-block:: python
 
   from testtools import TestCase
   from myproject import silly
@@ -47,7 +49,6 @@ Here's what a basic testtools unit tests look like::
           # 'square' raises a TypeError if it's given bad input, say a
           # string.
           self.assertRaises(TypeError, silly.square, "orange")
-
 
 Here you have a class that inherits from ``testtools.TestCase`` and bundles
 together a bunch of related tests.  The tests themselves are methods on that
@@ -134,14 +135,18 @@ Improved assertRaises
 ---------------------
 
 ``TestCase.assertRaises`` returns the caught exception.  This is useful for
-asserting more things about the exception than just the type::
+asserting more things about the exception than just the type:
 
-  def test_square_bad_input(self):
-      # 'square' raises a TypeError if it's given bad input, say a
-      # string.
-      e = self.assertRaises(TypeError, silly.square, "orange")
-      self.assertEqual("orange", e.bad_value)
-      self.assertEqual("Cannot square 'orange', not a number.", str(e))
+.. code-block:: python
+
+    class TestBadInput(TestCase):
+
+        def test_square_bad_input(self):
+            # 'square' raises a TypeError if it's given bad input, say a
+            # string.
+            e = self.assertRaises(TypeError, silly.square, "orange")
+            self.assertEqual("orange", e.bad_value)
+            self.assertEqual("Cannot square 'orange', not a number.", str(e))
 
 Note that this is incompatible with the ``assertRaises`` in unittest2 and
 Python2.7.
@@ -152,12 +157,18 @@ ExpectedException
 
 If you are using a version of Python that supports the ``with`` context
 manager syntax, you might prefer to use that syntax to ensure that code raises
-particular errors.  ``ExpectedException`` does just that.  For example::
+particular errors.  ``ExpectedException`` does just that.  For example:
 
-  def test_square_root_bad_input_2(self):
-      # 'square' raises a TypeError if it's given bad input.
-      with ExpectedException(TypeError, "Cannot square.*"):
-          silly.square('orange')
+.. code-block:: python
+
+    from testtools.testcase import ExpectedException
+
+    class TestBadInput2(TestCase):
+
+        def test_square_root_bad_input(self):
+            # 'square' raises a TypeError if it's given bad input.
+            with ExpectedException(TypeError, "Cannot square.*"):
+                silly.square('orange')
 
 The first argument to ``ExpectedException`` is the type of exception you
 expect to see raised.  The second argument is optional, and can be either a
@@ -172,13 +183,19 @@ assertIn, assertNotIn
 
 These two assertions check whether a value is in a sequence and whether a
 value is not in a sequence.  They are "assert" versions of the ``in`` and
-``not in`` operators.  For example::
+``not in`` operators.  For example:
 
-  def test_assert_in_example(self):
-      self.assertIn('a', 'cat')
-      self.assertNotIn('o', 'cat')
-      self.assertIn(5, list_of_primes_under_ten)
-      self.assertNotIn(12, list_of_primes_under_ten)
+.. code-block:: python
+
+    list_of_primes_under_ten = [2, 3, 5, 7]
+
+    class TestAssertInAndNotIn(TestCase):
+
+        def test_assert_in_example(self):
+            self.assertIn('a', 'cat')
+            self.assertNotIn('o', 'cat')
+            self.assertIn(5, list_of_primes_under_ten)
+            self.assertNotIn(12, list_of_primes_under_ten)
 
 
 assertIs, assertIsNot
@@ -1430,3 +1447,17 @@ Here, ``repr(nullary)`` will be the same as ``repr(f)``.
 .. _Distutils: http://docs.python.org/library/distutils.html
 .. _`setup configuration`: http://docs.python.org/distutils/configfile.html
 .. _broken: http://chipaca.com/post/3210673069/hasattr-17-less-harmful
+
+.. invisible-code-block: python
+
+    from unittest.loader import TestLoader
+    from unittest.runner import TextTestRunner
+    from unittest.suite import TestSuite
+
+    suite = TestSuite()
+    suite.addTests(TestLoader().loadTestsFromTestCase(TestSillySquare))
+    suite.addTests(TestLoader().loadTestsFromTestCase(TestBadInput))
+    suite.addTests(TestLoader().loadTestsFromTestCase(TestBadInput2))
+    suite.addTests(TestLoader().loadTestsFromTestCase(TestAssertInAndNotIn))
+    result = TextTestRunner().run(suite)
+    assert result.wasSuccessful()
