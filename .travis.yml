@@ -8,8 +8,8 @@ python:
   - "pypy"
 
 install:
-  - pip install -q --use-mirrors fixtures extras python-mimeparse
+  - pip install -q --use-mirrors fixtures extras python-mimeparse manuel
   - python setup.py -q install
 
 script:
-  - python -m testtools.run testtools.tests.test_suite
+  - make check
