@@ -203,15 +203,19 @@ assertIs, assertIsNot
 
 These two assertions check whether values are identical to one another.  This
 is sometimes useful when you want to test something more strict than mere
-equality.  For example::
+equality.  For example:
 
-  def test_assert_is_example(self):
-      foo = [None]
-      foo_alias = foo
-      bar = [None]
-      self.assertIs(foo, foo_alias)
-      self.assertIsNot(foo, bar)
-      self.assertEqual(foo, bar) # They are equal, but not identical
+.. code-block:: python
+
+    class TestIdentity(TestCase):
+
+        def test_assert_is_example(self):
+            foo = [None]
+            foo_alias = foo
+            bar = [None]
+            self.assertIs(foo, foo_alias)
+            self.assertIsNot(foo, bar)
+            self.assertEqual(foo, bar) # They are equal, but not identical
 
 
 assertIsInstance
@@ -219,11 +223,17 @@ assertIsInstance
 
 As much as we love duck-typing and polymorphism, sometimes you need to check
 whether or not a value is of a given type.  This method does that.  For
-example::
+example:
 
-  def test_assert_is_instance_example(self):
-      now = datetime.now()
-      self.assertIsInstance(now, datetime)
+.. code-block:: python
+
+    from datetime import datetime
+
+    class TestIsInstance(TestCase):
+
+        def test_assert_is_instance_example(self):
+            now = datetime.now()
+            self.assertIsInstance(now, datetime)
 
 Note that there is no ``assertIsNotInstance`` in testtools currently.
 
@@ -240,11 +250,15 @@ testtools gives you the ``TestCase.expectFailure`` to help with this.  You use
 it to say that you expect this assertion to fail.  When the test runs and the
 assertion fails, testtools will report it as an "expected failure".
 
-Here's an example::
+Here's an example:
 
-  def test_expect_failure_example(self):
-      self.expectFailure(
-          "cats should be dogs", self.assertEqual, 'cats', 'dogs')
+.. code-block:: python
+
+    class TestExpectFailure(TestCase):
+
+        def test_expect_failure_example(self):
+            self.expectFailure(
+                "cats should be dogs", self.assertEqual, 'cats', 'dogs')
 
 As long as 'cats' is not equal to 'dogs', the test will be reported as an
 expected failure.
@@ -274,15 +288,20 @@ system.
 Using Matchers
 --------------
 
-Here's a really basic example using stock matchers found in testtools::
+Here's a really basic example using stock matchers found in testtools:
 
-  import testtools
-  from testtools.matchers import Equals
+.. code-block:: python
 
-  class TestSquare(TestCase):
-      def test_square(self):
-         result = square(7)
-         self.assertThat(result, Equals(49))
+    import testtools
+    from testtools.matchers import *
+
+    from myproject import square
+
+    class TestSquare(TestCase):
+
+        def test_square(self):
+            result = square(7)
+            self.assertThat(result, Equals(49))
 
 The line ``self.assertThat(result, Equals(49))`` is equivalent to
 ``self.assertEqual(result, 49)`` and means "assert that ``result`` equals 49".
@@ -292,17 +311,25 @@ kind of observed value (in this case, ``result``) and any matcher object
 
 The matcher object could be absolutely anything that implements the Matcher
 protocol.  This means that you can make more complex matchers by combining
-existing ones::
+existing ones:
 
-  def test_square_silly(self):
-      result = square(7)
-      self.assertThat(result, Not(Equals(50)))
+.. code-block:: python
 
-Which is roughly equivalent to::
+    class TestSquareNotEqualsWithMatcher(TestCase):
 
-  def test_square_silly(self):
-      result = square(7)
-      self.assertNotEqual(result, 50)
+        def test_square_silly(self):
+            result = square(7)
+            self.assertThat(result, Not(Equals(50)))
+
+Which is roughly equivalent to:
+
+.. code-block:: python
+
+    class TestSquareNotEqualsWithoutMatcher(TestCase):
+
+        def test_square_silly(self):
+            result = square(7)
+            self.assertNotEqual(result, 50)
 
 
 Stock matchers
@@ -314,40 +341,57 @@ imported from the ``testtools.matchers`` module.
 Equals
 ~~~~~~
 
-Matches if two items are equal. For example::
+Matches if two items are equal. For example:
 
-  def test_equals_example(self):
-      self.assertThat([42], Equals([42]))
+.. code-block:: python
+
+    class TestEquals(TestCase):
+
+        def test_equals_example(self):
+            self.assertThat([42], Equals([42]))
 
 
 Is
 ~~~
 
-Matches if two items are identical.  For example::
+Matches if two items are identical.  For example:
 
-  def test_is_example(self):
-      foo = object()
-      self.assertThat(foo, Is(foo))
+.. code-block:: python
+
+    class TestIs(TestCase):
+
+        def test_is_example(self):
+            foo = object()
+            self.assertThat(foo, Is(foo))
 
 
 IsInstance
 ~~~~~~~~~~
 
-Adapts isinstance() to use as a matcher.  For example::
+Adapts isinstance() to use as a matcher.  For example:
 
-  def test_isinstance_example(self):
-      class MyClass:pass
-      self.assertThat(MyClass(), IsInstance(MyClass))
-      self.assertThat(MyClass(), IsInstance(MyClass, str))
+.. code-block:: python
+
+    class TestIsInstance(TestCase):
+
+        def test_isinstance_example(self):
+            class MyClass:
+                pass
+            self.assertThat(MyClass(), IsInstance(MyClass))
+            self.assertThat(MyClass(), IsInstance(MyClass, str))
 
 
 The raises helper
 ~~~~~~~~~~~~~~~~~
 
-Matches if a callable raises a particular type of exception.  For example::
+Matches if a callable raises a particular type of exception.  For example:
 
-  def test_raises_example(self):
-      self.assertThat(lambda: 1/0, raises(ZeroDivisionError))
+.. code-block:: python
+
+    class TestRaises(TestCase):
+
+        def test_raises_example(self):
+            self.assertThat(lambda: 1/0, raises(ZeroDivisionError))
 
 This is actually a convenience function that combines two other matchers:
 Raises_ and MatchesException_.
@@ -357,15 +401,19 @@ DocTestMatches
 ~~~~~~~~~~~~~~
 
 Matches a string as if it were the output of a doctest_ example.  Very useful
-for making assertions about large chunks of text.  For example::
+for making assertions about large chunks of text.  For example:
 
-  import doctest
+.. code-block:: python
 
-  def test_doctest_example(self):
-      output = "Colorless green ideas"
-      self.assertThat(
-          output,
-          DocTestMatches("Colorless ... ideas", doctest.ELLIPSIS))
+    import doctest
+
+    class TestDocTestMatches(TestCase):
+
+        def test_doctest_example(self):
+            output = "Colorless green ideas"
+            self.assertThat(
+                output,
+                DocTestMatches("Colorless ... ideas", doctest.ELLIPSIS))
 
 We highly recommend using the following flags::
 
@@ -376,56 +424,78 @@ GreaterThan
 ~~~~~~~~~~~
 
 Matches if the given thing is greater than the thing in the matcher.  For
-example::
+example:
 
-  def test_greater_than_example(self):
-      self.assertThat(3, GreaterThan(2))
+.. code-block:: python
+
+    class TestGreaterThan(TestCase):
+
+        def test_greater_than_example(self):
+            self.assertThat(3, GreaterThan(2))
 
 
 LessThan
 ~~~~~~~~
 
 Matches if the given thing is less than the thing in the matcher.  For
-example::
+example:
 
-  def test_less_than_example(self):
-      self.assertThat(2, LessThan(3))
+.. code-block:: python
+
+    class TestLessThan(TestCase):
+
+        def test_less_than_example(self):
+            self.assertThat(2, LessThan(3))
 
 
 StartsWith, EndsWith
 ~~~~~~~~~~~~~~~~~~~~
 
 These matchers check to see if a string starts with or ends with a particular
-substring.  For example::
+substring.  For example:
 
-  def test_starts_and_ends_with_example(self):
-      self.assertThat('underground', StartsWith('und'))
-      self.assertThat('underground', EndsWith('und'))
+.. code-block:: python
+
+    class TestStartsWithEndsWith(TestCase):
+
+        def test_starts_and_ends_with_example(self):
+            self.assertThat('underground', StartsWith('und'))
+            self.assertThat('underground', EndsWith('und'))
 
 
 Contains
 ~~~~~~~~
 
 This matcher checks to see if the given thing contains the thing in the
-matcher.  For example::
+matcher.  For example:
 
-  def test_contains_example(self):
-      self.assertThat('abc', Contains('b'))
+.. code-block:: python
+
+    class TestContains(TestCase):
+
+        def test_contains_example(self):
+            self.assertThat('abc', Contains('b'))
 
 
 MatchesException
 ~~~~~~~~~~~~~~~~
 
 Matches an exc_info tuple if the exception is of the correct type.  For
-example::
+example:
 
-  def test_matches_exception_example(self):
-      try:
-          raise RuntimeError('foo')
-      except RuntimeError:
-          exc_info = sys.exc_info()
-      self.assertThat(exc_info, MatchesException(RuntimeError))
-      self.assertThat(exc_info, MatchesException(RuntimeError('bar'))
+.. code-block:: python
+
+    import sys
+
+    class TestMatchesException(TestCase):
+
+        def test_matches_exception_example(self):
+            try:
+                raise RuntimeError('foo')
+            except RuntimeError:
+                exc_info = sys.exc_info()
+            self.assertThat(exc_info, MatchesException(RuntimeError))
+            self.assertThat(exc_info, Not(MatchesException(RuntimeError('bar'))))
 
 Most of the time, you will want to uses `The raises helper`_ instead.
 
@@ -445,12 +515,16 @@ KeysEqual
 ~~~~~~~~~
 
 Matches if the keys of one dict are equal to the keys of another dict.  For
-example::
+example:
 
-  def test_keys_equal(self):
-      x = {'a': 1, 'b': 2}
-      y = {'a': 2, 'b': 3}
-      self.assertThat(x, KeysEqual(y))
+.. code-block:: python
+
+    class TestKeysEqual(TestCase):
+
+        def test_keys_equal(self):
+            x = {'a': 1, 'b': 2}
+            y = {'a': 2, 'b': 3}
+            self.assertThat(x, KeysEqual(y))
 
 
 MatchesRegex

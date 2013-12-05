@@ -8,3 +8,6 @@ class silly(object):
             exception = TypeError("Cannot square '{}', not a number.".format(number))
             exception.bad_value = number
             raise exception
+
+
+square = silly.square
