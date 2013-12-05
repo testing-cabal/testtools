@@ -255,7 +255,10 @@ class StacktraceContent(StackLineProvidingContent):
         return FrameTraceback.from_stack(stack)
 
     def _strip_content_frames_out_of_stack(self, stack):
-        return stack[3:]
+        for i, frame in enumerate(stack):
+            if frame[1] != __file__:
+                break
+        return stack[i:]
 
 
 class FrameTraceback(object):
