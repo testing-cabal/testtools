@@ -177,6 +177,13 @@ class StackLinesContent(Content):
 
 
 class StackLineProvidingContent(StackLinesContent):
+    """
+    A base class for different ways of providing stack lines as content.
+
+    Sub-classes need only implement _get_traceback_root, which should
+    provide a traceback object that represents the root of the stack
+    which should be processed in to a content object.
+    """
 
     def __init__(self, prefix, postfix):
         stack_lines = self._process_stack_lines()
@@ -190,6 +197,9 @@ class StackLineProvidingContent(StackLinesContent):
             while tb and '__unittest' in tb.tb_frame.f_globals:
                 tb = tb.tb_next
         return traceback.extract_tb(tb)
+
+    def _get_traceback_root(self):
+        raise NotImplementedError(self._get_traceback_root)
 
 
 class TracebackContent(StackLineProvidingContent):
@@ -229,8 +239,8 @@ class TracebackContent(StackLineProvidingContent):
 class StacktraceContent(StackLineProvidingContent):
     """Content object for stack traces.
 
-    This function will create and return a content object that contains a
-    stack trace.
+    This function will create and return a content object that contains
+    the current stack trace.
 
     The mime type is set to 'text/x-traceback;language=python', so other
     languages can format their stack traces differently.
