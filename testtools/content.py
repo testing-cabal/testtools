@@ -185,11 +185,11 @@ class StackLineProvidingContent(StackLinesContent):
     which should be processed in to a content object.
     """
 
-    def __init__(self, prefix, postfix):
+    def __init__(self, prefix_content='', postfix_content=''):
         stack_lines = self._process_stack_lines()
         super(StackLineProvidingContent, self).__init__(stack_lines,
-                                                        prefix,
-                                                        postfix)
+                                                        prefix_content,
+                                                        postfix_content)
 
     def _process_stack_lines(self):
         tb = self._get_traceback_root()
@@ -248,9 +248,6 @@ class StacktraceContent(StackLineProvidingContent):
     :param prefix_content: A unicode string to add before the stack lines.
     :param postfix_content: A unicode string to add after the stack lines.
     """
-    def __init__(self, prefix_content="", postfix_content=""):
-        return super(StacktraceContent, self).__init__(prefix_content,
-                                                       postfix_content)
 
     def _get_traceback_root(self):
         stack = inspect.stack()
@@ -258,7 +255,7 @@ class StacktraceContent(StackLineProvidingContent):
         return FrameTraceback.from_stack(stack)
 
     def _strip_content_frames_out_of_stack(self, stack):
-        return stack[4:]
+        return stack[3:]
 
 
 class FrameTraceback(object):
