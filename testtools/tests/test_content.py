@@ -281,6 +281,12 @@ class TestStacktraceContent(TestCase):
 
         self.assertNotIn('testtools/content.py', actual)
 
+    def test_last_frame_correct(self):
+        actual = StacktraceContent().as_text()
+        last_line = actual.strip().split('\n')[-1]
+        self.assertEqual('    actual = StacktraceContent().as_text()',
+                         last_line)
+
 
 class TestAttachFile(TestCase):
 
