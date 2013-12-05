@@ -1693,9 +1693,7 @@ Here, ``repr(nullary)`` will be the same as ``repr(f)``.
 
 .. invisible-code-block: python
 
-    from unittest.loader import TestLoader
-    from unittest.runner import TextTestRunner
-    from unittest.suite import TestSuite
+    from unittest import TestLoader, TestSuite, TextTestRunner
 
     suite = TestSuite()
     test_cases = []

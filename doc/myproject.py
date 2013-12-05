@@ -5,7 +5,7 @@ class silly(object):
         try:
             return number ** 2
         except TypeError:
-            exception = TypeError("Cannot square '{}', not a number.".format(number))
+            exception = TypeError("Cannot square '{0}', not a number.".format(number))
             exception.bad_value = number
             raise exception
 
@@ -45,7 +45,7 @@ class Person(object):
 
     @property
     def full_name(self):
-        return '{} {}'.format(self.first_name, self.last_name)
+        return '{0} {1}'.format(self.first_name, self.last_name)
 
 
 class SomeServer(object):
