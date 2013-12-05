@@ -544,13 +544,24 @@ be able to do, if you think about it:
 HasLength
 ~~~~~~~~~
 
-Check the length of a collection.  The following assertion will fail::
+Check the length of a collection.  The following assertion will fail:
 
-  self.assertThat([1, 2, 3], HasLength(2))
+.. code-block:: python
 
-But this one won't::
+    class TestHasLengthFail(TestCase):
 
-  self.assertThat([1, 2, 3], HasLength(3))
+        def test_has_length(self):
+            self.expectFailure('3 != 2',
+                self.assertThat, [1, 2, 3], HasLength(2))
+
+But this one won't:
+
+.. code-block:: python
+
+    class TestHasLength(TestCase):
+
+        def test_has_length(self):
+            self.assertThat([1, 2, 3], HasLength(3))
 
 
 File- and path-related matchers
@@ -717,12 +728,16 @@ Negates another matcher.  For example:
             self.assertThat([42], Not(Is([42])))
 
 If you find yourself using ``Not`` frequently, you may wish to create a custom
-matcher for it.  For example::
+matcher for it.  For example:
 
-  IsNot = lambda x: Not(Is(x))
+.. code-block:: python
 
-  def test_not_example_2(self):
-      self.assertThat([42], IsNot([42]))
+    IsNot = lambda x: Not(Is(x))
+
+    class TestCustomMatcher(TestCase):
+
+        def test_not_example_2(self):
+            self.assertThat([42], IsNot([42]))
 
 
 Annotate
@@ -1009,16 +1024,24 @@ Raises
 
 Takes whatever the callable raises as an exc_info tuple and matches it against
 whatever matcher it was given.  For example, if you want to assert that a
-callable raises an exception of a given type::
+callable raises an exception of a given type:
 
-  def test_raises_example(self):
-      self.assertThat(
-          lambda: 1/0, Raises(MatchesException(ZeroDivisionError)))
+.. code-block:: python
 
-Although note that this could also be written as::
+    class TestRaisesMatchesException(TestCase):
 
-  def test_raises_example_convenient(self):
-      self.assertThat(lambda: 1/0, raises(ZeroDivisionError))
+        def test_raises_example(self):
+            self.assertThat(
+                lambda: 1/0, Raises(MatchesException(ZeroDivisionError)))
+
+Although note that this could also be written as:
+
+.. code-block:: python
+
+    class TestRaisesConvenience(TestCase):
+
+        def test_raises_example_convenient(self):
+            self.assertThat(lambda: 1/0, raises(ZeroDivisionError))
 
 See also MatchesException_ and `the raises helper`_
 
@@ -1182,25 +1205,35 @@ The basic ``testtools.content.Content`` object is constructed from a
 iterator of chunks of bytes that the content is made from.
 
 So, to make a Content object that is just a simple string of text, you can
-do::
+do:
 
-  from testtools.content import Content
-  from testtools.content_type import ContentType
+.. code-block:: python
 
-  text = Content(ContentType('text', 'plain'), lambda: ["some text"])
+    from testtools.content import Content
+    from testtools.content_type import ContentType
+
+    text = Content(ContentType('text', 'plain'), lambda: ["some text"])
 
 Because adding small bits of text content is very common, there's also a
-convenience method::
+convenience method:
 
-  text = text_content("some text")
+.. code-block:: python
 
-To make content out of an image stored on disk, you could do something like::
+    from testtools.content import text_content
+    text = text_content("some text")
 
-  image = Content(ContentType('image', 'png'), lambda: open('foo.png').read())
+To make content out of an image stored on disk, you could do something like:
 
-Or you could use the convenience function::
+.. code-block:: python
 
-  image = content_from_file('foo.png', ContentType('image', 'png'))
+    image = Content(ContentType('image', 'png'), lambda: open('foo.png').read())
+
+Or you could use the convenience function:
+
+.. code-block:: python
+
+    from testtools.content import content_from_file
+    image = content_from_file('foo.png', ContentType('image', 'png'))
 
 The ``lambda`` helps make sure that the file is opened and the actual bytes
 read only when they are needed – by default, when the test is finished.  This
@@ -1216,31 +1249,33 @@ project has a server represented by a class ``SomeServer`` that you can start
 up and shut down in tests, but runs in another process.  You want to test
 interaction with that server, and whenever the interaction fails, you want to
 see the client-side error *and* the logs from the server-side.  Here's how you
-might do it::
+might do it:
 
-  from testtools import TestCase
-  from testtools.content import attach_file, Content
-  from testtools.content_type import UTF8_TEXT
+.. code-block:: python
 
-  from myproject import SomeServer
+    from testtools import TestCase
+    from testtools.content import attach_file, Content
+    from testtools.content_type import UTF8_TEXT
 
-  class SomeTestCase(TestCase):
+    from myproject import SomeServer
 
-      def setUp(self):
-          super(SomeTestCase, self).setUp()
-          self.server = SomeServer()
-          self.server.start_up()
-          self.addCleanup(self.server.shut_down)
-          self.addCleanup(attach_file, self.server.logfile, self)
+    class TestSomeServer(TestCase):
 
-      def attach_log_file(self):
-          self.addDetail(
-              'log-file',
-              Content(UTF8_TEXT,
-                      lambda: open(self.server.logfile, 'r').readlines()))
+        def setUp(self):
+            super(TestSomeServer, self).setUp()
+            self.server = SomeServer()
+            self.server.start_up()
+            self.addCleanup(self.server.shut_down)
+            self.addCleanup(self.attach_log_file)
 
-      def test_a_thing(self):
-          self.assertEqual("cool", self.server.temperature)
+        def attach_log_file(self):
+            self.addDetail(
+                'log-file',
+                Content(UTF8_TEXT,
+                        lambda: open(self.server.logfile, 'r').readlines()))
+
+        def test_a_thing(self):
+            self.assertEqual("cool", self.server.temperature)
 
 This test will attach the log file of ``SomeServer`` to each test that is
 run.  testtools will only display the log file for failing tests, so it's not
@@ -1307,12 +1342,20 @@ One common way of doing this is to do::
           self.server.setUp()
           self.addCleanup(self.server.tearDown)
 
-testtools provides a more convenient, declarative way to do the same thing::
+testtools provides a more convenient, declarative way to do the same thing:
 
-  class SomeTest(TestCase):
-      def setUp(self):
-          super(SomeTest, self).setUp()
-          self.server = self.useFixture(Server())
+.. code-block:: python
+
+    from myproject import Server
+
+    class TestFixture(TestCase):
+
+        def setUp(self):
+            super(TestFixture, self).setUp()
+            self.server = self.useFixture(Server())
+
+        def test_something(self):
+            pass
 
 ``useFixture(fixture)`` calls ``setUp`` on the fixture, schedules a clean up
 to clean it up, and schedules a clean up to attach all details_ held by the
@@ -1459,13 +1502,17 @@ TestCase.patch
 --------------
 
 ``patch`` is a convenient way to monkey-patch a Python object for the duration
-of your test.  It's especially useful for testing legacy code.  e.g.::
+of your test.  It's especially useful for testing legacy code.  e.g.:
 
-  def test_foo(self):
-      my_stream = StringIO()
-      self.patch(sys, 'stderr', my_stream)
-      run_some_code_that_prints_to_stderr()
-      self.assertEqual('', my_stream.getvalue())
+.. code-block:: python
+
+    class TestPatch(TestCase):
+
+        def test_patch(self):
+            my_stream = StringIO()
+            self.patch(sys, 'stderr', my_stream)
+            sys.stderr.write('foobar')
+            self.assertEqual('foobar', my_stream.getvalue())
 
 The call to ``patch`` above masks ``sys.stderr`` with ``my_stream`` so that
 anything printed to stderr will be captured in a StringIO variable that can be

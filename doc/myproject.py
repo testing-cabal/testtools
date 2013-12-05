@@ -46,3 +46,27 @@ class Person(object):
     @property
     def full_name(self):
         return '{} {}'.format(self.first_name, self.last_name)
+
+
+class SomeServer(object):
+
+    logfile = 'greetings.txt'
+    temperature = 'cool'
+
+    def start_up(self):
+        pass
+
+    def shut_down(self):
+        pass
+
+
+class Server(object):
+
+    def getDetails(self):
+        return {}
+
+    def setUp(self):
+        pass
+
+    def cleanUp(self):
+        pass
