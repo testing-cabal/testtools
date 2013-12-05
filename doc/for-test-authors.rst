@@ -531,10 +531,14 @@ MatchesRegex
 ~~~~~~~~~~~~
 
 Matches a string against a regular expression, which is a wonderful thing to
-be able to do, if you think about it::
+be able to do, if you think about it:
 
-  def test_matches_regex_example(self):
-      self.assertThat('foo', MatchesRegex('fo+'))
+.. code-block:: python
+
+    class TestMatchesRegex(TestCase):
+
+        def test_matches_regex_example(self):
+            self.assertThat('foo', MatchesRegex('fo+'))
 
 
 HasLength
@@ -558,45 +562,66 @@ the state of the filesystem.
 PathExists
 ~~~~~~~~~~
 
-Matches if a path exists::
+Matches if a path exists:
 
-  self.assertThat('/', PathExists())
+.. code-block:: python
+
+    class TestPathExists(TestCase):
+
+        def test_path_exists(self):
+            self.assertThat('/', PathExists())
 
 
 DirExists
 ~~~~~~~~~
 
-Matches if a path exists and it refers to a directory::
+Matches if a path exists and it refers to a directory:
 
-  # This will pass on most Linux systems.
-  self.assertThat('/home/', DirExists())
-  # This will not
-  self.assertThat('/home/jml/some-file.txt', DirExists())
+.. code-block:: python
+
+    class TestDirExists(TestCase):
+
+        def test_dir_exists(self):
+            # This will exist on most Linux systems.
+            self.assertThat('/home/', DirExists())
+            # This will not
+            self.assertThat('/home/jml/some-file.txt', Not(DirExists()))
 
 
 FileExists
 ~~~~~~~~~~
 
-Matches if a path exists and it refers to a file (as opposed to a directory)::
+Matches if a path exists and it refers to a file (as opposed to a directory):
 
-  # This will pass on most Linux systems.
-  self.assertThat('/bin/true', FileExists())
-  # This will not.
-  self.assertThat('/home/', FileExists())
+.. code-block:: python
+
+    class TestFileExists(TestCase):
+
+        def test_file_exists(self):
+            # This will be a file on most Linux systems.
+            self.assertThat('/bin/true', FileExists())
+            # This will not.
+            self.assertThat('/home/', Not(FileExists()))
 
 
 DirContains
 ~~~~~~~~~~~
 
 Matches if the given directory contains the specified files and directories.
-Say we have a directory ``foo`` that has the files ``a``, ``b`` and ``c``,
-then::
+Say we have a directory ``sample_dir`` that has the files ``a``, ``b`` and
+``c``:
 
-  self.assertThat('foo', DirContains(['a', 'b', 'c']))
+.. code-block:: python
 
-will match, but::
+    class TestDirContains(TestCase):
 
-  self.assertThat('foo', DirContains(['a', 'b']))
+        def test_dir_contains(self):
+            # This will match
+            self.assertThat('sample_dir', DirContains(['a', 'b', 'c']))
+            # But this will not
+            self.expectFailure(
+                "c is in there too!",
+                self.assertThat, 'sample_dir', DirContains(['a', 'b']))
 
 will not.
 
@@ -604,9 +629,14 @@ The matcher sorts both the input and the list of names we get back from the
 filesystem.
 
 You can use this in a more advanced way, and match the sorted directory
-listing against an arbitrary matcher::
+listing against an arbitrary matcher:
 
-  self.assertThat('foo', DirContains(matcher=Contains('a')))
+.. code-block:: python
+
+    class TestDirContainsAdvanced(TestCase):
+
+        def test_dir_contains(self):
+            self.assertThat('sample_dir', DirContains(matcher=Contains('a')))
 
 
 FileContains
