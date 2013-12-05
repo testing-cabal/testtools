@@ -1455,13 +1455,9 @@ Here, ``repr(nullary)`` will be the same as ``repr(f)``.
     from unittest.suite import TestSuite
 
     suite = TestSuite()
-    test_cases = [
-        TestSillySquare,
-        TestBadInput,
-        TestBadInput2,
-        TestAssertInAndNotIn,
-    ]
-    for test_case in test_cases:
-        suite.addTests(TestLoader().loadTestsFromTestCase(test_case))
+    test_cases = []
+    for key, value in list(globals().items()):
+        if key.startswith('Test') and issubclass(value, TestCase):
+            suite.addTests(TestLoader().loadTestsFromTestCase(value))
     result = TextTestRunner().run(suite)
     assert result.wasSuccessful()
