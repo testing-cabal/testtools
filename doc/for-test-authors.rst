@@ -551,8 +551,7 @@ Check the length of a collection.  The following assertion will fail:
     class TestHasLengthFail(TestCase):
 
         def test_has_length(self):
-            self.expectFailure('3 != 2',
-                self.assertThat, [1, 2, 3], HasLength(2))
+            self.assertThat([1, 2, 3], HasLength(2))
 
 But this one won't:
 
@@ -629,12 +628,12 @@ Say we have a directory ``sample_dir`` that has the files ``a``, ``b`` and
         def test_dir_contains(self):
             # This will match
             self.assertThat('sample_dir', DirContains(['a', 'b', 'c']))
-            # But this will not
-            self.expectFailure(
-                "c is in there too!",
-                self.assertThat, 'sample_dir', DirContains(['a', 'b']))
 
-will not.
+    class TestDirContainsFail(TestCase):
+
+        def test_dir_contains(self):
+            # But this will not
+            self.assertThat('sample_dir', DirContains(['a', 'b']))
 
 The matcher sorts both the input and the list of names we get back from the
 filesystem.
@@ -797,18 +796,21 @@ It's much easier to understand in Python than in English:
 
 .. code-block:: python
 
+    has_und_at_both_ends = MatchesAll(StartsWith("und"), EndsWith("und"))
+
     class TestMatchesAll(TestCase):
 
         def test_matches_all_example(self):
-            has_und_at_both_ends = MatchesAll(StartsWith("und"), EndsWith("und"))
             # This will succeed.
             self.assertThat("underground", has_und_at_both_ends)
+
+    class TestMatchesAllFail(TestCase):
+
+        def test_matches_all_example(self):
             # This will fail.
-            self.expectFailure('not at start',
-                self.assertThat, "found", has_und_at_both_ends)
+            self.assertThat("found", has_und_at_both_ends)
             # So will this.
-            self.expectFailure('not at end',
-                self.assertThat, "undead", has_und_at_both_ends)
+            self.assertThat("undead", has_und_at_both_ends)
 
 At this point some people ask themselves, "why bother doing this at all? why
 not just have two separate assertions?".  It's a good question.
@@ -967,14 +969,18 @@ matcher based on it:
 
     from myproject import is_prime
 
+    IsPrime = MatchesPredicate(is_prime, '%s is not prime.')
+
     class TestMatchesPredicate(TestCase):
 
         def test_prime_numbers(self):
-            IsPrime = MatchesPredicate(is_prime, '%s is not prime.')
             self.assertThat(7, IsPrime)
+
+    class TestMatchesPredicateFail(TestCase):
+
+        def test_prime_numbers(self):
             # This will fail.
-            self.expectFailure('42 is not prime.',
-                self.assertThat, 42, IsPrime)
+            self.assertThat(42, IsPrime)
 
 The last assertion would produce the error message::
 
@@ -1001,15 +1007,19 @@ matcher based on it:
 
     from myproject import divisible
 
+    IsDivisibleBy = MatchesPredicateWithParams(divisible,
+                                               '{0} is not divisible by {1}')
+
     class TestMatchesPredicateWithParams(TestCase):
 
         def test_divisible_numbers(self):
-            IsDivisibleBy = MatchesPredicateWithParams(
-                divisible, '{0} is not divisible by {1}')
             self.assertThat(7, IsDivisibleBy(1))
             self.assertThat(7, IsDivisibleBy(7))
-            self.expectFailure('7 is not divisible by 2.',
-                self.assertThat, 7, IsDivisibleBy(2))
+
+    class TestMatchesPredicateWithParamsFail(TestCase):
+
+        def test_divisible_numbers(self):
+            self.assertThat(7, IsDivisibleBy(2))
 
 The last assertion would produce the error message::
 
@@ -1092,9 +1102,12 @@ returns a non-None value.  For example:
         def test_is_divisible_by_example(self):
             # This succeeds, since IsDivisibleBy(5).match(10) returns None.
             self.assertThat(10, IsDivisibleBy(5))
+
+    class TestIsDivisibleByFail(TestCase):
+
+        def test_is_divisible_by_example(self):
             # This fails, since IsDivisibleBy(7).match(10) returns a mismatch.
-            self.expectFailure('3 remains',
-                self.assertThat, 10, IsDivisibleBy(7))
+            self.assertThat(10, IsDivisibleBy(7))
 
 The mismatch is responsible for what sort of error message the failing test
 generates.  Here's an example mismatch:
@@ -1695,10 +1708,18 @@ Here, ``repr(nullary)`` will be the same as ``repr(f)``.
 
     from unittest import TestLoader, TestSuite, TextTestRunner
 
-    suite = TestSuite()
+    pass_suite = TestSuite()
+    fail_suite = TestSuite()
     test_cases = []
     for key, value in list(globals().items()):
-        if key.startswith('Test') and issubclass(value, TestCase):
-            suite.addTests(TestLoader().loadTestsFromTestCase(value))
-    result = TextTestRunner().run(suite)
-    assert result.wasSuccessful()
+        if isinstance(value, type) and issubclass(value, TestCase):
+            tests = TestLoader().loadTestsFromTestCase(value)
+            if 'Fail' in key:
+                fail_suite.addTests(tests)
+            else:
+                pass_suite.addTests(tests)
+    expected_pass_result = TextTestRunner().run(pass_suite)
+    expected_fail_result = TextTestRunner().run(fail_suite)
+    assert expected_pass_result.wasSuccessful(), "Some manuel tests failed"
+    assert 0 == len(expected_fail_result.errors), (
+        "Some manuel tests that should have failed errored")
