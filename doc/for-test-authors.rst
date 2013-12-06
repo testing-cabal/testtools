@@ -30,7 +30,9 @@ that you could easily miss.
 The basics
 ==========
 
-Here's what a basic testtools unit tests look like::
+Here's what a basic testtools unit tests look like:
+
+.. code-block:: python
 
   from testtools import TestCase
   from myproject import silly
@@ -47,7 +49,6 @@ Here's what a basic testtools unit tests look like::
           # 'square' raises a TypeError if it's given bad input, say a
           # string.
           self.assertRaises(TypeError, silly.square, "orange")
-
 
 Here you have a class that inherits from ``testtools.TestCase`` and bundles
 together a bunch of related tests.  The tests themselves are methods on that
@@ -112,7 +113,7 @@ You can then run::
 
 For more information about the capabilities of the `TestCommand` command see::
 
-	$ python setup.py test --help
+    $ python setup.py test --help
 
 You can use the `setup configuration`_ to specify the default behavior of the
 `TestCommand` command.
@@ -134,14 +135,18 @@ Improved assertRaises
 ---------------------
 
 ``TestCase.assertRaises`` returns the caught exception.  This is useful for
-asserting more things about the exception than just the type::
+asserting more things about the exception than just the type:
 
-  def test_square_bad_input(self):
-      # 'square' raises a TypeError if it's given bad input, say a
-      # string.
-      e = self.assertRaises(TypeError, silly.square, "orange")
-      self.assertEqual("orange", e.bad_value)
-      self.assertEqual("Cannot square 'orange', not a number.", str(e))
+.. code-block:: python
+
+    class TestBadInput(TestCase):
+
+        def test_square_bad_input(self):
+            # 'square' raises a TypeError if it's given bad input, say a
+            # string.
+            e = self.assertRaises(TypeError, silly.square, "orange")
+            self.assertEqual("orange", e.bad_value)
+            self.assertEqual("Cannot square 'orange', not a number.", str(e))
 
 Note that this is incompatible with the ``assertRaises`` in unittest2 and
 Python2.7.
@@ -152,12 +157,18 @@ ExpectedException
 
 If you are using a version of Python that supports the ``with`` context
 manager syntax, you might prefer to use that syntax to ensure that code raises
-particular errors.  ``ExpectedException`` does just that.  For example::
+particular errors.  ``ExpectedException`` does just that.  For example:
 
-  def test_square_root_bad_input_2(self):
-      # 'square' raises a TypeError if it's given bad input.
-      with ExpectedException(TypeError, "Cannot square.*"):
-          silly.square('orange')
+.. code-block:: python
+
+    from testtools.testcase import ExpectedException
+
+    class TestBadInput2(TestCase):
+
+        def test_square_root_bad_input(self):
+            # 'square' raises a TypeError if it's given bad input.
+            with ExpectedException(TypeError, "Cannot square.*"):
+                silly.square('orange')
 
 The first argument to ``ExpectedException`` is the type of exception you
 expect to see raised.  The second argument is optional, and can be either a
@@ -172,13 +183,19 @@ assertIn, assertNotIn
 
 These two assertions check whether a value is in a sequence and whether a
 value is not in a sequence.  They are "assert" versions of the ``in`` and
-``not in`` operators.  For example::
+``not in`` operators.  For example:
 
-  def test_assert_in_example(self):
-      self.assertIn('a', 'cat')
-      self.assertNotIn('o', 'cat')
-      self.assertIn(5, list_of_primes_under_ten)
-      self.assertNotIn(12, list_of_primes_under_ten)
+.. code-block:: python
+
+    list_of_primes_under_ten = [2, 3, 5, 7]
+
+    class TestAssertInAndNotIn(TestCase):
+
+        def test_assert_in_example(self):
+            self.assertIn('a', 'cat')
+            self.assertNotIn('o', 'cat')
+            self.assertIn(5, list_of_primes_under_ten)
+            self.assertNotIn(12, list_of_primes_under_ten)
 
 
 assertIs, assertIsNot
@@ -186,15 +203,19 @@ assertIs, assertIsNot
 
 These two assertions check whether values are identical to one another.  This
 is sometimes useful when you want to test something more strict than mere
-equality.  For example::
+equality.  For example:
 
-  def test_assert_is_example(self):
-      foo = [None]
-      foo_alias = foo
-      bar = [None]
-      self.assertIs(foo, foo_alias)
-      self.assertIsNot(foo, bar)
-      self.assertEqual(foo, bar) # They are equal, but not identical
+.. code-block:: python
+
+    class TestIdentity(TestCase):
+
+        def test_assert_is_example(self):
+            foo = [None]
+            foo_alias = foo
+            bar = [None]
+            self.assertIs(foo, foo_alias)
+            self.assertIsNot(foo, bar)
+            self.assertEqual(foo, bar) # They are equal, but not identical
 
 
 assertIsInstance
@@ -202,11 +223,17 @@ assertIsInstance
 
 As much as we love duck-typing and polymorphism, sometimes you need to check
 whether or not a value is of a given type.  This method does that.  For
-example::
+example:
 
-  def test_assert_is_instance_example(self):
-      now = datetime.now()
-      self.assertIsInstance(now, datetime)
+.. code-block:: python
+
+    from datetime import datetime
+
+    class TestIsInstance(TestCase):
+
+        def test_assert_is_instance_example(self):
+            now = datetime.now()
+            self.assertIsInstance(now, datetime)
 
 Note that there is no ``assertIsNotInstance`` in testtools currently.
 
@@ -223,11 +250,15 @@ testtools gives you the ``TestCase.expectFailure`` to help with this.  You use
 it to say that you expect this assertion to fail.  When the test runs and the
 assertion fails, testtools will report it as an "expected failure".
 
-Here's an example::
+Here's an example:
 
-  def test_expect_failure_example(self):
-      self.expectFailure(
-          "cats should be dogs", self.assertEqual, 'cats', 'dogs')
+.. code-block:: python
+
+    class TestExpectFailure(TestCase):
+
+        def test_expect_failure_example(self):
+            self.expectFailure(
+                "cats should be dogs", self.assertEqual, 'cats', 'dogs')
 
 As long as 'cats' is not equal to 'dogs', the test will be reported as an
 expected failure.
@@ -257,15 +288,20 @@ system.
 Using Matchers
 --------------
 
-Here's a really basic example using stock matchers found in testtools::
+Here's a really basic example using stock matchers found in testtools:
 
-  import testtools
-  from testtools.matchers import Equals
+.. code-block:: python
 
-  class TestSquare(TestCase):
-      def test_square(self):
-         result = square(7)
-         self.assertThat(result, Equals(49))
+    import testtools
+    from testtools.matchers import *
+
+    from myproject import square
+
+    class TestSquare(TestCase):
+
+        def test_square(self):
+            result = square(7)
+            self.assertThat(result, Equals(49))
 
 The line ``self.assertThat(result, Equals(49))`` is equivalent to
 ``self.assertEqual(result, 49)`` and means "assert that ``result`` equals 49".
@@ -275,17 +311,25 @@ kind of observed value (in this case, ``result``) and any matcher object
 
 The matcher object could be absolutely anything that implements the Matcher
 protocol.  This means that you can make more complex matchers by combining
-existing ones::
+existing ones:
 
-  def test_square_silly(self):
-      result = square(7)
-      self.assertThat(result, Not(Equals(50)))
+.. code-block:: python
 
-Which is roughly equivalent to::
+    class TestSquareNotEqualsWithMatcher(TestCase):
 
-  def test_square_silly(self):
-      result = square(7)
-      self.assertNotEqual(result, 50)
+        def test_square_silly(self):
+            result = square(7)
+            self.assertThat(result, Not(Equals(50)))
+
+Which is roughly equivalent to:
+
+.. code-block:: python
+
+    class TestSquareNotEqualsWithoutMatcher(TestCase):
+
+        def test_square_silly(self):
+            result = square(7)
+            self.assertNotEqual(result, 50)
 
 
 Stock matchers
@@ -297,40 +341,57 @@ imported from the ``testtools.matchers`` module.
 Equals
 ~~~~~~
 
-Matches if two items are equal. For example::
+Matches if two items are equal. For example:
 
-  def test_equals_example(self):
-      self.assertThat([42], Equals([42]))
+.. code-block:: python
+
+    class TestEquals(TestCase):
+
+        def test_equals_example(self):
+            self.assertThat([42], Equals([42]))
 
 
 Is
 ~~~
 
-Matches if two items are identical.  For example::
+Matches if two items are identical.  For example:
 
-  def test_is_example(self):
-      foo = object()
-      self.assertThat(foo, Is(foo))
+.. code-block:: python
+
+    class TestIs(TestCase):
+
+        def test_is_example(self):
+            foo = object()
+            self.assertThat(foo, Is(foo))
 
 
 IsInstance
 ~~~~~~~~~~
 
-Adapts isinstance() to use as a matcher.  For example::
+Adapts isinstance() to use as a matcher.  For example:
 
-  def test_isinstance_example(self):
-      class MyClass:pass
-      self.assertThat(MyClass(), IsInstance(MyClass))
-      self.assertThat(MyClass(), IsInstance(MyClass, str))
+.. code-block:: python
+
+    class TestIsInstance(TestCase):
+
+        def test_isinstance_example(self):
+            class MyClass:
+                pass
+            self.assertThat(MyClass(), IsInstance(MyClass))
+            self.assertThat(MyClass(), IsInstance(MyClass, str))
 
 
 The raises helper
 ~~~~~~~~~~~~~~~~~
 
-Matches if a callable raises a particular type of exception.  For example::
+Matches if a callable raises a particular type of exception.  For example:
 
-  def test_raises_example(self):
-      self.assertThat(lambda: 1/0, raises(ZeroDivisionError))
+.. code-block:: python
+
+    class TestRaises(TestCase):
+
+        def test_raises_example(self):
+            self.assertThat(lambda: 1/0, raises(ZeroDivisionError))
 
 This is actually a convenience function that combines two other matchers:
 Raises_ and MatchesException_.
@@ -340,15 +401,19 @@ DocTestMatches
 ~~~~~~~~~~~~~~
 
 Matches a string as if it were the output of a doctest_ example.  Very useful
-for making assertions about large chunks of text.  For example::
+for making assertions about large chunks of text.  For example:
 
-  import doctest
+.. code-block:: python
 
-  def test_doctest_example(self):
-      output = "Colorless green ideas"
-      self.assertThat(
-          output,
-          DocTestMatches("Colorless ... ideas", doctest.ELLIPSIS))
+    import doctest
+
+    class TestDocTestMatches(TestCase):
+
+        def test_doctest_example(self):
+            output = "Colorless green ideas"
+            self.assertThat(
+                output,
+                DocTestMatches("Colorless ... ideas", doctest.ELLIPSIS))
 
 We highly recommend using the following flags::
 
@@ -359,56 +424,78 @@ GreaterThan
 ~~~~~~~~~~~
 
 Matches if the given thing is greater than the thing in the matcher.  For
-example::
+example:
 
-  def test_greater_than_example(self):
-      self.assertThat(3, GreaterThan(2))
+.. code-block:: python
+
+    class TestGreaterThan(TestCase):
+
+        def test_greater_than_example(self):
+            self.assertThat(3, GreaterThan(2))
 
 
 LessThan
 ~~~~~~~~
 
 Matches if the given thing is less than the thing in the matcher.  For
-example::
+example:
 
-  def test_less_than_example(self):
-      self.assertThat(2, LessThan(3))
+.. code-block:: python
+
+    class TestLessThan(TestCase):
+
+        def test_less_than_example(self):
+            self.assertThat(2, LessThan(3))
 
 
 StartsWith, EndsWith
 ~~~~~~~~~~~~~~~~~~~~
 
 These matchers check to see if a string starts with or ends with a particular
-substring.  For example::
+substring.  For example:
 
-  def test_starts_and_ends_with_example(self):
-      self.assertThat('underground', StartsWith('und'))
-      self.assertThat('underground', EndsWith('und'))
+.. code-block:: python
+
+    class TestStartsWithEndsWith(TestCase):
+
+        def test_starts_and_ends_with_example(self):
+            self.assertThat('underground', StartsWith('und'))
+            self.assertThat('underground', EndsWith('und'))
 
 
 Contains
 ~~~~~~~~
 
 This matcher checks to see if the given thing contains the thing in the
-matcher.  For example::
+matcher.  For example:
 
-  def test_contains_example(self):
-      self.assertThat('abc', Contains('b'))
+.. code-block:: python
+
+    class TestContains(TestCase):
+
+        def test_contains_example(self):
+            self.assertThat('abc', Contains('b'))
 
 
 MatchesException
 ~~~~~~~~~~~~~~~~
 
 Matches an exc_info tuple if the exception is of the correct type.  For
-example::
+example:
 
-  def test_matches_exception_example(self):
-      try:
-          raise RuntimeError('foo')
-      except RuntimeError:
-          exc_info = sys.exc_info()
-      self.assertThat(exc_info, MatchesException(RuntimeError))
-      self.assertThat(exc_info, MatchesException(RuntimeError('bar'))
+.. code-block:: python
+
+    import sys
+
+    class TestMatchesException(TestCase):
+
+        def test_matches_exception_example(self):
+            try:
+                raise RuntimeError('foo')
+            except RuntimeError:
+                exc_info = sys.exc_info()
+            self.assertThat(exc_info, MatchesException(RuntimeError))
+            self.assertThat(exc_info, Not(MatchesException(RuntimeError('bar'))))
 
 Most of the time, you will want to uses `The raises helper`_ instead.
 
@@ -428,34 +515,52 @@ KeysEqual
 ~~~~~~~~~
 
 Matches if the keys of one dict are equal to the keys of another dict.  For
-example::
+example:
 
-  def test_keys_equal(self):
-      x = {'a': 1, 'b': 2}
-      y = {'a': 2, 'b': 3}
-      self.assertThat(x, KeysEqual(y))
+.. code-block:: python
+
+    class TestKeysEqual(TestCase):
+
+        def test_keys_equal(self):
+            x = {'a': 1, 'b': 2}
+            y = {'a': 2, 'b': 3}
+            self.assertThat(x, KeysEqual(y))
 
 
 MatchesRegex
 ~~~~~~~~~~~~
 
 Matches a string against a regular expression, which is a wonderful thing to
-be able to do, if you think about it::
+be able to do, if you think about it:
 
-  def test_matches_regex_example(self):
-      self.assertThat('foo', MatchesRegex('fo+'))
+.. code-block:: python
+
+    class TestMatchesRegex(TestCase):
+
+        def test_matches_regex_example(self):
+            self.assertThat('foo', MatchesRegex('fo+'))
 
 
 HasLength
 ~~~~~~~~~
 
-Check the length of a collection.  The following assertion will fail::
+Check the length of a collection.  The following assertion will fail:
 
-  self.assertThat([1, 2, 3], HasLength(2))
+.. code-block:: python
 
-But this one won't::
+    class TestHasLengthFail(TestCase):
 
-  self.assertThat([1, 2, 3], HasLength(3))
+        def test_has_length(self):
+            self.assertThat([1, 2, 3], HasLength(2))
+
+But this one won't:
+
+.. code-block:: python
+
+    class TestHasLength(TestCase):
+
+        def test_has_length(self):
+            self.assertThat([1, 2, 3], HasLength(3))
 
 
 File- and path-related matchers
@@ -467,71 +572,107 @@ the state of the filesystem.
 PathExists
 ~~~~~~~~~~
 
-Matches if a path exists::
+Matches if a path exists:
 
-  self.assertThat('/', PathExists())
+.. code-block:: python
+
+    class TestPathExists(TestCase):
+
+        def test_path_exists(self):
+            self.assertThat('/', PathExists())
 
 
 DirExists
 ~~~~~~~~~
 
-Matches if a path exists and it refers to a directory::
+Matches if a path exists and it refers to a directory:
 
-  # This will pass on most Linux systems.
-  self.assertThat('/home/', DirExists())
-  # This will not
-  self.assertThat('/home/jml/some-file.txt', DirExists())
+.. code-block:: python
+
+    class TestDirExists(TestCase):
+
+        def test_dir_exists(self):
+            # This will exist on most Linux systems.
+            self.assertThat('/home/', DirExists())
+            # This will not
+            self.assertThat('/home/jml/some-file.txt', Not(DirExists()))
 
 
 FileExists
 ~~~~~~~~~~
 
-Matches if a path exists and it refers to a file (as opposed to a directory)::
+Matches if a path exists and it refers to a file (as opposed to a directory):
 
-  # This will pass on most Linux systems.
-  self.assertThat('/bin/true', FileExists())
-  # This will not.
-  self.assertThat('/home/', FileExists())
+.. code-block:: python
+
+    class TestFileExists(TestCase):
+
+        def test_file_exists(self):
+            # This will be a file on most Linux systems.
+            self.assertThat('/bin/true', FileExists())
+            # This will not.
+            self.assertThat('/home/', Not(FileExists()))
 
 
 DirContains
 ~~~~~~~~~~~
 
 Matches if the given directory contains the specified files and directories.
-Say we have a directory ``foo`` that has the files ``a``, ``b`` and ``c``,
-then::
+Say we have a directory ``sample_dir`` that has the files ``a``, ``b`` and
+``c``:
 
-  self.assertThat('foo', DirContains(['a', 'b', 'c']))
+.. code-block:: python
 
-will match, but::
+    class TestDirContains(TestCase):
 
-  self.assertThat('foo', DirContains(['a', 'b']))
+        def test_dir_contains(self):
+            # This will match
+            self.assertThat('sample_dir', DirContains(['a', 'b', 'c']))
 
-will not.
+    class TestDirContainsFail(TestCase):
+
+        def test_dir_contains(self):
+            # But this will not
+            self.assertThat('sample_dir', DirContains(['a', 'b']))
 
 The matcher sorts both the input and the list of names we get back from the
 filesystem.
 
 You can use this in a more advanced way, and match the sorted directory
-listing against an arbitrary matcher::
+listing against an arbitrary matcher:
 
-  self.assertThat('foo', DirContains(matcher=Contains('a')))
+.. code-block:: python
+
+    class TestDirContainsAdvanced(TestCase):
+
+        def test_dir_contains(self):
+            self.assertThat('sample_dir', DirContains(matcher=Contains('a')))
 
 
 FileContains
 ~~~~~~~~~~~~
 
 Matches if the given file has the specified contents.  Say there's a file
-called ``greetings.txt`` with the contents, ``Hello World!``::
+called ``greetings.txt`` with the contents, ``Hello World!``:
 
-  self.assertThat('greetings.txt', FileContains("Hello World!"))
+.. code-block:: python
+
+    class TestFileContains(TestCase):
+
+        def test_file_contains(self):
+            self.assertThat('greetings.txt', FileContains("Hello World!\n"))
 
 will match.
 
 You can also use this in a more advanced way, and match the contents of the
-file against an arbitrary matcher::
+file against an arbitrary matcher:
 
-  self.assertThat('greetings.txt', FileContains(matcher=Contains('!')))
+.. code-block:: python
+
+    class TestFileContainsAdvanced(TestCase):
+
+        def test_file_contains(self):
+            self.assertThat('greetings.txt', FileContains(matcher=Contains('!')))
 
 
 HasPermissions
@@ -575,19 +716,27 @@ Below are a few of the combining matchers that come with testtools.
 Not
 ~~~
 
-Negates another matcher.  For example::
+Negates another matcher.  For example:
 
-  def test_not_example(self):
-      self.assertThat([42], Not(Equals("potato")))
-      self.assertThat([42], Not(Is([42])))
+.. code-block:: python
+
+    class TestCombiningNot(TestCase):
+
+        def test_not_example(self):
+            self.assertThat([42], Not(Equals("potato")))
+            self.assertThat([42], Not(Is([42])))
 
 If you find yourself using ``Not`` frequently, you may wish to create a custom
-matcher for it.  For example::
+matcher for it.  For example:
 
-  IsNot = lambda x: Not(Is(x))
+.. code-block:: python
 
-  def test_not_example_2(self):
-      self.assertThat([42], IsNot([42]))
+    IsNot = lambda x: Not(Is(x))
+
+    class TestCustomMatcher(TestCase):
+
+        def test_not_example_2(self):
+            self.assertThat([42], IsNot([42]))
 
 
 Annotate
@@ -623,14 +772,18 @@ AfterPreprocessing
 
 Used to make a matcher that applies a function to the matched object before
 matching. This can be used to aid in creating trivial matchers as functions, for
-example::
+example:
 
-  def test_after_preprocessing_example(self):
-      def PathHasFileContent(content):
-          def _read(path):
-              return open(path).read()
-          return AfterPreprocessing(_read, Equals(content))
-      self.assertThat('/tmp/foo.txt', PathHasFileContent("Hello world!"))
+.. code-block:: python
+
+    class TestAfterPreprocessing(TestCase):
+
+        def test_after_preprocessing_example(self):
+            def PathHasFileContent(content):
+                def _read(path):
+                    return open(path).read()
+                return AfterPreprocessing(_read, Equals(content))
+            self.assertThat('./greetings.txt', PathHasFileContent("Hello World!\n"))
 
 
 MatchesAll
@@ -639,16 +792,25 @@ MatchesAll
 Combines many matchers to make a new matcher.  The new matcher will only match
 things that match every single one of the component matchers.
 
-It's much easier to understand in Python than in English::
+It's much easier to understand in Python than in English:
 
-  def test_matches_all_example(self):
-      has_und_at_both_ends = MatchesAll(StartsWith("und"), EndsWith("und"))
-      # This will succeed.
-      self.assertThat("underground", has_und_at_both_ends)
-      # This will fail.
-      self.assertThat("found", has_und_at_both_ends)
-      # So will this.
-      self.assertThat("undead", has_und_at_both_ends)
+.. code-block:: python
+
+    has_und_at_both_ends = MatchesAll(StartsWith("und"), EndsWith("und"))
+
+    class TestMatchesAll(TestCase):
+
+        def test_matches_all_example(self):
+            # This will succeed.
+            self.assertThat("underground", has_und_at_both_ends)
+
+    class TestMatchesAllFail(TestCase):
+
+        def test_matches_all_example(self):
+            # This will fail.
+            self.assertThat("found", has_und_at_both_ends)
+            # So will this.
+            self.assertThat("undead", has_und_at_both_ends)
 
 At this point some people ask themselves, "why bother doing this at all? why
 not just have two separate assertions?".  It's a good question.
@@ -681,20 +843,28 @@ Like MatchesAll_, ``MatchesAny`` combines many matchers to make a new
 matcher.  The difference is that the new matchers will match a thing if it
 matches *any* of the component matchers.
 
-For example::
+For example:
 
-  def test_matches_any_example(self):
-      self.assertThat(42, MatchesAny(Equals(5), Not(Equals(6))))
+.. code-block:: python
+
+    class TestMatchesAny(TestCase):
+
+        def test_matches_any_example(self):
+            self.assertThat(42, MatchesAny(Equals(5), Not(Equals(6))))
 
 
 AllMatch
 ~~~~~~~~
 
 Matches many values against a single matcher.  Can be used to make sure that
-many things all meet the same condition::
+many things all meet the same condition:
 
-  def test_all_match_example(self):
-      self.assertThat([2, 3, 5, 7], AllMatch(LessThan(10)))
+.. code-block:: python
+
+    class TestAllMatch(TestCase):
+
+        def test_all_match_example(self):
+            self.assertThat([2, 3, 5, 7], AllMatch(LessThan(10)))
 
 If the match fails, then all of the values that fail to match will be included
 in the error message.
@@ -708,11 +878,16 @@ MatchesListwise
 Where ``MatchesAny`` and ``MatchesAll`` combine many matchers to match a
 single value, ``MatchesListwise`` combines many matches to match many values.
 
-For example::
+For example:
 
-  def test_matches_listwise_example(self):
-      self.assertThat(
-          [1, 2, 3], MatchesListwise(map(Equals, [1, 2, 3])))
+.. code-block:: python
+
+    class TestMatchesListwise(TestCase):
+
+        def test_matches_listwise_example(self):
+            self.assertThat(
+                [1, 2, 3],
+                MatchesListwise([Equals(x) for x in [1, 2, 3]]))
 
 This is useful for writing custom, domain-specific matchers.
 
@@ -725,11 +900,15 @@ MatchesSetwise
 
 Combines many matchers to match many values, without regard to their order.
 
-Here's an example::
+Here's an example:
 
-  def test_matches_setwise_example(self):
-      self.assertThat(
-          [1, 2, 3], MatchesSetwise(Equals(2), Equals(3), Equals(1)))
+.. code-block:: python
+
+    class TestMatchesSetwise(TestCase):
+
+        def test_matches_setwise_example(self):
+            self.assertThat(
+                [1, 2, 3], MatchesSetwise(Equals(2), Equals(3), Equals(1)))
 
 Much like ``MatchesListwise``, best used for writing custom, domain-specific
 matchers.
@@ -741,24 +920,32 @@ MatchesStructure
 Creates a matcher that matches certain attributes of an object against a
 pre-defined set of matchers.
 
-It's much easier to understand in Python than in English::
+It's much easier to understand in Python than in English:
 
-  def test_matches_structure_example(self):
-      foo = Foo()
-      foo.a = 1
-      foo.b = 2
-      matcher = MatchesStructure(a=Equals(1), b=Equals(2))
-      self.assertThat(foo, matcher)
+.. code-block:: python
+
+    class TestMatchesStructure(TestCase):
+
+        def test_matches_structure_example(self):
+            foo = silly()
+            foo.a = 1
+            foo.b = 2
+            matcher = MatchesStructure(a=Equals(1), b=Equals(2))
+            self.assertThat(foo, matcher)
 
 Since all of the matchers used were ``Equals``, we could also write this using
-the ``byEquality`` helper::
+the ``byEquality`` helper:
 
-  def test_matches_structure_example(self):
-      foo = Foo()
-      foo.a = 1
-      foo.b = 2
-      matcher = MatchesStructure.byEquality(a=1, b=2)
-      self.assertThat(foo, matcher)
+.. code-block:: python
+
+    class TestMatchesStructureByEquality(TestCase):
+
+        def test_matches_structure_example(self):
+            foo = silly()
+            foo.a = 1
+            foo.b = 2
+            matcher = MatchesStructure.byEquality(a=1, b=2)
+            self.assertThat(foo, matcher)
 
 ``MatchesStructure.fromExample`` takes an object and a list of attributes and
 creates a ``MatchesStructure`` matcher where each attribute of the matched
@@ -776,16 +963,26 @@ Sometimes, all you want to do is create a matcher that matches if a given
 function returns True, and mismatches if it returns False.
 
 For example, you might have an ``is_prime`` function and want to make a
-matcher based on it::
+matcher based on it:
 
-  def test_prime_numbers(self):
-      IsPrime = MatchesPredicate(is_prime, '%s is not prime.')
-      self.assertThat(7, IsPrime)
-      self.assertThat(1983, IsPrime)
-      # This will fail.
-      self.assertThat(42, IsPrime)
+.. code-block:: python
 
-Which will produce the error message::
+    from myproject import is_prime
+
+    IsPrime = MatchesPredicate(is_prime, '%s is not prime.')
+
+    class TestMatchesPredicate(TestCase):
+
+        def test_prime_numbers(self):
+            self.assertThat(7, IsPrime)
+
+    class TestMatchesPredicateFail(TestCase):
+
+        def test_prime_numbers(self):
+            # This will fail.
+            self.assertThat(42, IsPrime)
+
+The last assertion would produce the error message::
 
   Traceback (most recent call last):
     File "...", line ..., in test_prime_numbers
@@ -804,17 +1001,27 @@ predicate needs to return a boolean (or any truthy object), and accept the
 object to match + whatever was passed into the factory.
 
 For example, you might have an ``divisible`` function and want to make a
-matcher based on it::
+matcher based on it:
 
-  def test_divisible_numbers(self):
-      IsDivisibleBy = MatchesPredicateWithParams(
-          divisible, '{0} is not divisible by {1}')
-      self.assertThat(7, IsDivisibleBy(1))
-      self.assertThat(7, IsDivisibleBy(7))
-      self.assertThat(7, IsDivisibleBy(2)))
-      # This will fail.
+.. code-block:: python
 
-Which will produce the error message::
+    from myproject import divisible
+
+    IsDivisibleBy = MatchesPredicateWithParams(divisible,
+                                               '{0} is not divisible by {1}')
+
+    class TestMatchesPredicateWithParams(TestCase):
+
+        def test_divisible_numbers(self):
+            self.assertThat(7, IsDivisibleBy(1))
+            self.assertThat(7, IsDivisibleBy(7))
+
+    class TestMatchesPredicateWithParamsFail(TestCase):
+
+        def test_divisible_numbers(self):
+            self.assertThat(7, IsDivisibleBy(2))
+
+The last assertion would produce the error message::
 
   Traceback (most recent call last):
     File "...", line ..., in test_divisible
@@ -827,16 +1034,24 @@ Raises
 
 Takes whatever the callable raises as an exc_info tuple and matches it against
 whatever matcher it was given.  For example, if you want to assert that a
-callable raises an exception of a given type::
+callable raises an exception of a given type:
 
-  def test_raises_example(self):
-      self.assertThat(
-          lambda: 1/0, Raises(MatchesException(ZeroDivisionError)))
+.. code-block:: python
 
-Although note that this could also be written as::
+    class TestRaisesMatchesException(TestCase):
 
-  def test_raises_example_convenient(self):
-      self.assertThat(lambda: 1/0, raises(ZeroDivisionError))
+        def test_raises_example(self):
+            self.assertThat(
+                lambda: 1/0, Raises(MatchesException(ZeroDivisionError)))
+
+Although note that this could also be written as:
+
+.. code-block:: python
+
+    class TestRaisesConvenience(TestCase):
+
+        def test_raises_example_convenient(self):
+            self.assertThat(lambda: 1/0, raises(ZeroDivisionError))
 
 See also MatchesException_ and `the raises helper`_
 
@@ -851,20 +1066,22 @@ You need to make two closely-linked objects: a ``Matcher`` and a
 ``Mismatch``.  The ``Matcher`` knows how to actually make the comparison, and
 the ``Mismatch`` knows how to describe a failure to match.
 
-Here's an example matcher::
+Here's an example matcher:
 
-  class IsDivisibleBy(object):
-      """Match if a number is divisible by another number."""
-      def __init__(self, divider):
-          self.divider = divider
-      def __str__(self):
-          return 'IsDivisibleBy(%s)' % (self.divider,)
-      def match(self, actual):
-          remainder = actual % self.divider
-          if remainder != 0:
-              return IsDivisibleByMismatch(actual, self.divider, remainder)
-          else:
-              return None
+.. code-block:: python
+
+    class IsDivisibleBy(object):
+        """Match if a number is divisible by another number."""
+        def __init__(self, divider):
+            self.divider = divider
+        def __str__(self):
+            return 'IsDivisibleBy(%s)' % (self.divider,)
+        def match(self, actual):
+            remainder = actual % self.divider
+            if remainder != 0:
+                return IsDivisibleByMismatch(actual, self.divider, remainder)
+            else:
+                return None
 
 The matcher has a constructor that takes parameters that describe what you
 actually *expect*, in this case a number that other numbers ought to be
@@ -876,29 +1093,39 @@ matching.
 whether or not it matches.  If it does match, then ``match`` must return
 ``None``.  If it does *not* match, then ``match`` must return a ``Mismatch``
 object. ``assertThat`` will call ``match`` and then fail the test if it
-returns a non-None value.  For example::
+returns a non-None value.  For example:
 
-  def test_is_divisible_by_example(self):
-      # This succeeds, since IsDivisibleBy(5).match(10) returns None.
-      self.assertThat(10, IsDivisibleBy(5))
-      # This fails, since IsDivisibleBy(7).match(10) returns a mismatch.
-      self.assertThat(10, IsDivisibleBy(7))
+.. code-block:: python
+
+    class TestIsDivisibleBy(TestCase):
+
+        def test_is_divisible_by_example(self):
+            # This succeeds, since IsDivisibleBy(5).match(10) returns None.
+            self.assertThat(10, IsDivisibleBy(5))
+
+    class TestIsDivisibleByFail(TestCase):
+
+        def test_is_divisible_by_example(self):
+            # This fails, since IsDivisibleBy(7).match(10) returns a mismatch.
+            self.assertThat(10, IsDivisibleBy(7))
 
 The mismatch is responsible for what sort of error message the failing test
-generates.  Here's an example mismatch::
+generates.  Here's an example mismatch:
 
-  class IsDivisibleByMismatch(object):
-      def __init__(self, number, divider, remainder):
-          self.number = number
-          self.divider = divider
-          self.remainder = remainder
+.. code-block:: python
 
-      def describe(self):
-          return "%r is not divisible by %r, %r remains" % (
-              self.number, self.divider, self.remainder)
+    class IsDivisibleByMismatch(object):
+        def __init__(self, number, divider, remainder):
+            self.number = number
+            self.divider = divider
+            self.remainder = remainder
 
-      def get_details(self):
-          return {}
+        def describe(self):
+            return "%r is not divisible by %r, %r remains" % (
+                self.number, self.divider, self.remainder)
+
+        def get_details(self):
+            return {}
 
 The mismatch takes information about the mismatch, and provides a ``describe``
 method that assembles all of that into a nice error message for end users.
@@ -991,25 +1218,35 @@ The basic ``testtools.content.Content`` object is constructed from a
 iterator of chunks of bytes that the content is made from.
 
 So, to make a Content object that is just a simple string of text, you can
-do::
+do:
 
-  from testtools.content import Content
-  from testtools.content_type import ContentType
+.. code-block:: python
 
-  text = Content(ContentType('text', 'plain'), lambda: ["some text"])
+    from testtools.content import Content
+    from testtools.content_type import ContentType
+
+    text = Content(ContentType('text', 'plain'), lambda: ["some text"])
 
 Because adding small bits of text content is very common, there's also a
-convenience method::
+convenience method:
 
-  text = text_content("some text")
+.. code-block:: python
 
-To make content out of an image stored on disk, you could do something like::
+    from testtools.content import text_content
+    text = text_content("some text")
 
-  image = Content(ContentType('image', 'png'), lambda: open('foo.png').read())
+To make content out of an image stored on disk, you could do something like:
 
-Or you could use the convenience function::
+.. code-block:: python
 
-  image = content_from_file('foo.png', ContentType('image', 'png'))
+    image = Content(ContentType('image', 'png'), lambda: open('foo.png').read())
+
+Or you could use the convenience function:
+
+.. code-block:: python
+
+    from testtools.content import content_from_file
+    image = content_from_file('foo.png', ContentType('image', 'png'))
 
 The ``lambda`` helps make sure that the file is opened and the actual bytes
 read only when they are needed – by default, when the test is finished.  This
@@ -1025,31 +1262,33 @@ project has a server represented by a class ``SomeServer`` that you can start
 up and shut down in tests, but runs in another process.  You want to test
 interaction with that server, and whenever the interaction fails, you want to
 see the client-side error *and* the logs from the server-side.  Here's how you
-might do it::
+might do it:
 
-  from testtools import TestCase
-  from testtools.content import attach_file, Content
-  from testtools.content_type import UTF8_TEXT
+.. code-block:: python
 
-  from myproject import SomeServer
+    from testtools import TestCase
+    from testtools.content import attach_file, Content
+    from testtools.content_type import UTF8_TEXT
 
-  class SomeTestCase(TestCase):
+    from myproject import SomeServer
 
-      def setUp(self):
-          super(SomeTestCase, self).setUp()
-          self.server = SomeServer()
-          self.server.start_up()
-          self.addCleanup(self.server.shut_down)
-          self.addCleanup(attach_file, self.server.logfile, self)
+    class TestSomeServer(TestCase):
 
-      def attach_log_file(self):
-          self.addDetail(
-              'log-file',
-              Content(UTF8_TEXT,
-                      lambda: open(self.server.logfile, 'r').readlines()))
+        def setUp(self):
+            super(TestSomeServer, self).setUp()
+            self.server = SomeServer()
+            self.server.start_up()
+            self.addCleanup(self.server.shut_down)
+            self.addCleanup(self.attach_log_file)
 
-      def test_a_thing(self):
-          self.assertEqual("cool", self.server.temperature)
+        def attach_log_file(self):
+            self.addDetail(
+                'log-file',
+                Content(UTF8_TEXT,
+                        lambda: open(self.server.logfile, 'r').readlines()))
+
+        def test_a_thing(self):
+            self.assertEqual("cool", self.server.temperature)
 
 This test will attach the log file of ``SomeServer`` to each test that is
 run.  testtools will only display the log file for failing tests, so it's not
@@ -1116,12 +1355,20 @@ One common way of doing this is to do::
           self.server.setUp()
           self.addCleanup(self.server.tearDown)
 
-testtools provides a more convenient, declarative way to do the same thing::
+testtools provides a more convenient, declarative way to do the same thing:
 
-  class SomeTest(TestCase):
-      def setUp(self):
-          super(SomeTest, self).setUp()
-          self.server = self.useFixture(Server())
+.. code-block:: python
+
+    from myproject import Server
+
+    class TestFixture(TestCase):
+
+        def setUp(self):
+            super(TestFixture, self).setUp()
+            self.server = self.useFixture(Server())
+
+        def test_something(self):
+            pass
 
 ``useFixture(fixture)`` calls ``setUp`` on the fixture, schedules a clean up
 to clean it up, and schedules a clean up to attach all details_ held by the
@@ -1143,13 +1390,19 @@ the test is testing an incomplete feature.
 
 ``TestCase.skipTest`` is a simple way to have a test stop running and be
 reported as a skipped test, rather than a success, error or failure.  For
-example::
+example:
 
-  def test_make_symlink(self):
-      symlink = getattr(os, 'symlink', None)
-      if symlink is None:
-          self.skipTest("No symlink support")
-      symlink(whatever, something_else)
+.. code-block:: python
+
+    import os
+
+    class TestSkipTest(TestCase):
+
+        def test_make_symlink(self):
+            symlink = getattr(os, 'special_symlink', None)
+            if symlink is None:
+                self.skipTest("No symlink support")
+            symlink(whatever, something_else)
 
 Using ``skipTest`` means that you can make decisions about what tests to run
 as late as possible, and close to the actual tests.  Without it, you might be
@@ -1262,13 +1515,17 @@ TestCase.patch
 --------------
 
 ``patch`` is a convenient way to monkey-patch a Python object for the duration
-of your test.  It's especially useful for testing legacy code.  e.g.::
+of your test.  It's especially useful for testing legacy code.  e.g.:
 
-  def test_foo(self):
-      my_stream = StringIO()
-      self.patch(sys, 'stderr', my_stream)
-      run_some_code_that_prints_to_stderr()
-      self.assertEqual('', my_stream.getvalue())
+.. code-block:: python
+
+    class TestPatch(TestCase):
+
+        def test_patch(self):
+            my_stream = StringIO()
+            self.patch(sys, 'stderr', my_stream)
+            sys.stderr.write('foobar')
+            self.assertEqual('foobar', my_stream.getvalue())
 
 The call to ``patch`` above masks ``sys.stderr`` with ``my_stream`` so that
 anything printed to stderr will be captured in a StringIO variable that can be
@@ -1293,15 +1550,19 @@ To help with this, ``testtools.TestCase`` implements creation methods called
 ``getUniqueString`` and ``getUniqueInteger``.  They return strings and
 integers that are unique within the context of the test that can be used to
 assemble more complex objects.  Here's a basic example where
-``getUniqueString`` is used instead of saying "foo" or "bar" or whatever::
+``getUniqueString`` is used instead of saying "foo" or "bar" or whatever:
 
-  class SomeTest(TestCase):
+.. code-block:: python
 
-      def test_full_name(self):
-          first_name = self.getUniqueString()
-          last_name = self.getUniqueString()
-          p = Person(first_name, last_name)
-          self.assertEqual(p.full_name, "%s %s" % (first_name, last_name))
+    from myproject import Person
+
+    class TestPerson(TestCase):
+
+        def test_full_name(self):
+            first_name = self.getUniqueString()
+            last_name = self.getUniqueString()
+            p = Person(first_name, last_name)
+            self.assertEqual(p.full_name, "%s %s" % (first_name, last_name))
 
 
 And here's how it could be used to make a complicated test::
@@ -1334,24 +1595,26 @@ Test attributes
 
 Inspired by the ``nosetests`` ``attr`` plugin, testtools provides support for
 marking up test methods with attributes, which are then exposed in the test
-id and can be used when filtering tests by id. (e.g. via ``--load-list``)::
+id and can be used when filtering tests by id. (e.g. via ``--load-list``):
 
-  from testtools.testcase import attr, WithAttributes
-  
-  class AnnotatedTests(WithAttributes, TestCase):
+.. code-block:: python
 
-      @attr('simple')
-      def test_one(self):
-          pass
-      
-      @attr('more', 'than', 'one)
-      def test_two(self):
-          pass
+    from testtools.testcase import attr, WithAttributes
 
-      @attr('or')
-      @attr('stacked')
-      def test_three(self):
-          pass
+    class TestAttributes(WithAttributes, TestCase):
+
+        @attr('simple')
+        def test_one(self):
+            pass
+
+        @attr('more', 'than', 'one')
+        def test_two(self):
+            pass
+
+        @attr('or')
+        @attr('stacked')
+        def test_three(self):
+            pass
 
 General helpers
 ===============
@@ -1362,28 +1625,38 @@ Conditional imports
 Lots of the time we would like to conditionally import modules.  testtools
 uses the small library extras to do this. This used to be part of testtools.
 
-Instead of::
+Instead of:
 
-  try:
-      from twisted.internet import defer
-  except ImportError:
-      defer = None
+.. code-block:: python
 
-You can do::
+    try:
+        from twisted.internet import defer
+    except ImportError:
+        defer = None
 
-   defer = try_import('twisted.internet.defer')
+You can do:
+
+.. code-block:: python
+
+    from extras import try_import
+    defer = try_import('twisted.internet.defer')
 
 
-Instead of::
+Instead of:
 
-  try:
-      from StringIO import StringIO
-  except ImportError:
-      from io import StringIO
+.. code-block:: python
 
-You can do::
+    try:
+        from StringIO import StringIO
+    except ImportError:
+        from io import StringIO
 
-  StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
+You can do:
+
+.. code-block:: python
+
+    from extras import try_imports
+    StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
 
 
 Safe attribute testing
@@ -1430,3 +1703,23 @@ Here, ``repr(nullary)`` will be the same as ``repr(f)``.
 .. _Distutils: http://docs.python.org/library/distutils.html
 .. _`setup configuration`: http://docs.python.org/distutils/configfile.html
 .. _broken: http://chipaca.com/post/3210673069/hasattr-17-less-harmful
+
+.. invisible-code-block: python
+
+    from unittest import TestLoader, TestSuite, TextTestRunner
+
+    pass_suite = TestSuite()
+    fail_suite = TestSuite()
+    test_cases = []
+    for key, value in list(globals().items()):
+        if isinstance(value, type) and issubclass(value, TestCase):
+            tests = TestLoader().loadTestsFromTestCase(value)
+            if 'Fail' in key:
+                fail_suite.addTests(tests)
+            else:
+                pass_suite.addTests(tests)
+    expected_pass_result = TextTestRunner().run(pass_suite)
+    expected_fail_result = TextTestRunner().run(fail_suite)
+    assert expected_pass_result.wasSuccessful(), "Some manuel tests failed"
+    assert 0 == len(expected_fail_result.errors), (
+        "Some manuel tests that should have failed errored")
