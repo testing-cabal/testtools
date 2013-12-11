@@ -176,54 +176,71 @@ class StackLinesContent(Content):
         return ''.join(msg_lines)
 
 
-def TracebackContent(err, test):
+class StackLineProvidingContent(StackLinesContent):
+    """
+    A base class for different ways of providing stack lines as content.
+
+    Sub-classes need only implement _get_traceback_root, which should
+    provide a traceback object that represents the root of the stack
+    which should be processed in to a content object.
+    """
+
+    def __init__(self, prefix_content='', postfix_content=''):
+        stack_lines = self._process_stack_lines()
+        super(StackLineProvidingContent, self).__init__(stack_lines,
+                                                        prefix_content,
+                                                        postfix_content)
+
+    def _process_stack_lines(self):
+        tb = self._get_traceback_root()
+        if StackLinesContent.HIDE_INTERNAL_STACK:
+            while tb and '__unittest' in tb.tb_frame.f_globals:
+                tb = tb.tb_next
+        return traceback.extract_tb(tb)
+
+    def _get_traceback_root(self):
+        raise NotImplementedError(self._get_traceback_root)
+
+
+class TracebackContent(StackLineProvidingContent):
     """Content object for tracebacks.
 
     This adapts an exc_info tuple to the Content interface.
     text/x-traceback;language=python is used for the mime type, in order to
     provide room for other languages to format their tracebacks differently.
     """
-    if err is None:
-        raise ValueError("err may not be None")
+    def __init__(self, err, test):
+        if err is None:
+            raise ValueError("err may not be None")
+        self.err = err
 
-    exctype, value, tb = err
-    # Skip test runner traceback levels
-    if StackLinesContent.HIDE_INTERNAL_STACK:
-        while tb and '__unittest' in tb.tb_frame.f_globals:
-            tb = tb.tb_next
+        prefix = _TB_HEADER
+        postfix = self._get_postfix()
 
-    # testtools customization. When str is unicode (e.g. IronPython,
-    # Python 3), traceback.format_exception_only returns unicode. For Python 2,
-    # it returns bytes. We need to guarantee unicode.
-    if str_is_unicode:
-        format_exception_only = traceback.format_exception_only
-    else:
-        format_exception_only = _format_exception_only
+        return super(TracebackContent, self).__init__(prefix,
+                                                      postfix)
 
-    limit = None
-    # Disabled due to https://bugs.launchpad.net/testtools/+bug/1188420
-    if (False
-        and StackLinesContent.HIDE_INTERNAL_STACK
-        and test.failureException
-        and isinstance(value, test.failureException)):
-        # Skip assert*() traceback levels
-        limit = 0
-        while tb and not self._is_relevant_tb_level(tb):
-            limit += 1
-            tb = tb.tb_next
+    def _get_traceback_root(self):
+        _, _, tb = self.err
+        return tb
 
-    prefix = _TB_HEADER
-    stack_lines = traceback.extract_tb(tb, limit)
-    postfix = ''.join(format_exception_only(exctype, value))
-
-    return StackLinesContent(stack_lines, prefix, postfix)
+    def _get_postfix(self):
+        # testtools customization. When str is unicode (e.g. IronPython,
+        # Python 3), traceback.format_exception_only returns unicode. For
+        # Python 2, it returns bytes. We need to guarantee unicode.
+        if str_is_unicode:
+            format_exception_only = traceback.format_exception_only
+        else:
+            format_exception_only = _format_exception_only
+        exctype, value, _ = self.err
+        return ''.join(format_exception_only(exctype, value))
 
 
-def StacktraceContent(prefix_content="", postfix_content=""):
+class StacktraceContent(StackLineProvidingContent):
     """Content object for stack traces.
 
-    This function will create and return a content object that contains a
-    stack trace.
+    This function will create and return a content object that contains
+    the current stack trace.
 
     The mime type is set to 'text/x-traceback;language=python', so other
     languages can format their stack traces differently.
@@ -231,22 +248,46 @@ def StacktraceContent(prefix_content="", postfix_content=""):
     :param prefix_content: A unicode string to add before the stack lines.
     :param postfix_content: A unicode string to add after the stack lines.
     """
-    stack = inspect.stack()[1:]
 
-    if StackLinesContent.HIDE_INTERNAL_STACK:
-        limit = 1
-        while limit < len(stack) and '__unittest' not in stack[limit][0].f_globals:
-            limit += 1
-    else:
-        limit = -1
+    def _get_traceback_root(self):
+        stack = inspect.stack()
+        stack = self._strip_content_frames_out_of_stack(stack)
+        return FrameTraceback.from_stack(stack)
 
-    frames_only = [line[0] for line in stack[:limit]]
-    processed_stack = [ ]
-    for frame in reversed(frames_only):
-        filename, line, function, context, _ = inspect.getframeinfo(frame)
-        context = ''.join(context)
-        processed_stack.append((filename, line, function, context))
-    return StackLinesContent(processed_stack, prefix_content, postfix_content)
+    def _strip_content_frames_out_of_stack(self, stack):
+        for i, frame in enumerate(stack):
+            if not frame[1].endswith('testtools/content.py'):
+                break
+        return stack[i:]
+
+
+class FrameTraceback(object):
+    """
+    Presents a stack of frame objects as a traceback object.
+
+    :param frames:
+        A list of frame objects comprising a stack, ordered top-to-bottom (the
+        opposite of what inspect.stack() returns).
+    """
+
+    def __init__(self, frames):
+        frame, remaining_frames = frames[0], frames[1:]
+        self.tb_frame = frame[0]
+        self.tb_lineno = frame[0].f_lineno
+        self.tb_next = None
+        if remaining_frames:
+            self.tb_next = FrameTraceback(remaining_frames)
+
+    @classmethod
+    def from_stack(cls, stack):
+        """
+        Takes a stack and returns a traceback object.
+
+        ``inspect.stack()`` returns a list from bottom-to-top, tracebacks are a
+        linked list from top-to-bottom; this classmethod handles the difference
+        in ordering.
+        """
+        return cls(list(reversed(stack)))
 
 
 def json_content(json_data):
