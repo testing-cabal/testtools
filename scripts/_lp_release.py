@@ -109,7 +109,7 @@ def get_release_notes_and_changelog(news_path):
             line = line.strip()
             if state is None:
                 if (is_heading_marker(line, '~') and
-                    not last_line.startwith('NEXT')):
+                    not last_line.startswith('NEXT')):
                     milestone_name = last_line
                     state = 'release-notes'
                 else:
