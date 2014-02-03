@@ -34,6 +34,7 @@ from testtools.matchers import (
     Equals,
     HasLength,
     MatchesException,
+    MismatchError,
     Raises,
     )
 from testtools.testcase import (
@@ -373,6 +374,24 @@ class TestAssertions(TestCase):
             lambda: self.assertRaises(Exception, foo),
             Raises(
                 MatchesException(self.failureException, '.*%r.*' % (foo,))))
+
+    def test_assertRaisesRegexp(self):
+        # assertRaisesRegexp asserts that function raises particular exception
+        # with particular message.
+        self.assertRaisesRegexp(RuntimeError, "M\w*e", self.raiseError,
+                                RuntimeError, "Message")
+
+    def test_assertRaisesRegexp_wrong_error_type(self):
+        # If function raises an exception of unexpected type,
+        # assertRaisesRegexp re-raise it.
+        self.assertRaises(SyntaxError, self.assertRaisesRegexp, RuntimeError,
+                          "M\w*e", self.raiseError, SyntaxError, "Message")
+
+    def test_assertRaisesRegexp_wrong_message(self):
+        # If function raises an exception with unexpected message
+        # assertRaisesregexp raise MismatchError.
+        self.assertRaises(MismatchError, self.assertRaisesRegexp, RuntimeError,
+                          "Msg", self.raiseError, RuntimeError, "Message")
 
     def assertFails(self, message, function, *args, **kwargs):
         """Assert that function raises a failure with the given message."""

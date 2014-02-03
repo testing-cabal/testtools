@@ -42,6 +42,7 @@ from testtools.matchers import (
     Equals,
     MatchesAll,
     MatchesException,
+    MatchesRegex,
     MismatchError,
     Is,
     IsInstance,
@@ -422,6 +423,16 @@ class TestCase(unittest.TestCase):
         self.assertThat(our_callable, matcher)
         return capture.matchee
     failUnlessRaises = assertRaises
+
+    def assertRaisesRegexp(self, excClass, pattern, callableObj, *args,
+                           **kwargs):
+        """Fail unless an exception of class excClass is thrown
+           by callableObj when invoked with arguments args and keyword
+           arguments kwargs and exception message matches pattern.
+        """
+        exception = self.assertRaises(excClass, callableObj, *args, **kwargs)
+        matcher = MatchesRegex(pattern)
+        self.assertThat(exception.args[0], matcher)
 
     def assertThat(self, matchee, matcher, message='', verbose=False):
         """Assert that matchee is matched by matcher.
