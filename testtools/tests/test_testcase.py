@@ -400,6 +400,16 @@ class TestAssertions(TestCase):
             '%r not in %r' % ('qux', 'foo bar baz'),
             self.assertIn, 'qux', 'foo bar baz')
 
+    def test_assertIn_failure_with_message(self):
+        # assertIn(needle, haystack) fails the test when 'needle' is not in
+        # 'haystack'.
+        self.assertFails('3 not in [0, 1, 2]: foo bar', self.assertIn, 3,
+                         [0, 1, 2], 'foo bar')
+        self.assertFails(
+            '%r not in %r: foo bar' % ('qux', 'foo bar baz'),
+            self.assertIn, 'qux', 'foo bar baz', 'foo bar')
+
+
     def test_assertNotIn_success(self):
         # assertNotIn(needle, haystack) asserts that 'needle' is not in
         # 'haystack'.
@@ -414,6 +424,18 @@ class TestAssertions(TestCase):
         self.assertFails(
             "'foo bar baz' matches Contains('foo')",
             self.assertNotIn, 'foo', 'foo bar baz')
+
+
+    def test_assertNotIn_failure_with_message(self):
+        # assertNotIn(needle, haystack) fails the test when 'needle' is in
+        # 'haystack'.
+        self.assertFails('[1, 2, 3] matches Contains(3): foo bar', self.assertNotIn,
+            3, [1, 2, 3], 'foo bar')
+        self.assertFails(
+            "'foo bar baz' matches Contains('foo'): foo bar",
+            self.assertNotIn, 'foo', 'foo bar baz', "foo bar")
+
+
 
     def test_assertIsInstance(self):
         # assertIsInstance asserts that an object is an instance of a class.

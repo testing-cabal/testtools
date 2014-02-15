@@ -322,9 +322,9 @@ class TestCase(unittest.TestCase):
 
     failUnlessEqual = assertEquals = assertEqual
 
-    def assertIn(self, needle, haystack):
+    def assertIn(self, needle, haystack, message=''):
         """Assert that needle is in haystack."""
-        self.assertThat(haystack, Contains(needle))
+        self.assertThat(haystack, Contains(needle), message)
 
     def assertIsNone(self, observed, message=''):
         """Assert that 'observed' is equal to None.
@@ -359,10 +359,10 @@ class TestCase(unittest.TestCase):
         matcher = Not(Is(expected))
         self.assertThat(observed, matcher, message)
 
-    def assertNotIn(self, needle, haystack):
+    def assertNotIn(self, needle, haystack, message=''):
         """Assert that needle is not in haystack."""
         matcher = Not(Contains(needle))
-        self.assertThat(haystack, matcher)
+        self.assertThat(haystack, matcher, message)
 
     def assertIsInstance(self, obj, klass, msg=None):
         if isinstance(klass, tuple):
