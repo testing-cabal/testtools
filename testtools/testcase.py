@@ -16,6 +16,7 @@ __all__ = [
     ]
 
 import copy
+import functools
 import itertools
 import sys
 import types
@@ -81,6 +82,20 @@ _ExpectedFailure = try_import(
     'unittest2.case._ExpectedFailure', _ExpectedFailure)
 _ExpectedFailure = try_import(
     'unittest.case._ExpectedFailure', _ExpectedFailure)
+
+
+# Copied from unittest before python 3.4 release. Used to maintain
+# compatibility with unittest sub-test feature. Users should not use this
+# directly.
+def _expectedFailure(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except Exception:
+            raise _ExpectedFailure(sys.exc_info())
+        raise _UnexpectedSuccess
+    return wrapper
 
 
 def run_test_with(test_runner, **kwargs):
@@ -192,6 +207,8 @@ class TestCase(unittest.TestCase):
             runTest = getattr(
                 test_method, '_run_test_with', self.run_tests_with)
         self.__RunTest = runTest
+        if getattr(test_method, '__unittest_expecting_failure__', False):
+            setattr(self, self._testMethodName, _expectedFailure(test_method))
         self.__exception_handlers = []
         self.exception_handlers = [
             (self.skipException, self._report_skip),
