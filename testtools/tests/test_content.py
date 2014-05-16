@@ -5,12 +5,13 @@ import os
 import tempfile
 import unittest
 
-from testtools import TestCase
+from testtools import TestCase, skipUnless
 from testtools.compat import (
     _b,
     _u,
     BytesIO,
     StringIO,
+    str_is_unicode,
     )
 from testtools.content import (
     attach_file,
@@ -189,6 +190,11 @@ class TestContent(TestCase):
         data = _u("some data")
         expected = Content(UTF8_TEXT, lambda: [data.encode('utf8')])
         self.assertEqual(expected, text_content(data))
+
+    @skipUnless(str_is_unicode, "Test only applies in python 3.")
+    def test_text_content_raises_TypeError_when_passed_bytes(self):
+        data = _b("Some Bytes")
+        self.assertRaises(TypeError, text_content, data)
 
     def test_json_content(self):
         data = {'foo': 'bar'}
