@@ -1006,6 +1006,28 @@ class TestExpectedFailure(TestWithDetails):
         self.assertDetailsProvided(case, "addUnexpectedSuccess",
             ["foo", "reason"])
 
+    @skipIf(not hasattr(unittest, 'expectedFailure'), 'Need py27+')
+    def test_unittest_expectedFailure_decorator_works_with_failure(self):
+        class ReferenceTest(TestCase):
+            @unittest.expectedFailure
+            def test_fails_expectedly(self):
+                self.assertEquals(1, 0)
+
+        test = ReferenceTest('test_fails_expectedly')
+        result = test.run()
+        self.assertEqual(True, result.wasSuccessful())
+
+    @skipIf(not hasattr(unittest, 'expectedFailure'), 'Need py27+')
+    def test_unittest_expectedFailure_decorator_works_with_success(self):
+        class ReferenceTest(TestCase):
+            @unittest.expectedFailure
+            def test_passes_unexpectedly(self):
+                self.assertEquals(1, 1)
+
+        test = ReferenceTest('test_passes_unexpectedly')
+        result = test.run()
+        self.assertEqual(False, result.wasSuccessful())
+
 
 class TestUniqueFactories(TestCase):
     """Tests for getUniqueString and getUniqueInteger."""
