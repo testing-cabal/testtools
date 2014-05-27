@@ -108,7 +108,8 @@ def get_release_notes_and_changelog(news_path):
         for line in news:
             line = line.strip()
             if state is None:
-                if is_heading_marker(line, '~'):
+                if (is_heading_marker(line, '~') and
+                    not last_line.startswith('NEXT')):
                     milestone_name = last_line
                     state = 'release-notes'
                 else:
@@ -222,7 +223,8 @@ def release_project(launchpad, project_name, next_milestone_name):
 
 
 def main(args):
-    launchpad = Launchpad.login_with(APP_NAME, SERVICE_ROOT, CACHE_DIR)
+    launchpad = Launchpad.login_with(
+        APP_NAME, SERVICE_ROOT, CACHE_DIR, credentials_file='.lp_creds')
     return release_project(launchpad, PROJECT_NAME, NEXT_MILESTONE_NAME)
 
 

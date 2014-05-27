@@ -10,14 +10,33 @@ NEXT
 Changes
 -------
 
-* Removed a number of code paths where Python 2.4 and Python 2.5 were
-  explicitly handled. (Daniel Watkins)
+* Make testtools compatible with the ``unittest.expectedFailure`` decorator in
+  Python 3.4. (Thomi Richards)
 
 Improvements
 ------------
 
 * Introduce the assert_that function, which allows matchers to be used
   independent of testtools.TestCase. (Daniel Watkins, #1243834)
+
+
+0.9.35
+~~~~~~
+
+Changes
+-------
+
+* Removed a number of code paths where Python 2.4 and Python 2.5 were
+  explicitly handled. (Daniel Watkins)
+
+Improvements
+------------
+
+* Added the ``testtools.TestCase.expectThat`` method, which implements
+  delayed assertions. (Thomi Richards)
+
+* Docs are now built as part of the Travis-CI build, reducing the chance of
+  Read The Docs being broken accidentally. (Daniel Watkins, #1158773)
 
 0.9.34
 ~~~~~~

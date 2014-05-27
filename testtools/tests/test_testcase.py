@@ -26,6 +26,7 @@ from testtools.compat import (
     )
 from testtools.content import (
     text_content,
+    TracebackContent,
     )
 from testtools.matchers import (
     Annotate,
@@ -399,6 +400,16 @@ class TestAssertions(TestCase):
             '%r not in %r' % ('qux', 'foo bar baz'),
             self.assertIn, 'qux', 'foo bar baz')
 
+    def test_assertIn_failure_with_message(self):
+        # assertIn(needle, haystack) fails the test when 'needle' is not in
+        # 'haystack'.
+        self.assertFails('3 not in [0, 1, 2]: foo bar', self.assertIn, 3,
+                         [0, 1, 2], 'foo bar')
+        self.assertFails(
+            '%r not in %r: foo bar' % ('qux', 'foo bar baz'),
+            self.assertIn, 'qux', 'foo bar baz', 'foo bar')
+
+
     def test_assertNotIn_success(self):
         # assertNotIn(needle, haystack) asserts that 'needle' is not in
         # 'haystack'.
@@ -413,6 +424,18 @@ class TestAssertions(TestCase):
         self.assertFails(
             "'foo bar baz' matches Contains('foo')",
             self.assertNotIn, 'foo', 'foo bar baz')
+
+
+    def test_assertNotIn_failure_with_message(self):
+        # assertNotIn(needle, haystack) fails the test when 'needle' is in
+        # 'haystack'.
+        self.assertFails('[1, 2, 3] matches Contains(3): foo bar', self.assertNotIn,
+            3, [1, 2, 3], 'foo bar')
+        self.assertFails(
+            "'foo bar baz' matches Contains('foo'): foo bar",
+            self.assertNotIn, 'foo', 'foo bar baz', "foo bar")
+
+
 
     def test_assertIsInstance(self):
         # assertIsInstance asserts that an object is an instance of a class.
@@ -509,6 +532,97 @@ class TestAssertions(TestCase):
             'None matches Is(None): foo bar', self.assertIsNot, None, None,
             "foo bar")
 
+    def test_assertThat_matches_clean(self):
+        class Matcher(object):
+            def match(self, foo):
+                return None
+        self.assertThat("foo", Matcher())
+
+    def test_assertThat_mismatch_raises_description(self):
+        calls = []
+        class Mismatch(object):
+            def __init__(self, thing):
+                self.thing = thing
+            def describe(self):
+                calls.append(('describe_diff', self.thing))
+                return "object is not a thing"
+            def get_details(self):
+                return {}
+        class Matcher(object):
+            def match(self, thing):
+                calls.append(('match', thing))
+                return Mismatch(thing)
+            def __str__(self):
+                calls.append(('__str__',))
+                return "a description"
+        class Test(TestCase):
+            def test(self):
+                self.assertThat("foo", Matcher())
+        result = Test("test").run()
+        self.assertEqual([
+            ('match', "foo"),
+            ('describe_diff', "foo"),
+            ], calls)
+        self.assertFalse(result.wasSuccessful())
+
+    def test_assertThat_output(self):
+        matchee = 'foo'
+        matcher = Equals('bar')
+        expected = matcher.match(matchee).describe()
+        self.assertFails(expected, self.assertThat, matchee, matcher)
+
+    def test_assertThat_message_is_annotated(self):
+        matchee = 'foo'
+        matcher = Equals('bar')
+        expected = Annotate('woo', matcher).match(matchee).describe()
+        self.assertFails(expected, self.assertThat, matchee, matcher, 'woo')
+
+    def test_assertThat_verbose_output(self):
+        matchee = 'foo'
+        matcher = Equals('bar')
+        expected = (
+            'Match failed. Matchee: %r\n'
+            'Matcher: %s\n'
+            'Difference: %s\n' % (
+                matchee,
+                matcher,
+                matcher.match(matchee).describe(),
+                ))
+        self.assertFails(
+            expected, self.assertThat, matchee, matcher, verbose=True)
+
+    def test_expectThat_matches_clean(self):
+        class Matcher(object):
+            def match(self, foo):
+                return None
+        self.expectThat("foo", Matcher())
+
+    def test_expectThat_mismatch_fails_test(self):
+        class Test(TestCase):
+            def test(self):
+                self.expectThat("foo", Equals("bar"))
+        result = Test("test").run()
+        self.assertFalse(result.wasSuccessful())
+
+    def test_expectThat_does_not_exit_test(self):
+        class Test(TestCase):
+            marker = False
+            def test(self):
+                self.expectThat("foo", Equals("bar"))
+                Test.marker = True
+        result = Test("test").run()
+        self.assertFalse(result.wasSuccessful())
+        self.assertTrue(Test.marker)
+
+    def test_expectThat_adds_detail(self):
+        class Test(TestCase):
+            def test(self):
+                self.expectThat("foo", Equals("bar"))
+        test = Test("test")
+        result = test.run()
+        details = test.getDetails()
+        self.assertTrue("Failed expectation" in details)
+
     def test__force_failure_fails_test(self):
         class Test(TestCase):
             def test_foo(self):
@@ -518,6 +632,48 @@ class TestAssertions(TestCase):
         result = test.run()
         self.assertFalse(result.wasSuccessful())
         self.assertTrue(test.remaining_code_run)
+
+    def get_error_string(self, e):
+        """Get the string showing how 'e' would be formatted in test output.
+
+        This is a little bit hacky, since it's designed to give consistent
+        output regardless of Python version.
+
+        In testtools, TestResult._exc_info_to_unicode is the point of dispatch
+        between various different implementations of methods that format
+        exceptions, so that's what we have to call. However, that method cares
+        about stack traces and formats the exception class. We don't care
+        about either of these, so we take its output and parse it a little.
+        """
+        error = TracebackContent((e.__class__, e, None), self).as_text()
+        # We aren't at all interested in the traceback.
+        if error.startswith('Traceback (most recent call last):\n'):
+            lines = error.splitlines(True)[1:]
+            for i, line in enumerate(lines):
+                if not line.startswith(' '):
+                    break
+            error = ''.join(lines[i:])
+        # We aren't interested in how the exception type is formatted.
+        exc_class, error = error.split(': ', 1)
+        return error
+
+    def test_assertThat_verbose_unicode(self):
+        # When assertThat is given matchees or matchers that contain non-ASCII
+        # unicode strings, we can still provide a meaningful error.
+        matchee = _u('\xa7')
+        matcher = Equals(_u('a'))
+        expected = (
+            'Match failed. Matchee: %s\n'
+            'Matcher: %s\n'
+            'Difference: %s\n\n' % (
+                repr(matchee).replace("\\xa7", matchee),
+                matcher,
+                matcher.match(matchee).describe(),
+                ))
+        e = self.assertRaises(
+            self.failureException, self.assertThat, matchee, matcher,
+            verbose=True)
+        self.assertEqual(expected, self.get_error_string(e))
 
     def test_assertEqual_nice_formatting(self):
         message = "These things ought not be equal."
@@ -849,6 +1005,28 @@ class TestExpectedFailure(TestWithDetails):
         case = self.make_xfail_case_succeeds()
         self.assertDetailsProvided(case, "addUnexpectedSuccess",
             ["foo", "reason"])
+
+    @skipIf(not hasattr(unittest, 'expectedFailure'), 'Need py27+')
+    def test_unittest_expectedFailure_decorator_works_with_failure(self):
+        class ReferenceTest(TestCase):
+            @unittest.expectedFailure
+            def test_fails_expectedly(self):
+                self.assertEquals(1, 0)
+
+        test = ReferenceTest('test_fails_expectedly')
+        result = test.run()
+        self.assertEqual(True, result.wasSuccessful())
+
+    @skipIf(not hasattr(unittest, 'expectedFailure'), 'Need py27+')
+    def test_unittest_expectedFailure_decorator_works_with_success(self):
+        class ReferenceTest(TestCase):
+            @unittest.expectedFailure
+            def test_passes_unexpectedly(self):
+                self.assertEquals(1, 1)
+
+        test = ReferenceTest('test_passes_unexpectedly')
+        result = test.run()
+        self.assertEqual(False, result.wasSuccessful())
 
 
 class TestUniqueFactories(TestCase):

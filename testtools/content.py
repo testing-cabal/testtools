@@ -25,6 +25,7 @@ from testtools.compat import (
     _b,
     _format_exception_only,
     _format_stack_list,
+    _isbytes,
     _TB_HEADER,
     _u,
     str_is_unicode,
@@ -263,6 +264,8 @@ def text_content(text):
 
     This is useful for adding details which are short strings.
     """
+    if _isbytes(text):
+        raise TypeError('text_content must be given a string, not bytes.')
     return Content(UTF8_TEXT, lambda: [text.encode('utf8')])
 
 

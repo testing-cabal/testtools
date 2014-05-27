@@ -306,6 +306,44 @@ on to internally).  This behaves as the method version does::
             assert_that(result, Not(Equals(50)))
 
 
+=======
+Delayed Assertions
+~~~~~~~~~~~~~~~~~~
+
+A failure in the ``self.assertThat`` method will immediately fail the test: No
+more test code will be run after the assertion failure.
+
+The ``expectThat`` method behaves the same as ``assertThat`` with one
+exception: when failing the test it does so at the end of the test code rather
+than when the mismatch is detected. For example::
+
+  import subprocess
+
+  from testtools import TestCase
+  from testtools.matchers import Equals
+
+
+  class SomeProcessTests(TestCase):
+
+      def test_process_output(self):
+          process = subprocess.Popen(
+            ["my-app", "/some/path"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+          )
+
+          stdout, stderrr = process.communicate()
+
+          self.expectThat(process.returncode, Equals(0))
+          self.expectThat(stdout, Equals("Expected Output"))
+          self.expectThat(stderr, Equals(""))
+
+In this example, should the ``expectThat`` call fail, the failure will be
+recorded in the test result, but the test will continue as normal. If all
+three assertions fail, the test result will have three failures recorded, and
+the failure details for each failed assertion will be attached to the test
+result.
+
 Stock matchers
 --------------
 

@@ -16,6 +16,7 @@ __all__ = [
     ]
 
 import copy
+import functools
 import itertools
 import sys
 import types
@@ -29,9 +30,6 @@ from extras import (
 from testtools import (
     content,
     )
-from testtools.assertions import (
-    assert_that,
-)
 from testtools.compat import (
     advance_iterator,
     reraise,
@@ -84,6 +82,20 @@ _ExpectedFailure = try_import(
     'unittest2.case._ExpectedFailure', _ExpectedFailure)
 _ExpectedFailure = try_import(
     'unittest.case._ExpectedFailure', _ExpectedFailure)
+
+
+# Copied from unittest before python 3.4 release. Used to maintain
+# compatibility with unittest sub-test feature. Users should not use this
+# directly.
+def _expectedFailure(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            func(*args, **kwargs)
+        except Exception:
+            raise _ExpectedFailure(sys.exc_info())
+        raise _UnexpectedSuccess
+    return wrapper
 
 
 def run_test_with(test_runner, **kwargs):
@@ -195,6 +207,8 @@ class TestCase(unittest.TestCase):
             runTest = getattr(
                 test_method, '_run_test_with', self.run_tests_with)
         self.__RunTest = runTest
+        if getattr(test_method, '__unittest_expecting_failure__', False):
+            setattr(self, self._testMethodName, _expectedFailure(test_method))
         self.__exception_handlers = []
         self.exception_handlers = [
             (self.skipException, self._report_skip),
@@ -325,9 +339,9 @@ class TestCase(unittest.TestCase):
 
     failUnlessEqual = assertEquals = assertEqual
 
-    def assertIn(self, needle, haystack):
+    def assertIn(self, needle, haystack, message=''):
         """Assert that needle is in haystack."""
-        self.assertThat(haystack, Contains(needle))
+        self.assertThat(haystack, Contains(needle), message)
 
     def assertIsNone(self, observed, message=''):
         """Assert that 'observed' is equal to None.
@@ -362,10 +376,10 @@ class TestCase(unittest.TestCase):
         matcher = Not(Is(expected))
         self.assertThat(observed, matcher, message)
 
-    def assertNotIn(self, needle, haystack):
+    def assertNotIn(self, needle, haystack, message=''):
         """Assert that needle is not in haystack."""
         matcher = Not(Contains(needle))
-        self.assertThat(haystack, matcher)
+        self.assertThat(haystack, matcher, message)
 
     def assertIsInstance(self, obj, klass, msg=None):
         if isinstance(klass, tuple):
@@ -404,13 +418,9 @@ class TestCase(unittest.TestCase):
         :param matcher: An object meeting the testtools.Matcher protocol.
         :raises MismatchError: When matcher does not match thing.
         """
-        try:
-            assert_that(matchee, matcher, message, verbose)
-        except MismatchError as error:
-            mismatch = error.mismatch
-            for (name, content) in mismatch.get_details().items():
-                self.addDetailUniqueName(name, content)
-            raise
+        mismatch_error = self._matchHelper(matchee, matcher, message, verbose)
+        if mismatch_error is not None:
+            raise mismatch_error
 
     def addDetailUniqueName(self, name, content_object):
         """Add a detail to the test, but ensure it's name is unique.
@@ -432,6 +442,38 @@ class TestCase(unittest.TestCase):
             full_name = "%s-%d" % (name, suffix)
             suffix += 1
         self.addDetail(full_name, content_object)
+
+    def expectThat(self, matchee, matcher, message='', verbose=False):
+        """Check that matchee is matched by matcher, but delay the assertion failure.
+
+        This method behaves similarly to ``assertThat``, except that a failed
+        match does not exit the test immediately. The rest of the test code will
+        continue to run, and the test will be marked as failing after the test
+        has finished.
+
+        :param matchee: An object to match with matcher.
+        :param matcher: An object meeting the testtools.Matcher protocol.
+        :param message: If specified, show this message with any failed match.
+        """
+        mismatch_error = self._matchHelper(matchee, matcher, message, verbose)
+
+        if mismatch_error is not None:
+            self.addDetailUniqueName(
+                "Failed expectation",
+                content.StacktraceContent(
+                    postfix_content="MismatchError: " + str(mismatch_error)
+                )
+            )
+            self.force_failure = True
+
+    def _matchHelper(self, matchee, matcher, message, verbose):
+        matcher = Annotate.if_message(message, matcher)
+        mismatch = matcher.match(matchee)
+        if not mismatch:
+            return
+        for (name, value) in mismatch.get_details().items():
+            self.addDetailUniqueName(name, value)
+        return MismatchError(matchee, matcher, mismatch, verbose)
 
     def defaultTestResult(self):
         return TestResult()
