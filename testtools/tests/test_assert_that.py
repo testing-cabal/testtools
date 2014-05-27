@@ -20,9 +20,7 @@ from testtools.matchers import (
 
 
 class AssertThatTests(object):
-    """
-    A mixin containing shared tests for assertThat and assert_that.
-    """
+    """A mixin containing shared tests for assertThat and assert_that."""
 
     def assert_that_callable(self, *args, **kwargs):
         raise NotImplementedError

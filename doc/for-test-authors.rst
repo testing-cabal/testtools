@@ -292,8 +292,7 @@ Which is roughly equivalent to::
 ------------------------
 
 In addition to ``self.assertThat``, testtools also provides the ``assert_that``
-function in ``testtools.assertions`` (which is what ``self.assertThat`` backs
-on to internally).  This behaves as the method version does::
+function in ``testtools.assertions`` This behaves like the method version does::
 
     class TestSquare(TestCase):
 
