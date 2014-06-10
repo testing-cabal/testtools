@@ -9,6 +9,7 @@ from unittest import TestSuite
 def test_suite():
     from testtools.tests import (
         matchers,
+        test_assert_that,
         test_compat,
         test_content,
         test_content_type,
@@ -27,6 +28,7 @@ def test_suite():
         )
     modules = [
         matchers,
+        test_assert_that,
         test_compat,
         test_content,
         test_content_type,

@@ -13,6 +13,13 @@ Changes
 * Make testtools compatible with the ``unittest.expectedFailure`` decorator in
   Python 3.4. (Thomi Richards)
 
+Improvements
+------------
+
+* Introduce the assert_that function, which allows matchers to be used
+  independent of testtools.TestCase. (Daniel Watkins, #1243834)
+
+
 0.9.35
 ~~~~~~
 
