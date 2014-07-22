@@ -7,6 +7,12 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Changes
+-------
+
+* Made ``testtools.content.text_content`` raise a ``TypeError`` if passed
+  something other than text. (Thomi Richards)
+
 0.9.35
 ~~~~~~
 

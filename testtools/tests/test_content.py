@@ -2,10 +2,14 @@
 
 import json
 import os
+import sys
 import tempfile
 import unittest
 
-from testtools import TestCase
+from testtools import (
+    TestCase,
+    skipIf,
+    )
 from testtools.compat import (
     _b,
     _u,
@@ -189,6 +193,14 @@ class TestContent(TestCase):
         data = _u("some data")
         expected = Content(UTF8_TEXT, lambda: [data.encode('utf8')])
         self.assertEqual(expected, text_content(data))
+
+    @skipIf(sys.version < '3', "Only applicable in python 3.")
+    def test_text_content_raises_TypeError_when_not_given_text(self):
+        fn = lambda: text_content(_b('Some Bytes'))
+        self.assertThat(
+            fn,
+            raises(TypeError("'text' parameter must be a string, not bytes"))
+        )
 
     def test_json_content(self):
         data = {'foo': 'bar'}
