@@ -26,7 +26,7 @@ What better way to start than with a contrived code snippet?::
       def attach_log_file(self):
           self.addDetail(
               'log-file',
-              Content(UTF8_TEXT
+              Content(UTF8_TEXT,
                       lambda: open(self.server.logfile, 'r').readlines()))
 
       def test_server_is_cool(self):
