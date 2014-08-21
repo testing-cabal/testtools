@@ -305,7 +305,6 @@ function in ``testtools.assertions`` This behaves like the method version does::
             assert_that(result, Not(Equals(50)))
 
 
-=======
 Delayed Assertions
 ~~~~~~~~~~~~~~~~~~
 
@@ -463,7 +462,7 @@ example::
       except RuntimeError:
           exc_info = sys.exc_info()
       self.assertThat(exc_info, MatchesException(RuntimeError))
-      self.assertThat(exc_info, MatchesException(RuntimeError('bar'))
+      self.assertThat(exc_info, MatchesException(RuntimeError('bar')))
 
 Most of the time, you will want to uses `The raises helper`_ instead.
 
@@ -653,7 +652,7 @@ Used to add custom notes to a matcher.  For example::
   def test_annotate_example(self):
       result = 43
       self.assertThat(
-          result, Annotate("Not the answer to the Question!", Equals(42))
+          result, Annotate("Not the answer to the Question!", Equals(42)))
 
 Since the annotation is only ever displayed when there is a mismatch
 (e.g. when ``result`` does not equal 42), it's a good idea to phrase the note
@@ -866,7 +865,7 @@ matcher based on it::
           divisible, '{0} is not divisible by {1}')
       self.assertThat(7, IsDivisibleBy(1))
       self.assertThat(7, IsDivisibleBy(7))
-      self.assertThat(7, IsDivisibleBy(2)))
+      self.assertThat(7, IsDivisibleBy(2))
       # This will fail.
 
 Which will produce the error message::
@@ -1392,14 +1391,14 @@ marking up test methods with attributes, which are then exposed in the test
 id and can be used when filtering tests by id. (e.g. via ``--load-list``)::
 
   from testtools.testcase import attr, WithAttributes
-  
+
   class AnnotatedTests(WithAttributes, TestCase):
 
       @attr('simple')
       def test_one(self):
           pass
-      
-      @attr('more', 'than', 'one)
+
+      @attr('more', 'than', 'one')
       def test_two(self):
           pass
 
