@@ -1207,6 +1207,18 @@ class TestSetupTearDown(TestCase):
 
     run_test_with = FullStackRunTest
 
+    def test_setUpCalledTwice(self):
+        class CallsTooMuch(TestCase):
+            def test_method(self):
+                self.setUp()
+        result = unittest.TestResult()
+        CallsTooMuch('test_method').run(result)
+        self.assertThat(result.errors, HasLength(1))
+        self.assertThat(result.errors[0][1],
+            DocTestMatches(
+                "...ValueError...File...testtools/tests/test_testcase.py...",
+                ELLIPSIS))
+
     def test_setUpNotCalled(self):
         class DoesnotcallsetUp(TestCase):
             def setUp(self):
@@ -1215,6 +1227,18 @@ class TestSetupTearDown(TestCase):
                 pass
         result = unittest.TestResult()
         DoesnotcallsetUp('test_method').run(result)
+        self.assertThat(result.errors, HasLength(1))
+        self.assertThat(result.errors[0][1],
+            DocTestMatches(
+                "...ValueError...File...testtools/tests/test_testcase.py...",
+                ELLIPSIS))
+
+    def test_tearDownCalledTwice(self):
+        class CallsTooMuch(TestCase):
+            def test_method(self):
+                self.tearDown()
+        result = unittest.TestResult()
+        CallsTooMuch('test_method').run(result)
         self.assertThat(result.errors, HasLength(1))
         self.assertThat(result.errors[0][1],
             DocTestMatches(

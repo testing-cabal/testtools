@@ -10,8 +10,12 @@ NEXT
 Changes
 -------
 
+* Error if ``setUp`` or ``tearDown`` are called twice.
+  (Robert Collins, #882884)
+
 * Make testtools compatible with the ``unittest.expectedFailure`` decorator in
   Python 3.4. (Thomi Richards)
+
 
 Improvements
 ------------
