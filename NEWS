@@ -7,6 +7,13 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Changes
+-------
+
+* The ``ExtendedToStreamDecorator`` now handles content objects with one less
+  packet - the last packet of the source content is sent with EOF set rather
+  than an empty packet with EOF set being sent after the last packet of the
+  source content. (Robert Collins)
 
 0.9.36
 ~~~~~~

@@ -189,12 +189,10 @@ TypeError: run() takes ...1 ...argument...2...given...
         self.assertEqual([
             ('status', "broken-runner-'0'", 'inprogress', None, True, None, None, False, None, _u('0'), None),
             ('status', "broken-runner-'0'", None, None, True, 'traceback', None,
-             False,
+             True,
              'text/x-traceback; charset="utf8"; language="python"',
              '0',
              None),
-             ('status', "broken-runner-'0'", None, None, True, 'traceback', b'', True,
-              'text/x-traceback; charset="utf8"; language="python"', '0', None),
              ('status', "broken-runner-'0'", 'fail', set(), True, None, None, False, None, _u('0'), None)
             ], events)
 

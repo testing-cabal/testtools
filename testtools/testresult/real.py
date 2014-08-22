@@ -1336,10 +1336,13 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
         if details is not None:
             for name, content in details.items():
                 mime_type = repr(content.content_type)
-                for file_bytes in content.iter_bytes():
-                    self.status(file_name=name, file_bytes=file_bytes,
-                        mime_type=mime_type, test_id=test_id, timestamp=now)
-                self.status(file_name=name, file_bytes=_b(""), eof=True,
+                file_bytes = None
+                for next_bytes in content.iter_bytes():
+                    if file_bytes is not None:
+                        self.status(file_name=name, file_bytes=file_bytes,
+                            mime_type=mime_type, test_id=test_id, timestamp=now)
+                    file_bytes = next_bytes
+                self.status(file_name=name, file_bytes=file_bytes, eof=True,
                     mime_type=mime_type, test_id=test_id, timestamp=now)
         if reason is not None:
             self.status(file_name='reason', file_bytes=reason.encode('utf8'),
