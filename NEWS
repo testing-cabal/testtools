@@ -7,6 +7,15 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+
+0.9.36
+~~~~~~
+
+Welcome to our long overdue 0.9.36 release, which improves compatibility with
+Python3.4, adds assert_that, a function for using matchers without TestCase
+objects, and finally will error if you try to use setUp or tearDown twice -
+since that invariably leads to bad things of one sort or another happening.
+
 Changes
 -------
 
