@@ -150,9 +150,7 @@ testtools.runexample.TestFoo.test_quux
             SystemExit,
             run.main, ['prog', 'discover', '-l', broken.package.base, '*.py'], out)
         self.assertEqual(2, exc.args[0])
-        self.assertEqual("""Failed to import
-runexample.__init__
-""", out.getvalue())
+        self.assertRegexMatches(out.getvalue(), ".*Failed to import.*runexample.__init__.*")
 
     def test_run_orders_tests(self):
         self.useFixture(SampleTestFixture())
