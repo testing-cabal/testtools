@@ -61,8 +61,8 @@ class TestCommandTest(TestCase):
         dist.cmdclass = {'test': TestCommand}
         dist.command_options = {
             'test': {'test_module': ('command line', 'testtools.runexample')}}
-        cmd = dist.reinitialize_command('test')
         with fixtures.MonkeyPatch('sys.stdout', stdout.stream):
+            cmd = dist.reinitialize_command('test')
             dist.run_command('test')
         self.assertThat(
             stdout.getDetails()['stdout'].as_text(),
@@ -83,8 +83,8 @@ OK
             'test': {
                 'test_suite': (
                     'command line', 'testtools.runexample.test_suite')}}
-        cmd = dist.reinitialize_command('test')
         with fixtures.MonkeyPatch('sys.stdout', stdout.stream):
+            cmd = dist.reinitialize_command('test')
             dist.run_command('test')
         self.assertThat(
             stdout.getDetails()['stdout'].as_text(),

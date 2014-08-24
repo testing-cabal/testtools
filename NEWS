@@ -10,6 +10,12 @@ NEXT
 Changes
 -------
 
+* ``stdout`` is now correctly honoured on ``run.TestProgram`` - before the
+  runner objects would be created with no stdout parameter. If construction
+  fails, the previous parameter list is attempted, permitting compatibility
+  with Runner classes that don't accept stdout as a parameter.
+  (Robert Collins)
+
 * The ``ExtendedToStreamDecorator`` now handles content objects with one less
   packet - the last packet of the source content is sent with EOF set rather
   than an empty packet with EOF set being sent after the last packet of the

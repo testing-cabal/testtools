@@ -26,7 +26,7 @@ class TestCommand(Command):
 
     def __init__(self, dist):
         Command.__init__(self, dist)
-        self.runner = TestToolsTestRunner(sys.stdout)
+        self.runner = TestToolsTestRunner(stdout=sys.stdout)
 
 
     def initialize_options(self):

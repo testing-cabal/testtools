@@ -73,6 +73,8 @@ class TestToolsTestRunner(object):
         :param stdout: Stream to use for stdout.
         """
         self.failfast = failfast
+        if stdout is None:
+            stdout = sys.stdout
         self.stdout = stdout
 
     def list(self, test):
@@ -89,7 +91,7 @@ class TestToolsTestRunner(object):
     def run(self, test):
         "Run the given test case or test suite."
         result = TextTestResult(
-            unicode_output_stream(sys.stdout), failfast=self.failfast)
+            unicode_output_stream(self.stdout), failfast=self.failfast)
         result.startTestRun()
         try:
             return test.run(result)
@@ -185,6 +187,7 @@ class TestProgram(object):
             argv = sys.argv
         if stdout is None:
             stdout = sys.stdout
+        self.stdout = stdout
 
         self.exit = exit
         self.failfast = failfast
@@ -224,7 +227,7 @@ class TestProgram(object):
                 runner.list(self.test)
             else:
                 for test in iterate_tests(self.test):
-                    stdout.write('%s\n' % test.id())
+                    self.stdout.write('%s\n' % test.id())
 
     def usageExit(self, msg=None):
         if msg:
@@ -378,14 +381,22 @@ class TestProgram(object):
         try:
             testRunner = self.testRunner(verbosity=self.verbosity,
                                          failfast=self.failfast,
-                                         buffer=self.buffer)
+                                         buffer=self.buffer,
+                                         stdout=self.stdout)
         except TypeError:
-            # didn't accept the verbosity, buffer or failfast arguments
+            # didn't accept the verbosity, buffer, failfast or stdout arguments
+            # Try with the prior contract
             try:
-                testRunner = self.testRunner()
+                testRunner = self.testRunner(verbosity=self.verbosity,
+                                             failfast=self.failfast,
+                                             buffer=self.buffer)
             except TypeError:
-                # it is assumed to be a TestRunner instance
-                testRunner = self.testRunner
+                # Now try calling it with defaults
+                try:
+                    testRunner = self.testRunner()
+                except TypeError:
+                    # it is assumed to be a TestRunner instance
+                    testRunner = self.testRunner
         return testRunner
 
 

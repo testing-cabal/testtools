@@ -13,9 +13,13 @@ import testtools
 from testtools import TestCase, run
 from testtools.compat import (
     _b,
+    _u,
     StringIO,
     )
-from testtools.matchers import Contains
+from testtools.matchers import (
+    Contains,
+    MatchesRegex,
+    )
 
 
 if fixtures:
@@ -235,12 +239,27 @@ testtools.resourceexample.TestFoo.test_foo
                 self.fail('a')
             def test_b(self):
                 self.fail('b')
-        runner = run.TestToolsTestRunner(failfast=True)
         with fixtures.MonkeyPatch('sys.stdout', stdout.stream):
+            runner = run.TestToolsTestRunner(failfast=True)
             runner.run(TestSuite([Failing('test_a'), Failing('test_b')]))
         self.assertThat(
             stdout.getDetails()['stdout'].as_text(), Contains('Ran 1 test'))
 
+    def test_stdout_honoured(self):
+        self.useFixture(SampleTestFixture())
+        tests = []
+        out = StringIO()
+        exc = self.assertRaises(SystemExit, run.main,
+            argv=['prog', 'testtools.runexample.test_suite'],
+            stdout=out)
+        self.assertEqual((0,), exc.args)
+        self.assertThat(
+            out.getvalue(),
+            MatchesRegex(_u("""Tests running...
+
+Ran 2 tests in \\d.\\d\\d\\ds
+OK
+""")))
 
 
 def test_suite():
