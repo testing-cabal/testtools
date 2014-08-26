@@ -266,7 +266,6 @@ class StreamResult(object):
     """A test result for reporting the activity of a test run.
 
     Typical use
-    -----------
 
       >>> result = StreamResult()
       >>> result.startTestRun()
@@ -282,7 +281,6 @@ class StreamResult(object):
       >>> result.status(self.id(), 'success')
 
     General concepts
-    ----------------
 
     StreamResult is built to process events that are emitted by tests during a
     test run or test enumeration. The test run may be running concurrently, and
