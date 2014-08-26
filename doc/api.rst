@@ -1,0 +1,26 @@
+testtools API documentation
+===========================
+
+Generated reference documentation for all the public functionality of
+testtools.
+
+Please :doc:`send patches </hacking>` if you notice anything confusing or
+wrong, or that could be improved.
+
+
+.. toctree::
+   :maxdepth: 2
+
+
+testtools
+---------
+
+.. automodule:: testtools
+   :members:
+
+
+testtools.matchers
+------------------
+
+.. automodule:: testtools.matchers
+   :members:
