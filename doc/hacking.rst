@@ -100,7 +100,7 @@ Tests belong in ``testtools/tests/``.
 Committing to trunk
 -------------------
 
-testtools is maintained using git, with its master repo at
+Testtools is maintained using git, with its master repo at
 https://github.com/testing-cabal/testtools. This gives every contributor the
 ability to commit their work to their own branches. However permission must be
 granted to allow contributors to commit to the trunk branch.
