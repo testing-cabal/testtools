@@ -14,8 +14,8 @@ unit-tested project, are trying to get one testing framework to play nicely
 with another or are hacking away at getting your test suite to run in parallel
 over a heterogenous cluster of machines, this guide is for you.
 
-This manual is a summary.  You can get details by consulting the `testtools
-API docs`_.
+This manual is a summary. You can get details by consulting the
+:doc:`testtools API docs </api>`.
 
 
 Extensions to TestCase
@@ -449,6 +449,5 @@ To facilitate custom listing of tests, ``testtools.run.TestProgram`` attempts
 to call ``list`` on the ``TestRunner``, falling back to a generic
 implementation if it is not present.
 
-.. _`testtools API docs`: http://mumak.net/testtools/apidocs/
 .. _unittest: http://docs.python.org/library/unittest.html
 .. _fixture: http://pypi.python.org/pypi/fixtures
