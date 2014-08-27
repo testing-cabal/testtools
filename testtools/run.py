@@ -48,13 +48,17 @@ def list_test(test):
     :return: A tuple of test ids that would run and error strings
         describing things that failed to import.
     """
-    unittest_import_str = 'unittest.loader.ModuleImportFailure.' 
+    unittest_import_strs = set([
+        'unittest.loader.ModuleImportFailure.', 'discover.ModuleImportFailure.'
+        ])
     test_ids = []
     errors = []
     for test in iterate_tests(test):
-        # to this ugly.
-        if test.id().startswith(unittest_import_str):
-            errors.append(test.id()[len(unittest_import_str):])
+        # Much ugly.
+        for prefix in unittest_import_strs:
+            if test.id().startswith(prefix):
+                errors.append(test.id()[len(prefix):])
+                break
         else:
             test_ids.append(test.id())
     return test_ids, errors

@@ -7,6 +7,12 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* Discovery import error detection wasn't implemented for python 2.6 (the
+  'discover' module). (Robert Collins)
+
 0.9.37
 ~~~~~~
 
