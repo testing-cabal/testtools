@@ -13,6 +13,9 @@ Improvements
 * Discovery import error detection wasn't implemented for python 2.6 (the
   'discover' module). (Robert Collins)
 
+* Discovery now executes load_tests (if present) in __init__ in all packages.
+  (Robert Collins, http://bugs.python.org/issue16662)
+
 0.9.37
 ~~~~~~
 

@@ -4,13 +4,14 @@
 
 from unittest import TestSuite
 import sys
+from textwrap import dedent
 
 from extras import try_import
 fixtures = try_import('fixtures')
 testresources = try_import('testresources')
 
 import testtools
-from testtools import TestCase, run
+from testtools import TestCase, run, skipUnless
 from testtools.compat import (
     _b,
     _u,
@@ -104,6 +105,31 @@ def test_suite():
             testtools.__path__.append(self.package.base)
 
 
+if fixtures and run.have_discover:
+    class SampleLoadTestsPackage(fixtures.Fixture):
+        """Creates a test suite package using load_tests."""
+
+        def __init__(self):
+            super(SampleLoadTestsPackage, self).__init__()
+            self.package = fixtures.PythonPackage(
+            'discoverexample', [('__init__.py', _b("""
+from testtools import TestCase, clone_test_with_new_id
+
+class TestExample(TestCase):
+    def test_foo(self):
+        pass
+
+def load_tests(loader, tests, pattern):
+    tests.addTest(clone_test_with_new_id(tests._tests[1]._tests[0], "fred"))
+    return tests
+"""))])
+
+        def setUp(self):
+            super(SampleLoadTestsPackage, self).setUp()
+            self.useFixture(self.package)
+            self.addCleanup(sys.path.remove, self.package.base)
+
+
 class TestRun(TestCase):
 
     def setUp(self):
@@ -151,7 +177,7 @@ testtools.runexample.TestFoo.test_quux
             run.main, ['prog', 'discover', '-l', broken.package.base, '*.py'], out)
         self.assertEqual(2, exc.args[0])
         self.assertEqual("""Failed to import
-runexample.__init__
+runexample
 """, out.getvalue())
 
     def test_run_orders_tests(self):
@@ -260,6 +286,22 @@ testtools.resourceexample.TestFoo.test_foo
 Ran 2 tests in \\d.\\d\\d\\ds
 OK
 """)))
+
+    @skipUnless(run.have_discover, "discovery not present")
+    @skipUnless(fixtures, "fixtures not present")
+    def test_issue_16662(self):
+        # unittest's discover implementation didn't handle load_tests on
+        # packages. That is fixed pending commit, but we want to offer it
+        # to all testtools users regardless of Python version.
+        # See http://bugs.python.org/issue16662
+        pkg = self.useFixture(SampleLoadTestsPackage())
+        out = StringIO()
+        self.assertEqual(None, run.main(
+            ['prog', 'discover', '-l', pkg.package.base], out))
+        self.assertEqual(dedent("""\
+            discoverexample.TestExample.test_foo
+            fred
+            """), out.getvalue())
 
 
 def test_suite():
