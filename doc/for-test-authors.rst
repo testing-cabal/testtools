@@ -11,7 +11,7 @@ automated testing already.
 If you are a test author of an unusually large or unusually unusual test
 suite, you might be interested in :doc:`for-framework-folk`.
 
-You might also be interested in the `testtools API docs`_.
+You might also be interested in the :doc:`testtools API docs </api>`.
 
 
 Introduction
@@ -1480,7 +1480,6 @@ Here, ``repr(nullary)`` will be the same as ``repr(f)``.
 .. _doctest: http://docs.python.org/library/doctest.html
 .. _Deferred: http://twistedmatrix.com/documents/current/core/howto/defer.html
 .. _discover: http://pypi.python.org/pypi/discover
-.. _`testtools API docs`: http://mumak.net/testtools/apidocs/
 .. _Distutils: http://docs.python.org/library/distutils.html
 .. _`setup configuration`: http://docs.python.org/distutils/configfile.html
 .. _broken: http://chipaca.com/post/3210673069/hasattr-17-less-harmful
