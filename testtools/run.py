@@ -9,13 +9,13 @@ For instance, to run the testtools test suite.
 """
 
 from functools import partial
-import os
+import os.path
 import unittest
 import sys
 
 from extras import safe_hasattr
 
-from testtools import TextTestResult
+from testtools import TextTestResult, testcase
 from testtools.compat import classtypes, istext, unicode_output_stream
 from testtools.testsuite import filter_by_ids, iterate_tests, sorted_tests
 
@@ -29,10 +29,13 @@ if getattr(defaultTestLoader, 'discover', None) is None:
         defaultTestLoader = discover.DiscoveringTestLoader()
         defaultTestLoaderCls = discover.DiscoveringTestLoader
         have_discover = True
+        discover_impl = discover
     except ImportError:
         have_discover = False
 else:
     have_discover = True
+    discover_impl = unittest.loader
+discover_fixed = False
 
 
 def list_test(test):
@@ -125,6 +128,8 @@ class TestToolsTestRunner(object):
 #  - The limitation of using getopt is declared to the user.
 #  - http://bugs.python.org/issue16709 is worked around, by sorting tests when
 #    discover is used.
+#  - We monkey-patch the discover and unittest loaders to address
+#     http://bugs.python.org/issue16662 with the proposed upstream patch.
 
 FAILFAST     = "  -f, --failfast   Stop on first failure\n"
 CATCHBREAK   = "  -c, --catch      Catch control-C and display results\n"
@@ -303,6 +308,7 @@ class TestProgram(object):
         if not have_discover:
             raise AssertionError("Unable to use discovery, must use python 2.7 "
                     "or greater, or install the discover package.")
+        _fix_discovery()
         self.progName = '%s discover' % self.progName
         import optparse
         parser = optparse.OptionParser()
@@ -403,6 +409,118 @@ class TestProgram(object):
                     testRunner = self.testRunner
         return testRunner
 
+
+def _fix_discovery():
+    # Monkey patch in the bugfix from http://bugs.python.org/issue16662
+    # - the code here is a straight copy from the Python core tree
+    # with the patch applied.
+    global discover_fixed
+    if discover_fixed:
+        return
+    # Do we have a fixed Python?
+    # (not committed upstream yet - so we can't uncomment this code,
+    # but when it gets committed, the next version to be released won't
+    # need monkey patching.
+    # if sys.version_info[:2] > (3, 4):
+    #     discover_fixed = True
+    #     return
+    if not have_discover:
+        return
+    if safe_hasattr(discover_impl, '_jython_aware_splitext'):
+        _jython_aware_splitext = discover_impl._jython_aware_splitext
+    else:
+        _jython_aware_splitext = os.path.splitext
+    def loadTestsFromModule(self, module, use_load_tests=True, pattern=None):
+        """Return a suite of all tests cases contained in the given module"""
+        # use_load_tests is preserved for compatability though it was never
+        # an official API.
+        # pattern is not an official API either; it is used in discovery to
+        # chain the requested pattern down.
+        tests = []
+        for name in dir(module):
+            obj = getattr(module, name)
+            if isinstance(obj, type) and issubclass(obj, unittest.TestCase):
+                tests.append(self.loadTestsFromTestCase(obj))
+
+        load_tests = getattr(module, 'load_tests', None)
+        tests = self.suiteClass(tests)
+        if use_load_tests and load_tests is not None:
+            try:
+                return load_tests(self, tests, pattern)
+            except Exception as e:
+                return discover_impl._make_failed_load_tests(
+                    module.__name__, e, self.suiteClass)
+        return tests
+    def _find_tests(self, start_dir, pattern, namespace=False):
+        """Used by discovery. Yields test suites it loads."""
+        paths = sorted(os.listdir(start_dir))
+
+        for path in paths:
+            full_path = os.path.join(start_dir, path)
+            if os.path.isfile(full_path):
+                if not discover_impl.VALID_MODULE_NAME.match(path):
+                    # valid Python identifiers only
+                    continue
+                if not self._match_path(path, full_path, pattern):
+                    continue
+                # if the test file matches, load it
+                name = self._get_name_from_path(full_path)
+                try:
+                    module = self._get_module_from_name(name)
+                except testcase.TestSkipped as e:
+                    yield discover_impl._make_skipped_test(
+                        name, e, self.suiteClass)
+                except:
+                    yield discover_impl._make_failed_import_test(
+                        name, self.suiteClass)
+                else:
+                    mod_file = os.path.abspath(getattr(module, '__file__', full_path))
+                    realpath = _jython_aware_splitext(
+                        os.path.realpath(mod_file))
+                    fullpath_noext = _jython_aware_splitext(
+                        os.path.realpath(full_path))
+                    if realpath.lower() != fullpath_noext.lower():
+                        module_dir = os.path.dirname(realpath)
+                        mod_name = _jython_aware_splitext(
+                            os.path.basename(full_path))
+                        expected_dir = os.path.dirname(full_path)
+                        msg = ("%r module incorrectly imported from %r. Expected %r. "
+                               "Is this module globally installed?")
+                        raise ImportError(msg % (mod_name, module_dir, expected_dir))
+                    yield self.loadTestsFromModule(module, pattern=pattern)
+            elif os.path.isdir(full_path):
+                if (not namespace and
+                    not os.path.isfile(os.path.join(full_path, '__init__.py'))):
+                    continue
+
+                load_tests = None
+                tests = None
+                name = self._get_name_from_path(full_path)
+                try:
+                    package = self._get_module_from_name(name)
+                except testcase.TestSkipped as e:
+                    yield discover_impl._make_skipped_test(
+                        name, e, self.suiteClass)
+                except:
+                    yield discover_impl._make_failed_import_test(
+                        name, self.suiteClass)
+                else:
+                    load_tests = getattr(package, 'load_tests', None)
+                    tests = self.loadTestsFromModule(package, pattern=pattern)
+                    if tests is not None:
+                        # tests loaded from package file
+                        yield tests
+
+                    if load_tests is not None:
+                        # loadTestsFromModule(package) has load_tests for us.
+                        continue
+                    # recurse into the package
+                    pkg_tests =  self._find_tests(
+                        full_path, pattern, namespace=namespace)
+                    for test in pkg_tests:
+                        yield test
+    defaultTestLoaderCls.loadTestsFromModule = loadTestsFromModule
+    defaultTestLoaderCls._find_tests = _find_tests
 
 ################
 
