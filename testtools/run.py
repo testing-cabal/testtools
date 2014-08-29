@@ -429,7 +429,10 @@ def _fix_discovery():
     if safe_hasattr(discover_impl, '_jython_aware_splitext'):
         _jython_aware_splitext = discover_impl._jython_aware_splitext
     else:
-        _jython_aware_splitext = os.path.splitext
+        def _jython_aware_splitext(path):
+            if path.lower().endswith('$py.class'):
+                return path[:-9]
+            return os.path.splitext(path)[0]
     def loadTestsFromModule(self, module, use_load_tests=True, pattern=None):
         """Return a suite of all tests cases contained in the given module"""
         # use_load_tests is preserved for compatability though it was never

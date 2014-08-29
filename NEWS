@@ -7,6 +7,13 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+0.9.39
+~~~~~~
+
+Brown paper bag release - 0.9.38 was broken for some users,
+_jython_aware_splitext was not defined entirely compatibly.
+(Robert Collins, #https://github.com/testing-cabal/testtools/issues/100)
+
 0.9.38
 ~~~~~~
 
