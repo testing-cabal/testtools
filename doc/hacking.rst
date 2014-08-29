@@ -141,8 +141,20 @@ branches, the bullet points are kept alphabetically sorted. The release NEXT is
 permanently present at the top of the list.
 
 
-Release tasks
--------------
+Releasing
+---------
+
+Prerequisites
++++++++++++++
+
+Membership in the testing-cabal org on github as committer.
+
+Membership in the pypi testtools project as maintainer.
+
+Membership in the https://launchpad.net/~testtools-committers.
+
+Tasks
++++++
 
 #. Choose a version number, say X.Y.Z
 #. In trunk, ensure __init__ has version ``(X, Y, Z, 'final', 0)``
