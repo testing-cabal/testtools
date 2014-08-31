@@ -7,6 +7,12 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* We have adopted a formal backwards compatibility statement (see hacking.rst)
+  (Robert Collins)
+
 0.9.39
 ~~~~~~
 

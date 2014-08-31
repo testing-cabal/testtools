@@ -130,6 +130,18 @@ including conformance with this HACKING file.
 
 Changes which all users should be made aware of should be documented in NEWS.
 
+We are now in full backwards compatibility mode - no more releases < 1.0.0, and 
+breaking compatibility will require consensus on the testtools-dev mailing list.
+Exactly what constitutes a backwards incompatible change is vague, but coarsely:
+
+* adding required arguments or required calls to something that used to work
+* removing keyword or position arguments, removing methods, functions or modules
+* changing behaviour someone may have reasonably depended on
+
+Some things are not compatibility issues:
+
+* changes to _ prefixed methods, functions, modules, packages.
+
 
 NEWS management
 ---------------
