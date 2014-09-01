@@ -10,6 +10,10 @@ NEXT
 Improvements
 ------------
 
+* Fix an issue where tests skipped with the ``skip``* family of decorators would
+  still have their ``setUp`` and ``tearDown`` functions called.
+  (Thomi Richards, #https://github.com/testing-cabal/testtools/issues/86)
+
 * We have adopted a formal backwards compatibility statement (see hacking.rst)
   (Robert Collins)
 

@@ -1260,6 +1260,12 @@ class TestSetupTearDown(TestCase):
                 ELLIPSIS))
 
 
+require_py27_minimum = skipIf(
+    sys.version < '2.7',
+    "Requires python 2.7 or greater"
+)
+
+
 class TestSkipping(TestCase):
     """Tests for skipping of tests functionality."""
 
@@ -1362,6 +1368,71 @@ class TestSkipping(TestCase):
         test = SkippingTest("test_that_is_decorated_with_skipUnless")
         test.run(result)
         self.assertEqual('addSuccess', result._events[1][0])
+
+    def check_skip_decorator_does_not_run_setup(self, decorator, reason):
+        class SkippingTest(TestCase):
+
+            setup_ran = False
+
+            def setUp(self):
+                super(SkippingTest, self).setUp()
+                self.setup_ran = True
+
+            # Use the decorator passed to us:
+            @decorator
+            def test_skipped(self):
+                self.fail()
+
+        test = SkippingTest('test_skipped')
+        result = test.run()
+        self.assertTrue(result.wasSuccessful())
+        self.assertTrue(reason in result.skip_reasons, result.skip_reasons)
+        self.assertFalse(test.setup_ran)
+
+    def test_testtools_skip_decorator_does_not_run_setUp(self):
+        reason = self.getUniqueString()
+        self.check_skip_decorator_does_not_run_setup(
+            skip(reason),
+            reason
+        )
+
+    def test_testtools_skipIf_decorator_does_not_run_setUp(self):
+        reason = self.getUniqueString()
+        self.check_skip_decorator_does_not_run_setup(
+            skipIf(True, reason),
+            reason
+        )
+
+    def test_testtools_skipUnless_decorator_does_not_run_setUp(self):
+        reason = self.getUniqueString()
+        self.check_skip_decorator_does_not_run_setup(
+            skipUnless(False, reason),
+            reason
+        )
+
+    @require_py27_minimum
+    def test_unittest_skip_decorator_does_not_run_setUp(self):
+        reason = self.getUniqueString()
+        self.check_skip_decorator_does_not_run_setup(
+            unittest.skip(reason),
+            reason
+        )
+
+    @require_py27_minimum
+    def test_unittest_skipIf_decorator_does_not_run_setUp(self):
+        reason = self.getUniqueString()
+        self.check_skip_decorator_does_not_run_setup(
+            unittest.skipIf(True, reason),
+            reason
+        )
+
+    @require_py27_minimum
+    def test_unittest_skipUnless_decorator_does_not_run_setUp(self):
+        reason = self.getUniqueString()
+        self.check_skip_decorator_does_not_run_setup(
+            unittest.skipUnless(False, reason),
+            reason
+        )
 
 
 class TestOnException(TestCase):

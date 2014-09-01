@@ -112,6 +112,14 @@ class RunTest(object):
 
     def _run_core(self):
         """Run the user supplied test code."""
+        test_method = self.case._get_test_method()
+        if getattr(test_method, '__unittest_skip__', False):
+            self.result.addSkip(
+                self.case,
+                reason=getattr(test_method, '__unittest_skip_why__', None)
+            )
+            return
+
         if self.exception_caught == self._run_user(self.case._run_setup,
             self.result):
             # Don't run the test method if we failed getting here.
