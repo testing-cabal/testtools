@@ -841,6 +841,12 @@ def skip(reason):
     @unittest.skip decorator.
     """
     def decorator(test_item):
+        # This attribute signals to RunTest._run_core that the entire test
+        # must be skipped - including setUp and tearDown. This makes us
+        # compatible with testtools.skip* functions, which set the same
+        # attributes.
+        test_item.__unittest_skip__ = True
+        test_item.__unittest_skip_why__ = reason
         if wraps is not None:
             @wraps(test_item)
             def skip_wrapper(*args, **kwargs):
