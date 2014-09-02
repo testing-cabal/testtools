@@ -50,9 +50,9 @@ provide a custom ``RunTest`` to a ``TestCase``.  The ``RunTest`` object can
 change everything about how the test executes.
 
 To work with ``testtools.TestCase``, a ``RunTest`` must have a factory that
-takes a test and an optional list of exception handlers.  Instances returned
-by the factory must have a ``run()`` method that takes an optional ``TestResult``
-object.
+takes a test and an optional list of exception handlers and an optional
+last_resort handler.  Instances returned by the factory must have a ``run()``
+method that takes an optional ``TestResult`` object.
 
 The default is ``testtools.runtest.RunTest``, which calls ``setUp``, the test
 method, ``tearDown`` and clean ups (see :ref:`addCleanup`) in the normal, vanilla

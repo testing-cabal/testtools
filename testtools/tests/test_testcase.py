@@ -909,6 +909,18 @@ class TestAddCleanup(TestCase):
             set(self.logging_result._events[1][2].keys()))
 
 
+class TestRunTestUsage(TestCase):
+
+    def test_last_resort_in_place(self):
+        class TestBase(TestCase):
+            def test_base_exception(self):
+                raise SystemExit(0)
+        result = ExtendedTestResult()
+        test = TestBase("test_base_exception")
+        self.assertRaises(SystemExit, test.run, result)
+        self.assertFalse(result.wasSuccessful())
+
+
 class TestWithDetails(TestCase):
 
     run_test_with = FullStackRunTest

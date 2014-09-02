@@ -47,17 +47,23 @@ class RunTest(object):
         reporting of error/failure/skip etc.
     """
 
-    def __init__(self, case, handlers=None):
+    def __init__(self, case, handlers=None, last_resort=None):
         """Create a RunTest to run a case.
 
         :param case: A testtools.TestCase test case object.
         :param handlers: Exception handlers for this RunTest. These are stored
             in self.handlers and can be modified later if needed.
+        :param last_resort: A handler of last resort: any exception which is
+            not handled by handlers will cause the last resort handler to be
+            called as last_resort(exc_info), and then the exception will be
+            raised - aborting the test run as this is inside the runner
+            machinery rather than the confined context of the test.
         """
         self.case = case
         self.handlers = handlers or []
         self.exception_caught = object()
         self._exceptions = []
+        self.last_resort = last_resort or (lambda case, result, exc: None)
 
     def run(self, result=None):
         """Run self.case reporting activity to result.
@@ -106,6 +112,9 @@ class RunTest(object):
                     if isinstance(e, exc_class):
                         handler(self.case, self.result, e)
                         break
+                else:
+                    self.last_resort(self.case, self.result, e)
+                    raise e
         finally:
             result.stopTest(self.case)
         return result
@@ -178,8 +187,6 @@ class RunTest(object):
         """
         try:
             return fn(*args, **kwargs)
-        except KeyboardInterrupt:
-            raise
         except:
             return self._got_user_exception(sys.exc_info())
 
@@ -204,11 +211,11 @@ class RunTest(object):
             self.case.onException(exc_info, tb_label=tb_label)
         finally:
             del exc_info
-        for exc_class, handler in self.handlers:
-            if isinstance(e, exc_class):
-                self._exceptions.append(e)
-                return self.exception_caught
-        raise e
+        self._exceptions.append(e)
+        # Yes, this means we catch everything - we re-raise KeyBoardInterrupt
+        # etc later, after tearDown and cleanUp - since those may be cleaning up
+        # external processes.
+        return self.exception_caught
 
 
 def _raise_force_fail_error():

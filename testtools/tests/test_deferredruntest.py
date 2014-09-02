@@ -53,6 +53,12 @@ class X(object):
             self.calls.append('tearDown')
             super(X.Base, self).tearDown()
 
+    class BaseExceptionRaised(Base):
+        expected_calls = ['setUp', 'tearDown', 'clean-up']
+        expected_results = [('addError', SystemExit)]
+        def test_something(self):
+            raise SystemExit(0)
+
     class ErrorInSetup(Base):
         expected_calls = ['setUp', 'clean-up']
         expected_results = [('addError', RuntimeError)]
@@ -103,7 +109,10 @@ class X(object):
         def test_runner(self):
             result = ExtendedTestResult()
             test = self.test_factory('test_something', runTest=self.runner)
-            test.run(result)
+            if self.test_factory is X.BaseExceptionRaised:
+                self.assertRaises(SystemExit, test.run, result)
+            else:
+                test.run(result)
             self.assertEqual(test.calls, self.test_factory.expected_calls)
             self.assertResultsMatch(test, result)
 
@@ -118,6 +127,7 @@ def make_integration_tests():
         ]
 
     tests = [
+        X.BaseExceptionRaised,
         X.ErrorInSetup,
         X.ErrorInTest,
         X.ErrorInTearDown,

@@ -34,6 +34,12 @@ class TestRunTest(TestCase):
         run = RunTest("bar", handlers)
         self.assertEqual(handlers, run.handlers)
 
+    def test__init____handlers_last_resort(self):
+        handlers = [("quux", "baz")]
+        last_resort = "foo"
+        run = RunTest("bar", handlers, last_resort)
+        self.assertEqual(last_resort, run.last_resort)
+
     def test_run_with_result(self):
         # test.run passes result down to _run_test_method.
         log = []
@@ -61,15 +67,19 @@ class TestRunTest(TestCase):
         run.run()
         self.assertEqual(['foo'], log)
 
-    def test__run_user_does_not_catch_keyboard(self):
-        case = self.make_case()
-        def raises():
-            raise KeyboardInterrupt("yo")
-        run = RunTest(case, None)
+    def test__run_prepared_result_does_not_mask_keyboard(self):
+        class Case(TestCase):
+            def test(self):
+                raise KeyboardInterrupt("go")
+        case = Case('test')
+        run = RunTest(case)
         run.result = ExtendedTestResult()
-        self.assertThat(lambda: run._run_user(raises),
+        self.assertThat(lambda: run._run_prepared_result(run.result),
             Raises(MatchesException(KeyboardInterrupt)))
-        self.assertEqual([], run.result._events)
+        self.assertEqual(
+            [('startTest', case), ('stopTest', case)], run.result._events)
+        # tearDown is still run though!
+        self.assertEqual(True, getattr(case, '_TestCase__teardown_called'))
 
     def test__run_user_calls_onException(self):
         case = self.make_case()
@@ -103,20 +113,42 @@ class TestRunTest(TestCase):
         self.assertEqual([], run.result._events)
         self.assertEqual([], log)
 
-    def test__run_user_uncaught_Exception_raised(self):
-        case = self.make_case()
+    def test__run_prepared_result_uncaught_Exception_raised(self):
         e = KeyError('Yo')
-        def raises():
-            raise e
+        class Case(TestCase):
+            def test(self):
+                raise e
+        case = Case('test')
         log = []
         def log_exc(self, result, err):
             log.append((result, err))
         run = RunTest(case, [(ValueError, log_exc)])
         run.result = ExtendedTestResult()
-        self.assertThat(lambda: run._run_user(raises),
+        self.assertThat(lambda: run._run_prepared_result(run.result),
             Raises(MatchesException(KeyError)))
-        self.assertEqual([], run.result._events)
+        self.assertEqual(
+            [('startTest', case), ('stopTest', case)], run.result._events)
         self.assertEqual([], log)
+
+    def test__run_prepared_result_uncaught_Exception_triggers_error(self):
+        # https://bugs.launchpad.net/testtools/+bug/1364188
+        # When something isn't handled, the test that was
+        # executing has errored, one way or another.
+        e = SystemExit(0)
+        class Case(TestCase):
+            def test(self):
+                raise e
+        case = Case('test')
+        log = []
+        def log_exc(self, result, err):
+            log.append((result, err))
+        run = RunTest(case, [], log_exc)
+        run.result = ExtendedTestResult()
+        self.assertThat(lambda: run._run_prepared_result(run.result),
+            Raises(MatchesException(SystemExit)))
+        self.assertEqual(
+            [('startTest', case), ('stopTest', case)], run.result._events)
+        self.assertEqual([(run.result, e)], log)
 
     def test__run_user_uncaught_Exception_from_exception_handler_raised(self):
         case = self.make_case()

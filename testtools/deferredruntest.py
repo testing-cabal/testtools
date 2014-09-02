@@ -89,14 +89,21 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
     This is highly experimental code.  Use at your own risk.
     """
 
-    def __init__(self, case, handlers=None, reactor=None, timeout=0.005,
-                 debug=False):
+    def __init__(self, case, handlers=None, last_resort=None, reactor=None,
+                 timeout=0.005, debug=False):
         """Construct an `AsynchronousDeferredRunTest`.
+
+        Please be sure to always use keyword syntax, not positional, as the
+        base class may add arguments in future - and for core code
+        compatibility with that we have to insert them before the local
+        parameters.
 
         :param case: The `TestCase` to run.
         :param handlers: A list of exception handlers (ExceptionType, handler)
             where 'handler' is a callable that takes a `TestCase`, a
             ``testtools.TestResult`` and the exception raised.
+        :param last_resort: Handler to call before re-raising uncatchable
+            exceptions (those for which there is no handler).
         :param reactor: The Twisted reactor to use.  If not given, we use the
             default reactor.
         :param timeout: The maximum time allowed for running a test.  The
@@ -105,7 +112,8 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
             to get information about unhandled Deferreds and left-over
             DelayedCalls.  Defaults to False.
         """
-        super(AsynchronousDeferredRunTest, self).__init__(case, handlers)
+        super(AsynchronousDeferredRunTest, self).__init__(
+            case, handlers, last_resort)
         if reactor is None:
             from twisted.internet import reactor
         self._reactor = reactor
@@ -119,8 +127,8 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         # will be able to be assigned to a class variable *and* also be
         # invoked directly.
         class AsynchronousDeferredRunTestFactory:
-            def __call__(self, case, handlers=None):
-                return cls(case, handlers, reactor, timeout, debug)
+            def __call__(self, case, handlers=None, last_resort=None):
+                return cls(case, handlers, last_resort, reactor, timeout, debug)
         return AsynchronousDeferredRunTestFactory()
 
     @defer.deferredGenerator
