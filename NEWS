@@ -10,6 +10,18 @@ NEXT
 Improvements
 ------------
 
+* Fix a long-standing bug where tearDown and cleanUps would not be called if the
+  test run was interrupted. This should fix leaking external resources from
+  interrupted tests.
+  (Robert Collins, #1364188)
+
+* Fix a long-standing bug where calling sys.exit(0) from within a test would
+  cause the test suite to exit with 0, without reporting a failure of that
+  test. We still allow the test suite to be exited (since catching higher order
+  exceptions requires exceptional circumstances) but we now call a last-resort
+  handler on the TestCase, resulting in an error being reported for the test.
+  (Robert Collins, #1364188)
+
 * Fix an issue where tests skipped with the ``skip``* family of decorators would
   still have their ``setUp`` and ``tearDown`` functions called.
   (Thomi Richards, #https://github.com/testing-cabal/testtools/issues/86)

@@ -126,9 +126,16 @@ def run_test_with(test_runner, **kwargs):
     def decorator(function):
         # Set an attribute on 'function' which will inform TestCase how to
         # make the runner.
-        function._run_test_with = (
-            lambda case, handlers=None:
-                test_runner(case, handlers=handlers, **kwargs))
+        def _run_test_with(case, handlers=None, last_resort=None):
+            try:
+                return test_runner(
+                    case, handlers=handlers, last_resort=last_resort,
+                    **kwargs)
+            except TypeError:
+                # Backwards compat: if we can't call the constructor
+                # with last_resort, try without that.
+                return test_runner(case, handlers=handlers, **kwargs)
+        function._run_test_with = _run_test_with
         return function
     return decorator
 
@@ -209,7 +216,10 @@ class TestCase(unittest.TestCase):
         self.__RunTest = runTest
         if getattr(test_method, '__unittest_expecting_failure__', False):
             setattr(self, self._testMethodName, _expectedFailure(test_method))
+        # Used internally for onException processing - used to gather extra
+        # data from exceptions.
         self.__exception_handlers = []
+        # Passed to RunTest to map exceptions to result actions
         self.exception_handlers = [
             (self.skipException, self._report_skip),
             (self.failureException, self._report_failure),
@@ -582,7 +592,14 @@ class TestCase(unittest.TestCase):
         result.addUnexpectedSuccess(self, details=self.getDetails())
 
     def run(self, result=None):
-        return self.__RunTest(self, self.exception_handlers).run(result)
+        try:
+            run_test = self.__RunTest(
+                self, self.exception_handlers, last_resort=self._report_error)
+        except TypeError:
+            # Backwards compat: if we can't call the constructor
+            # with last_resort, try without that.
+            run_test = self.__RunTest(self, self.exception_handlers)
+        return run_test.run(result)
 
     def _run_setup(self, result):
         """Run the setUp function for this test.
