@@ -7,6 +7,13 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+1.0.0
+~~~~~
+
+Long overdue, we've adopted a backwards compatibility statement and recognized
+that we have plenty of users depending on our behaviour - calling our version
+1.0.0 is a recognition of that.
+
 Improvements
 ------------
 
