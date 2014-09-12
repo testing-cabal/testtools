@@ -7,6 +7,13 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* Exceptions in a ``fixture.getDetails`` method will no longer mask errors
+  raised from the same fixture's ``setUp`` method.
+  (Robert Collins, #1368440)
+
 1.0.0
 ~~~~~
 

@@ -10,6 +10,7 @@ from testtools import (
     content_type,
     )
 from testtools.compat import _b, _u
+from testtools.matchers import Contains
 from testtools.testresult.doubles import (
     ExtendedTestResult,
     )
@@ -111,6 +112,32 @@ class TestFixtureSupport(TestCase):
         details = result._events[-2][2]
         self.assertEqual(['content', 'traceback'], sorted(details))
         self.assertEqual('foobar', ''.join(details['content'].iter_text()))
+
+    def test_useFixture_original_exception_raised_if_gather_details_fails(self):
+        # In bug #1368440 it was reported that when a fixture fails setUp
+        # and gather_details errors on it, then the original exception that
+        # failed is not reported.
+        class BrokenFixture(fixtures.Fixture):
+            def getDetails(self):
+                raise AttributeError("getDetails broke")
+            def setUp(self):
+                fixtures.Fixture.setUp(self)
+                raise Exception("setUp broke")
+        fixture = BrokenFixture()
+        class SimpleTest(TestCase):
+            def test_foo(self):
+                self.useFixture(fixture)
+        result = ExtendedTestResult()
+        SimpleTest('test_foo').run(result)
+        self.assertEqual('addError', result._events[-2][0])
+        details = result._events[-2][2]
+        self.assertEqual(['traceback', 'traceback-1'], sorted(details))
+        self.assertThat(
+            ''.join(details['traceback'].iter_text()),
+            Contains('setUp broke'))
+        self.assertThat(
+            ''.join(details['traceback-1'].iter_text()),
+            Contains('getDetails broke'))
 
 
 def test_suite():

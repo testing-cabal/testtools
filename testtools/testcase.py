@@ -661,8 +661,18 @@ class TestCase(unittest.TestCase):
         try:
             fixture.setUp()
         except:
-            gather_details(fixture.getDetails(), self.getDetails())
-            raise
+            exc_info = sys.exc_info()
+            try:
+                gather_details(fixture.getDetails(), self.getDetails())
+            except:
+                # Report the setUp exception, then raise the error during
+                # gather_details.
+                self._report_traceback(exc_info)
+                raise
+            else:
+                # Gather_details worked, so raise the exception setUp
+                # encountered.
+                reraise(*exc_info)
         else:
             self.addCleanup(fixture.cleanUp)
             self.addCleanup(
