@@ -63,11 +63,11 @@ def _iter_chunks(stream, chunk_size, seek_offset=None, seek_whence=0):
 class Content(object):
     """A MIME-like Content object.
 
-    Content objects can be serialised to bytes using the iter_bytes method.
+    'Content' objects can be serialised to bytes using the iter_bytes method.
     If the Content-Type is recognised by other code, they are welcome to
     look for richer contents that mere byte serialisation - for example in
     memory object graphs etc. However, such code MUST be prepared to receive
-    a generic Content object that has been reconstructed from a byte stream.
+    a generic 'Content' object that has been reconstructed from a byte stream.
 
     :ivar content_type: The content type of this Content.
     """
@@ -128,7 +128,7 @@ class Content(object):
 class StackLinesContent(Content):
     """Content object for stack lines.
 
-    This adapts a list of "preprocessed" stack lines into a content object.
+    This adapts a list of "preprocessed" stack lines into a 'Content' object.
     The stack lines are most likely produced from ``traceback.extract_stack``
     or ``traceback.extract_tb``.
 
@@ -181,7 +181,7 @@ def TracebackContent(err, test):
     """Content object for tracebacks.
 
     This adapts an exc_info tuple to the Content interface.
-    text/x-traceback;language=python is used for the mime type, in order to
+    'text/x-traceback;language=python' is used for the mime type, in order to
     provide room for other languages to format their tracebacks differently.
     """
     if err is None:
@@ -223,7 +223,7 @@ def TracebackContent(err, test):
 def StacktraceContent(prefix_content="", postfix_content=""):
     """Content object for stack traces.
 
-    This function will create and return a content object that contains a
+    This function will create and return a `Content` object that contains a
     stack trace.
 
     The mime type is set to 'text/x-traceback;language=python', so other
@@ -280,7 +280,7 @@ def content_from_file(path, content_type=None, chunk_size=DEFAULT_CHUNK_SIZE,
                       buffer_now=False, seek_offset=None, seek_whence=0):
     """Create a `Content` object from a file on disk.
 
-    Note that unless 'read_now' is explicitly passed in as True, the file
+    Note that unless ``buffer_now`` is explicitly passed in as True, the file
     will only be read from when ``iter_bytes`` is called.
 
     :param path: The path to the file to be used as content.
@@ -291,7 +291,7 @@ def content_from_file(path, content_type=None, chunk_size=DEFAULT_CHUNK_SIZE,
     :param buffer_now: If True, read the file from disk now and keep it in
         memory. Otherwise, only read when the content is serialized.
     :param seek_offset: If non-None, seek within the stream before reading it.
-    :param seek_whence: If supplied, pass to stream.seek() when seeking.
+    :param seek_whence: If supplied, pass to ``stream.seek()`` when seeking.
     """
     if content_type is None:
         content_type = UTF8_TEXT
@@ -314,7 +314,7 @@ def content_from_stream(stream, content_type=None,
     called.
 
     :param stream: A file-like object to read the content from. The stream
-        is not closed by this function or the content object it returns.
+        is not closed by this function or the 'Content' object it returns.
     :param content_type: The type of content. If not specified, defaults
         to UTF8-encoded text/plain.
     :param chunk_size: The size of chunks to read from the file.
@@ -322,7 +322,7 @@ def content_from_stream(stream, content_type=None,
     :param buffer_now: If True, reads from the stream right now. Otherwise,
         only reads when the content is serialized. Defaults to False.
     :param seek_offset: If non-None, seek within the stream before reading it.
-    :param seek_whence: If supplied, pass to stream.seek() when seeking.
+    :param seek_whence: If supplied, pass to ``stream.seek()`` when seeking.
     """
     if content_type is None:
         content_type = UTF8_TEXT
@@ -331,7 +331,7 @@ def content_from_stream(stream, content_type=None,
 
 
 def content_from_reader(reader, content_type, buffer_now):
-    """Create a Content object that will obtain the content from reader.
+    """Create a 'Content' object that will obtain the content from reader.
 
     :param reader: A callback to read the content. Should return an iterable of
         bytestrings.
@@ -353,7 +353,7 @@ def attach_file(detailed, path, name=None, content_type=None,
 
     This is a convenience method wrapping around ``addDetail``.
 
-    Note that unless 'read_now' is explicitly passed in as True, the file
+    Note that unless 'buffer_now' is explicitly passed in as True, the file
     *must* exist when the test result is called with the results of this
     test, after the test has been torn down.
 
