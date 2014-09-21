@@ -64,7 +64,7 @@ class Content(object):
     """A MIME-like Content object.
 
     'Content' objects can be serialised to bytes using the iter_bytes method.
-    If the Content-Type is recognised by other code, they are welcome to
+    If the 'Content-Type' is recognised by other code, they are welcome to
     look for richer contents that mere byte serialisation - for example in
     memory object graphs etc. However, such code MUST be prepared to receive
     a generic 'Content' object that has been reconstructed from a byte stream.
@@ -180,7 +180,7 @@ class StackLinesContent(Content):
 def TracebackContent(err, test):
     """Content object for tracebacks.
 
-    This adapts an exc_info tuple to the Content interface.
+    This adapts an exc_info tuple to the 'Content' interface.
     'text/x-traceback;language=python' is used for the mime type, in order to
     provide room for other languages to format their tracebacks differently.
     """
@@ -223,7 +223,7 @@ def TracebackContent(err, test):
 def StacktraceContent(prefix_content="", postfix_content=""):
     """Content object for stack traces.
 
-    This function will create and return a `Content` object that contains a
+    This function will create and return a 'Content' object that contains a
     stack trace.
 
     The mime type is set to 'text/x-traceback;language=python', so other
@@ -251,7 +251,7 @@ def StacktraceContent(prefix_content="", postfix_content=""):
 
 
 def json_content(json_data):
-    """Create a JSON `Content` object from JSON-encodeable data."""
+    """Create a JSON Content object from JSON-encodeable data."""
     data = json.dumps(json_data)
     if str_is_unicode:
         # The json module perversely returns native str not bytes
@@ -260,7 +260,7 @@ def json_content(json_data):
 
 
 def text_content(text):
-    """Create a `Content` object from some text.
+    """Create a Content object from some text.
 
     This is useful for adding details which are short strings.
     """
@@ -278,7 +278,7 @@ def maybe_wrap(wrapper, func):
 
 def content_from_file(path, content_type=None, chunk_size=DEFAULT_CHUNK_SIZE,
                       buffer_now=False, seek_offset=None, seek_whence=0):
-    """Create a `Content` object from a file on disk.
+    """Create a Content object from a file on disk.
 
     Note that unless ``buffer_now`` is explicitly passed in as True, the file
     will only be read from when ``iter_bytes`` is called.
@@ -308,10 +308,10 @@ def content_from_file(path, content_type=None, chunk_size=DEFAULT_CHUNK_SIZE,
 def content_from_stream(stream, content_type=None,
                         chunk_size=DEFAULT_CHUNK_SIZE, buffer_now=False,
                         seek_offset=None, seek_whence=0):
-    """Create a `Content` object from a file-like stream.
+    """Create a Content object from a file-like stream.
 
-    Note that the stream will only be read from when ``iter_bytes`` is
-    called.
+    Note that unless ``buffer_now`` is explicitly passed in as True, the stream
+    will only be read from when ``iter_bytes`` is called.
 
     :param stream: A file-like object to read the content from. The stream
         is not closed by this function or the 'Content' object it returns.
@@ -331,7 +331,7 @@ def content_from_stream(stream, content_type=None,
 
 
 def content_from_reader(reader, content_type, buffer_now):
-    """Create a 'Content' object that will obtain the content from reader.
+    """Create a Content object that will obtain the content from reader.
 
     :param reader: A callback to read the content. Should return an iterable of
         bytestrings.
@@ -353,9 +353,9 @@ def attach_file(detailed, path, name=None, content_type=None,
 
     This is a convenience method wrapping around ``addDetail``.
 
-    Note that unless 'buffer_now' is explicitly passed in as True, the file
-    *must* exist when the test result is called with the results of this
-    test, after the test has been torn down.
+    Note that by default the contents of the file will be read immediately. If
+    ``buffer_now`` is False, then the file *must* exist when the test result is
+    called with the results of this test, after the test has been torn down.
 
     :param detailed: An object with details
     :param path: The path to the file to attach.
