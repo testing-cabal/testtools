@@ -9,6 +9,7 @@ import datetime
 import doctest
 from itertools import chain, combinations
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -69,6 +70,7 @@ from testtools.matchers import (
     HasLength,
     MatchesAny,
     MatchesException,
+    MatchesRegex,
     Raises,
     )
 from testtools.tests.helpers import (
@@ -2547,13 +2549,18 @@ class TestNonAsciiResults(TestCase):
         self._write_module("bad", "iso-8859-5",
             "# coding: iso-8859-5\n%% = 0 # %s\n" % text)
         textoutput = self._run_external_case()
-        self.assertIn(self._as_output(_u(
-            #'bad.py", line 2\n'
-            '    %% = 0 # %s\n'
-            + ' ' * self._error_on_character +
-            '   ^\n'
-            'SyntaxError: ') %
-            (text,)), textoutput)
+        self.assertThat(
+            textoutput,
+            MatchesRegex(
+                self._as_output(_u(
+                #'bad.py", line 2\n'
+                '.*%% = 0 # %s\n'
+                + ' ' * self._error_on_character +
+                '\\s*\\^\n'
+                'SyntaxError:.*') %
+                (text,)),
+            re.MULTILINE | re.DOTALL)
+        )
 
     def test_syntax_error_line_euc_jp(self):
         """Syntax error on a euc_jp line shows the line decoded"""
@@ -2579,13 +2586,17 @@ class TestNonAsciiResults(TestCase):
         textoutput = self._setup_external_case("import bad")
         self._write_module("bad", "utf-8", _u("\ufeff^ = 0 # %s\n") % text)
         textoutput = self._run_external_case()
-        self.assertIn(self._as_output(_u(
-            'bad.py", line 1\n'
-            '    ^ = 0 # %s\n'
-            + ' ' * self._error_on_character +
-            '   ^\n'
-            'SyntaxError: ') %
-            text), textoutput)
+        self.assertThat(
+            textoutput,
+            MatchesRegex(
+                self._as_output(_u(
+                    '.*bad.py", line 1\n'
+                    '\\s*\\^ = 0 # %s\n'
+                    + ' ' * self._error_on_character +
+                    '\\s*\\^\n'
+                    'SyntaxError:.*') % text),
+                re.M | re.S)
+        )
 
 
 class TestNonAsciiResultsWithUnittest(TestNonAsciiResults):
