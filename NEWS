@@ -13,6 +13,9 @@ Changes
 * Fixed unit tests which were failing under pypy due to a change in the way
   pypy formats tracebacks. (Thomi Richards)
 
+* Make `testtools.content.text_content` error if anything other than text
+  is given as content. (Thomi Richards)
+
 1.1.0
 ~~~~~
 

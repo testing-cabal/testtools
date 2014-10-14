@@ -25,9 +25,9 @@ from testtools.compat import (
     _b,
     _format_exception_only,
     _format_stack_list,
-    _isbytes,
     _TB_HEADER,
     _u,
+    istext,
     str_is_unicode,
 )
 from testtools.content_type import ContentType, JSON, UTF8_TEXT
@@ -264,8 +264,10 @@ def text_content(text):
 
     This is useful for adding details which are short strings.
     """
-    if _isbytes(text):
-        raise TypeError('text_content must be given a string, not bytes.')
+    if not istext(text):
+        raise TypeError(
+            "text_content must be given text, not '%s'." % type(text).__name__
+        )
     return Content(UTF8_TEXT, lambda: [text.encode('utf8')])
 
 

@@ -196,6 +196,17 @@ class TestContent(TestCase):
         data = _b("Some Bytes")
         self.assertRaises(TypeError, text_content, data)
 
+    def test_text_content_raises_TypeError_when_passed_non_text(self):
+        bad_values = (None, list(), dict(), 42, 1.23)
+        for value in bad_values:
+            self.assertThat(
+                lambda: text_content(value),
+                raises(
+                    TypeError("text_content must be given text, not '%s'." %
+                        type(value).__name__)
+                ),
+            )
+
     def test_json_content(self):
         data = {'foo': 'bar'}
         expected = Content(JSON, lambda: [_b('{"foo": "bar"}')])
