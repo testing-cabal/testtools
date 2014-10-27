@@ -433,6 +433,29 @@ def _fix_discovery():
             if path.lower().endswith('$py.class'):
                 return path[:-9]
             return os.path.splitext(path)[0]
+# def _make_failed_import_test(name, suiteClass):
+#-    message = 'Failed to import test module: %s\n%s' % (name, traceback.format_exc())
+#+    message = 'Failed to import test module: %s\n%s' % (
+#+        name, traceback.format_exc())
+#     return _make_failed_test('ModuleImportFailure', name, ImportError(message),
+#-                             suiteClass)
+#+                             suiteClass, message)
+# 
+# def _make_failed_load_tests(name, exception, suiteClass):
+#-    return _make_failed_test('LoadTestsFailure', name, exception, suiteClass)
+#+    message = 'Failed to call load_tests:\n%s' % (traceback.format_exc(),)
+#+    return _make_failed_test(
+#+        'LoadTestsFailure', name, exception, suiteClass, message)
+# 
+#-def _make_failed_test(classname, methodname, exception, suiteClass):
+#+def _make_failed_test(classname, methodname, exception, suiteClass, message):
+#     def testFailure(self):
+#         raise exception
+#     attrs = {methodname: testFailure}
+#     TestClass = type(classname, (case.TestCase,), attrs)
+#-    return suiteClass((TestClass(methodname),))
+#+    return suiteClass((TestClass(methodname),)), message
+
     def loadTestsFromModule(self, module, use_load_tests=True, pattern=None):
         """Return a suite of all tests cases contained in the given module"""
         # use_load_tests is preserved for compatability though it was never

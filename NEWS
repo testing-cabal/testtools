@@ -16,6 +16,8 @@ Changes
 * Make `testtools.content.text_content` error if anything other than text
   is given as content. (Thomi Richards)
 
+* We now publish wheels of testtools. (Robert Collins, #issue84)
+
 1.1.0
 ~~~~~
 
