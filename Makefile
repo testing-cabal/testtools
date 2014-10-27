@@ -21,11 +21,11 @@ prerelease:
 	-rm MANIFEST
 
 release:
-	./setup.py sdist upload --sign
+	./setup.py sdist bdist_wheel upload --sign
 	$(PYTHON) scripts/_lp_release.py
 
 snapshot: prerelease
-	./setup.py sdist
+	./setup.py sdist bdist_wheel
 
 ### Documentation ###
 
