@@ -31,13 +31,16 @@ under the same license as Python, see LICENSE for details.
 Required Dependencies
 ---------------------
 
- * Python 2.6+ or 3.0+
+ * Python 2.6+ or 3.0+ / pypy (2.x+)
 
 If you would like to use testtools for earlier Python's, please use testtools
 0.9.15.
 
  * extras (helpers that we intend to push into Python itself in the near
    future).
+
+ * unittest2 (backports of the latest unittest API from cPython, which we use
+   to avoid code duplication).
 
 
 Optional Dependencies
