@@ -17,7 +17,7 @@ matrix:
       env: JINJA_REQ="jinja2<2.7"
 
 install:
-  - pip install -q --use-mirrors fixtures extras python-mimeparse $JINJA_REQ sphinx
+  - pip install -q --use-mirrors fixtures extras python-mimeparse $JINJA_REQ sphinx unittest2
   - python setup.py -q install
 
 script:
