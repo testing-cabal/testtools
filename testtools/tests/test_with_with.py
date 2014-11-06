@@ -86,3 +86,8 @@ class TestExpectedException(TestCase):
                 pass
         exc = self.assertRaises(AssertionError, die)
         self.assertThat(exc.args[0], EndsWith(': foo'))
+
+
+def test_suite():
+    from unittest import TestLoader
+    return TestLoader().loadTestsFromName(__name__)

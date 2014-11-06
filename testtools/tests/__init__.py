@@ -25,6 +25,7 @@ def test_suite():
         test_testcase,
         test_testresult,
         test_testsuite,
+        test_with_with,
         )
     modules = [
         matchers,
@@ -44,6 +45,7 @@ def test_suite():
         test_testcase,
         test_testresult,
         test_testsuite,
+        test_with_with,
         ]
     suites = map(lambda x: x.test_suite(), modules)
     return TestSuite(suites)

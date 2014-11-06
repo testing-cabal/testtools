@@ -51,12 +51,6 @@ from testtools.tests.helpers import (
     FullStackRunTest,
     LoggingResult,
     )
-try:
-    exec('from __future__ import with_statement')
-except SyntaxError:
-    pass
-else:
-    from testtools.tests.test_with_with import *
 
 
 class TestPlaceHolder(TestCase):
