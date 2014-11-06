@@ -775,3 +775,8 @@ def test_suite():
     return TestSuite(
         [TestLoader().loadTestsFromName(__name__),
          make_integration_tests()])
+
+
+def load_tests(loader, tests, pattern):
+    tests.addTest(make_integration_tests())
+    return tests
