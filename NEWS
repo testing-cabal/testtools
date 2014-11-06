@@ -13,6 +13,9 @@ Changes
 * Fixed unit tests which were failing under pypy due to a change in the way
   pypy formats tracebacks. (Thomi Richards)
 
+* Fixed the testtools test suite to run correctly when run via ``unit2``
+  or ``testtools.run discover``.
+
 * Make `testtools.content.text_content` error if anything other than text
   is given as content. (Thomi Richards)
 

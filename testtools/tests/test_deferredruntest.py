@@ -771,7 +771,10 @@ class TestRunWithLogObservers(NeedsTwistedTestCase):
 
 
 def test_suite():
-    from unittest import TestLoader, TestSuite
-    return TestSuite(
-        [TestLoader().loadTestsFromName(__name__),
-         make_integration_tests()])
+    from unittest2 import TestLoader, TestSuite
+    return TestLoader().loadTestsFromName(__name__)
+
+
+def load_tests(loader, tests, pattern):
+    tests.addTest(make_integration_tests())
+    return tests
