@@ -10,6 +10,11 @@ NEXT
 Changes
 -------
 
+* Depends on unittest2 for discovery functionality and the ``TestProgram`` base
+  class. This brings in many fixes made to discovery where previously we were
+  only using the discovery package or the version in the release of Python
+  that the test execution was occuring on. (Robert Collins, #1271133)
+
 * Fixed unit tests which were failing under pypy due to a change in the way
   pypy formats tracebacks. (Thomi Richards)
 

@@ -9,6 +9,7 @@ from textwrap import dedent
 from extras import try_import
 fixtures = try_import('fixtures')
 testresources = try_import('testresources')
+import unittest2
 
 import testtools
 from testtools import TestCase, run, skipUnless
@@ -105,7 +106,7 @@ def test_suite():
             testtools.__path__.append(self.package.base)
 
 
-if fixtures and run.have_discover:
+if fixtures:
     class SampleLoadTestsPackage(fixtures.Fixture):
         """Creates a test suite package using load_tests."""
 
@@ -168,10 +169,10 @@ testtools.runexample.TestFoo.test_quux
 """, out.getvalue())
 
     def test_run_list_failed_import(self):
-        if not run.have_discover:
-            self.skipTest("Need discover")
         broken = self.useFixture(SampleTestFixture(broken=True))
         out = StringIO()
+        # XXX: http://bugs.python.org/issue22811
+        unittest2.defaultTestLoader._top_level_dir = None
         exc = self.assertRaises(
             SystemExit,
             run.main, ['prog', 'discover', '-l', broken.package.base, '*.py'], out)
@@ -287,7 +288,6 @@ Ran 2 tests in \\d.\\d\\d\\ds
 OK
 """)))
 
-    @skipUnless(run.have_discover, "discovery not present")
     @skipUnless(fixtures, "fixtures not present")
     def test_issue_16662(self):
         # unittest's discover implementation didn't handle load_tests on
@@ -296,6 +296,8 @@ OK
         # See http://bugs.python.org/issue16662
         pkg = self.useFixture(SampleLoadTestsPackage())
         out = StringIO()
+        # XXX: http://bugs.python.org/issue22811
+        unittest2.defaultTestLoader._top_level_dir = None
         self.assertEqual(None, run.main(
             ['prog', 'discover', '-l', pkg.package.base], out))
         self.assertEqual(dedent("""\
