@@ -57,8 +57,8 @@ wraps = try_import('functools.wraps')
 
 class TestSkipped(Exception):
     """Raised within TestCase.run() when a test is skipped."""
-TestSkipped = try_import('unittest2.case.SkipTest', TestSkipped)
 TestSkipped = try_import('unittest.case.SkipTest', TestSkipped)
+TestSkipped = try_import('unittest2.case.SkipTest', TestSkipped)
 
 
 class _UnexpectedSuccess(Exception):
@@ -68,9 +68,9 @@ class _UnexpectedSuccess(Exception):
     module.
     """
 _UnexpectedSuccess = try_import(
-    'unittest2.case._UnexpectedSuccess', _UnexpectedSuccess)
-_UnexpectedSuccess = try_import(
     'unittest.case._UnexpectedSuccess', _UnexpectedSuccess)
+_UnexpectedSuccess = try_import(
+    'unittest2.case._UnexpectedSuccess', _UnexpectedSuccess)
 
 class _ExpectedFailure(Exception):
     """An expected failure occured.
@@ -79,9 +79,9 @@ class _ExpectedFailure(Exception):
     module.
     """
 _ExpectedFailure = try_import(
-    'unittest2.case._ExpectedFailure', _ExpectedFailure)
-_ExpectedFailure = try_import(
     'unittest.case._ExpectedFailure', _ExpectedFailure)
+_ExpectedFailure = try_import(
+    'unittest2.case._ExpectedFailure', _ExpectedFailure)
 
 
 # Copied from unittest before python 3.4 release. Used to maintain

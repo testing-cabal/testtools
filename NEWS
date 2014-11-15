@@ -7,6 +7,18 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Changes
+-------
+
+* Support setUpClass skipping with self.skipException. Previously this worked
+  with unittest from 2.7 and above but was not supported by testtools - it was
+  a happy accident. Since we now hard depend on unittest2, we need to invert
+  our exception lookup priorities to support it. Regular skips done through
+  raise self.skipException will continue to work, since they were always caught
+  in our code - its because the suite type being used to implement setUpClass
+  has changed that an issue occured.
+  (Robert Collins, #1393068)
+
 1.2.1
 ~~~~~
 

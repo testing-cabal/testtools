@@ -14,6 +14,7 @@ __all__ = [
 import sys
 import threading
 import unittest
+import unittest2
 
 from extras import safe_hasattr, try_imports
 
@@ -34,7 +35,7 @@ def iterate_tests(test_suite_or_case):
                 yield subtest
 
 
-class ConcurrentTestSuite(unittest.TestSuite):
+class ConcurrentTestSuite(unittest2.TestSuite):
     """A TestSuite whose run() calls out to a concurrency strategy."""
 
     def __init__(self, suite, make_tests, wrap_result=None):
@@ -197,7 +198,7 @@ class ConcurrentStreamTestSuite(object):
             process_result.stopTestRun()
 
 
-class FixtureSuite(unittest.TestSuite):
+class FixtureSuite(unittest2.TestSuite):
 
     def __init__(self, fixture, tests):
         super(FixtureSuite, self).__init__(tests)

@@ -8,6 +8,7 @@ import doctest
 from functools import partial
 import sys
 import unittest
+import unittest2
 
 from extras import try_import
 
@@ -199,6 +200,23 @@ TypeError: run() takes ...1 ...argument...2...given...
     def split_suite(self, suite):
         tests = list(enumerate(iterate_tests(suite)))
         return [(test, _u(str(pos))) for pos, test in tests]
+
+    def test_setupclass_skip(self):
+        # We should support setupclass skipping using cls.skipException.
+        # Because folk have used that.
+        class Skips(TestCase):
+            @classmethod
+            def setUpClass(cls):
+                raise cls.skipException('foo')
+            def test_notrun(self):
+                pass
+        # Test discovery uses the default suite from unittest2 (unless users
+        # deliberately change things, in which case they keep both pieces).
+        suite = unittest2.TestSuite([Skips("test_notrun")])
+        log = []
+        result = LoggingResult(log)
+        suite.run(result)
+        self.assertEqual(['addSkip'], [item[0] for item in log])
 
 
 class TestFixtureSuite(TestCase):
