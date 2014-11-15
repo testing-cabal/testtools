@@ -7,6 +7,15 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+1.2.1
+~~~~~
+
+Changes
+-------
+
+* Correctly express our unittest2 dependency: we don't work with old releases.
+  (Robert Collins)
+
 1.2.0
 ~~~~~
 
