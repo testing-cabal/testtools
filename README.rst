@@ -39,8 +39,8 @@ If you would like to use testtools for earlier Python's, please use testtools
  * extras (helpers that we intend to push into Python itself in the near
    future).
 
- * unittest2 (backports of the latest unittest API from cPython, which we use
-   to avoid code duplication).
+ * The most recent unittest2 (backports of the latest unittest API from
+   cPython, which we use to avoid code duplication).
 
 
 Optional Dependencies
