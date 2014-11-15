@@ -48,7 +48,7 @@ def get_version():
     # Apparently if we just say "snapshot" then distribute won't accept it
     # as satisfying versioned dependencies. This is a problem for the
     # daily build version.
-    return "snapshot-%s" % (version,)
+    return "%s.0dev0" % (version,)
 
 
 def get_long_description():
