@@ -56,6 +56,16 @@ def get_long_description():
         os.path.dirname(__file__), 'doc/overview.rst')
     return open(manual_path).read()
 
+# Since we import testtools in setup.py, our setup requirements are our install
+# requirements.
+deps = [
+    'extras',
+    # 'mimeparse' has not been uploaded by the maintainer with Python3 compat
+    # but someone kindly uploaded a fixed version as 'python-mimeparse'.
+    'python-mimeparse',
+    'unittest2>=0.8.0',
+    ]
+
 
 setup(name='testtools',
       author='Jonathan M. Lange',
@@ -77,11 +87,6 @@ setup(name='testtools',
         ],
       cmdclass=cmd_class,
       zip_safe=False,
-      install_requires=[
-        'extras',
-        # 'mimeparse' has not been uploaded by the maintainer with Python3 compat
-        # but someone kindly uploaded a fixed version as 'python-mimeparse'.
-        'python-mimeparse',
-        'unittest2>=0.8.0',
-        ],
+      install_requires=deps,
+      setup_requires=deps,
       )

@@ -10,6 +10,10 @@ NEXT
 Changes
 -------
 
+* Fixed our setup.py to use setup_requires to ensure the import dependencies
+  for testtools are present before setup.py runs (as setup.py imports testtools
+  to read out the version number). (Robert Collins)
+
 * Support setUpClass skipping with self.skipException. Previously this worked
   with unittest from 2.7 and above but was not supported by testtools - it was
   a happy accident. Since we now hard depend on unittest2, we need to invert
