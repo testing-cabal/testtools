@@ -7,6 +7,13 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Changes
+-------
+
+* ``testtools.TestCase`` now inherits from unittest2.TestCase, which
+  provides a ``setUpClass`` for upcalls on Python 2.6.
+  (Robert Collins, #1393283)
+
 1.3.0
 ~~~~~
 

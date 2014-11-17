@@ -218,6 +218,25 @@ TypeError: run() takes ...1 ...argument...2...given...
         suite.run(result)
         self.assertEqual(['addSkip'], [item[0] for item in log])
 
+    def test_setupclass_upcall(self):
+        # Note that this is kindof-a-case-test, kindof-suite, because
+        # setUpClass is linked between them.
+        class Simples(TestCase):
+            @classmethod
+            def setUpClass(cls):
+                super(Simples, cls).setUpClass()
+            def test_simple(self):
+                pass
+        # Test discovery uses the default suite from unittest2 (unless users
+        # deliberately change things, in which case they keep both pieces).
+        suite = unittest2.TestSuite([Simples("test_simple")])
+        log = []
+        result = LoggingResult(log)
+        suite.run(result)
+        self.assertEqual(
+            ['startTest', 'addSuccess', 'stopTest'],
+            [item[0] for item in log])
+
 
 class TestFixtureSuite(TestCase):
 

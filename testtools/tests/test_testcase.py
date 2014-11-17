@@ -1602,40 +1602,43 @@ class TestNullary(TestCase):
         self.assertRaises(ZeroDivisionError, wrapped)
 
 
+class Attributes(WithAttributes, TestCase):
+    @attr('foo')
+    def simple(self):
+        pass
+
+    # Not sorted here, forward or backwards.
+    @attr('foo', 'quux', 'bar')
+    def many(self):
+        pass
+
+    # Not sorted here, forward or backwards.
+    @attr('bar')
+    @attr('quux')
+    @attr('foo')
+    def decorated(self):
+        pass
+
+
 class TestAttributes(TestCase):
 
     def test_simple_attr(self):
         # Adding an attr to a test changes its id().
-        class MyTest(WithAttributes, TestCase):
-            @attr('foo')
-            def test_bar(self):
-                pass
-        case = MyTest('test_bar')
-        self.assertEqual('testtools.tests.test_testcase.MyTest.test_bar[foo]',
+        case = Attributes('simple')
+        self.assertEqual(
+            'testtools.tests.test_testcase.Attributes.simple[foo]',
             case.id())
 
     def test_multiple_attributes(self):
-        class MyTest(WithAttributes, TestCase):
-            # Not sorted here, forward or backwards.
-            @attr('foo', 'quux', 'bar')
-            def test_bar(self):
-                pass
-        case = MyTest('test_bar')
+        case = Attributes('many')
         self.assertEqual(
-            'testtools.tests.test_testcase.MyTest.test_bar[bar,foo,quux]',
+            'testtools.tests.test_testcase.Attributes.many[bar,foo,quux]',
             case.id())
 
     def test_multiple_attr_decorators(self):
-        class MyTest(WithAttributes, TestCase):
-            # Not sorted here, forward or backwards.
-            @attr('bar')
-            @attr('quux')
-            @attr('foo')
-            def test_bar(self):
-                pass
-        case = MyTest('test_bar')
+        case = Attributes('decorated')
         self.assertEqual(
-            'testtools.tests.test_testcase.MyTest.test_bar[bar,foo,quux]',
+            'testtools.tests.test_testcase.Attributes.decorated[bar,foo,quux]',
             case.id())
 
 

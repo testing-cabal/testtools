@@ -20,12 +20,12 @@ import functools
 import itertools
 import sys
 import types
-import unittest
 
 from extras import (
     safe_hasattr,
     try_import,
     )
+import unittest2 as unittest
 
 from testtools import (
     content,
