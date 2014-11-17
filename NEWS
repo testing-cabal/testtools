@@ -7,6 +7,13 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* When an import error happens ``testtools.run`` will now show the full
+  error rather than just the name of the module that failed to import.
+  (Robert Collins)
+
 1.4.0
 ~~~~~
 

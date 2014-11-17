@@ -80,13 +80,13 @@ class TestToolsTestRunner(object):
             stdout = sys.stdout
         self.stdout = stdout
 
-    def list(self, test):
+    def list(self, test, loader):
         """List the tests that would be run if test() was run."""
-        test_ids, errors = list_test(test)
+        test_ids, _ = list_test(test)
         for test_id in test_ids:
             self.stdout.write('%s\n' % test_id)
+        errors = loader.errors
         if errors:
-            self.stdout.write('Failed to import\n')
             for test_id in errors:
                 self.stdout.write('%s\n' % test_id)
             sys.exit(2)
@@ -180,10 +180,14 @@ class TestProgram(unittest.TestProgram):
         else:
             runner = self._get_runner()
             if safe_hasattr(runner, 'list'):
-                runner.list(self.test)
+                try:
+                    runner.list(self.test, loader=self.testLoader)
+                except TypeError:
+                    runner.list(self.test)
             else:
                 for test in iterate_tests(self.test):
                     self.stdout.write('%s\n' % test.id())
+        del self.testLoader.errors[:]
 
     def _getParentArgParser(self):
         parser = super(TestProgram, self)._getParentArgParser()

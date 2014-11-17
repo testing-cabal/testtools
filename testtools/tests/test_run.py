@@ -2,6 +2,7 @@
 
 """Tests for the test runner logic."""
 
+import doctest
 from unittest import TestSuite
 import sys
 from textwrap import dedent
@@ -20,6 +21,7 @@ from testtools.compat import (
     )
 from testtools.matchers import (
     Contains,
+    DocTestMatches,
     MatchesRegex,
     )
 
@@ -156,6 +158,27 @@ class TestRun(TestCase):
         self.assertEqual([set(['testtools.runexample.TestFoo.test_bar',
             'testtools.runexample.TestFoo.test_quux'])], tests)
 
+    def test_run_list_with_loader(self):
+        # list() is attempted with a loader first.
+        self.useFixture(SampleTestFixture())
+        tests = []
+        class CaptureList(run.TestToolsTestRunner):
+            def list(self, test, loader=None):
+                tests.append(set([case.id() for case
+                    in testtools.testsuite.iterate_tests(test)]))
+                tests.append(loader)
+        out = StringIO()
+        try:
+            program = run.TestProgram(
+                argv=['prog', '-l', 'testtools.runexample.test_suite'],
+                stdout=out, testRunner=CaptureList)
+        except SystemExit:
+            exc_info = sys.exc_info()
+            raise AssertionError("-l tried to exit. %r" % exc_info[1])
+        self.assertEqual([set(['testtools.runexample.TestFoo.test_bar',
+            'testtools.runexample.TestFoo.test_quux']), program.testLoader],
+            tests)
+
     def test_run_list(self):
         self.useFixture(SampleTestFixture())
         out = StringIO()
@@ -177,9 +200,19 @@ testtools.runexample.TestFoo.test_quux
             SystemExit,
             run.main, ['prog', 'discover', '-l', broken.package.base, '*.py'], out)
         self.assertEqual(2, exc.args[0])
-        self.assertEqual("""Failed to import
-runexample
-""", out.getvalue())
+        self.assertThat(out.getvalue(), DocTestMatches("""\
+Failed to import test module: runexample
+Traceback (most recent call last):
+  File ".../loader.py", line ..., in _find_test_path
+    package = self._get_module_from_name(name)
+  File ".../loader.py", line ..., in _get_module_from_name
+    __import__(name)
+  File ".../runexample/__init__.py", line 1
+    class not in
+...^...
+SyntaxError: invalid syntax
+
+""", doctest.ELLIPSIS))
 
     def test_run_orders_tests(self):
         self.useFixture(SampleTestFixture())
@@ -202,7 +235,8 @@ testtools.runexample.missingtest
                 'testtools.runexample.test_suite'], out)
         except SystemExit:
             exc_info = sys.exc_info()
-            raise AssertionError("-l tried to exit. %r" % exc_info[1])
+            raise AssertionError(
+                "-l --load-list tried to exit. %r" % exc_info[1])
         self.assertEqual("""testtools.runexample.TestFoo.test_bar
 """, out.getvalue())
 
@@ -227,7 +261,8 @@ testtools.runexample.missingtest
                 'testtools.runexample.test_suite'], out)
         except SystemExit:
             exc_info = sys.exc_info()
-            raise AssertionError("-l tried to exit. %r" % exc_info[1])
+            raise AssertionError(
+                "-l --load-list tried to exit. %r" % exc_info[1])
         self.assertEqual("""testtools.runexample.TestFoo.test_bar
 """, out.getvalue())
 
