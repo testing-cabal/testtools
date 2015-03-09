@@ -103,6 +103,8 @@ class RunTest(object):
         self.result = result
         try:
             self._exceptions = []
+            self.case.__testtools_tb_locals__ = getattr(
+                result, 'tb_locals', False)
             self._run_core()
             if self._exceptions:
                 # One or more caught exceptions, now trigger the test's

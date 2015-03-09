@@ -11,10 +11,11 @@ For instance, to run the testtools test suite.
 import argparse
 from functools import partial
 import os.path
-import unittest2 as unittest
 import sys
 
-from extras import safe_hasattr
+from extras import safe_hasattr, try_imports
+# To let setup.py work, make this a conditional import.
+unittest = try_imports(['unittest2', 'unittest'])
 
 from testtools import TextTestResult, testcase
 from testtools.compat import classtypes, istext, unicode_output_stream
@@ -67,18 +68,20 @@ class TestToolsTestRunner(object):
     """ A thunk object to support unittest.TestProgram."""
 
     def __init__(self, verbosity=None, failfast=None, buffer=None,
-        stdout=None):
+        stdout=None, tb_locals=False, **kwargs):
         """Create a TestToolsTestRunner.
 
         :param verbosity: Ignored.
         :param failfast: Stop running tests at the first failure.
         :param buffer: Ignored.
         :param stdout: Stream to use for stdout.
+        :param tb_locals: If True include local variables in tracebacks.
         """
         self.failfast = failfast
         if stdout is None:
             stdout = sys.stdout
         self.stdout = stdout
+        self.tb_locals = tb_locals
 
     def list(self, test, loader):
         """List the tests that would be run if test() was run."""
@@ -94,7 +97,8 @@ class TestToolsTestRunner(object):
     def run(self, test):
         "Run the given test case or test suite."
         result = TextTestResult(
-            unicode_output_stream(self.stdout), failfast=self.failfast)
+            unicode_output_stream(self.stdout), failfast=self.failfast,
+            tb_locals=self.tb_locals)
         result.startTestRun()
         try:
             return test.run(result)
@@ -127,7 +131,7 @@ class TestProgram(unittest.TestProgram):
     def __init__(self, module=__name__, defaultTest=None, argv=None,
                     testRunner=None, testLoader=defaultTestLoader,
                     exit=True, verbosity=1, failfast=None, catchbreak=None,
-                    buffer=None, stdout=None):
+                    buffer=None, stdout=None, tb_locals=False):
         if module == __name__:
             self.module = None
         elif istext(module):
@@ -147,6 +151,7 @@ class TestProgram(unittest.TestProgram):
         self.catchbreak = catchbreak
         self.verbosity = verbosity
         self.buffer = buffer
+        self.tb_locals = tb_locals
         self.defaultTest = defaultTest
         # XXX: Local edit (see http://bugs.python.org/issue22860)
         self.listtests = False
@@ -219,10 +224,18 @@ class TestProgram(unittest.TestProgram):
         if self.testRunner is None:
             self.testRunner = TestToolsTestRunner
         try:
-            testRunner = self.testRunner(verbosity=self.verbosity,
-                                         failfast=self.failfast,
-                                         buffer=self.buffer,
-                                         stdout=self.stdout)
+            try:
+                testRunner = self.testRunner(verbosity=self.verbosity,
+                                             failfast=self.failfast,
+                                             buffer=self.buffer,
+                                             stdout=self.stdout,
+                                             tb_locals=self.tb_locals)
+            except TypeError:
+                # didn't accept the tb_locals parameter
+                testRunner = self.testRunner(verbosity=self.verbosity,
+                                             failfast=self.failfast,
+                                             buffer=self.buffer,
+                                             stdout=self.stdout)
         except TypeError:
             # didn't accept the verbosity, buffer, failfast or stdout arguments
             # Try with the prior contract

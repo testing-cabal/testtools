@@ -63,7 +63,8 @@ deps = [
     # 'mimeparse' has not been uploaded by the maintainer with Python3 compat
     # but someone kindly uploaded a fixed version as 'python-mimeparse'.
     'python-mimeparse',
-    'unittest2>=0.8.0',
+    'unittest2>=1.0.0',
+    'traceback2',
     ]
 
 

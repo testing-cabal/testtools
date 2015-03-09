@@ -92,6 +92,13 @@ cause ``testtools.RunTest`` to fail the test case after the test has finished.
 This is useful when you want to cause a test to fail, but don't want to
 prevent the remainder of the test code from being executed.
 
+Exception formatting
+--------------------
+
+Testtools ``TestCase`` instances format their own exceptions. The attribute
+``__testtools_tb_locals__`` controls whether to include local variables in the
+formatted exceptions.
+
 Test placeholders
 =================
 

@@ -307,6 +307,18 @@ testtools.resourceexample.TestFoo.test_foo
         self.assertThat(
             stdout.getDetails()['stdout'].as_text(), Contains('Ran 1 test'))
 
+    def test_run_locals(self):
+        stdout = self.useFixture(fixtures.StringStream('stdout'))
+
+        class Failing(TestCase):
+            def test_a(self):
+                a = 1
+                self.fail('a')
+        runner = run.TestToolsTestRunner(tb_locals=True, stdout=stdout.stream)
+        runner.run(Failing('test_a'))
+        self.assertThat(
+            stdout.getDetails()['stdout'].as_text(), Contains('a = 1'))
+
     def test_stdout_honoured(self):
         self.useFixture(SampleTestFixture())
         tests = []

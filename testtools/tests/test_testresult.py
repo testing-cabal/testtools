@@ -95,6 +95,7 @@ from testtools.testresult.real import (
 def make_erroring_test():
     class Test(TestCase):
         def error(self):
+            a = 1
             1/0
     return Test("error")
 
@@ -1162,6 +1163,32 @@ class TestTestResult(TestCase):
         text_traceback = result._exc_info_to_unicode(exc_info, test)
         self.assertEqual(
             TracebackContent(exc_info, test).as_text(), text_traceback)
+
+    def test_traceback_with_locals(self):
+        result = self.makeResult()
+        result.tb_locals = True
+        test = make_erroring_test()
+        test.run(result)
+        self.assertThat(
+            result.errors[0][1],
+            DocTestMatches(
+                'Traceback (most recent call last):\n'
+                '  File "...testtools...runtest.py", line ..., in _run_user\n'
+                '    return fn(*args, **kwargs)\n'
+                '    args = ...\n'
+                '    fn = ...\n'
+                '    kwargs = ...\n'
+                '    self = ...\n'
+                '  File "...testtools...testcase.py", line ..., in _run_test_method\n'
+                '    return self._get_test_method()()\n'
+                '    result = ...\n'
+                '    self = ...\n'
+                '  File "...testtools...tests...test_testresult.py", line ..., in error\n'
+                '    1/0\n'
+                '    a = 1\n'
+                '    self = ...\n'
+                'ZeroDivisionError: ...\n',
+                doctest.ELLIPSIS | doctest.REPORT_UDIFF))
 
 
 class TestMultiTestResult(TestCase):
@@ -2445,8 +2472,7 @@ class TestNonAsciiResults(TestCase):
         if str_is_unicode:
             output_text = example_text
         else:
-            output_text = example_text.encode("shift_jis").decode(
-                _get_exception_encoding(), "replace")
+            output_text = "b%r" % example_text.encode("shift_jis")
         self.assertIn(self._as_output("AssertionError: %s" % output_text),
             textoutput)
 
@@ -2514,19 +2540,6 @@ class TestNonAsciiResults(TestCase):
         """Syntax errors with bogus parameters should break anything"""
         textoutput = self._test_external_case("raise SyntaxError(3, 2, 1)")
         self.assertIn(self._as_output("\nSyntaxError: "), textoutput)
-
-    def test_syntax_error_import_binary(self):
-        """Importing a binary file shouldn't break SyntaxError formatting"""
-        self._setup_external_case("import bad")
-        f = open(os.path.join(self.dir, "bad.py"), "wb")
-        try:
-            f.write(_b("x\x9c\xcb*\xcd\xcb\x06\x00\x04R\x01\xb9"))
-        finally:
-            f.close()
-        textoutput = self._run_external_case()
-        matches_error = MatchesAny(
-            Contains('\nTypeError: '), Contains('\nSyntaxError: '))
-        self.assertThat(textoutput, matches_error)
 
     def test_syntax_error_line_iso_8859_1(self):
         """Syntax error on a latin-1 line shows the line decoded"""

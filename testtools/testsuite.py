@@ -14,10 +14,10 @@ __all__ = [
 import sys
 import threading
 import unittest
-import unittest2
 
 from extras import safe_hasattr, try_imports
-
+# This is just to let setup.py work, as testtools is imported in setup.py.
+unittest2 = try_imports(['unittest2', 'unittest'])
 Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
 import testtools

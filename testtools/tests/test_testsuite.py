@@ -179,16 +179,31 @@ class TestConcurrentStreamTestSuiteRun(TestCase):
         suite.run(result)
         events = result._events
         # Check the traceback loosely.
-        self.assertThat(events[1][6].decode('utf8'), DocTestMatches("""\
-Traceback (most recent call last):
+        self.assertEqual(events[1][6].decode('utf8'),
+            "Traceback (most recent call last):\n")
+        self.assertThat(events[2][6].decode('utf8'), DocTestMatches("""\
   File "...testtools/testsuite.py", line ..., in _run_test
     test.run(process_result)
+""", doctest.ELLIPSIS))
+        self.assertThat(events[3][6].decode('utf8'), DocTestMatches("""\
 TypeError: run() takes ...1 ...argument...2...given...
 """, doctest.ELLIPSIS))
         events = [event[0:10] + (None,) for event in events]
         events[1] = events[1][:6] + (None,) + events[1][7:]
+        events[2] = events[2][:6] + (None,) + events[2][7:]
+        events[3] = events[3][:6] + (None,) + events[3][7:]
         self.assertEqual([
             ('status', "broken-runner-'0'", 'inprogress', None, True, None, None, False, None, _u('0'), None),
+            ('status', "broken-runner-'0'", None, None, True, 'traceback', None,
+             False,
+             'text/x-traceback; charset="utf8"; language="python"',
+             '0',
+             None),
+            ('status', "broken-runner-'0'", None, None, True, 'traceback', None,
+             False,
+             'text/x-traceback; charset="utf8"; language="python"',
+             '0',
+             None),
             ('status', "broken-runner-'0'", None, None, True, 'traceback', None,
              True,
              'text/x-traceback; charset="utf8"; language="python"',

@@ -80,12 +80,13 @@ class TestResult(unittest.TestResult):
     :ivar skip_reasons: A dict of skip-reasons -> list of tests. See addSkip.
     """
 
-    def __init__(self, failfast=False):
+    def __init__(self, failfast=False, tb_locals=False):
         # startTestRun resets all attributes, and older clients don't know to
         # call startTestRun, so it is called once here.
         # Because subclasses may reasonably not expect this, we call the
         # specific version we want to run.
         self.failfast = failfast
+        self.tb_locals = tb_locals
         TestResult.startTestRun(self)
 
     def addExpectedFailure(self, test, err=None, details=None):
@@ -174,7 +175,8 @@ class TestResult(unittest.TestResult):
     def _err_details_to_string(self, test, err=None, details=None):
         """Convert an error in exc_info form or a contents dict to a string."""
         if err is not None:
-            return TracebackContent(err, test).as_text()
+            return TracebackContent(
+                err, test, capture_locals=self.tb_locals).as_text()
         return _details_to_str(details, special='traceback')
 
     def _exc_info_to_unicode(self, err, test):
@@ -201,8 +203,9 @@ class TestResult(unittest.TestResult):
         pristine condition ready for use in another test run.  Note that this
         is different from Python 2.7's startTestRun, which does nothing.
         """
-        # failfast is reset by the super __init__, so stash it.
+        # failfast and tb_locals are reset by the super __init__, so save them.
         failfast = self.failfast
+        tb_locals = self.tb_locals
         super(TestResult, self).__init__()
         self.skip_reasons = {}
         self.__now = None
@@ -212,6 +215,8 @@ class TestResult(unittest.TestResult):
         self.unexpectedSuccesses = []
         self.failfast = failfast
         # -- End:   As per python 2.7 --
+        # -- Python 3.5
+        self.tb_locals = tb_locals
 
     def stopTestRun(self):
         """Called after a test run completes
@@ -875,9 +880,10 @@ class MultiTestResult(TestResult):
 class TextTestResult(TestResult):
     """A TestResult which outputs activity to a text stream."""
 
-    def __init__(self, stream, failfast=False):
+    def __init__(self, stream, failfast=False, tb_locals=False):
         """Construct a TextTestResult writing to stream."""
-        super(TextTestResult, self).__init__(failfast=failfast)
+        super(TextTestResult, self).__init__(
+            failfast=failfast, tb_locals=tb_locals)
         self.stream = stream
         self.sep1 = '=' * 70 + '\n'
         self.sep2 = '-' * 70 + '\n'
@@ -1642,7 +1648,8 @@ class TestByTestResult(TestResult):
     def _err_to_details(self, test, err, details):
         if details:
             return details
-        return {'traceback': TracebackContent(err, test)}
+        return {'traceback': TracebackContent(
+            err, test, capture_locals=self.tb_locals)}
 
     def addSuccess(self, test, details=None):
         super(TestByTestResult, self).addSuccess(test)

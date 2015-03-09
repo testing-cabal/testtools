@@ -7,6 +7,21 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* ``testtools.run`` now accepts ``--locals`` to show local variables
+  in tracebacks, which can be a significant aid in debugging. In doing
+  so we've removed the code reimplementing linecache and traceback by
+  using the new traceback2 and linecache2 packages.
+  (Robert Collins, github #111)
+
+Changes
+-------
+
+* ``testtools`` now depends on ``unittest2`` 1.0.0 which brings in a dependency
+  on ``traceback2`` and via it ``linecache2``. (Robert Collins)
+
 1.5.0
 ~~~~~
 

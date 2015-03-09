@@ -17,15 +17,13 @@ import inspect
 import json
 import os
 import sys
-import traceback
 
 from extras import try_import
+# To let setup.py work, make this a conditional import.
+traceback = try_import('traceback2')
 
 from testtools.compat import (
     _b,
-    _format_exception_only,
-    _format_stack_list,
-    _TB_HEADER,
     _u,
     istext,
     str_is_unicode,
@@ -163,61 +161,52 @@ class StackLinesContent(Content):
     def _stack_lines_to_unicode(self, stack_lines):
         """Converts a list of pre-processed stack lines into a unicode string.
         """
-
-        # testtools customization. When str is unicode (e.g. IronPython,
-        # Python 3), traceback.format_exception returns unicode. For Python 2,
-        # it returns bytes. We need to guarantee unicode.
-        if str_is_unicode:
-            format_stack_lines = traceback.format_list
-        else:
-            format_stack_lines = _format_stack_list
-
-        msg_lines = format_stack_lines(stack_lines)
-
-        return ''.join(msg_lines)
+        msg_lines = traceback.format_list(stack_lines)
+        return _u('').join(msg_lines)
 
 
-def TracebackContent(err, test):
+class TracebackContent(Content):
     """Content object for tracebacks.
 
     This adapts an exc_info tuple to the 'Content' interface.
     'text/x-traceback;language=python' is used for the mime type, in order to
     provide room for other languages to format their tracebacks differently.
     """
-    if err is None:
-        raise ValueError("err may not be None")
 
-    exctype, value, tb = err
-    # Skip test runner traceback levels
-    if StackLinesContent.HIDE_INTERNAL_STACK:
-        while tb and '__unittest' in tb.tb_frame.f_globals:
-            tb = tb.tb_next
+    def __init__(self, err, test, capture_locals=False):
+        """Create a TracebackContent for ``err``.
 
-    # testtools customization. When str is unicode (e.g. IronPython,
-    # Python 3), traceback.format_exception_only returns unicode. For Python 2,
-    # it returns bytes. We need to guarantee unicode.
-    if str_is_unicode:
-        format_exception_only = traceback.format_exception_only
-    else:
-        format_exception_only = _format_exception_only
+        :param err: An exc_info error tuple.
+        :param test: A test object used to obtain failureException.
+        :param capture_locals: If true, show locals in the traceback.
+        """
+        if err is None:
+            raise ValueError("err may not be None")
 
-    limit = None
-    # Disabled due to https://bugs.launchpad.net/testtools/+bug/1188420
-    if (False
-        and StackLinesContent.HIDE_INTERNAL_STACK
-        and test.failureException
-        and isinstance(value, test.failureException)):
-        # Skip assert*() traceback levels
-        limit = 0
-        while tb and not self._is_relevant_tb_level(tb):
-            limit += 1
-            tb = tb.tb_next
+        exctype, value, tb = err
+        # Skip test runner traceback levels
+        if StackLinesContent.HIDE_INTERNAL_STACK:
+            while tb and '__unittest' in tb.tb_frame.f_globals:
+                tb = tb.tb_next
 
-    prefix = _TB_HEADER
-    stack_lines = traceback.extract_tb(tb, limit)
-    postfix = ''.join(format_exception_only(exctype, value))
+        limit = None
+        # Disabled due to https://bugs.launchpad.net/testtools/+bug/1188420
+        if (False
+            and StackLinesContent.HIDE_INTERNAL_STACK
+            and test.failureException
+            and isinstance(value, test.failureException)):
+            # Skip assert*() traceback levels
+            limit = 0
+            while tb and not self._is_relevant_tb_level(tb):
+                limit += 1
+                tb = tb.tb_next
 
-    return StackLinesContent(stack_lines, prefix, postfix)
+        stack_lines = list(traceback.TracebackException(exctype, value, tb,
+            limit=limit, capture_locals=capture_locals).format())
+        content_type = ContentType('text', 'x-traceback',
+            {"language": "python", "charset": "utf8"})
+        super(TracebackContent, self).__init__(
+            content_type, lambda: [x.encode('utf8') for x in stack_lines])
 
 
 def StacktraceContent(prefix_content="", postfix_content=""):
@@ -232,22 +221,20 @@ def StacktraceContent(prefix_content="", postfix_content=""):
     :param prefix_content: A unicode string to add before the stack lines.
     :param postfix_content: A unicode string to add after the stack lines.
     """
-    stack = inspect.stack()[1:]
-
-    if StackLinesContent.HIDE_INTERNAL_STACK:
-        limit = 1
-        while limit < len(stack) and '__unittest' not in stack[limit][0].f_globals:
-            limit += 1
-    else:
-        limit = -1
-
-    frames_only = [line[0] for line in stack[:limit]]
-    processed_stack = [ ]
-    for frame in reversed(frames_only):
-        filename, line, function, context, _ = inspect.getframeinfo(frame)
-        context = ''.join(context)
-        processed_stack.append((filename, line, function, context))
-    return StackLinesContent(processed_stack, prefix_content, postfix_content)
+    stack = traceback.walk_stack(None)
+    def filter_stack(stack):
+        # Discard the filter_stack frame.
+        next(stack)
+        # Discard the StacktraceContent frame.
+        next(stack)
+        for f, f_lineno in stack:
+            if StackLinesContent.HIDE_INTERNAL_STACK:
+                if '__unittest' in f.f_globals:
+                    return
+                yield f, f_lineno
+    extract = traceback.StackSummary.extract(filter_stack(stack))
+    extract.reverse()
+    return StackLinesContent(extract, prefix_content, postfix_content)
 
 
 def json_content(json_data):

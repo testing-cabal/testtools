@@ -24,8 +24,10 @@ import types
 from extras import (
     safe_hasattr,
     try_import,
+    try_imports,
     )
-import unittest2 as unittest
+# To let setup.py work, make this a conditional import.
+unittest = try_imports(['unittest2', 'unittest'])
 
 from testtools import (
     content,
@@ -585,7 +587,9 @@ class TestCase(unittest.TestCase):
                 tb_label = '%s-%d' % (tb_label, tb_id)
             if tb_label not in self.getDetails():
                 break
-        self.addDetail(tb_label, content.TracebackContent(exc_info, self))
+        self.addDetail(tb_label, content.TracebackContent(
+            exc_info, self, capture_locals=getattr(
+                self, '__testtools_tb_locals__', False)))
 
     @staticmethod
     def _report_unexpected_success(self, result, err):

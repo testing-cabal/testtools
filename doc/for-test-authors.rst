@@ -72,9 +72,11 @@ installed or have Python 2.7 or later, and then run::
 
   $ python -m testtools.run discover packagecontainingtests
 
-For more information see the Python 2.7 unittest documentation, or::
+For more information see the Python unittest documentation, and::
 
     python -m testtools.run --help
+
+which describes the options available to ``testtools.run``.
 
 As your testing needs grow and evolve, you will probably want to use a more
 sophisticated test runner.  There are many of these for Python, and almost all
