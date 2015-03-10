@@ -7,6 +7,16 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+1.6.1
+~~~~~
+
+Changes
+-------
+
+* Fix installing when ``extras`` is not already installed. Our guards
+  for the absence of unittest2 were not sufficient.
+  (Robert Collins, #1430076)
+
 1.6.0
 ~~~~~
 
