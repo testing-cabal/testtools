@@ -848,6 +848,53 @@ class TestExtendedToStreamDecorator(TestCase):
         result.stopTestRun()
         self.assertEqual(False, result.wasSuccessful())
 
+    def test_empty_detail_status_correct(self):
+        log = LoggingStreamResult()
+        result = ExtendedToStreamDecorator(log)
+        result.startTestRun()
+        now = datetime.datetime.now(utc)
+        result.time(now)
+        result.startTest(self)
+        result.addError(self, details={'foo': text_content(_u(""))})
+        result.stopTest(self)
+        result.stopTestRun()
+        self.assertEqual([
+            ('startTestRun',),
+            ('status',
+             'testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_empty_detail_status_correct',
+             'inprogress',
+             None,
+             True,
+             None,
+             None,
+             False,
+             None,
+             None,
+             now),
+            ('status',
+             'testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_empty_detail_status_correct',
+              None,
+              None,
+              True,
+              'foo',
+              _b(''),
+              True,
+              'text/plain; charset="utf8"',
+              None,
+              now),
+            ('status',
+             'testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_empty_detail_status_correct',
+             'fail',
+              set(),
+              True,
+              None,
+              None,
+              False,
+              None,
+              None,
+              now),
+             ('stopTestRun',)], log._events)
+
 
 class TestStreamFailFast(TestCase):
 

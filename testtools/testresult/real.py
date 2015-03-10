@@ -1346,6 +1346,8 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
                         self.status(file_name=name, file_bytes=file_bytes,
                             mime_type=mime_type, test_id=test_id, timestamp=now)
                     file_bytes = next_bytes
+                if file_bytes is None:
+                    file_bytes = _b("")
                 self.status(file_name=name, file_bytes=file_bytes, eof=True,
                     mime_type=mime_type, test_id=test_id, timestamp=now)
         if reason is not None:

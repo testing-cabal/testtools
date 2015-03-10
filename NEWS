@@ -7,6 +7,14 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* Empty attachments to tests were triggering a file payload of None in the
+  ``ExtendedToStreamDecorator`` code, which caused multiple copies of
+  attachments that had been output prior to the empty one.
+  (Robert Collins, #1378609)
+
 1.6.1
 ~~~~~
 
