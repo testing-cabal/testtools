@@ -7,6 +7,13 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* Building a wheel on Python 3 was missing ``_compat2x.py`` needed for Python2.
+  This was a side effect of the fix to bug #941958, where we fixed a cosmetic
+  error. (Robert Collins, #1430534)
+
 1.7.0
 ~~~~~
 

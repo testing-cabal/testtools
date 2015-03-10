@@ -2,23 +2,13 @@
 """Distutils installer for testtools."""
 
 from setuptools import setup
-from distutils.command.build_py import build_py
 import email
 import os
-import sys
 
 import testtools
 cmd_class = {}
 if getattr(testtools, 'TestCommand', None) is not None:
     cmd_class['test'] = testtools.TestCommand
-
-
-class testtools_build_py(build_py):
-    def build_module(self, module, module_file, package):
-        if sys.version_info >= (3,) and module == '_compat2x':
-            return
-        return build_py.build_module(self, module, module_file, package)
-cmd_class['build_py'] = testtools_build_py
 
 
 def get_version_from_pkg_info():

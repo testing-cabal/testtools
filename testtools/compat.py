@@ -34,7 +34,7 @@ linecache = try_import('linecache2')
 
 try:
     from testtools import _compat2x as _compat
-except (SyntaxError, ImportError):
+except SyntaxError:
     from testtools import _compat3x as _compat
 
 reraise = _compat.reraise
