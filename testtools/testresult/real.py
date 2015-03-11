@@ -23,6 +23,7 @@ __all__ = [
     ]
 
 import datetime
+import math
 from operator import methodcaller
 import sys
 import unittest
@@ -888,9 +889,14 @@ class TextTestResult(TestResult):
         self.sep1 = '=' * 70 + '\n'
         self.sep2 = '-' * 70 + '\n'
 
-    def _delta_to_float(self, a_timedelta):
-        return (a_timedelta.days * 86400.0 + a_timedelta.seconds +
-            a_timedelta.microseconds / 1000000.0)
+    def _delta_to_float(self, a_timedelta, precision):
+        # This calls ceiling to ensure that the most pessimistic view of time
+        # taken is shown (rather than leaving it to the Python %f operator
+        # to decide whether to round/floor/ceiling. This was added when we
+        # had pyp3 test failures that suggest a floor was happening.
+        shift = 10 ** precision
+        return math.ceil((a_timedelta.days * 86400.0 + a_timedelta.seconds +
+            a_timedelta.microseconds / 1000000.0) * shift) / shift
 
     def _show_list(self, label, error_list):
         for test, output in error_list:
@@ -918,7 +924,7 @@ class TextTestResult(TestResult):
                     self.sep1, test.id(), self.sep2))
         self.stream.write("\nRan %d test%s in %.3fs\n" %
             (self.testsRun, plural,
-             self._delta_to_float(stop - self.__start)))
+             self._delta_to_float(stop - self.__start, 3)))
         if self.wasSuccessful():
             self.stream.write("OK\n")
         else:
