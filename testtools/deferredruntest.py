@@ -13,6 +13,7 @@ __all__ = [
     'SynchronousDeferredRunTest',
     ]
 
+import os
 import sys
 
 from testtools.compat import StringIO
@@ -232,8 +233,10 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
             [error_observer.gotEvent, full_observer.emit],
             self._blocking_run_deferred, spinner)
 
+        full_log.seek(0, os.SEEK_SET)
+        log_content = full_log.readlines()
         self.case.addDetail(
-            'twisted-log', Content(UTF8_TEXT, full_log.readlines))
+            'twisted-log', Content(UTF8_TEXT, lambda: log_content))
 
         logged_errors = error_observer.flushErrors()
         for logged_error in logged_errors:

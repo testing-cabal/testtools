@@ -16,6 +16,8 @@ from testtools.content import (
     text_content,
     )
 from testtools.matchers import (
+    ContainsAll,
+    EndsWith,
     Equals,
     KeysEqual,
     MatchesException,
@@ -620,11 +622,17 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
         result = self.make_result()
         runner.run(result)
         self.assertThat(
-            result._events,
+            [event[:2] for event in result._events],
             Equals([
                 ('startTest', test),
-                ('addSuccess', test, {'twisted-log': text_content('')}),
+                ('addSuccess', test),
                 ('stopTest', test)]))
+        error = result._events[1][2]
+        self.assertThat(error, KeysEqual('twisted-log'))
+        self.assertThat(
+            error['twisted-log'].as_text(),
+            ContainsAll(
+                ['Traceback (most recent call last):', 'ZeroDivisionError']))
 
     def test_log_in_details(self):
         class LogAnError(TestCase):
@@ -643,6 +651,7 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
                 ('stopTest', test)]))
         error = result._events[1][2]
         self.assertThat(error, KeysEqual('traceback', 'twisted-log'))
+        self.assertThat(error['twisted-log'].as_text(), EndsWith(' foo\n'))
 
     def test_debugging_unchanged_during_test_by_default(self):
         debugging = [(defer.Deferred.debug, DelayedCall.debug)]
