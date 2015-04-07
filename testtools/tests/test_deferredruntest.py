@@ -12,13 +12,17 @@ from testtools import (
     TestCase,
     TestResult,
     )
-from testtools.content import (
-    text_content,
-    )
 from testtools.matchers import (
+    AfterPreprocessing,
+    ContainsAll,
+    EndsWith,
     Equals,
+    Is,
     KeysEqual,
+    MatchesDict,
     MatchesException,
+    MatchesListwise,
+    Not,
     Raises,
     )
 from testtools.runtest import RunTest
@@ -37,6 +41,45 @@ defer = try_import('twisted.internet.defer')
 failure = try_import('twisted.python.failure')
 log = try_import('twisted.python.log')
 DelayedCall = try_import('twisted.internet.base.DelayedCall')
+
+
+class MatchesEvents(object):
+    """Match a list of test result events.
+
+    Specify events as a data structure.  Ordinary Python objects within this
+    structure will be compared exactly, but you can also use matchers at any
+    point.
+    """
+
+    def __init__(self, *expected):
+        self._expected = expected
+
+    def _make_matcher(self, obj):
+        # This isn't very safe for general use, but is good enough to make
+        # some tests in this module more readable.
+        if hasattr(obj, 'match'):
+            return obj
+        elif isinstance(obj, tuple) or isinstance(obj, list):
+            return MatchesListwise(
+                [self._make_matcher(item) for item in obj])
+        elif isinstance(obj, dict):
+            return MatchesDict(dict(
+                (key, self._make_matcher(value))
+                for key, value in obj.items()))
+        else:
+            return Equals(obj)
+
+    def match(self, observed):
+        matcher = self._make_matcher(self._expected)
+        return matcher.match(observed)
+
+
+class AsText(AfterPreprocessing):
+    """Match the text of a Content instance."""
+
+    def __init__(self, matcher, annotate=True):
+        super(AsText, self).__init__(
+            lambda log: log.as_text(), matcher, annotate=annotate)
 
 
 class X(object):
@@ -596,13 +639,20 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
         result = self.make_result()
         runner.run(result)
         self.assertThat(
-            [event[:2] for event in result._events],
-            Equals([
+            result._events,
+            MatchesEvents(
                 ('startTest', test),
-                ('addError', test),
-                ('stopTest', test)]))
-        error = result._events[1][2]
-        self.assertThat(error, KeysEqual('logged-error', 'twisted-log'))
+                ('addError', test, {
+                    'logged-error': AsText(ContainsAll([
+                        'Traceback (most recent call last):',
+                        'ZeroDivisionError',
+                        ])),
+                    'twisted-log': AsText(ContainsAll([
+                        'Traceback (most recent call last):',
+                        'ZeroDivisionError',
+                        ])),
+                    }),
+                ('stopTest', test)))
 
     def test_log_err_flushed_is_success(self):
         # An error logged during the test run is recorded as an error in the
@@ -621,10 +671,15 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
         runner.run(result)
         self.assertThat(
             result._events,
-            Equals([
+            MatchesEvents(
                 ('startTest', test),
-                ('addSuccess', test, {'twisted-log': text_content('')}),
-                ('stopTest', test)]))
+                ('addSuccess', test, {
+                    'twisted-log': AsText(ContainsAll([
+                        'Traceback (most recent call last):',
+                        'ZeroDivisionError',
+                        ])),
+                    }),
+                ('stopTest', test)))
 
     def test_log_in_details(self):
         class LogAnError(TestCase):
@@ -636,13 +691,14 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
         result = self.make_result()
         runner.run(result)
         self.assertThat(
-            [event[:2] for event in result._events],
-            Equals([
+            result._events,
+            MatchesEvents(
                 ('startTest', test),
-                ('addError', test),
-                ('stopTest', test)]))
-        error = result._events[1][2]
-        self.assertThat(error, KeysEqual('traceback', 'twisted-log'))
+                ('addError', test, {
+                    'traceback': Not(Is(None)),
+                    'twisted-log': AsText(EndsWith(' foo\n')),
+                    }),
+                ('stopTest', test)))
 
     def test_debugging_unchanged_during_test_by_default(self):
         debugging = [(defer.Deferred.debug, DelayedCall.debug)]
