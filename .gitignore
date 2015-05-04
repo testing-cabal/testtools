@@ -16,3 +16,6 @@ doc/_build
 testtools.egg-info
 /build/
 /.env/
+/.eggs/
+AUTHORS
+ChangeLog

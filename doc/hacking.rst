@@ -169,20 +169,16 @@ Tasks
 +++++
 
 #. Choose a version number, say X.Y.Z
-#. In trunk, ensure __init__ has version ``(X, Y, Z, 'final', 0)``
 #. Under NEXT in NEWS add a heading with the version number X.Y.Z.
 #. Possibly write a blurb into NEWS.
 #. Commit the changes.
-#. Tag the release, ``git tag -s testtools-X.Y.Z``
+#. Tag the release, ``git tag -s X.Y.Z -m "Releasing X.Y.Z"``
 #. Run 'make release', this:
    #. Creates a source distribution and uploads to PyPI
    #. Ensures all Fix Committed bugs are in the release milestone
    #. Makes a release on Launchpad and uploads the tarball
    #. Marks all the Fix Committed bugs as Fix Released
    #. Creates a new milestone
-#. Change __version__ in __init__.py to the probable next version.
-   e.g. to ``(X, Y, Z+1, 'dev', 0)``.
-#. Commit 'Opening X.Y.Z+1 for development.'
 #. If a new series has been created (e.g. 0.10.0), make the series on Launchpad.
 #. Push trunk to Github, ``git push --tags origin master``
 
