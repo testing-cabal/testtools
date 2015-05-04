@@ -7,6 +7,15 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+1.8.0
+~~~~~
+
+Improvements
+------------
+
+* AsynchronousDeferredRunTest now correctly attaches the test log.
+  Previously it attached an empty file. (Colin Watson)
+
 1.7.1
 ~~~~~
 
