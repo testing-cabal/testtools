@@ -3,16 +3,12 @@
 PYTHON=python
 SOURCES=$(shell find testtools -name "*.py")
 
+SRC_REPO=github.com/testing-cabal/testtools
+SRC_EGGNAME=testtools
+SRC_PYPINAME=${SRC_EGGNAME}
+PIP_SRC_URL='git+ssh://git@${SRC_REPO}\#egg=${SRC_EGGNAME}'
+
 default: check
-
-# Install requirements with pip
-install-pip-requirements:
-	pip install -r ./requirements.txt
-
-# Install dev/doc requirements with pip
-install-dev: install-pip-requirements
-	pip install -r ./requirements-dev.txt
-	pip install -e .
 
 check:
 	PYTHONPATH=$(PWD) $(PYTHON) -m testtools.run testtools.tests.test_suite
@@ -68,6 +64,37 @@ html-sphinx:
 gh-pages:
 	ghp-import -n -p ./doc/_build/html
 
+### Installation ###
+
+# Install from pypi
+install-from-pypi:
+	# pip install testtools
+	pip install ${SRC_PYPINAME}
+
+install-from-warehouse:
+	pip install -i https://warehouse.python.org/project/ ${SRC_PYPINAME}
+
+# Install from github
+install-from-github:
+	pip install -v --find-links=https://${SRC_REPO}/releases ${SRC_PYPINAME}
+
+# Install from src
+install-from-src:
+	pip install -e ${PIP_SRC_URL}
+
+# Install requirements with pip
+install-pip-requirements:
+	pip install -r ./requirements.txt
+
+# Install dev/doc requirements with pip
+install-dev: install-pip-requirements
+	pip install -r ./requirements-dev.txt
+	pip install -e .
+
+
+.PHONY: default check clean prerelease release
 .PHONY: apidocs docs-sphinx clean-sphinx html-sphinx docs
-.PHONY: check clean prerelease release
-.PHONY: install-pip-requirements install-dev gh-pages
+.PHONY: gh-pages
+.PHONY: install-from-pypi install-from-warehouse install-from-github \
+		install-from-src
+.PHONY: install-pip-requirements install-dev
