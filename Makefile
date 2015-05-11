@@ -62,6 +62,9 @@ html-sphinx:
 # Overwrite gh-pages branch with the contents of doc/_build/html,
 # add a .nojekyll file, and git push to origin:gh-pages
 gh-pages:
+	test -d ./apidocs \
+		&& mv ./apidocs doc/_build/html/ \
+		&& ln -s doc/_build/html/apidocs ./apidocs
 	ghp-import -n -p ./doc/_build/html
 
 ### Installation ###
