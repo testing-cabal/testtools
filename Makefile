@@ -3,6 +3,17 @@
 PYTHON=python
 SOURCES=$(shell find testtools -name "*.py")
 
+default: check
+
+# Install requirements with pip
+install-pip-requirements:
+	pip install -r ./requirements.txt
+
+# Install dev/doc requirements with pip
+install-dev: install-pip-requirements
+	pip install -r ./requirements-dev.txt
+	pip install -e .
+
 check:
 	PYTHONPATH=$(PWD) $(PYTHON) -m testtools.run testtools.tests.test_suite
 
@@ -52,19 +63,11 @@ clean-sphinx:
 html-sphinx:
 	cd doc && make html
 
-# Install gh-pages	
-install-ghp-import:
-	pip install ghp-import
-
-# Overwrite gh-pages branch w/ contents of doc/_build/html
-# add a .nojekyll file, and push
+# Overwrite gh-pages branch with the contents of doc/_build/html,
+# add a .nojekyll file, and git push to origin:gh-pages
 gh-pages:
 	ghp-import -n -p ./doc/_build/html
 
-# To host the docs on the gh-pages branch (and push):
-#   make install-ghp-import
-#   make docs-sphinx gh-pages 
-
 .PHONY: apidocs docs-sphinx clean-sphinx html-sphinx docs
 .PHONY: check clean prerelease release
-.PHONY: install-ghp-import gh-pages
+.PHONY: install-pip-requirements install-dev gh-pages
