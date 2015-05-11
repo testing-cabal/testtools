@@ -52,5 +52,19 @@ clean-sphinx:
 html-sphinx:
 	cd doc && make html
 
+# Install gh-pages	
+install-ghp-import:
+	pip install ghp-import
+
+# Overwrite gh-pages branch w/ contents of doc/_build/html
+# add a .nojekyll file, and push
+gh-pages:
+	ghp-import -n -p ./doc/_build/html
+
+# To host the docs on the gh-pages branch (and push):
+#   make install-ghp-import
+#   make docs-sphinx gh-pages 
+
 .PHONY: apidocs docs-sphinx clean-sphinx html-sphinx docs
 .PHONY: check clean prerelease release
+.PHONY: install-ghp-import gh-pages
