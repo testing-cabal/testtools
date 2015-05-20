@@ -139,6 +139,27 @@ class TestFixtureSupport(TestCase):
             ''.join(details['traceback-1'].iter_text()),
             Contains('getDetails broke'))
 
+    def test_useFixture_cleanUp_with_failed_setUp(self):
+        class BrokenFixture(fixtures.Fixture):
+            def __init__(self):
+                self.cleanup_called = False
+            def setUp(self):
+                fixtures.Fixture.setUp(self)
+                raise Exception()
+            def cleanUp(self):
+                self.cleanup_called = True
+                fixtures.Fixture.cleanUp(self)
+
+        fixture = BrokenFixture()
+        class SimpleTest(TestCase):
+            def test_foo(self):
+                self.useFixture(fixture)
+
+        self.assertFalse(fixture.cleanup_called)
+        result = unittest.TestResult()
+        SimpleTest('test_foo').run(result)
+        self.assertTrue(fixture.cleanup_called)
+
 
 def test_suite():
     from unittest import TestLoader
