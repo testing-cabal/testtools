@@ -19,7 +19,7 @@ What better way to start than with a contrived code snippet?::
   class TestSillySquareServer(TestCase):
 
       def setUp(self):
-          super(TestSillySquare, self).setUp()
+          super(TestSillySquareServer, self).setUp()
           self.server = self.useFixture(SillySquareServer())
           self.addCleanup(self.attach_log_file)
 
