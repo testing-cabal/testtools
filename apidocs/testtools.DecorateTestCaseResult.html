@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.DecorateTestCaseResult : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="class"><code>testtools.DecorateTestCaseResult(<span title="object">object</span>)</code> <small>class documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a></code>
+          
+          <a href="classIndex.html#testtools.DecorateTestCaseResult">(View In Hierarchy)</a>
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        
+      </div>
+
+      <div class="moduleDocstring">
+        <div>Decorate a TestCase and permit customisation of the result for runs.<table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id147">
+  
+  <tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.DecorateTestCaseResult.html#__init__" class="code">__init__</a></td>
+    <td><span>Construct a DecorateTestCaseResult.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.DecorateTestCaseResult.html#run" class="code">run</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.DecorateTestCaseResult.html#__call__" class="code">__call__</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.DecorateTestCaseResult.html#__getattr__" class="code">__getattr__</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.DecorateTestCaseResult.html#__delattr__" class="code">__delattr__</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.DecorateTestCaseResult.html#__setattr__" class="code">__setattr__</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.DecorateTestCaseResult.html#_run" class="code">_run</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr>
+</table>
+        
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.DecorateTestCaseResult.__init__">
+    
+  </a>
+  <a name="__init__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __init__(self, case, callout, before_run=None, after_run=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Construct a DecorateTestCaseResult.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">case</td><td>The case to decorate.</td></tr><tr><td></td><td class="fieldArg">callout</td><td>A callback to call when run/__call__/debug is called.
+Must take a result parameter and return a result object to be used.
+For instance: lambda result: result.</td></tr><tr><td></td><td class="fieldArg">before_run</td><td>If set, call this with the decorated result before
+calling into the decorated run/__call__ method.</td></tr><tr><td></td><td class="fieldArg">before_run</td><td>If set, call this with the decorated result after
+calling into the decorated run/__call__ method.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.DecorateTestCaseResult._run">
+    
+  </a>
+  <a name="_run">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _run(self, result, run_method):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.DecorateTestCaseResult.run">
+    
+  </a>
+  <a name="run">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    run(self, result=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.DecorateTestCaseResult.__call__">
+    
+  </a>
+  <a name="__call__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __call__(self, result=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.DecorateTestCaseResult.__getattr__">
+    
+  </a>
+  <a name="__getattr__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __getattr__(self, name):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.DecorateTestCaseResult.__delattr__">
+    
+  </a>
+  <a name="__delattr__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __delattr__(self, name):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.DecorateTestCaseResult.__setattr__">
+    
+  </a>
+  <a name="__setattr__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __setattr__(self, name, value):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

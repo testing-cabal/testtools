@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.testsuite.ConcurrentTestSuite : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="class"><code>testtools.testsuite.ConcurrentTestSuite(<span title="unittest2.TestSuite">unittest2.TestSuite</span>)</code> <small>class documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a>.<a href="testtools.testsuite.html" class="code">testsuite</a></code>
+          
+          <a href="classIndex.html#testtools.testsuite.ConcurrentTestSuite">(View In Hierarchy)</a>
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        
+      </div>
+
+      <div class="moduleDocstring">
+        <div>A TestSuite whose run() calls out to a concurrency strategy.<table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id163">
+  
+  <tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testsuite.ConcurrentTestSuite.html#__init__" class="code">__init__</a></td>
+    <td><span>Create a ConcurrentTestSuite to execute suite.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testsuite.ConcurrentTestSuite.html#run" class="code">run</a></td>
+    <td><span>Run the tests concurrently.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testsuite.ConcurrentTestSuite.html#_wrap_result" class="code">_wrap_result</a></td>
+    <td><span>Wrap a thread-safe result before sending it test results.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testsuite.ConcurrentTestSuite.html#_run_test" class="code">_run_test</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr>
+</table>
+        
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.testsuite.ConcurrentTestSuite.__init__">
+    
+  </a>
+  <a name="__init__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __init__(self, suite, make_tests, wrap_result=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Create a ConcurrentTestSuite to execute suite.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">suite</td><td>A suite to run concurrently.</td></tr><tr><td></td><td class="fieldArg">make_tests</td><td>A helper function to split the tests in the
+ConcurrentTestSuite into some number of concurrently executing
+sub-suites. make_tests must take a suite, and return an iterable
+of TestCase-like object, each of which must have a run(result)
+method.</td></tr><tr><td></td><td class="fieldArg">wrap_result</td><td>An optional function that takes a thread-safe
+result and a thread number and must return a <tt class="rst-docutils literal">TestResult</tt>
+object. If not provided, then <tt class="rst-docutils literal">ConcurrentTestSuite</tt> will just
+use a <tt class="rst-docutils literal">ThreadsafeForwardingResult</tt> wrapped around the result
+passed to <tt class="rst-docutils literal">run()</tt>.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testsuite.ConcurrentTestSuite._wrap_result">
+    
+  </a>
+  <a name="_wrap_result">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _wrap_result(self, thread_safe_result, thread_number):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Wrap a thread-safe result before sending it test results.</p>
+<p>You can either override this in a subclass or pass your own
+<tt class="rst-docutils literal">wrap_result</tt> in to the constructor.  The latter is preferred.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testsuite.ConcurrentTestSuite.run">
+    
+  </a>
+  <a name="run">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    run(self, result):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Run the tests concurrently.</p>
+<p>This calls out to the provided make_tests helper, and then serialises
+the results so that result only sees activity from one TestCase at
+a time.</p>
+<p>ConcurrentTestSuite provides no special mechanism to stop the tests
+returned by make_tests, it is up to the make_tests to honour the
+shouldStop attribute on the result object they are run with, which will
+be set if an exception is raised in the thread which
+ConcurrentTestSuite.run is called in.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testsuite.ConcurrentTestSuite._run_test">
+    
+  </a>
+  <a name="_run_test">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _run_test(self, test, process_result, queue):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

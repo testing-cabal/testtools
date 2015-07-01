@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.content.Content : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="class"><code>testtools.content.Content(<span title="object">object</span>)</code> <small>class documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a>.<a href="testtools.content.html" class="code">content</a></code>
+          
+          <a href="classIndex.html#testtools.content.Content">(View In Hierarchy)</a>
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        <p>Known subclasses: <a href="testtools.content.StackLinesContent.html" class="code">testtools.content.StackLinesContent</a>, <a href="testtools.content.TracebackContent.html" class="code">testtools.content.TracebackContent</a></p>
+      </div>
+
+      <div class="moduleDocstring">
+        <div><p>A MIME-like Content object.</p>
+<p>'Content' objects can be serialised to bytes using the iter_bytes method.
+If the 'Content-Type' is recognised by other code, they are welcome to
+look for richer contents that mere byte serialisation - for example in
+memory object graphs etc. However, such code MUST be prepared to receive
+a generic 'Content' object that has been reconstructed from a byte stream.</p><table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id141">
+  
+  <tr class="instancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.content.Content.html#content_type" class="code">content_type</a></td>
+    <td>The content type of this Content.</td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.content.Content.html#__init__" class="code">__init__</a></td>
+    <td><span>Create a ContentType.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.content.Content.html#__eq__" class="code">__eq__</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.content.Content.html#as_text" class="code">as_text</a></td>
+    <td><span>Return all of the content as text.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.content.Content.html#iter_bytes" class="code">iter_bytes</a></td>
+    <td><span>Iterate over bytestrings of the serialised content.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.content.Content.html#iter_text" class="code">iter_text</a></td>
+    <td><span>Iterate over the text of the serialised content.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.content.Content.html#__repr__" class="code">__repr__</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.content.Content.html#_iter_text" class="code">_iter_text</a></td>
+    <td><span>Worker for iter_text - does the decoding.</span></td>
+  </tr>
+</table>
+        
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.content.Content.content_type">
+    
+  </a>
+  <a name="content_type">
+    
+  </a>
+  <div class="functionHeader">
+    content_type =
+  </div>
+  <div class="functionBody">
+    The content type of this Content.
+  </div>
+</div><div class="function">
+  <a name="testtools.content.Content.__init__">
+    
+  </a>
+  <a name="__init__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __init__(self, content_type, get_bytes):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overridden in <a href="testtools.content.StackLinesContent.html" class="code">testtools.content.StackLinesContent</a>, <a href="testtools.content.TracebackContent.html" class="code">testtools.content.TracebackContent</a></div>
+    <div>Create a ContentType.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.content.Content.__eq__">
+    
+  </a>
+  <a name="__eq__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __eq__(self, other):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.content.Content.as_text">
+    
+  </a>
+  <a name="as_text">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    as_text(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Return all of the content as text.</p>
+<p>This is only valid where <tt class="rst-docutils literal">iter_text</tt> is.  It will load all of the
+content into memory.  Where this is a concern, use <tt class="rst-docutils literal">iter_text</tt>
+instead.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.content.Content.iter_bytes">
+    
+  </a>
+  <a name="iter_bytes">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    iter_bytes(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Iterate over bytestrings of the serialised content.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.content.Content.iter_text">
+    
+  </a>
+  <a name="iter_text">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    iter_text(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Iterate over the text of the serialised content.</p>
+<p>This is only valid for text MIME types, and will use ISO-8859-1 if
+no charset parameter is present in the MIME type. (This is somewhat
+arbitrary, but consistent with RFC2617 3.7.1).</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Raises</td><td class="fieldArg">ValueError</td><td>If the content type is not text/*.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.content.Content._iter_text">
+    
+  </a>
+  <a name="_iter_text">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _iter_text(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Worker for iter_text - does the decoding.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.content.Content.__repr__">
+    
+  </a>
+  <a name="__repr__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __repr__(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

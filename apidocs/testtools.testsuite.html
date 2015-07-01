@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.testsuite : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="module"><code>testtools.testsuite</code> <small>module documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a></code>
+          
+          
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        
+      </div>
+
+      <div class="moduleDocstring">
+        <div>Test suites and related things.<table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id162">
+  
+  <tr class="function">
+    
+    <td>Function</td>
+    <td><a href="testtools.testsuite.html#iterate_tests" class="code">iterate_tests</a></td>
+    <td><span>Iterate through all of the test cases in 'test_suite_or_case'.</span></td>
+  </tr><tr class="class">
+    
+    <td>Class</td>
+    <td><a href="testtools.testsuite.ConcurrentTestSuite.html" class="code">ConcurrentTestSuite</a></td>
+    <td><span>A TestSuite whose run() calls out to a concurrency strategy.</span></td>
+  </tr><tr class="class">
+    
+    <td>Class</td>
+    <td><a href="testtools.testsuite.ConcurrentStreamTestSuite.html" class="code">ConcurrentStreamTestSuite</a></td>
+    <td><span>A TestSuite whose run() parallelises.</span></td>
+  </tr><tr class="function">
+    
+    <td>Function</td>
+    <td><a href="testtools.testsuite.html#filter_by_ids" class="code">filter_by_ids</a></td>
+    <td><span>Remove tests from suite_or_case where their id is not in test_ids.</span></td>
+  </tr><tr class="function">
+    
+    <td>Function</td>
+    <td><a href="testtools.testsuite.html#sorted_tests" class="code">sorted_tests</a></td>
+    <td><span>Sort suite_or_case while preserving non-vanilla TestSuites.</span></td>
+  </tr><tr class="function private">
+    
+    <td>Function</td>
+    <td><a href="testtools.testsuite.html#_flatten_tests" class="code">_flatten_tests</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr>
+</table>
+        
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.testsuite.iterate_tests">
+    
+  </a>
+  <a name="iterate_tests">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    iterate_tests(test_suite_or_case):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Iterate through all of the test cases in 'test_suite_or_case'.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testsuite._flatten_tests">
+    
+  </a>
+  <a name="_flatten_tests">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _flatten_tests(suite_or_case, unpack_outer=False):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testsuite.filter_by_ids">
+    
+  </a>
+  <a name="filter_by_ids">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    filter_by_ids(suite_or_case, test_ids):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Remove tests from suite_or_case where their id is not in test_ids.</p>
+<p>This helper exists to provide backwards compatability with older versions
+of Python (currently all versions :)) that don't have a native
+filter_by_ids() method on Test(Case|Suite).</p>
+<dl class="rst-docutils">
+<dt>For subclasses of TestSuite, filtering is done by:</dt>
+<dd><ul class="rst-first rst-last rst-simple">
+<li>attempting to call suite.filter_by_ids(test_ids)</li>
+<li>if there is no method, iterating the suite and identifying tests to
+remove, then removing them from _tests, manually recursing into
+each entry.</li>
+</ul>
+</dd>
+<dt>For objects with an id() method - TestCases, filtering is done by:</dt>
+<dd><ul class="rst-first rst-last rst-simple">
+<li>attempting to return case.filter_by_ids(test_ids)</li>
+<li>if there is no such method, checking for case.id() in test_ids
+and returning case if it is, or TestSuite() if it is not.</li>
+</ul>
+</dd>
+</dl>
+<p>For anything else, it is not filtered - it is returned as-is.</p>
+<p>To provide compatability with this routine for a custom TestSuite, just
+define a filter_by_ids() method that will return a TestSuite equivalent to
+the original minus any tests not in test_ids.
+Similarly to provide compatability for a custom TestCase that does
+something unusual define filter_by_ids to return a new TestCase object
+that will only run test_ids that are in the provided container. If none
+would run, return an empty TestSuite().</p>
+<p>The contract for this function does not require mutation - each filtered
+object can choose to return a new object with the filtered tests. However
+because existing custom TestSuite classes in the wild do not have this
+method, we need a way to copy their state correctly which is tricky:
+thus the backwards-compatible code paths attempt to mutate in place rather
+than guessing how to reconstruct a new suite.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">suite_or_case</td><td>A test suite or test case.</td></tr><tr><td></td><td class="fieldArg">test_ids</td><td>Something that supports the __contains__ protocol.</td></tr><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">suite_or_case, unless suite_or_case was a case that itself
+fails the predicate when it will return a new unittest.TestSuite with
+no contents.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testsuite.sorted_tests">
+    
+  </a>
+  <a name="sorted_tests">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    sorted_tests(suite_or_case, unpack_outer=False):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Sort suite_or_case while preserving non-vanilla TestSuites.<table class="fieldTable"></table></div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.testcase : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="module"><code>testtools.testcase</code> <small>module documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a></code>
+          
+          
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        
+      </div>
+
+      <div class="moduleDocstring">
+        <div>Test case related stuff.<table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id165">
+  
+  <tr class="class">
+    
+    <td>Class</td>
+    <td><a href="testtools.testcase.TestSkipped.html" class="code">TestSkipped</a></td>
+    <td><span>Raised within TestCase.run() when a test is skipped.</span></td>
+  </tr><tr class="function">
+    
+    <td>Function</td>
+    <td><a href="testtools.testcase.html#run_test_with" class="code">run_test_with</a></td>
+    <td><span>Decorate a test as using a specific <tt class="rst-docutils literal">RunTest</tt>.</span></td>
+  </tr><tr class="function">
+    
+    <td>Function</td>
+    <td><a href="testtools.testcase.html#gather_details" class="code">gather_details</a></td>
+    <td><span>Merge the details from <tt class="rst-docutils literal">source_dict</tt> into <tt class="rst-docutils literal">target_dict</tt>.</span></td>
+  </tr><tr class="class">
+    
+    <td>Class</td>
+    <td><a href="testtools.testcase.TestCase.html" class="code">TestCase</a></td>
+    <td><span>Extensions to the basic TestCase.</span></td>
+  </tr><tr class="function">
+    
+    <td>Function</td>
+    <td><a href="testtools.testcase.html#clone_test_with_new_id" class="code">clone_test_with_new_id</a></td>
+    <td><span>Copy a <a href="testtools.testcase.TestCase.html"><code>TestCase</code></a>, and give the copied test a new id.</span></td>
+  </tr><tr class="function">
+    
+    <td>Function</td>
+    <td><a href="testtools.testcase.html#attr" class="code">attr</a></td>
+    <td><span>Decorator for adding attributes to WithAttributes.</span></td>
+  </tr><tr class="class">
+    
+    <td>Class</td>
+    <td><a href="testtools.testcase.WithAttributes.html" class="code">WithAttributes</a></td>
+    <td><span>A mix-in class for modifying test id by attributes.</span></td>
+  </tr><tr class="function">
+    
+    <td>Function</td>
+    <td><a href="testtools.testcase.html#skip" class="code">skip</a></td>
+    <td><span>A decorator to skip unit tests.</span></td>
+  </tr><tr class="function">
+    
+    <td>Function</td>
+    <td><a href="testtools.testcase.html#skipIf" class="code">skipIf</a></td>
+    <td><span>A decorator to skip a test if the condition is true.</span></td>
+  </tr><tr class="function">
+    
+    <td>Function</td>
+    <td><a href="testtools.testcase.html#skipUnless" class="code">skipUnless</a></td>
+    <td><span>A decorator to skip a test unless the condition is true.</span></td>
+  </tr><tr class="class">
+    
+    <td>Class</td>
+    <td><a href="testtools.testcase.ExpectedException.html" class="code">ExpectedException</a></td>
+    <td><span>A context manager to handle expected exceptions.</span></td>
+  </tr><tr class="class">
+    
+    <td>Class</td>
+    <td><a href="testtools.testcase.Nullary.html" class="code">Nullary</a></td>
+    <td><span>Turn a callable into a nullary callable.</span></td>
+  </tr><tr class="class private">
+    
+    <td>Class</td>
+    <td><a href="testtools.testcase._UnexpectedSuccess.html" class="code">_UnexpectedSuccess</a></td>
+    <td><span>An unexpected success was raised.</span></td>
+  </tr><tr class="class private">
+    
+    <td>Class</td>
+    <td><a href="testtools.testcase._ExpectedFailure.html" class="code">_ExpectedFailure</a></td>
+    <td><span>An expected failure occured.</span></td>
+  </tr><tr class="function private">
+    
+    <td>Function</td>
+    <td><a href="testtools.testcase.html#_expectedFailure" class="code">_expectedFailure</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="function private">
+    
+    <td>Function</td>
+    <td><a href="testtools.testcase.html#_copy_content" class="code">_copy_content</a></td>
+    <td><span>Make a copy of the given content object.</span></td>
+  </tr><tr class="function private">
+    
+    <td>Function</td>
+    <td><a href="testtools.testcase.html#_clone_test_id_callback" class="code">_clone_test_id_callback</a></td>
+    <td><span>Copy a <a href="testtools.testcase.TestCase.html"><code>TestCase</code></a>, and make it call callback for its id().</span></td>
+  </tr>
+</table>
+        
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.testcase._expectedFailure">
+    
+  </a>
+  <a name="_expectedFailure">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _expectedFailure(func):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.run_test_with">
+    
+  </a>
+  <a name="run_test_with">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    run_test_with(test_runner, **kwargs):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Decorate a test as using a specific <tt class="rst-docutils literal">RunTest</tt>.</p>
+<p>e.g.:</p>
+<pre class="rst-literal-block">
+@run_test_with(CustomRunner, timeout=42)
+def test_foo(self):
+    self.assertTrue(True)
+</pre>
+<p>The returned decorator works by setting an attribute on the decorated
+function.  <a href="testtools.testcase.TestCase.html#__init__"><code>TestCase.__init__</code></a> looks for this attribute when deciding on a
+<tt class="rst-docutils literal">RunTest</tt> factory.  If you wish to use multiple decorators on a test
+method, then you must either make this one the top-most decorator, or you
+must write your decorators so that they update the wrapping function with
+the attributes of the wrapped function.  The latter is recommended style
+anyway.  <tt class="rst-docutils literal">functools.wraps</tt>, <tt class="rst-docutils literal">functools.wrapper</tt> and
+<tt class="rst-docutils literal">twisted.python.util.mergeFunctionMetadata</tt> can help you do this.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">test_runner</td><td>A <tt class="rst-docutils literal">RunTest</tt> factory that takes a test case and an
+optional list of exception handlers.  See <tt class="rst-docutils literal">RunTest</tt>.</td></tr><tr><td></td><td class="fieldArg">kwargs</td><td>Keyword arguments to pass on as extra arguments to
+'test_runner'.</td></tr><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">A decorator to be used for marking a test as needing a special
+runner.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase._copy_content">
+    
+  </a>
+  <a name="_copy_content">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _copy_content(content_object):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Make a copy of the given content object.</p>
+<p>The content within <tt class="rst-docutils literal">content_object</tt> is iterated and saved. This is
+useful when the source of the content is volatile, a log file in a
+temporary directory for example.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">content_object</td><td>A <a href="testtools.content.Content.html"><code>content.Content</code></a> instance.</td></tr><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">A <a href="testtools.content.Content.html"><code>content.Content</code></a> instance with the same mime-type as
+<tt class="rst-docutils literal">content_object</tt> and a non-volatile copy of its content.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.gather_details">
+    
+  </a>
+  <a name="gather_details">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    gather_details(source_dict, target_dict):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Merge the details from <tt class="rst-docutils literal">source_dict</tt> into <tt class="rst-docutils literal">target_dict</tt>.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">source_dict</td><td>A dictionary of details will be gathered.</td></tr><tr><td></td><td class="fieldArg">target_dict</td><td>A dictionary into which details will be gathered.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase._clone_test_id_callback">
+    
+  </a>
+  <a name="_clone_test_id_callback">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _clone_test_id_callback(test, callback):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Copy a <a href="testtools.testcase.TestCase.html"><code>TestCase</code></a>, and make it call callback for its id().</p>
+<p>This is only expected to be used on tests that have been constructed but
+not executed.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">test</td><td>A TestCase instance.</td></tr><tr><td></td><td class="fieldArg">callback</td><td>A callable that takes no parameters and returns a string.</td></tr><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">A copy.copy of the test with id=callback.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.clone_test_with_new_id">
+    
+  </a>
+  <a name="clone_test_with_new_id">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    clone_test_with_new_id(test, new_id):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Copy a <a href="testtools.testcase.TestCase.html"><code>TestCase</code></a>, and give the copied test a new id.</p>
+<p>This is only expected to be used on tests that have been constructed but
+not executed.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.attr">
+    
+  </a>
+  <a name="attr">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    attr(*args):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Decorator for adding attributes to WithAttributes.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">args</td><td>The name of attributes to add.</td></tr><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">A callable that when applied to a WithAttributes will
+alter its id to enumerate the added attributes.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.skip">
+    
+  </a>
+  <a name="skip">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    skip(reason):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>A decorator to skip unit tests.</p>
+<p>This is just syntactic sugar so users don't have to change any of their
+unit tests in order to migrate to python 2.7, which provides the
+@unittest.skip decorator.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.skipIf">
+    
+  </a>
+  <a name="skipIf">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    skipIf(condition, reason):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>A decorator to skip a test if the condition is true.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.skipUnless">
+    
+  </a>
+  <a name="skipUnless">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    skipUnless(condition, reason):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>A decorator to skip a test unless the condition is true.<table class="fieldTable"></table></div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

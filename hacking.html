@@ -1,0 +1,301 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Contributing to testtools &mdash; testtools VERSION documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'VERSION',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="testtools VERSION documentation" href="index.html" />
+    <link rel="next" title="testtools NEWS" href="news.html" />
+    <link rel="prev" title="testtools for framework folk" href="for-framework-folk.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="news.html" title="testtools NEWS"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="for-framework-folk.html" title="testtools for framework folk"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">testtools VERSION documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="contributing-to-testtools">
+<h1>Contributing to testtools<a class="headerlink" href="#contributing-to-testtools" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="getting-the-code">
+<h2>Getting the code<a class="headerlink" href="#getting-the-code" title="Permalink to this headline">¶</a></h2>
+<p>Clone from <cite>github &lt;https://github.com/testing-cabal/testools/&gt;</cite>.
+Install for development:</p>
+<div class="highlight-python"><div class="highlight"><pre>pip install -e .[dev,test]
+</pre></div>
+</div>
+</div>
+<div class="section" id="bugs-and-patches">
+<h2>Bugs and patches<a class="headerlink" href="#bugs-and-patches" title="Permalink to this headline">¶</a></h2>
+<p><cite>File bugs &lt;https://bugs.launchpad.net/testtools/+filebug&gt;</cite> on Launchpad, and
+<cite>send patches &lt;https://github.com/testing-cabal/testtools/&gt;</cite> on Github.</p>
+</div>
+<div class="section" id="coding-style">
+<h2>Coding style<a class="headerlink" href="#coding-style" title="Permalink to this headline">¶</a></h2>
+<p>In general, follow <a class="reference external" href="http://www.python.org/dev/peps/pep-0008/">PEP 8</a> except where consistency with the standard
+library&#8217;s <a class="reference external" href="http://docs.python.org/library/unittest.html">unittest</a> module would suggest otherwise.</p>
+<p>testtools currently supports Python 2.6 and later, including Python 3.</p>
+</div>
+<div class="section" id="copyright-assignment">
+<h2>Copyright assignment<a class="headerlink" href="#copyright-assignment" title="Permalink to this headline">¶</a></h2>
+<p>Part of testtools raison d&#8217;etre is to provide Python with improvements to the
+testing code it ships. For that reason we require all contributions (that are
+non-trivial) to meet one of the following rules:</p>
+<ul class="simple">
+<li>be inapplicable for inclusion in Python.</li>
+<li>be able to be included in Python without further contact with the contributor.</li>
+<li>be copyright assigned to Jonathan M. Lange.</li>
+</ul>
+<p>Please pick one of these and specify it when contributing code to testtools.</p>
+</div>
+<div class="section" id="licensing">
+<h2>Licensing<a class="headerlink" href="#licensing" title="Permalink to this headline">¶</a></h2>
+<p>All code that is not copyright assigned to Jonathan M. Lange (see Copyright
+Assignment above) needs to be licensed under the <a class="reference external" href="http://www.opensource.org/licenses/mit-license.php">MIT license</a> that testtools
+uses, so that testtools can ship it.</p>
+</div>
+<div class="section" id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<p>Please write tests for every feature.  This project ought to be a model
+example of well-tested Python code!</p>
+<p>Take particular care to make sure the <em>intent</em> of each test is clear.</p>
+<p>You can run tests with <code class="docutils literal"><span class="pre">make</span> <span class="pre">check</span></code>.</p>
+<p>By default, testtools hides many levels of its own stack when running tests.
+This is for the convenience of users, who do not care about how, say, assert
+methods are implemented. However, when writing tests for testtools itself, it
+is often useful to see all levels of the stack. To do this, add
+<code class="docutils literal"><span class="pre">run_tests_with</span> <span class="pre">=</span> <span class="pre">FullStackRunTest</span></code> to the top of a test&#8217;s class definition.</p>
+<p>To install all the test dependencies, install the <code class="docutils literal"><span class="pre">test</span></code> extra:</p>
+<div class="highlight-python"><div class="highlight"><pre>pip install e .[test]
+</pre></div>
+</div>
+</div>
+<div class="section" id="discussion">
+<h2>Discussion<a class="headerlink" href="#discussion" title="Permalink to this headline">¶</a></h2>
+<p>When submitting a patch, it will help the review process a lot if there&#8217;s a
+clear explanation of what the change does and why you think the change is a
+good idea.  For crasher bugs, this is generally a no-brainer, but for UI bugs
+&amp; API tweaks, the reason something is an improvement might not be obvious, so
+it&#8217;s worth spelling out.</p>
+<p>If you are thinking of implementing a new feature, you might want to have that
+discussion on the [mailing list](<a class="reference external" href="mailto:testtools-dev&#37;&#52;&#48;lists&#46;launchpad&#46;net">testtools-dev<span>&#64;</span>lists<span>&#46;</span>launchpad<span>&#46;</span>net</a>) before the
+patch goes up for review.  This is not at all mandatory, but getting feedback
+early can help avoid dead ends.</p>
+</div>
+<div class="section" id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<p>Documents are written using the <a class="reference external" href="http://sphinx.pocoo.org/">Sphinx</a> variant of <a class="reference external" href="http://docutils.sourceforge.net/rst.html">reStructuredText</a>.  All
+public methods, functions, classes and modules must have API documentation.
+When changing code, be sure to check the API documentation to see if it could
+be improved.  Before submitting changes to trunk, look over them and see if
+the manuals ought to be updated.</p>
+</div>
+<div class="section" id="source-layout">
+<h2>Source layout<a class="headerlink" href="#source-layout" title="Permalink to this headline">¶</a></h2>
+<p>The top-level directory contains the <code class="docutils literal"><span class="pre">testtools/</span></code> package directory, and
+miscellaneous files like <code class="docutils literal"><span class="pre">README.rst</span></code> and <code class="docutils literal"><span class="pre">setup.py</span></code>.</p>
+<p>The <code class="docutils literal"><span class="pre">testtools/</span></code> directory is the Python package itself.  It is separated
+into submodules for internal clarity, but all public APIs should be “promoted”
+into the top-level package by importing them in <code class="docutils literal"><span class="pre">testtools/__init__.py</span></code>.
+Users of testtools should never import a submodule in order to use a stable
+API.  Unstable APIs like <code class="docutils literal"><span class="pre">testtools.matchers</span></code> and
+<code class="docutils literal"><span class="pre">testtools.deferredruntest</span></code> should be exported as submodules.</p>
+<p>Tests belong in <code class="docutils literal"><span class="pre">testtools/tests/</span></code>.</p>
+</div>
+<div class="section" id="committing-to-trunk">
+<h2>Committing to trunk<a class="headerlink" href="#committing-to-trunk" title="Permalink to this headline">¶</a></h2>
+<p>Testtools is maintained using git, with its master repo at
+<a class="reference external" href="https://github.com/testing-cabal/testtools">https://github.com/testing-cabal/testtools</a>. This gives every contributor the
+ability to commit their work to their own branches. However permission must be
+granted to allow contributors to commit to the trunk branch.</p>
+<p>Commit access to trunk is obtained by joining the <a class="reference external" href="https://github.com/organizations/testing-cabal/">testing-cabal</a>, either as an
+Owner or a Committer. Commit access is contingent on obeying the testtools
+contribution policy, see <a class="reference internal" href="#copyright-assignment">Copyright Assignment</a> above.</p>
+</div>
+<div class="section" id="code-review">
+<h2>Code Review<a class="headerlink" href="#code-review" title="Permalink to this headline">¶</a></h2>
+<p>All code must be reviewed before landing on trunk. The process is to create a
+branch on Github, and make a pull request into trunk. It will then be reviewed
+before it can be merged to trunk. It will be reviewed by someone:</p>
+<ul class="simple">
+<li>not the author</li>
+<li>a committer</li>
+</ul>
+<p>As a special exception, since there are few testtools committers and thus
+reviews are prone to blocking, a pull request from a committer that has not been
+reviewed after 24 hours may be merged by that committer. When the team is larger
+this policy will be revisited.</p>
+<p>Code reviewers should look for the quality of what is being submitted,
+including conformance with this HACKING file.</p>
+<p>Changes which all users should be made aware of should be documented in NEWS.</p>
+<p>We are now in full backwards compatibility mode - no more releases &lt; 1.0.0, and
+breaking compatibility will require consensus on the testtools-dev mailing list.
+Exactly what constitutes a backwards incompatible change is vague, but coarsely:</p>
+<ul class="simple">
+<li>adding required arguments or required calls to something that used to work</li>
+<li>removing keyword or position arguments, removing methods, functions or modules</li>
+<li>changing behaviour someone may have reasonably depended on</li>
+</ul>
+<p>Some things are not compatibility issues:</p>
+<ul class="simple">
+<li>changes to _ prefixed methods, functions, modules, packages.</li>
+</ul>
+</div>
+<div class="section" id="news-management">
+<h2>NEWS management<a class="headerlink" href="#news-management" title="Permalink to this headline">¶</a></h2>
+<p>The file NEWS is structured as a sorted list of releases. Each release can have
+a free form description and more or more sections with bullet point items.
+Sections in use today are &#8216;Improvements&#8217; and &#8216;Changes&#8217;. To ease merging between
+branches, the bullet points are kept alphabetically sorted. The release NEXT is
+permanently present at the top of the list.</p>
+</div>
+<div class="section" id="releasing">
+<h2>Releasing<a class="headerlink" href="#releasing" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="prerequisites">
+<h3>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h3>
+<p>Membership in the testing-cabal org on github as committer.</p>
+<p>Membership in the pypi testtools project as maintainer.</p>
+<p>Membership in the <a class="reference external" href="https://launchpad.net/~testtools-committers">https://launchpad.net/~testtools-committers</a>.</p>
+</div>
+<div class="section" id="tasks">
+<h3>Tasks<a class="headerlink" href="#tasks" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Choose a version number, say X.Y.Z</li>
+<li>Under NEXT in NEWS add a heading with the version number X.Y.Z.</li>
+<li>Possibly write a blurb into NEWS.</li>
+<li>Commit the changes.</li>
+<li>Tag the release, <code class="docutils literal"><span class="pre">git</span> <span class="pre">tag</span> <span class="pre">-s</span> <span class="pre">X.Y.Z</span> <span class="pre">-m</span> <span class="pre">&quot;Releasing</span> <span class="pre">X.Y.Z&quot;</span></code></li>
+<li>Run &#8216;make release&#8217;, this:
+#. Creates a source distribution and uploads to PyPI
+#. Ensures all Fix Committed bugs are in the release milestone
+#. Makes a release on Launchpad and uploads the tarball
+#. Marks all the Fix Committed bugs as Fix Released
+#. Creates a new milestone</li>
+<li>If a new series has been created (e.g. 0.10.0), make the series on Launchpad.</li>
+<li>Push trunk to Github, <code class="docutils literal"><span class="pre">git</span> <span class="pre">push</span> <span class="pre">--tags</span> <span class="pre">origin</span> <span class="pre">master</span></code></li>
+</ol>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Contributing to testtools</a><ul>
+<li><a class="reference internal" href="#getting-the-code">Getting the code</a></li>
+<li><a class="reference internal" href="#bugs-and-patches">Bugs and patches</a></li>
+<li><a class="reference internal" href="#coding-style">Coding style</a></li>
+<li><a class="reference internal" href="#copyright-assignment">Copyright assignment</a></li>
+<li><a class="reference internal" href="#licensing">Licensing</a></li>
+<li><a class="reference internal" href="#testing">Testing</a></li>
+<li><a class="reference internal" href="#discussion">Discussion</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
+<li><a class="reference internal" href="#source-layout">Source layout</a></li>
+<li><a class="reference internal" href="#committing-to-trunk">Committing to trunk</a></li>
+<li><a class="reference internal" href="#code-review">Code Review</a></li>
+<li><a class="reference internal" href="#news-management">NEWS management</a></li>
+<li><a class="reference internal" href="#releasing">Releasing</a><ul>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li><a class="reference internal" href="#tasks">Tasks</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="for-framework-folk.html"
+                        title="previous chapter">testtools for framework folk</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="news.html"
+                        title="next chapter">testtools NEWS</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/hacking.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="news.html" title="testtools NEWS"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="for-framework-folk.html" title="testtools for framework folk"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">testtools VERSION documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2010, The testtools authors.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

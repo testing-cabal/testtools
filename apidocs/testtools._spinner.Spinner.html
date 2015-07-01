@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools._spinner.Spinner : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="class"><code>testtools._spinner.Spinner(<span title="object">object</span>)</code> <small>class documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a>.<a href="testtools._spinner.html" class="code">_spinner</a></code>
+          
+          <a href="classIndex.html#testtools._spinner.Spinner">(View In Hierarchy)</a>
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        
+      </div>
+
+      <div class="moduleDocstring">
+        <div><p>Spin the reactor until a function is done.</p>
+<p>This class emulates the behaviour of twisted.trial in that it grotesquely
+and horribly spins the Twisted reactor while a function is running, and
+then kills the reactor when that function is complete and all the
+callbacks in its chains are done.</p><table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id736">
+  
+  <tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools._spinner.Spinner.html#__init__" class="code">__init__</a></td>
+    <td><span>Construct a Spinner.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools._spinner.Spinner.html#clear_junk" class="code">clear_junk</a></td>
+    <td><span>Clear out our recorded junk.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools._spinner.Spinner.html#get_junk" class="code">get_junk</a></td>
+    <td><span>Return any junk that has been found on the reactor.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools._spinner.Spinner.html#run" class="code">run</a></td>
+    <td><span>Run 'function' in a reactor.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools._spinner.Spinner.html#_cancel_timeout" class="code">_cancel_timeout</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools._spinner.Spinner.html#_get_result" class="code">_get_result</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools._spinner.Spinner.html#_got_failure" class="code">_got_failure</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools._spinner.Spinner.html#_got_success" class="code">_got_success</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools._spinner.Spinner.html#_stop_reactor" class="code">_stop_reactor</a></td>
+    <td><span>Stop the reactor!</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools._spinner.Spinner.html#_timed_out" class="code">_timed_out</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools._spinner.Spinner.html#_clean" class="code">_clean</a></td>
+    <td><span>Clean up any junk in the reactor.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools._spinner.Spinner.html#_save_signals" class="code">_save_signals</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools._spinner.Spinner.html#_restore_signals" class="code">_restore_signals</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr>
+</table>
+        
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools._spinner.Spinner.__init__">
+    
+  </a>
+  <a name="__init__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __init__(self, reactor, debug=False):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Construct a Spinner.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">reactor</td><td>A Twisted reactor.</td></tr><tr><td></td><td class="fieldArg">debug</td><td>Whether or not to enable Twisted's debugging.  Defaults
+to False.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools._spinner.Spinner._cancel_timeout">
+    
+  </a>
+  <a name="_cancel_timeout">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _cancel_timeout(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools._spinner.Spinner._get_result">
+    
+  </a>
+  <a name="_get_result">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _get_result(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools._spinner.Spinner._got_failure">
+    
+  </a>
+  <a name="_got_failure">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _got_failure(self, result):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools._spinner.Spinner._got_success">
+    
+  </a>
+  <a name="_got_success">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _got_success(self, result):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools._spinner.Spinner._stop_reactor">
+    
+  </a>
+  <a name="_stop_reactor">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _stop_reactor(self, ignored=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Stop the reactor!<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools._spinner.Spinner._timed_out">
+    
+  </a>
+  <a name="_timed_out">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _timed_out(self, function, timeout):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools._spinner.Spinner._clean">
+    
+  </a>
+  <a name="_clean">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _clean(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Clean up any junk in the reactor.</p>
+<p>Will always iterate the reactor a number of times equal to
+<tt class="rst-docutils literal">Spinner._OBLIGATORY_REACTOR_ITERATIONS</tt>.  This is to work around
+bugs in various Twisted APIs where a Deferred fires but still leaves
+work (e.g. cancelling a call, actually closing a connection) for the
+reactor to do.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools._spinner.Spinner.clear_junk">
+    
+  </a>
+  <a name="clear_junk">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    clear_junk(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Clear out our recorded junk.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">Whatever junk was there before.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools._spinner.Spinner.get_junk">
+    
+  </a>
+  <a name="get_junk">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    get_junk(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Return any junk that has been found on the reactor.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools._spinner.Spinner._save_signals">
+    
+  </a>
+  <a name="_save_signals">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _save_signals(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools._spinner.Spinner._restore_signals">
+    
+  </a>
+  <a name="_restore_signals">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _restore_signals(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools._spinner.Spinner.run">
+    
+  </a>
+  <a name="run">
+    
+  </a>
+  <div class="functionHeader">
+    @not_reentrant<br />
+    def
+    run(self, timeout, function, *args, **kwargs):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Run 'function' in a reactor.</p>
+<p>If 'function' returns a Deferred, the reactor will keep spinning until
+the Deferred fires and its chain completes or until the timeout is
+reached -- whichever comes first.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">Whatever is at the end of the function's callback chain.  If
+it's an error, then raise that.</td></tr><tr class="fieldStart"><td class="fieldName">Raises</td><td class="fieldArg">TimeoutError</td><td>If 'timeout' is reached before the Deferred
+returned by 'function' has completed its callback chain.</td></tr><tr><td></td><td class="fieldArg">NoResultError</td><td>If the reactor is somehow interrupted before
+the Deferred returned by 'function' has completed its callback
+chain.</td></tr><tr><td></td><td class="fieldArg">StaleJunkError</td><td>If there's junk in the spinner from a previous
+run.</td></tr></table></div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

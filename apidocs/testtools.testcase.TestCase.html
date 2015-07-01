@@ -1,0 +1,1164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.testcase.TestCase : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="class"><code>testtools.testcase.TestCase(<span title="unittest.TestCase">unittest.TestCase</span>)</code> <small>class documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a>.<a href="testtools.testcase.html" class="code">testcase</a></code>
+          
+          <a href="classIndex.html#testtools.testcase.TestCase">(View In Hierarchy)</a>
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        <p>Known subclasses: <a href="testtools.tests.matchers.test_basic.DoesNotEndWithTests.html" class="code">testtools.tests.matchers.test_basic.DoesNotEndWithTests</a>, <a href="testtools.tests.matchers.test_basic.DoesNotStartWithTests.html" class="code">testtools.tests.matchers.test_basic.DoesNotStartWithTests</a>, <a href="testtools.tests.matchers.test_basic.EndsWithTests.html" class="code">testtools.tests.matchers.test_basic.EndsWithTests</a>, <a href="testtools.tests.matchers.test_basic.StartsWithTests.html" class="code">testtools.tests.matchers.test_basic.StartsWithTests</a>, <a href="testtools.tests.matchers.test_basic.Test_BinaryMismatch.html" class="code">testtools.tests.matchers.test_basic.Test_BinaryMismatch</a>, <a href="testtools.tests.matchers.test_basic.TestContainsInterface.html" class="code">testtools.tests.matchers.test_basic.TestContainsInterface</a>, <a href="testtools.tests.matchers.test_basic.TestEqualsInterface.html" class="code">testtools.tests.matchers.test_basic.TestEqualsInterface</a>, <a href="testtools.tests.matchers.test_basic.TestGreaterThanInterface.html" class="code">testtools.tests.matchers.test_basic.TestGreaterThanInterface</a>, <a href="testtools.tests.matchers.test_basic.TestHasLength.html" class="code">testtools.tests.matchers.test_basic.TestHasLength</a>, <a href="testtools.tests.matchers.test_basic.TestIsInstanceInterface.html" class="code">testtools.tests.matchers.test_basic.TestIsInstanceInterface</a>, <a href="testtools.tests.matchers.test_basic.TestIsInterface.html" class="code">testtools.tests.matchers.test_basic.TestIsInterface</a>, <a href="testtools.tests.matchers.test_basic.TestLessThanInterface.html" class="code">testtools.tests.matchers.test_basic.TestLessThanInterface</a>, <a href="testtools.tests.matchers.test_basic.TestMatchesRegex.html" class="code">testtools.tests.matchers.test_basic.TestMatchesRegex</a>, <a href="testtools.tests.matchers.test_basic.TestNotEqualsInterface.html" class="code">testtools.tests.matchers.test_basic.TestNotEqualsInterface</a>, <a href="testtools.tests.matchers.test_basic.TestSameMembers.html" class="code">testtools.tests.matchers.test_basic.TestSameMembers</a>, <a href="testtools.tests.matchers.test_datastructures.TestContainsAllInterface.html" class="code">testtools.tests.matchers.test_datastructures.TestContainsAllInterface</a>, <a href="testtools.tests.matchers.test_datastructures.TestMatchesListwise.html" class="code">testtools.tests.matchers.test_datastructures.TestMatchesListwise</a>, <a href="testtools.tests.matchers.test_datastructures.TestMatchesSetwise.html" class="code">testtools.tests.matchers.test_datastructures.TestMatchesSetwise</a>, <a href="testtools.tests.matchers.test_datastructures.TestMatchesStructure.html" class="code">testtools.tests.matchers.test_datastructures.TestMatchesStructure</a>, <a href="testtools.tests.matchers.test_dict.TestContainedByDict.html" class="code">testtools.tests.matchers.test_dict.TestContainedByDict</a>, <a href="testtools.tests.matchers.test_dict.TestContainsDict.html" class="code">testtools.tests.matchers.test_dict.TestContainsDict</a>, <a href="testtools.tests.matchers.test_dict.TestKeysEqualWithList.html" class="code">testtools.tests.matchers.test_dict.TestKeysEqualWithList</a>, <a href="testtools.tests.matchers.test_dict.TestMatchesAllDictInterface.html" class="code">testtools.tests.matchers.test_dict.TestMatchesAllDictInterface</a>, <a href="testtools.tests.matchers.test_dict.TestMatchesDict.html" class="code">testtools.tests.matchers.test_dict.TestMatchesDict</a>, <a href="testtools.tests.matchers.test_dict.TestSubDictOf.html" class="code">testtools.tests.matchers.test_dict.TestSubDictOf</a>, <a href="testtools.tests.matchers.test_doctest.TestDocTestMatchesInterface.html" class="code">testtools.tests.matchers.test_doctest.TestDocTestMatchesInterface</a>, <a href="testtools.tests.matchers.test_doctest.TestDocTestMatchesInterfaceUnicode.html" class="code">testtools.tests.matchers.test_doctest.TestDocTestMatchesInterfaceUnicode</a>, <a href="testtools.tests.matchers.test_doctest.TestDocTestMatchesSpecific.html" class="code">testtools.tests.matchers.test_doctest.TestDocTestMatchesSpecific</a>, <a href="testtools.tests.matchers.test_exception.TestMatchesExceptionInstanceInterface.html" class="code">testtools.tests.matchers.test_exception.TestMatchesExceptionInstanceInterface</a>, <a href="testtools.tests.matchers.test_exception.TestMatchesExceptionTypeInterface.html" class="code">testtools.tests.matchers.test_exception.TestMatchesExceptionTypeInterface</a>, <a href="testtools.tests.matchers.test_exception.TestMatchesExceptionTypeMatcherInterface.html" class="code">testtools.tests.matchers.test_exception.TestMatchesExceptionTypeMatcherInterface</a>, <a href="testtools.tests.matchers.test_exception.TestMatchesExceptionTypeReInterface.html" class="code">testtools.tests.matchers.test_exception.TestMatchesExceptionTypeReInterface</a>, <a href="testtools.tests.matchers.test_exception.TestRaisesBaseTypes.html" class="code">testtools.tests.matchers.test_exception.TestRaisesBaseTypes</a>, <a href="testtools.tests.matchers.test_exception.TestRaisesConvenience.html" class="code">testtools.tests.matchers.test_exception.TestRaisesConvenience</a>, <a href="testtools.tests.matchers.test_exception.TestRaisesExceptionMatcherInterface.html" class="code">testtools.tests.matchers.test_exception.TestRaisesExceptionMatcherInterface</a>, <a href="testtools.tests.matchers.test_exception.TestRaisesInterface.html" class="code">testtools.tests.matchers.test_exception.TestRaisesInterface</a>, <a href="testtools.tests.matchers.test_filesystem.TestDirContains.html" class="code">testtools.tests.matchers.test_filesystem.TestDirContains</a>, <a href="testtools.tests.matchers.test_filesystem.TestDirExists.html" class="code">testtools.tests.matchers.test_filesystem.TestDirExists</a>, <a href="testtools.tests.matchers.test_filesystem.TestFileContains.html" class="code">testtools.tests.matchers.test_filesystem.TestFileContains</a>, <a href="testtools.tests.matchers.test_filesystem.TestFileExists.html" class="code">testtools.tests.matchers.test_filesystem.TestFileExists</a>, <a href="testtools.tests.matchers.test_filesystem.TestHasPermissions.html" class="code">testtools.tests.matchers.test_filesystem.TestHasPermissions</a>, <a href="testtools.tests.matchers.test_filesystem.TestPathExists.html" class="code">testtools.tests.matchers.test_filesystem.TestPathExists</a>, <a href="testtools.tests.matchers.test_filesystem.TestSamePath.html" class="code">testtools.tests.matchers.test_filesystem.TestSamePath</a>, <a href="testtools.tests.matchers.test_filesystem.TestTarballContains.html" class="code">testtools.tests.matchers.test_filesystem.TestTarballContains</a>, <a href="testtools.tests.matchers.test_higherorder.TestAfterPreprocessing.html" class="code">testtools.tests.matchers.test_higherorder.TestAfterPreprocessing</a>, <a href="testtools.tests.matchers.test_higherorder.TestAllMatch.html" class="code">testtools.tests.matchers.test_higherorder.TestAllMatch</a>, <a href="testtools.tests.matchers.test_higherorder.TestAnnotate.html" class="code">testtools.tests.matchers.test_higherorder.TestAnnotate</a>, <a href="testtools.tests.matchers.test_higherorder.TestAnnotatedMismatch.html" class="code">testtools.tests.matchers.test_higherorder.TestAnnotatedMismatch</a>, <a href="testtools.tests.matchers.test_higherorder.TestAnyMatch.html" class="code">testtools.tests.matchers.test_higherorder.TestAnyMatch</a>, <a href="testtools.tests.matchers.test_higherorder.TestMatchersAnyInterface.html" class="code">testtools.tests.matchers.test_higherorder.TestMatchersAnyInterface</a>, <a href="testtools.tests.matchers.test_higherorder.TestMatchesAllInterface.html" class="code">testtools.tests.matchers.test_higherorder.TestMatchesAllInterface</a>, <a href="testtools.tests.matchers.test_higherorder.TestMatchesPredicate.html" class="code">testtools.tests.matchers.test_higherorder.TestMatchesPredicate</a>, <a href="testtools.tests.matchers.test_higherorder.TestMatchesPredicateWithParams.html" class="code">testtools.tests.matchers.test_higherorder.TestMatchesPredicateWithParams</a>, <a href="testtools.tests.matchers.test_higherorder.TestNotInterface.html" class="code">testtools.tests.matchers.test_higherorder.TestNotInterface</a>, <a href="testtools.tests.matchers.test_impl.TestMismatch.html" class="code">testtools.tests.matchers.test_impl.TestMismatch</a>, <a href="testtools.tests.matchers.test_impl.TestMismatchDecorator.html" class="code">testtools.tests.matchers.test_impl.TestMismatchDecorator</a>, <a href="testtools.tests.matchers.test_impl.TestMismatchError.html" class="code">testtools.tests.matchers.test_impl.TestMismatchError</a>, <a href="testtools.tests.test_assert_that.TestAssertThatFunction.html" class="code">testtools.tests.test_assert_that.TestAssertThatFunction</a>, <a href="testtools.tests.test_assert_that.TestAssertThatMethod.html" class="code">testtools.tests.test_assert_that.TestAssertThatMethod</a>, <a href="testtools.tests.test_compat.TestReraise.html" class="code">testtools.tests.test_compat.TestReraise</a>, <a href="testtools.tests.test_compat.TestTextRepr.html" class="code">testtools.tests.test_compat.TestTextRepr</a>, <a href="testtools.tests.test_compat.TestUnicodeOutputStream.html" class="code">testtools.tests.test_compat.TestUnicodeOutputStream</a>, <a href="testtools.tests.test_content.TestAttachFile.html" class="code">testtools.tests.test_content.TestAttachFile</a>, <a href="testtools.tests.test_content.TestContent.html" class="code">testtools.tests.test_content.TestContent</a>, <a href="testtools.tests.test_content.TestStackLinesContent.html" class="code">testtools.tests.test_content.TestStackLinesContent</a>, <a href="testtools.tests.test_content.TestStacktraceContent.html" class="code">testtools.tests.test_content.TestStacktraceContent</a>, <a href="testtools.tests.test_content.TestTracebackContent.html" class="code">testtools.tests.test_content.TestTracebackContent</a>, <a href="testtools.tests.test_content_type.TestBuiltinContentTypes.html" class="code">testtools.tests.test_content_type.TestBuiltinContentTypes</a>, <a href="testtools.tests.test_content_type.TestContentType.html" class="code">testtools.tests.test_content_type.TestContentType</a>, <a href="testtools.tests.test_deferredruntest.X.Base.html" class="code">testtools.tests.test_deferredruntest.X.Base</a>, <a href="testtools.tests.test_distutilscmd.TestCommandTest.html" class="code">testtools.tests.test_distutilscmd.TestCommandTest</a>, <a href="testtools.tests.test_fixturesupport.TestFixtureSupport.html" class="code">testtools.tests.test_fixturesupport.TestFixtureSupport</a>, <a href="testtools.tests.test_helpers.TestStackHiding.html" class="code">testtools.tests.test_helpers.TestStackHiding</a>, <a href="testtools.tests.test_monkey.MonkeyPatcherTest.html" class="code">testtools.tests.test_monkey.MonkeyPatcherTest</a>, <a href="testtools.tests.test_monkey.TestPatchHelper.html" class="code">testtools.tests.test_monkey.TestPatchHelper</a>, <a href="testtools.tests.test_run.TestRun.html" class="code">testtools.tests.test_run.TestRun</a>, <a href="testtools.tests.test_runtest.TestRunTest.html" class="code">testtools.tests.test_runtest.TestRunTest</a>, <a href="testtools.tests.test_runtest.TestTestCaseSupportForRunTest.html" class="code">testtools.tests.test_runtest.TestTestCaseSupportForRunTest</a>, <a href="testtools.tests.test_spinner.NeedsTwistedTestCase.html" class="code">testtools.tests.test_spinner.NeedsTwistedTestCase</a>, <a href="testtools.tests.test_tags.TestTags.html" class="code">testtools.tests.test_tags.TestTags</a>, <a href="testtools.tests.test_testcase.Attributes.html" class="code">testtools.tests.test_testcase.Attributes</a>, <a href="testtools.tests.test_testcase.TestAddCleanup.html" class="code">testtools.tests.test_testcase.TestAddCleanup</a>, <a href="testtools.tests.test_testcase.TestAddCleanup.LoggingTest.html" class="code">testtools.tests.test_testcase.TestAddCleanup.LoggingTest</a>, <a href="testtools.tests.test_testcase.TestAssertions.html" class="code">testtools.tests.test_testcase.TestAssertions</a>, <a href="testtools.tests.test_testcase.TestAttributes.html" class="code">testtools.tests.test_testcase.TestAttributes</a>, <a href="testtools.tests.test_testcase.TestCloneTestWithNewId.html" class="code">testtools.tests.test_testcase.TestCloneTestWithNewId</a>, <a href="testtools.tests.test_testcase.TestDecorateTestCaseResult.html" class="code">testtools.tests.test_testcase.TestDecorateTestCaseResult</a>, <a href="testtools.tests.test_testcase.TestEquality.html" class="code">testtools.tests.test_testcase.TestEquality</a>, <a href="testtools.tests.test_testcase.TestErrorHolder.html" class="code">testtools.tests.test_testcase.TestErrorHolder</a>, <a href="testtools.tests.test_testcase.TestNullary.html" class="code">testtools.tests.test_testcase.TestNullary</a>, <a href="testtools.tests.test_testcase.TestOnException.html" class="code">testtools.tests.test_testcase.TestOnException</a>, <a href="testtools.tests.test_testcase.TestPatchSupport.html" class="code">testtools.tests.test_testcase.TestPatchSupport</a>, <a href="testtools.tests.test_testcase.TestPatchSupport.Case.html" class="code">testtools.tests.test_testcase.TestPatchSupport.Case</a>, <a href="testtools.tests.test_testcase.TestPlaceHolder.html" class="code">testtools.tests.test_testcase.TestPlaceHolder</a>, <a href="testtools.tests.test_testcase.TestRunTestUsage.html" class="code">testtools.tests.test_testcase.TestRunTestUsage</a>, <a href="testtools.tests.test_testcase.TestSetupTearDown.html" class="code">testtools.tests.test_testcase.TestSetupTearDown</a>, <a href="testtools.tests.test_testcase.TestSkipping.html" class="code">testtools.tests.test_testcase.TestSkipping</a>, <a href="testtools.tests.test_testcase.TestTestCaseSuper.html" class="code">testtools.tests.test_testcase.TestTestCaseSuper</a>, <a href="testtools.tests.test_testcase.TestUniqueFactories.html" class="code">testtools.tests.test_testcase.TestUniqueFactories</a>, <a href="testtools.tests.test_testcase.TestWithDetails.html" class="code">testtools.tests.test_testcase.TestWithDetails</a>, <a href="testtools.tests.test_testresult.TestAdaptedPython26TestResultContract.html" class="code">testtools.tests.test_testresult.TestAdaptedPython26TestResultContract</a>, <a href="testtools.tests.test_testresult.TestAdaptedPython27TestResultContract.html" class="code">testtools.tests.test_testresult.TestAdaptedPython27TestResultContract</a>, <a href="testtools.tests.test_testresult.TestAdaptedStreamResult.html" class="code">testtools.tests.test_testresult.TestAdaptedStreamResult</a>, <a href="testtools.tests.test_testresult.TestBaseStreamResultContract.html" class="code">testtools.tests.test_testresult.TestBaseStreamResultContract</a>, <a href="testtools.tests.test_testresult.TestByTestResultTests.html" class="code">testtools.tests.test_testresult.TestByTestResultTests</a>, <a href="testtools.tests.test_testresult.TestCopyStreamResultContract.html" class="code">testtools.tests.test_testresult.TestCopyStreamResultContract</a>, <a href="testtools.tests.test_testresult.TestCopyStreamResultCopies.html" class="code">testtools.tests.test_testresult.TestCopyStreamResultCopies</a>, <a href="testtools.tests.test_testresult.TestDetailsToStr.html" class="code">testtools.tests.test_testresult.TestDetailsToStr</a>, <a href="testtools.tests.test_testresult.TestDoubleStreamResultContract.html" class="code">testtools.tests.test_testresult.TestDoubleStreamResultContract</a>, <a href="testtools.tests.test_testresult.TestDoubleStreamResultEvents.html" class="code">testtools.tests.test_testresult.TestDoubleStreamResultEvents</a>, <a href="testtools.tests.test_testresult.TestExtendedTestResultContract.html" class="code">testtools.tests.test_testresult.TestExtendedTestResultContract</a>, <a href="testtools.tests.test_testresult.TestExtendedToOriginalResultDecoratorBase.html" class="code">testtools.tests.test_testresult.TestExtendedToOriginalResultDecoratorBase</a>, <a href="testtools.tests.test_testresult.TestExtendedToStreamDecorator.html" class="code">testtools.tests.test_testresult.TestExtendedToStreamDecorator</a>, <a href="testtools.tests.test_testresult.TestExtendedToStreamDecoratorContract.html" class="code">testtools.tests.test_testresult.TestExtendedToStreamDecoratorContract</a>, <a href="testtools.tests.test_testresult.TestMergeTags.html" class="code">testtools.tests.test_testresult.TestMergeTags</a>, <a href="testtools.tests.test_testresult.TestMultiTestResult.html" class="code">testtools.tests.test_testresult.TestMultiTestResult</a>, <a href="testtools.tests.test_testresult.TestMultiTestResultContract.html" class="code">testtools.tests.test_testresult.TestMultiTestResultContract</a>, <a href="testtools.tests.test_testresult.TestNonAsciiResults.html" class="code">testtools.tests.test_testresult.TestNonAsciiResults</a>, <a href="testtools.tests.test_testresult.TestPython26TestResultContract.html" class="code">testtools.tests.test_testresult.TestPython26TestResultContract</a>, <a href="testtools.tests.test_testresult.TestPython27TestResultContract.html" class="code">testtools.tests.test_testresult.TestPython27TestResultContract</a>, <a href="testtools.tests.test_testresult.TestStreamFailFast.html" class="code">testtools.tests.test_testresult.TestStreamFailFast</a>, <a href="testtools.tests.test_testresult.TestStreamFailFastContract.html" class="code">testtools.tests.test_testresult.TestStreamFailFastContract</a>, <a href="testtools.tests.test_testresult.TestStreamResultRouter.html" class="code">testtools.tests.test_testresult.TestStreamResultRouter</a>, <a href="testtools.tests.test_testresult.TestStreamResultRouterContract.html" class="code">testtools.tests.test_testresult.TestStreamResultRouterContract</a>, <a href="testtools.tests.test_testresult.TestStreamSummary.html" class="code">testtools.tests.test_testresult.TestStreamSummary</a>, <a href="testtools.tests.test_testresult.TestStreamSummaryResultContract.html" class="code">testtools.tests.test_testresult.TestStreamSummaryResultContract</a>, <a href="testtools.tests.test_testresult.TestStreamTagger.html" class="code">testtools.tests.test_testresult.TestStreamTagger</a>, <a href="testtools.tests.test_testresult.TestStreamTaggerContract.html" class="code">testtools.tests.test_testresult.TestStreamTaggerContract</a>, <a href="testtools.tests.test_testresult.TestStreamToDict.html" class="code">testtools.tests.test_testresult.TestStreamToDict</a>, <a href="testtools.tests.test_testresult.TestStreamToDictContract.html" class="code">testtools.tests.test_testresult.TestStreamToDictContract</a>, <a href="testtools.tests.test_testresult.TestStreamToExtendedContract.html" class="code">testtools.tests.test_testresult.TestStreamToExtendedContract</a>, <a href="testtools.tests.test_testresult.TestStreamToExtendedDecoratorContract.html" class="code">testtools.tests.test_testresult.TestStreamToExtendedDecoratorContract</a>, <a href="testtools.tests.test_testresult.TestStreamToQueue.html" class="code">testtools.tests.test_testresult.TestStreamToQueue</a>, <a href="testtools.tests.test_testresult.TestStreamToQueueContract.html" class="code">testtools.tests.test_testresult.TestStreamToQueueContract</a>, <a href="testtools.tests.test_testresult.TestTagger.html" class="code">testtools.tests.test_testresult.TestTagger</a>, <a href="testtools.tests.test_testresult.TestTestControl.html" class="code">testtools.tests.test_testresult.TestTestControl</a>, <a href="testtools.tests.test_testresult.TestTestResult.html" class="code">testtools.tests.test_testresult.TestTestResult</a>, <a href="testtools.tests.test_testresult.TestTestResultContract.html" class="code">testtools.tests.test_testresult.TestTestResultContract</a>, <a href="testtools.tests.test_testresult.TestTestResultDecoratorContract.html" class="code">testtools.tests.test_testresult.TestTestResultDecoratorContract</a>, <a href="testtools.tests.test_testresult.TestTextTestResult.html" class="code">testtools.tests.test_testresult.TestTextTestResult</a>, <a href="testtools.tests.test_testresult.TestTextTestResultContract.html" class="code">testtools.tests.test_testresult.TestTextTestResultContract</a>, <a href="testtools.tests.test_testresult.TestThreadSafeForwardingResult.html" class="code">testtools.tests.test_testresult.TestThreadSafeForwardingResult</a>, <a href="testtools.tests.test_testresult.TestThreadSafeForwardingResultContract.html" class="code">testtools.tests.test_testresult.TestThreadSafeForwardingResultContract</a>, <a href="testtools.tests.test_testresult.TestTimestampingStreamResult.html" class="code">testtools.tests.test_testresult.TestTimestampingStreamResult</a>, <a href="testtools.tests.test_testsuite.Sample.html" class="code">testtools.tests.test_testsuite.Sample</a>, <a href="testtools.tests.test_testsuite.TestConcurrentStreamTestSuiteRun.html" class="code">testtools.tests.test_testsuite.TestConcurrentStreamTestSuiteRun</a>, <a href="testtools.tests.test_testsuite.TestConcurrentTestSuiteRun.html" class="code">testtools.tests.test_testsuite.TestConcurrentTestSuiteRun</a>, <a href="testtools.tests.test_testsuite.TestFixtureSuite.html" class="code">testtools.tests.test_testsuite.TestFixtureSuite</a>, <a href="testtools.tests.test_testsuite.TestSortedTests.html" class="code">testtools.tests.test_testsuite.TestSortedTests</a>, <a href="testtools.tests.test_with_with.TestExpectedException.html" class="code">testtools.tests.test_with_with.TestExpectedException</a></p>
+      </div>
+
+      <div class="moduleDocstring">
+        <div>Extensions to the basic TestCase.<table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id166">
+  
+  <tr class="instancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.testcase.TestCase.html#exception_handlers" class="code">exception_handlers</a></td>
+    <td>Exceptions to catch from setUp, runTest and
+tearDown. This list is able to be modified at any time and consists of
+(exception_class, handler(case, result, exception_value)) pairs.</td>
+  </tr><tr class="instancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.testcase.TestCase.html#force_failure" class="code">force_failure</a></td>
+    <td>Force testtools.RunTest to fail the test after the
+test has completed.</td>
+  </tr><tr class="classvariable">
+    
+    <td>Class Variable</td>
+    <td><a href="testtools.testcase.TestCase.html#run_tests_with" class="code">run_tests_with</a></td>
+    <td>A factory to make the <tt class="rst-docutils literal">RunTest</tt> to run tests with.
+Defaults to <tt class="rst-docutils literal">RunTest</tt>.  The factory is expected to take a test case
+and an optional list of exception handlers.</td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#__init__" class="code">__init__</a></td>
+    <td><span>Construct a TestCase.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#__eq__" class="code">__eq__</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#__repr__" class="code">__repr__</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#addDetail" class="code">addDetail</a></td>
+    <td><span>Add a detail to be reported with this test's outcome.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#getDetails" class="code">getDetails</a></td>
+    <td><span>Get the details dict that will be reported with this test's outcome.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#patch" class="code">patch</a></td>
+    <td><span>Monkey-patch 'obj.attribute' to 'value' while the test is running.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#shortDescription" class="code">shortDescription</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#skipTest" class="code">skipTest</a></td>
+    <td><span>Cause this test to be skipped.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#addCleanup" class="code">addCleanup</a></td>
+    <td><span>Add a cleanup function to be called after tearDown.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#addOnException" class="code">addOnException</a></td>
+    <td><span>Add a handler to be called when an exception occurs in test code.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#assertEqual" class="code">assertEqual</a></td>
+    <td><span>Assert that 'expected' is equal to 'observed'.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#assertIn" class="code">assertIn</a></td>
+    <td><span>Assert that needle is in haystack.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#assertIsNone" class="code">assertIsNone</a></td>
+    <td><span>Assert that 'observed' is equal to None.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#assertIsNotNone" class="code">assertIsNotNone</a></td>
+    <td><span>Assert that 'observed' is not equal to None.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#assertIs" class="code">assertIs</a></td>
+    <td><span>Assert that 'expected' is 'observed'.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#assertIsNot" class="code">assertIsNot</a></td>
+    <td><span>Assert that 'expected' is not 'observed'.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#assertNotIn" class="code">assertNotIn</a></td>
+    <td><span>Assert that needle is not in haystack.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#assertIsInstance" class="code">assertIsInstance</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#assertRaises" class="code">assertRaises</a></td>
+    <td><span class="undocumented">No summary</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#assertThat" class="code">assertThat</a></td>
+    <td><span>Assert that matchee is matched by matcher.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#addDetailUniqueName" class="code">addDetailUniqueName</a></td>
+    <td><span>Add a detail to the test, but ensure it's name is unique.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#expectThat" class="code">expectThat</a></td>
+    <td><span>Check that matchee is matched by matcher, but delay the assertion failure.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#defaultTestResult" class="code">defaultTestResult</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#expectFailure" class="code">expectFailure</a></td>
+    <td><span>Check that a test fails in a particular way.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#getUniqueInteger" class="code">getUniqueInteger</a></td>
+    <td><span>Get an integer unique to this test.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#getUniqueString" class="code">getUniqueString</a></td>
+    <td><span>Get a string unique to this test.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#onException" class="code">onException</a></td>
+    <td><span>Called when an exception propogates from test code.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#run" class="code">run</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#useFixture" class="code">useFixture</a></td>
+    <td><span>Use fixture in a test case.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#setUp" class="code">setUp</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#tearDown" class="code">tearDown</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#_formatTypes" class="code">_formatTypes</a></td>
+    <td><span>Format a class or a bunch of classes for display in an error.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#_add_reason" class="code">_add_reason</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#_matchHelper" class="code">_matchHelper</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="staticmethod private">
+    
+    <td>Static Method</td>
+    <td><a href="testtools.testcase.TestCase.html#_report_error" class="code">_report_error</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="staticmethod private">
+    
+    <td>Static Method</td>
+    <td><a href="testtools.testcase.TestCase.html#_report_expected_failure" class="code">_report_expected_failure</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="staticmethod private">
+    
+    <td>Static Method</td>
+    <td><a href="testtools.testcase.TestCase.html#_report_failure" class="code">_report_failure</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="staticmethod private">
+    
+    <td>Static Method</td>
+    <td><a href="testtools.testcase.TestCase.html#_report_skip" class="code">_report_skip</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#_report_traceback" class="code">_report_traceback</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="staticmethod private">
+    
+    <td>Static Method</td>
+    <td><a href="testtools.testcase.TestCase.html#_report_unexpected_success" class="code">_report_unexpected_success</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#_run_setup" class="code">_run_setup</a></td>
+    <td><span>Run the setUp function for this test.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#_run_teardown" class="code">_run_teardown</a></td>
+    <td><span>Run the tearDown function for this test.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#_get_test_method" class="code">_get_test_method</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testcase.TestCase.html#_run_test_method" class="code">_run_test_method</a></td>
+    <td><span>Run the test method for this test.</span></td>
+  </tr>
+</table>
+        
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.testcase.TestCase.exception_handlers">
+    
+  </a>
+  <a name="exception_handlers">
+    
+  </a>
+  <div class="functionHeader">
+    exception_handlers =
+  </div>
+  <div class="functionBody">
+    Exceptions to catch from setUp, runTest and
+tearDown. This list is able to be modified at any time and consists of
+(exception_class, handler(case, result, exception_value)) pairs.
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.force_failure">
+    
+  </a>
+  <a name="force_failure">
+    
+  </a>
+  <div class="functionHeader">
+    force_failure =
+  </div>
+  <div class="functionBody">
+    Force testtools.RunTest to fail the test after the
+test has completed.
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.run_tests_with">
+    
+  </a>
+  <a name="run_tests_with">
+    
+  </a>
+  <div class="functionHeader">
+    run_tests_with =
+  </div>
+  <div class="functionBody">
+    A factory to make the <tt class="rst-docutils literal">RunTest</tt> to run tests with.
+Defaults to <tt class="rst-docutils literal">RunTest</tt>.  The factory is expected to take a test case
+and an optional list of exception handlers.
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.__init__">
+    
+  </a>
+  <a name="__init__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __init__(self, *args, **kwargs):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Construct a TestCase.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">testMethod</td><td>The name of the method to run.</td></tr><tr><td></td><td class="fieldArg">runTest</td><td>Optional class to use to execute the test. If not
+supplied <tt class="rst-docutils literal">RunTest</tt> is used. The instance to be used is created
+when run() is invoked, so will be fresh each time. Overrides
+<tt class="rst-docutils literal">TestCase.run_tests_with</tt> if given.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.__eq__">
+    
+  </a>
+  <a name="__eq__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __eq__(self, other):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.__repr__">
+    
+  </a>
+  <a name="__repr__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __repr__(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.addDetail">
+    
+  </a>
+  <a name="addDetail">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    addDetail(self, name, content_object):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Add a detail to be reported with this test's outcome.</p>
+<p>For more details see pydoc testtools.TestResult.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">name</td><td>The name to give this detail.</td></tr><tr><td></td><td class="fieldArg">content_object</td><td>The content object for this detail. See
+testtools.content for more detail.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.getDetails">
+    
+  </a>
+  <a name="getDetails">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    getDetails(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Get the details dict that will be reported with this test's outcome.</p>
+<p>For more details see pydoc testtools.TestResult.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.patch">
+    
+  </a>
+  <a name="patch">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    patch(self, obj, attribute, value):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Monkey-patch 'obj.attribute' to 'value' while the test is running.</p>
+<p>If 'obj' has no attribute, then the monkey-patch will still go ahead,
+and the attribute will be deleted instead of restored to its original
+value.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">obj</td><td>The object to patch. Can be anything.</td></tr><tr><td></td><td class="fieldArg">attribute</td><td>The attribute on 'obj' to patch.</td></tr><tr><td></td><td class="fieldArg">value</td><td>The value to set 'obj.attribute' to.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.shortDescription">
+    
+  </a>
+  <a name="shortDescription">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    shortDescription(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.skipTest">
+    
+  </a>
+  <a name="skipTest">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    skipTest(self, reason):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Cause this test to be skipped.</p>
+<p>This raises self.skipException(reason). skipException is raised
+to permit a skip to be triggered at any point (during setUp or the
+testMethod itself). The run() method catches skipException and
+translates that into a call to the result objects addSkip method.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">reason</td><td>The reason why the test is being skipped. This must
+support being cast into a unicode string for reporting.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase._formatTypes">
+    
+  </a>
+  <a name="_formatTypes">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _formatTypes(self, classOrIterable):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Format a class or a bunch of classes for display in an error.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.addCleanup">
+    
+  </a>
+  <a name="addCleanup">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    addCleanup(self, function, *arguments, **keywordArguments):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Add a cleanup function to be called after tearDown.</p>
+<p>Functions added with addCleanup will be called in reverse order of
+adding after tearDown, or after setUp if setUp raises an exception.</p>
+<p>If a function added with addCleanup raises an exception, the error
+will be recorded as a test error, and the next cleanup will then be
+run.</p>
+<p>Cleanup functions are always called before a test finishes running,
+even if setUp is aborted by an exception.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.addOnException">
+    
+  </a>
+  <a name="addOnException">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    addOnException(self, handler):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Add a handler to be called when an exception occurs in test code.</p>
+<p>This handler cannot affect what result methods are called, and is
+called before any outcome is called on the result object. An example
+use for it is to add some diagnostic state to the test details dict
+which is expensive to calculate and not interesting for reporting in
+the success case.</p>
+<p>Handlers are called before the outcome (such as addFailure) that
+the exception has caused.</p>
+<p>Handlers are called in first-added, first-called order, and if they
+raise an exception, that will propogate out of the test running
+machinery, halting test processing. As a result, do not call code that
+may unreasonably fail.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase._add_reason">
+    
+  </a>
+  <a name="_add_reason">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _add_reason(self, reason):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.assertEqual">
+    
+  </a>
+  <a name="assertEqual">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    assertEqual(self, expected, observed, message=''):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Assert that 'expected' is equal to 'observed'.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">expected</td><td>The expected value.</td></tr><tr><td></td><td class="fieldArg">observed</td><td>The observed value.</td></tr><tr><td></td><td class="fieldArg">message</td><td>An optional message to include in the error.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.assertIn">
+    
+  </a>
+  <a name="assertIn">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    assertIn(self, needle, haystack, message=''):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Assert that needle is in haystack.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.assertIsNone">
+    
+  </a>
+  <a name="assertIsNone">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    assertIsNone(self, observed, message=''):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Assert that 'observed' is equal to None.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">observed</td><td>The observed value.</td></tr><tr><td></td><td class="fieldArg">message</td><td>An optional message describing the error.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.assertIsNotNone">
+    
+  </a>
+  <a name="assertIsNotNone">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    assertIsNotNone(self, observed, message=''):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Assert that 'observed' is not equal to None.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">observed</td><td>The observed value.</td></tr><tr><td></td><td class="fieldArg">message</td><td>An optional message describing the error.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.assertIs">
+    
+  </a>
+  <a name="assertIs">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    assertIs(self, expected, observed, message=''):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Assert that 'expected' is 'observed'.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">expected</td><td>The expected value.</td></tr><tr><td></td><td class="fieldArg">observed</td><td>The observed value.</td></tr><tr><td></td><td class="fieldArg">message</td><td>An optional message describing the error.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.assertIsNot">
+    
+  </a>
+  <a name="assertIsNot">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    assertIsNot(self, expected, observed, message=''):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Assert that 'expected' is not 'observed'.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.assertNotIn">
+    
+  </a>
+  <a name="assertNotIn">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    assertNotIn(self, needle, haystack, message=''):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Assert that needle is not in haystack.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.assertIsInstance">
+    
+  </a>
+  <a name="assertIsInstance">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    assertIsInstance(self, obj, klass, msg=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.assertRaises">
+    
+  </a>
+  <a name="assertRaises">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    assertRaises(self, excClass, callableObj, *args, **kwargs):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Fail unless an exception of class excClass is thrown
+by callableObj when invoked with arguments args and keyword
+arguments kwargs. If a different type of exception is
+thrown, it will not be caught, and the test case will be
+deemed to have suffered an error, exactly as for an
+unexpected exception.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.assertThat">
+    
+  </a>
+  <a name="assertThat">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    assertThat(self, matchee, matcher, message='', verbose=False):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Assert that matchee is matched by matcher.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">matchee</td><td>An object to match with matcher.</td></tr><tr><td></td><td class="fieldArg">matcher</td><td>An object meeting the testtools.Matcher protocol.</td></tr><tr class="fieldStart"><td class="fieldName">Raises</td><td class="fieldArg">MismatchError</td><td>When matcher does not match thing.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.addDetailUniqueName">
+    
+  </a>
+  <a name="addDetailUniqueName">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    addDetailUniqueName(self, name, content_object):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Add a detail to the test, but ensure it's name is unique.</p>
+<p>This method checks whether <tt class="rst-docutils literal">name</tt> conflicts with a detail that has
+already been added to the test. If it does, it will modify <tt class="rst-docutils literal">name</tt> to
+avoid the conflict.</p>
+<p>For more details see pydoc testtools.TestResult.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">name</td><td>The name to give this detail.</td></tr><tr><td></td><td class="fieldArg">content_object</td><td>The content object for this detail. See
+testtools.content for more detail.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.expectThat">
+    
+  </a>
+  <a name="expectThat">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    expectThat(self, matchee, matcher, message='', verbose=False):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Check that matchee is matched by matcher, but delay the assertion failure.</p>
+<p>This method behaves similarly to <tt class="rst-docutils literal">assertThat</tt>, except that a failed
+match does not exit the test immediately. The rest of the test code will
+continue to run, and the test will be marked as failing after the test
+has finished.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">matchee</td><td>An object to match with matcher.</td></tr><tr><td></td><td class="fieldArg">matcher</td><td>An object meeting the testtools.Matcher protocol.</td></tr><tr><td></td><td class="fieldArg">message</td><td>If specified, show this message with any failed match.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase._matchHelper">
+    
+  </a>
+  <a name="_matchHelper">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _matchHelper(self, matchee, matcher, message, verbose):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.defaultTestResult">
+    
+  </a>
+  <a name="defaultTestResult">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    defaultTestResult(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.expectFailure">
+    
+  </a>
+  <a name="expectFailure">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    expectFailure(self, reason, predicate, *args, **kwargs):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Check that a test fails in a particular way.</p>
+<p>If the test fails in the expected way, a KnownFailure is caused. If it
+succeeds an UnexpectedSuccess is caused.</p>
+<p>The expected use of expectFailure is as a barrier at the point in a
+test where the test would fail. For example:
+&gt;&gt;&gt; def test_foo(self):
+&gt;&gt;&gt;    self.expectFailure("1 should be 0", self.assertNotEqual, 1, 0)
+&gt;&gt;&gt;    self.assertEqual(1, 0)</p>
+<p>If in the future 1 were to equal 0, the expectFailure call can simply
+be removed. This separation preserves the original intent of the test
+while it is in the expectFailure mode.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.getUniqueInteger">
+    
+  </a>
+  <a name="getUniqueInteger">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    getUniqueInteger(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Get an integer unique to this test.</p>
+<p>Returns an integer that is guaranteed to be unique to this instance.
+Use this when you need an arbitrary integer in your test, or as a
+helper for custom anonymous factory methods.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.getUniqueString">
+    
+  </a>
+  <a name="getUniqueString">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    getUniqueString(self, prefix=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Get a string unique to this test.</p>
+<p>Returns a string that is guaranteed to be unique to this instance. Use
+this when you need an arbitrary string in your test, or as a helper
+for custom anonymous factory methods.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">prefix</td><td>The prefix of the string. If not provided, defaults
+to the id of the tests.</td></tr><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">A bytestring of '&lt;prefix&gt;-&lt;unique_int&gt;'.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.onException">
+    
+  </a>
+  <a name="onException">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    onException(self, exc_info, tb_label='traceback'):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Called when an exception propogates from test code.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">See Also</td><td colspan="2"></td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase._report_error">
+    
+  </a>
+  <a name="_report_error">
+    
+  </a>
+  <div class="functionHeader">
+    @staticmethod<br />
+    def
+    _report_error(self, result, err):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase._report_expected_failure">
+    
+  </a>
+  <a name="_report_expected_failure">
+    
+  </a>
+  <div class="functionHeader">
+    @staticmethod<br />
+    def
+    _report_expected_failure(self, result, err):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase._report_failure">
+    
+  </a>
+  <a name="_report_failure">
+    
+  </a>
+  <div class="functionHeader">
+    @staticmethod<br />
+    def
+    _report_failure(self, result, err):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase._report_skip">
+    
+  </a>
+  <a name="_report_skip">
+    
+  </a>
+  <div class="functionHeader">
+    @staticmethod<br />
+    def
+    _report_skip(self, result, err):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase._report_traceback">
+    
+  </a>
+  <a name="_report_traceback">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _report_traceback(self, exc_info, tb_label='traceback'):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase._report_unexpected_success">
+    
+  </a>
+  <a name="_report_unexpected_success">
+    
+  </a>
+  <div class="functionHeader">
+    @staticmethod<br />
+    def
+    _report_unexpected_success(self, result, err):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.run">
+    
+  </a>
+  <a name="run">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    run(self, result=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase._run_setup">
+    
+  </a>
+  <a name="_run_setup">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _run_setup(self, result):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Run the setUp function for this test.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">result</td><td>A testtools.TestResult to report activity to.</td></tr><tr class="fieldStart"><td class="fieldName">Raises</td><td class="fieldArg">ValueError</td><td>If the base class setUp is not called, a
+ValueError is raised.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase._run_teardown">
+    
+  </a>
+  <a name="_run_teardown">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _run_teardown(self, result):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Run the tearDown function for this test.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">result</td><td>A testtools.TestResult to report activity to.</td></tr><tr class="fieldStart"><td class="fieldName">Raises</td><td class="fieldArg">ValueError</td><td>If the base class tearDown is not called, a
+ValueError is raised.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase._get_test_method">
+    
+  </a>
+  <a name="_get_test_method">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _get_test_method(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase._run_test_method">
+    
+  </a>
+  <a name="_run_test_method">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _run_test_method(self, result):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Run the test method for this test.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">result</td><td>A testtools.TestResult to report activity to.</td></tr><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">None.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.useFixture">
+    
+  </a>
+  <a name="useFixture">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    useFixture(self, fixture):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Use fixture in a test case.</p>
+<p>The fixture will be setUp, and self.addCleanup(fixture.cleanUp) called.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">fixture</td><td>The fixture to use.</td></tr><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">The fixture, after setting it up and scheduling a cleanup for
+it.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.setUp">
+    
+  </a>
+  <a name="setUp">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    setUp(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overridden in <a href="testtools.tests.test_compat.TestUnicodeOutputStream.html" class="code">testtools.tests.test_compat.TestUnicodeOutputStream</a>, <a href="testtools.tests.test_deferredruntest.X.Base.html" class="code">testtools.tests.test_deferredruntest.X.Base</a>, <a href="testtools.tests.test_distutilscmd.TestCommandTest.html" class="code">testtools.tests.test_distutilscmd.TestCommandTest</a>, <a href="testtools.tests.test_fixturesupport.TestFixtureSupport.html" class="code">testtools.tests.test_fixturesupport.TestFixtureSupport</a>, <a href="testtools.tests.test_helpers.TestStackHiding.html" class="code">testtools.tests.test_helpers.TestStackHiding</a>, <a href="testtools.tests.test_monkey.MonkeyPatcherTest.html" class="code">testtools.tests.test_monkey.MonkeyPatcherTest</a>, <a href="testtools.tests.test_run.TestRun.html" class="code">testtools.tests.test_run.TestRun</a>, <a href="testtools.tests.test_spinner.NeedsTwistedTestCase.html" class="code">testtools.tests.test_spinner.NeedsTwistedTestCase</a>, <a href="testtools.tests.test_testcase.TestAddCleanup.html" class="code">testtools.tests.test_testcase.TestAddCleanup</a>, <a href="testtools.tests.test_testcase.TestAddCleanup.LoggingTest.html" class="code">testtools.tests.test_testcase.TestAddCleanup.LoggingTest</a>, <a href="testtools.tests.test_testcase.TestDecorateTestCaseResult.html" class="code">testtools.tests.test_testcase.TestDecorateTestCaseResult</a>, <a href="testtools.tests.test_testresult.TestByTestResultTests.html" class="code">testtools.tests.test_testresult.TestByTestResultTests</a>, <a href="testtools.tests.test_testresult.TestCopyStreamResultCopies.html" class="code">testtools.tests.test_testresult.TestCopyStreamResultCopies</a>, <a href="testtools.tests.test_testresult.TestMultiTestResult.html" class="code">testtools.tests.test_testresult.TestMultiTestResult</a>, <a href="testtools.tests.test_testresult.TestTextTestResult.html" class="code">testtools.tests.test_testresult.TestTextTestResult</a>, <a href="testtools.tests.test_testsuite.TestFixtureSuite.html" class="code">testtools.tests.test_testsuite.TestFixtureSuite</a></div>
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testcase.TestCase.tearDown">
+    
+  </a>
+  <a name="tearDown">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    tearDown(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overridden in <a href="testtools.tests.test_deferredruntest.X.Base.html" class="code">testtools.tests.test_deferredruntest.X.Base</a>, <a href="testtools.tests.test_testcase.TestAddCleanup.LoggingTest.html" class="code">testtools.tests.test_testcase.TestAddCleanup.LoggingTest</a></div>
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

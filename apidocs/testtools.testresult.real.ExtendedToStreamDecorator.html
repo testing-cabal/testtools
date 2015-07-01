@@ -1,0 +1,575 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.testresult.real.ExtendedToStreamDecorator : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="class"><code>testtools.testresult.real.ExtendedToStreamDecorator(<a href="testtools.testresult.CopyStreamResult.html" class="code">CopyStreamResult</a>, <a href="testtools.testresult.real.StreamSummary.html" class="code">StreamSummary</a>, <a href="testtools.testresult.real.TestControl.html" class="code">TestControl</a>)</code> <small>class documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a>.<a href="testtools.testresult.html" class="code">testresult</a>.<a href="testtools.testresult.real.html" class="code">real</a></code>
+          
+          <a href="classIndex.html#testtools.testresult.real.ExtendedToStreamDecorator">(View In Hierarchy)</a>
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        
+      </div>
+
+      <div class="moduleDocstring">
+        <div><p>Permit using old TestResult API code with new StreamResult objects.</p>
+<p>This decorates a StreamResult and converts old (Python 2.6 / 2.7 /
+Extended) TestResult API calls into StreamResult calls.</p>
+<p>It also supports regular StreamResult calls, making it safe to wrap around
+any StreamResult.</p><table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id127">
+  
+  <tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#__init__" class="code">__init__</a></td>
+    <td><span>Create a StreamToDict calling on_test on test completions.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#startTest" class="code">startTest</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#stopTest%200" class="code">stopTest 0</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#addError" class="code">addError</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#addExpectedFailure" class="code">addExpectedFailure</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#addSkip" class="code">addSkip</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#addUnexpectedSuccess" class="code">addUnexpectedSuccess</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#addSuccess" class="code">addSuccess</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#startTestRun" class="code">startTestRun</a></td>
+    <td><span>Start a test run.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#stopTest" class="code">stopTest</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#current_tags" class="code">current_tags</a></td>
+    <td><span>The currently set tags.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#tags" class="code">tags</a></td>
+    <td><span>Add and remove tags from the test.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#time" class="code">time</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#wasSuccessful" class="code">wasSuccessful</a></td>
+    <td><span>Return False if any failure has occured.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#_get_failfast" class="code">_get_failfast</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#_set_failfast" class="code">_set_failfast</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#_convert" class="code">_convert</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#_check_args" class="code">_check_args</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.ExtendedToStreamDecorator.html#_now" class="code">_now</a></td>
+    <td><span>Return the current 'test time'.</span></td>
+  </tr>
+</table>
+        
+          <p class="inheritedFrom">
+            Inherited from <a href="testtools.testresult.real.TestControl.html" class="code">TestControl</a>:
+          </p>
+          <table class="children sortable" id="id131">
+  
+  <tr class="baseinstancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.testresult.real.TestControl.html#shouldStop" class="code">shouldStop</a></td>
+    <td>If True, tests should not run and should instead
+return immediately. Similarly a TestSuite should check this between
+each test and if set stop dispatching any new tests and return.</td>
+  </tr><tr class="basemethod">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.TestControl.html#stop" class="code">stop</a></td>
+    <td><span>Indicate that tests should stop running.</span></td>
+  </tr>
+</table>
+          
+          <p class="inheritedFrom">
+            Inherited from <a href="testtools.testresult.real.TestControl.html" class="code">TestControl</a>:
+          </p>
+          <table class="children sortable" id="id131">
+  
+  <tr class="baseinstancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.testresult.real.TestControl.html#shouldStop" class="code">shouldStop</a></td>
+    <td>If True, tests should not run and should instead
+return immediately. Similarly a TestSuite should check this between
+each test and if set stop dispatching any new tests and return.</td>
+  </tr><tr class="basemethod">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.TestControl.html#stop" class="code">stop</a></td>
+    <td><span>Indicate that tests should stop running.</span></td>
+  </tr>
+</table>
+          
+          <p class="inheritedFrom">
+            Inherited from <a href="testtools.testresult.real.TestControl.html" class="code">TestControl</a>:
+          </p>
+          <table class="children sortable" id="id131">
+  
+  <tr class="baseinstancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.testresult.real.TestControl.html#shouldStop" class="code">shouldStop</a></td>
+    <td>If True, tests should not run and should instead
+return immediately. Similarly a TestSuite should check this between
+each test and if set stop dispatching any new tests and return.</td>
+  </tr><tr class="basemethod">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.TestControl.html#stop" class="code">stop</a></td>
+    <td><span>Indicate that tests should stop running.</span></td>
+  </tr>
+</table>
+          
+          <p class="inheritedFrom">
+            Inherited from <a href="testtools.testresult.real.TestControl.html" class="code">TestControl</a>:
+          </p>
+          <table class="children sortable" id="id131">
+  
+  <tr class="baseinstancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.testresult.real.TestControl.html#shouldStop" class="code">shouldStop</a></td>
+    <td>If True, tests should not run and should instead
+return immediately. Similarly a TestSuite should check this between
+each test and if set stop dispatching any new tests and return.</td>
+  </tr><tr class="basemethod">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.TestControl.html#stop" class="code">stop</a></td>
+    <td><span>Indicate that tests should stop running.</span></td>
+  </tr>
+</table>
+          
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator.__init__">
+    
+  </a>
+  <a name="__init__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __init__(self, decorated):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.testresult.CopyStreamResult.html#__init__" class="code">testtools.testresult.CopyStreamResult.__init__</a></div>
+    <div>Create a StreamToDict calling on_test on test completions.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">on_test</td><td>A callback that accepts one parameter - a dict
+describing a test.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator._get_failfast">
+    
+  </a>
+  <a name="_get_failfast">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _get_failfast(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator._set_failfast">
+    
+  </a>
+  <a name="_set_failfast">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _set_failfast(self, value):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator.startTest">
+    
+  </a>
+  <a name="startTest">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    startTest(self, test):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator.stopTest 0">
+    
+  </a>
+  <a name="stopTest 0">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    stopTest 0(self, test):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator.addError">
+    
+  </a>
+  <a name="addError">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    addError(self, test, err=None, details=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator._convert">
+    
+  </a>
+  <a name="_convert">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _convert(self, test, err, details, status, reason=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator.addExpectedFailure">
+    
+  </a>
+  <a name="addExpectedFailure">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    addExpectedFailure(self, test, err=None, details=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator.addSkip">
+    
+  </a>
+  <a name="addSkip">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    addSkip(self, test, reason=None, details=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator.addUnexpectedSuccess">
+    
+  </a>
+  <a name="addUnexpectedSuccess">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    addUnexpectedSuccess(self, test, details=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator.addSuccess">
+    
+  </a>
+  <a name="addSuccess">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    addSuccess(self, test, details=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator._check_args">
+    
+  </a>
+  <a name="_check_args">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _check_args(self, err, details):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator.startTestRun">
+    
+  </a>
+  <a name="startTestRun">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    startTestRun(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.testresult.CopyStreamResult.html#startTestRun" class="code">testtools.testresult.CopyStreamResult.startTestRun</a></div>
+    <div><p>Start a test run.</p>
+<p>This will prepare the test result to process results (which might imply
+connecting to a database or remote machine).</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator.stopTest">
+    
+  </a>
+  <a name="stopTest">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    stopTest(self, test):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator.current_tags">
+    
+  </a>
+  <a name="current_tags">
+    
+  </a>
+  <div class="functionHeader">
+    @property<br />
+    def
+    current_tags(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>The currently set tags.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator.tags">
+    
+  </a>
+  <a name="tags">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    tags(self, new_tags, gone_tags):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Add and remove tags from the test.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">new_tags</td><td>A set of tags to be added to the stream.</td></tr><tr><td></td><td class="fieldArg">gone_tags</td><td>A set of tags to be removed from the stream.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator._now">
+    
+  </a>
+  <a name="_now">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _now(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Return the current 'test time'.</p>
+<p>If the time() method has not been called, this is equivalent to
+datetime.now(), otherwise its the last supplied datestamp given to the
+time() method.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator.time">
+    
+  </a>
+  <a name="time">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    time(self, a_datetime):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.ExtendedToStreamDecorator.wasSuccessful">
+    
+  </a>
+  <a name="wasSuccessful">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    wasSuccessful(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.testresult.real.StreamSummary.html#wasSuccessful" class="code">testtools.testresult.real.StreamSummary.wasSuccessful</a></div>
+    <div><p>Return False if any failure has occured.</p>
+<p>Note that incomplete tests can only be detected when stopTestRun is
+called, so that should be called before checking wasSuccessful.</p><table class="fieldTable"></table></div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

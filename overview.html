@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>testtools: tasteful testing for Python &mdash; testtools VERSION documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'VERSION',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="testtools VERSION documentation" href="index.html" />
+    <link rel="next" title="testtools for test authors" href="for-test-authors.html" />
+    <link rel="prev" title="testtools: tasteful testing for Python" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="for-test-authors.html" title="testtools for test authors"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="testtools: tasteful testing for Python"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">testtools VERSION documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="testtools-tasteful-testing-for-python">
+<h1>testtools: tasteful testing for Python<a class="headerlink" href="#testtools-tasteful-testing-for-python" title="Permalink to this headline">¶</a></h1>
+<p>testtools is a set of extensions to the Python standard library&#8217;s unit testing
+framework. These extensions have been derived from many years of experience
+with unit testing in Python and come from many different sources. testtools
+supports Python versions all the way back to Python 2.6.</p>
+<p>What better way to start than with a contrived code snippet?:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">testtools</span> <span class="kn">import</span> <span class="n">TestCase</span>
+<span class="kn">from</span> <span class="nn">testtools.content</span> <span class="kn">import</span> <span class="n">Content</span>
+<span class="kn">from</span> <span class="nn">testtools.content_type</span> <span class="kn">import</span> <span class="n">UTF8_TEXT</span>
+<span class="kn">from</span> <span class="nn">testtools.matchers</span> <span class="kn">import</span> <span class="n">Equals</span>
+
+<span class="kn">from</span> <span class="nn">myproject</span> <span class="kn">import</span> <span class="n">SillySquareServer</span>
+
+<span class="k">class</span> <span class="nc">TestSillySquareServer</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TestSillySquare</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">useFixture</span><span class="p">(</span><span class="n">SillySquareServer</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addCleanup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attach_log_file</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">attach_log_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addDetail</span><span class="p">(</span>
+            <span class="s">&#39;log-file&#39;</span><span class="p">,</span>
+            <span class="n">Content</span><span class="p">(</span><span class="n">UTF8_TEXT</span><span class="p">,</span>
+                    <span class="k">lambda</span><span class="p">:</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">logfile</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()))</span>
+
+    <span class="k">def</span> <span class="nf">test_server_is_cool</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span> <span class="n">Equals</span><span class="p">(</span><span class="s">&quot;cool&quot;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">test_square</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">silly_square_of</span><span class="p">(</span><span class="mi">7</span><span class="p">),</span> <span class="n">Equals</span><span class="p">(</span><span class="mi">49</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="section" id="why-use-testtools">
+<h2>Why use testtools?<a class="headerlink" href="#why-use-testtools" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="better-assertion-methods">
+<h3>Better assertion methods<a class="headerlink" href="#better-assertion-methods" title="Permalink to this headline">¶</a></h3>
+<p>The standard assertion methods that come with unittest aren&#8217;t as helpful as
+they could be, and there aren&#8217;t quite enough of them.  testtools adds
+<code class="docutils literal"><span class="pre">assertIn</span></code>, <code class="docutils literal"><span class="pre">assertIs</span></code>, <code class="docutils literal"><span class="pre">assertIsInstance</span></code> and their negatives.</p>
+</div>
+<div class="section" id="matchers-better-than-assertion-methods">
+<h3>Matchers: better than assertion methods<a class="headerlink" href="#matchers-better-than-assertion-methods" title="Permalink to this headline">¶</a></h3>
+<p>Of course, in any serious project you want to be able to have assertions that
+are specific to that project and the particular problem that it is addressing.
+Rather than forcing you to define your own assertion methods and maintain your
+own inheritance hierarchy of <code class="docutils literal"><span class="pre">TestCase</span></code> classes, testtools lets you write
+your own &#8220;matchers&#8221;, custom predicates that can be plugged into a unit test:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_response_has_bold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+   <span class="c"># The response has bold text.</span>
+   <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">getResponse</span><span class="p">()</span>
+   <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">HTMLContains</span><span class="p">(</span><span class="n">Tag</span><span class="p">(</span><span class="s">&#39;bold&#39;</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="more-debugging-info-when-you-need-it">
+<h3>More debugging info, when you need it<a class="headerlink" href="#more-debugging-info-when-you-need-it" title="Permalink to this headline">¶</a></h3>
+<p>testtools makes it easy to add arbitrary data to your test result.  If you
+want to know what&#8217;s in a log file when a test fails, or what the load was on
+the computer when a test started, or what files were open, you can add that
+information with <code class="docutils literal"><span class="pre">TestCase.addDetail</span></code>, and it will appear in the test
+results if that test fails.</p>
+</div>
+<div class="section" id="extend-unittest-but-stay-compatible-and-re-usable">
+<h3>Extend unittest, but stay compatible and re-usable<a class="headerlink" href="#extend-unittest-but-stay-compatible-and-re-usable" title="Permalink to this headline">¶</a></h3>
+<p>testtools goes to great lengths to allow serious test authors and test
+<em>framework</em> authors to do whatever they like with their tests and their
+extensions while staying compatible with the standard library&#8217;s unittest.</p>
+<p>testtools has completely parametrized how exceptions raised in tests are
+mapped to <code class="docutils literal"><span class="pre">TestResult</span></code> methods and how tests are actually executed (ever
+wanted <code class="docutils literal"><span class="pre">tearDown</span></code> to be called regardless of whether <code class="docutils literal"><span class="pre">setUp</span></code> succeeds?)</p>
+<p>It also provides many simple but handy utilities, like the ability to clone a
+test, a <code class="docutils literal"><span class="pre">MultiTestResult</span></code> object that lets many result objects get the
+results from one test suite, adapters to bring legacy <code class="docutils literal"><span class="pre">TestResult</span></code> objects
+into our new golden age.</p>
+</div>
+<div class="section" id="cross-python-compatibility">
+<h3>Cross-Python compatibility<a class="headerlink" href="#cross-python-compatibility" title="Permalink to this headline">¶</a></h3>
+<p>testtools gives you the very latest in unit testing technology in a way that
+will work with Python 2.6, 2.7, 3.1 and 3.2.</p>
+<p>If you wish to use testtools with Python 2.4 or 2.5, then please use testtools
+0.9.15. Up to then we supported Python 2.4 and 2.5, but we found the
+constraints involved in not using the newer language features onerous as we
+added more support for versions post Python 3.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">testtools: tasteful testing for Python</a><ul>
+<li><a class="reference internal" href="#why-use-testtools">Why use testtools?</a><ul>
+<li><a class="reference internal" href="#better-assertion-methods">Better assertion methods</a></li>
+<li><a class="reference internal" href="#matchers-better-than-assertion-methods">Matchers: better than assertion methods</a></li>
+<li><a class="reference internal" href="#more-debugging-info-when-you-need-it">More debugging info, when you need it</a></li>
+<li><a class="reference internal" href="#extend-unittest-but-stay-compatible-and-re-usable">Extend unittest, but stay compatible and re-usable</a></li>
+<li><a class="reference internal" href="#cross-python-compatibility">Cross-Python compatibility</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">testtools: tasteful testing for Python</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="for-test-authors.html"
+                        title="next chapter">testtools for test authors</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/overview.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="for-test-authors.html" title="testtools for test authors"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="testtools: tasteful testing for Python"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">testtools VERSION documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2010, The testtools authors.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

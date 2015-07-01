@@ -1,0 +1,1532 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>testtools for test authors &mdash; testtools VERSION documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'VERSION',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="testtools VERSION documentation" href="index.html" />
+    <link rel="next" title="testtools for framework folk" href="for-framework-folk.html" />
+    <link rel="prev" title="testtools: tasteful testing for Python" href="overview.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="for-framework-folk.html" title="testtools for framework folk"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="overview.html" title="testtools: tasteful testing for Python"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">testtools VERSION documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="testtools-for-test-authors">
+<h1>testtools for test authors<a class="headerlink" href="#testtools-for-test-authors" title="Permalink to this headline">¶</a></h1>
+<p>If you are writing tests for a Python project and you (rather wisely) want to
+use testtools to do so, this is the manual for you.</p>
+<p>We assume that you already know Python and that you know something about
+automated testing already.</p>
+<p>If you are a test author of an unusually large or unusually unusual test
+suite, you might be interested in <a class="reference internal" href="for-framework-folk.html"><em>testtools for framework folk</em></a>.</p>
+<p>You might also be interested in the <a class="reference internal" href="api.html"><em>testtools API docs</em></a>.</p>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>testtools is a set of extensions to Python&#8217;s standard unittest module.
+Writing tests with testtools is very much like writing tests with standard
+Python, or with Twisted&#8217;s &#8220;<a class="reference external" href="http://twistedmatrix.com/documents/current/core/howto/testing.html">trial</a>&#8221;, or <a class="reference external" href="http://somethingaboutorange.com/mrl/projects/nose/">nose</a>, except a little bit easier and
+more enjoyable.</p>
+<p>Below, we&#8217;ll try to give some examples of how to use testtools in its most
+basic way, as well as a sort of feature-by-feature breakdown of the cool bits
+that you could easily miss.</p>
+</div>
+<div class="section" id="the-basics">
+<h2>The basics<a class="headerlink" href="#the-basics" title="Permalink to this headline">¶</a></h2>
+<p>Here&#8217;s what a basic testtools unit tests look like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">testtools</span> <span class="kn">import</span> <span class="n">TestCase</span>
+<span class="kn">from</span> <span class="nn">myproject</span> <span class="kn">import</span> <span class="n">silly</span>
+
+<span class="k">class</span> <span class="nc">TestSillySquare</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Tests for silly square function.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">test_square</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># &#39;square&#39; takes a number and multiplies it by itself.</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">silly</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="mi">49</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_square_bad_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># &#39;square&#39; raises a TypeError if it&#39;s given bad input, say a</span>
+        <span class="c"># string.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="n">silly</span><span class="o">.</span><span class="n">square</span><span class="p">,</span> <span class="s">&quot;orange&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here you have a class that inherits from <code class="docutils literal"><span class="pre">testtools.TestCase</span></code> and bundles
+together a bunch of related tests.  The tests themselves are methods on that
+class that begin with <code class="docutils literal"><span class="pre">test_</span></code>.</p>
+<div class="section" id="running-your-tests">
+<h3>Running your tests<a class="headerlink" href="#running-your-tests" title="Permalink to this headline">¶</a></h3>
+<p>You can run these tests in many ways.  testtools provides a very basic
+mechanism for doing so:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ python -m testtools.run exampletest
+Tests running...
+Ran 2 tests in 0.000s
+
+OK
+</pre></div>
+</div>
+<p>where &#8216;exampletest&#8217; is a module that contains unit tests.  By default,
+<code class="docutils literal"><span class="pre">testtools.run</span></code> will <em>not</em> recursively search the module or package for unit
+tests.  To do this, you will need to either have the <a class="reference external" href="http://pypi.python.org/pypi/discover">discover</a> module
+installed or have Python 2.7 or later, and then run:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ python -m testtools.run discover packagecontainingtests
+</pre></div>
+</div>
+<p>For more information see the Python unittest documentation, and:</p>
+<div class="highlight-python"><div class="highlight"><pre>python -m testtools.run --help
+</pre></div>
+</div>
+<p>which describes the options available to <code class="docutils literal"><span class="pre">testtools.run</span></code>.</p>
+<p>As your testing needs grow and evolve, you will probably want to use a more
+sophisticated test runner.  There are many of these for Python, and almost all
+of them will happily run testtools tests.  In particular:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://launchpad.net/testrepository">testrepository</a></li>
+<li><a class="reference external" href="http://twistedmatrix.com/documents/current/core/howto/testing.html">Trial</a></li>
+<li><a class="reference external" href="http://somethingaboutorange.com/mrl/projects/nose/">nose</a></li>
+<li><a class="reference external" href="http://pypi.python.org/pypi/unittest2">unittest2</a></li>
+<li><a class="reference external" href="http://pypi.python.org/pypi/zope.testrunner/">zope.testrunner</a> (aka zope.testing)</li>
+</ul>
+<p>From now on, we&#8217;ll assume that you know how to run your tests.</p>
+<div class="section" id="running-test-with-distutils">
+<h4>Running test with Distutils<a class="headerlink" href="#running-test-with-distutils" title="Permalink to this headline">¶</a></h4>
+<p>If you are using <a class="reference external" href="http://docs.python.org/library/distutils.html">Distutils</a> to build your Python project, you can use the testtools
+<a class="reference external" href="http://docs.python.org/library/distutils.html">Distutils</a> command to integrate testtools into your <a class="reference external" href="http://docs.python.org/library/distutils.html">Distutils</a> workflow:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">distutils.core</span> <span class="kn">import</span> <span class="n">setup</span>
+<span class="kn">from</span> <span class="nn">testtools</span> <span class="kn">import</span> <span class="n">TestCommand</span>
+<span class="n">setup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;foo&#39;</span><span class="p">,</span>
+    <span class="n">version</span><span class="o">=</span><span class="s">&#39;1.0&#39;</span><span class="p">,</span>
+    <span class="n">py_modules</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;foo&#39;</span><span class="p">],</span>
+    <span class="n">cmdclass</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;test&#39;</span><span class="p">:</span> <span class="n">TestCommand</span><span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>You can then run:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ python setup.py test -m exampletest
+Tests running...
+Ran 2 tests in 0.000s
+
+OK
+</pre></div>
+</div>
+<p>For more information about the capabilities of the <cite>TestCommand</cite> command see:</p>
+<div class="highlight-python"><div class="highlight"><pre>$ python setup.py test --help
+</pre></div>
+</div>
+<p>You can use the <a class="reference external" href="http://docs.python.org/distutils/configfile.html">setup configuration</a> to specify the default behavior of the
+<cite>TestCommand</cite> command.</p>
+</div>
+</div>
+</div>
+<div class="section" id="assertions">
+<h2>Assertions<a class="headerlink" href="#assertions" title="Permalink to this headline">¶</a></h2>
+<p>The core of automated testing is making assertions about the way things are,
+and getting a nice, helpful, informative error message when things are not as
+they ought to be.</p>
+<p>All of the assertions that you can find in Python standard <a class="reference external" href="http://docs.python.org/library/unittest.html">unittest</a> can be
+found in testtools (remember, testtools extends unittest).  testtools changes
+the behaviour of some of those assertions slightly and adds some new
+assertions that you will almost certainly find useful.</p>
+<div class="section" id="improved-assertraises">
+<h3>Improved assertRaises<a class="headerlink" href="#improved-assertraises" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal"><span class="pre">TestCase.assertRaises</span></code> returns the caught exception.  This is useful for
+asserting more things about the exception than just the type:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_square_bad_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c"># &#39;square&#39; raises a TypeError if it&#39;s given bad input, say a</span>
+    <span class="c"># string.</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="n">silly</span><span class="o">.</span><span class="n">square</span><span class="p">,</span> <span class="s">&quot;orange&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="s">&quot;orange&quot;</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">bad_value</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="s">&quot;Cannot square &#39;orange&#39;, not a number.&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Note that this is incompatible with the <code class="docutils literal"><span class="pre">assertRaises</span></code> in unittest2 and
+Python2.7.</p>
+</div>
+<div class="section" id="expectedexception">
+<h3>ExpectedException<a class="headerlink" href="#expectedexception" title="Permalink to this headline">¶</a></h3>
+<p>If you are using a version of Python that supports the <code class="docutils literal"><span class="pre">with</span></code> context
+manager syntax, you might prefer to use that syntax to ensure that code raises
+particular errors.  <code class="docutils literal"><span class="pre">ExpectedException</span></code> does just that.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_square_root_bad_input_2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c"># &#39;square&#39; raises a TypeError if it&#39;s given bad input.</span>
+    <span class="k">with</span> <span class="n">ExpectedException</span><span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="s">&quot;Cannot square.*&quot;</span><span class="p">):</span>
+        <span class="n">silly</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="s">&#39;orange&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The first argument to <code class="docutils literal"><span class="pre">ExpectedException</span></code> is the type of exception you
+expect to see raised.  The second argument is optional, and can be either a
+regular expression or a matcher. If it is a regular expression, the <code class="docutils literal"><span class="pre">str()</span></code>
+of the raised exception must match the regular expression. If it is a matcher,
+then the raised exception object must match it. The optional third argument
+<code class="docutils literal"><span class="pre">msg</span></code> will cause the raised error to be annotated with that message.</p>
+</div>
+<div class="section" id="assertin-assertnotin">
+<h3>assertIn, assertNotIn<a class="headerlink" href="#assertin-assertnotin" title="Permalink to this headline">¶</a></h3>
+<p>These two assertions check whether a value is in a sequence and whether a
+value is not in a sequence.  They are &#8220;assert&#8221; versions of the <code class="docutils literal"><span class="pre">in</span></code> and
+<code class="docutils literal"><span class="pre">not</span> <span class="pre">in</span></code> operators.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_assert_in_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertIn</span><span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="s">&#39;cat&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertNotIn</span><span class="p">(</span><span class="s">&#39;o&#39;</span><span class="p">,</span> <span class="s">&#39;cat&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertIn</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">list_of_primes_under_ten</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertNotIn</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="n">list_of_primes_under_ten</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="assertis-assertisnot">
+<h3>assertIs, assertIsNot<a class="headerlink" href="#assertis-assertisnot" title="Permalink to this headline">¶</a></h3>
+<p>These two assertions check whether values are identical to one another.  This
+is sometimes useful when you want to test something more strict than mere
+equality.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_assert_is_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">foo</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span>
+    <span class="n">foo_alias</span> <span class="o">=</span> <span class="n">foo</span>
+    <span class="n">bar</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertIs</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span> <span class="n">foo_alias</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNot</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span> <span class="n">bar</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span> <span class="n">bar</span><span class="p">)</span> <span class="c"># They are equal, but not identical</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="assertisinstance">
+<h3>assertIsInstance<a class="headerlink" href="#assertisinstance" title="Permalink to this headline">¶</a></h3>
+<p>As much as we love duck-typing and polymorphism, sometimes you need to check
+whether or not a value is of a given type.  This method does that.  For
+example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_assert_is_instance_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertIsInstance</span><span class="p">(</span><span class="n">now</span><span class="p">,</span> <span class="n">datetime</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that there is no <code class="docutils literal"><span class="pre">assertIsNotInstance</span></code> in testtools currently.</p>
+</div>
+<div class="section" id="expectfailure">
+<h3>expectFailure<a class="headerlink" href="#expectfailure" title="Permalink to this headline">¶</a></h3>
+<p>Sometimes it&#8217;s useful to write tests that fail.  For example, you might want
+to turn a bug report into a unit test, but you don&#8217;t know how to fix the bug
+yet.  Or perhaps you want to document a known, temporary deficiency in a
+dependency.</p>
+<p>testtools gives you the <code class="docutils literal"><span class="pre">TestCase.expectFailure</span></code> to help with this.  You use
+it to say that you expect this assertion to fail.  When the test runs and the
+assertion fails, testtools will report it as an &#8220;expected failure&#8221;.</p>
+<p>Here&#8217;s an example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_expect_failure_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">expectFailure</span><span class="p">(</span>
+        <span class="s">&quot;cats should be dogs&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">,</span> <span class="s">&#39;cats&#39;</span><span class="p">,</span> <span class="s">&#39;dogs&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>As long as &#8216;cats&#8217; is not equal to &#8216;dogs&#8217;, the test will be reported as an
+expected failure.</p>
+<p>If ever by some miracle &#8216;cats&#8217; becomes &#8216;dogs&#8217;, then testtools will report an
+&#8220;unexpected success&#8221;.  Unlike standard unittest, testtools treats this as
+something that fails the test suite, like an error or a failure.</p>
+</div>
+</div>
+<div class="section" id="matchers">
+<h2>Matchers<a class="headerlink" href="#matchers" title="Permalink to this headline">¶</a></h2>
+<p>The built-in assertion methods are very useful, they are the bread and butter
+of writing tests.  However, soon enough you will probably want to write your
+own assertions.  Perhaps there are domain specific things that you want to
+check (e.g. assert that two widgets are aligned parallel to the flux grid), or
+perhaps you want to check something that could almost but not quite be found
+in some other standard library (e.g. assert that two paths point to the same
+file).</p>
+<p>When you are in such situations, you could either make a base class for your
+project that inherits from <code class="docutils literal"><span class="pre">testtools.TestCase</span></code> and make sure that all of
+your tests derive from that, <em>or</em> you could use the testtools <code class="docutils literal"><span class="pre">Matcher</span></code>
+system.</p>
+<div class="section" id="using-matchers">
+<h3>Using Matchers<a class="headerlink" href="#using-matchers" title="Permalink to this headline">¶</a></h3>
+<p>Here&#8217;s a really basic example using stock matchers found in testtools:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">testtools</span>
+<span class="kn">from</span> <span class="nn">testtools.matchers</span> <span class="kn">import</span> <span class="n">Equals</span>
+
+<span class="k">class</span> <span class="nc">TestSquare</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_square</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+       <span class="n">result</span> <span class="o">=</span> <span class="n">square</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+       <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">Equals</span><span class="p">(</span><span class="mi">49</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The line <code class="docutils literal"><span class="pre">self.assertThat(result,</span> <span class="pre">Equals(49))</span></code> is equivalent to
+<code class="docutils literal"><span class="pre">self.assertEqual(result,</span> <span class="pre">49)</span></code> and means &#8220;assert that <code class="docutils literal"><span class="pre">result</span></code> equals 49&#8221;.
+The difference is that <code class="docutils literal"><span class="pre">assertThat</span></code> is a more general method that takes some
+kind of observed value (in this case, <code class="docutils literal"><span class="pre">result</span></code>) and any matcher object
+(here, <code class="docutils literal"><span class="pre">Equals(49)</span></code>).</p>
+<p>The matcher object could be absolutely anything that implements the Matcher
+protocol.  This means that you can make more complex matchers by combining
+existing ones:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_square_silly</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">square</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">Not</span><span class="p">(</span><span class="n">Equals</span><span class="p">(</span><span class="mi">50</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>Which is roughly equivalent to:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_square_silly</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">square</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertNotEqual</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="assert-that-function">
+<h3><code class="docutils literal"><span class="pre">assert_that</span></code> Function<a class="headerlink" href="#assert-that-function" title="Permalink to this headline">¶</a></h3>
+<p>In addition to <code class="docutils literal"><span class="pre">self.assertThat</span></code>, testtools also provides the <code class="docutils literal"><span class="pre">assert_that</span></code>
+function in <code class="docutils literal"><span class="pre">testtools.assertions</span></code> This behaves like the method version does:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">TestSquare</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_square</span><span class="p">():</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">square</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+        <span class="n">assert_that</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">Equals</span><span class="p">(</span><span class="mi">49</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">test_square_silly</span><span class="p">():</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">square</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+        <span class="n">assert_that</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">Not</span><span class="p">(</span><span class="n">Equals</span><span class="p">(</span><span class="mi">50</span><span class="p">)))</span>
+</pre></div>
+</div>
+<div class="section" id="delayed-assertions">
+<h4>Delayed Assertions<a class="headerlink" href="#delayed-assertions" title="Permalink to this headline">¶</a></h4>
+<p>A failure in the <code class="docutils literal"><span class="pre">self.assertThat</span></code> method will immediately fail the test: No
+more test code will be run after the assertion failure.</p>
+<p>The <code class="docutils literal"><span class="pre">expectThat</span></code> method behaves the same as <code class="docutils literal"><span class="pre">assertThat</span></code> with one
+exception: when failing the test it does so at the end of the test code rather
+than when the mismatch is detected. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">subprocess</span>
+
+<span class="kn">from</span> <span class="nn">testtools</span> <span class="kn">import</span> <span class="n">TestCase</span>
+<span class="kn">from</span> <span class="nn">testtools.matchers</span> <span class="kn">import</span> <span class="n">Equals</span>
+
+
+<span class="k">class</span> <span class="nc">SomeProcessTests</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_process_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+          <span class="p">[</span><span class="s">&quot;my-app&quot;</span><span class="p">,</span> <span class="s">&quot;/some/path&quot;</span><span class="p">],</span>
+          <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+          <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span>
+        <span class="p">)</span>
+
+        <span class="n">stdout</span><span class="p">,</span> <span class="n">stderrr</span> <span class="o">=</span> <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">expectThat</span><span class="p">(</span><span class="n">process</span><span class="o">.</span><span class="n">returncode</span><span class="p">,</span> <span class="n">Equals</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expectThat</span><span class="p">(</span><span class="n">stdout</span><span class="p">,</span> <span class="n">Equals</span><span class="p">(</span><span class="s">&quot;Expected Output&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expectThat</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="n">Equals</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>In this example, should the <code class="docutils literal"><span class="pre">expectThat</span></code> call fail, the failure will be
+recorded in the test result, but the test will continue as normal. If all
+three assertions fail, the test result will have three failures recorded, and
+the failure details for each failed assertion will be attached to the test
+result.</p>
+</div>
+</div>
+<div class="section" id="stock-matchers">
+<h3>Stock matchers<a class="headerlink" href="#stock-matchers" title="Permalink to this headline">¶</a></h3>
+<p>testtools comes with many matchers built in.  They can all be found in and
+imported from the <code class="docutils literal"><span class="pre">testtools.matchers</span></code> module.</p>
+<div class="section" id="equals">
+<h4>Equals<a class="headerlink" href="#equals" title="Permalink to this headline">¶</a></h4>
+<p>Matches if two items are equal. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_equals_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">([</span><span class="mi">42</span><span class="p">],</span> <span class="n">Equals</span><span class="p">([</span><span class="mi">42</span><span class="p">]))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="is">
+<h4>Is<a class="headerlink" href="#is" title="Permalink to this headline">¶</a></h4>
+<p>Matches if two items are identical.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_is_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">foo</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span> <span class="n">Is</span><span class="p">(</span><span class="n">foo</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="isinstance">
+<h4>IsInstance<a class="headerlink" href="#isinstance" title="Permalink to this headline">¶</a></h4>
+<p>Adapts isinstance() to use as a matcher.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_isinstance_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">MyClass</span><span class="p">:</span><span class="k">pass</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="n">MyClass</span><span class="p">(),</span> <span class="n">IsInstance</span><span class="p">(</span><span class="n">MyClass</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="n">MyClass</span><span class="p">(),</span> <span class="n">IsInstance</span><span class="p">(</span><span class="n">MyClass</span><span class="p">,</span> <span class="nb">str</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-raises-helper">
+<h4>The raises helper<a class="headerlink" href="#the-raises-helper" title="Permalink to this headline">¶</a></h4>
+<p>Matches if a callable raises a particular type of exception.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_raises_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">1</span><span class="o">/</span><span class="mi">0</span><span class="p">,</span> <span class="n">raises</span><span class="p">(</span><span class="ne">ZeroDivisionError</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>This is actually a convenience function that combines two other matchers:
+<a class="reference internal" href="#raises">Raises</a> and <a class="reference internal" href="#matchesexception">MatchesException</a>.</p>
+</div>
+<div class="section" id="doctestmatches">
+<h4>DocTestMatches<a class="headerlink" href="#doctestmatches" title="Permalink to this headline">¶</a></h4>
+<p>Matches a string as if it were the output of a <a class="reference external" href="http://docs.python.org/library/doctest.html">doctest</a> example.  Very useful
+for making assertions about large chunks of text.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">doctest</span>
+
+<span class="k">def</span> <span class="nf">test_doctest_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="s">&quot;Colorless green ideas&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span>
+        <span class="n">output</span><span class="p">,</span>
+        <span class="n">DocTestMatches</span><span class="p">(</span><span class="s">&quot;Colorless ... ideas&quot;</span><span class="p">,</span> <span class="n">doctest</span><span class="o">.</span><span class="n">ELLIPSIS</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>We highly recommend using the following flags:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">doctest</span><span class="o">.</span><span class="n">ELLIPSIS</span> <span class="o">|</span> <span class="n">doctest</span><span class="o">.</span><span class="n">NORMALIZE_WHITESPACE</span> <span class="o">|</span> <span class="n">doctest</span><span class="o">.</span><span class="n">REPORT_NDIFF</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="greaterthan">
+<h4>GreaterThan<a class="headerlink" href="#greaterthan" title="Permalink to this headline">¶</a></h4>
+<p>Matches if the given thing is greater than the thing in the matcher.  For
+example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_greater_than_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">GreaterThan</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="lessthan">
+<h4>LessThan<a class="headerlink" href="#lessthan" title="Permalink to this headline">¶</a></h4>
+<p>Matches if the given thing is less than the thing in the matcher.  For
+example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_less_than_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">LessThan</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="startswith-endswith">
+<h4>StartsWith, EndsWith<a class="headerlink" href="#startswith-endswith" title="Permalink to this headline">¶</a></h4>
+<p>These matchers check to see if a string starts with or ends with a particular
+substring.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_starts_and_ends_with_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;underground&#39;</span><span class="p">,</span> <span class="n">StartsWith</span><span class="p">(</span><span class="s">&#39;und&#39;</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;underground&#39;</span><span class="p">,</span> <span class="n">EndsWith</span><span class="p">(</span><span class="s">&#39;und&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="contains">
+<h4>Contains<a class="headerlink" href="#contains" title="Permalink to this headline">¶</a></h4>
+<p>This matcher checks to see if the given thing contains the thing in the
+matcher.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_contains_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;abc&#39;</span><span class="p">,</span> <span class="n">Contains</span><span class="p">(</span><span class="s">&#39;b&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="matchesexception">
+<h4>MatchesException<a class="headerlink" href="#matchesexception" title="Permalink to this headline">¶</a></h4>
+<p>Matches an exc_info tuple if the exception is of the correct type.  For
+example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_matches_exception_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+        <span class="n">exc_info</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="n">exc_info</span><span class="p">,</span> <span class="n">MatchesException</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="n">exc_info</span><span class="p">,</span> <span class="n">MatchesException</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>Most of the time, you will want to uses <a class="reference internal" href="#the-raises-helper">The raises helper</a> instead.</p>
+</div>
+<div class="section" id="notequals">
+<h4>NotEquals<a class="headerlink" href="#notequals" title="Permalink to this headline">¶</a></h4>
+<p>Matches if something is not equal to something else.  Note that this is subtly
+different to <code class="docutils literal"><span class="pre">Not(Equals(x))</span></code>.  <code class="docutils literal"><span class="pre">NotEquals(x)</span></code> will match if <code class="docutils literal"><span class="pre">y</span> <span class="pre">!=</span> <span class="pre">x</span></code>,
+<code class="docutils literal"><span class="pre">Not(Equals(x))</span></code> will match if <code class="docutils literal"><span class="pre">not</span> <span class="pre">y</span> <span class="pre">==</span> <span class="pre">x</span></code>.</p>
+<p>You only need to worry about this distinction if you are testing code that
+relies on badly written overloaded equality operators.</p>
+</div>
+<div class="section" id="keysequal">
+<h4>KeysEqual<a class="headerlink" href="#keysequal" title="Permalink to this headline">¶</a></h4>
+<p>Matches if the keys of one dict are equal to the keys of another dict.  For
+example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_keys_equal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">KeysEqual</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="matchesregex">
+<h4>MatchesRegex<a class="headerlink" href="#matchesregex" title="Permalink to this headline">¶</a></h4>
+<p>Matches a string against a regular expression, which is a wonderful thing to
+be able to do, if you think about it:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_matches_regex_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="n">MatchesRegex</span><span class="p">(</span><span class="s">&#39;fo+&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="haslength">
+<h4>HasLength<a class="headerlink" href="#haslength" title="Permalink to this headline">¶</a></h4>
+<p>Check the length of a collection.  The following assertion will fail:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">HasLength</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>But this one won&#8217;t:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">HasLength</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="file-and-path-related-matchers">
+<h3>File- and path-related matchers<a class="headerlink" href="#file-and-path-related-matchers" title="Permalink to this headline">¶</a></h3>
+<p>testtools also has a number of matchers to help with asserting things about
+the state of the filesystem.</p>
+<div class="section" id="pathexists">
+<h4>PathExists<a class="headerlink" href="#pathexists" title="Permalink to this headline">¶</a></h4>
+<p>Matches if a path exists:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">PathExists</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="direxists">
+<h4>DirExists<a class="headerlink" href="#direxists" title="Permalink to this headline">¶</a></h4>
+<p>Matches if a path exists and it refers to a directory:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># This will pass on most Linux systems.</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;/home/&#39;</span><span class="p">,</span> <span class="n">DirExists</span><span class="p">())</span>
+<span class="c"># This will not</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;/home/jml/some-file.txt&#39;</span><span class="p">,</span> <span class="n">DirExists</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="fileexists">
+<h4>FileExists<a class="headerlink" href="#fileexists" title="Permalink to this headline">¶</a></h4>
+<p>Matches if a path exists and it refers to a file (as opposed to a directory):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># This will pass on most Linux systems.</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;/bin/true&#39;</span><span class="p">,</span> <span class="n">FileExists</span><span class="p">())</span>
+<span class="c"># This will not.</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;/home/&#39;</span><span class="p">,</span> <span class="n">FileExists</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="dircontains">
+<h4>DirContains<a class="headerlink" href="#dircontains" title="Permalink to this headline">¶</a></h4>
+<p>Matches if the given directory contains the specified files and directories.
+Say we have a directory <code class="docutils literal"><span class="pre">foo</span></code> that has the files <code class="docutils literal"><span class="pre">a</span></code>, <code class="docutils literal"><span class="pre">b</span></code> and <code class="docutils literal"><span class="pre">c</span></code>,
+then:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="n">DirContains</span><span class="p">([</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">,</span> <span class="s">&#39;c&#39;</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>will match, but:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="n">DirContains</span><span class="p">([</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>will not.</p>
+<p>The matcher sorts both the input and the list of names we get back from the
+filesystem.</p>
+<p>You can use this in a more advanced way, and match the sorted directory
+listing against an arbitrary matcher:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="n">DirContains</span><span class="p">(</span><span class="n">matcher</span><span class="o">=</span><span class="n">Contains</span><span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="filecontains">
+<h4>FileContains<a class="headerlink" href="#filecontains" title="Permalink to this headline">¶</a></h4>
+<p>Matches if the given file has the specified contents.  Say there&#8217;s a file
+called <code class="docutils literal"><span class="pre">greetings.txt</span></code> with the contents, <code class="docutils literal"><span class="pre">Hello</span> <span class="pre">World!</span></code>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;greetings.txt&#39;</span><span class="p">,</span> <span class="n">FileContains</span><span class="p">(</span><span class="s">&quot;Hello World!&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>will match.</p>
+<p>You can also use this in a more advanced way, and match the contents of the
+file against an arbitrary matcher:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;greetings.txt&#39;</span><span class="p">,</span> <span class="n">FileContains</span><span class="p">(</span><span class="n">matcher</span><span class="o">=</span><span class="n">Contains</span><span class="p">(</span><span class="s">&#39;!&#39;</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="haspermissions">
+<h4>HasPermissions<a class="headerlink" href="#haspermissions" title="Permalink to this headline">¶</a></h4>
+<p>Used for asserting that a file or directory has certain permissions.  Uses
+octal-mode permissions for both input and matching.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;/tmp&#39;</span><span class="p">,</span> <span class="n">HasPermissions</span><span class="p">(</span><span class="s">&#39;1777&#39;</span><span class="p">))</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;id_rsa&#39;</span><span class="p">,</span> <span class="n">HasPermissions</span><span class="p">(</span><span class="s">&#39;0600&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>This is probably more useful on UNIX systems than on Windows systems.</p>
+</div>
+<div class="section" id="samepath">
+<h4>SamePath<a class="headerlink" href="#samepath" title="Permalink to this headline">¶</a></h4>
+<p>Matches if two paths actually refer to the same thing.  The paths don&#8217;t have
+to exist, but if they do exist, <code class="docutils literal"><span class="pre">SamePath</span></code> will resolve any symlinks.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;somefile&#39;</span><span class="p">,</span> <span class="n">SamePath</span><span class="p">(</span><span class="s">&#39;childdir/../somefile&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="tarballcontains">
+<h4>TarballContains<a class="headerlink" href="#tarballcontains" title="Permalink to this headline">¶</a></h4>
+<p>Matches the contents of a tarball.  In many ways, much like <code class="docutils literal"><span class="pre">DirContains</span></code>,
+but instead of matching on <code class="docutils literal"><span class="pre">os.listdir</span></code> matches on <code class="docutils literal"><span class="pre">TarFile.getnames</span></code>.</p>
+</div>
+</div>
+<div class="section" id="combining-matchers">
+<h3>Combining matchers<a class="headerlink" href="#combining-matchers" title="Permalink to this headline">¶</a></h3>
+<p>One great thing about matchers is that you can readily combine existing
+matchers to get variations on their behaviour or to quickly build more complex
+assertions.</p>
+<p>Below are a few of the combining matchers that come with testtools.</p>
+<div class="section" id="not">
+<h4>Not<a class="headerlink" href="#not" title="Permalink to this headline">¶</a></h4>
+<p>Negates another matcher.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_not_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">([</span><span class="mi">42</span><span class="p">],</span> <span class="n">Not</span><span class="p">(</span><span class="n">Equals</span><span class="p">(</span><span class="s">&quot;potato&quot;</span><span class="p">)))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">([</span><span class="mi">42</span><span class="p">],</span> <span class="n">Not</span><span class="p">(</span><span class="n">Is</span><span class="p">([</span><span class="mi">42</span><span class="p">])))</span>
+</pre></div>
+</div>
+<p>If you find yourself using <code class="docutils literal"><span class="pre">Not</span></code> frequently, you may wish to create a custom
+matcher for it.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">IsNot</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">Not</span><span class="p">(</span><span class="n">Is</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">test_not_example_2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">([</span><span class="mi">42</span><span class="p">],</span> <span class="n">IsNot</span><span class="p">([</span><span class="mi">42</span><span class="p">]))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="annotate">
+<h4>Annotate<a class="headerlink" href="#annotate" title="Permalink to this headline">¶</a></h4>
+<p>Used to add custom notes to a matcher.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_annotate_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="mi">43</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span>
+        <span class="n">result</span><span class="p">,</span> <span class="n">Annotate</span><span class="p">(</span><span class="s">&quot;Not the answer to the Question!&quot;</span><span class="p">,</span> <span class="n">Equals</span><span class="p">(</span><span class="mi">42</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>Since the annotation is only ever displayed when there is a mismatch
+(e.g. when <code class="docutils literal"><span class="pre">result</span></code> does not equal 42), it&#8217;s a good idea to phrase the note
+negatively, so that it describes what a mismatch actually means.</p>
+<p>As with <a class="reference internal" href="#not">Not</a>, you may wish to create a custom matcher that describes a
+common operation.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">PoliticallyEquals</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">Annotate</span><span class="p">(</span><span class="s">&quot;Death to the aristos!&quot;</span><span class="p">,</span> <span class="n">Equals</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">test_annotate_example_2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&quot;orange&quot;</span><span class="p">,</span> <span class="n">PoliticallyEquals</span><span class="p">(</span><span class="s">&quot;yellow&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>You can have assertThat perform the annotation for you as a convenience:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_annotate_example_3</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&quot;orange&quot;</span><span class="p">,</span> <span class="n">Equals</span><span class="p">(</span><span class="s">&quot;yellow&quot;</span><span class="p">),</span> <span class="s">&quot;Death to the aristos!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="afterpreprocessing">
+<h4>AfterPreprocessing<a class="headerlink" href="#afterpreprocessing" title="Permalink to this headline">¶</a></h4>
+<p>Used to make a matcher that applies a function to the matched object before
+matching. This can be used to aid in creating trivial matchers as functions, for
+example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_after_preprocessing_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">PathHasFileContent</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">_read</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">AfterPreprocessing</span><span class="p">(</span><span class="n">_read</span><span class="p">,</span> <span class="n">Equals</span><span class="p">(</span><span class="n">content</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;/tmp/foo.txt&#39;</span><span class="p">,</span> <span class="n">PathHasFileContent</span><span class="p">(</span><span class="s">&quot;Hello world!&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="matchesall">
+<h4>MatchesAll<a class="headerlink" href="#matchesall" title="Permalink to this headline">¶</a></h4>
+<p>Combines many matchers to make a new matcher.  The new matcher will only match
+things that match every single one of the component matchers.</p>
+<p>It&#8217;s much easier to understand in Python than in English:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_matches_all_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">has_und_at_both_ends</span> <span class="o">=</span> <span class="n">MatchesAll</span><span class="p">(</span><span class="n">StartsWith</span><span class="p">(</span><span class="s">&quot;und&quot;</span><span class="p">),</span> <span class="n">EndsWith</span><span class="p">(</span><span class="s">&quot;und&quot;</span><span class="p">))</span>
+    <span class="c"># This will succeed.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&quot;underground&quot;</span><span class="p">,</span> <span class="n">has_und_at_both_ends</span><span class="p">)</span>
+    <span class="c"># This will fail.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&quot;found&quot;</span><span class="p">,</span> <span class="n">has_und_at_both_ends</span><span class="p">)</span>
+    <span class="c"># So will this.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&quot;undead&quot;</span><span class="p">,</span> <span class="n">has_und_at_both_ends</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>At this point some people ask themselves, &#8220;why bother doing this at all? why
+not just have two separate assertions?&#8221;.  It&#8217;s a good question.</p>
+<p>The first reason is that when a <code class="docutils literal"><span class="pre">MatchesAll</span></code> gets a mismatch, the error will
+include information about all of the bits that mismatched.  When you have two
+separate assertions, as below:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_two_separate_assertions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+     <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="n">StartsWith</span><span class="p">(</span><span class="s">&quot;und&quot;</span><span class="p">))</span>
+     <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="s">&quot;foo&quot;</span><span class="p">,</span> <span class="n">EndsWith</span><span class="p">(</span><span class="s">&quot;und&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Then you get absolutely no information from the second assertion if the first
+assertion fails.  Tests are largely there to help you debug code, so having
+more information in error messages is a big help.</p>
+<p>The second reason is that it is sometimes useful to give a name to a set of
+matchers. <code class="docutils literal"><span class="pre">has_und_at_both_ends</span></code> is a bit contrived, of course, but it is
+clear.  The <code class="docutils literal"><span class="pre">FileExists</span></code> and <code class="docutils literal"><span class="pre">DirExists</span></code> matchers included in testtools
+are perhaps better real examples.</p>
+<p>If you want only the first mismatch to be reported, pass <code class="docutils literal"><span class="pre">first_only=True</span></code>
+as a keyword parameter to <code class="docutils literal"><span class="pre">MatchesAll</span></code>.</p>
+</div>
+<div class="section" id="matchesany">
+<h4>MatchesAny<a class="headerlink" href="#matchesany" title="Permalink to this headline">¶</a></h4>
+<p>Like <a class="reference internal" href="#matchesall">MatchesAll</a>, <code class="docutils literal"><span class="pre">MatchesAny</span></code> combines many matchers to make a new
+matcher.  The difference is that the new matchers will match a thing if it
+matches <em>any</em> of the component matchers.</p>
+<p>For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_matches_any_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="n">MatchesAny</span><span class="p">(</span><span class="n">Equals</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="n">Not</span><span class="p">(</span><span class="n">Equals</span><span class="p">(</span><span class="mi">6</span><span class="p">))))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="allmatch">
+<h4>AllMatch<a class="headerlink" href="#allmatch" title="Permalink to this headline">¶</a></h4>
+<p>Matches many values against a single matcher.  Can be used to make sure that
+many things all meet the same condition:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_all_match_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">],</span> <span class="n">AllMatch</span><span class="p">(</span><span class="n">LessThan</span><span class="p">(</span><span class="mi">10</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>If the match fails, then all of the values that fail to match will be included
+in the error message.</p>
+<p>In some ways, this is the converse of <a class="reference internal" href="#matchesall">MatchesAll</a>.</p>
+</div>
+<div class="section" id="matcheslistwise">
+<h4>MatchesListwise<a class="headerlink" href="#matcheslistwise" title="Permalink to this headline">¶</a></h4>
+<p>Where <code class="docutils literal"><span class="pre">MatchesAny</span></code> and <code class="docutils literal"><span class="pre">MatchesAll</span></code> combine many matchers to match a
+single value, <code class="docutils literal"><span class="pre">MatchesListwise</span></code> combines many matches to match many values.</p>
+<p>For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_matches_listwise_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">MatchesListwise</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">Equals</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])))</span>
+</pre></div>
+</div>
+<p>This is useful for writing custom, domain-specific matchers.</p>
+<p>If you want only the first mismatch to be reported, pass <code class="docutils literal"><span class="pre">first_only=True</span></code>
+to <code class="docutils literal"><span class="pre">MatchesListwise</span></code>.</p>
+</div>
+<div class="section" id="matchessetwise">
+<h4>MatchesSetwise<a class="headerlink" href="#matchessetwise" title="Permalink to this headline">¶</a></h4>
+<p>Combines many matchers to match many values, without regard to their order.</p>
+<p>Here&#8217;s an example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_matches_setwise_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="n">MatchesSetwise</span><span class="p">(</span><span class="n">Equals</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">Equals</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">Equals</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>Much like <code class="docutils literal"><span class="pre">MatchesListwise</span></code>, best used for writing custom, domain-specific
+matchers.</p>
+</div>
+<div class="section" id="matchesstructure">
+<h4>MatchesStructure<a class="headerlink" href="#matchesstructure" title="Permalink to this headline">¶</a></h4>
+<p>Creates a matcher that matches certain attributes of an object against a
+pre-defined set of matchers.</p>
+<p>It&#8217;s much easier to understand in Python than in English:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_matches_structure_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">foo</span> <span class="o">=</span> <span class="n">Foo</span><span class="p">()</span>
+    <span class="n">foo</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">foo</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">matcher</span> <span class="o">=</span> <span class="n">MatchesStructure</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">Equals</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">b</span><span class="o">=</span><span class="n">Equals</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span> <span class="n">matcher</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Since all of the matchers used were <code class="docutils literal"><span class="pre">Equals</span></code>, we could also write this using
+the <code class="docutils literal"><span class="pre">byEquality</span></code> helper:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_matches_structure_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">foo</span> <span class="o">=</span> <span class="n">Foo</span><span class="p">()</span>
+    <span class="n">foo</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">foo</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">matcher</span> <span class="o">=</span> <span class="n">MatchesStructure</span><span class="o">.</span><span class="n">byEquality</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span> <span class="n">matcher</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal"><span class="pre">MatchesStructure.fromExample</span></code> takes an object and a list of attributes and
+creates a <code class="docutils literal"><span class="pre">MatchesStructure</span></code> matcher where each attribute of the matched
+object must equal each attribute of the example object.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">matcher</span> <span class="o">=</span> <span class="n">MatchesStructure</span><span class="o">.</span><span class="n">fromExample</span><span class="p">(</span><span class="n">foo</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>is exactly equivalent to <code class="docutils literal"><span class="pre">matcher</span></code> in the previous example.</p>
+</div>
+<div class="section" id="matchespredicate">
+<h4>MatchesPredicate<a class="headerlink" href="#matchespredicate" title="Permalink to this headline">¶</a></h4>
+<p>Sometimes, all you want to do is create a matcher that matches if a given
+function returns True, and mismatches if it returns False.</p>
+<p>For example, you might have an <code class="docutils literal"><span class="pre">is_prime</span></code> function and want to make a
+matcher based on it:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_prime_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">IsPrime</span> <span class="o">=</span> <span class="n">MatchesPredicate</span><span class="p">(</span><span class="n">is_prime</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> is not prime.&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="n">IsPrime</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="mi">1983</span><span class="p">,</span> <span class="n">IsPrime</span><span class="p">)</span>
+    <span class="c"># This will fail.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="n">IsPrime</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Which will produce the error message:</p>
+<div class="highlight-python"><div class="highlight"><pre>Traceback (most recent call last):
+  File &quot;...&quot;, line ..., in test_prime_numbers
+    self.assertThat(42, IsPrime)
+MismatchError: 42 is not prime.
+</pre></div>
+</div>
+</div>
+<div class="section" id="matchespredicatewithparams">
+<h4>MatchesPredicateWithParams<a class="headerlink" href="#matchespredicatewithparams" title="Permalink to this headline">¶</a></h4>
+<p>Sometimes you can&#8217;t use a trivial predicate and instead need to pass in some
+parameters each time. In that case, MatchesPredicateWithParams is your go-to
+tool for creating ad hoc matchers. MatchesPredicateWithParams takes a predicate
+function and message and returns a factory to produce matchers from that. The
+predicate needs to return a boolean (or any truthy object), and accept the
+object to match + whatever was passed into the factory.</p>
+<p>For example, you might have an <code class="docutils literal"><span class="pre">divisible</span></code> function and want to make a
+matcher based on it:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_divisible_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">IsDivisibleBy</span> <span class="o">=</span> <span class="n">MatchesPredicateWithParams</span><span class="p">(</span>
+        <span class="n">divisible</span><span class="p">,</span> <span class="s">&#39;{0} is not divisible by {1}&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="n">IsDivisibleBy</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="n">IsDivisibleBy</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="n">IsDivisibleBy</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+    <span class="c"># This will fail.</span>
+</pre></div>
+</div>
+<p>Which will produce the error message:</p>
+<div class="highlight-python"><div class="highlight"><pre>Traceback (most recent call last):
+  File &quot;...&quot;, line ..., in test_divisible
+    self.assertThat(7, IsDivisibleBy(2))
+MismatchError: 7 is not divisible by 2.
+</pre></div>
+</div>
+</div>
+<div class="section" id="raises">
+<h4>Raises<a class="headerlink" href="#raises" title="Permalink to this headline">¶</a></h4>
+<p>Takes whatever the callable raises as an exc_info tuple and matches it against
+whatever matcher it was given.  For example, if you want to assert that a
+callable raises an exception of a given type:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_raises_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="mi">1</span><span class="o">/</span><span class="mi">0</span><span class="p">,</span> <span class="n">Raises</span><span class="p">(</span><span class="n">MatchesException</span><span class="p">(</span><span class="ne">ZeroDivisionError</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>Although note that this could also be written as:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_raises_example_convenient</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">1</span><span class="o">/</span><span class="mi">0</span><span class="p">,</span> <span class="n">raises</span><span class="p">(</span><span class="ne">ZeroDivisionError</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>See also <a class="reference internal" href="#matchesexception">MatchesException</a> and <a class="reference internal" href="#the-raises-helper">the raises helper</a></p>
+</div>
+</div>
+<div class="section" id="writing-your-own-matchers">
+<h3>Writing your own matchers<a class="headerlink" href="#writing-your-own-matchers" title="Permalink to this headline">¶</a></h3>
+<p>Combining matchers is fun and can get you a very long way indeed, but
+sometimes you will have to write your own.  Here&#8217;s how.</p>
+<p>You need to make two closely-linked objects: a <code class="docutils literal"><span class="pre">Matcher</span></code> and a
+<code class="docutils literal"><span class="pre">Mismatch</span></code>.  The <code class="docutils literal"><span class="pre">Matcher</span></code> knows how to actually make the comparison, and
+the <code class="docutils literal"><span class="pre">Mismatch</span></code> knows how to describe a failure to match.</p>
+<p>Here&#8217;s an example matcher:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">IsDivisibleBy</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Match if a number is divisible by another number.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">divider</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">divider</span> <span class="o">=</span> <span class="n">divider</span>
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;IsDivisibleBy(</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">divider</span><span class="p">,)</span>
+    <span class="k">def</span> <span class="nf">match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actual</span><span class="p">):</span>
+        <span class="n">remainder</span> <span class="o">=</span> <span class="n">actual</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">divider</span>
+        <span class="k">if</span> <span class="n">remainder</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">IsDivisibleByMismatch</span><span class="p">(</span><span class="n">actual</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">divider</span><span class="p">,</span> <span class="n">remainder</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+</pre></div>
+</div>
+<p>The matcher has a constructor that takes parameters that describe what you
+actually <em>expect</em>, in this case a number that other numbers ought to be
+divisible by.  It has a <code class="docutils literal"><span class="pre">__str__</span></code> method, the result of which is displayed
+on failure by <code class="docutils literal"><span class="pre">assertThat</span></code> and a <code class="docutils literal"><span class="pre">match</span></code> method that does the actual
+matching.</p>
+<p><code class="docutils literal"><span class="pre">match</span></code> takes something to match against, here <code class="docutils literal"><span class="pre">actual</span></code>, and decides
+whether or not it matches.  If it does match, then <code class="docutils literal"><span class="pre">match</span></code> must return
+<code class="docutils literal"><span class="pre">None</span></code>.  If it does <em>not</em> match, then <code class="docutils literal"><span class="pre">match</span></code> must return a <code class="docutils literal"><span class="pre">Mismatch</span></code>
+object. <code class="docutils literal"><span class="pre">assertThat</span></code> will call <code class="docutils literal"><span class="pre">match</span></code> and then fail the test if it
+returns a non-None value.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_is_divisible_by_example</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c"># This succeeds, since IsDivisibleBy(5).match(10) returns None.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">IsDivisibleBy</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+    <span class="c"># This fails, since IsDivisibleBy(7).match(10) returns a mismatch.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">IsDivisibleBy</span><span class="p">(</span><span class="mi">7</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The mismatch is responsible for what sort of error message the failing test
+generates.  Here&#8217;s an example mismatch:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">IsDivisibleByMismatch</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">,</span> <span class="n">divider</span><span class="p">,</span> <span class="n">remainder</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="n">number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">divider</span> <span class="o">=</span> <span class="n">divider</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remainder</span> <span class="o">=</span> <span class="n">remainder</span>
+
+    <span class="k">def</span> <span class="nf">describe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;</span><span class="si">%r</span><span class="s"> is not divisible by </span><span class="si">%r</span><span class="s">, </span><span class="si">%r</span><span class="s"> remains&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">divider</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remainder</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_details</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span>
+</pre></div>
+</div>
+<p>The mismatch takes information about the mismatch, and provides a <code class="docutils literal"><span class="pre">describe</span></code>
+method that assembles all of that into a nice error message for end users.
+You can use the <code class="docutils literal"><span class="pre">get_details</span></code> method to provide extra, arbitrary data with
+the mismatch (e.g. the contents of a log file).  Most of the time it&#8217;s fine to
+just return an empty dict.  You can read more about <a class="reference internal" href="#details">Details</a> elsewhere in this
+document.</p>
+<p>Sometimes you don&#8217;t need to create a custom mismatch class.  In particular, if
+you don&#8217;t care <em>when</em> the description is calculated, then you can just do that
+in the Matcher itself like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actual</span><span class="p">):</span>
+    <span class="n">remainder</span> <span class="o">=</span> <span class="n">actual</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">divider</span>
+    <span class="k">if</span> <span class="n">remainder</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Mismatch</span><span class="p">(</span>
+            <span class="s">&quot;</span><span class="si">%r</span><span class="s"> is not divisible by </span><span class="si">%r</span><span class="s">, </span><span class="si">%r</span><span class="s"> remains&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">actual</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">divider</span><span class="p">,</span> <span class="n">remainder</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+</pre></div>
+</div>
+<p>When writing a <code class="docutils literal"><span class="pre">describe</span></code> method or constructing a <code class="docutils literal"><span class="pre">Mismatch</span></code> object the
+code should ensure it only emits printable unicode.  As this output must be
+combined with other text and forwarded for presentation, letting through
+non-ascii bytes of ambiguous encoding or control characters could throw an
+exception or mangle the display.  In most cases simply avoiding the <code class="docutils literal"><span class="pre">%s</span></code>
+format specifier and using <code class="docutils literal"><span class="pre">%r</span></code> instead will be enough.  For examples of
+more complex formatting see the <code class="docutils literal"><span class="pre">testtools.matchers</span></code> implementatons.</p>
+</div>
+</div>
+<div class="section" id="details">
+<h2>Details<a class="headerlink" href="#details" title="Permalink to this headline">¶</a></h2>
+<p>As we may have mentioned once or twice already, one of the great benefits of
+automated tests is that they help find, isolate and debug errors in your
+system.</p>
+<p>Frequently however, the information provided by a mere assertion failure is
+not enough.  It&#8217;s often useful to have other information: the contents of log
+files; what queries were run; benchmark timing information; what state certain
+subsystem components are in and so forth.</p>
+<p>testtools calls all of these things &#8220;details&#8221; and provides a single, powerful
+mechanism for including this information in your test run.</p>
+<p>Here&#8217;s an example of how to add them:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">testtools</span> <span class="kn">import</span> <span class="n">TestCase</span>
+<span class="kn">from</span> <span class="nn">testtools.content</span> <span class="kn">import</span> <span class="n">text_content</span>
+
+<span class="k">class</span> <span class="nc">TestSomething</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_thingy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addDetail</span><span class="p">(</span><span class="s">&#39;arbitrary-color-name&#39;</span><span class="p">,</span> <span class="n">text_content</span><span class="p">(</span><span class="s">&quot;blue&quot;</span><span class="p">))</span>
+        <span class="mi">1</span> <span class="o">/</span> <span class="mi">0</span> <span class="c"># Gratuitous error!</span>
+</pre></div>
+</div>
+<p>A detail an arbitrary piece of content given a name that&#8217;s unique within the
+test.  Here the name is <code class="docutils literal"><span class="pre">arbitrary-color-name</span></code> and the content is
+<code class="docutils literal"><span class="pre">text_content(&quot;blue&quot;)</span></code>.  The name can be any text string, and the content
+can be any <code class="docutils literal"><span class="pre">testtools.content.Content</span></code> object.</p>
+<p>When the test runs, testtools will show you something like this:</p>
+<div class="highlight-python"><div class="highlight"><pre>======================================================================
+ERROR: exampletest.TestSomething.test_thingy
+----------------------------------------------------------------------
+arbitrary-color-name: {{{blue}}}
+
+Traceback (most recent call last):
+  File &quot;exampletest.py&quot;, line 8, in test_thingy
+    1 / 0 # Gratuitous error!
+ZeroDivisionError: integer division or modulo by zero
+------------
+Ran 1 test in 0.030s
+</pre></div>
+</div>
+<p>As you can see, the detail is included as an attachment, here saying
+that our arbitrary-color-name is &#8220;blue&#8221;.</p>
+<div class="section" id="content">
+<h3>Content<a class="headerlink" href="#content" title="Permalink to this headline">¶</a></h3>
+<p>For the actual content of details, testtools uses its own MIME-based Content
+object.  This allows you to attach any information that you could possibly
+conceive of to a test, and allows testtools to use or serialize that
+information.</p>
+<p>The basic <code class="docutils literal"><span class="pre">testtools.content.Content</span></code> object is constructed from a
+<code class="docutils literal"><span class="pre">testtools.content.ContentType</span></code> and a nullary callable that must return an
+iterator of chunks of bytes that the content is made from.</p>
+<p>So, to make a Content object that is just a simple string of text, you can
+do:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">testtools.content</span> <span class="kn">import</span> <span class="n">Content</span>
+<span class="kn">from</span> <span class="nn">testtools.content_type</span> <span class="kn">import</span> <span class="n">ContentType</span>
+
+<span class="n">text</span> <span class="o">=</span> <span class="n">Content</span><span class="p">(</span><span class="n">ContentType</span><span class="p">(</span><span class="s">&#39;text&#39;</span><span class="p">,</span> <span class="s">&#39;plain&#39;</span><span class="p">),</span> <span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;some text&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Because adding small bits of text content is very common, there&#8217;s also a
+convenience method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">text</span> <span class="o">=</span> <span class="n">text_content</span><span class="p">(</span><span class="s">&quot;some text&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To make content out of an image stored on disk, you could do something like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">image</span> <span class="o">=</span> <span class="n">Content</span><span class="p">(</span><span class="n">ContentType</span><span class="p">(</span><span class="s">&#39;image&#39;</span><span class="p">,</span> <span class="s">&#39;png&#39;</span><span class="p">),</span> <span class="k">lambda</span><span class="p">:</span> <span class="nb">open</span><span class="p">(</span><span class="s">&#39;foo.png&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>Or you could use the convenience function:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">image</span> <span class="o">=</span> <span class="n">content_from_file</span><span class="p">(</span><span class="s">&#39;foo.png&#39;</span><span class="p">,</span> <span class="n">ContentType</span><span class="p">(</span><span class="s">&#39;image&#39;</span><span class="p">,</span> <span class="s">&#39;png&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal"><span class="pre">lambda</span></code> helps make sure that the file is opened and the actual bytes
+read only when they are needed – by default, when the test is finished.  This
+means that tests can construct and add Content objects freely without worrying
+too much about how they affect run time.</p>
+</div>
+<div class="section" id="a-realistic-example">
+<h3>A realistic example<a class="headerlink" href="#a-realistic-example" title="Permalink to this headline">¶</a></h3>
+<p>A very common use of details is to add a log file to failing tests.  Say your
+project has a server represented by a class <code class="docutils literal"><span class="pre">SomeServer</span></code> that you can start
+up and shut down in tests, but runs in another process.  You want to test
+interaction with that server, and whenever the interaction fails, you want to
+see the client-side error <em>and</em> the logs from the server-side.  Here&#8217;s how you
+might do it:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">testtools</span> <span class="kn">import</span> <span class="n">TestCase</span>
+<span class="kn">from</span> <span class="nn">testtools.content</span> <span class="kn">import</span> <span class="n">attach_file</span><span class="p">,</span> <span class="n">Content</span>
+<span class="kn">from</span> <span class="nn">testtools.content_type</span> <span class="kn">import</span> <span class="n">UTF8_TEXT</span>
+
+<span class="kn">from</span> <span class="nn">myproject</span> <span class="kn">import</span> <span class="n">SomeServer</span>
+
+<span class="k">class</span> <span class="nc">SomeTestCase</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SomeTestCase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">SomeServer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">start_up</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addCleanup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">shut_down</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addCleanup</span><span class="p">(</span><span class="n">attach_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">logfile</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">attach_log_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addDetail</span><span class="p">(</span>
+            <span class="s">&#39;log-file&#39;</span><span class="p">,</span>
+            <span class="n">Content</span><span class="p">(</span><span class="n">UTF8_TEXT</span><span class="p">,</span>
+                    <span class="k">lambda</span><span class="p">:</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">logfile</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">readlines</span><span class="p">()))</span>
+
+    <span class="k">def</span> <span class="nf">test_a_thing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="s">&quot;cool&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This test will attach the log file of <code class="docutils literal"><span class="pre">SomeServer</span></code> to each test that is
+run.  testtools will only display the log file for failing tests, so it&#8217;s not
+such a big deal.</p>
+<p>If the act of adding at detail is expensive, you might want to use
+<a class="reference internal" href="#addonexception">addOnException</a> so that you only do it when a test actually raises an
+exception.</p>
+</div>
+</div>
+<div class="section" id="controlling-test-execution">
+<h2>Controlling test execution<a class="headerlink" href="#controlling-test-execution" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="addcleanup">
+<span id="id1"></span><h3>addCleanup<a class="headerlink" href="#addcleanup" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal"><span class="pre">TestCase.addCleanup</span></code> is a robust way to arrange for a clean up function to
+be called before <code class="docutils literal"><span class="pre">tearDown</span></code>.  This is a powerful and simple alternative to
+putting clean up logic in a try/finally block or <code class="docutils literal"><span class="pre">tearDown</span></code> method.  For
+example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_foo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">foo</span><span class="o">.</span><span class="n">lock</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addCleanup</span><span class="p">(</span><span class="n">foo</span><span class="o">.</span><span class="n">unlock</span><span class="p">)</span>
+    <span class="o">...</span>
+</pre></div>
+</div>
+<p>This is particularly useful if you have some sort of factory in your test:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">make_locked_foo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">foo</span> <span class="o">=</span> <span class="n">Foo</span><span class="p">()</span>
+    <span class="n">foo</span><span class="o">.</span><span class="n">lock</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addCleanup</span><span class="p">(</span><span class="n">foo</span><span class="o">.</span><span class="n">unlock</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">foo</span>
+
+<span class="k">def</span> <span class="nf">test_frotz_a_foo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">foo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_locked_foo</span><span class="p">()</span>
+    <span class="n">foo</span><span class="o">.</span><span class="n">frotz</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">foo</span><span class="o">.</span><span class="n">frotz_count</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Any extra arguments or keyword arguments passed to <code class="docutils literal"><span class="pre">addCleanup</span></code> are passed
+to the callable at cleanup time.</p>
+<p>Cleanups can also report multiple errors, if appropriate by wrapping them in
+a <code class="docutils literal"><span class="pre">testtools.MultipleExceptions</span></code> object:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">raise</span> <span class="n">MultipleExceptions</span><span class="p">(</span><span class="n">exc_info1</span><span class="p">,</span> <span class="n">exc_info2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="fixtures">
+<h3>Fixtures<a class="headerlink" href="#fixtures" title="Permalink to this headline">¶</a></h3>
+<p>Tests often depend on a system being set up in a certain way, or having
+certain resources available to them.  Perhaps a test needs a connection to the
+database or access to a running external server.</p>
+<p>One common way of doing this is to do:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">SomeTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SomeTest</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addCleanup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">tearDown</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>testtools provides a more convenient, declarative way to do the same thing:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">SomeTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SomeTest</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">useFixture</span><span class="p">(</span><span class="n">Server</span><span class="p">())</span>
+</pre></div>
+</div>
+<p><code class="docutils literal"><span class="pre">useFixture(fixture)</span></code> calls <code class="docutils literal"><span class="pre">setUp</span></code> on the fixture, schedules a clean up
+to clean it up, and schedules a clean up to attach all <a class="reference internal" href="#details">details</a> held by the
+fixture to the test case.  The fixture object must meet the
+<code class="docutils literal"><span class="pre">fixtures.Fixture</span></code> protocol (version 0.3.4 or newer, see <a class="reference external" href="http://pypi.python.org/pypi/fixtures">fixtures</a>).</p>
+<p>If you have anything beyond the most simple test set up, we recommend that
+you put this set up into a <code class="docutils literal"><span class="pre">Fixture</span></code> class.  Once there, the fixture can be
+easily re-used by other tests and can be combined with other fixtures to make
+more complex resources.</p>
+</div>
+<div class="section" id="skipping-tests">
+<h3>Skipping tests<a class="headerlink" href="#skipping-tests" title="Permalink to this headline">¶</a></h3>
+<p>Many reasons exist to skip a test: a dependency might be missing; a test might
+be too expensive and thus should not berun while on battery power; or perhaps
+the test is testing an incomplete feature.</p>
+<p><code class="docutils literal"><span class="pre">TestCase.skipTest</span></code> is a simple way to have a test stop running and be
+reported as a skipped test, rather than a success, error or failure.  For
+example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_make_symlink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">symlink</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">os</span><span class="p">,</span> <span class="s">&#39;symlink&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">symlink</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">skipTest</span><span class="p">(</span><span class="s">&quot;No symlink support&quot;</span><span class="p">)</span>
+    <span class="n">symlink</span><span class="p">(</span><span class="n">whatever</span><span class="p">,</span> <span class="n">something_else</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Using <code class="docutils literal"><span class="pre">skipTest</span></code> means that you can make decisions about what tests to run
+as late as possible, and close to the actual tests.  Without it, you might be
+forced to use convoluted logic during test loading, which is a bit of a mess.</p>
+<div class="section" id="legacy-skip-support">
+<h4>Legacy skip support<a class="headerlink" href="#legacy-skip-support" title="Permalink to this headline">¶</a></h4>
+<p>If you are using this feature when running your test suite with a legacy
+<code class="docutils literal"><span class="pre">TestResult</span></code> object that is missing the <code class="docutils literal"><span class="pre">addSkip</span></code> method, then the
+<code class="docutils literal"><span class="pre">addError</span></code> method will be invoked instead.  If you are using a test result
+from testtools, you do not have to worry about this.</p>
+<p>In older versions of testtools, <code class="docutils literal"><span class="pre">skipTest</span></code> was known as <code class="docutils literal"><span class="pre">skip</span></code>. Since
+Python 2.7 added <code class="docutils literal"><span class="pre">skipTest</span></code> support, the <code class="docutils literal"><span class="pre">skip</span></code> name is now deprecated.
+No warning is emitted yet – some time in the future we may do so.</p>
+</div>
+</div>
+<div class="section" id="addonexception">
+<h3>addOnException<a class="headerlink" href="#addonexception" title="Permalink to this headline">¶</a></h3>
+<p>Sometimes, you might wish to do something only when a test fails.  Perhaps you
+need to run expensive diagnostic routines or some such.
+<code class="docutils literal"><span class="pre">TestCase.addOnException</span></code> allows you to easily do just this.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">SomeTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SomeTest</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">useFixture</span><span class="p">(</span><span class="n">SomeServer</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addOnException</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">attach_server_diagnostics</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">attach_server_diagnostics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_info</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">prep_for_diagnostics</span><span class="p">()</span> <span class="c"># Expensive!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addDetail</span><span class="p">(</span><span class="s">&#39;server-diagnostics&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">get_diagnostics</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_a_thing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="s">&#39;cheese&#39;</span><span class="p">,</span> <span class="s">&#39;chalk&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this example, <code class="docutils literal"><span class="pre">attach_server_diagnostics</span></code> will only be called when a test
+fails.  It is given the exc_info tuple of the error raised by the test, just
+in case it is needed.</p>
+</div>
+<div class="section" id="twisted-support">
+<h3>Twisted support<a class="headerlink" href="#twisted-support" title="Permalink to this headline">¶</a></h3>
+<p>testtools provides <em>highly experimental</em> support for running Twisted tests –
+tests that return a <a class="reference external" href="http://twistedmatrix.com/documents/current/core/howto/defer.html">Deferred</a> and rely on the Twisted reactor.  You should not
+use this feature right now.  We reserve the right to change the API and
+behaviour without telling you first.</p>
+<p>However, if you are going to, here&#8217;s how you do it:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">testtools</span> <span class="kn">import</span> <span class="n">TestCase</span>
+<span class="kn">from</span> <span class="nn">testtools.deferredruntest</span> <span class="kn">import</span> <span class="n">AsynchronousDeferredRunTest</span>
+
+<span class="k">class</span> <span class="nc">MyTwistedTests</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="n">run_tests_with</span> <span class="o">=</span> <span class="n">AsynchronousDeferredRunTest</span>
+
+    <span class="k">def</span> <span class="nf">test_foo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># ...</span>
+        <span class="k">return</span> <span class="n">d</span>
+</pre></div>
+</div>
+<p>In particular, note that you do <em>not</em> have to use a special base <code class="docutils literal"><span class="pre">TestCase</span></code>
+in order to run Twisted tests.</p>
+<p>You can also run individual tests within a test case class using the Twisted
+test runner:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyTestsSomeOfWhichAreTwisted</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_normal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@run_test_with</span><span class="p">(</span><span class="n">AsynchronousDeferredRunTest</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_twisted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># ...</span>
+        <span class="k">return</span> <span class="n">d</span>
+</pre></div>
+</div>
+<p>Here are some tips for converting your Trial tests into testtools tests.</p>
+<ul class="simple">
+<li>Use the <code class="docutils literal"><span class="pre">AsynchronousDeferredRunTest</span></code> runner</li>
+<li>Make sure to upcall to <code class="docutils literal"><span class="pre">setUp</span></code> and <code class="docutils literal"><span class="pre">tearDown</span></code></li>
+<li>Don&#8217;t use <code class="docutils literal"><span class="pre">setUpClass</span></code> or <code class="docutils literal"><span class="pre">tearDownClass</span></code></li>
+<li>Don&#8217;t expect setting .todo, .timeout or .skip attributes to do anything</li>
+<li><code class="docutils literal"><span class="pre">flushLoggedErrors</span></code> is <code class="docutils literal"><span class="pre">testtools.deferredruntest.flush_logged_errors</span></code></li>
+<li><code class="docutils literal"><span class="pre">assertFailure</span></code> is <code class="docutils literal"><span class="pre">testtools.deferredruntest.assert_fails_with</span></code></li>
+<li>Trial spins the reactor a couple of times before cleaning it up,
+<code class="docutils literal"><span class="pre">AsynchronousDeferredRunTest</span></code> does not.  If you rely on this behavior, use
+<code class="docutils literal"><span class="pre">AsynchronousDeferredRunTestForBrokenTwisted</span></code>.</li>
+</ul>
+</div>
+<div class="section" id="force-failure">
+<h3>force_failure<a class="headerlink" href="#force-failure" title="Permalink to this headline">¶</a></h3>
+<p>Setting the <code class="docutils literal"><span class="pre">testtools.TestCase.force_failure</span></code> instance variable to <code class="docutils literal"><span class="pre">True</span></code>
+will cause the test to be marked as a failure, but won&#8217;t stop the test code
+from running (see <a class="reference internal" href="for-framework-folk.html#force-failure"><span>Delayed Test Failure</span></a>).</p>
+</div>
+</div>
+<div class="section" id="test-helpers">
+<h2>Test helpers<a class="headerlink" href="#test-helpers" title="Permalink to this headline">¶</a></h2>
+<p>testtools comes with a few little things that make it a little bit easier to
+write tests.</p>
+<div class="section" id="testcase-patch">
+<h3>TestCase.patch<a class="headerlink" href="#testcase-patch" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal"><span class="pre">patch</span></code> is a convenient way to monkey-patch a Python object for the duration
+of your test.  It&#8217;s especially useful for testing legacy code.  e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">test_foo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">my_stream</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="n">sys</span><span class="p">,</span> <span class="s">&#39;stderr&#39;</span><span class="p">,</span> <span class="n">my_stream</span><span class="p">)</span>
+    <span class="n">run_some_code_that_prints_to_stderr</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">my_stream</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>The call to <code class="docutils literal"><span class="pre">patch</span></code> above masks <code class="docutils literal"><span class="pre">sys.stderr</span></code> with <code class="docutils literal"><span class="pre">my_stream</span></code> so that
+anything printed to stderr will be captured in a StringIO variable that can be
+actually tested. Once the test is done, the real <code class="docutils literal"><span class="pre">sys.stderr</span></code> is restored to
+its rightful place.</p>
+</div>
+<div class="section" id="creation-methods">
+<h3>Creation methods<a class="headerlink" href="#creation-methods" title="Permalink to this headline">¶</a></h3>
+<p>Often when writing unit tests, you want to create an object that is a
+completely normal instance of its type.  You don&#8217;t want there to be anything
+special about its properties, because you are testing generic behaviour rather
+than specific conditions.</p>
+<p>A lot of the time, test authors do this by making up silly strings and numbers
+and passing them to constructors (e.g. 42, &#8216;foo&#8217;, &#8220;bar&#8221; etc), and that&#8217;s
+fine.  However, sometimes it&#8217;s useful to be able to create arbitrary objects
+at will, without having to make up silly sample data.</p>
+<p>To help with this, <code class="docutils literal"><span class="pre">testtools.TestCase</span></code> implements creation methods called
+<code class="docutils literal"><span class="pre">getUniqueString</span></code> and <code class="docutils literal"><span class="pre">getUniqueInteger</span></code>.  They return strings and
+integers that are unique within the context of the test that can be used to
+assemble more complex objects.  Here&#8217;s a basic example where
+<code class="docutils literal"><span class="pre">getUniqueString</span></code> is used instead of saying &#8220;foo&#8221; or &#8220;bar&#8221; or whatever:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">SomeTest</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_full_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">first_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getUniqueString</span><span class="p">()</span>
+        <span class="n">last_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getUniqueString</span><span class="p">()</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Person</span><span class="p">(</span><span class="n">first_name</span><span class="p">,</span> <span class="n">last_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">full_name</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">first_name</span><span class="p">,</span> <span class="n">last_name</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>And here&#8217;s how it could be used to make a complicated test:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">TestCoupleLogic</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">make_arbitrary_person</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Person</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getUniqueString</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">getUniqueString</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">test_get_invitation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_arbitrary_person</span><span class="p">()</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_arbitrary_person</span><span class="p">()</span>
+        <span class="n">couple</span> <span class="o">=</span> <span class="n">Couple</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+        <span class="n">event_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getUniqueString</span><span class="p">()</span>
+        <span class="n">invitation</span> <span class="o">=</span> <span class="n">couple</span><span class="o">.</span><span class="n">get_invitation</span><span class="p">(</span><span class="n">event_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span>
+            <span class="n">invitation</span><span class="p">,</span>
+            <span class="s">&quot;We invite </span><span class="si">%s</span><span class="s"> and </span><span class="si">%s</span><span class="s"> to </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">a</span><span class="o">.</span><span class="n">full_name</span><span class="p">,</span> <span class="n">b</span><span class="o">.</span><span class="n">full_name</span><span class="p">,</span> <span class="n">event_name</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Essentially, creation methods like these are a way of reducing the number of
+assumptions in your tests and communicating to test readers that the exact
+details of certain variables don&#8217;t actually matter.</p>
+<p>See pages 419-423 of <a class="reference external" href="http://xunitpatterns.com/">xUnit Test Patterns</a> by Gerard Meszaros for a detailed
+discussion of creation methods.</p>
+</div>
+<div class="section" id="test-attributes">
+<h3>Test attributes<a class="headerlink" href="#test-attributes" title="Permalink to this headline">¶</a></h3>
+<p>Inspired by the <code class="docutils literal"><span class="pre">nosetests</span></code> <code class="docutils literal"><span class="pre">attr</span></code> plugin, testtools provides support for
+marking up test methods with attributes, which are then exposed in the test
+id and can be used when filtering tests by id. (e.g. via <code class="docutils literal"><span class="pre">--load-list</span></code>):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">testtools.testcase</span> <span class="kn">import</span> <span class="n">attr</span><span class="p">,</span> <span class="n">WithAttributes</span>
+
+<span class="k">class</span> <span class="nc">AnnotatedTests</span><span class="p">(</span><span class="n">WithAttributes</span><span class="p">,</span> <span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="nd">@attr</span><span class="p">(</span><span class="s">&#39;simple&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_one</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@attr</span><span class="p">(</span><span class="s">&#39;more&#39;</span><span class="p">,</span> <span class="s">&#39;than&#39;</span><span class="p">,</span> <span class="s">&#39;one&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_two</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@attr</span><span class="p">(</span><span class="s">&#39;or&#39;</span><span class="p">)</span>
+    <span class="nd">@attr</span><span class="p">(</span><span class="s">&#39;stacked&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_three</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="general-helpers">
+<h2>General helpers<a class="headerlink" href="#general-helpers" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="conditional-imports">
+<h3>Conditional imports<a class="headerlink" href="#conditional-imports" title="Permalink to this headline">¶</a></h3>
+<p>Lots of the time we would like to conditionally import modules.  testtools
+uses the small library extras to do this. This used to be part of testtools.</p>
+<p>Instead of:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">twisted.internet</span> <span class="kn">import</span> <span class="n">defer</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">defer</span> <span class="o">=</span> <span class="bp">None</span>
+</pre></div>
+</div>
+<p>You can do:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">defer</span> <span class="o">=</span> <span class="n">try_import</span><span class="p">(</span><span class="s">&#39;twisted.internet.defer&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Instead of:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">StringIO</span> <span class="kn">import</span> <span class="n">StringIO</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
+</pre></div>
+</div>
+<p>You can do:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">StringIO</span> <span class="o">=</span> <span class="n">try_imports</span><span class="p">([</span><span class="s">&#39;StringIO.StringIO&#39;</span><span class="p">,</span> <span class="s">&#39;io.StringIO&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="safe-attribute-testing">
+<h3>Safe attribute testing<a class="headerlink" href="#safe-attribute-testing" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal"><span class="pre">hasattr</span></code> is <a class="reference external" href="http://chipaca.com/post/3210673069/hasattr-17-less-harmful">broken</a> on many versions of Python. The helper <code class="docutils literal"><span class="pre">safe_hasattr</span></code>
+can be used to safely test whether an object has a particular attribute. Like
+<code class="docutils literal"><span class="pre">try_import</span></code> this used to be in testtools but is now in extras.</p>
+</div>
+<div class="section" id="nullary-callables">
+<h3>Nullary callables<a class="headerlink" href="#nullary-callables" title="Permalink to this headline">¶</a></h3>
+<p>Sometimes you want to be able to pass around a function with the arguments
+already specified.  The normal way of doing this in Python is:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">nullary</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="n">nullary</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Which is mostly good enough, but loses a bit of debugging information.  If you
+take the <code class="docutils literal"><span class="pre">repr()</span></code> of <code class="docutils literal"><span class="pre">nullary</span></code>, you&#8217;re only told that it&#8217;s a lambda, and
+you get none of the juicy meaning that you&#8217;d get from the <code class="docutils literal"><span class="pre">repr()</span></code> of <code class="docutils literal"><span class="pre">f</span></code>.</p>
+<p>The solution is to use <code class="docutils literal"><span class="pre">Nullary</span></code> instead:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">nullary</span> <span class="o">=</span> <span class="n">Nullary</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="n">nullary</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Here, <code class="docutils literal"><span class="pre">repr(nullary)</span></code> will be the same as <code class="docutils literal"><span class="pre">repr(f)</span></code>.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">testtools for test authors</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#the-basics">The basics</a><ul>
+<li><a class="reference internal" href="#running-your-tests">Running your tests</a><ul>
+<li><a class="reference internal" href="#running-test-with-distutils">Running test with Distutils</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#assertions">Assertions</a><ul>
+<li><a class="reference internal" href="#improved-assertraises">Improved assertRaises</a></li>
+<li><a class="reference internal" href="#expectedexception">ExpectedException</a></li>
+<li><a class="reference internal" href="#assertin-assertnotin">assertIn, assertNotIn</a></li>
+<li><a class="reference internal" href="#assertis-assertisnot">assertIs, assertIsNot</a></li>
+<li><a class="reference internal" href="#assertisinstance">assertIsInstance</a></li>
+<li><a class="reference internal" href="#expectfailure">expectFailure</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#matchers">Matchers</a><ul>
+<li><a class="reference internal" href="#using-matchers">Using Matchers</a></li>
+<li><a class="reference internal" href="#assert-that-function"><code class="docutils literal"><span class="pre">assert_that</span></code> Function</a><ul>
+<li><a class="reference internal" href="#delayed-assertions">Delayed Assertions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#stock-matchers">Stock matchers</a><ul>
+<li><a class="reference internal" href="#equals">Equals</a></li>
+<li><a class="reference internal" href="#is">Is</a></li>
+<li><a class="reference internal" href="#isinstance">IsInstance</a></li>
+<li><a class="reference internal" href="#the-raises-helper">The raises helper</a></li>
+<li><a class="reference internal" href="#doctestmatches">DocTestMatches</a></li>
+<li><a class="reference internal" href="#greaterthan">GreaterThan</a></li>
+<li><a class="reference internal" href="#lessthan">LessThan</a></li>
+<li><a class="reference internal" href="#startswith-endswith">StartsWith, EndsWith</a></li>
+<li><a class="reference internal" href="#contains">Contains</a></li>
+<li><a class="reference internal" href="#matchesexception">MatchesException</a></li>
+<li><a class="reference internal" href="#notequals">NotEquals</a></li>
+<li><a class="reference internal" href="#keysequal">KeysEqual</a></li>
+<li><a class="reference internal" href="#matchesregex">MatchesRegex</a></li>
+<li><a class="reference internal" href="#haslength">HasLength</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#file-and-path-related-matchers">File- and path-related matchers</a><ul>
+<li><a class="reference internal" href="#pathexists">PathExists</a></li>
+<li><a class="reference internal" href="#direxists">DirExists</a></li>
+<li><a class="reference internal" href="#fileexists">FileExists</a></li>
+<li><a class="reference internal" href="#dircontains">DirContains</a></li>
+<li><a class="reference internal" href="#filecontains">FileContains</a></li>
+<li><a class="reference internal" href="#haspermissions">HasPermissions</a></li>
+<li><a class="reference internal" href="#samepath">SamePath</a></li>
+<li><a class="reference internal" href="#tarballcontains">TarballContains</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#combining-matchers">Combining matchers</a><ul>
+<li><a class="reference internal" href="#not">Not</a></li>
+<li><a class="reference internal" href="#annotate">Annotate</a></li>
+<li><a class="reference internal" href="#afterpreprocessing">AfterPreprocessing</a></li>
+<li><a class="reference internal" href="#matchesall">MatchesAll</a></li>
+<li><a class="reference internal" href="#matchesany">MatchesAny</a></li>
+<li><a class="reference internal" href="#allmatch">AllMatch</a></li>
+<li><a class="reference internal" href="#matcheslistwise">MatchesListwise</a></li>
+<li><a class="reference internal" href="#matchessetwise">MatchesSetwise</a></li>
+<li><a class="reference internal" href="#matchesstructure">MatchesStructure</a></li>
+<li><a class="reference internal" href="#matchespredicate">MatchesPredicate</a></li>
+<li><a class="reference internal" href="#matchespredicatewithparams">MatchesPredicateWithParams</a></li>
+<li><a class="reference internal" href="#raises">Raises</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#writing-your-own-matchers">Writing your own matchers</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#details">Details</a><ul>
+<li><a class="reference internal" href="#content">Content</a></li>
+<li><a class="reference internal" href="#a-realistic-example">A realistic example</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#controlling-test-execution">Controlling test execution</a><ul>
+<li><a class="reference internal" href="#addcleanup">addCleanup</a></li>
+<li><a class="reference internal" href="#fixtures">Fixtures</a></li>
+<li><a class="reference internal" href="#skipping-tests">Skipping tests</a><ul>
+<li><a class="reference internal" href="#legacy-skip-support">Legacy skip support</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#addonexception">addOnException</a></li>
+<li><a class="reference internal" href="#twisted-support">Twisted support</a></li>
+<li><a class="reference internal" href="#force-failure">force_failure</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test-helpers">Test helpers</a><ul>
+<li><a class="reference internal" href="#testcase-patch">TestCase.patch</a></li>
+<li><a class="reference internal" href="#creation-methods">Creation methods</a></li>
+<li><a class="reference internal" href="#test-attributes">Test attributes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#general-helpers">General helpers</a><ul>
+<li><a class="reference internal" href="#conditional-imports">Conditional imports</a></li>
+<li><a class="reference internal" href="#safe-attribute-testing">Safe attribute testing</a></li>
+<li><a class="reference internal" href="#nullary-callables">Nullary callables</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="overview.html"
+                        title="previous chapter">testtools: tasteful testing for Python</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="for-framework-folk.html"
+                        title="next chapter">testtools for framework folk</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/for-test-authors.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="for-framework-folk.html" title="testtools for framework folk"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="overview.html" title="testtools: tasteful testing for Python"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">testtools VERSION documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2010, The testtools authors.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

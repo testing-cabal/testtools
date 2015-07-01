@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.testresult.real.StreamToDict : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="class"><code>testtools.testresult.real.StreamToDict(<a href="testtools.testresult.real.StreamResult.html" class="code">StreamResult</a>)</code> <small>class documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a>.<a href="testtools.testresult.html" class="code">testresult</a>.<a href="testtools.testresult.real.html" class="code">real</a></code>
+          
+          <a href="classIndex.html#testtools.testresult.real.StreamToDict">(View In Hierarchy)</a>
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        <p>Known subclasses: <a href="testtools.testresult.real.StreamSummary.html" class="code">testtools.testresult.real.StreamSummary</a></p>
+      </div>
+
+      <div class="moduleDocstring">
+        <div><p>A specialised StreamResult that emits a callback as tests complete.</p>
+<p>Top level file attachments are simply discarded. Hung tests are detected
+by stopTestRun and notified there and then.</p>
+<p>The callback is passed a dict with the following keys:</p>
+<blockquote>
+<ul class="rst-simple">
+<li>id: the test id.</li>
+<li>tags: The tags for the test. A set of unicode strings.</li>
+<li>details: A dict of file attachments - <tt class="rst-docutils literal">testtools.content.Content</tt>
+objects.</li>
+<li>status: One of the StreamResult status codes (including inprogress) or
+'unknown' (used if only file events for a test were received...)</li>
+<li>timestamps: A pair of timestamps - the first one received with this
+test id, and the one in the event that triggered the notification.
+Hung tests have a None for the second end event. Timestamps are not
+compared - their ordering is purely order received in the stream.</li>
+</ul>
+</blockquote>
+<p>Only the most recent tags observed in the stream are reported.</p><table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id118">
+  
+  <tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamToDict.html#__init__" class="code">__init__</a></td>
+    <td><span>Create a StreamToDict calling on_test on test completions.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamToDict.html#startTestRun" class="code">startTestRun</a></td>
+    <td><span>Start a test run.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamToDict.html#status" class="code">status</a></td>
+    <td><span>Inform the result about a test status.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamToDict.html#stopTestRun" class="code">stopTestRun</a></td>
+    <td><span>Stop a test run.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamToDict.html#_ensure_key" class="code">_ensure_key</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr>
+</table>
+        
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.testresult.real.StreamToDict.__init__">
+    
+  </a>
+  <a name="__init__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __init__(self, on_test):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overridden in <a href="testtools.testresult.real.StreamSummary.html" class="code">testtools.testresult.real.StreamSummary</a></div>
+    <div>Create a StreamToDict calling on_test on test completions.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">on_test</td><td>A callback that accepts one parameter - a dict
+describing a test.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.StreamToDict.startTestRun">
+    
+  </a>
+  <a name="startTestRun">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    startTestRun(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.testresult.real.StreamResult.html#startTestRun" class="code">testtools.testresult.real.StreamResult.startTestRun</a></div><div class="interfaceinfo">overridden in <a href="testtools.testresult.real.StreamSummary.html" class="code">testtools.testresult.real.StreamSummary</a></div>
+    <div><p>Start a test run.</p>
+<p>This will prepare the test result to process results (which might imply
+connecting to a database or remote machine).</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.StreamToDict.status">
+    
+  </a>
+  <a name="status">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    status(self, test_id=None, test_status=None, test_tags=None, runnable=True, file_name=None, file_bytes=None, eof=False, mime_type=None, route_code=None, timestamp=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.testresult.real.StreamResult.html#status" class="code">testtools.testresult.real.StreamResult.status</a></div>
+    <div>Inform the result about a test status.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">test_id</td><td>The test whose status is being reported. None to
+report status about the test run as a whole.</td></tr><tr><td></td><td class="fieldArg">test_status</td><td><p>The status for the test. There are two sorts of
+status - interim and final status events. As many interim events
+can be generated as desired, but only one final event. After a
+final status event any further file or status events from the
+same test_id+route_code may be discarded or associated with a new
+test by the StreamResult. (But no exception will be thrown).</p>
+<dl class="rst-docutils">
+<dt>Interim states:</dt>
+<dd><ul class="rst-first rst-last rst-simple">
+<li>None - no particular status is being reported, or status being
+reported is not associated with a test (e.g. when reporting on
+stdout / stderr chatter).</li>
+<li>inprogress - the test is currently running. Emitted by tests when
+they start running and at any intermediary point they might
+choose to indicate their continual operation.</li>
+</ul>
+</dd>
+<dt>Final states:</dt>
+<dd><ul class="rst-first rst-last rst-simple">
+<li>exists - the test exists. This is used when a test is not being
+executed. Typically this is when querying what tests could be run
+in a test run (which is useful for selecting tests to run).</li>
+<li>xfail - the test failed but that was expected. This is purely
+informative - the test is not considered to be a failure.</li>
+<li>uxsuccess - the test passed but was expected to fail. The test
+will be considered a failure.</li>
+<li>success - the test has finished without error.</li>
+<li>fail - the test failed (or errored). The test will be considered
+a failure.</li>
+<li>skip - the test was selected to run but chose to be skipped. E.g.
+a test dependency was missing. This is purely informative - the
+test is not considered to be a failure.</li>
+</ul>
+</dd>
+</dl></td></tr><tr><td></td><td class="fieldArg">test_tags</td><td>Optional set of tags to apply to the test. Tags
+have no intrinsic meaning - that is up to the test author.</td></tr><tr><td></td><td class="fieldArg">runnable</td><td>Allows status reports to mark that they are for
+tests which are not able to be explicitly run. For instance,
+subtests will report themselves as non-runnable.</td></tr><tr><td></td><td class="fieldArg">file_name</td><td>The name for the file_bytes. Any unicode string may
+be used. While there is no semantic value attached to the name
+of any attachment, the names 'stdout' and 'stderr' and 'traceback'
+are recommended for use only for output sent to stdout, stderr and
+tracebacks of exceptions. When file_name is supplied, file_bytes
+must be a bytes instance.</td></tr><tr><td></td><td class="fieldArg">file_bytes</td><td>A bytes object containing content for the named
+file. This can just be a single chunk of the file - emitting
+another file event with more later. Must be None unleses a
+file_name is supplied.</td></tr><tr><td></td><td class="fieldArg">eof</td><td>True if this chunk is the last chunk of the file, any
+additional chunks with the same name should be treated as an error
+and discarded. Ignored unless file_name has been supplied.</td></tr><tr><td></td><td class="fieldArg">mime_type</td><td>An optional MIME type for the file. stdout and
+stderr will generally be "text/plain; charset=utf8". If None,
+defaults to application/octet-stream. Ignored unless file_name
+has been supplied.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.StreamToDict.stopTestRun">
+    
+  </a>
+  <a name="stopTestRun">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    stopTestRun(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.testresult.real.StreamResult.html#stopTestRun" class="code">testtools.testresult.real.StreamResult.stopTestRun</a></div>
+    <div><p>Stop a test run.</p>
+<p>This informs the result that no more test updates will be received. At
+this point any test ids that have started and not completed can be
+considered failed-or-hung.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.StreamToDict._ensure_key">
+    
+  </a>
+  <a name="_ensure_key">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _ensure_key(self, test_id, route_code, timestamp):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

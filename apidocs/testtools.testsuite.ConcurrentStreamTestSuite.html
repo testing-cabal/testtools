@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.testsuite.ConcurrentStreamTestSuite : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="class"><code>testtools.testsuite.ConcurrentStreamTestSuite(<span title="object">object</span>)</code> <small>class documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a>.<a href="testtools.testsuite.html" class="code">testsuite</a></code>
+          
+          <a href="classIndex.html#testtools.testsuite.ConcurrentStreamTestSuite">(View In Hierarchy)</a>
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        
+      </div>
+
+      <div class="moduleDocstring">
+        <div>A TestSuite whose run() parallelises.<table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id164">
+  
+  <tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testsuite.ConcurrentStreamTestSuite.html#__init__" class="code">__init__</a></td>
+    <td><span>Create a ConcurrentTestSuite to execute tests returned by make_tests.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testsuite.ConcurrentStreamTestSuite.html#run" class="code">run</a></td>
+    <td><span>Run the tests concurrently.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testsuite.ConcurrentStreamTestSuite.html#_run_test" class="code">_run_test</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr>
+</table>
+        
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.testsuite.ConcurrentStreamTestSuite.__init__">
+    
+  </a>
+  <a name="__init__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __init__(self, make_tests):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Create a ConcurrentTestSuite to execute tests returned by make_tests.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">make_tests</td><td>A helper function that should return some number
+of concurrently executable test suite / test case objects.
+make_tests must take no parameters and return an iterable of
+tuples. Each tuple must be of the form (case, route_code), where
+case is a TestCase-like object with a run(result) method, and
+route_code is either None or a unicode string.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testsuite.ConcurrentStreamTestSuite.run">
+    
+  </a>
+  <a name="run">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    run(self, result):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Run the tests concurrently.</p>
+<p>This calls out to the provided make_tests helper to determine the
+concurrency to use and to assign routing codes to each worker.</p>
+<p>ConcurrentTestSuite provides no special mechanism to stop the tests
+returned by make_tests, it is up to the made tests to honour the
+shouldStop attribute on the result object they are run with, which will
+be set if the test run is to be aborted.</p>
+<p>The tests are run with an ExtendedToStreamDecorator wrapped around a
+StreamToQueue instance. ConcurrentStreamTestSuite dequeues events from
+the queue and forwards them to result. Tests can therefore be either
+original unittest tests (or compatible tests), or new tests that emit
+StreamResult events directly.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">result</td><td>A StreamResult instance. The caller is responsible for
+calling startTestRun on this instance prior to invoking suite.run,
+and stopTestRun subsequent to the run method returning.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testsuite.ConcurrentStreamTestSuite._run_test">
+    
+  </a>
+  <a name="_run_test">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _run_test(self, test, process_result, route_code):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

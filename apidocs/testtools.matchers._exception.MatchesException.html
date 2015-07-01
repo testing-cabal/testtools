@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.matchers._exception.MatchesException : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="class"><code>testtools.matchers._exception.MatchesException(<a href="testtools.matchers._impl.Matcher.html" class="code">Matcher</a>)</code> <small>class documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a>.<a href="testtools.matchers.html" class="code">matchers</a>.<a href="testtools.matchers._exception.html" class="code">_exception</a></code>
+          
+          <a href="classIndex.html#testtools.matchers._exception.MatchesException">(View In Hierarchy)</a>
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        
+      </div>
+
+      <div class="moduleDocstring">
+        <div>Match an exc_info tuple against an exception instance or type.<table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id78">
+  
+  <tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.matchers._exception.MatchesException.html#__init__" class="code">__init__</a></td>
+    <td><span>Create a MatchesException that will match exc_info's for exception.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.matchers._exception.MatchesException.html#match" class="code">match</a></td>
+    <td><span>Return None if this matcher matches something, a Mismatch otherwise.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.matchers._exception.MatchesException.html#__str__" class="code">__str__</a></td>
+    <td><span>Get a sensible human representation of the matcher.</span></td>
+  </tr>
+</table>
+        
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.matchers._exception.MatchesException.__init__">
+    
+  </a>
+  <a name="__init__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __init__(self, exception, value_re=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Create a MatchesException that will match exc_info's for exception.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">exception</td><td>Either an exception instance or type.
+If an instance is given, the type and arguments of the exception
+are checked. If a type is given only the type of the exception is
+checked. If a tuple is given, then as with isinstance, any of the
+types in the tuple matching is sufficient to match.</td></tr><tr><td></td><td class="fieldArg">value_re</td><td>If 'exception' is a type, and the matchee exception
+is of the right type, then match against this.  If value_re is a
+string, then assume value_re is a regular expression and match
+the str() of the exception against it.  Otherwise, assume value_re
+is a matcher, and match the exception against it.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.matchers._exception.MatchesException.match">
+    
+  </a>
+  <a name="match">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    match(self, other):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.matchers._impl.Matcher.html#match" class="code">testtools.matchers._impl.Matcher.match</a></div>
+    <div>Return None if this matcher matches something, a Mismatch otherwise.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.matchers._exception.MatchesException.__str__">
+    
+  </a>
+  <a name="__str__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __str__(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.matchers._impl.Matcher.html#__str__" class="code">testtools.matchers._impl.Matcher.__str__</a></div>
+    <div><p>Get a sensible human representation of the matcher.</p>
+<p>This should include the parameters given to the matcher and any
+state that would affect the matches operation.</p><table class="fieldTable"></table></div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

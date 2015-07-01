@@ -1,0 +1,555 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>testtools for framework folk &mdash; testtools VERSION documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'VERSION',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="testtools VERSION documentation" href="index.html" />
+    <link rel="next" title="Contributing to testtools" href="hacking.html" />
+    <link rel="prev" title="testtools for test authors" href="for-test-authors.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hacking.html" title="Contributing to testtools"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="for-test-authors.html" title="testtools for test authors"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">testtools VERSION documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="testtools-for-framework-folk">
+<h1>testtools for framework folk<a class="headerlink" href="#testtools-for-framework-folk" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>In addition to having many features <a class="reference internal" href="for-test-authors.html"><em>for test authors</em></a>, testtools also has many bits and pieces that are useful
+for folk who write testing frameworks.</p>
+<p>If you are the author of a test runner, are working on a very large
+unit-tested project, are trying to get one testing framework to play nicely
+with another or are hacking away at getting your test suite to run in parallel
+over a heterogenous cluster of machines, this guide is for you.</p>
+<p>This manual is a summary. You can get details by consulting the
+<a class="reference internal" href="api.html"><em>testtools API docs</em></a>.</p>
+</div>
+<div class="section" id="extensions-to-testcase">
+<h2>Extensions to TestCase<a class="headerlink" href="#extensions-to-testcase" title="Permalink to this headline">¶</a></h2>
+<p>In addition to the <code class="docutils literal"><span class="pre">TestCase</span></code> specific methods, we have extensions for
+<code class="docutils literal"><span class="pre">TestSuite</span></code> that also apply to <code class="docutils literal"><span class="pre">TestCase</span></code> (because <code class="docutils literal"><span class="pre">TestCase</span></code> and
+<code class="docutils literal"><span class="pre">TestSuite</span></code> follow the Composite pattern).</p>
+<div class="section" id="custom-exception-handling">
+<h3>Custom exception handling<a class="headerlink" href="#custom-exception-handling" title="Permalink to this headline">¶</a></h3>
+<p>testtools provides a way to control how test exceptions are handled.  To do
+this, add a new exception to <code class="docutils literal"><span class="pre">self.exception_handlers</span></code> on a
+<code class="docutils literal"><span class="pre">testtools.TestCase</span></code>.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="bp">self</span><span class="o">.</span><span class="n">exception_handlers</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">ExceptionClass</span><span class="p">,</span> <span class="n">handler</span><span class="p">))</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Having done this, if any of <code class="docutils literal"><span class="pre">setUp</span></code>, <code class="docutils literal"><span class="pre">tearDown</span></code>, or the test method raise
+<code class="docutils literal"><span class="pre">ExceptionClass</span></code>, <code class="docutils literal"><span class="pre">handler</span></code> will be called with the test case, test result
+and the raised exception.</p>
+<p>Use this if you want to add a new kind of test result, that is, if you think
+that <code class="docutils literal"><span class="pre">addError</span></code>, <code class="docutils literal"><span class="pre">addFailure</span></code> and so forth are not enough for your needs.</p>
+</div>
+<div class="section" id="controlling-test-execution">
+<h3>Controlling test execution<a class="headerlink" href="#controlling-test-execution" title="Permalink to this headline">¶</a></h3>
+<p>If you want to control more than just how exceptions are raised, you can
+provide a custom <code class="docutils literal"><span class="pre">RunTest</span></code> to a <code class="docutils literal"><span class="pre">TestCase</span></code>.  The <code class="docutils literal"><span class="pre">RunTest</span></code> object can
+change everything about how the test executes.</p>
+<p>To work with <code class="docutils literal"><span class="pre">testtools.TestCase</span></code>, a <code class="docutils literal"><span class="pre">RunTest</span></code> must have a factory that
+takes a test and an optional list of exception handlers and an optional
+last_resort handler.  Instances returned by the factory must have a <code class="docutils literal"><span class="pre">run()</span></code>
+method that takes an optional <code class="docutils literal"><span class="pre">TestResult</span></code> object.</p>
+<p>The default is <code class="docutils literal"><span class="pre">testtools.runtest.RunTest</span></code>, which calls <code class="docutils literal"><span class="pre">setUp</span></code>, the test
+method, <code class="docutils literal"><span class="pre">tearDown</span></code> and clean ups (see <a class="reference internal" href="for-test-authors.html#addcleanup"><span>addCleanup</span></a>) in the normal, vanilla
+way that Python&#8217;s standard <a class="reference external" href="http://docs.python.org/library/unittest.html">unittest</a> does.</p>
+<p>To specify a <code class="docutils literal"><span class="pre">RunTest</span></code> for all the tests in a <code class="docutils literal"><span class="pre">TestCase</span></code> class, do something
+like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">SomeTests</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="n">run_tests_with</span> <span class="o">=</span> <span class="n">CustomRunTestFactory</span>
+</pre></div>
+</div>
+<p>To specify a <code class="docutils literal"><span class="pre">RunTest</span></code> for a specific test in a <code class="docutils literal"><span class="pre">TestCase</span></code> class, do:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">SomeTests</span><span class="p">(</span><span class="n">TestCase</span><span class="p">):</span>
+    <span class="nd">@run_test_with</span><span class="p">(</span><span class="n">CustomRunTestFactory</span><span class="p">,</span> <span class="n">extra_arg</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">foo</span><span class="o">=</span><span class="s">&#39;whatever&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_something</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+</pre></div>
+</div>
+<p>In addition, either of these can be overridden by passing a factory in to the
+<code class="docutils literal"><span class="pre">TestCase</span></code> constructor with the optional <code class="docutils literal"><span class="pre">runTest</span></code> argument.</p>
+</div>
+<div class="section" id="test-renaming">
+<h3>Test renaming<a class="headerlink" href="#test-renaming" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal"><span class="pre">testtools.clone_test_with_new_id</span></code> is a function to copy a test case
+instance to one with a new name.  This is helpful for implementing test
+parameterization.</p>
+</div>
+<div class="section" id="delayed-test-failure">
+<span id="force-failure"></span><h3>Delayed Test Failure<a class="headerlink" href="#delayed-test-failure" title="Permalink to this headline">¶</a></h3>
+<p>Setting the <code class="docutils literal"><span class="pre">testtools.TestCase.force_failure</span></code> instance variable to True will
+cause <code class="docutils literal"><span class="pre">testtools.RunTest</span></code> to fail the test case after the test has finished.
+This is useful when you want to cause a test to fail, but don&#8217;t want to
+prevent the remainder of the test code from being executed.</p>
+</div>
+<div class="section" id="exception-formatting">
+<h3>Exception formatting<a class="headerlink" href="#exception-formatting" title="Permalink to this headline">¶</a></h3>
+<p>Testtools <code class="docutils literal"><span class="pre">TestCase</span></code> instances format their own exceptions. The attribute
+<code class="docutils literal"><span class="pre">__testtools_tb_locals__</span></code> controls whether to include local variables in the
+formatted exceptions.</p>
+</div>
+</div>
+<div class="section" id="test-placeholders">
+<h2>Test placeholders<a class="headerlink" href="#test-placeholders" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes, it&#8217;s useful to be able to add things to a test suite that are not
+actually tests.  For example, you might wish to represents import failures
+that occur during test discovery as tests, so that your test result object
+doesn&#8217;t have to do special work to handle them nicely.</p>
+<p>testtools provides two such objects, called &#8220;placeholders&#8221;: <code class="docutils literal"><span class="pre">PlaceHolder</span></code>
+and <code class="docutils literal"><span class="pre">ErrorHolder</span></code>.  <code class="docutils literal"><span class="pre">PlaceHolder</span></code> takes a test id and an optional
+description.  When it&#8217;s run, it succeeds.  <code class="docutils literal"><span class="pre">ErrorHolder</span></code> takes a test id,
+and error and an optional short description.  When it&#8217;s run, it reports that
+error.</p>
+<p>These placeholders are best used to log events that occur outside the test
+suite proper, but are still very relevant to its results.</p>
+<p>e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">suite</span> <span class="o">=</span> <span class="n">TestSuite</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">suite</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">PlaceHolder</span><span class="p">(</span><span class="s">&#39;I record an event&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">suite</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">TextTestResult</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+<span class="go">I record an event                                                   [OK]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="test-instance-decorators">
+<h2>Test instance decorators<a class="headerlink" href="#test-instance-decorators" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="decoratetestcaseresult">
+<h3>DecorateTestCaseResult<a class="headerlink" href="#decoratetestcaseresult" title="Permalink to this headline">¶</a></h3>
+<p>This object calls out to your code when <code class="docutils literal"><span class="pre">run</span></code> / <code class="docutils literal"><span class="pre">__call__</span></code> are called and
+allows the result object that will be used to run the test to be altered. This
+is very useful when working with a test runner that doesn&#8217;t know your test case
+requirements. For instance, it can be used to inject a <code class="docutils literal"><span class="pre">unittest2</span></code> compatible
+adapter when someone attempts to run your test suite with a <code class="docutils literal"><span class="pre">TestResult</span></code> that
+does not support <code class="docutils literal"><span class="pre">addSkip</span></code> or other <code class="docutils literal"><span class="pre">unittest2</span></code> methods. Similarly it can
+aid the migration to <code class="docutils literal"><span class="pre">StreamResult</span></code>.</p>
+<p>e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">suite</span> <span class="o">=</span> <span class="n">TestSuite</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">suite</span> <span class="o">=</span> <span class="n">DecorateTestCaseResult</span><span class="p">(</span><span class="n">suite</span><span class="p">,</span> <span class="n">ExtendedToOriginalDecorator</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="extensions-to-testresult">
+<h2>Extensions to TestResult<a class="headerlink" href="#extensions-to-testresult" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="streamresult">
+<h3>StreamResult<a class="headerlink" href="#streamresult" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal"><span class="pre">StreamResult</span></code> is a new API for dealing with test case progress that supports
+concurrent and distributed testing without the various issues that
+<code class="docutils literal"><span class="pre">TestResult</span></code> has such as buffering in multiplexers.</p>
+<p>The design has several key principles:</p>
+<ul class="simple">
+<li>Nothing that requires up-front knowledge of all tests.</li>
+<li>Deal with tests running in concurrent environments, potentially distributed
+across multiple processes (or even machines). This implies allowing multiple
+tests to be active at once, supplying time explicitly, being able to
+differentiate between tests running in different contexts and removing any
+assumption that tests are necessarily in the same process.</li>
+<li>Make the API as simple as possible - each aspect should do one thing well.</li>
+</ul>
+<p>The <code class="docutils literal"><span class="pre">TestResult</span></code> API this is intended to replace has three different clients.</p>
+<ul class="simple">
+<li>Each executing <code class="docutils literal"><span class="pre">TestCase</span></code> notifies the <code class="docutils literal"><span class="pre">TestResult</span></code> about activity.</li>
+<li>The testrunner running tests uses the API to find out whether the test run
+had errors, how many tests ran and so on.</li>
+<li>Finally, each <code class="docutils literal"><span class="pre">TestCase</span></code> queries the <code class="docutils literal"><span class="pre">TestResult</span></code> to see whether the test
+run should be aborted.</li>
+</ul>
+<p>With <code class="docutils literal"><span class="pre">StreamResult</span></code> we need to be able to provide a <code class="docutils literal"><span class="pre">TestResult</span></code> compatible
+adapter (<code class="docutils literal"><span class="pre">StreamToExtendedDecorator</span></code>) to allow incremental migration.
+However, we don&#8217;t need to conflate things long term. So - we define three
+separate APIs, and merely mix them together to provide the
+<code class="docutils literal"><span class="pre">StreamToExtendedDecorator</span></code>. <code class="docutils literal"><span class="pre">StreamResult</span></code> is the first of these APIs -
+meeting the needs of <code class="docutils literal"><span class="pre">TestCase</span></code> clients. It handles events generated by
+running tests. See the API documentation for <code class="docutils literal"><span class="pre">testtools.StreamResult</span></code> for
+details.</p>
+</div>
+<div class="section" id="streamsummary">
+<h3>StreamSummary<a class="headerlink" href="#streamsummary" title="Permalink to this headline">¶</a></h3>
+<p>Secondly we define the <code class="docutils literal"><span class="pre">StreamSummary</span></code> API which takes responsibility for
+collating errors, detecting incomplete tests and counting tests. This provides
+a compatible API with those aspects of <code class="docutils literal"><span class="pre">TestResult</span></code>. Again, see the API
+documentation for <code class="docutils literal"><span class="pre">testtools.StreamSummary</span></code>.</p>
+</div>
+<div class="section" id="testcontrol">
+<h3>TestControl<a class="headerlink" href="#testcontrol" title="Permalink to this headline">¶</a></h3>
+<p>Lastly we define the <code class="docutils literal"><span class="pre">TestControl</span></code> API which is used to provide the
+<code class="docutils literal"><span class="pre">shouldStop</span></code> and <code class="docutils literal"><span class="pre">stop</span></code> elements from <code class="docutils literal"><span class="pre">TestResult</span></code>. Again, see the API
+documentation for <code class="docutils literal"><span class="pre">testtools.TestControl</span></code>. <code class="docutils literal"><span class="pre">TestControl</span></code> can be paired with
+a <code class="docutils literal"><span class="pre">StreamFailFast</span></code> to trigger aborting a test run when a failure is observed.
+Aborting multiple workers in a distributed environment requires hooking
+whatever signalling mechanism the distributed environment has up to a
+<code class="docutils literal"><span class="pre">TestControl</span></code> in each worker process.</p>
+</div>
+<div class="section" id="streamtagger">
+<h3>StreamTagger<a class="headerlink" href="#streamtagger" title="Permalink to this headline">¶</a></h3>
+<p>A <code class="docutils literal"><span class="pre">StreamResult</span></code> filter that adds or removes tags from events:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">testtools</span> <span class="kn">import</span> <span class="n">StreamTagger</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sink</span> <span class="o">=</span> <span class="n">StreamResult</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">StreamTagger</span><span class="p">([</span><span class="n">sink</span><span class="p">],</span> <span class="nb">set</span><span class="p">([</span><span class="s">&#39;add&#39;</span><span class="p">]),</span> <span class="nb">set</span><span class="p">([</span><span class="s">&#39;discard&#39;</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">startTestRun</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Run tests against result here.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">stopTestRun</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="streamtodict">
+<h3>StreamToDict<a class="headerlink" href="#streamtodict" title="Permalink to this headline">¶</a></h3>
+<p>A simplified API for dealing with <code class="docutils literal"><span class="pre">StreamResult</span></code> streams. Each test is
+buffered until it completes and then reported as a trivial dict. This makes
+writing analysers very easy - you can ignore all the plumbing and just work
+with the result. e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">testtools</span> <span class="kn">import</span> <span class="n">StreamToDict</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">handle_test</span><span class="p">(</span><span class="n">test_dict</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">print</span><span class="p">(</span><span class="n">test_dict</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">StreamToDict</span><span class="p">(</span><span class="n">handle_test</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">startTestRun</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># Run tests against result here.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># At stopTestRun() any incomplete buffered tests are announced.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">stopTestRun</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="extendedtostreamdecorator">
+<h3>ExtendedToStreamDecorator<a class="headerlink" href="#extendedtostreamdecorator" title="Permalink to this headline">¶</a></h3>
+<p>This is a hybrid object that combines both the <code class="docutils literal"><span class="pre">Extended</span></code> and <code class="docutils literal"><span class="pre">Stream</span></code>
+<code class="docutils literal"><span class="pre">TestResult</span></code> APIs into one class, but only emits <code class="docutils literal"><span class="pre">StreamResult</span></code> events.
+This is useful when a <code class="docutils literal"><span class="pre">StreamResult</span></code> stream is desired, but you cannot
+be sure that the tests which will run have been updated to the <code class="docutils literal"><span class="pre">StreamResult</span></code>
+API.</p>
+</div>
+<div class="section" id="streamtoextendeddecorator">
+<h3>StreamToExtendedDecorator<a class="headerlink" href="#streamtoextendeddecorator" title="Permalink to this headline">¶</a></h3>
+<p>This is a simple converter that emits the <code class="docutils literal"><span class="pre">ExtendedTestResult</span></code> API in
+response to events from the <code class="docutils literal"><span class="pre">StreamResult</span></code> API. Useful when outputting
+<code class="docutils literal"><span class="pre">StreamResult</span></code> events from a <code class="docutils literal"><span class="pre">TestCase</span></code> but the supplied <code class="docutils literal"><span class="pre">TestResult</span></code>
+does not support the <code class="docutils literal"><span class="pre">status</span></code> and <code class="docutils literal"><span class="pre">file</span></code> methods.</p>
+</div>
+<div class="section" id="streamtoqueue">
+<h3>StreamToQueue<a class="headerlink" href="#streamtoqueue" title="Permalink to this headline">¶</a></h3>
+<p>This is a <code class="docutils literal"><span class="pre">StreamResult</span></code> decorator for reporting tests from multiple threads
+at once. Each method submits an event to a supplied Queue object as a simple
+dict. See <code class="docutils literal"><span class="pre">ConcurrentStreamTestSuite</span></code> for a convenient way to use this.</p>
+</div>
+<div class="section" id="timestampingstreamresult">
+<h3>TimestampingStreamResult<a class="headerlink" href="#timestampingstreamresult" title="Permalink to this headline">¶</a></h3>
+<p>This is a <code class="docutils literal"><span class="pre">StreamResult</span></code> decorator for adding timestamps to events that lack
+them. This allows writing the simplest possible generators of events and
+passing the events via this decorator to get timestamped data. As long as
+no buffering/queueing or blocking happen before the timestamper sees the event
+the timestamp will be as accurate as if the original event had it.</p>
+</div>
+<div class="section" id="streamresultrouter">
+<h3>StreamResultRouter<a class="headerlink" href="#streamresultrouter" title="Permalink to this headline">¶</a></h3>
+<p>This is a <code class="docutils literal"><span class="pre">StreamResult</span></code> which forwards events to an arbitrary set of target
+<code class="docutils literal"><span class="pre">StreamResult</span></code> objects. Events that have no forwarding rule are passed onto
+an fallback <code class="docutils literal"><span class="pre">StreamResult</span></code> for processing. The mapping can be changed at
+runtime, allowing great flexibility and responsiveness to changes. Because
+The mapping can change dynamically and there could be the same recipient for
+two different maps, <code class="docutils literal"><span class="pre">startTestRun</span></code> and <code class="docutils literal"><span class="pre">stopTestRun</span></code> handling is fine
+grained and up to the user.</p>
+<p>If no fallback has been supplied, an unroutable event will raise an exception.</p>
+<p>For instance:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">router</span> <span class="o">=</span> <span class="n">StreamResultRouter</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sink</span> <span class="o">=</span> <span class="n">doubles</span><span class="o">.</span><span class="n">StreamResult</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="n">sink</span><span class="p">,</span> <span class="s">&#39;route_code_prefix&#39;</span><span class="p">,</span> <span class="n">route_prefix</span><span class="o">=</span><span class="s">&#39;0&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">consume_route</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">test_id</span><span class="o">=</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="n">route_code</span><span class="o">=</span><span class="s">&#39;0/1&#39;</span><span class="p">,</span> <span class="n">test_status</span><span class="o">=</span><span class="s">&#39;uxsuccess&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Would remove the <code class="docutils literal"><span class="pre">0/</span></code> from the route_code and forward the event like so:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">sink</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="s">&#39;test_id=foo&#39;</span><span class="p">,</span> <span class="n">route_code</span><span class="o">=</span><span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="n">test_status</span><span class="o">=</span><span class="s">&#39;uxsuccess&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>See <code class="docutils literal"><span class="pre">pydoc</span> <span class="pre">testtools.StreamResultRouter</span></code> for details.</p>
+</div>
+<div class="section" id="testresult-addskip">
+<h3>TestResult.addSkip<a class="headerlink" href="#testresult-addskip" title="Permalink to this headline">¶</a></h3>
+<p>This method is called on result objects when a test skips. The
+<code class="docutils literal"><span class="pre">testtools.TestResult</span></code> class records skips in its <code class="docutils literal"><span class="pre">skip_reasons</span></code> instance
+dict. The can be reported on in much the same way as succesful tests.</p>
+</div>
+<div class="section" id="testresult-time">
+<h3>TestResult.time<a class="headerlink" href="#testresult-time" title="Permalink to this headline">¶</a></h3>
+<p>This method controls the time used by a <code class="docutils literal"><span class="pre">TestResult</span></code>, permitting accurate
+timing of test results gathered on different machines or in different threads.
+See pydoc testtools.TestResult.time for more details.</p>
+</div>
+<div class="section" id="threadsafeforwardingresult">
+<h3>ThreadsafeForwardingResult<a class="headerlink" href="#threadsafeforwardingresult" title="Permalink to this headline">¶</a></h3>
+<p>A <code class="docutils literal"><span class="pre">TestResult</span></code> which forwards activity to another test result, but synchronises
+on a semaphore to ensure that all the activity for a single test arrives in a
+batch. This allows simple TestResults which do not expect concurrent test
+reporting to be fed the activity from multiple test threads, or processes.</p>
+<p>Note that when you provide multiple errors for a single test, the target sees
+each error as a distinct complete test.</p>
+</div>
+<div class="section" id="multitestresult">
+<h3>MultiTestResult<a class="headerlink" href="#multitestresult" title="Permalink to this headline">¶</a></h3>
+<p>A test result that dispatches its events to many test results.  Use this
+to combine multiple different test result objects into one test result object
+that can be passed to <code class="docutils literal"><span class="pre">TestCase.run()</span></code> or similar.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">a</span> <span class="o">=</span> <span class="n">TestResult</span><span class="p">()</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">TestResult</span><span class="p">()</span>
+<span class="n">combined</span> <span class="o">=</span> <span class="n">MultiTestResult</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="n">combined</span><span class="o">.</span><span class="n">startTestRun</span><span class="p">()</span>  <span class="c"># Calls a.startTestRun() and b.startTestRun()</span>
+</pre></div>
+</div>
+<p>Each of the methods on <code class="docutils literal"><span class="pre">MultiTestResult</span></code> will return a tuple of whatever the
+component test results return.</p>
+</div>
+<div class="section" id="testresultdecorator">
+<h3>TestResultDecorator<a class="headerlink" href="#testresultdecorator" title="Permalink to this headline">¶</a></h3>
+<p>Not strictly a <code class="docutils literal"><span class="pre">TestResult</span></code>, but something that implements the extended
+<code class="docutils literal"><span class="pre">TestResult</span></code> interface of testtools.  It can be subclassed to create objects
+that wrap <code class="docutils literal"><span class="pre">TestResults</span></code>.</p>
+</div>
+<div class="section" id="texttestresult">
+<h3>TextTestResult<a class="headerlink" href="#texttestresult" title="Permalink to this headline">¶</a></h3>
+<p>A <code class="docutils literal"><span class="pre">TestResult</span></code> that provides a text UI very similar to the Python standard
+library UI. Key differences are that its supports the extended outcomes and
+details API, and is completely encapsulated into the result object, permitting
+it to be used without a &#8216;TestRunner&#8217; object. Not all the Python 2.7 outcomes
+are displayed (yet). It is also a &#8216;quiet&#8217; result with no dots or verbose mode.
+These limitations will be corrected soon.</p>
+</div>
+<div class="section" id="extendedtooriginaldecorator">
+<h3>ExtendedToOriginalDecorator<a class="headerlink" href="#extendedtooriginaldecorator" title="Permalink to this headline">¶</a></h3>
+<p>Adapts legacy <code class="docutils literal"><span class="pre">TestResult</span></code> objects, such as those found in older Pythons, to
+meet the testtools <code class="docutils literal"><span class="pre">TestResult</span></code> API.</p>
+</div>
+<div class="section" id="test-doubles">
+<h3>Test Doubles<a class="headerlink" href="#test-doubles" title="Permalink to this headline">¶</a></h3>
+<p>In testtools.testresult.doubles there are three test doubles that testtools
+uses for its own testing: <code class="docutils literal"><span class="pre">Python26TestResult</span></code>, <code class="docutils literal"><span class="pre">Python27TestResult</span></code>,
+<code class="docutils literal"><span class="pre">ExtendedTestResult</span></code>. These TestResult objects implement a single variation of
+the TestResult API each, and log activity to a list <code class="docutils literal"><span class="pre">self._events</span></code>. These are
+made available for the convenience of people writing their own extensions.</p>
+</div>
+<div class="section" id="starttestrun-and-stoptestrun">
+<h3>startTestRun and stopTestRun<a class="headerlink" href="#starttestrun-and-stoptestrun" title="Permalink to this headline">¶</a></h3>
+<p>Python 2.7 added hooks <code class="docutils literal"><span class="pre">startTestRun</span></code> and <code class="docutils literal"><span class="pre">stopTestRun</span></code> which are called
+before and after the entire test run. &#8216;stopTestRun&#8217; is particularly useful for
+test results that wish to produce summary output.</p>
+<p><code class="docutils literal"><span class="pre">testtools.TestResult</span></code> provides default <code class="docutils literal"><span class="pre">startTestRun</span></code> and <code class="docutils literal"><span class="pre">stopTestRun</span></code>
+methods, and he default testtools runner will call these methods
+appropriately.</p>
+<p>The <code class="docutils literal"><span class="pre">startTestRun</span></code> method will reset any errors, failures and so forth on
+the result, making the result object look as if no tests have been run.</p>
+</div>
+</div>
+<div class="section" id="extensions-to-testsuite">
+<h2>Extensions to TestSuite<a class="headerlink" href="#extensions-to-testsuite" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="concurrenttestsuite">
+<h3>ConcurrentTestSuite<a class="headerlink" href="#concurrenttestsuite" title="Permalink to this headline">¶</a></h3>
+<p>A TestSuite for parallel testing. This is used in conjuction with a helper that
+runs a single suite in some parallel fashion (for instance, forking, handing
+off to a subprocess, to a compute cloud, or simple threads).
+ConcurrentTestSuite uses the helper to get a number of separate runnable
+objects with a run(result), runs them all in threads using the
+ThreadsafeForwardingResult to coalesce their activity.</p>
+</div>
+<div class="section" id="concurrentstreamtestsuite">
+<h3>ConcurrentStreamTestSuite<a class="headerlink" href="#concurrentstreamtestsuite" title="Permalink to this headline">¶</a></h3>
+<p>A variant of ConcurrentTestSuite that uses the new StreamResult API instead of
+the TestResult API. ConcurrentStreamTestSuite coordinates running some number
+of test/suites concurrently, with one StreamToQueue per test/suite.</p>
+<p>Each test/suite gets given its own ExtendedToStreamDecorator +
+TimestampingStreamResult wrapped StreamToQueue instance, forwarding onto the
+StreamResult that ConcurrentStreamTestSuite.run was called with.</p>
+<p>ConcurrentStreamTestSuite is a thin shim and it is easy to implement your own
+specialised form if that is needed.</p>
+</div>
+<div class="section" id="fixturesuite">
+<h3>FixtureSuite<a class="headerlink" href="#fixturesuite" title="Permalink to this headline">¶</a></h3>
+<p>A test suite that sets up a <a class="reference external" href="http://pypi.python.org/pypi/fixtures">fixture</a> before running any tests, and then tears
+it down after all of the tests are run. The fixture is <em>not</em> made available to
+any of the tests due to there being no standard channel for suites to pass
+information to the tests they contain (and we don&#8217;t have enough data on what
+such a channel would need to achieve to design a good one yet - or even decide
+if it is a good idea).</p>
+</div>
+<div class="section" id="sorted-tests">
+<h3>sorted_tests<a class="headerlink" href="#sorted-tests" title="Permalink to this headline">¶</a></h3>
+<p>Given the composite structure of TestSuite / TestCase, sorting tests is
+problematic - you can&#8217;t tell what functionality is embedded into custom Suite
+implementations. In order to deliver consistent test orders when using test
+discovery (see <a class="reference external" href="http://bugs.python.org/issue16709">http://bugs.python.org/issue16709</a>), testtools flattens and
+sorts tests that have the standard TestSuite, and defines a new method
+sort_tests, which can be used by non-standard TestSuites to know when they
+should sort their tests. An example implementation can be seen at
+<code class="docutils literal"><span class="pre">FixtureSuite.sorted_tests</span></code>.</p>
+<p>If there are duplicate test ids in a suite, ValueError will be raised.</p>
+</div>
+<div class="section" id="filter-by-ids">
+<h3>filter_by_ids<a class="headerlink" href="#filter-by-ids" title="Permalink to this headline">¶</a></h3>
+<p>Similarly to <code class="docutils literal"><span class="pre">sorted_tests</span></code> running a subset of tests is problematic - the
+standard run interface provides no way to limit what runs. Rather than
+confounding the two problems (selection and execution) we defined a method
+that filters the tests in a suite (or a case) by their unique test id.
+If you a writing custom wrapping suites, consider implementing filter_by_ids
+to support this (though most wrappers that subclass <code class="docutils literal"><span class="pre">unittest.TestSuite</span></code> will
+work just fine [see <code class="docutils literal"><span class="pre">testtools.testsuite.filter_by_ids</span></code> for details.]</p>
+</div>
+</div>
+<div class="section" id="extensions-to-testrunner">
+<h2>Extensions to TestRunner<a class="headerlink" href="#extensions-to-testrunner" title="Permalink to this headline">¶</a></h2>
+<p>To facilitate custom listing of tests, <code class="docutils literal"><span class="pre">testtools.run.TestProgram</span></code> attempts
+to call <code class="docutils literal"><span class="pre">list</span></code> on the <code class="docutils literal"><span class="pre">TestRunner</span></code>, falling back to a generic
+implementation if it is not present.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">testtools for framework folk</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#extensions-to-testcase">Extensions to TestCase</a><ul>
+<li><a class="reference internal" href="#custom-exception-handling">Custom exception handling</a></li>
+<li><a class="reference internal" href="#controlling-test-execution">Controlling test execution</a></li>
+<li><a class="reference internal" href="#test-renaming">Test renaming</a></li>
+<li><a class="reference internal" href="#delayed-test-failure">Delayed Test Failure</a></li>
+<li><a class="reference internal" href="#exception-formatting">Exception formatting</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#test-placeholders">Test placeholders</a></li>
+<li><a class="reference internal" href="#test-instance-decorators">Test instance decorators</a><ul>
+<li><a class="reference internal" href="#decoratetestcaseresult">DecorateTestCaseResult</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#extensions-to-testresult">Extensions to TestResult</a><ul>
+<li><a class="reference internal" href="#streamresult">StreamResult</a></li>
+<li><a class="reference internal" href="#streamsummary">StreamSummary</a></li>
+<li><a class="reference internal" href="#testcontrol">TestControl</a></li>
+<li><a class="reference internal" href="#streamtagger">StreamTagger</a></li>
+<li><a class="reference internal" href="#streamtodict">StreamToDict</a></li>
+<li><a class="reference internal" href="#extendedtostreamdecorator">ExtendedToStreamDecorator</a></li>
+<li><a class="reference internal" href="#streamtoextendeddecorator">StreamToExtendedDecorator</a></li>
+<li><a class="reference internal" href="#streamtoqueue">StreamToQueue</a></li>
+<li><a class="reference internal" href="#timestampingstreamresult">TimestampingStreamResult</a></li>
+<li><a class="reference internal" href="#streamresultrouter">StreamResultRouter</a></li>
+<li><a class="reference internal" href="#testresult-addskip">TestResult.addSkip</a></li>
+<li><a class="reference internal" href="#testresult-time">TestResult.time</a></li>
+<li><a class="reference internal" href="#threadsafeforwardingresult">ThreadsafeForwardingResult</a></li>
+<li><a class="reference internal" href="#multitestresult">MultiTestResult</a></li>
+<li><a class="reference internal" href="#testresultdecorator">TestResultDecorator</a></li>
+<li><a class="reference internal" href="#texttestresult">TextTestResult</a></li>
+<li><a class="reference internal" href="#extendedtooriginaldecorator">ExtendedToOriginalDecorator</a></li>
+<li><a class="reference internal" href="#test-doubles">Test Doubles</a></li>
+<li><a class="reference internal" href="#starttestrun-and-stoptestrun">startTestRun and stopTestRun</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#extensions-to-testsuite">Extensions to TestSuite</a><ul>
+<li><a class="reference internal" href="#concurrenttestsuite">ConcurrentTestSuite</a></li>
+<li><a class="reference internal" href="#concurrentstreamtestsuite">ConcurrentStreamTestSuite</a></li>
+<li><a class="reference internal" href="#fixturesuite">FixtureSuite</a></li>
+<li><a class="reference internal" href="#sorted-tests">sorted_tests</a></li>
+<li><a class="reference internal" href="#filter-by-ids">filter_by_ids</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#extensions-to-testrunner">Extensions to TestRunner</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="for-test-authors.html"
+                        title="previous chapter">testtools for test authors</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="hacking.html"
+                        title="next chapter">Contributing to testtools</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/for-framework-folk.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="hacking.html" title="Contributing to testtools"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="for-test-authors.html" title="testtools for test authors"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">testtools VERSION documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2010, The testtools authors.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

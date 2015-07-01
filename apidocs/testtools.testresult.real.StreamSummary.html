@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.testresult.real.StreamSummary : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="class"><code>testtools.testresult.real.StreamSummary(<a href="testtools.testresult.real.StreamToDict.html" class="code">StreamToDict</a>)</code> <small>class documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a>.<a href="testtools.testresult.html" class="code">testresult</a>.<a href="testtools.testresult.real.html" class="code">real</a></code>
+          
+          <a href="classIndex.html#testtools.testresult.real.StreamSummary">(View In Hierarchy)</a>
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        <p>Known subclasses: <a href="testtools.testresult.real.ExtendedToStreamDecorator.html" class="code">testtools.testresult.real.ExtendedToStreamDecorator</a></p>
+      </div>
+
+      <div class="moduleDocstring">
+        <div><p>A specialised StreamResult that summarises a stream.</p>
+<p>The summary uses the same representation as the original
+unittest.TestResult contract, allowing it to be consumed by any test
+runner.</p><table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id119">
+  
+  <tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamSummary.html#__init__" class="code">__init__</a></td>
+    <td><span>Create a StreamToDict calling on_test on test completions.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamSummary.html#startTestRun" class="code">startTestRun</a></td>
+    <td><span>Start a test run.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamSummary.html#wasSuccessful" class="code">wasSuccessful</a></td>
+    <td><span>Return False if any failure has occured.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamSummary.html#_gather_test" class="code">_gather_test</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamSummary.html#_incomplete" class="code">_incomplete</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamSummary.html#_success" class="code">_success</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamSummary.html#_skip" class="code">_skip</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamSummary.html#_exists" class="code">_exists</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamSummary.html#_fail" class="code">_fail</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamSummary.html#_xfail" class="code">_xfail</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamSummary.html#_uxsuccess" class="code">_uxsuccess</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr>
+</table>
+        
+          <p class="inheritedFrom">
+            Inherited from <a href="testtools.testresult.real.StreamToDict.html" class="code">StreamToDict</a>:
+          </p>
+          <table class="children sortable" id="id120">
+  
+  <tr class="basemethod">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamToDict.html#status" class="code">status</a></td>
+    <td><span>Inform the result about a test status.</span></td>
+  </tr><tr class="basemethod">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamToDict.html#stopTestRun" class="code">stopTestRun</a></td>
+    <td><span>Stop a test run.</span></td>
+  </tr><tr class="basemethod private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.real.StreamToDict.html#_ensure_key" class="code">_ensure_key</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr>
+</table>
+          
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.testresult.real.StreamSummary.__init__">
+    
+  </a>
+  <a name="__init__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __init__(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.testresult.real.StreamToDict.html#__init__" class="code">testtools.testresult.real.StreamToDict.__init__</a></div><div class="interfaceinfo">overridden in <a href="testtools.testresult.real.ExtendedToStreamDecorator.html" class="code">testtools.testresult.real.ExtendedToStreamDecorator</a></div>
+    <div>Create a StreamToDict calling on_test on test completions.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">on_test</td><td>A callback that accepts one parameter - a dict
+describing a test.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.StreamSummary.startTestRun">
+    
+  </a>
+  <a name="startTestRun">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    startTestRun(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.testresult.real.StreamToDict.html#startTestRun" class="code">testtools.testresult.real.StreamToDict.startTestRun</a></div><div class="interfaceinfo">overridden in <a href="testtools.testresult.real.ExtendedToStreamDecorator.html" class="code">testtools.testresult.real.ExtendedToStreamDecorator</a></div>
+    <div><p>Start a test run.</p>
+<p>This will prepare the test result to process results (which might imply
+connecting to a database or remote machine).</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.StreamSummary.wasSuccessful">
+    
+  </a>
+  <a name="wasSuccessful">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    wasSuccessful(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overridden in <a href="testtools.testresult.real.ExtendedToStreamDecorator.html" class="code">testtools.testresult.real.ExtendedToStreamDecorator</a></div>
+    <div><p>Return False if any failure has occured.</p>
+<p>Note that incomplete tests can only be detected when stopTestRun is
+called, so that should be called before checking wasSuccessful.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.StreamSummary._gather_test">
+    
+  </a>
+  <a name="_gather_test">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _gather_test(self, test_dict):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.StreamSummary._incomplete">
+    
+  </a>
+  <a name="_incomplete">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _incomplete(self, case):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.StreamSummary._success">
+    
+  </a>
+  <a name="_success">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _success(self, case):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.StreamSummary._skip">
+    
+  </a>
+  <a name="_skip">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _skip(self, case):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.StreamSummary._exists">
+    
+  </a>
+  <a name="_exists">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _exists(self, case):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.StreamSummary._fail">
+    
+  </a>
+  <a name="_fail">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _fail(self, case):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.StreamSummary._xfail">
+    
+  </a>
+  <a name="_xfail">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _xfail(self, case):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.real.StreamSummary._uxsuccess">
+    
+  </a>
+  <a name="_uxsuccess">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _uxsuccess(self, case):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

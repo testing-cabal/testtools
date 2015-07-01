@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.deferredruntest.AsynchronousDeferredRunTest : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="class"><code>testtools.deferredruntest.AsynchronousDeferredRunTest(<a href="testtools.deferredruntest._DeferredRunTest.html" class="code">_DeferredRunTest</a>)</code> <small>class documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a>.<a href="testtools.deferredruntest.html" class="code">deferredruntest</a></code>
+          
+          <a href="classIndex.html#testtools.deferredruntest.AsynchronousDeferredRunTest">(View In Hierarchy)</a>
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        <p>Known subclasses: <a href="testtools.deferredruntest.AsynchronousDeferredRunTestForBrokenTwisted.html" class="code">testtools.deferredruntest.AsynchronousDeferredRunTestForBrokenTwisted</a></p>
+      </div>
+
+      <div class="moduleDocstring">
+        <div><p>Runner for tests that return Deferreds that fire asynchronously.</p>
+<p>That is, this test runner assumes that the Deferreds will only fire if the
+reactor is left to spin for a while.</p>
+<p>Do not rely too heavily on the nuances of the behaviour of this class.
+What it does to the reactor is black magic, and if we can find nicer ways
+of doing it we will gladly break backwards compatibility.</p>
+<p>This is highly experimental code.  Use at your own risk.</p><table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id720">
+  
+  <tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.deferredruntest.AsynchronousDeferredRunTest.html#__init__" class="code">__init__</a></td>
+    <td><span>Construct an <a href="testtools.deferredruntest.AsynchronousDeferredRunTest.html"><code>AsynchronousDeferredRunTest</code></a>.</span></td>
+  </tr><tr class="classmethod">
+    
+    <td>Class Method</td>
+    <td><a href="testtools.deferredruntest.AsynchronousDeferredRunTest.html#make_factory" class="code">make_factory</a></td>
+    <td><span>Make a factory that conforms to the RunTest factory interface.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.deferredruntest.AsynchronousDeferredRunTest.html#_run_cleanups" class="code">_run_cleanups</a></td>
+    <td><span>Run the cleanups on the test case.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.deferredruntest.AsynchronousDeferredRunTest.html#_make_spinner" class="code">_make_spinner</a></td>
+    <td><span>Make the <a href="testtools._spinner.Spinner.html"><code>Spinner</code></a> to be used to run the tests.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.deferredruntest.AsynchronousDeferredRunTest.html#_run_deferred" class="code">_run_deferred</a></td>
+    <td><span>Run the test, assuming everything in it is Deferred-returning.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.deferredruntest.AsynchronousDeferredRunTest.html#_log_user_exception" class="code">_log_user_exception</a></td>
+    <td><span>Raise 'e' and report it as a user exception.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.deferredruntest.AsynchronousDeferredRunTest.html#_blocking_run_deferred" class="code">_blocking_run_deferred</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.deferredruntest.AsynchronousDeferredRunTest.html#_run_core" class="code">_run_core</a></td>
+    <td><span>Run the user supplied test code.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.deferredruntest.AsynchronousDeferredRunTest.html#_run_user" class="code">_run_user</a></td>
+    <td><span>Run a user-supplied function.</span></td>
+  </tr>
+</table>
+        
+          <p class="inheritedFrom">
+            Inherited from <a href="testtools.runtest.RunTest.html" class="code">RunTest</a> (via <a href="testtools.deferredruntest._DeferredRunTest.html" class="code">_DeferredRunTest</a>):
+          </p>
+          <table class="children sortable" id="id722">
+  
+  <tr class="baseinstancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#case" class="code">case</a></td>
+    <td>The test case that is to be run.</td>
+  </tr><tr class="baseinstancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#result" class="code">result</a></td>
+    <td>The result object a case is reporting to.</td>
+  </tr><tr class="baseinstancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#handlers" class="code">handlers</a></td>
+    <td>A list of (ExceptionClass, handler_function) for
+exceptions that should be caught if raised from the user
+code. Exceptions that are caught are checked against this list in
+first to last order.  There is a catch-all of 'Exception' at the end
+of the list, so to add a new exception to the list, insert it at the
+front (which ensures that it will be checked before any existing base
+classes in the list. If you add multiple exceptions some of which are
+subclasses of each other, add the most specific exceptions last (so
+they come before their parent classes in the list).</td>
+  </tr><tr class="baseinstancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#exception_caught" class="code">exception_caught</a></td>
+    <td>An object returned when _run_user catches an
+exception.</td>
+  </tr><tr class="basemethod">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#run" class="code">run</a></td>
+    <td><span>Run self.case reporting activity to result.</span></td>
+  </tr><tr class="baseinstancevariable private">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#_exceptions" class="code">_exceptions</a></td>
+    <td>A list of caught exceptions, used to do the single
+reporting of error/failure/skip etc.</td>
+  </tr><tr class="basemethod private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_run_one" class="code">_run_one</a></td>
+    <td><span>Run one test reporting to result.</span></td>
+  </tr><tr class="basemethod private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_run_prepared_result" class="code">_run_prepared_result</a></td>
+    <td><span>Run one test reporting to result.</span></td>
+  </tr><tr class="basemethod private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_got_user_exception" class="code">_got_user_exception</a></td>
+    <td><span>Called when user code raises an exception.</span></td>
+  </tr>
+</table>
+          
+          <p class="inheritedFrom">
+            Inherited from <a href="testtools.runtest.RunTest.html" class="code">RunTest</a> (via <a href="testtools.deferredruntest._DeferredRunTest.html" class="code">_DeferredRunTest</a>):
+          </p>
+          <table class="children sortable" id="id722">
+  
+  <tr class="baseinstancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#case" class="code">case</a></td>
+    <td>The test case that is to be run.</td>
+  </tr><tr class="baseinstancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#result" class="code">result</a></td>
+    <td>The result object a case is reporting to.</td>
+  </tr><tr class="baseinstancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#handlers" class="code">handlers</a></td>
+    <td>A list of (ExceptionClass, handler_function) for
+exceptions that should be caught if raised from the user
+code. Exceptions that are caught are checked against this list in
+first to last order.  There is a catch-all of 'Exception' at the end
+of the list, so to add a new exception to the list, insert it at the
+front (which ensures that it will be checked before any existing base
+classes in the list. If you add multiple exceptions some of which are
+subclasses of each other, add the most specific exceptions last (so
+they come before their parent classes in the list).</td>
+  </tr><tr class="baseinstancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#exception_caught" class="code">exception_caught</a></td>
+    <td>An object returned when _run_user catches an
+exception.</td>
+  </tr><tr class="basemethod">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#run" class="code">run</a></td>
+    <td><span>Run self.case reporting activity to result.</span></td>
+  </tr><tr class="baseinstancevariable private">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#_exceptions" class="code">_exceptions</a></td>
+    <td>A list of caught exceptions, used to do the single
+reporting of error/failure/skip etc.</td>
+  </tr><tr class="basemethod private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_run_one" class="code">_run_one</a></td>
+    <td><span>Run one test reporting to result.</span></td>
+  </tr><tr class="basemethod private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_run_prepared_result" class="code">_run_prepared_result</a></td>
+    <td><span>Run one test reporting to result.</span></td>
+  </tr><tr class="basemethod private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_got_user_exception" class="code">_got_user_exception</a></td>
+    <td><span>Called when user code raises an exception.</span></td>
+  </tr>
+</table>
+          
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.deferredruntest.AsynchronousDeferredRunTest.__init__">
+    
+  </a>
+  <a name="__init__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __init__(self, case, handlers=None, last_resort=None, reactor=None, timeout=0.005, debug=False):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.runtest.RunTest.html#__init__" class="code">testtools.runtest.RunTest.__init__</a></div>
+    <div><p>Construct an <a href="testtools.deferredruntest.AsynchronousDeferredRunTest.html"><code>AsynchronousDeferredRunTest</code></a>.</p>
+<p>Please be sure to always use keyword syntax, not positional, as the
+base class may add arguments in future - and for core code
+compatibility with that we have to insert them before the local
+parameters.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">case</td><td>The <a href="testtools.testcase.TestCase.html"><code>TestCase</code></a> to run.</td></tr><tr><td></td><td class="fieldArg">handlers</td><td>A list of exception handlers (ExceptionType, handler)
+where 'handler' is a callable that takes a <a href="testtools.testcase.TestCase.html"><code>TestCase</code></a>, a
+<tt class="rst-docutils literal">testtools.TestResult</tt> and the exception raised.</td></tr><tr><td></td><td class="fieldArg">last_resort</td><td>Handler to call before re-raising uncatchable
+exceptions (those for which there is no handler).</td></tr><tr><td></td><td class="fieldArg">reactor</td><td>The Twisted reactor to use.  If not given, we use the
+default reactor.</td></tr><tr><td></td><td class="fieldArg">timeout</td><td>The maximum time allowed for running a test.  The
+default is 0.005s.</td></tr><tr><td></td><td class="fieldArg">debug</td><td>Whether or not to enable Twisted's debugging.  Use this
+to get information about unhandled Deferreds and left-over
+DelayedCalls.  Defaults to False.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.deferredruntest.AsynchronousDeferredRunTest.make_factory">
+    
+  </a>
+  <a name="make_factory">
+    
+  </a>
+  <div class="functionHeader">
+    @classmethod<br />
+    def
+    make_factory(cls, reactor=None, timeout=0.005, debug=False):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Make a factory that conforms to the RunTest factory interface.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.deferredruntest.AsynchronousDeferredRunTest._run_cleanups">
+    
+  </a>
+  <a name="_run_cleanups">
+    
+  </a>
+  <div class="functionHeader">
+    @defer.deferredGenerator<br />
+    def
+    _run_cleanups(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.runtest.RunTest.html#_run_cleanups" class="code">testtools.runtest.RunTest._run_cleanups</a></div>
+    <div><p>Run the cleanups on the test case.</p>
+<p>We expect that the cleanups on the test case can also return
+asynchronous Deferreds.  As such, we take the responsibility for
+running the cleanups, rather than letting TestCase do it.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.deferredruntest.AsynchronousDeferredRunTest._make_spinner">
+    
+  </a>
+  <a name="_make_spinner">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _make_spinner(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overridden in <a href="testtools.deferredruntest.AsynchronousDeferredRunTestForBrokenTwisted.html" class="code">testtools.deferredruntest.AsynchronousDeferredRunTestForBrokenTwisted</a></div>
+    <div>Make the <a href="testtools._spinner.Spinner.html"><code>Spinner</code></a> to be used to run the tests.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.deferredruntest.AsynchronousDeferredRunTest._run_deferred">
+    
+  </a>
+  <a name="_run_deferred">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _run_deferred(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Run the test, assuming everything in it is Deferred-returning.</p>
+<p>This should return a Deferred that fires with True if the test was
+successful and False if the test was not successful.  It should <em>not</em>
+call addSuccess on the result, because there's reactor clean up that
+we needs to be done afterwards.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.deferredruntest.AsynchronousDeferredRunTest._log_user_exception">
+    
+  </a>
+  <a name="_log_user_exception">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _log_user_exception(self, e):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Raise 'e' and report it as a user exception.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.deferredruntest.AsynchronousDeferredRunTest._blocking_run_deferred">
+    
+  </a>
+  <a name="_blocking_run_deferred">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _blocking_run_deferred(self, spinner):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.deferredruntest.AsynchronousDeferredRunTest._run_core">
+    
+  </a>
+  <a name="_run_core">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _run_core(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.runtest.RunTest.html#_run_core" class="code">testtools.runtest.RunTest._run_core</a></div>
+    <div>Run the user supplied test code.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.deferredruntest.AsynchronousDeferredRunTest._run_user">
+    
+  </a>
+  <a name="_run_user">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _run_user(self, function, *args):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.runtest.RunTest.html#_run_user" class="code">testtools.runtest.RunTest._run_user</a></div>
+    <div><p>Run a user-supplied function.</p>
+<p>This just makes sure that it returns a Deferred, regardless of how the
+user wrote it.</p><table class="fieldTable"></table></div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

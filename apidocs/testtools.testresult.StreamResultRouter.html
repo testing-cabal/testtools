@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.testresult.StreamResultRouter : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="class"><code>testtools.testresult.StreamResultRouter(<a href="testtools.testresult.real.StreamResult.html" class="code">StreamResult</a>)</code> <small>class documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a>.<a href="testtools.testresult.html" class="code">testresult</a></code>
+          
+          <a href="classIndex.html#testtools.testresult.StreamResultRouter">(View In Hierarchy)</a>
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        
+      </div>
+
+      <div class="moduleDocstring">
+        <div><p>A StreamResult that routes events.</p>
+<p>StreamResultRouter forwards received events to another StreamResult object,
+selected by a dynamic forwarding policy. Events where no destination is
+found are forwarded to the fallback StreamResult, or an error is raised.</p>
+<p>Typical use is to construct a router with a fallback and then either
+create up front mapping rules, or create them as-needed from the fallback
+handler:</p>
+<pre class="rst-literal-block">
+&gt;&gt;&gt; router = StreamResultRouter()
+&gt;&gt;&gt; sink = doubles.StreamResult()
+&gt;&gt;&gt; router.add_rule(sink, 'route_code_prefix', route_prefix='0',
+...     consume_route=True)
+&gt;&gt;&gt; router.status(test_id='foo', route_code='0/1', test_status='uxsuccess')
+</pre>
+<p>StreamResultRouter has no buffering.</p>
+<p>When adding routes (and for the fallback) whether to call startTestRun and
+stopTestRun or to not call them is controllable by passing
+'do_start_stop_run'. The default is to call them for the fallback only.
+If a route is added after startTestRun has been called, and
+do_start_stop_run is True then startTestRun is called immediately on the
+new route sink.</p>
+<p>There is no a-priori defined lookup order for routes: if they are ambiguous
+the behaviour is undefined. Only a single route is chosen for any event.</p><table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id95">
+  
+  <tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.StreamResultRouter.html#__init__" class="code">__init__</a></td>
+    <td><span>Construct a StreamResultRouter with optional fallback.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.StreamResultRouter.html#startTestRun" class="code">startTestRun</a></td>
+    <td><span>Start a test run.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.StreamResultRouter.html#stopTestRun" class="code">stopTestRun</a></td>
+    <td><span>Stop a test run.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.StreamResultRouter.html#status" class="code">status</a></td>
+    <td><span>Inform the result about a test status.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.StreamResultRouter.html#add_rule" class="code">add_rule</a></td>
+    <td><span>Add a rule to route events to sink when they match a given policy.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.StreamResultRouter.html#_map_route_code_prefix" class="code">_map_route_code_prefix</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.testresult.StreamResultRouter.html#_map_test_id" class="code">_map_test_id</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr>
+</table>
+        
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.testresult.StreamResultRouter.__init__">
+    
+  </a>
+  <a name="__init__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __init__(self, fallback=None, do_start_stop_run=True):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Construct a StreamResultRouter with optional fallback.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">fallback</td><td>A StreamResult to forward events to when no route
+exists for them.</td></tr><tr><td></td><td class="fieldArg">do_start_stop_run</td><td>If False do not pass startTestRun and
+stopTestRun onto the fallback.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.StreamResultRouter.startTestRun">
+    
+  </a>
+  <a name="startTestRun">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    startTestRun(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.testresult.real.StreamResult.html#startTestRun" class="code">testtools.testresult.real.StreamResult.startTestRun</a></div>
+    <div><p>Start a test run.</p>
+<p>This will prepare the test result to process results (which might imply
+connecting to a database or remote machine).</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.StreamResultRouter.stopTestRun">
+    
+  </a>
+  <a name="stopTestRun">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    stopTestRun(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.testresult.real.StreamResult.html#stopTestRun" class="code">testtools.testresult.real.StreamResult.stopTestRun</a></div>
+    <div><p>Stop a test run.</p>
+<p>This informs the result that no more test updates will be received. At
+this point any test ids that have started and not completed can be
+considered failed-or-hung.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.StreamResultRouter.status">
+    
+  </a>
+  <a name="status">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    status(self, **kwargs):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.testresult.real.StreamResult.html#status" class="code">testtools.testresult.real.StreamResult.status</a></div>
+    <div>Inform the result about a test status.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">test_id</td><td>The test whose status is being reported. None to
+report status about the test run as a whole.</td></tr><tr><td></td><td class="fieldArg">test_status</td><td><p>The status for the test. There are two sorts of
+status - interim and final status events. As many interim events
+can be generated as desired, but only one final event. After a
+final status event any further file or status events from the
+same test_id+route_code may be discarded or associated with a new
+test by the StreamResult. (But no exception will be thrown).</p>
+<dl class="rst-docutils">
+<dt>Interim states:</dt>
+<dd><ul class="rst-first rst-last rst-simple">
+<li>None - no particular status is being reported, or status being
+reported is not associated with a test (e.g. when reporting on
+stdout / stderr chatter).</li>
+<li>inprogress - the test is currently running. Emitted by tests when
+they start running and at any intermediary point they might
+choose to indicate their continual operation.</li>
+</ul>
+</dd>
+<dt>Final states:</dt>
+<dd><ul class="rst-first rst-last rst-simple">
+<li>exists - the test exists. This is used when a test is not being
+executed. Typically this is when querying what tests could be run
+in a test run (which is useful for selecting tests to run).</li>
+<li>xfail - the test failed but that was expected. This is purely
+informative - the test is not considered to be a failure.</li>
+<li>uxsuccess - the test passed but was expected to fail. The test
+will be considered a failure.</li>
+<li>success - the test has finished without error.</li>
+<li>fail - the test failed (or errored). The test will be considered
+a failure.</li>
+<li>skip - the test was selected to run but chose to be skipped. E.g.
+a test dependency was missing. This is purely informative - the
+test is not considered to be a failure.</li>
+</ul>
+</dd>
+</dl></td></tr><tr><td></td><td class="fieldArg">test_tags</td><td>Optional set of tags to apply to the test. Tags
+have no intrinsic meaning - that is up to the test author.</td></tr><tr><td></td><td class="fieldArg">runnable</td><td>Allows status reports to mark that they are for
+tests which are not able to be explicitly run. For instance,
+subtests will report themselves as non-runnable.</td></tr><tr><td></td><td class="fieldArg">file_name</td><td>The name for the file_bytes. Any unicode string may
+be used. While there is no semantic value attached to the name
+of any attachment, the names 'stdout' and 'stderr' and 'traceback'
+are recommended for use only for output sent to stdout, stderr and
+tracebacks of exceptions. When file_name is supplied, file_bytes
+must be a bytes instance.</td></tr><tr><td></td><td class="fieldArg">file_bytes</td><td>A bytes object containing content for the named
+file. This can just be a single chunk of the file - emitting
+another file event with more later. Must be None unleses a
+file_name is supplied.</td></tr><tr><td></td><td class="fieldArg">eof</td><td>True if this chunk is the last chunk of the file, any
+additional chunks with the same name should be treated as an error
+and discarded. Ignored unless file_name has been supplied.</td></tr><tr><td></td><td class="fieldArg">mime_type</td><td>An optional MIME type for the file. stdout and
+stderr will generally be "text/plain; charset=utf8". If None,
+defaults to application/octet-stream. Ignored unless file_name
+has been supplied.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.StreamResultRouter.add_rule">
+    
+  </a>
+  <a name="add_rule">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    add_rule(self, sink, policy, do_start_stop_run=False, **policy_args):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Add a rule to route events to sink when they match a given policy.</p>
+<p><tt class="rst-docutils literal">route_code_prefix</tt> routes events based on a prefix of the route
+code in the event. It takes a <tt class="rst-docutils literal">route_prefix</tt> argument to match on
+(e.g. '0') and a <tt class="rst-docutils literal">consume_route</tt> argument, which, if True, removes
+the prefix from the <tt class="rst-docutils literal">route_code</tt> when forwarding events.</p>
+<p><tt class="rst-docutils literal">test_id</tt> routes events based on the test id.  It takes a single
+argument, <tt class="rst-docutils literal">test_id</tt>.  Use <tt class="rst-docutils literal">None</tt> to select non-test events.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">sink</td><td>A StreamResult to receive events.</td></tr><tr><td></td><td class="fieldArg">policy</td><td>A routing policy. Valid policies are
+'route_code_prefix' and 'test_id'.</td></tr><tr><td></td><td class="fieldArg">do_start_stop_run</td><td>If True then startTestRun and stopTestRun
+events will be passed onto this sink.</td></tr><tr class="fieldStart"><td class="fieldName">Raises</td><td colspan="2">ValueError if the policy is unknown</td></tr><tr><td></td><td colspan="2">TypeError if the policy is given arguments it cannot handle.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.StreamResultRouter._map_route_code_prefix">
+    
+  </a>
+  <a name="_map_route_code_prefix">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _map_route_code_prefix(self, sink, route_prefix, consume_route=False):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.testresult.StreamResultRouter._map_test_id">
+    
+  </a>
+  <a name="_map_test_id">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _map_test_id(self, sink, test_id):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

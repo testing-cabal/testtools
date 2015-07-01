@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.helpers : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="module"><code>testtools.helpers</code> <small>module documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a></code>
+          
+          
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        
+      </div>
+
+      <div class="moduleDocstring">
+        <div class="undocumented">No module docstring</div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id151">
+  
+  <tr class="function">
+    
+    <td>Function</td>
+    <td><a href="testtools.helpers.html#map_values" class="code">map_values</a></td>
+    <td><span>Map <tt class="rst-docutils literal">function</tt> across the values of <tt class="rst-docutils literal">dictionary</tt>.</span></td>
+  </tr><tr class="function">
+    
+    <td>Function</td>
+    <td><a href="testtools.helpers.html#filter_values" class="code">filter_values</a></td>
+    <td><span>Filter <tt class="rst-docutils literal">dictionary</tt> by its values using <tt class="rst-docutils literal">function</tt>.</span></td>
+  </tr><tr class="function">
+    
+    <td>Function</td>
+    <td><a href="testtools.helpers.html#dict_subtract" class="code">dict_subtract</a></td>
+    <td><span>Return the part of <tt class="rst-docutils literal">a</tt> that's not in <tt class="rst-docutils literal">b</tt>.</span></td>
+  </tr><tr class="function">
+    
+    <td>Function</td>
+    <td><a href="testtools.helpers.html#list_subtract" class="code">list_subtract</a></td>
+    <td><span>Return a list <tt class="rst-docutils literal">a</tt> without the elements of <tt class="rst-docutils literal">b</tt>.</span></td>
+  </tr>
+</table>
+        
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.helpers.map_values">
+    
+  </a>
+  <a name="map_values">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    map_values(function, dictionary):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Map <tt class="rst-docutils literal">function</tt> across the values of <tt class="rst-docutils literal">dictionary</tt>.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">A dict with the same keys as <tt class="rst-docutils literal">dictionary</tt>, where the value
+of each key <tt class="rst-docutils literal">k</tt> is <tt class="rst-docutils literal">function(dictionary[k])</tt>.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.helpers.filter_values">
+    
+  </a>
+  <a name="filter_values">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    filter_values(function, dictionary):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Filter <tt class="rst-docutils literal">dictionary</tt> by its values using <tt class="rst-docutils literal">function</tt>.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.helpers.dict_subtract">
+    
+  </a>
+  <a name="dict_subtract">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    dict_subtract(a, b):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Return the part of <tt class="rst-docutils literal">a</tt> that's not in <tt class="rst-docutils literal">b</tt>.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.helpers.list_subtract">
+    
+  </a>
+  <a name="list_subtract">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    list_subtract(a, b):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Return a list <tt class="rst-docutils literal">a</tt> without the elements of <tt class="rst-docutils literal">b</tt>.</p>
+<p>If a particular value is in <tt class="rst-docutils literal">a</tt> twice and <tt class="rst-docutils literal">b</tt> once then the returned
+list then that value will appear once in the returned list.</p><table class="fieldTable"></table></div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

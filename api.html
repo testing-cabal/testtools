@@ -1,0 +1,1939 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>testtools API documentation &mdash; testtools VERSION documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     'VERSION',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="testtools VERSION documentation" href="index.html" />
+    <link rel="prev" title="testtools NEWS" href="news.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="news.html" title="testtools NEWS"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">testtools VERSION documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="testtools-api-documentation">
+<h1>testtools API documentation<a class="headerlink" href="#testtools-api-documentation" title="Permalink to this headline">¶</a></h1>
+<p>Generated reference documentation for all the public functionality of
+testtools.</p>
+<p>Please <a class="reference internal" href="hacking.html"><em>send patches</em></a> if you notice anything confusing or
+wrong, or that could be improved.</p>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+<div class="section" id="module-testtools">
+<span id="testtools"></span><h2>testtools<a class="headerlink" href="#module-testtools" title="Permalink to this headline">¶</a></h2>
+<p>Extensions to the standard Python unittest library.</p>
+<dl class="function">
+<dt id="testtools.clone_test_with_new_id">
+<code class="descclassname">testtools.</code><code class="descname">clone_test_with_new_id</code><span class="sig-paren">(</span><em>test</em>, <em>new_id</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.clone_test_with_new_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy a <cite>TestCase</cite>, and give the copied test a new id.</p>
+<p>This is only expected to be used on tests that have been constructed but
+not executed.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.CopyStreamResult">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">CopyStreamResult</code><span class="sig-paren">(</span><em>targets</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.CopyStreamResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies all event it receives to multiple results.</p>
+<p>This provides an easy facility for combining multiple StreamResults.</p>
+<p>For TestResult the equivalent class was <code class="docutils literal"><span class="pre">MultiTestResult</span></code>.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.ConcurrentTestSuite">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">ConcurrentTestSuite</code><span class="sig-paren">(</span><em>suite</em>, <em>make_tests</em>, <em>wrap_result=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.ConcurrentTestSuite" title="Permalink to this definition">¶</a></dt>
+<dd><p>A TestSuite whose run() calls out to a concurrency strategy.</p>
+<dl class="method">
+<dt id="testtools.ConcurrentTestSuite.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>result</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.ConcurrentTestSuite.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the tests concurrently.</p>
+<p>This calls out to the provided make_tests helper, and then serialises
+the results so that result only sees activity from one TestCase at
+a time.</p>
+<p>ConcurrentTestSuite provides no special mechanism to stop the tests
+returned by make_tests, it is up to the make_tests to honour the
+shouldStop attribute on the result object they are run with, which will
+be set if an exception is raised in the thread which
+ConcurrentTestSuite.run is called in.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.ConcurrentStreamTestSuite">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">ConcurrentStreamTestSuite</code><span class="sig-paren">(</span><em>make_tests</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.ConcurrentStreamTestSuite" title="Permalink to this definition">¶</a></dt>
+<dd><p>A TestSuite whose run() parallelises.</p>
+<dl class="method">
+<dt id="testtools.ConcurrentStreamTestSuite.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>result</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.ConcurrentStreamTestSuite.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run the tests concurrently.</p>
+<p>This calls out to the provided make_tests helper to determine the
+concurrency to use and to assign routing codes to each worker.</p>
+<p>ConcurrentTestSuite provides no special mechanism to stop the tests
+returned by make_tests, it is up to the made tests to honour the
+shouldStop attribute on the result object they are run with, which will
+be set if the test run is to be aborted.</p>
+<p>The tests are run with an ExtendedToStreamDecorator wrapped around a
+StreamToQueue instance. ConcurrentStreamTestSuite dequeues events from
+the queue and forwards them to result. Tests can therefore be either
+original unittest tests (or compatible tests), or new tests that emit
+StreamResult events directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>result</strong> &#8211; A StreamResult instance. The caller is responsible for
+calling startTestRun on this instance prior to invoking suite.run,
+and stopTestRun subsequent to the run method returning.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.DecorateTestCaseResult">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">DecorateTestCaseResult</code><span class="sig-paren">(</span><em>case</em>, <em>callout</em>, <em>before_run=None</em>, <em>after_run=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.DecorateTestCaseResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorate a TestCase and permit customisation of the result for runs.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="testtools.ErrorHolder">
+<code class="descclassname">testtools.</code><code class="descname">ErrorHolder</code><span class="sig-paren">(</span><em>test_id</em>, <em>error</em>, <em>short_description=None</em>, <em>details=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.ErrorHolder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct an <cite>ErrorHolder</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>test_id</strong> &#8211; The id of the test.</li>
+<li><strong>error</strong> &#8211; The exc info tuple that will be used as the test&#8217;s error.
+This is inserted into the details as &#8216;traceback&#8217; - any existing key
+will be overridden.</li>
+<li><strong>short_description</strong> &#8211; An optional short description of the test.</li>
+<li><strong>details</strong> &#8211; Outcome details as accepted by addSuccess etc.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.ExpectedException">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">ExpectedException</code><span class="sig-paren">(</span><em>exc_type</em>, <em>value_re=None</em>, <em>msg=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.ExpectedException" title="Permalink to this definition">¶</a></dt>
+<dd><p>A context manager to handle expected exceptions.</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>def test_foo(self):</dt>
+<dd><dl class="first last docutils">
+<dt>with ExpectedException(ValueError, &#8216;fo.*&#8217;):</dt>
+<dd>raise ValueError(&#8216;foo&#8217;)</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+<p>will pass.  If the raised exception has a type other than the specified
+type, it will be re-raised.  If it has a &#8216;str()&#8217; that does not match the
+given regular expression, an AssertionError will be raised.  If no
+exception is raised, an AssertionError will be raised.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.ExtendedToOriginalDecorator">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">ExtendedToOriginalDecorator</code><span class="sig-paren">(</span><em>decorated</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.ExtendedToOriginalDecorator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Permit new TestResult API code to degrade gracefully with old results.</p>
+<p>This decorates an existing TestResult and converts missing outcomes
+such as addSkip to older outcomes such as addSuccess. It also supports
+the extended details protocol. In all cases the most recent protocol
+is attempted first, and fallbacks only occur when the decorated result
+does not support the newer style of calling.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.ExtendedToStreamDecorator">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">ExtendedToStreamDecorator</code><span class="sig-paren">(</span><em>decorated</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.ExtendedToStreamDecorator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Permit using old TestResult API code with new StreamResult objects.</p>
+<p>This decorates a StreamResult and converts old (Python 2.6 / 2.7 /
+Extended) TestResult API calls into StreamResult calls.</p>
+<p>It also supports regular StreamResult calls, making it safe to wrap around
+any StreamResult.</p>
+<dl class="attribute">
+<dt id="testtools.ExtendedToStreamDecorator.current_tags">
+<code class="descname">current_tags</code><a class="headerlink" href="#testtools.ExtendedToStreamDecorator.current_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>The currently set tags.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.ExtendedToStreamDecorator.tags">
+<code class="descname">tags</code><span class="sig-paren">(</span><em>new_tags</em>, <em>gone_tags</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.ExtendedToStreamDecorator.tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add and remove tags from the test.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>new_tags</strong> &#8211; A set of tags to be added to the stream.</li>
+<li><strong>gone_tags</strong> &#8211; A set of tags to be removed from the stream.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="testtools.iterate_tests">
+<code class="descclassname">testtools.</code><code class="descname">iterate_tests</code><span class="sig-paren">(</span><em>test_suite_or_case</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.iterate_tests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate through all of the test cases in &#8216;test_suite_or_case&#8217;.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="testtools.MultipleExceptions">
+<em class="property">exception </em><code class="descclassname">testtools.</code><code class="descname">MultipleExceptions</code><a class="headerlink" href="#testtools.MultipleExceptions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents many exceptions raised from some operation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>args</strong> &#8211; The sys.exc_info() tuples for each exception.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.MultiTestResult">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">MultiTestResult</code><span class="sig-paren">(</span><em>*results</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.MultiTestResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>A test result that dispatches to many test results.</p>
+<dl class="method">
+<dt id="testtools.MultiTestResult.wasSuccessful">
+<code class="descname">wasSuccessful</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.MultiTestResult.wasSuccessful" title="Permalink to this definition">¶</a></dt>
+<dd><p>Was this result successful?</p>
+<p>Only returns True if every constituent result was successful.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.PlaceHolder">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">PlaceHolder</code><span class="sig-paren">(</span><em>test_id</em>, <em>short_description=None</em>, <em>details=None</em>, <em>outcome='addSuccess'</em>, <em>error=None</em>, <em>tags=None</em>, <em>timestamps=(None</em>, <em>None)</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.PlaceHolder" title="Permalink to this definition">¶</a></dt>
+<dd><p>A placeholder test.</p>
+<p><cite>PlaceHolder</cite> implements much of the same interface as TestCase and is
+particularly suitable for being added to TestResults.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="testtools.run_test_with">
+<code class="descclassname">testtools.</code><code class="descname">run_test_with</code><span class="sig-paren">(</span><em>test_runner</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.run_test_with" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorate a test as using a specific <code class="docutils literal"><span class="pre">RunTest</span></code>.</p>
+<p>e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@run_test_with</span><span class="p">(</span><span class="n">CustomRunner</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">test_foo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The returned decorator works by setting an attribute on the decorated
+function.  <cite>TestCase.__init__</cite> looks for this attribute when deciding on a
+<code class="docutils literal"><span class="pre">RunTest</span></code> factory.  If you wish to use multiple decorators on a test
+method, then you must either make this one the top-most decorator, or you
+must write your decorators so that they update the wrapping function with
+the attributes of the wrapped function.  The latter is recommended style
+anyway.  <code class="docutils literal"><span class="pre">functools.wraps</span></code>, <code class="docutils literal"><span class="pre">functools.wrapper</span></code> and
+<code class="docutils literal"><span class="pre">twisted.python.util.mergeFunctionMetadata</span></code> can help you do this.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>test_runner</strong> &#8211; A <code class="docutils literal"><span class="pre">RunTest</span></code> factory that takes a test case and an
+optional list of exception handlers.  See <code class="docutils literal"><span class="pre">RunTest</span></code>.</li>
+<li><strong>kwargs</strong> &#8211; Keyword arguments to pass on as extra arguments to
+&#8216;test_runner&#8217;.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A decorator to be used for marking a test as needing a special
+runner.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.Tagger">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">Tagger</code><span class="sig-paren">(</span><em>decorated</em>, <em>new_tags</em>, <em>gone_tags</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.Tagger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tag each test individually.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.TestCase">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">TestCase</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extensions to the basic TestCase.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>exception_handlers</strong> &#8211; Exceptions to catch from setUp, runTest and
+tearDown. This list is able to be modified at any time and consists of
+(exception_class, handler(case, result, exception_value)) pairs.</li>
+<li><strong>force_failure</strong> &#8211; Force testtools.RunTest to fail the test after the
+test has completed.</li>
+<li><a class="reference internal" href="#testtools.TestCase.run_tests_with" title="testtools.TestCase.run_tests_with"><strong>run_tests_with</strong></a> &#8211; A factory to make the <code class="docutils literal"><span class="pre">RunTest</span></code> to run tests with.
+Defaults to <code class="docutils literal"><span class="pre">RunTest</span></code>.  The factory is expected to take a test case
+and an optional list of exception handlers.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="testtools.TestCase.addCleanup">
+<code class="descname">addCleanup</code><span class="sig-paren">(</span><em>function</em>, <em>*arguments</em>, <em>**keywordArguments</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.addCleanup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a cleanup function to be called after tearDown.</p>
+<p>Functions added with addCleanup will be called in reverse order of
+adding after tearDown, or after setUp if setUp raises an exception.</p>
+<p>If a function added with addCleanup raises an exception, the error
+will be recorded as a test error, and the next cleanup will then be
+run.</p>
+<p>Cleanup functions are always called before a test finishes running,
+even if setUp is aborted by an exception.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.addDetail">
+<code class="descname">addDetail</code><span class="sig-paren">(</span><em>name</em>, <em>content_object</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.addDetail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a detail to be reported with this test&#8217;s outcome.</p>
+<p>For more details see pydoc testtools.TestResult.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; The name to give this detail.</li>
+<li><strong>content_object</strong> &#8211; The content object for this detail. See
+testtools.content for more detail.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.addDetailUniqueName">
+<code class="descname">addDetailUniqueName</code><span class="sig-paren">(</span><em>name</em>, <em>content_object</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.addDetailUniqueName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a detail to the test, but ensure it&#8217;s name is unique.</p>
+<p>This method checks whether <code class="docutils literal"><span class="pre">name</span></code> conflicts with a detail that has
+already been added to the test. If it does, it will modify <code class="docutils literal"><span class="pre">name</span></code> to
+avoid the conflict.</p>
+<p>For more details see pydoc testtools.TestResult.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; The name to give this detail.</li>
+<li><strong>content_object</strong> &#8211; The content object for this detail. See
+testtools.content for more detail.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.addOnException">
+<code class="descname">addOnException</code><span class="sig-paren">(</span><em>handler</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.addOnException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a handler to be called when an exception occurs in test code.</p>
+<p>This handler cannot affect what result methods are called, and is
+called before any outcome is called on the result object. An example
+use for it is to add some diagnostic state to the test details dict
+which is expensive to calculate and not interesting for reporting in
+the success case.</p>
+<p>Handlers are called before the outcome (such as addFailure) that
+the exception has caused.</p>
+<p>Handlers are called in first-added, first-called order, and if they
+raise an exception, that will propogate out of the test running
+machinery, halting test processing. As a result, do not call code that
+may unreasonably fail.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.assertEqual">
+<code class="descname">assertEqual</code><span class="sig-paren">(</span><em>expected</em>, <em>observed</em>, <em>message=''</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.assertEqual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert that &#8216;expected&#8217; is equal to &#8216;observed&#8217;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>expected</strong> &#8211; The expected value.</li>
+<li><strong>observed</strong> &#8211; The observed value.</li>
+<li><strong>message</strong> &#8211; An optional message to include in the error.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.assertEquals">
+<code class="descname">assertEquals</code><span class="sig-paren">(</span><em>expected</em>, <em>observed</em>, <em>message=''</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.assertEquals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert that &#8216;expected&#8217; is equal to &#8216;observed&#8217;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>expected</strong> &#8211; The expected value.</li>
+<li><strong>observed</strong> &#8211; The observed value.</li>
+<li><strong>message</strong> &#8211; An optional message to include in the error.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.assertIn">
+<code class="descname">assertIn</code><span class="sig-paren">(</span><em>needle</em>, <em>haystack</em>, <em>message=''</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.assertIn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert that needle is in haystack.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.assertIs">
+<code class="descname">assertIs</code><span class="sig-paren">(</span><em>expected</em>, <em>observed</em>, <em>message=''</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.assertIs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert that &#8216;expected&#8217; is &#8216;observed&#8217;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>expected</strong> &#8211; The expected value.</li>
+<li><strong>observed</strong> &#8211; The observed value.</li>
+<li><strong>message</strong> &#8211; An optional message describing the error.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.assertIsNone">
+<code class="descname">assertIsNone</code><span class="sig-paren">(</span><em>observed</em>, <em>message=''</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.assertIsNone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert that &#8216;observed&#8217; is equal to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>observed</strong> &#8211; The observed value.</li>
+<li><strong>message</strong> &#8211; An optional message describing the error.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.assertIsNot">
+<code class="descname">assertIsNot</code><span class="sig-paren">(</span><em>expected</em>, <em>observed</em>, <em>message=''</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.assertIsNot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert that &#8216;expected&#8217; is not &#8216;observed&#8217;.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.assertIsNotNone">
+<code class="descname">assertIsNotNone</code><span class="sig-paren">(</span><em>observed</em>, <em>message=''</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.assertIsNotNone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert that &#8216;observed&#8217; is not equal to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>observed</strong> &#8211; The observed value.</li>
+<li><strong>message</strong> &#8211; An optional message describing the error.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.assertNotIn">
+<code class="descname">assertNotIn</code><span class="sig-paren">(</span><em>needle</em>, <em>haystack</em>, <em>message=''</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.assertNotIn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert that needle is not in haystack.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.assertRaises">
+<code class="descname">assertRaises</code><span class="sig-paren">(</span><em>excClass</em>, <em>callableObj</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.assertRaises" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fail unless an exception of class excClass is thrown
+by callableObj when invoked with arguments args and keyword
+arguments kwargs. If a different type of exception is
+thrown, it will not be caught, and the test case will be
+deemed to have suffered an error, exactly as for an
+unexpected exception.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.assertThat">
+<code class="descname">assertThat</code><span class="sig-paren">(</span><em>matchee</em>, <em>matcher</em>, <em>message=''</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.assertThat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert that matchee is matched by matcher.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>matchee</strong> &#8211; An object to match with matcher.</li>
+<li><strong>matcher</strong> &#8211; An object meeting the testtools.Matcher protocol.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises MismatchError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">When matcher does not match thing.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.expectFailure">
+<code class="descname">expectFailure</code><span class="sig-paren">(</span><em>reason</em>, <em>predicate</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.expectFailure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check that a test fails in a particular way.</p>
+<p>If the test fails in the expected way, a KnownFailure is caused. If it
+succeeds an UnexpectedSuccess is caused.</p>
+<p>The expected use of expectFailure is as a barrier at the point in a
+test where the test would fail. For example:
+&gt;&gt;&gt; def test_foo(self):
+&gt;&gt;&gt;    self.expectFailure(&#8220;1 should be 0&#8221;, self.assertNotEqual, 1, 0)
+&gt;&gt;&gt;    self.assertEqual(1, 0)</p>
+<p>If in the future 1 were to equal 0, the expectFailure call can simply
+be removed. This separation preserves the original intent of the test
+while it is in the expectFailure mode.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.expectThat">
+<code class="descname">expectThat</code><span class="sig-paren">(</span><em>matchee</em>, <em>matcher</em>, <em>message=''</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.expectThat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check that matchee is matched by matcher, but delay the assertion failure.</p>
+<p>This method behaves similarly to <code class="docutils literal"><span class="pre">assertThat</span></code>, except that a failed
+match does not exit the test immediately. The rest of the test code will
+continue to run, and the test will be marked as failing after the test
+has finished.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>matchee</strong> &#8211; An object to match with matcher.</li>
+<li><strong>matcher</strong> &#8211; An object meeting the testtools.Matcher protocol.</li>
+<li><strong>message</strong> &#8211; If specified, show this message with any failed match.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.failUnlessEqual">
+<code class="descname">failUnlessEqual</code><span class="sig-paren">(</span><em>expected</em>, <em>observed</em>, <em>message=''</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.failUnlessEqual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert that &#8216;expected&#8217; is equal to &#8216;observed&#8217;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>expected</strong> &#8211; The expected value.</li>
+<li><strong>observed</strong> &#8211; The observed value.</li>
+<li><strong>message</strong> &#8211; An optional message to include in the error.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.failUnlessRaises">
+<code class="descname">failUnlessRaises</code><span class="sig-paren">(</span><em>excClass</em>, <em>callableObj</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.failUnlessRaises" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fail unless an exception of class excClass is thrown
+by callableObj when invoked with arguments args and keyword
+arguments kwargs. If a different type of exception is
+thrown, it will not be caught, and the test case will be
+deemed to have suffered an error, exactly as for an
+unexpected exception.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.getDetails">
+<code class="descname">getDetails</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.getDetails" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the details dict that will be reported with this test&#8217;s outcome.</p>
+<p>For more details see pydoc testtools.TestResult.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.getUniqueInteger">
+<code class="descname">getUniqueInteger</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.getUniqueInteger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an integer unique to this test.</p>
+<p>Returns an integer that is guaranteed to be unique to this instance.
+Use this when you need an arbitrary integer in your test, or as a
+helper for custom anonymous factory methods.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.getUniqueString">
+<code class="descname">getUniqueString</code><span class="sig-paren">(</span><em>prefix=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.getUniqueString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a string unique to this test.</p>
+<p>Returns a string that is guaranteed to be unique to this instance. Use
+this when you need an arbitrary string in your test, or as a helper
+for custom anonymous factory methods.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>prefix</strong> &#8211; The prefix of the string. If not provided, defaults
+to the id of the tests.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A bytestring of &#8216;&lt;prefix&gt;-&lt;unique_int&gt;&#8217;.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.onException">
+<code class="descname">onException</code><span class="sig-paren">(</span><em>exc_info</em>, <em>tb_label='traceback'</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.onException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when an exception propogates from test code.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Seealso addOnException:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.patch">
+<code class="descname">patch</code><span class="sig-paren">(</span><em>obj</em>, <em>attribute</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.patch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Monkey-patch &#8216;obj.attribute&#8217; to &#8216;value&#8217; while the test is running.</p>
+<p>If &#8216;obj&#8217; has no attribute, then the monkey-patch will still go ahead,
+and the attribute will be deleted instead of restored to its original
+value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>obj</strong> &#8211; The object to patch. Can be anything.</li>
+<li><strong>attribute</strong> &#8211; The attribute on &#8216;obj&#8217; to patch.</li>
+<li><strong>value</strong> &#8211; The value to set &#8216;obj.attribute&#8217; to.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="testtools.TestCase.run_tests_with">
+<code class="descname">run_tests_with</code><a class="headerlink" href="#testtools.TestCase.run_tests_with" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#testtools.RunTest" title="testtools.RunTest"><code class="xref py py-class docutils literal"><span class="pre">RunTest</span></code></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.skip">
+<code class="descname">skip</code><span class="sig-paren">(</span><em>reason</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.skip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cause this test to be skipped.</p>
+<p>This raises self.skipException(reason). skipException is raised
+to permit a skip to be triggered at any point (during setUp or the
+testMethod itself). The run() method catches skipException and
+translates that into a call to the result objects addSkip method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reason</strong> &#8211; The reason why the test is being skipped. This must
+support being cast into a unicode string for reporting.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="testtools.TestCase.skipException">
+<code class="descname">skipException</code><a class="headerlink" href="#testtools.TestCase.skipException" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">SkipTest</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.skipTest">
+<code class="descname">skipTest</code><span class="sig-paren">(</span><em>reason</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.skipTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cause this test to be skipped.</p>
+<p>This raises self.skipException(reason). skipException is raised
+to permit a skip to be triggered at any point (during setUp or the
+testMethod itself). The run() method catches skipException and
+translates that into a call to the result objects addSkip method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reason</strong> &#8211; The reason why the test is being skipped. This must
+support being cast into a unicode string for reporting.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestCase.useFixture">
+<code class="descname">useFixture</code><span class="sig-paren">(</span><em>fixture</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCase.useFixture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use fixture in a test case.</p>
+<p>The fixture will be setUp, and self.addCleanup(fixture.cleanUp) called.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fixture</strong> &#8211; The fixture to use.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The fixture, after setting it up and scheduling a cleanup for
+it.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.TestCommand">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">TestCommand</code><span class="sig-paren">(</span><em>dist</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Command to run unit tests with testtools</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.TestByTestResult">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">TestByTestResult</code><span class="sig-paren">(</span><em>on_test</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestByTestResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call something every time a test completes.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.TestResult">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">TestResult</code><span class="sig-paren">(</span><em>failfast=False</em>, <em>tb_locals=False</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subclass of unittest.TestResult extending the protocol for flexability.</p>
+<p>This test result supports an experimental protocol for providing additional
+data to in test outcomes. All the outcome methods take an optional dict
+&#8216;details&#8217;. If supplied any other detail parameters like &#8216;err&#8217; or &#8216;reason&#8217;
+should not be provided. The details dict is a mapping from names to
+MIME content objects (see testtools.content). This permits attaching
+tracebacks, log files, or even large objects like databases that were
+part of the test fixture. Until this API is accepted into upstream
+Python it is considered experimental: it may be replaced at any point
+by a newer version more in line with upstream Python. Compatibility would
+be aimed for in this case, but may not be possible.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>skip_reasons</strong> &#8211; A dict of skip-reasons -&gt; list of tests. See addSkip.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="testtools.TestResult.addError">
+<code class="descname">addError</code><span class="sig-paren">(</span><em>test</em>, <em>err=None</em>, <em>details=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestResult.addError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when an error has occurred. &#8216;err&#8217; is a tuple of values as
+returned by sys.exc_info().</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>details</strong> &#8211; Alternative way to supply details about the outcome.
+see the class docstring for more information.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestResult.addExpectedFailure">
+<code class="descname">addExpectedFailure</code><span class="sig-paren">(</span><em>test</em>, <em>err=None</em>, <em>details=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestResult.addExpectedFailure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when a test has failed in an expected manner.</p>
+<p>Like with addSuccess and addError, testStopped should still be called.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>test</strong> &#8211; The test that has been skipped.</li>
+<li><strong>err</strong> &#8211; The exc_info of the error that was raised.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestResult.addFailure">
+<code class="descname">addFailure</code><span class="sig-paren">(</span><em>test</em>, <em>err=None</em>, <em>details=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestResult.addFailure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when an error has occurred. &#8216;err&#8217; is a tuple of values as
+returned by sys.exc_info().</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>details</strong> &#8211; Alternative way to supply details about the outcome.
+see the class docstring for more information.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestResult.addSkip">
+<code class="descname">addSkip</code><span class="sig-paren">(</span><em>test</em>, <em>reason=None</em>, <em>details=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestResult.addSkip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when a test has been skipped rather than running.</p>
+<p>Like with addSuccess and addError, testStopped should still be called.</p>
+<p>This must be called by the TestCase. &#8216;addError&#8217; and &#8216;addFailure&#8217; will
+not call addSkip, since they have no assumptions about the kind of
+errors that a test can raise.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>test</strong> &#8211; The test that has been skipped.</li>
+<li><strong>reason</strong> &#8211; The reason for the test being skipped. For instance,
+u&#8221;pyGL is not available&#8221;.</li>
+<li><strong>details</strong> &#8211; Alternative way to supply details about the outcome.
+see the class docstring for more information.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestResult.addSuccess">
+<code class="descname">addSuccess</code><span class="sig-paren">(</span><em>test</em>, <em>details=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestResult.addSuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when a test succeeded.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestResult.addUnexpectedSuccess">
+<code class="descname">addUnexpectedSuccess</code><span class="sig-paren">(</span><em>test</em>, <em>details=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestResult.addUnexpectedSuccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when a test was expected to fail, but succeed.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="testtools.TestResult.current_tags">
+<code class="descname">current_tags</code><a class="headerlink" href="#testtools.TestResult.current_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>The currently set tags.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestResult.done">
+<code class="descname">done</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestResult.done" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the test runner is done.</p>
+<p>deprecated in favour of stopTestRun.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestResult.startTestRun">
+<code class="descname">startTestRun</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestResult.startTestRun" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called before a test run starts.</p>
+<p>New in Python 2.7. The testtools version resets the result to a
+pristine condition ready for use in another test run.  Note that this
+is different from Python 2.7&#8217;s startTestRun, which does nothing.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestResult.stopTestRun">
+<code class="descname">stopTestRun</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestResult.stopTestRun" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called after a test run completes</p>
+<p>New in python 2.7</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestResult.tags">
+<code class="descname">tags</code><span class="sig-paren">(</span><em>new_tags</em>, <em>gone_tags</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestResult.tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add and remove tags from the test.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>new_tags</strong> &#8211; A set of tags to be added to the stream.</li>
+<li><strong>gone_tags</strong> &#8211; A set of tags to be removed from the stream.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestResult.time">
+<code class="descname">time</code><span class="sig-paren">(</span><em>a_datetime</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestResult.time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provide a timestamp to represent the current time.</p>
+<p>This is useful when test activity is time delayed, or happening
+concurrently and getting the system time between API calls will not
+accurately represent the duration of tests (or the whole run).</p>
+<p>Calling time() sets the datetime used by the TestResult object.
+Time is permitted to go backwards when using this call.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>a_datetime</strong> &#8211; A datetime.datetime object with TZ information or
+None to reset the TestResult to gathering time from the system.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.TestResult.wasSuccessful">
+<code class="descname">wasSuccessful</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestResult.wasSuccessful" title="Permalink to this definition">¶</a></dt>
+<dd><p>Has this result been successful so far?</p>
+<p>If there have been any errors, failures or unexpected successes,
+return False.  Otherwise, return True.</p>
+<p>Note: This differs from standard unittest in that we consider
+unexpected successes to be equivalent to failures, rather than
+successes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.TestResultDecorator">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">TestResultDecorator</code><span class="sig-paren">(</span><em>decorated</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestResultDecorator" title="Permalink to this definition">¶</a></dt>
+<dd><p>General pass-through decorator.</p>
+<p>This provides a base that other TestResults can inherit from to
+gain basic forwarding functionality.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.TextTestResult">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">TextTestResult</code><span class="sig-paren">(</span><em>stream</em>, <em>failfast=False</em>, <em>tb_locals=False</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TextTestResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>A TestResult which outputs activity to a text stream.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.RunTest">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">RunTest</code><span class="sig-paren">(</span><em>case</em>, <em>handlers=None</em>, <em>last_resort=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.RunTest" title="Permalink to this definition">¶</a></dt>
+<dd><p>An object to run a test.</p>
+<p>RunTest objects are used to implement the internal logic involved in
+running a test. TestCase.__init__ stores _RunTest as the class of RunTest
+to execute.  Passing the runTest= parameter to TestCase.__init__ allows a
+different RunTest class to be used to execute the test.</p>
+<p>Subclassing or replacing RunTest can be useful to add functionality to the
+way that tests are run in a given project.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>case</strong> &#8211; The test case that is to be run.</li>
+<li><strong>result</strong> &#8211; The result object a case is reporting to.</li>
+<li><strong>handlers</strong> &#8211; A list of (ExceptionClass, handler_function) for
+exceptions that should be caught if raised from the user
+code. Exceptions that are caught are checked against this list in
+first to last order.  There is a catch-all of &#8216;Exception&#8217; at the end
+of the list, so to add a new exception to the list, insert it at the
+front (which ensures that it will be checked before any existing base
+classes in the list. If you add multiple exceptions some of which are
+subclasses of each other, add the most specific exceptions last (so
+they come before their parent classes in the list).</li>
+<li><strong>exception_caught</strong> &#8211; An object returned when _run_user catches an
+exception.</li>
+<li><strong>_exceptions</strong> &#8211; A list of caught exceptions, used to do the single
+reporting of error/failure/skip etc.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="testtools.RunTest.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>result=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.RunTest.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run self.case reporting activity to result.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>result</strong> &#8211; Optional testtools.TestResult to report activity to.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The result object the test was run against.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="testtools.skip">
+<code class="descclassname">testtools.</code><code class="descname">skip</code><span class="sig-paren">(</span><em>reason</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.skip" title="Permalink to this definition">¶</a></dt>
+<dd><p>A decorator to skip unit tests.</p>
+<p>This is just syntactic sugar so users don&#8217;t have to change any of their
+unit tests in order to migrate to python 2.7, which provides the
+&#64;unittest.skip decorator.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="testtools.skipIf">
+<code class="descclassname">testtools.</code><code class="descname">skipIf</code><span class="sig-paren">(</span><em>condition</em>, <em>reason</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.skipIf" title="Permalink to this definition">¶</a></dt>
+<dd><p>A decorator to skip a test if the condition is true.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="testtools.skipUnless">
+<code class="descclassname">testtools.</code><code class="descname">skipUnless</code><span class="sig-paren">(</span><em>condition</em>, <em>reason</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.skipUnless" title="Permalink to this definition">¶</a></dt>
+<dd><p>A decorator to skip a test unless the condition is true.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.StreamFailFast">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">StreamFailFast</code><span class="sig-paren">(</span><em>on_error</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.StreamFailFast" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call the supplied callback if an error is seen in a stream.</p>
+<p>An example callback:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">do_something</span><span class="p">():</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.StreamResult">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">StreamResult</code><a class="headerlink" href="#testtools.StreamResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>A test result for reporting the activity of a test run.</p>
+<p>Typical use</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">StreamResult</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">startTestRun</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">try</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">case</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="gp">... </span><span class="k">finally</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="n">result</span><span class="o">.</span><span class="n">stopTestRun</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The case object will be either a TestCase or a TestSuite, and
+generally make a sequence of calls like:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">(),</span> <span class="s">&#39;inprogress&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">(),</span> <span class="s">&#39;success&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>General concepts</p>
+<p>StreamResult is built to process events that are emitted by tests during a
+test run or test enumeration. The test run may be running concurrently, and
+even be spread out across multiple machines.</p>
+<p>All events are timestamped to prevent network buffering or scheduling
+latency causing false timing reports. Timestamps are datetime objects in
+the UTC timezone.</p>
+<p>A route_code is a unicode string that identifies where a particular test
+run. This is optional in the API but very useful when multiplexing multiple
+streams together as it allows identification of interactions between tests
+that were run on the same hardware or in the same test process. Generally
+actual tests never need to bother with this - it is added and processed
+by StreamResult&#8217;s that do multiplexing / run analysis. route_codes are
+also used to route stdin back to pdb instances.</p>
+<p>The StreamResult base class does no accounting or processing, rather it
+just provides an empty implementation of every method, suitable for use
+as a base class regardless of intent.</p>
+<dl class="method">
+<dt id="testtools.StreamResult.startTestRun">
+<code class="descname">startTestRun</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.StreamResult.startTestRun" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start a test run.</p>
+<p>This will prepare the test result to process results (which might imply
+connecting to a database or remote machine).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.StreamResult.status">
+<code class="descname">status</code><span class="sig-paren">(</span><em>test_id=None</em>, <em>test_status=None</em>, <em>test_tags=None</em>, <em>runnable=True</em>, <em>file_name=None</em>, <em>file_bytes=None</em>, <em>eof=False</em>, <em>mime_type=None</em>, <em>route_code=None</em>, <em>timestamp=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.StreamResult.status" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inform the result about a test status.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>test_id</strong> &#8211; The test whose status is being reported. None to
+report status about the test run as a whole.</li>
+<li><strong>test_status</strong> &#8211; <p>The status for the test. There are two sorts of
+status - interim and final status events. As many interim events
+can be generated as desired, but only one final event. After a
+final status event any further file or status events from the
+same test_id+route_code may be discarded or associated with a new
+test by the StreamResult. (But no exception will be thrown).</p>
+<dl class="docutils">
+<dt>Interim states:</dt>
+<dd><ul class="first last">
+<li>None - no particular status is being reported, or status being
+reported is not associated with a test (e.g. when reporting on
+stdout / stderr chatter).</li>
+<li>inprogress - the test is currently running. Emitted by tests when
+they start running and at any intermediary point they might
+choose to indicate their continual operation.</li>
+</ul>
+</dd>
+<dt>Final states:</dt>
+<dd><ul class="first last">
+<li>exists - the test exists. This is used when a test is not being
+executed. Typically this is when querying what tests could be run
+in a test run (which is useful for selecting tests to run).</li>
+<li>xfail - the test failed but that was expected. This is purely
+informative - the test is not considered to be a failure.</li>
+<li>uxsuccess - the test passed but was expected to fail. The test
+will be considered a failure.</li>
+<li>success - the test has finished without error.</li>
+<li>fail - the test failed (or errored). The test will be considered
+a failure.</li>
+<li>skip - the test was selected to run but chose to be skipped. E.g.
+a test dependency was missing. This is purely informative - the
+test is not considered to be a failure.</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><strong>test_tags</strong> &#8211; Optional set of tags to apply to the test. Tags
+have no intrinsic meaning - that is up to the test author.</li>
+<li><strong>runnable</strong> &#8211; Allows status reports to mark that they are for
+tests which are not able to be explicitly run. For instance,
+subtests will report themselves as non-runnable.</li>
+<li><strong>file_name</strong> &#8211; The name for the file_bytes. Any unicode string may
+be used. While there is no semantic value attached to the name
+of any attachment, the names &#8216;stdout&#8217; and &#8216;stderr&#8217; and &#8216;traceback&#8217;
+are recommended for use only for output sent to stdout, stderr and
+tracebacks of exceptions. When file_name is supplied, file_bytes
+must be a bytes instance.</li>
+<li><strong>file_bytes</strong> &#8211; A bytes object containing content for the named
+file. This can just be a single chunk of the file - emitting
+another file event with more later. Must be None unleses a
+file_name is supplied.</li>
+<li><strong>eof</strong> &#8211; True if this chunk is the last chunk of the file, any
+additional chunks with the same name should be treated as an error
+and discarded. Ignored unless file_name has been supplied.</li>
+<li><strong>mime_type</strong> &#8211; An optional MIME type for the file. stdout and
+stderr will generally be &#8220;text/plain; charset=utf8&#8221;. If None,
+defaults to application/octet-stream. Ignored unless file_name
+has been supplied.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="testtools.StreamResult.stopTestRun">
+<code class="descname">stopTestRun</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.StreamResult.stopTestRun" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop a test run.</p>
+<p>This informs the result that no more test updates will be received. At
+this point any test ids that have started and not completed can be
+considered failed-or-hung.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.StreamResultRouter">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">StreamResultRouter</code><span class="sig-paren">(</span><em>fallback=None</em>, <em>do_start_stop_run=True</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.StreamResultRouter" title="Permalink to this definition">¶</a></dt>
+<dd><p>A StreamResult that routes events.</p>
+<p>StreamResultRouter forwards received events to another StreamResult object,
+selected by a dynamic forwarding policy. Events where no destination is
+found are forwarded to the fallback StreamResult, or an error is raised.</p>
+<p>Typical use is to construct a router with a fallback and then either
+create up front mapping rules, or create them as-needed from the fallback
+handler:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">router</span> <span class="o">=</span> <span class="n">StreamResultRouter</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sink</span> <span class="o">=</span> <span class="n">doubles</span><span class="o">.</span><span class="n">StreamResult</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="n">sink</span><span class="p">,</span> <span class="s">&#39;route_code_prefix&#39;</span><span class="p">,</span> <span class="n">route_prefix</span><span class="o">=</span><span class="s">&#39;0&#39;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">consume_route</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">router</span><span class="o">.</span><span class="n">status</span><span class="p">(</span><span class="n">test_id</span><span class="o">=</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="n">route_code</span><span class="o">=</span><span class="s">&#39;0/1&#39;</span><span class="p">,</span> <span class="n">test_status</span><span class="o">=</span><span class="s">&#39;uxsuccess&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>StreamResultRouter has no buffering.</p>
+<p>When adding routes (and for the fallback) whether to call startTestRun and
+stopTestRun or to not call them is controllable by passing
+&#8216;do_start_stop_run&#8217;. The default is to call them for the fallback only.
+If a route is added after startTestRun has been called, and
+do_start_stop_run is True then startTestRun is called immediately on the
+new route sink.</p>
+<p>There is no a-priori defined lookup order for routes: if they are ambiguous
+the behaviour is undefined. Only a single route is chosen for any event.</p>
+<dl class="method">
+<dt id="testtools.StreamResultRouter.add_rule">
+<code class="descname">add_rule</code><span class="sig-paren">(</span><em>sink</em>, <em>policy</em>, <em>do_start_stop_run=False</em>, <em>**policy_args</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.StreamResultRouter.add_rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a rule to route events to sink when they match a given policy.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sink</strong> &#8211; A StreamResult to receive events.</li>
+<li><strong>policy</strong> &#8211; A routing policy. Valid policies are
+&#8216;route_code_prefix&#8217; and &#8216;test_id&#8217;.</li>
+<li><strong>do_start_stop_run</strong> &#8211; If True then startTestRun and stopTestRun
+events will be passed onto this sink.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first">ValueError if the policy is unknown</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">TypeError if the policy is given arguments it cannot handle.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><code class="docutils literal"><span class="pre">route_code_prefix</span></code> routes events based on a prefix of the route
+code in the event. It takes a <code class="docutils literal"><span class="pre">route_prefix</span></code> argument to match on
+(e.g. &#8216;0&#8217;) and a <code class="docutils literal"><span class="pre">consume_route</span></code> argument, which, if True, removes
+the prefix from the <code class="docutils literal"><span class="pre">route_code</span></code> when forwarding events.</p>
+<p><code class="docutils literal"><span class="pre">test_id</span></code> routes events based on the test id.  It takes a single
+argument, <code class="docutils literal"><span class="pre">test_id</span></code>.  Use <code class="docutils literal"><span class="pre">None</span></code> to select non-test events.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.StreamSummary">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">StreamSummary</code><a class="headerlink" href="#testtools.StreamSummary" title="Permalink to this definition">¶</a></dt>
+<dd><p>A specialised StreamResult that summarises a stream.</p>
+<p>The summary uses the same representation as the original
+unittest.TestResult contract, allowing it to be consumed by any test
+runner.</p>
+<dl class="method">
+<dt id="testtools.StreamSummary.wasSuccessful">
+<code class="descname">wasSuccessful</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.StreamSummary.wasSuccessful" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return False if any failure has occured.</p>
+<p>Note that incomplete tests can only be detected when stopTestRun is
+called, so that should be called before checking wasSuccessful.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.StreamTagger">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">StreamTagger</code><span class="sig-paren">(</span><em>targets</em>, <em>add=None</em>, <em>discard=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.StreamTagger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds or discards tags from StreamResult events.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.StreamToDict">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">StreamToDict</code><span class="sig-paren">(</span><em>on_test</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.StreamToDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>A specialised StreamResult that emits a callback as tests complete.</p>
+<p>Top level file attachments are simply discarded. Hung tests are detected
+by stopTestRun and notified there and then.</p>
+<p>The callback is passed a dict with the following keys:</p>
+<blockquote>
+<div><ul class="simple">
+<li>id: the test id.</li>
+<li>tags: The tags for the test. A set of unicode strings.</li>
+<li>details: A dict of file attachments - <code class="docutils literal"><span class="pre">testtools.content.Content</span></code>
+objects.</li>
+<li>status: One of the StreamResult status codes (including inprogress) or
+&#8216;unknown&#8217; (used if only file events for a test were received...)</li>
+<li>timestamps: A pair of timestamps - the first one received with this
+test id, and the one in the event that triggered the notification.
+Hung tests have a None for the second end event. Timestamps are not
+compared - their ordering is purely order received in the stream.</li>
+</ul>
+</div></blockquote>
+<p>Only the most recent tags observed in the stream are reported.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.StreamToExtendedDecorator">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">StreamToExtendedDecorator</code><span class="sig-paren">(</span><em>decorated</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.StreamToExtendedDecorator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert StreamResult API calls into ExtendedTestResult calls.</p>
+<p>This will buffer all calls for all concurrently active tests, and
+then flush each test as they complete.</p>
+<p>Incomplete tests will be flushed as errors when the test run stops.</p>
+<p>Non test file attachments are accumulated into a test called
+&#8216;testtools.extradata&#8217; flushed at the end of the run.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.StreamToQueue">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">StreamToQueue</code><span class="sig-paren">(</span><em>queue</em>, <em>routing_code</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.StreamToQueue" title="Permalink to this definition">¶</a></dt>
+<dd><p>A StreamResult which enqueues events as a dict to a queue.Queue.</p>
+<p>Events have their route code updated to include the route code
+StreamToQueue was constructed with before they are submitted. If the event
+route code is None, it is replaced with the StreamToQueue route code,
+otherwise it is prefixed with the supplied code + a hyphen.</p>
+<p>startTestRun and stopTestRun are forwarded to the queue. Implementors that
+dequeue events back into StreamResult calls should take care not to call
+startTestRun / stopTestRun on other StreamResult objects multiple times
+(e.g. by filtering startTestRun and stopTestRun).</p>
+<p><code class="docutils literal"><span class="pre">StreamToQueue</span></code> is typically used by
+<code class="docutils literal"><span class="pre">ConcurrentStreamTestSuite</span></code>, which creates one <code class="docutils literal"><span class="pre">StreamToQueue</span></code>
+per thread, forwards status events to the the StreamResult that
+<code class="docutils literal"><span class="pre">ConcurrentStreamTestSuite.run()</span></code> was called with, and uses the
+stopTestRun event to trigger calling join() on the each thread.</p>
+<p>Unlike ThreadsafeForwardingResult which this supercedes, no buffering takes
+place - any event supplied to a StreamToQueue will be inserted into the
+queue immediately.</p>
+<p>Events are forwarded as a dict with a key <code class="docutils literal"><span class="pre">event</span></code> which is one of
+<code class="docutils literal"><span class="pre">startTestRun</span></code>, <code class="docutils literal"><span class="pre">stopTestRun</span></code> or <code class="docutils literal"><span class="pre">status</span></code>. When <code class="docutils literal"><span class="pre">event</span></code> is
+<code class="docutils literal"><span class="pre">status</span></code> the dict also has keys matching the keyword arguments
+of <code class="docutils literal"><span class="pre">StreamResult.status</span></code>, otherwise it has one other key <code class="docutils literal"><span class="pre">result</span></code> which
+is the result that invoked <code class="docutils literal"><span class="pre">startTestRun</span></code>.</p>
+<dl class="method">
+<dt id="testtools.StreamToQueue.route_code">
+<code class="descname">route_code</code><span class="sig-paren">(</span><em>route_code</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.StreamToQueue.route_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adjust route_code on the way through.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.TestControl">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">TestControl</code><a class="headerlink" href="#testtools.TestControl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Controls a running test run, allowing it to be interrupted.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>shouldStop</strong> &#8211; If True, tests should not run and should instead
+return immediately. Similarly a TestSuite should check this between
+each test and if set stop dispatching any new tests and return.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="testtools.TestControl.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TestControl.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicate that tests should stop running.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.ThreadsafeForwardingResult">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">ThreadsafeForwardingResult</code><span class="sig-paren">(</span><em>target</em>, <em>semaphore</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.ThreadsafeForwardingResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>A TestResult which ensures the target does not receive mixed up calls.</p>
+<p>Multiple <code class="docutils literal"><span class="pre">ThreadsafeForwardingResults</span></code> can forward to the same target
+result, and that target result will only ever receive the complete set of
+events for one test at a time.</p>
+<p>This is enforced using a semaphore, which further guarantees that tests
+will be sent atomically even if the <code class="docutils literal"><span class="pre">ThreadsafeForwardingResults</span></code> are in
+different threads.</p>
+<p><code class="docutils literal"><span class="pre">ThreadsafeForwardingResult</span></code> is typically used by
+<code class="docutils literal"><span class="pre">ConcurrentTestSuite</span></code>, which creates one <code class="docutils literal"><span class="pre">ThreadsafeForwardingResult</span></code>
+per thread, each of which wraps of the TestResult that
+<code class="docutils literal"><span class="pre">ConcurrentTestSuite.run()</span></code> is called with.</p>
+<p>target.startTestRun() and target.stopTestRun() are called once for each
+ThreadsafeForwardingResult that forwards to the same target. If the target
+takes special action on these events, it should take care to accommodate
+this.</p>
+<p>time() and tags() calls are batched to be adjacent to the test result and
+in the case of tags() are coerced into test-local scope, avoiding the
+opportunity for bugs around global state in the target.</p>
+<dl class="method">
+<dt id="testtools.ThreadsafeForwardingResult.tags">
+<code class="descname">tags</code><span class="sig-paren">(</span><em>new_tags</em>, <em>gone_tags</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.ThreadsafeForwardingResult.tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <cite>TestResult</cite>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.TimestampingStreamResult">
+<em class="property">class </em><code class="descclassname">testtools.</code><code class="descname">TimestampingStreamResult</code><span class="sig-paren">(</span><em>target</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.TimestampingStreamResult" title="Permalink to this definition">¶</a></dt>
+<dd><p>A StreamResult decorator that assigns a timestamp when none is present.</p>
+<p>This is convenient for ensuring events are timestamped.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="testtools.try_import">
+<code class="descclassname">testtools.</code><code class="descname">try_import</code><span class="sig-paren">(</span><em>name</em>, <em>alternative=None</em>, <em>error_callback=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.try_import" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to import <code class="docutils literal"><span class="pre">name</span></code>.  If it fails, return <code class="docutils literal"><span class="pre">alternative</span></code>.</p>
+<p>When supporting multiple versions of Python or optional dependencies, it
+is useful to be able to try to import a module.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> &#8211; The name of the object to import, e.g. <code class="docutils literal"><span class="pre">os.path</span></code> or
+<code class="docutils literal"><span class="pre">os.path.join</span></code>.</li>
+<li><strong>alternative</strong> &#8211; The value to return if no module can be imported.
+Defaults to None.</li>
+<li><strong>error_callback</strong> &#8211; If non-None, a callable that is passed the ImportError
+when the module cannot be loaded.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="testtools.try_imports">
+<code class="descclassname">testtools.</code><code class="descname">try_imports</code><span class="sig-paren">(</span><em>module_names</em>, <em>alternative=&lt;object object at 0x26e2180&gt;</em>, <em>error_callback=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.try_imports" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to import modules.</p>
+<p>Tries to import the first module in <code class="docutils literal"><span class="pre">module_names</span></code>.  If it can be
+imported, we return it.  If not, we go on to the second module and try
+that.  The process continues until we run out of modules to try.  If none
+of the modules can be imported, either raise an exception or return the
+provided <code class="docutils literal"><span class="pre">alternative</span></code> value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>module_names</strong> &#8211; A sequence of module names to try to import.</li>
+<li><strong>alternative</strong> &#8211; The value to return if no module can be imported.
+If unspecified, we raise an ImportError.</li>
+<li><strong>error_callback</strong> &#8211; If None, called with the ImportError for <em>each</em>
+module that fails to load.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Raises ImportError:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body"><p class="first last">If none of the modules can be imported and no
+alternative value was specified.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-testtools.matchers">
+<span id="testtools-matchers"></span><h2>testtools.matchers<a class="headerlink" href="#module-testtools.matchers" title="Permalink to this headline">¶</a></h2>
+<p>All the matchers.</p>
+<p>Matchers, a way to express complex assertions outside the testcase.</p>
+<p>Inspired by &#8216;hamcrest&#8217;.</p>
+<p>Matcher provides the abstract API that all matchers need to implement.</p>
+<p>Bundled matchers are listed in __all__: a list can be obtained by running
+$ python -c &#8216;import testtools.matchers; print testtools.matchers.__all__&#8217;</p>
+<dl class="class">
+<dt id="testtools.matchers.AfterPreprocessing">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">AfterPreprocessing</code><span class="sig-paren">(</span><em>preprocessor</em>, <em>matcher</em>, <em>annotate=True</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.AfterPreprocessing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if the value matches after passing through a function.</p>
+<p>This can be used to aid in creating trivial matchers as functions, for
+example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">PathHasFileContent</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_read</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">AfterPreprocessing</span><span class="p">(</span><span class="n">_read</span><span class="p">,</span> <span class="n">Equals</span><span class="p">(</span><span class="n">content</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.AllMatch">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">AllMatch</code><span class="sig-paren">(</span><em>matcher</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.AllMatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if all provided values match the given matcher.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.Annotate">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">Annotate</code><span class="sig-paren">(</span><em>annotation</em>, <em>matcher</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.Annotate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Annotates a matcher with a descriptive string.</p>
+<p>Mismatches are then described as &#8216;&lt;mismatch&gt;: &lt;annotation&gt;&#8217;.</p>
+<dl class="classmethod">
+<dt id="testtools.matchers.Annotate.if_message">
+<em class="property">classmethod </em><code class="descname">if_message</code><span class="sig-paren">(</span><em>annotation</em>, <em>matcher</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.Annotate.if_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Annotate <code class="docutils literal"><span class="pre">matcher</span></code> only if <code class="docutils literal"><span class="pre">annotation</span></code> is non-empty.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.AnyMatch">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">AnyMatch</code><span class="sig-paren">(</span><em>matcher</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.AnyMatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if any of the provided values match the given matcher.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.Contains">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">Contains</code><span class="sig-paren">(</span><em>needle</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.Contains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether something is contained in another thing.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="testtools.matchers.ContainsAll">
+<code class="descclassname">testtools.matchers.</code><code class="descname">ContainsAll</code><span class="sig-paren">(</span><em>items</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.ContainsAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a matcher that checks whether a list of things is contained
+in another thing.</p>
+<p>The matcher effectively checks that the provided sequence is a subset of
+the matchee.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.ContainedByDict">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">ContainedByDict</code><span class="sig-paren">(</span><em>expected</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.ContainedByDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match a dictionary for which this is a super-dictionary.</p>
+<p>Specify a dictionary mapping keys (often strings) to matchers.  This is
+the &#8216;expected&#8217; dict.  Any dictionary that matches this must have <strong>only</strong>
+these keys, and the values must match the corresponding matchers in the
+expected dict.  Dictionaries that have fewer keys can also match.</p>
+<p>In other words, any matching dictionary must be contained by the
+dictionary given to the constructor.</p>
+<p>Does not check for strict super-dictionary.  That is, equal dictionaries
+match.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.ContainsDict">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">ContainsDict</code><span class="sig-paren">(</span><em>expected</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.ContainsDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match a dictionary for that contains a specified sub-dictionary.</p>
+<p>Specify a dictionary mapping keys (often strings) to matchers.  This is
+the &#8216;expected&#8217; dict.  Any dictionary that matches this must have <strong>at
+least</strong> these keys, and the values must match the corresponding matchers
+in the expected dict.  Dictionaries that have more keys will also match.</p>
+<p>In other words, any matching dictionary must contain the dictionary given
+to the constructor.</p>
+<p>Does not check for strict sub-dictionary.  That is, equal dictionaries
+match.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.DirContains">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">DirContains</code><span class="sig-paren">(</span><em>filenames=None</em>, <em>matcher=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.DirContains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if the given directory contains files with the given names.</p>
+<p>That is, is the directory listing exactly equal to the given files?</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="testtools.matchers.DirExists">
+<code class="descclassname">testtools.matchers.</code><code class="descname">DirExists</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.DirExists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if the path exists and is a directory.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.DocTestMatches">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">DocTestMatches</code><span class="sig-paren">(</span><em>example</em>, <em>flags=0</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.DocTestMatches" title="Permalink to this definition">¶</a></dt>
+<dd><p>See if a string matches a doctest example.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.EndsWith">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">EndsWith</code><span class="sig-paren">(</span><em>expected</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.EndsWith" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether one string ends with another.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.Equals">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">Equals</code><span class="sig-paren">(</span><em>expected</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.Equals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if the items are equal.</p>
+<dl class="method">
+<dt id="testtools.matchers.Equals.comparator">
+<code class="descname">comparator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.Equals.comparator" title="Permalink to this definition">¶</a></dt>
+<dd><p>eq(a, b) &#8211; Same as a==b.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.FileContains">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">FileContains</code><span class="sig-paren">(</span><em>contents=None</em>, <em>matcher=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.FileContains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if the given file has the specified contents.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="testtools.matchers.FileExists">
+<code class="descclassname">testtools.matchers.</code><code class="descname">FileExists</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.FileExists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if the given path exists and is a file.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.GreaterThan">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">GreaterThan</code><span class="sig-paren">(</span><em>expected</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.GreaterThan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if the item is greater than the matchers reference object.</p>
+<dl class="method">
+<dt id="testtools.matchers.GreaterThan.comparator">
+<code class="descname">comparator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.GreaterThan.comparator" title="Permalink to this definition">¶</a></dt>
+<dd><p>gt(a, b) &#8211; Same as a&gt;b.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.HasPermissions">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">HasPermissions</code><span class="sig-paren">(</span><em>octal_permissions</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.HasPermissions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if a file has the given permissions.</p>
+<p>Permissions are specified and matched as a four-digit octal string.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.Is">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">Is</code><span class="sig-paren">(</span><em>expected</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.Is" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if the items are identical.</p>
+<dl class="method">
+<dt id="testtools.matchers.Is.comparator">
+<code class="descname">comparator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.Is.comparator" title="Permalink to this definition">¶</a></dt>
+<dd><p>is_(a, b) &#8211; Same as a is b.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.IsInstance">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">IsInstance</code><span class="sig-paren">(</span><em>*types</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.IsInstance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matcher that wraps isinstance.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.KeysEqual">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">KeysEqual</code><span class="sig-paren">(</span><em>*expected</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.KeysEqual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether a dict has particular keys.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.LessThan">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">LessThan</code><span class="sig-paren">(</span><em>expected</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.LessThan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if the item is less than the matchers reference object.</p>
+<dl class="method">
+<dt id="testtools.matchers.LessThan.comparator">
+<code class="descname">comparator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.LessThan.comparator" title="Permalink to this definition">¶</a></dt>
+<dd><p>lt(a, b) &#8211; Same as a&lt;b.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.MatchesAll">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">MatchesAll</code><span class="sig-paren">(</span><em>*matchers</em>, <em>**options</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.MatchesAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if all of the matchers it is created with match.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.MatchesAny">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">MatchesAny</code><span class="sig-paren">(</span><em>*matchers</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.MatchesAny" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if any of the matchers it is created with match.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.MatchesDict">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">MatchesDict</code><span class="sig-paren">(</span><em>expected</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.MatchesDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match a dictionary exactly, by its keys.</p>
+<p>Specify a dictionary mapping keys (often strings) to matchers.  This is
+the &#8216;expected&#8217; dict.  Any dictionary that matches this must have exactly
+the same keys, and the values must match the corresponding matchers in the
+expected dict.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.MatchesException">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">MatchesException</code><span class="sig-paren">(</span><em>exception</em>, <em>value_re=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.MatchesException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match an exc_info tuple against an exception instance or type.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.MatchesListwise">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">MatchesListwise</code><span class="sig-paren">(</span><em>matchers</em>, <em>first_only=False</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.MatchesListwise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if each matcher matches the corresponding value.</p>
+<p>More easily explained by example than in words:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">._basic</span> <span class="kn">import</span> <span class="n">Equals</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MatchesListwise</span><span class="p">([</span><span class="n">Equals</span><span class="p">(</span><span class="mi">1</span><span class="p">)])</span><span class="o">.</span><span class="n">match</span><span class="p">([</span><span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">MatchesListwise</span><span class="p">([</span><span class="n">Equals</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">Equals</span><span class="p">(</span><span class="mi">2</span><span class="p">)])</span><span class="o">.</span><span class="n">match</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="p">(</span><span class="n">MatchesListwise</span><span class="p">([</span><span class="n">Equals</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">Equals</span><span class="p">(</span><span class="mi">2</span><span class="p">)])</span><span class="o">.</span><span class="n">match</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
+<span class="go">Differences: [</span>
+<span class="go">1 != 2</span>
+<span class="go">2 != 1</span>
+<span class="go">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matcher</span> <span class="o">=</span> <span class="n">MatchesListwise</span><span class="p">([</span><span class="n">Equals</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">Equals</span><span class="p">(</span><span class="mi">2</span><span class="p">)],</span> <span class="n">first_only</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="p">(</span><span class="n">matcher</span><span class="o">.</span><span class="n">match</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
+<span class="go">1 != 3</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.MatchesPredicate">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">MatchesPredicate</code><span class="sig-paren">(</span><em>predicate</em>, <em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.MatchesPredicate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match if a given function returns True.</p>
+<p>It is reasonably common to want to make a very simple matcher based on a
+function that you already have that returns True or False given a single
+argument (i.e. a predicate function).  This matcher makes it very easy to
+do so. e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">IsEven</span> <span class="o">=</span> <span class="n">MatchesPredicate</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> is not even&#39;</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">IsEven</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="testtools.matchers.MatchesPredicateWithParams">
+<code class="descclassname">testtools.matchers.</code><code class="descname">MatchesPredicateWithParams</code><span class="sig-paren">(</span><em>predicate</em>, <em>message</em>, <em>name=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.MatchesPredicateWithParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match if a given parameterised function returns True.</p>
+<p>It is reasonably common to want to make a very simple matcher based on a
+function that you already have that returns True or False given some
+arguments. This matcher makes it very easy to do so. e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">HasLength</span> <span class="o">=</span> <span class="n">MatchesPredicate</span><span class="p">(</span>
+    <span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="n">y</span><span class="p">,</span> <span class="s">&#39;len({0}) is not {1}&#39;</span><span class="p">)</span>
+<span class="c"># This assertion will fail, as &#39;len([1, 2]) == 3&#39; is False.</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">assertThat</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">HasLength</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Note that unlike MatchesPredicate MatchesPredicateWithParams returns a
+factory which you then customise to use by constructing an actual matcher
+from it.</p>
+<p>The predicate function should take the object to match as its first
+parameter. Any additional parameters supplied when constructing a matcher
+are supplied to the predicate as additional parameters when checking for a
+match.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>predicate</strong> &#8211; The predicate function.</li>
+<li><strong>message</strong> &#8211; A format string for describing mis-matches.</li>
+<li><strong>name</strong> &#8211; Optional replacement name for the matcher.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.MatchesRegex">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">MatchesRegex</code><span class="sig-paren">(</span><em>pattern</em>, <em>flags=0</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.MatchesRegex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if the matchee is matched by a regular expression.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.MatchesSetwise">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">MatchesSetwise</code><span class="sig-paren">(</span><em>*matchers</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.MatchesSetwise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if all the matchers match elements of the value being matched.</p>
+<p>That is, each element in the &#8216;observed&#8217; set must match exactly one matcher
+from the set of matchers, with no matchers left over.</p>
+<p>The difference compared to <cite>MatchesListwise</cite> is that the order of the
+matchings does not matter.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.MatchesStructure">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">MatchesStructure</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.MatchesStructure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matcher that matches an object structurally.</p>
+<p>&#8216;Structurally&#8217; here means that attributes of the object being matched are
+compared against given matchers.</p>
+<p><cite>fromExample</cite> allows the creation of a matcher from a prototype object and
+then modified versions can be created with <cite>update</cite>.</p>
+<p><cite>byEquality</cite> creates a matcher in much the same way as the constructor,
+except that the matcher for each of the attributes is assumed to be
+<cite>Equals</cite>.</p>
+<p><cite>byMatcher</cite> creates a similar matcher to <cite>byEquality</cite>, but you get to pick
+the matcher, rather than just using <cite>Equals</cite>.</p>
+<dl class="classmethod">
+<dt id="testtools.matchers.MatchesStructure.byEquality">
+<em class="property">classmethod </em><code class="descname">byEquality</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.MatchesStructure.byEquality" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches an object where the attributes equal the keyword values.</p>
+<p>Similar to the constructor, except that the matcher is assumed to be
+Equals.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="testtools.matchers.MatchesStructure.byMatcher">
+<em class="property">classmethod </em><code class="descname">byMatcher</code><span class="sig-paren">(</span><em>matcher</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.MatchesStructure.byMatcher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches an object where the attributes match the keyword values.</p>
+<p>Similar to the constructor, except that the provided matcher is used
+to match all of the values.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.NotEquals">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">NotEquals</code><span class="sig-paren">(</span><em>expected</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.NotEquals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if the items are not equal.</p>
+<p>In most cases, this is equivalent to <code class="docutils literal"><span class="pre">Not(Equals(foo))</span></code>. The difference
+only matters when testing <code class="docutils literal"><span class="pre">__ne__</span></code> implementations.</p>
+<dl class="method">
+<dt id="testtools.matchers.NotEquals.comparator">
+<code class="descname">comparator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.NotEquals.comparator" title="Permalink to this definition">¶</a></dt>
+<dd><p>ne(a, b) &#8211; Same as a!=b.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.Not">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">Not</code><span class="sig-paren">(</span><em>matcher</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.Not" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inverts a matcher.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="testtools.matchers.PathExists">
+<code class="descclassname">testtools.matchers.</code><code class="descname">PathExists</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.PathExists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if the given path exists.</p>
+<p>Use like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">assertThat</span><span class="p">(</span><span class="s">&#39;/some/path&#39;</span><span class="p">,</span> <span class="n">PathExists</span><span class="p">())</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.Raises">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">Raises</code><span class="sig-paren">(</span><em>exception_matcher=None</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.Raises" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match if the matchee raises an exception when called.</p>
+<p>Exceptions which are not subclasses of Exception propogate out of the
+Raises.match call unless they are explicitly matched.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="testtools.matchers.raises">
+<code class="descclassname">testtools.matchers.</code><code class="descname">raises</code><span class="sig-paren">(</span><em>exception</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.raises" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a matcher that checks that a callable raises an exception.</p>
+<p>This is a convenience function, exactly equivalent to:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">return</span> <span class="n">Raises</span><span class="p">(</span><span class="n">MatchesException</span><span class="p">(</span><span class="n">exception</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>See <cite>Raises</cite> and <cite>MatchesException</cite> for more information.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.SamePath">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">SamePath</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.SamePath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if two paths are the same.</p>
+<p>That is, the paths are equal, or they point to the same file but in
+different ways.  The paths do not have to exist.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.StartsWith">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">StartsWith</code><span class="sig-paren">(</span><em>expected</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.StartsWith" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether one string starts with another.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="testtools.matchers.TarballContains">
+<em class="property">class </em><code class="descclassname">testtools.matchers.</code><code class="descname">TarballContains</code><span class="sig-paren">(</span><em>paths</em><span class="sig-paren">)</span><a class="headerlink" href="#testtools.matchers.TarballContains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches if the given tarball contains the given paths.</p>
+<p>Uses TarFile.getnames() to get the paths out of the tarball.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">testtools API documentation</a><ul>
+<li><a class="reference internal" href="#module-testtools">testtools</a></li>
+<li><a class="reference internal" href="#module-testtools.matchers">testtools.matchers</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="news.html"
+                        title="previous chapter">testtools NEWS</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/api.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="news.html" title="testtools NEWS"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">testtools VERSION documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2010, The testtools authors.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

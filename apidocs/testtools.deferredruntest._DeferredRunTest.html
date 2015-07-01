@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.deferredruntest._DeferredRunTest : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="class private"><code>testtools.deferredruntest._DeferredRunTest(<a href="testtools.runtest.RunTest.html" class="code">RunTest</a>)</code> <small>class documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a>.<a href="testtools.deferredruntest.html" class="code">deferredruntest</a></code>
+          
+          <a href="classIndex.html#testtools.deferredruntest._DeferredRunTest">(View In Hierarchy)</a>
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        <p>Known subclasses: <a href="testtools.deferredruntest.AsynchronousDeferredRunTest.html" class="code">testtools.deferredruntest.AsynchronousDeferredRunTest</a>, <a href="testtools.deferredruntest.SynchronousDeferredRunTest.html" class="code">testtools.deferredruntest.SynchronousDeferredRunTest</a></p>
+      </div>
+
+      <div class="moduleDocstring">
+        <div>Base for tests that return Deferreds.<table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id715">
+  
+  <tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.deferredruntest._DeferredRunTest.html#_got_user_failure" class="code">_got_user_failure</a></td>
+    <td><span>We got a failure from user code.</span></td>
+  </tr>
+</table>
+        
+          <p class="inheritedFrom">
+            Inherited from <a href="testtools.runtest.RunTest.html" class="code">RunTest</a>:
+          </p>
+          <table class="children sortable" id="id716">
+  
+  <tr class="baseinstancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#case" class="code">case</a></td>
+    <td>The test case that is to be run.</td>
+  </tr><tr class="baseinstancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#result" class="code">result</a></td>
+    <td>The result object a case is reporting to.</td>
+  </tr><tr class="baseinstancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#handlers" class="code">handlers</a></td>
+    <td>A list of (ExceptionClass, handler_function) for
+exceptions that should be caught if raised from the user
+code. Exceptions that are caught are checked against this list in
+first to last order.  There is a catch-all of 'Exception' at the end
+of the list, so to add a new exception to the list, insert it at the
+front (which ensures that it will be checked before any existing base
+classes in the list. If you add multiple exceptions some of which are
+subclasses of each other, add the most specific exceptions last (so
+they come before their parent classes in the list).</td>
+  </tr><tr class="baseinstancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#exception_caught" class="code">exception_caught</a></td>
+    <td>An object returned when _run_user catches an
+exception.</td>
+  </tr><tr class="basemethod">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#__init__" class="code">__init__</a></td>
+    <td><span>Create a RunTest to run a case.</span></td>
+  </tr><tr class="basemethod">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#run" class="code">run</a></td>
+    <td><span>Run self.case reporting activity to result.</span></td>
+  </tr><tr class="baseinstancevariable private">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#_exceptions" class="code">_exceptions</a></td>
+    <td>A list of caught exceptions, used to do the single
+reporting of error/failure/skip etc.</td>
+  </tr><tr class="basemethod private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_run_one" class="code">_run_one</a></td>
+    <td><span>Run one test reporting to result.</span></td>
+  </tr><tr class="basemethod private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_run_prepared_result" class="code">_run_prepared_result</a></td>
+    <td><span>Run one test reporting to result.</span></td>
+  </tr><tr class="basemethod private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_run_core" class="code">_run_core</a></td>
+    <td><span>Run the user supplied test code.</span></td>
+  </tr><tr class="basemethod private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_run_cleanups" class="code">_run_cleanups</a></td>
+    <td><span>Run the cleanups that have been added with addCleanup.</span></td>
+  </tr><tr class="basemethod private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_run_user" class="code">_run_user</a></td>
+    <td><span>Run a user supplied function.</span></td>
+  </tr><tr class="basemethod private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_got_user_exception" class="code">_got_user_exception</a></td>
+    <td><span>Called when user code raises an exception.</span></td>
+  </tr>
+</table>
+          
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.deferredruntest._DeferredRunTest._got_user_failure">
+    
+  </a>
+  <a name="_got_user_failure">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _got_user_failure(self, failure, tb_label='traceback'):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>We got a failure from user code.<table class="fieldTable"></table></div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

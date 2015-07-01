@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.content.StackLinesContent : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="class"><code>testtools.content.StackLinesContent(<a href="testtools.content.Content.html" class="code">Content</a>)</code> <small>class documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a>.<a href="testtools.content.html" class="code">content</a></code>
+          
+          <a href="classIndex.html#testtools.content.StackLinesContent">(View In Hierarchy)</a>
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        
+      </div>
+
+      <div class="moduleDocstring">
+        <div><p>Content object for stack lines.</p>
+<p>This adapts a list of "preprocessed" stack lines into a 'Content' object.
+The stack lines are most likely produced from <tt class="rst-docutils literal">traceback.extract_stack</tt>
+or <tt class="rst-docutils literal">traceback.extract_tb</tt>.</p>
+<p>text/x-traceback;language=python is used for the mime type, in order to
+provide room for other languages to format their tracebacks differently.</p><table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id142">
+  
+  <tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.content.StackLinesContent.html#__init__" class="code">__init__</a></td>
+    <td><span>Create a StackLinesContent for <tt class="rst-docutils literal">stack_lines</tt>.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.content.StackLinesContent.html#_stack_lines_to_unicode" class="code">_stack_lines_to_unicode</a></td>
+    <td><span>Converts a list of pre-processed stack lines into a unicode string.</span></td>
+  </tr>
+</table>
+        
+          <p class="inheritedFrom">
+            Inherited from <a href="testtools.content.Content.html" class="code">Content</a>:
+          </p>
+          <table class="children sortable" id="id143">
+  
+  <tr class="baseinstancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.content.Content.html#content_type" class="code">content_type</a></td>
+    <td>The content type of this Content.</td>
+  </tr><tr class="basemethod">
+    
+    <td>Method</td>
+    <td><a href="testtools.content.Content.html#__eq__" class="code">__eq__</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="basemethod">
+    
+    <td>Method</td>
+    <td><a href="testtools.content.Content.html#as_text" class="code">as_text</a></td>
+    <td><span>Return all of the content as text.</span></td>
+  </tr><tr class="basemethod">
+    
+    <td>Method</td>
+    <td><a href="testtools.content.Content.html#iter_bytes" class="code">iter_bytes</a></td>
+    <td><span>Iterate over bytestrings of the serialised content.</span></td>
+  </tr><tr class="basemethod">
+    
+    <td>Method</td>
+    <td><a href="testtools.content.Content.html#iter_text" class="code">iter_text</a></td>
+    <td><span>Iterate over the text of the serialised content.</span></td>
+  </tr><tr class="basemethod">
+    
+    <td>Method</td>
+    <td><a href="testtools.content.Content.html#__repr__" class="code">__repr__</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="basemethod private">
+    
+    <td>Method</td>
+    <td><a href="testtools.content.Content.html#_iter_text" class="code">_iter_text</a></td>
+    <td><span>Worker for iter_text - does the decoding.</span></td>
+  </tr>
+</table>
+          
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.content.StackLinesContent.__init__">
+    
+  </a>
+  <a name="__init__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __init__(self, stack_lines, prefix_content='', postfix_content=''):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overrides <a href="testtools.content.Content.html#__init__" class="code">testtools.content.Content.__init__</a></div>
+    <div>Create a StackLinesContent for <tt class="rst-docutils literal">stack_lines</tt>.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">stack_lines</td><td>A list of preprocessed stack lines, probably
+obtained by calling <tt class="rst-docutils literal">traceback.extract_stack</tt> or
+<tt class="rst-docutils literal">traceback.extract_tb</tt>.</td></tr><tr><td></td><td class="fieldArg">prefix_content</td><td>If specified, a unicode string to prepend to the
+text content.</td></tr><tr><td></td><td class="fieldArg">postfix_content</td><td>If specified, a unicode string to append to the
+text content.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.content.StackLinesContent._stack_lines_to_unicode">
+    
+  </a>
+  <a name="_stack_lines_to_unicode">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _stack_lines_to_unicode(self, stack_lines):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Converts a list of pre-processed stack lines into a unicode string.<table class="fieldTable"></table></div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

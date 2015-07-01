@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools._spinner : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="module private"><code>testtools._spinner</code> <small>module documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a></code>
+          
+          
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        
+      </div>
+
+      <div class="moduleDocstring">
+        <div><p>Evil reactor-spinning logic for running Twisted tests.</p>
+<p>This code is highly experimental, liable to change and not to be trusted.  If
+you couldn't write this yourself, you should not be using it.</p><table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id731">
+  
+  <tr class="class">
+    
+    <td>Class</td>
+    <td><a href="testtools._spinner.ReentryError.html" class="code">ReentryError</a></td>
+    <td><span>Raised when we try to re-enter a function that forbids it.</span></td>
+  </tr><tr class="function">
+    
+    <td>Function</td>
+    <td><a href="testtools._spinner.html#not_reentrant" class="code">not_reentrant</a></td>
+    <td><span>Decorates a function as not being re-entrant.</span></td>
+  </tr><tr class="class">
+    
+    <td>Class</td>
+    <td><a href="testtools._spinner.DeferredNotFired.html" class="code">DeferredNotFired</a></td>
+    <td><span>Raised when we extract a result from a Deferred that's not fired yet.</span></td>
+  </tr><tr class="function">
+    
+    <td>Function</td>
+    <td><a href="testtools._spinner.html#extract_result" class="code">extract_result</a></td>
+    <td><span>Extract the result from a fired deferred.</span></td>
+  </tr><tr class="function">
+    
+    <td>Function</td>
+    <td><a href="testtools._spinner.html#trap_unhandled_errors" class="code">trap_unhandled_errors</a></td>
+    <td><span>Run a function, trapping any unhandled errors in Deferreds.</span></td>
+  </tr><tr class="class">
+    
+    <td>Class</td>
+    <td><a href="testtools._spinner.TimeoutError.html" class="code">TimeoutError</a></td>
+    <td><span>Raised when run_in_reactor takes too long to run a function.</span></td>
+  </tr><tr class="class">
+    
+    <td>Class</td>
+    <td><a href="testtools._spinner.NoResultError.html" class="code">NoResultError</a></td>
+    <td><span>Raised when the reactor has stopped but we don't have any result.</span></td>
+  </tr><tr class="class">
+    
+    <td>Class</td>
+    <td><a href="testtools._spinner.StaleJunkError.html" class="code">StaleJunkError</a></td>
+    <td><span>Raised when there's junk in the spinner from a previous run.</span></td>
+  </tr><tr class="class">
+    
+    <td>Class</td>
+    <td><a href="testtools._spinner.Spinner.html" class="code">Spinner</a></td>
+    <td><span>Spin the reactor until a function is done.</span></td>
+  </tr>
+</table>
+        
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools._spinner.not_reentrant">
+    
+  </a>
+  <a name="not_reentrant">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    not_reentrant(function, _calls={}):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Decorates a function as not being re-entrant.</p>
+<p>The decorated function will raise an error if called from within itself.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools._spinner.extract_result">
+    
+  </a>
+  <a name="extract_result">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    extract_result(deferred):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Extract the result from a fired deferred.</p>
+<p>It can happen that you have an API that returns Deferreds for
+compatibility with Twisted code, but is in fact synchronous, i.e. the
+Deferreds it returns have always fired by the time it returns.  In this
+case, you can use this function to convert the result back into the usual
+form for a synchronous API, i.e. the result itself or a raised exception.</p>
+<p>It would be very bad form to use this as some way of checking if a
+Deferred has fired.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools._spinner.trap_unhandled_errors">
+    
+  </a>
+  <a name="trap_unhandled_errors">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    trap_unhandled_errors(function, *args, **kwargs):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Run a function, trapping any unhandled errors in Deferreds.</p>
+<p>Assumes that 'function' will have handled any errors in Deferreds by the
+time it is complete.  This is almost never true of any Twisted code, since
+you can never tell when someone has added an errback to a Deferred.</p>
+<p>If 'function' raises, then don't bother doing any unhandled error
+jiggery-pokery, since something horrible has probably happened anyway.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">A tuple of '(result, error)', where 'result' is the value
+returned by 'function' and 'error' is a list of 'defer.DebugInfo'
+objects that have unhandled errors in Deferreds.</td></tr></table></div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

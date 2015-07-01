@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.runtest.RunTest : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="class"><code>testtools.runtest.RunTest(<span title="object">object</span>)</code> <small>class documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a>.<a href="testtools.runtest.html" class="code">runtest</a></code>
+          
+          <a href="classIndex.html#testtools.runtest.RunTest">(View In Hierarchy)</a>
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        <p>Known subclasses: <a href="testtools.deferredruntest._DeferredRunTest.html" class="code">testtools.deferredruntest._DeferredRunTest</a>, <a href="testtools.tests.helpers.FullStackRunTest.html" class="code">testtools.tests.helpers.FullStackRunTest</a>, <a href="testtools.tests.test_runtest.CustomRunTest.html" class="code">testtools.tests.test_runtest.CustomRunTest</a></p>
+      </div>
+
+      <div class="moduleDocstring">
+        <div><p>An object to run a test.</p>
+<p>RunTest objects are used to implement the internal logic involved in
+running a test. TestCase.__init__ stores _RunTest as the class of RunTest
+to execute.  Passing the runTest= parameter to TestCase.__init__ allows a
+different RunTest class to be used to execute the test.</p>
+<p>Subclassing or replacing RunTest can be useful to add functionality to the
+way that tests are run in a given project.</p><table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id157">
+  
+  <tr class="instancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#case" class="code">case</a></td>
+    <td>The test case that is to be run.</td>
+  </tr><tr class="instancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#result" class="code">result</a></td>
+    <td>The result object a case is reporting to.</td>
+  </tr><tr class="instancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#handlers" class="code">handlers</a></td>
+    <td>A list of (ExceptionClass, handler_function) for
+exceptions that should be caught if raised from the user
+code. Exceptions that are caught are checked against this list in
+first to last order.  There is a catch-all of 'Exception' at the end
+of the list, so to add a new exception to the list, insert it at the
+front (which ensures that it will be checked before any existing base
+classes in the list. If you add multiple exceptions some of which are
+subclasses of each other, add the most specific exceptions last (so
+they come before their parent classes in the list).</td>
+  </tr><tr class="instancevariable">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#exception_caught" class="code">exception_caught</a></td>
+    <td>An object returned when _run_user catches an
+exception.</td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#__init__" class="code">__init__</a></td>
+    <td><span>Create a RunTest to run a case.</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#run" class="code">run</a></td>
+    <td><span>Run self.case reporting activity to result.</span></td>
+  </tr><tr class="instancevariable private">
+    
+    <td>Instance Variable</td>
+    <td><a href="testtools.runtest.RunTest.html#_exceptions" class="code">_exceptions</a></td>
+    <td>A list of caught exceptions, used to do the single
+reporting of error/failure/skip etc.</td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_run_one" class="code">_run_one</a></td>
+    <td><span>Run one test reporting to result.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_run_prepared_result" class="code">_run_prepared_result</a></td>
+    <td><span>Run one test reporting to result.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_run_core" class="code">_run_core</a></td>
+    <td><span>Run the user supplied test code.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_run_cleanups" class="code">_run_cleanups</a></td>
+    <td><span>Run the cleanups that have been added with addCleanup.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_run_user" class="code">_run_user</a></td>
+    <td><span>Run a user supplied function.</span></td>
+  </tr><tr class="method private">
+    
+    <td>Method</td>
+    <td><a href="testtools.runtest.RunTest.html#_got_user_exception" class="code">_got_user_exception</a></td>
+    <td><span>Called when user code raises an exception.</span></td>
+  </tr>
+</table>
+        
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.runtest.RunTest.case">
+    
+  </a>
+  <a name="case">
+    
+  </a>
+  <div class="functionHeader">
+    case =
+  </div>
+  <div class="functionBody">
+    The test case that is to be run.
+  </div>
+</div><div class="function">
+  <a name="testtools.runtest.RunTest.result">
+    
+  </a>
+  <a name="result">
+    
+  </a>
+  <div class="functionHeader">
+    result =
+  </div>
+  <div class="functionBody">
+    The result object a case is reporting to.
+  </div>
+</div><div class="function">
+  <a name="testtools.runtest.RunTest.handlers">
+    
+  </a>
+  <a name="handlers">
+    
+  </a>
+  <div class="functionHeader">
+    handlers =
+  </div>
+  <div class="functionBody">
+    A list of (ExceptionClass, handler_function) for
+exceptions that should be caught if raised from the user
+code. Exceptions that are caught are checked against this list in
+first to last order.  There is a catch-all of 'Exception' at the end
+of the list, so to add a new exception to the list, insert it at the
+front (which ensures that it will be checked before any existing base
+classes in the list. If you add multiple exceptions some of which are
+subclasses of each other, add the most specific exceptions last (so
+they come before their parent classes in the list).
+  </div>
+</div><div class="function">
+  <a name="testtools.runtest.RunTest.exception_caught">
+    
+  </a>
+  <a name="exception_caught">
+    
+  </a>
+  <div class="functionHeader">
+    exception_caught =
+  </div>
+  <div class="functionBody">
+    An object returned when _run_user catches an
+exception.
+  </div>
+</div><div class="function">
+  <a name="testtools.runtest.RunTest._exceptions">
+    
+  </a>
+  <a name="_exceptions">
+    
+  </a>
+  <div class="functionHeader">
+    _exceptions =
+  </div>
+  <div class="functionBody">
+    A list of caught exceptions, used to do the single
+reporting of error/failure/skip etc.
+  </div>
+</div><div class="function">
+  <a name="testtools.runtest.RunTest.__init__">
+    
+  </a>
+  <a name="__init__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __init__(self, case, handlers=None, last_resort=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overridden in <a href="testtools.deferredruntest.AsynchronousDeferredRunTest.html" class="code">testtools.deferredruntest.AsynchronousDeferredRunTest</a></div>
+    <div>Create a RunTest to run a case.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">case</td><td>A testtools.TestCase test case object.</td></tr><tr><td></td><td class="fieldArg">handlers</td><td>Exception handlers for this RunTest. These are stored
+in self.handlers and can be modified later if needed.</td></tr><tr><td></td><td class="fieldArg">last_resort</td><td>A handler of last resort: any exception which is
+not handled by handlers will cause the last resort handler to be
+called as last_resort(exc_info), and then the exception will be
+raised - aborting the test run as this is inside the runner
+machinery rather than the confined context of the test.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.runtest.RunTest.run">
+    
+  </a>
+  <a name="run">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    run(self, result=None):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overridden in <a href="testtools.tests.test_runtest.CustomRunTest.html" class="code">testtools.tests.test_runtest.CustomRunTest</a></div>
+    <div>Run self.case reporting activity to result.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">result</td><td>Optional testtools.TestResult to report activity to.</td></tr><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">The result object the test was run against.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.runtest.RunTest._run_one">
+    
+  </a>
+  <a name="_run_one">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _run_one(self, result):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Run one test reporting to result.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">result</td><td>A testtools.TestResult to report activity to.
+This result object is decorated with an ExtendedToOriginalDecorator
+to ensure that the latest TestResult API can be used with
+confidence by client code.</td></tr><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">The result object the test was run against.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.runtest.RunTest._run_prepared_result">
+    
+  </a>
+  <a name="_run_prepared_result">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _run_prepared_result(self, result):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Run one test reporting to result.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">result</td><td>A testtools.TestResult to report activity to.</td></tr><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">The result object the test was run against.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.runtest.RunTest._run_core">
+    
+  </a>
+  <a name="_run_core">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _run_core(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overridden in <a href="testtools.deferredruntest.AsynchronousDeferredRunTest.html" class="code">testtools.deferredruntest.AsynchronousDeferredRunTest</a></div>
+    <div>Run the user supplied test code.<table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.runtest.RunTest._run_cleanups">
+    
+  </a>
+  <a name="_run_cleanups">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _run_cleanups(self, result):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overridden in <a href="testtools.deferredruntest.AsynchronousDeferredRunTest.html" class="code">testtools.deferredruntest.AsynchronousDeferredRunTest</a></div>
+    <div><p>Run the cleanups that have been added with addCleanup.</p>
+<p>See the docstring for addCleanup for more information.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">None if all cleanups ran without error,
+<tt class="rst-docutils literal">exception_caught</tt> if there was an error.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.runtest.RunTest._run_user">
+    
+  </a>
+  <a name="_run_user">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _run_user(self, fn, *args, **kwargs):
+    
+  </div>
+  <div class="docstring functionBody">
+    <div class="interfaceinfo">overridden in <a href="testtools.deferredruntest.AsynchronousDeferredRunTest.html" class="code">testtools.deferredruntest.AsynchronousDeferredRunTest</a>, <a href="testtools.deferredruntest.SynchronousDeferredRunTest.html" class="code">testtools.deferredruntest.SynchronousDeferredRunTest</a>, <a href="testtools.tests.helpers.FullStackRunTest.html" class="code">testtools.tests.helpers.FullStackRunTest</a></div>
+    <div><p>Run a user supplied function.</p>
+<p>Exceptions are processed by <a href="testtools.runtest.RunTest.html#_got_user_exception"><code>_got_user_exception</code></a>.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">Either whatever 'fn' returns or <tt class="rst-docutils literal">exception_caught</tt> if
+'fn' raised an exception.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.runtest.RunTest._got_user_exception">
+    
+  </a>
+  <a name="_got_user_exception">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    _got_user_exception(self, exc_info, tb_label='traceback'):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Called when user code raises an exception.</p>
+<p>If 'exc_info' is a <a href="testtools.runtest.MultipleExceptions.html"><code>MultipleExceptions</code></a>, then we recurse into it
+unpacking the errors that it's made up from.</p><table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">exc_info</td><td>A sys.exc_info() tuple for the user error.</td></tr><tr><td></td><td class="fieldArg">tb_label</td><td>An optional string label for the error.  If
+not specified, will default to 'traceback'.</td></tr><tr class="fieldStart"><td class="fieldName">Returns</td><td colspan="2">'exception_caught' if we catch one of the exceptions that
+have handlers in 'handlers', otherwise raise the error.</td></tr></table></div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>

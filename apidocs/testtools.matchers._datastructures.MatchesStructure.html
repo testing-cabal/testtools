@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+          "DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <title>testtools.matchers._datastructures.MatchesStructure : API documentation</title>
+
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+    <link href="bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="apidocs.css" type="text/css" rel="stylesheet" />
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a href="index.html" class="navbar-brand">
+            <a href="https://github.com/testing-cabal/testtools">testtools</a> API Documentation
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+
+      <div class="page-header">
+        <h1 class="class"><code>testtools.matchers._datastructures.MatchesStructure(<span title="object">object</span>)</code> <small>class documentation</small></h1>
+
+        <span id="partOf">
+          Part of <code><a href="testtools.html" class="code">testtools</a>.<a href="testtools.matchers.html" class="code">matchers</a>.<a href="testtools.matchers._datastructures.html" class="code">_datastructures</a></code>
+          
+          <a href="classIndex.html#testtools.matchers._datastructures.MatchesStructure">(View In Hierarchy)</a>
+        </span>
+      </div>
+
+      <div class="extrasDocstring">
+        
+      </div>
+
+      <div class="moduleDocstring">
+        <div><p>Matcher that matches an object structurally.</p>
+<p>'Structurally' here means that attributes of the object being matched are
+compared against given matchers.</p>
+<p><a href="testtools.matchers._datastructures.MatchesStructure.html#fromExample"><code>fromExample</code></a> allows the creation of a matcher from a prototype object and
+then modified versions can be created with <a href="testtools.matchers._datastructures.MatchesStructure.html#update"><code>update</code></a>.</p>
+<p><a href="testtools.matchers._datastructures.MatchesStructure.html#byEquality"><code>byEquality</code></a> creates a matcher in much the same way as the constructor,
+except that the matcher for each of the attributes is assumed to be
+<a href="testtools.matchers._basic.Equals.html"><code>Equals</code></a>.</p>
+<p><a href="testtools.matchers._datastructures.MatchesStructure.html#byMatcher"><code>byMatcher</code></a> creates a similar matcher to <a href="testtools.matchers._datastructures.MatchesStructure.html#byEquality"><code>byEquality</code></a>, but you get to pick
+the matcher, rather than just using <a href="testtools.matchers._basic.Equals.html"><code>Equals</code></a>.</p><table class="fieldTable"></table></div>
+      </div>
+
+      <div id="splitTables">
+        <table class="children sortable" id="id87">
+  
+  <tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.matchers._datastructures.MatchesStructure.html#__init__" class="code">__init__</a></td>
+    <td><span>Construct a <a href="testtools.matchers._datastructures.MatchesStructure.html"><code>MatchesStructure</code></a>.</span></td>
+  </tr><tr class="classmethod">
+    
+    <td>Class Method</td>
+    <td><a href="testtools.matchers._datastructures.MatchesStructure.html#byEquality" class="code">byEquality</a></td>
+    <td><span>Matches an object where the attributes equal the keyword values.</span></td>
+  </tr><tr class="classmethod">
+    
+    <td>Class Method</td>
+    <td><a href="testtools.matchers._datastructures.MatchesStructure.html#byMatcher" class="code">byMatcher</a></td>
+    <td><span>Matches an object where the attributes match the keyword values.</span></td>
+  </tr><tr class="classmethod">
+    
+    <td>Class Method</td>
+    <td><a href="testtools.matchers._datastructures.MatchesStructure.html#fromExample" class="code">fromExample</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.matchers._datastructures.MatchesStructure.html#update" class="code">update</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.matchers._datastructures.MatchesStructure.html#__str__" class="code">__str__</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr><tr class="method">
+    
+    <td>Method</td>
+    <td><a href="testtools.matchers._datastructures.MatchesStructure.html#match" class="code">match</a></td>
+    <td><span class="undocumented">Undocumented</span></td>
+  </tr>
+</table>
+        
+
+          
+      </div>
+
+      <div id="childList">
+
+        <div class="function">
+  <a name="testtools.matchers._datastructures.MatchesStructure.__init__">
+    
+  </a>
+  <a name="__init__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __init__(self, **kwargs):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div>Construct a <a href="testtools.matchers._datastructures.MatchesStructure.html"><code>MatchesStructure</code></a>.<table class="fieldTable"><tr class="fieldStart"><td class="fieldName">Parameters</td><td class="fieldArg">kwargs</td><td>A mapping of attributes to matchers.</td></tr></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.matchers._datastructures.MatchesStructure.byEquality">
+    
+  </a>
+  <a name="byEquality">
+    
+  </a>
+  <div class="functionHeader">
+    @classmethod<br />
+    def
+    byEquality(cls, **kwargs):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Matches an object where the attributes equal the keyword values.</p>
+<p>Similar to the constructor, except that the matcher is assumed to be
+Equals.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.matchers._datastructures.MatchesStructure.byMatcher">
+    
+  </a>
+  <a name="byMatcher">
+    
+  </a>
+  <div class="functionHeader">
+    @classmethod<br />
+    def
+    byMatcher(cls, matcher, **kwargs):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div><p>Matches an object where the attributes match the keyword values.</p>
+<p>Similar to the constructor, except that the provided matcher is used
+to match all of the values.</p><table class="fieldTable"></table></div>
+  </div>
+</div><div class="function">
+  <a name="testtools.matchers._datastructures.MatchesStructure.fromExample">
+    
+  </a>
+  <a name="fromExample">
+    
+  </a>
+  <div class="functionHeader">
+    @classmethod<br />
+    def
+    fromExample(cls, example, *attributes):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.matchers._datastructures.MatchesStructure.update">
+    
+  </a>
+  <a name="update">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    update(self, **kws):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.matchers._datastructures.MatchesStructure.__str__">
+    
+  </a>
+  <a name="__str__">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    __str__(self):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div><div class="function">
+  <a name="testtools.matchers._datastructures.MatchesStructure.match">
+    
+  </a>
+  <a name="match">
+    
+  </a>
+  <div class="functionHeader">
+    
+    def
+    match(self, value):
+    
+  </div>
+  <div class="docstring functionBody">
+    
+    <div class="undocumented">Undocumented</div>
+  </div>
+</div>
+
+      </div>
+      <address>
+        <a href="index.html">API Documentation</a> for <a href="https://github.com/testing-cabal/testtools">testtools</a>, generated by <a href="https://github.com/twisted/pydoctor/">pydoctor</a> at 2015-07-01 16:11:28.
+      </address>
+
+    </div>
+  </body>
+</html>
