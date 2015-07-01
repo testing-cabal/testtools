@@ -55,6 +55,9 @@ methods are implemented. However, when writing tests for testtools itself, it
 is often useful to see all levels of the stack. To do this, add
 ``run_tests_with = FullStackRunTest`` to the top of a test's class definition.
 
+To install all the test dependencies, install the ``test`` extra::
+
+  pip install e .[test]
 
 Discussion
 ----------
