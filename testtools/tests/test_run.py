@@ -201,6 +201,7 @@ testtools.runexample.TestFoo.test_quux
             run.main, ['prog', 'discover', '-l', broken.package.base, '*.py'], out)
         self.assertEqual(2, exc.args[0])
         self.assertThat(out.getvalue(), DocTestMatches("""\
+unittest2.loader._FailedTest.runexample
 Failed to import test module: runexample
 Traceback (most recent call last):
   File ".../loader.py", line ..., in _find_test_path
