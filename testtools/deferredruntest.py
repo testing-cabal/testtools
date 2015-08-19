@@ -27,8 +27,15 @@ from testtools._spinner import (
     )
 
 from twisted.internet import defer
+try:
+    from twisted.logger import globalLogPublisher
+except ImportError:
+    globalLogPublisher = None
 from twisted.python import log
-from twisted.trial.unittest import _LogObserver
+try:
+    from twisted.trial.unittest import _LogObserver
+except ImportError:
+    from twisted.trial._synctest import _LogObserver
 
 
 class _DeferredRunTest(RunTest):
@@ -53,9 +60,21 @@ class SynchronousDeferredRunTest(_DeferredRunTest):
 
 def run_with_log_observers(observers, function, *args, **kwargs):
     """Run 'function' with the given Twisted log observers."""
-    real_observers = list(log.theLogPublisher.observers)
+    if globalLogPublisher is not None:
+        # Twisted >= 15.2.0, with the new twisted.logger framework.
+        # log.theLogPublisher.observers will only contain legacy observers;
+        # we need to look at globalLogPublisher._observers, which contains
+        # both legacy and modern observers, and add and remove them via
+        # globalLogPublisher.  However, we must still add and remove the
+        # observers we want to run with via log.theLogPublisher, because
+        # _LogObserver may consider old keys and require them to be mapped.
+        publisher = globalLogPublisher
+        real_observers = list(publisher._observers)
+    else:
+        publisher = log.theLogPublisher
+        real_observers = list(publisher.observers)
     for observer in real_observers:
-        log.theLogPublisher.removeObserver(observer)
+        publisher.removeObserver(observer)
     for observer in observers:
         log.theLogPublisher.addObserver(observer)
     try:
@@ -64,7 +83,7 @@ def run_with_log_observers(observers, function, *args, **kwargs):
         for observer in observers:
             log.theLogPublisher.removeObserver(observer)
         for observer in real_observers:
-            log.theLogPublisher.addObserver(observer)
+            publisher.addObserver(observer)
 
 
 # Observer of the Twisted log that we install during tests.
