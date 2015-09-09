@@ -20,11 +20,11 @@ matrix:
     - python: "2.6"
       env: TWISTED_REQ="Twisted==13.0.0"
     - python: "2.6"
-      env: TWISTED_REQ="Twisted==15.2.0"
+      env: TWISTED_REQ="Twisted"
     - python: "2.7"
       env: TWISTED_REQ="Twisted==13.0.0"
     - python: "2.7"
-      env: TWISTED_REQ="Twisted==15.2.0"
+      env: TWISTED_REQ="Twisted"
     - python: "3.2"
       env:
         - JINJA_REQ="jinja2<2.7, Pygments<2.0"
@@ -32,7 +32,7 @@ matrix:
     - python: "pypy"
       env: TWISTED_REQ="Twisted==13.0.0"
     - python: "pypy"
-      env: TWISTED_REQ="Twisted==15.2.0"
+      env: TWISTED_REQ="Twisted"
     - python: "pypy3"
       env: SPHINX="<1.3"
 
