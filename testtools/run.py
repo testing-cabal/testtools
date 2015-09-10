@@ -158,6 +158,7 @@ class TestProgram(unittest.TestProgram):
         self.defaultTest = defaultTest
         # XXX: Local edit (see http://bugs.python.org/issue22860)
         self.listtests = False
+        self.showerrors = False
         self.load_list = None
         self.testRunner = testRunner
         self.testLoader = testLoader
@@ -192,6 +193,10 @@ class TestProgram(unittest.TestProgram):
                     runner.list(self.test, loader=self.testLoader)
                 except TypeError:
                     runner.list(self.test)
+                finally:
+                    if self.showerrors:
+                        errors = '\n'.join(self.testLoader.errors)
+                        sys.stderr.write(errors)
             else:
                 for test in iterate_tests(self.test):
                     self.stdout.write('%s\n' % test.id())
@@ -202,6 +207,8 @@ class TestProgram(unittest.TestProgram):
         # XXX: Local edit (see http://bugs.python.org/issue22860)
         parser.add_argument('-l', '--list', dest='listtests', default=False,
             action='store_true', help='List tests rather than executing them')
+        parser.add_argument('--show-import-errors', dest='showerrors', default=False,
+            action='store_true', help='Show import errors during the list command')
         parser.add_argument('--load-list', dest='load_list', default=None,
             help='Specifies a file containing test ids, only tests matching '
                 'those ids are executed')
