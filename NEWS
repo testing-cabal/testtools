@@ -7,6 +7,12 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* Documented more explicitly how to build and install testtools in the hacking
+  documentation. (Thomi Richards)
+  
 1.8.0
 ~~~~~
 

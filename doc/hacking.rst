@@ -39,6 +39,20 @@ Assignment above) needs to be licensed under the `MIT license`_ that testtools
 uses, so that testtools can ship it.
 
 
+Building
+--------
+
+Building and installing testtools requires a reasonably recent version of pip.
+At the time of writing, pip version 7.1.0 (which is bundled with virtualenv
+13.1.0) is a good choice. To install testtools from source and all its test
+dependencies, install the ``test`` extra::
+
+  pip install -e .[test]
+
+Installing via ``python setup.py install`` may not work, due to issues with
+easy_install.
+
+
 Testing
 -------
 
@@ -55,9 +69,6 @@ methods are implemented. However, when writing tests for testtools itself, it
 is often useful to see all levels of the stack. To do this, add
 ``run_tests_with = FullStackRunTest`` to the top of a test's class definition.
 
-To install all the test dependencies, install the ``test`` extra::
-
-  pip install e .[test]
 
 Discussion
 ----------
