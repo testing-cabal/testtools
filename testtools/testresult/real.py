@@ -656,9 +656,6 @@ class TestRecord(PRecord):
 
     x is the first timestamp we received for this test, y is the one that
     triggered the notification. y can be None if the test hanged.
-
-    Timestamps are not compared - their ordering is purely order received in
-    the stream.
     """
     timestamps = field(tuple, mandatory=True)
 
@@ -696,6 +693,14 @@ class TestRecord(PRecord):
             'status': self.status,
             'timestamps': list(self.timestamps),
         }
+
+    def got_timestamp(self, timestamp):
+        """Called when we receive a timestamp.
+
+        This will always update the second element of the 'timestamps' tuple.
+        It doesn't compare timestamps at all.
+        """
+        return self.set(timestamps=(self.timestamps[0], timestamp))
 
 
 class StreamToDict(StreamResult):
@@ -764,7 +769,7 @@ class StreamToDict(StreamResult):
         if test_status is not None:
             case = case.set(status=test_status)
 
-        case = case.set(timestamps=(case.timestamps[0], timestamp))
+        case = case.got_timestamp(timestamp)
 
         if file_name is not None:
             if file_name not in case.details:
@@ -785,8 +790,7 @@ class StreamToDict(StreamResult):
         super(StreamToDict, self).stopTestRun()
         while self._inprogress:
             case = self._inprogress.popitem()[1]
-            case = case.set(timestamps=(case.timestamps[0], None))
-            self.on_test(case.to_dict())
+            self.on_test(case.got_timestamp(None).to_dict())
 
     def _ensure_key(self, test_id, route_code, timestamp):
         if test_id is None:
