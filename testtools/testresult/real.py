@@ -695,6 +695,29 @@ class StreamToDict(StreamResult):
         if not key:
             return
         case = self._inprogress[key]
+        self._inprogress[key] = self._update_case(
+            case, test_status, test_tags, file_name, file_bytes,
+            mime_type, timestamp)
+        # notify completed tests.
+        if test_status not in INTERIM_STATES:
+            # XXX: This isn't actually desirable end-state code, but I just
+            # want to verify that we are re-using this correctly.
+            popped_case = self._inprogress.pop(key)
+            assert case == popped_case
+            self.on_test(popped_case)
+
+    def _make_case(self, test_id, timestamp):
+        return {
+            'id': test_id,
+            'tags': set(),
+            'details': {},
+            'status': 'unknown',
+            'timestamps': [timestamp, None],
+        }
+
+    def _update_case(self, case, test_status=None, test_tags=None,
+                     file_name=None, file_bytes=None, mime_type=None,
+                     timestamp=None):
         if test_status is not None:
             case['status'] = test_status
         case['timestamps'][1] = timestamp
@@ -708,13 +731,7 @@ class StreamToDict(StreamResult):
 
         if test_tags is not None:
             case['tags'] = test_tags
-        # notify completed tests.
-        if test_status not in INTERIM_STATES:
-            # XXX: This isn't actually desirable end-state code, but I just
-            # want to verify that we are re-using this correctly.
-            popped_case = self._inprogress.pop(key)
-            assert case == popped_case
-            self.on_test(popped_case)
+        return case
 
     def stopTestRun(self):
         super(StreamToDict, self).stopTestRun()
@@ -728,12 +745,7 @@ class StreamToDict(StreamResult):
             return
         key = (test_id, route_code)
         if key not in self._inprogress:
-            self._inprogress[key] = {
-                'id': test_id,
-                'tags': set(),
-                'details': {},
-                'status': 'unknown',
-                'timestamps': [timestamp, None]}
+            self._inprogress[key] = self._make_case(test_id, timestamp)
         return key
 
 
