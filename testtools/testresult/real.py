@@ -694,14 +694,16 @@ class StreamToDict(StreamResult):
         # update fields
         if not key:
             return
-        if test_status is not None:
-            self._inprogress[key]['status'] = test_status
-        self._inprogress[key]['timestamps'][1] = timestamp
         case = self._inprogress[key]
+        if test_status is not None:
+            case['status'] = test_status
+        case['timestamps'][1] = timestamp
         if file_name is not None:
             if file_name not in case['details']:
+
                 if mime_type is None:
                     mime_type = 'application/octet-stream'
+
                 primary, sub, parameters = parse_mime_type(mime_type)
                 if 'charset' in parameters:
                     if ',' in parameters['charset']:
@@ -710,16 +712,22 @@ class StreamToDict(StreamResult):
                         # this in a few releases.
                         parameters['charset'] = parameters['charset'][
                             :parameters['charset'].find(',')]
+
                 content_type = ContentType(primary, sub, parameters)
                 content_bytes = []
                 case['details'][file_name] = Content(
                     content_type, lambda: content_bytes)
             case['details'][file_name].iter_bytes().append(file_bytes)
+
         if test_tags is not None:
-            self._inprogress[key]['tags'] = test_tags
+            case['tags'] = test_tags
         # notify completed tests.
         if test_status not in INTERIM_STATES:
-            self.on_test(self._inprogress.pop(key))
+            # XXX: This isn't actually desirable end-state code, but I just
+            # want to verify that we are re-using this correctly.
+            popped_case = self._inprogress.pop(key)
+            assert case == popped_case
+            self.on_test(popped_case)
 
     def stopTestRun(self):
         super(StreamToDict, self).stopTestRun()
