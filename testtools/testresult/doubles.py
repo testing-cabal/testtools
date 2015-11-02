@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2010 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
 """Doubles of test result objects, useful for testing unittest code."""
 
@@ -167,8 +167,9 @@ class StreamResult(object):
         self._events.append(('stopTestRun',))
 
     def status(self, test_id=None, test_status=None, test_tags=None,
-        runnable=True, file_name=None, file_bytes=None, eof=False,
-        mime_type=None, route_code=None, timestamp=None):
-        self._events.append(('status', test_id, test_status, test_tags,
-            runnable, file_name, file_bytes, eof, mime_type, route_code,
-            timestamp))
+               runnable=True, file_name=None, file_bytes=None, eof=False,
+               mime_type=None, route_code=None, timestamp=None):
+        self._events.append(
+            ('status', test_id, test_status, test_tags,
+             runnable, file_name, file_bytes, eof, mime_type, route_code,
+             timestamp))
