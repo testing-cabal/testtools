@@ -16,8 +16,10 @@ from testtools.tags import TagContext
 class LoggingBase(object):
     """Basic support for logging of results."""
 
-    def __init__(self):
-        self._events = []
+    def __init__(self, event_log=None):
+        if event_log is None:
+            event_log = []
+        self._events = event_log
         self.shouldStop = False
         self._was_successful = True
         self.testsRun = 0
@@ -54,8 +56,8 @@ class Python26TestResult(LoggingBase):
 class Python27TestResult(Python26TestResult):
     """A precisely python 2.7 like test result, that logs."""
 
-    def __init__(self):
-        super(Python27TestResult, self).__init__()
+    def __init__(self, event_log=None):
+        super(Python27TestResult, self).__init__(event_log)
         self.failfast = False
 
     def addError(self, test, err):
@@ -89,8 +91,8 @@ class Python27TestResult(Python26TestResult):
 class ExtendedTestResult(Python27TestResult):
     """A test result like the proposed extended unittest result API."""
 
-    def __init__(self):
-        super(ExtendedTestResult, self).__init__()
+    def __init__(self, event_log=None):
+        super(ExtendedTestResult, self).__init__(event_log)
         self._tags = TagContext()
 
     def addError(self, test, err=None, details=None):
@@ -157,8 +159,10 @@ class StreamResult(object):
     All events are logged to _events.
     """
 
-    def __init__(self):
-        self._events = []
+    def __init__(self, event_log=None):
+        if event_log is None:
+            event_log = []
+        self._events = event_log
 
     def startTestRun(self):
         self._events.append(('startTestRun',))
