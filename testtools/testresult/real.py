@@ -726,6 +726,27 @@ class TestRecord(PRecord):
         )
 
 
+def _make_content_type(mime_type=None):
+    """Return ContentType for a given mime type.
+
+    testtools was emitting a bad encoding, and this works around it.
+    Unfortunately, is also loses data - probably want to drop this in a few
+    releases.
+    """
+    # XXX: Not sure what release this was added, so "in a few releases" is
+    # unactionable.
+    if mime_type is None:
+        mime_type = 'application/octet-stream'
+
+    primary, sub, parameters = parse_mime_type(mime_type)
+    if 'charset' in parameters:
+        if ',' in parameters['charset']:
+            parameters['charset'] = parameters['charset'][
+                :parameters['charset'].find(',')]
+
+    return ContentType(primary, sub, parameters)
+
+
 _status_map = pmap({
     'inprogress': 'addFailure',
     'unknown': 'addFailure',
@@ -840,27 +861,6 @@ class StreamToDict(StreamResult):
         if key not in self._inprogress:
             self._inprogress[key] = TestRecord.create(test_id, timestamp)
         return key
-
-
-def _make_content_type(mime_type=None):
-    """Return ContentType for a given mime type.
-
-    testtools was emitting a bad encoding, and this works around it.
-    Unfortunately, is also loses data - probably want to drop this in a few
-    releases.
-    """
-    # XXX: Not sure what release this was added, so "in a few releases" is
-    # unactionable.
-    if mime_type is None:
-        mime_type = 'application/octet-stream'
-
-    primary, sub, parameters = parse_mime_type(mime_type)
-    if 'charset' in parameters:
-        if ',' in parameters['charset']:
-            parameters['charset'] = parameters['charset'][
-                :parameters['charset'].find(',')]
-
-    return ContentType(primary, sub, parameters)
 
 
 class StreamSummary(StreamToDict):
