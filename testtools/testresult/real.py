@@ -31,6 +31,8 @@ from extras import safe_hasattr, try_import, try_imports
 parse_mime_type = try_import('mimeparse.parse_mime_type')
 Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
+from pyrsistent import PRecord, field, pmap_field, pset_field
+
 from testtools.compat import str_is_unicode, _u, _b
 from testtools.content import (
     Content,
@@ -264,6 +266,44 @@ class TestResult(unittest.TestResult):
 
         deprecated in favour of stopTestRun.
         """
+
+
+"""Interim states:
+
+* None - no particular status is being reported, or status being reported is
+  not associated with a test (e.g. when reporting on stdout / stderr chatter).
+
+* inprogress - the test is currently running. Emitted by tests when they start
+  running and at any intermediary point they might choose to indicate their
+  continual operation.
+"""
+INTERIM_STATES = frozenset({None, 'inprogress'})
+
+"""Final states:
+
+* exists - the test exists. This is used when a test is not being executed.
+  Typically this is when querying what tests could be run in a test run (which
+  is useful for selecting tests to run).
+
+* xfail - the test failed but that was expected. This is purely informative -
+  the test is not considered to be a failure.
+
+* uxsuccess - the test passed but was expected to fail. The test will be
+  considered a failure.
+
+* success - the test has finished without error.
+
+* fail - the test failed (or errored). The test will be considered a failure.
+
+* skip - the test was selected to run but chose to be skipped. e.g. a test
+  dependency was missing. This is purely informative: the test is not
+  considered to be a failure.
+"""
+FINAL_STATES = frozenset(
+    {'exists', 'xfail', 'uxsuccess', 'success', 'fail', 'skip'})
+
+
+STATES = INTERIM_STATES | FINAL_STATES
 
 
 class StreamResult(object):
@@ -577,6 +617,32 @@ class StreamTagger(CopyStreamResult):
         test_tags.difference_update(self.discard)
         kwargs['test_tags'] = test_tags or None
         super(StreamTagger, self).status(*args, **kwargs)
+
+
+class TestRecord(PRecord):
+    """Representation of a test."""
+
+    """The test id."""
+    id = field(unicode, mandatory=True)
+
+    """Tags for the test."""
+    tags = pset_field(unicode, optional=False)
+
+    """File attachments."""
+    details = pmap_field(unicode, Content, optional=False)
+
+    """One of the StreamResult status codes."""
+    status = field(unicode, mandatory=True, invariant=lambda x: x in STATES)
+
+    """Pair of timestamps (x, y).
+
+    x is the first timestamp we received for this test, y is the one that
+    triggered the notification. y can be None if the test hanged.
+
+    Timestamps are not compared - their ordering is purely order received in
+    the stream.
+    """
+    timestamps = field(tuple, mandatory=True)
 
 
 class StreamToDict(StreamResult):
