@@ -773,6 +773,85 @@ def test_dict_to_case(test_dict):
     ).to_test_case()
 
 
+class StreamToTestRecord(StreamResult):
+    """A specialised StreamResult that emits a callback as tests complete.
+
+    Top level file attachments are simply discarded. Hung tests are detected
+    by stopTestRun and notified there and then.
+
+    The callback is passed a ``TestRecord`` object.
+
+    Only the most recent tags observed in the stream are reported.
+    """
+
+    def __init__(self, on_test):
+        """Create a StreamToTestRecord calling on_test on test completions.
+
+        :param on_test: A callback that accepts one parameter:
+            a ``TestRecord`` object describing a test.
+        """
+        super(StreamToTestRecord, self).__init__()
+        self.on_test = on_test
+        if parse_mime_type is None:
+            raise ImportError("mimeparse module missing.")
+
+    def startTestRun(self):
+        super(StreamToTestRecord, self).startTestRun()
+        self._inprogress = {}
+
+    def status(self, test_id=None, test_status=None, test_tags=None,
+               runnable=True, file_name=None, file_bytes=None, eof=False,
+               mime_type=None, route_code=None, timestamp=None):
+        super(StreamToTestRecord, self).status(
+            test_id, test_status,
+            test_tags=test_tags, runnable=runnable, file_name=file_name,
+            file_bytes=file_bytes, eof=eof, mime_type=mime_type,
+            route_code=route_code, timestamp=timestamp)
+
+        key = self._ensure_key(test_id, route_code, timestamp)
+        if not key:
+            return
+
+        # update fields
+        self._inprogress[key] = self._update_case(
+            self._inprogress[key], test_status, test_tags, file_name,
+            file_bytes, mime_type, timestamp)
+
+        # notify completed tests.
+        if test_status not in INTERIM_STATES:
+            self.on_test(self._inprogress.pop(key))
+
+    def _update_case(self, case, test_status=None, test_tags=None,
+                     file_name=None, file_bytes=None, mime_type=None,
+                     timestamp=None):
+        if test_status is not None:
+            case = case.set(status=test_status)
+
+        case = case.got_timestamp(timestamp)
+
+        if file_name is not None:
+            case = case.got_file(file_name, file_bytes, mime_type)
+
+        if test_tags is not None:
+            case = case.set('tags', test_tags)
+
+        return case
+
+    def stopTestRun(self):
+        super(StreamToTestRecord, self).stopTestRun()
+        while self._inprogress:
+            case = self._inprogress.popitem()[1]
+            self.on_test(case.got_timestamp(None))
+
+    def _ensure_key(self, test_id, route_code, timestamp):
+        if test_id is None:
+            return
+        key = (test_id, route_code)
+        if key not in self._inprogress:
+            self._inprogress[key] = TestRecord.create(test_id, timestamp)
+        return key
+
+
 class StreamToDict(StreamResult):
     """A specialised StreamResult that emits a callback as tests complete.
 
@@ -795,72 +874,39 @@ class StreamToDict(StreamResult):
     Only the most recent tags observed in the stream are reported.
     """
 
-    def __init__(self, on_test):
-        """Create a StreamToDict calling on_test on test completions.
+    # XXX: This could actually be replaced by a very simple function.
+    # Unfortunately, subclassing is a supported API.
 
-        :param on_test: A callback that accepts one parameter - a dict
-            describing a test.
+    # XXX: Alternative simplification is to extract a StreamAdapter base
+    # class, and have this inherit from that.
+
+    def __init__(self, on_test):
+        """Create a StreamToTestRecord calling on_test on test completions.
+
+        :param on_test: A callback that accepts one parameter:
+            a ``TestRecord`` object describing a test.
         """
         super(StreamToDict, self).__init__()
+        self._streamer = StreamToTestRecord(self._handle_test)
+        # XXX: Not clear whether its part of the supported interface for
+        # self.on_test to be the passed-in on_test. If not, we could reduce
+        # the boilerplate by subclassing StreamToTestRecord.
         self.on_test = on_test
-        if parse_mime_type is None:
-            raise ImportError("mimeparse module missing.")
+
+    def _handle_test(self, test_record):
+        self.on_test(test_record.to_dict())
 
     def startTestRun(self):
         super(StreamToDict, self).startTestRun()
-        self._inprogress = {}
+        self._streamer.startTestRun()
 
-    def status(self, test_id=None, test_status=None, test_tags=None,
-               runnable=True, file_name=None, file_bytes=None, eof=False,
-               mime_type=None, route_code=None, timestamp=None):
-        super(StreamToDict, self).status(
-            test_id, test_status,
-            test_tags=test_tags, runnable=runnable, file_name=file_name,
-            file_bytes=file_bytes, eof=eof, mime_type=mime_type,
-            route_code=route_code, timestamp=timestamp)
-
-        key = self._ensure_key(test_id, route_code, timestamp)
-        if not key:
-            return
-
-        # update fields
-        self._inprogress[key] = self._update_case(
-            self._inprogress[key], test_status, test_tags, file_name,
-            file_bytes, mime_type, timestamp)
-
-        # notify completed tests.
-        if test_status not in INTERIM_STATES:
-            self.on_test(self._inprogress.pop(key).to_dict())
-
-    def _update_case(self, case, test_status=None, test_tags=None,
-                     file_name=None, file_bytes=None, mime_type=None,
-                     timestamp=None):
-        if test_status is not None:
-            case = case.set(status=test_status)
-
-        case = case.got_timestamp(timestamp)
-
-        if file_name is not None:
-            case = case.got_file(file_name, file_bytes, mime_type)
-
-        if test_tags is not None:
-            case = case.set('tags', test_tags)
-
-        return case
+    def status(self, *args, **kwargs):
+        super(StreamToDict, self).status(*args, **kwargs)
+        self._streamer.status(*args, **kwargs)
 
     def stopTestRun(self):
         super(StreamToDict, self).stopTestRun()
-        while self._inprogress:
-            case = self._inprogress.popitem()[1]
-            self.on_test(case.got_timestamp(None).to_dict())
-
-    def _ensure_key(self, test_id, route_code, timestamp):
-        if test_id is None:
-            return
-        key = (test_id, route_code)
-        if key not in self._inprogress:
-            self._inprogress[key] = TestRecord.create(test_id, timestamp)
-        return key
+        self._streamer.stopTestRun()
 
 
 class StreamSummary(StreamToDict):
