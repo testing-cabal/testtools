@@ -721,7 +721,7 @@ class TestRecord(PRecord):
         return case
 
 
-_status_map = {
+_status_map = pmap({
     'inprogress': 'addFailure',
     'unknown': 'addFailure',
     'success': 'addSuccess',
@@ -729,7 +729,7 @@ _status_map = {
     'fail': 'addFailure',
     'xfail': 'addExpectedFailure',
     'uxsuccess': 'addUnexpectedSuccess',
-    }
+})
 
 
 def test_dict_to_case(test_dict):
