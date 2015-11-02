@@ -932,7 +932,7 @@ class StreamSummary(StreamResult):
 
     def __init__(self):
         super(StreamSummary, self).__init__()
-        self._hook = StreamToDict(self._gather_test)
+        self._hook = StreamToTestRecord(self._gather_test)
         self._handle_status = {
             'success': self._success,
             'skip': self._skip,
@@ -970,12 +970,12 @@ class StreamSummary(StreamResult):
         """
         return (not self.failures and not self.errors)
 
-    def _gather_test(self, test_dict):
-        if test_dict['status'] == 'exists':
+    def _gather_test(self, test_record):
+        if test_record.status == 'exists':
             return
         self.testsRun += 1
-        case = test_dict_to_case(test_dict)
-        self._handle_status[test_dict['status']](case)
+        case = test_record.to_test_case()
+        self._handle_status[test_record.status](case)
 
     def _incomplete(self, case):
         self.errors.append((case, "Test did not complete"))
@@ -1688,8 +1688,8 @@ class StreamToExtendedDecorator(StreamResult):
         # ExtendedToOriginalDecorator takes care of thunking details back to
         # exceptions/reasons etc.
         self.decorated = ExtendedToOriginalDecorator(decorated)
-        # StreamToDict buffers and gives us individual tests.
-        self.hook = StreamToDict(self._handle_tests)
+        # StreamToTestRecord buffers and gives us individual tests.
+        self.hook = StreamToTestRecord(self._handle_tests)
 
     def status(self, test_id=None, test_status=None, *args, **kwargs):
         if test_status == 'exists':
@@ -1705,8 +1705,8 @@ class StreamToExtendedDecorator(StreamResult):
         self.hook.stopTestRun()
         self.decorated.stopTestRun()
 
-    def _handle_tests(self, test_dict):
-        case = test_dict_to_case(test_dict)
+    def _handle_tests(self, test_record):
+        case = test_record.to_test_case()
         case.run(self.decorated)
 
 
