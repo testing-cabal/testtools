@@ -649,6 +649,16 @@ class TestRecord(PRecord):
     """
     timestamps = field(tuple, mandatory=True)
 
+    @classmethod
+    def create(cls, test_id, timestamp):
+        return cls(
+            id=test_id,
+            tags=pset(),
+            details=pmap(),
+            status='unknown',
+            timestamps=(timestamp, None),
+        )
+
     def to_dict(self):
         """Convert record into a "test dict".
 
@@ -735,15 +745,6 @@ class StreamToDict(StreamResult):
             case = self._inprogress.pop(key)
             self.on_test(case.to_dict())
 
-    def _make_case(self, test_id, timestamp):
-        return TestRecord(
-            id=test_id,
-            tags=pset(),
-            details=pmap(),
-            status='unknown',
-            timestamps=(timestamp, None),
-        )
-
     def _update_case(self, case, test_status=None, test_tags=None,
                      file_name=None, file_bytes=None, mime_type=None,
                      timestamp=None):
@@ -779,7 +780,7 @@ class StreamToDict(StreamResult):
             return
         key = (test_id, route_code)
         if key not in self._inprogress:
-            self._inprogress[key] = self._make_case(test_id, timestamp)
+            self._inprogress[key] = TestRecord.create(test_id, timestamp)
         return key
 
 
