@@ -1409,9 +1409,6 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
         self.__now = None
         self._started = True
 
-    def stopTest(self, test):
-        self._tags = self._tags.parent
-
     @property
     def current_tags(self):
         """The currently set tags."""
