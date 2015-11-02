@@ -32,7 +32,7 @@ from extras import safe_hasattr, try_import, try_imports
 parse_mime_type = try_import('mimeparse.parse_mime_type')
 Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
-from pyrsistent import PRecord, field, pmap_field, pset_field
+from pyrsistent import PRecord, field, pmap_field, pset_field, pmap, pset, thaw
 
 from testtools.compat import str_is_unicode, _u, _b
 from testtools.content import (
@@ -299,9 +299,11 @@ INTERIM_STATES = frozenset({None, 'inprogress'})
 * skip - the test was selected to run but chose to be skipped. e.g. a test
   dependency was missing. This is purely informative: the test is not
   considered to be a failure.
+
+* unknown - we don't know what state the test is in
 """
 FINAL_STATES = frozenset(
-    {'exists', 'xfail', 'uxsuccess', 'success', 'fail', 'skip'})
+    {'exists', 'xfail', 'uxsuccess', 'success', 'fail', 'skip', 'unknown'})
 
 
 STATES = INTERIM_STATES | FINAL_STATES
@@ -636,16 +638,19 @@ class TestRecord(PRecord):
     """Representation of a test."""
 
     """The test id."""
-    id = field(unicode, mandatory=True)
+    id = field((str, unicode), mandatory=True)
 
     """Tags for the test."""
-    tags = pset_field(unicode, optional=False)
+    tags = pset_field((str, unicode), optional=False)
 
     """File attachments."""
-    details = pmap_field(unicode, Content, optional=False)
+    # XXX: Documentation says these are unicode, but tests pass in str.
+    details = pmap_field((str, unicode), Content, optional=False)
 
     """One of the StreamResult status codes."""
-    status = field(unicode, mandatory=True, invariant=lambda x: x in STATES)
+    status = field(
+        (str, unicode), mandatory=True,
+        invariant=lambda x: (x in STATES, 'Invalid state'))
 
     """Pair of timestamps (x, y).
 
@@ -656,6 +661,31 @@ class TestRecord(PRecord):
     the stream.
     """
     timestamps = field(tuple, mandatory=True)
+
+    def to_dict(self):
+        """Convert record into a "test dict".
+
+        A "test dict" is a concept used in other parts of the code-base. It
+        has the following keys:
+
+        * id: the test id.
+        * tags: The tags for the test. A set of unicode strings.
+        * details: A dict of file attachments - ``testtools.content.Content``
+          objects.
+        * status: One of the StreamResult status codes (including inprogress) or
+          'unknown' (used if only file events for a test were received...)
+        * timestamps: A pair of timestamps - the first one received with this
+          test id, and the one in the event that triggered the notification.
+          Hung tests have a None for the second end event. Timestamps are not
+          compared - their ordering is purely order received in the stream.
+        """
+        return {
+            'id': self.id,
+            'tags': thaw(self.tags),
+            'details': thaw(self.details),
+            'status': self.status,
+            'timestamps': list(self.timestamps),
+        }
 
 
 class StreamToDict(StreamResult):
@@ -715,43 +745,47 @@ class StreamToDict(StreamResult):
         if test_status not in INTERIM_STATES:
             # XXX: This isn't actually desirable end-state code, but I just
             # want to verify that we are re-using this correctly.
-            popped_case = self._inprogress.pop(key)
-            assert case == popped_case
-            self.on_test(popped_case)
+            case = self._inprogress.pop(key)
+            self.on_test(case.to_dict())
 
     def _make_case(self, test_id, timestamp):
-        return {
-            'id': test_id,
-            'tags': set(),
-            'details': {},
-            'status': 'unknown',
-            'timestamps': [timestamp, None],
-        }
+        return TestRecord(
+            id=test_id,
+            tags=pset(),
+            details=pmap(),
+            status='unknown',
+            timestamps=(timestamp, None),
+        )
 
     def _update_case(self, case, test_status=None, test_tags=None,
                      file_name=None, file_bytes=None, mime_type=None,
                      timestamp=None):
         if test_status is not None:
-            case['status'] = test_status
-        case['timestamps'][1] = timestamp
+            case = case.set(status=test_status)
+
+        case = case.set(timestamps=(case.timestamps[0], timestamp))
+
         if file_name is not None:
-            if file_name not in case['details']:
+            if file_name not in case.details:
                 content_type = _make_content_type(mime_type)
                 content_bytes = []
-                case['details'][file_name] = Content(
-                    content_type, lambda: content_bytes)
-            case['details'][file_name].iter_bytes().append(file_bytes)
+                case = case.transform(
+                    ['details', file_name],
+                    Content(content_type, lambda: content_bytes))
+
+            case.details[file_name].iter_bytes().append(file_bytes)
 
         if test_tags is not None:
-            case['tags'] = test_tags
+            case = case.set('tags', test_tags)
+
         return case
 
     def stopTestRun(self):
         super(StreamToDict, self).stopTestRun()
         while self._inprogress:
             case = self._inprogress.popitem()[1]
-            case['timestamps'][1] = None
-            self.on_test(case)
+            case = case.set(timestamps=(case.timestamps[0], None))
+            self.on_test(case.to_dict())
 
     def _ensure_key(self, test_id, route_code, timestamp):
         if test_id is None:
