@@ -31,7 +31,7 @@ from extras import safe_hasattr, try_import, try_imports
 parse_mime_type = try_import('mimeparse.parse_mime_type')
 Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
-from pyrsistent import PRecord, field, pmap_field, pset_field, pmap, pset, thaw
+from pyrsistent import PClass, field, pmap_field, pset_field, pmap, pset, thaw
 
 from testtools.compat import str_is_unicode, _u, _b
 from testtools.content import (
@@ -621,7 +621,7 @@ class StreamTagger(CopyStreamResult):
         super(StreamTagger, self).status(*args, **kwargs)
 
 
-class TestRecord(PRecord):
+class TestRecord(PClass):
     """Representation of a test."""
 
     """The test id."""
