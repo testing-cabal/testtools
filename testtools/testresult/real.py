@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
 """Test results and related things."""
 
@@ -385,8 +385,9 @@ class StreamResult(object):
         """
 
 
-def domap(*args, **kwargs):
-    return list(map(*args, **kwargs))
+def strict_map(f, xs):
+    """A version of 'map' that's guaranteed to run on all inputs."""
+    return list(map(f, xs))
 
 
 class CopyStreamResult(StreamResult):
@@ -403,15 +404,15 @@ class CopyStreamResult(StreamResult):
 
     def startTestRun(self):
         super(CopyStreamResult, self).startTestRun()
-        domap(methodcaller('startTestRun'), self.targets)
+        strict_map(methodcaller('startTestRun'), self.targets)
 
     def stopTestRun(self):
         super(CopyStreamResult, self).stopTestRun()
-        domap(methodcaller('stopTestRun'), self.targets)
+        strict_map(methodcaller('stopTestRun'), self.targets)
 
     def status(self, *args, **kwargs):
         super(CopyStreamResult, self).status(*args, **kwargs)
-        domap(methodcaller('status', *args, **kwargs), self.targets)
+        strict_map(methodcaller('status', *args, **kwargs), self.targets)
 
 
 class StreamFailFast(StreamResult):
