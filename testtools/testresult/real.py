@@ -731,7 +731,7 @@ class StreamToDict(StreamResult):
         if test_tags is not None:
             self._inprogress[key]['tags'] = test_tags
         # notify completed tests.
-        if test_status not in (None, 'inprogress'):
+        if test_status not in INTERIM_STATES:
             self.on_test(self._inprogress.pop(key))
 
     def stopTestRun(self):
