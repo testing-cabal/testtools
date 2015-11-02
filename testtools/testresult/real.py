@@ -909,7 +909,7 @@ class StreamToDict(StreamResult):
         self._streamer.stopTestRun()
 
 
-class StreamSummary(StreamToDict):
+class StreamSummary(StreamResult):
     """A specialised StreamResult that summarises a stream.
 
     The summary uses the same representation as the original
@@ -918,7 +918,8 @@ class StreamSummary(StreamToDict):
     """
 
     def __init__(self):
-        super(StreamSummary, self).__init__(self._gather_test)
+        super(StreamSummary, self).__init__()
+        self._streamer = StreamToDict(self._gather_test)
         self._handle_status = {
             'success': self._success,
             'skip': self._skip,
@@ -938,6 +939,15 @@ class StreamSummary(StreamToDict):
         self.skipped = []
         self.expectedFailures = []
         self.unexpectedSuccesses = []
+        self._streamer.startTestRun()
+
+    def status(self, *args, **kwargs):
+        super(StreamSummary, self).status(*args, **kwargs)
+        self._streamer.status(*args, **kwargs)
+
+    def stopTestRun(self):
+        super(StreamSummary, self).stopTestRun()
+        self._streamer.stopTestRun()
 
     def wasSuccessful(self):
         """Return False if any failure has occured.
