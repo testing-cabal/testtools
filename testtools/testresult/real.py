@@ -900,7 +900,7 @@ class StreamToDict(StreamResult):
             a ``TestRecord`` object describing a test.
         """
         super(StreamToDict, self).__init__()
-        self._streamer = StreamToTestRecord(self._handle_test)
+        self._hook = StreamToTestRecord(self._handle_test)
         # XXX: Not clear whether its part of the supported interface for
         # self.on_test to be the passed-in on_test. If not, we could reduce
         # the boilerplate by subclassing StreamToTestRecord.
@@ -911,15 +911,15 @@ class StreamToDict(StreamResult):
 
     def startTestRun(self):
         super(StreamToDict, self).startTestRun()
-        self._streamer.startTestRun()
+        self._hook.startTestRun()
 
     def status(self, *args, **kwargs):
         super(StreamToDict, self).status(*args, **kwargs)
-        self._streamer.status(*args, **kwargs)
+        self._hook.status(*args, **kwargs)
 
     def stopTestRun(self):
         super(StreamToDict, self).stopTestRun()
-        self._streamer.stopTestRun()
+        self._hook.stopTestRun()
 
 
 class StreamSummary(StreamResult):
@@ -932,7 +932,7 @@ class StreamSummary(StreamResult):
 
     def __init__(self):
         super(StreamSummary, self).__init__()
-        self._streamer = StreamToDict(self._gather_test)
+        self._hook = StreamToDict(self._gather_test)
         self._handle_status = {
             'success': self._success,
             'skip': self._skip,
@@ -952,15 +952,15 @@ class StreamSummary(StreamResult):
         self.skipped = []
         self.expectedFailures = []
         self.unexpectedSuccesses = []
-        self._streamer.startTestRun()
+        self._hook.startTestRun()
 
     def status(self, *args, **kwargs):
         super(StreamSummary, self).status(*args, **kwargs)
-        self._streamer.status(*args, **kwargs)
+        self._hook.status(*args, **kwargs)
 
     def stopTestRun(self):
         super(StreamSummary, self).stopTestRun()
-        self._streamer.stopTestRun()
+        self._hook.stopTestRun()
 
     def wasSuccessful(self):
         """Return False if any failure has occured.
