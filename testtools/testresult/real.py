@@ -753,20 +753,19 @@ class StreamToDict(StreamResult):
             test_tags=test_tags, runnable=runnable, file_name=file_name,
             file_bytes=file_bytes, eof=eof, mime_type=mime_type,
             route_code=route_code, timestamp=timestamp)
+
         key = self._ensure_key(test_id, route_code, timestamp)
-        # update fields
         if not key:
             return
-        case = self._inprogress[key]
+
+        # update fields
         self._inprogress[key] = self._update_case(
-            case, test_status, test_tags, file_name, file_bytes,
-            mime_type, timestamp)
+            self._inprogress[key], test_status, test_tags, file_name,
+            file_bytes, mime_type, timestamp)
+
         # notify completed tests.
         if test_status not in INTERIM_STATES:
-            # XXX: This isn't actually desirable end-state code, but I just
-            # want to verify that we are re-using this correctly.
-            case = self._inprogress.pop(key)
-            self.on_test(case.to_dict())
+            self.on_test(self._inprogress.pop(key).to_dict())
 
     def _update_case(self, case, test_status=None, test_tags=None,
                      file_name=None, file_bytes=None, mime_type=None,
