@@ -700,20 +700,7 @@ class StreamToDict(StreamResult):
         case['timestamps'][1] = timestamp
         if file_name is not None:
             if file_name not in case['details']:
-
-                if mime_type is None:
-                    mime_type = 'application/octet-stream'
-
-                primary, sub, parameters = parse_mime_type(mime_type)
-                if 'charset' in parameters:
-                    if ',' in parameters['charset']:
-                        # testtools was emitting a bad encoding, workaround it,
-                        # Though this does lose data - probably want to drop
-                        # this in a few releases.
-                        parameters['charset'] = parameters['charset'][
-                            :parameters['charset'].find(',')]
-
-                content_type = ContentType(primary, sub, parameters)
+                content_type = _make_content_type(mime_type)
                 content_bytes = []
                 case['details'][file_name] = Content(
                     content_type, lambda: content_bytes)
@@ -748,6 +735,27 @@ class StreamToDict(StreamResult):
                 'status': 'unknown',
                 'timestamps': [timestamp, None]}
         return key
+
+
+def _make_content_type(mime_type=None):
+    """Return ContentType for a given mime type.
+
+    testtools was emitting a bad encoding, and this works around it.
+    Unfortunately, is also loses data - probably want to drop this in a few
+    releases.
+    """
+    # XXX: Not sure what release this was added, so "in a few releases" is
+    # unactionable.
+    if mime_type is None:
+        mime_type = 'application/octet-stream'
+
+    primary, sub, parameters = parse_mime_type(mime_type)
+    if 'charset' in parameters:
+        if ',' in parameters['charset']:
+            parameters['charset'] = parameters['charset'][
+                :parameters['charset'].find(',')]
+
+    return ContentType(primary, sub, parameters)
 
 
 _status_map = {
