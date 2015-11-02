@@ -2,7 +2,6 @@
 
 """Test results and related things."""
 
-__metaclass__ = type
 __all__ = [
     'ExtendedToOriginalDecorator',
     'ExtendedToStreamDecorator',
