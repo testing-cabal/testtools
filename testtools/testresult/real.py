@@ -384,9 +384,9 @@ class StreamResult(object):
         """
 
 
-def strict_map(f, xs):
+def strict_map(function, items):
     """A version of 'map' that's guaranteed to run on all inputs."""
-    return list(map(f, xs))
+    return list(map(function, items))
 
 
 class CopyStreamResult(StreamResult):
