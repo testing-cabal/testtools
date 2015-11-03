@@ -37,7 +37,7 @@ matrix:
       env: SPHINX="<1.3"
 
 install:
-  - pip install fixtures $JINJA_REQ sphinx$SPHINX $TWISTED_REQ
+  - pip install fixtures $JINJA_REQ sphinx$SPHINX pyrsistent $TWISTED_REQ
   - python setup.py install
 
 script:
