@@ -33,7 +33,7 @@ Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
 from pyrsistent import PClass, field, pmap_field, pset_field, pmap, pset, thaw
 
-from testtools.compat import str_is_unicode, _u, _b
+from testtools.compat import str_is_unicode, text_or_bytes, _u, _b
 from testtools.content import (
     Content,
     text_content,
@@ -625,18 +625,18 @@ class TestRecord(PClass):
     """Representation of a test."""
 
     """The test id."""
-    id = field((str, unicode), mandatory=True)
+    id = field(text_or_bytes, mandatory=True)
 
     """Tags for the test."""
-    tags = pset_field((str, unicode), optional=False)
+    tags = pset_field(text_or_bytes, optional=False)
 
     """File attachments."""
     # XXX: Documentation says these are unicode, but tests pass in str.
-    details = pmap_field((str, unicode), Content, optional=False)
+    details = pmap_field(text_or_bytes, Content, optional=False)
 
     """One of the StreamResult status codes."""
     status = field(
-        (str, unicode), mandatory=True,
+        text_or_bytes, mandatory=True,
         invariant=lambda x: (x in STATES, 'Invalid state'))
 
     """Pair of timestamps (x, y).
