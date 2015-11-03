@@ -278,7 +278,7 @@ class TestResult(unittest.TestResult):
   running and at any intermediary point they might choose to indicate their
   continual operation.
 """
-INTERIM_STATES = frozenset({None, 'inprogress'})
+INTERIM_STATES = frozenset([None, 'inprogress'])
 
 """Final states:
 
@@ -303,7 +303,7 @@ INTERIM_STATES = frozenset({None, 'inprogress'})
 * unknown - we don't know what state the test is in
 """
 FINAL_STATES = frozenset(
-    {'exists', 'xfail', 'uxsuccess', 'success', 'fail', 'skip', 'unknown'})
+    ['exists', 'xfail', 'uxsuccess', 'success', 'fail', 'skip', 'unknown'])
 
 
 STATES = INTERIM_STATES | FINAL_STATES
