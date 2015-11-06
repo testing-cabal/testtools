@@ -26,6 +26,7 @@ import math
 from operator import methodcaller
 import sys
 import unittest
+import warnings
 
 from extras import safe_hasattr, try_import, try_imports
 parse_mime_type = try_import('mimeparse.parse_mime_type')
@@ -384,9 +385,21 @@ class StreamResult(object):
         """
 
 
-def strict_map(function, items):
-    """A version of 'map' that's guaranteed to run on all inputs."""
-    return list(map(function, items))
+def domap(function, *sequences):
+    """A strict version of 'map' that's guaranteed to run on all inputs.
+
+    DEPRECATED since testtools 1.8.1: Internal code should use _strict_map.
+    External code should look for other solutions for their strict mapping
+    needs.
+    """
+    warnings.warn(
+        "domap deprecated since 1.8.1. Please implement your own strict map.",
+        DeprecationWarning, stacklevel=2)
+    return _strict_map(function, *sequences)
+
+
+def _strict_map(function, *sequences):
+    return list(map(function, *sequences))
 
 
 class CopyStreamResult(StreamResult):
@@ -403,15 +416,15 @@ class CopyStreamResult(StreamResult):
 
     def startTestRun(self):
         super(CopyStreamResult, self).startTestRun()
-        strict_map(methodcaller('startTestRun'), self.targets)
+        _strict_map(methodcaller('startTestRun'), self.targets)
 
     def stopTestRun(self):
         super(CopyStreamResult, self).stopTestRun()
-        strict_map(methodcaller('stopTestRun'), self.targets)
+        _strict_map(methodcaller('stopTestRun'), self.targets)
 
     def status(self, *args, **kwargs):
         super(CopyStreamResult, self).status(*args, **kwargs)
-        strict_map(methodcaller('status', *args, **kwargs), self.targets)
+        _strict_map(methodcaller('status', *args, **kwargs), self.targets)
 
 
 class StreamFailFast(StreamResult):
