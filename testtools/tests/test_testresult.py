@@ -224,14 +224,11 @@ class Python27Contract(Python26Contract):
     def test_failfast(self):
         result = self.makeResult()
         result.failfast = True
-
         class Failing(TestCase):
             def test_a(self):
                 self.fail('a')
-
             def test_b(self):
                 self.fail('b')
-
         TestSuite([Failing('test_a'), Failing('test_b')]).run(result)
         self.assertEqual(1, result.testsRun)
 
