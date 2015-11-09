@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2010 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
 """Doubles of test result objects, useful for testing unittest code."""
 
@@ -16,8 +16,10 @@ from testtools.tags import TagContext
 class LoggingBase(object):
     """Basic support for logging of results."""
 
-    def __init__(self):
-        self._events = []
+    def __init__(self, event_log=None):
+        if event_log is None:
+            event_log = []
+        self._events = event_log
         self.shouldStop = False
         self._was_successful = True
         self.testsRun = 0
@@ -54,8 +56,8 @@ class Python26TestResult(LoggingBase):
 class Python27TestResult(Python26TestResult):
     """A precisely python 2.7 like test result, that logs."""
 
-    def __init__(self):
-        super(Python27TestResult, self).__init__()
+    def __init__(self, event_log=None):
+        super(Python27TestResult, self).__init__(event_log)
         self.failfast = False
 
     def addError(self, test, err):
@@ -89,8 +91,8 @@ class Python27TestResult(Python26TestResult):
 class ExtendedTestResult(Python27TestResult):
     """A test result like the proposed extended unittest result API."""
 
-    def __init__(self):
-        super(ExtendedTestResult, self).__init__()
+    def __init__(self, event_log=None):
+        super(ExtendedTestResult, self).__init__(event_log)
         self._tags = TagContext()
 
     def addError(self, test, err=None, details=None):
@@ -157,8 +159,10 @@ class StreamResult(object):
     All events are logged to _events.
     """
 
-    def __init__(self):
-        self._events = []
+    def __init__(self, event_log=None):
+        if event_log is None:
+            event_log = []
+        self._events = event_log
 
     def startTestRun(self):
         self._events.append(('startTestRun',))
@@ -167,8 +171,9 @@ class StreamResult(object):
         self._events.append(('stopTestRun',))
 
     def status(self, test_id=None, test_status=None, test_tags=None,
-        runnable=True, file_name=None, file_bytes=None, eof=False,
-        mime_type=None, route_code=None, timestamp=None):
-        self._events.append(('status', test_id, test_status, test_tags,
-            runnable, file_name, file_bytes, eof, mime_type, route_code,
-            timestamp))
+               runnable=True, file_name=None, file_bytes=None, eof=False,
+               mime_type=None, route_code=None, timestamp=None):
+        self._events.append(
+            ('status', test_id, test_status, test_tags,
+             runnable, file_name, file_bytes, eof, mime_type, route_code,
+             timestamp))

@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
 """Test TestResults and related things."""
 
@@ -15,7 +15,6 @@ import sys
 import tempfile
 import threading
 from unittest import TestSuite
-import warnings
 
 from extras import safe_hasattr, try_imports
 
@@ -520,8 +519,15 @@ class TestStreamResultContract(object):
         result.startTestRun()
         self.addCleanup(result.stopTestRun)
         now = datetime.datetime.now(utc)
-        args = [[_u("foo"), s] for s in ['exists', 'inprogress', 'xfail',
-            'uxsuccess', 'success', 'fail', 'skip']]
+        args = [[_u("foo"), s] for s in [
+            'exists',
+            'inprogress',
+            'xfail',
+            'uxsuccess',
+            'success',
+            'fail',
+            'skip',
+        ]]
         inputs = list(dict(
             runnable=False,
             test_tags=set(['quux']),
@@ -537,7 +543,8 @@ class TestStreamResultContract(object):
         "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
         s = list(iterable)
         param_dicts = []
-        for ss in chain.from_iterable(combinations(s, r) for r in range(len(s)+1)):
+        combos = (combinations(s, r) for r in range(len(s) + 1))
+        for ss in chain.from_iterable(combos):
             param_dicts.append(dict(ss))
         return param_dicts
 
