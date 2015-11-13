@@ -4,15 +4,18 @@ testtools NEWS
 Changes and improvements to testtools_, grouped by release.
 
 
-NEXT
-~~~~
+1.8.1
+~~~~~
 
 Improvements
 ------------
 
 * Documented more explicitly how to build and install testtools in the hacking
   documentation. (Thomi Richards)
-  
+
+* ``deferredruntest`` now works with Twisted 15.1.0 and later.
+  (Colin Watson, #1488710)
+
 1.8.0
 ~~~~~
 
