@@ -639,6 +639,8 @@ class TestCase(unittest.TestCase):
                 "super(%s, self).tearDown() from your tearDown()."
                 % (sys.modules[self.__class__.__module__].__file__,
                    self.__class__.__name__))
+        self.__setup_called = False
+        self.__teardown_called = False
         return ret
 
     def _get_test_method(self):

@@ -1265,6 +1265,18 @@ class TestSetupTearDown(TestCase):
                 "...ValueError...File...testtools/tests/test_testcase.py...",
                 ELLIPSIS))
 
+    def test_runTwice(self):
+        # Tests can be run twice.
+        class NormalTest(TestCase):
+            def test_method(self):
+                pass
+        test = NormalTest('test_method')
+        result = unittest.TestResult()
+        test.run(result)
+        test.run(result)
+        self.expectThat(result.errors, HasLength(0))
+        self.assertThat(result.testsRun, Equals(2))
+
 
 require_py27_minimum = skipIf(
     sys.version < '2.7',
