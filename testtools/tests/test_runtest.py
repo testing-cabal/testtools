@@ -72,9 +72,9 @@ class TestRunTest(TestCase):
         class Case(TestCase):
             def test(self):
                 raise KeyboardInterrupt("go")
-            def tearDown(self):
+            def _run_teardown(self, result):
                 tearDownRuns.append(self)
-                super(Case, self).tearDown()
+                return super(Case, self)._run_teardown(result)
         case = Case('test')
         run = RunTest(case)
         run.result = ExtendedTestResult()
