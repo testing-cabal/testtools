@@ -29,10 +29,13 @@ from testtools.content import (
     TracebackContent,
     )
 from testtools.matchers import (
+    AfterPreprocessing,
+    AllMatch,
     Annotate,
     DocTestMatches,
     Equals,
     HasLength,
+    MatchesAll,
     MatchesException,
     Raises,
     )
@@ -1276,6 +1279,33 @@ class TestSetupTearDown(TestCase):
         test.run(result)
         self.expectThat(result.errors, HasLength(0))
         self.assertThat(result.testsRun, Equals(2))
+
+    def test_runTwiceTearDownFailure(self):
+        # Tests can be run twice, even if tearDown fails.
+        class NormalTest(TestCase):
+            def test_method(self):
+                pass
+            def tearDown(self):
+                super(NormalTest, self).tearDown()
+                1/0
+        test = NormalTest('test_method')
+        result = unittest.TestResult()
+        test.run(result)
+        # We don't want the errors of the first test to appear in the last
+        # test.
+        test.getDetails().clear()
+        test.run(result)
+        self.expectThat(result.testsRun, Equals(2))
+        # We have code that discourages people from calling setUp()
+        # explicitly. Here we make sure that this code is not being activated
+        # when we run a test twice.
+        def count_tracebacks(exception):
+            """Number of tracebacks in exception."""
+            return str(exception).count('Traceback (most recent call last):')
+        self.assertThat(
+            [e[1] for e in result.errors],
+            AllMatch(
+                MatchesAll(AfterPreprocessing(count_tracebacks, Equals(1)))))
 
 
 require_py27_minimum = skipIf(

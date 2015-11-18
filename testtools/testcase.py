@@ -630,18 +630,19 @@ class TestCase(unittest.TestCase):
         :raises ValueError: If the base class tearDown is not called, a
             ValueError is raised.
         """
-        ret = self.tearDown()
-        if not self.__teardown_called:
-            raise ValueError(
-                "In File: %s\n"
-                "TestCase.tearDown was not called. Have you upcalled all the "
-                "way up the hierarchy from your tearDown? e.g. Call "
-                "super(%s, self).tearDown() from your tearDown()."
-                % (sys.modules[self.__class__.__module__].__file__,
-                   self.__class__.__name__))
-        self.__setup_called = False
-        self.__teardown_called = False
-        return ret
+        try:
+            return self.tearDown()
+        finally:
+            if not self.__teardown_called:
+                raise ValueError(
+                    "In File: %s\n"
+                    "TestCase.tearDown was not called. Have you upcalled all the "
+                    "way up the hierarchy from your tearDown? e.g. Call "
+                    "super(%s, self).tearDown() from your tearDown()."
+                    % (sys.modules[self.__class__.__module__].__file__,
+                       self.__class__.__name__))
+            self.__setup_called = False
+            self.__teardown_called = False
 
     def _get_test_method(self):
         method_name = getattr(self, '_testMethodName')
