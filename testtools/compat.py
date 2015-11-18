@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
 """Compatibility support for python 2 and 3."""
 
@@ -14,6 +14,7 @@ __all__ = [
     'StringIO',
     'reraise',
     'unicode_output_stream',
+    'text_or_bytes',
     ]
 
 import codecs
@@ -66,6 +67,7 @@ if sys.version_info > (3, 0):
     def classtypes():
         return (type,)
     str_is_unicode = True
+    text_or_bytes = (str, bytes)
 else:
     import __builtin__ as builtins
     def _u(s):
@@ -83,6 +85,7 @@ else:
         import types
         return (type, types.ClassType)
     str_is_unicode = sys.platform == "cli"
+    text_or_bytes = (unicode, str)
 
 _u.__doc__ = __u_doc
 
