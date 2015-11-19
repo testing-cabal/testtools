@@ -26,6 +26,7 @@ from extras import (
     try_import,
     try_imports,
     )
+fixtures = try_import('fixtures')
 # To let setup.py work, make this a conditional import.
 unittest = try_imports(['unittest2', 'unittest'])
 
@@ -49,7 +50,10 @@ from testtools.matchers import (
     )
 from testtools.matchers._basic import _FlippedEquals
 from testtools.monkey import patch
-from testtools.runtest import RunTest
+from testtools.runtest import (
+    MultipleExceptions,
+    RunTest,
+    )
 from testtools.testresult import (
     ExtendedToOriginalDecorator,
     TestResult,
@@ -680,10 +684,22 @@ class TestCase(unittest.TestCase):
         """
         try:
             fixture.setUp()
+        except MultipleExceptions as e:
+            if (fixtures is not None and
+                    e.args[-1][0] is fixtures.fixture.SetupError):
+                gather_details(e.args[-1][1].args[0], self.getDetails())
+            raise
         except:
             exc_info = sys.exc_info()
             try:
-                gather_details(fixture.getDetails(), self.getDetails())
+                # fixture._details is not available if using the newer
+                # _setUp() API in Fixtures because it already cleaned up
+                # the fixture.  Ideally this whole try/except is not
+                # really needed any more, however, we keep this code to
+                # remain compatible with the older setUp().
+                if (safe_hasattr(fixture, '_details') and
+                        fixture._details is not None):
+                    gather_details(fixture.getDetails(), self.getDetails())
             except:
                 # Report the setUp exception, then raise the error during
                 # gather_details.
