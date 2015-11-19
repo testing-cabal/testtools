@@ -113,6 +113,31 @@ class TestFixtureSupport(TestCase):
         self.assertEqual(['content', 'traceback'], sorted(details))
         self.assertEqual('foobar', ''.join(details['content'].iter_text()))
 
+    def test_useFixture_details_captured_from__setUp(self):
+        # Newer Fixtures deprecates setUp() in favour of _setUp().
+        # https://bugs.launchpad.net/testtools/+bug/1469759 reports that
+        # this is broken when gathering details from a broken _setUp().
+        class BrokenFixture(fixtures.Fixture):
+            def _setUp(self):
+                fixtures.Fixture._setUp(self)
+                self.addDetail('content', content.text_content("foobar"))
+                raise Exception("_setUp broke")
+        fixture = BrokenFixture()
+        class SimpleTest(TestCase):
+            def test_foo(self):
+                self.useFixture(fixture)
+        result = ExtendedTestResult()
+        SimpleTest('test_foo').run(result)
+        self.assertEqual('addError', result._events[-2][0])
+        details = result._events[-2][2]
+        self.assertEqual(['traceback', 'traceback-1'], sorted(details))
+        self.assertThat(
+            ''.join(details['traceback'].iter_text()),
+            Contains('_setUp broke'))
+        self.assertThat(
+            ''.join(details['traceback-1'].iter_text()),
+            Contains('foobar'))
+
     def test_useFixture_original_exception_raised_if_gather_details_fails(self):
         # In bug #1368440 it was reported that when a fixture fails setUp
         # and gather_details errors on it, then the original exception that
