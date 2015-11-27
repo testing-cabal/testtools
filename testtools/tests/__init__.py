@@ -2,8 +2,9 @@
 
 """Tests for testtools itself."""
 
-
 from unittest import TestSuite
+
+import testscenarios
 
 
 def test_suite():
@@ -48,4 +49,5 @@ def test_suite():
         test_with_with,
         ]
     suites = map(lambda x: x.test_suite(), modules)
-    return TestSuite(suites)
+    all_tests = TestSuite(suites)
+    return TestSuite(testscenarios.generate_scenarios(all_tests))

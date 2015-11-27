@@ -37,8 +37,9 @@ matrix:
       env: SPHINX="<1.3"
 
 install:
-  - pip install fixtures $JINJA_REQ sphinx$SPHINX $TWISTED_REQ
-  - python setup.py install
+  - pip install -U pip wheel setuptools
+  - pip install $JINJA_REQ sphinx$SPHINX $TWISTED_REQ
+  - pip install .[test]
 
 script:
   - python -m testtools.run testtools.tests.test_suite
