@@ -54,6 +54,7 @@ from testtools.tests.helpers import (
     FullStackRunTest,
     LoggingResult,
     )
+from testtools.tests.samplecases import all_sample_cases_scenarios
 
 
 class TestPlaceHolder(TestCase):
@@ -1277,19 +1278,21 @@ class TestRunTwice(TestCase):
     # 'run_tests_with'.
     run_tests_with = FullStackRunTest
 
+    scenarios = all_sample_cases_scenarios
+
     def test_runTwice(self):
-        # Tests can be run twice.
-        class NormalTest(TestCase):
-            def test_method(self):
-                pass
-        test = NormalTest('test_method')
-        result = unittest.TestResult()
-        test.run(result)
-        test.run(result)
-        self.expectThat(result.errors, HasLength(0))
-        self.assertThat(result.testsRun, Equals(2))
+        # Tests that are intrinsically determistic can be run twice and
+        # produce exactly the same results each time, without need for
+        # explicit resetting or reconstruction.
+        test = self.case
+        first_result = ExtendedTestResult()
+        test.run(first_result)
+        second_result = ExtendedTestResult()
+        test.run(second_result)
+        self.assertEqual(first_result._events, second_result._events)
 
     def test_runTwiceTearDownFailure(self):
+        # XXX: jml: you should move this into _samplecases.
         # Tests can be run twice, even if tearDown fails.
         class NormalTest(TestCase):
             def test_method(self):
