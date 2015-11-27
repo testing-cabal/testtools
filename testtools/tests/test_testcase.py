@@ -1268,6 +1268,15 @@ class TestSetupTearDown(TestCase):
                 "...ValueError...File...testtools/tests/test_testcase.py...",
                 ELLIPSIS))
 
+
+class TestRunTwice(TestCase):
+    """Can we run the same test case twice?"""
+
+    # XXX: Reviewer, please note that all of the other test cases in this
+    # module are doing this wrong, saying 'run_test_with' instead of
+    # 'run_tests_with'.
+    run_tests_with = FullStackRunTest
+
     def test_runTwice(self):
         # Tests can be run twice.
         class NormalTest(TestCase):
