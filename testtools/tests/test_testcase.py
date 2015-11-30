@@ -1291,34 +1291,6 @@ class TestRunTwice(TestCase):
         test.run(second_result)
         self.assertEqual(first_result._events, second_result._events)
 
-    def test_runTwiceTearDownFailure(self):
-        # XXX: jml: you should move this into _samplecases.
-        # Tests can be run twice, even if tearDown fails.
-        class NormalTest(TestCase):
-            def test_method(self):
-                pass
-            def tearDown(self):
-                super(NormalTest, self).tearDown()
-                1/0
-        test = NormalTest('test_method')
-        result = unittest.TestResult()
-        test.run(result)
-        # We don't want the errors of the first test to appear in the last
-        # test.
-        test.getDetails().clear()
-        test.run(result)
-        self.expectThat(result.testsRun, Equals(2))
-        # We have code that discourages people from calling setUp()
-        # explicitly. Here we make sure that this code is not being activated
-        # when we run a test twice.
-        def count_tracebacks(exception):
-            """Number of tracebacks in exception."""
-            return str(exception).count('Traceback (most recent call last):')
-        self.assertThat(
-            [e[1] for e in result.errors],
-            AllMatch(
-                MatchesAll(AfterPreprocessing(count_tracebacks, Equals(1)))))
-
 
 require_py27_minimum = skipIf(
     sys.version < '2.7',
