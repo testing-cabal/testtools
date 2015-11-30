@@ -54,7 +54,10 @@ from testtools.tests.helpers import (
     FullStackRunTest,
     LoggingResult,
     )
-from testtools.tests.samplecases import deterministic_sample_cases_scenarios
+from testtools.tests.samplecases import (
+    deterministic_sample_cases_scenarios,
+    nondeterministic_sample_cases_scenarios,
+)
 
 
 class TestPlaceHolder(TestCase):
@@ -1270,7 +1273,7 @@ class TestSetupTearDown(TestCase):
                 ELLIPSIS))
 
 
-class TestRunTwice(TestCase):
+class TestRunTwiceDeterminstic(TestCase):
     """Can we run the same test case twice?"""
 
     # XXX: Reviewer, please note that all of the other test cases in this
@@ -1290,6 +1293,29 @@ class TestRunTwice(TestCase):
         second_result = ExtendedTestResult()
         test.run(second_result)
         self.assertEqual(first_result._events, second_result._events)
+
+
+class TestRunTwiceNondeterministic(TestCase):
+    """Can we run the same test case twice?
+
+    Separate suite for non-deterministic tests, which require more complicated
+    assertions and scenarios.
+    """
+
+    run_tests_with = FullStackRunTest
+
+    scenarios = nondeterministic_sample_cases_scenarios
+
+    def test_runTwice(self):
+        test = self.case
+        first_result = ExtendedTestResult()
+        test.run(first_result)
+        second_result = ExtendedTestResult()
+        test.run(second_result)
+        self.expectThat(
+            first_result._events, self.expected_first_result)
+        self.assertThat(
+            second_result._events, self.expected_second_result)
 
 
 require_py27_minimum = skipIf(
