@@ -32,10 +32,10 @@ class _TearDownFails(TestCase):
 
 
 """
-A list that can be used with testscenarios to test every kind of sample
+A list that can be used with testscenarios to test every deterministic sample
 case that we have.
 """
-all_sample_cases_scenarios = [
+deterministic_sample_cases_scenarios = [
     ('simple-success-test', {'case': _NormalTest('test_success')}),
     ('simple-error-test', {'case': _NormalTest('test_error')}),
     ('simple-failure-test', {'case': _NormalTest('test_failure')}),

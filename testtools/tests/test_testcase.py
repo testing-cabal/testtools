@@ -54,7 +54,7 @@ from testtools.tests.helpers import (
     FullStackRunTest,
     LoggingResult,
     )
-from testtools.tests.samplecases import all_sample_cases_scenarios
+from testtools.tests.samplecases import deterministic_sample_cases_scenarios
 
 
 class TestPlaceHolder(TestCase):
@@ -1278,7 +1278,7 @@ class TestRunTwice(TestCase):
     # 'run_tests_with'.
     run_tests_with = FullStackRunTest
 
-    scenarios = all_sample_cases_scenarios
+    scenarios = deterministic_sample_cases_scenarios
 
     def test_runTwice(self):
         # Tests that are intrinsically determistic can be run twice and
