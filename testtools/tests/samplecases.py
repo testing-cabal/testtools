@@ -42,7 +42,8 @@ class _SetUpFailsOnGlobalState(TestCase):
     """Fail to upcall setUp on first run. Fail to upcall tearDown after.
 
     This simulates a test that fails to upcall in ``setUp`` if some global
-    state is broken, and fails to call ``tearDown`` at all.
+    state is broken, and fails to call ``tearDown`` when the global state
+    breaks but works after that.
     """
 
     first_run = True
