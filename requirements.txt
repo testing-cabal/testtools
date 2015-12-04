@@ -6,3 +6,4 @@ pyrsistent
 python-mimeparse
 unittest2>=1.0.0
 traceback2
+fixtures

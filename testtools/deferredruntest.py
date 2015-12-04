@@ -1,4 +1,4 @@
-# Copyright (c) 2010 testtools developers. See LICENSE for details.
+# Copyright (c) 2010-2015 testtools developers. See LICENSE for details.
 
 """Individual test case execution for tests that return Deferreds.
 
@@ -14,6 +14,8 @@ __all__ = [
     ]
 
 import sys
+
+from fixtures import Fixture
 
 from testtools.compat import StringIO
 from testtools.content import text_content
@@ -58,8 +60,13 @@ class SynchronousDeferredRunTest(_DeferredRunTest):
         return result
 
 
-def run_with_log_observers(observers, function, *args, **kwargs):
-    """Run 'function' with the given Twisted log observers."""
+def _get_global_publisher_and_observers():
+    """Return ``(log_publisher, observers)``.
+
+    Twisted 15.2.0 changed the logging framework. This method will always
+    return a tuple of the global log publisher and all observers associated
+    with that publisher.
+    """
     if globalLogPublisher is not None:
         # Twisted >= 15.2.0, with the new twisted.logger framework.
         # log.theLogPublisher.observers will only contain legacy observers;
@@ -69,21 +76,41 @@ def run_with_log_observers(observers, function, *args, **kwargs):
         # observers we want to run with via log.theLogPublisher, because
         # _LogObserver may consider old keys and require them to be mapped.
         publisher = globalLogPublisher
-        real_observers = list(publisher._observers)
+        return (publisher, list(publisher._observers))
     else:
         publisher = log.theLogPublisher
-        real_observers = list(publisher.observers)
-    for observer in real_observers:
-        publisher.removeObserver(observer)
+        return (publisher, list(publisher.observers))
+
+
+def _add_observers(publisher, observers):
     for observer in observers:
-        log.theLogPublisher.addObserver(observer)
-    try:
-        return function(*args, **kwargs)
-    finally:
+        publisher.addObserver(observer)
+
+
+def _remove_observers(publisher, observers):
+    for observer in observers:
+        publisher.removeObserver(observer)
+
+
+class NoTwistedLogObservers(Fixture):
+    """Completely but temporarily remove all Twisted log observers."""
+
+    def _setUp(self):
+        publisher, real_observers = _get_global_publisher_and_observers()
+        _remove_observers(publisher, real_observers)
+        self.addCleanup(_add_observers, publisher, real_observers)
+
+
+def run_with_log_observers(observers, function, *args, **kwargs):
+    """Run 'function' with the given Twisted log observers."""
+    with NoTwistedLogObservers():
         for observer in observers:
-            log.theLogPublisher.removeObserver(observer)
-        for observer in real_observers:
-            publisher.addObserver(observer)
+            log.theLogPublisher.addObserver(observer)
+        try:
+            return function(*args, **kwargs)
+        finally:
+            for observer in observers:
+                log.theLogPublisher.removeObserver(observer)
 
 
 # Observer of the Twisted log that we install during tests.
