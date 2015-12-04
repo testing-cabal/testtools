@@ -18,7 +18,8 @@ import sys
 from fixtures import Fixture
 
 from testtools.compat import StringIO
-from testtools.content import text_content
+from testtools.content import Content, text_content
+from testtools.content_type import UTF8_TEXT
 from testtools.runtest import RunTest
 from testtools._spinner import (
     extract_result,
@@ -148,6 +149,26 @@ class ErrorObserver(Fixture):
         :return: An iterable of errors removed from the logs.
         """
         return self._error_observer.flushErrors(*error_types)
+
+
+class CaptureTwistedLogs(Fixture):
+    """Capture all the Twisted logs and add them as a detail."""
+
+    def __init__(self):
+        super(CaptureTwistedLogs, self).__init__()
+        self._twisted_log = StringIO()
+
+    def _setUp(self):
+        full_observer = log.FileLogObserver(self._twisted_log)
+        self.useFixture(TwistedLogObservers([full_observer.emit]))
+        # XXX: This isn't actually *useful* yet because Fixture clears details
+        # when it exits a context manager (which is the only way we currently
+        # use it).
+        self.addCleanup(self.addDetail, 'twisted-log', self.get_twisted_log())
+
+    def get_twisted_log(self):
+        """Return the contents of the Twisted log."""
+        return Content(UTF8_TEXT, self._twisted_log.getvalue)
 
 
 def run_with_log_observers(observers, function, *args, **kwargs):
@@ -320,21 +341,24 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
             return False, []
 
     def _run_core(self):
-        # Add an observer to trap all logged errors.
+        # XXX: Blatting over the namespace of the test case isn't a nice thing
+        # to do. Find a better way of communicating between runtest and test
+        # case.
         self.case.reactor = self._reactor
-        error_observer = _log_observer
-        full_log = StringIO()
-        full_observer = log.FileLogObserver(full_log)
         spinner = self._make_spinner()
 
+        # XXX: jml: Review test coverage to see if this is sane.
         with NoTwistedLogObservers():
-            with ErrorObserver(error_observer) as error_fixture:
-                with TwistedLogObservers([full_observer.emit]):
+            with ErrorObserver(_log_observer) as error_fixture:
+                # XXX: jml: Maybe try self.case.useFixture(CaptureTwistedLogs())?
+                with CaptureTwistedLogs() as capture_logs:
                     successful, unhandled = self._blocking_run_deferred(
                         spinner)
 
+                # XXX: Duplicates the 'twisted-log' name from the fixture
+                # because Fixture clears details after the 'with' block.
                 self.case.addDetail(
-                    'twisted-log', text_content(full_log.getvalue()))
+                    'twisted-log', capture_logs.get_twisted_log())
 
             for logged_error in error_fixture.logged_errors:
                 successful = False
