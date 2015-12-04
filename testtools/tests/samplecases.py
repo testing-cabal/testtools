@@ -15,29 +15,38 @@ from testtools.matchers import (
 )
 
 
+def make_test_case(test_method_name, set_up=None, test_body=None,
+                   tear_down=None, cleanups=()):
+    """Make a test case with the given behaviors.
+
+    All callables are unary callables that receive this test as their argument.
+
+    :param str test_method_name: The name of the test method.
+    :param callable set_up: Implementation of setUp.
+    :param callable test_body: Implementation of the actual test. Will be
+        assigned to the test method.
+    :param callable tear_down: Implementation of tearDown.
+    :param cleanups: Iterable of callables that will be added as cleanups.
+
+    :return: A ``testtools.TestCase``.
+    """
+    set_up = set_up if set_up else _do_nothing
+    test_body = test_body if test_body else _do_nothing
+    tear_down = tear_down if tear_down else _do_nothing
+    return _ConstructedTest(
+        test_method_name, set_up, test_body, tear_down, cleanups)
+
+
 class _ConstructedTest(TestCase):
     """A test case where all of the stages."""
 
-    def __init__(self, test_method_name, set_up=None, test_body=None,
-                 tear_down=None, cleanups=()):
-        """Construct a ``_ConstructedTest``.
-
-        All callables are unary callables that receive this test as their
-        argument.
-
-        :param str test_method_name: The name of the test method.
-        :param callable set_up: Implementation of setUp.
-        :param callable test_body: Implementation of the actual test.
-            Will be assigned to the test method.
-        :param callable tear_down: Implementation of tearDown.
-        :param cleanups: Iterable of callables that will be added as
-            cleanups.
-        """
+    def __init__(self, test_method_name, set_up, test_body, tear_down,
+                 cleanups):
         setattr(self, test_method_name, test_body)
         super(_ConstructedTest, self).__init__(test_method_name)
-        self._set_up = set_up if set_up else _do_nothing
-        self._test_body = test_body if test_body else _do_nothing
-        self._tear_down = tear_down if tear_down else _do_nothing
+        self._set_up = set_up
+        self._test_body = test_body
+        self._tear_down = tear_down
         self._cleanups = cleanups
 
     def setUp(self):
@@ -155,22 +164,22 @@ case that we have.
 """
 deterministic_sample_cases_scenarios = [
     ('simple-success-test', {
-        'case': _ConstructedTest('test_success', test_body=_success)
+        'case': make_test_case('test_success', test_body=_success)
     }),
     ('simple-error-test', {
-        'case': _ConstructedTest('test_error', test_body=_error)
+        'case': make_test_case('test_error', test_body=_error)
     }),
     ('simple-failure-test', {
-        'case': _ConstructedTest('test_failure', test_body=_failure)
+        'case': make_test_case('test_failure', test_body=_failure)
     }),
     ('simple-expected-failure-test', {
-        'case': _ConstructedTest('test_failure', test_body=_expected_failure)
+        'case': make_test_case('test_failure', test_body=_expected_failure)
     }),
     ('simple-unexpected-success-test', {
-        'case': _ConstructedTest('test_failure', test_body=_unexpected_success)
+        'case': make_test_case('test_failure', test_body=_unexpected_success)
     }),
     ('simple-skip-test', {
-        'case': _ConstructedTest('test_failure', test_body=_skip)
+        'case': make_test_case('test_failure', test_body=_skip)
     }),
     ('teardown-fails', {'case': _TearDownFails('test_success')}),
 ]
