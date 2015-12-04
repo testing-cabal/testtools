@@ -101,16 +101,25 @@ class NoTwistedLogObservers(Fixture):
         self.addCleanup(_add_observers, publisher, real_observers)
 
 
+class TwistedLogObservers(Fixture):
+    """Temporarily add Twisted log observers."""
+
+    def __init__(self, observers):
+        super(TwistedLogObservers, self).__init__()
+        self._observers = observers
+        self._log_publisher = log.theLogPublisher
+
+    def _setUp(self):
+        for observer in self._observers:
+            self._log_publisher.addObserver(observer)
+            self.addCleanup(self._log_publisher.removeObserver, observer)
+
+
 def run_with_log_observers(observers, function, *args, **kwargs):
     """Run 'function' with the given Twisted log observers."""
     with NoTwistedLogObservers():
-        for observer in observers:
-            log.theLogPublisher.addObserver(observer)
-        try:
+        with TwistedLogObservers(observers):
             return function(*args, **kwargs)
-        finally:
-            for observer in observers:
-                log.theLogPublisher.removeObserver(observer)
 
 
 # Observer of the Twisted log that we install during tests.
