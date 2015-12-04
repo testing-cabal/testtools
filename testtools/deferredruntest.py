@@ -138,9 +138,16 @@ class ErrorObserver(Fixture):
         self.addCleanup(self._store_logged_errors)
 
     def _store_logged_errors(self):
-        self.logged_errors = self._error_observer.flushErrors()
+        self.logged_errors = self.flush_logged_errors()
 
-    # XXX: Add flush_logged errors
+    def flush_logged_errors(self, *error_types):
+        """Clear errors of the given types from the logs.
+
+        If no errors provided, clear all errors.
+
+        :return: An iterable of errors removed from the logs.
+        """
+        return self._error_observer.flushErrors(*error_types)
 
 
 def run_with_log_observers(observers, function, *args, **kwargs):
@@ -157,6 +164,14 @@ def run_with_log_observers(observers, function, *args, **kwargs):
 # test cases.
 _log_observer = _LogObserver()
 
+
+def flush_logged_errors(*error_types):
+    # XXX: I would like to deprecate this in favour of
+    # ErrorObserver.flush_logged_errors so that I can avoid mutable global
+    # state. However, I don't know how to make the correct instance of
+    # ErrorObserver.flush_logged_errors available to the end user. I also
+    # don't yet have a clear deprecation/migration path.
+    return _log_observer.flushErrors(*error_types)
 
 
 class AsynchronousDeferredRunTest(_DeferredRunTest):
@@ -404,10 +419,6 @@ def assert_fails_with(d, *exc_types, **kwargs):
         raise failureException("%s raised instead of %s:\n %s" % (
             failure.type.__name__, expected_names, failure.getTraceback()))
     return d.addCallbacks(got_success, got_failure)
-
-
-def flush_logged_errors(*error_types):
-    return _log_observer.flushErrors(*error_types)
 
 
 class UncleanReactorError(Exception):
