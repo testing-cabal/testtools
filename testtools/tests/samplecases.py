@@ -123,6 +123,11 @@ def _make_behavior_scenarios(stage):
     )
 
 
+def make_case_for_behavior_scenario(case):
+    """Given a test with a behavior scenario installed, make a TestCase."""
+    return make_test_case(case.getUniqueString(), test_body=case.body_behavior)
+
+
 class _TearDownFails(TestCase):
     """Passing test case with failing tearDown after upcall."""
 

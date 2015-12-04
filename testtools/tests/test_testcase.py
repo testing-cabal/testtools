@@ -53,7 +53,7 @@ from testtools.tests.helpers import (
     )
 from testtools.tests.samplecases import (
     deterministic_sample_cases_scenarios,
-    make_test_case,
+    make_case_for_behavior_scenario,
     nondeterministic_sample_cases_scenarios,
     special_deterministic_sample_cases_scenarios,
 )
@@ -1286,11 +1286,7 @@ class TestRunTwiceDeterminstic(TestCase):
         # Tests that are intrinsically determistic can be run twice and
         # produce exactly the same results each time, without need for
         # explicit resetting or reconstruction.
-
-        # XXX: jml: before resubmitting. Although make_test_case should be
-        # exported, it's a bit wrong to be relying on internal details of the
-        # scenario generation here.
-        test = make_test_case('test_arbitrary', test_body=self.body_behavior)
+        test = make_case_for_behavior_scenario(self)
         first_result = ExtendedTestResult()
         test.run(first_result)
         second_result = ExtendedTestResult()
