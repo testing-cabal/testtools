@@ -151,17 +151,6 @@ def make_case_for_behavior_scenario(case):
     )
 
 
-class _TearDownFails(TestCase):
-    """Passing test case with failing tearDown after upcall."""
-
-    def test_success(self):
-        pass
-
-    def tearDown(self):
-        super(_TearDownFails, self).tearDown()
-        1/0
-
-
 class _SetUpFailsOnGlobalState(TestCase):
     """Fail to upcall setUp on first run. Fail to upcall tearDown after.
 
@@ -227,15 +216,10 @@ deterministic_sample_cases_scenarios = multiply_scenarios(
     _make_behavior_scenarios('body'),
     _make_behavior_scenarios('tear_down'),
     _make_behavior_scenarios('cleanup'),
-)
-
-
-"""
-A list that can be used with testscenarios to test deterministic cases
-that we cannot easily construct from our test behavior matrix.
-"""
-special_deterministic_sample_cases_scenarios = [
-    ('teardown-fails', {'case': _TearDownFails('test_success')}),
+) + [
+    ('tear_down_fails_after_upcall', {
+        'post_tear_down_behavior': _error,
+    }),
 ]
 
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
 """Tests for extensions to the base test library."""
 
@@ -55,7 +55,6 @@ from testtools.tests.samplecases import (
     deterministic_sample_cases_scenarios,
     make_case_for_behavior_scenario,
     nondeterministic_sample_cases_scenarios,
-    special_deterministic_sample_cases_scenarios,
 )
 
 
@@ -1287,25 +1286,6 @@ class TestRunTwiceDeterminstic(TestCase):
         # produce exactly the same results each time, without need for
         # explicit resetting or reconstruction.
         test = make_case_for_behavior_scenario(self)
-        first_result = ExtendedTestResult()
-        test.run(first_result)
-        second_result = ExtendedTestResult()
-        test.run(second_result)
-        self.assertEqual(first_result._events, second_result._events)
-
-
-class TestRunTwiceDeterminsticSpecial(TestCase):
-    """Can we run the same test case twice?"""
-
-    run_tests_with = FullStackRunTest
-
-    scenarios = special_deterministic_sample_cases_scenarios
-
-    def test_runTwice(self):
-        # Tests that are intrinsically determistic can be run twice and
-        # produce exactly the same results each time, without need for
-        # explicit resetting or reconstruction.
-        test = self.case
         first_result = ExtendedTestResult()
         test.run(first_result)
         second_result = ExtendedTestResult()
