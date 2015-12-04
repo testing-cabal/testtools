@@ -95,6 +95,9 @@ def _remove_observers(publisher, observers):
 class NoTwistedLogObservers(Fixture):
     """Completely but temporarily remove all Twisted log observers."""
 
+    # XXX: Direct tests. Currently tested indirectly via
+    # run_with_log_observers.
+
     def _setUp(self):
         publisher, real_observers = _get_global_publisher_and_observers()
         _remove_observers(publisher, real_observers)
@@ -103,6 +106,9 @@ class NoTwistedLogObservers(Fixture):
 
 class TwistedLogObservers(Fixture):
     """Temporarily add Twisted log observers."""
+
+    # XXX: Direct tests. Currently tested indirectly via
+    # run_with_log_observers.
 
     def __init__(self, observers):
         super(TwistedLogObservers, self).__init__()
@@ -117,12 +123,16 @@ class TwistedLogObservers(Fixture):
 
 def run_with_log_observers(observers, function, *args, **kwargs):
     """Run 'function' with the given Twisted log observers."""
+    # XXX: DEPRECATE THIS
     with NoTwistedLogObservers():
         with TwistedLogObservers(observers):
             return function(*args, **kwargs)
 
 
 # Observer of the Twisted log that we install during tests.
+#
+# This is a global so that users can call flush_logged_errors errors in their
+# test cases.
 _log_observer = _LogObserver()
 
 
@@ -279,17 +289,20 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         full_log = StringIO()
         full_observer = log.FileLogObserver(full_log)
         spinner = self._make_spinner()
-        successful, unhandled = run_with_log_observers(
-            [error_observer.gotEvent, full_observer.emit],
-            self._blocking_run_deferred, spinner)
 
-        self.case.addDetail(
-            'twisted-log', text_content(full_log.getvalue()))
+        with NoTwistedLogObservers():
+            with TwistedLogObservers([error_observer.gotEvent]):
+                with TwistedLogObservers([full_observer.emit]):
+                    successful, unhandled = self._blocking_run_deferred(
+                        spinner)
 
-        logged_errors = error_observer.flushErrors()
-        for logged_error in logged_errors:
-            successful = False
-            self._got_user_failure(logged_error, tb_label='logged-error')
+                self.case.addDetail(
+                    'twisted-log', text_content(full_log.getvalue()))
+
+            logged_errors = error_observer.flushErrors()
+            for logged_error in logged_errors:
+                successful = False
+                self._got_user_failure(logged_error, tb_label='logged-error')
 
         if unhandled:
             successful = False
