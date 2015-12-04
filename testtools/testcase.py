@@ -201,13 +201,8 @@ class TestCase(unittest.TestCase):
         """
         runTest = kwargs.pop('runTest', None)
         super(TestCase, self).__init__(*args, **kwargs)
-        # XXX: jml: Before resubmitting, move these into _reset. We don't
-        # (yet!) have tests driving the change, but it does seem like the more
-        # correct thing to do.
         self._cleanups = []
         self._unique_id_gen = itertools.count(1)
-        # Generators to ensure unique traceback ids.  Maps traceback label to
-        # iterators.
         self._reset()
         test_method = self._get_test_method()
         if runTest is None:
@@ -230,6 +225,8 @@ class TestCase(unittest.TestCase):
 
     def _reset(self):
         """Reset the test case as if it had never been run."""
+        # Generators to ensure unique traceback ids.  Maps traceback label to
+        # iterators.
         self._traceback_id_gens = {}
         self.__setup_called = False
         self.__teardown_called = False
