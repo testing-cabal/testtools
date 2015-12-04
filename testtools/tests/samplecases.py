@@ -15,16 +15,59 @@ from testtools.matchers import (
 )
 
 
-class _NormalTest(TestCase):
+class _ConstructedTest(TestCase):
+    """A test case where all of the stages."""
 
-    def test_success(self):
-        pass
+    def __init__(self, test_method_name, set_up=None, test_body=None,
+                 tear_down=None, cleanups=()):
+        """Construct a ``_ConstructedTest``.
 
-    def test_error(self):
-        1/0
+        All callables are unary callables that receive this test as their
+        argument.
 
-    def test_failure(self):
-        self.fail('arbitrary failure')
+        :param str test_method_name: The name of the test method.
+        :param callable set_up: Implementation of setUp.
+        :param callable test_body: Implementation of the actual test.
+            Will be assigned to the test method.
+        :param callable tear_down: Implementation of tearDown.
+        :param cleanups: Iterable of callables that will be added as
+            cleanups.
+        """
+        setattr(self, test_method_name, test_body)
+        super(_ConstructedTest, self).__init__(test_method_name)
+        self._set_up = set_up if set_up else _do_nothing
+        self._test_body = test_body if test_body else _do_nothing
+        self._tear_down = tear_down if tear_down else _do_nothing
+        self._cleanups = cleanups
+
+    def setUp(self):
+        super(_ConstructedTest, self).setUp()
+        for cleanup in self._cleanups:
+            self.addCleanup(cleanup, self)
+        self._set_up(self)
+
+    def test_case(self):
+        self._test_body(self)
+
+    def tearDown(self):
+        self._tear_down(self)
+        super(_ConstructedTest, self).tearDown()
+
+
+def _do_nothing(case):
+    pass
+
+
+def _success(case):
+    pass
+
+
+def _error(case):
+    1/0
+
+
+def _failure(case):
+    case.fail('arbitrary failure')
 
 
 class _TearDownFails(TestCase):
@@ -99,9 +142,15 @@ A list that can be used with testscenarios to test every deterministic sample
 case that we have.
 """
 deterministic_sample_cases_scenarios = [
-    ('simple-success-test', {'case': _NormalTest('test_success')}),
-    ('simple-error-test', {'case': _NormalTest('test_error')}),
-    ('simple-failure-test', {'case': _NormalTest('test_failure')}),
+    ('simple-success-test', {
+        'case': _ConstructedTest('test_success', test_body=_success)
+    }),
+    ('simple-error-test', {
+        'case': _ConstructedTest('test_error', test_body=_error)
+    }),
+    ('simple-failure-test', {
+        'case': _ConstructedTest('test_failure', test_body=_failure)
+    }),
     ('teardown-fails', {'case': _TearDownFails('test_success')}),
 ]
 
