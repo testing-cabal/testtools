@@ -121,6 +121,28 @@ class TwistedLogObservers(Fixture):
             self.addCleanup(self._log_publisher.removeObserver, observer)
 
 
+class ErrorObserver(Fixture):
+    """Capture logged errors.
+
+    :ivar logged_errors: list of errors caught while fixture active.
+    """
+
+    def __init__(self, error_observer):
+        super(ErrorObserver, self).__init__()
+        self._error_observer = error_observer
+        self.logged_errors = []
+
+    def _setUp(self):
+        self.logged_errors = []
+        self.useFixture(TwistedLogObservers([self._error_observer.gotEvent]))
+        self.addCleanup(self._store_logged_errors)
+
+    def _store_logged_errors(self):
+        self.logged_errors = self._error_observer.flushErrors()
+
+    # XXX: Add flush_logged errors
+
+
 def run_with_log_observers(observers, function, *args, **kwargs):
     """Run 'function' with the given Twisted log observers."""
     # XXX: DEPRECATE THIS
@@ -291,7 +313,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         spinner = self._make_spinner()
 
         with NoTwistedLogObservers():
-            with TwistedLogObservers([error_observer.gotEvent]):
+            with ErrorObserver(error_observer) as error_fixture:
                 with TwistedLogObservers([full_observer.emit]):
                     successful, unhandled = self._blocking_run_deferred(
                         spinner)
@@ -299,8 +321,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
                 self.case.addDetail(
                     'twisted-log', text_content(full_log.getvalue()))
 
-            logged_errors = error_observer.flushErrors()
-            for logged_error in logged_errors:
+            for logged_error in error_fixture.logged_errors:
                 successful = False
                 self._got_user_failure(logged_error, tb_label='logged-error')
 
