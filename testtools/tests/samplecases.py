@@ -63,11 +63,23 @@ def _success(case):
 
 
 def _error(case):
-    1/0
+    1/0  # arbitrary non-failure exception
 
 
 def _failure(case):
     case.fail('arbitrary failure')
+
+
+def _skip(case):
+    case.skip('arbitrary skip message')
+
+
+def _expected_failure(case):
+    case.expectFailure('arbitrary expected failure', _failure, case)
+
+
+def _unexpected_success(case):
+    case.expectFailure('arbitrary unexpected success', _success)
 
 
 class _TearDownFails(TestCase):
@@ -150,6 +162,15 @@ deterministic_sample_cases_scenarios = [
     }),
     ('simple-failure-test', {
         'case': _ConstructedTest('test_failure', test_body=_failure)
+    }),
+    ('simple-expected-failure-test', {
+        'case': _ConstructedTest('test_failure', test_body=_expected_failure)
+    }),
+    ('simple-unexpected-success-test', {
+        'case': _ConstructedTest('test_failure', test_body=_unexpected_success)
+    }),
+    ('simple-skip-test', {
+        'case': _ConstructedTest('test_failure', test_body=_skip)
     }),
     ('teardown-fails', {'case': _TearDownFails('test_success')}),
 ]
