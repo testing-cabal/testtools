@@ -29,13 +29,10 @@ from testtools.content import (
     TracebackContent,
     )
 from testtools.matchers import (
-    AfterPreprocessing,
-    AllMatch,
     Annotate,
     DocTestMatches,
     Equals,
     HasLength,
-    MatchesAll,
     MatchesException,
     Raises,
     )
@@ -56,7 +53,9 @@ from testtools.tests.helpers import (
     )
 from testtools.tests.samplecases import (
     deterministic_sample_cases_scenarios,
+    make_test_case,
     nondeterministic_sample_cases_scenarios,
+    special_deterministic_sample_cases_scenarios,
 )
 
 
@@ -1282,6 +1281,29 @@ class TestRunTwiceDeterminstic(TestCase):
     run_tests_with = FullStackRunTest
 
     scenarios = deterministic_sample_cases_scenarios
+
+    def test_runTwice(self):
+        # Tests that are intrinsically determistic can be run twice and
+        # produce exactly the same results each time, without need for
+        # explicit resetting or reconstruction.
+
+        # XXX: jml: before resubmitting. Although make_test_case should be
+        # exported, it's a bit wrong to be relying on internal details of the
+        # scenario generation here.
+        test = make_test_case('test_arbitrary', test_body=self.body_behavior)
+        first_result = ExtendedTestResult()
+        test.run(first_result)
+        second_result = ExtendedTestResult()
+        test.run(second_result)
+        self.assertEqual(first_result._events, second_result._events)
+
+
+class TestRunTwiceDeterminsticSpecial(TestCase):
+    """Can we run the same test case twice?"""
+
+    run_tests_with = FullStackRunTest
+
+    scenarios = special_deterministic_sample_cases_scenarios
 
     def test_runTwice(self):
         # Tests that are intrinsically determistic can be run twice and

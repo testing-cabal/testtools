@@ -91,6 +91,38 @@ def _unexpected_success(case):
     case.expectFailure('arbitrary unexpected success', _success)
 
 
+behaviors = [
+    ('success', _success),
+    ('fail', _failure),
+    ('error',  _error),
+    ('skip', _skip),
+    ('xfail', _expected_failure),
+    ('uxsuccess', _unexpected_success),
+]
+
+
+def _make_behavior_scenarios(stage):
+    """Given a test stage, iterate over behavior scenarios for that stage.
+
+    e.g.
+        >>> list(_make_behavior_scenarios('setUp'))
+        [('setUp=success', {'setUp_behavior': <function _success>}),
+         ('setUp=fail', {'setUp_behavior': <function _failure>}),
+         ('setUp=error', {'setUp_behavior': <function _error>}),
+         ('setUp=skip', {'setUp_behavior': <function _skip>}),
+         ('setUp=xfail', {'setUp_behavior': <function _expected_failure>),
+         ('setUp=uxsuccess',
+          {'setUp_behavior': <function _unexpected_success>})]
+
+    Ordering is not consistent.
+    """
+    return (
+        ('%s=%s' % (stage, behavior),
+         {'%s_behavior' % (stage,): function})
+        for (behavior, function) in behaviors
+    )
+
+
 class _TearDownFails(TestCase):
     """Passing test case with failing tearDown after upcall."""
 
@@ -162,25 +194,14 @@ def _test_error_traceback(case, traceback_matcher):
 A list that can be used with testscenarios to test every deterministic sample
 case that we have.
 """
-deterministic_sample_cases_scenarios = [
-    ('simple-success-test', {
-        'case': make_test_case('test_success', test_body=_success)
-    }),
-    ('simple-error-test', {
-        'case': make_test_case('test_error', test_body=_error)
-    }),
-    ('simple-failure-test', {
-        'case': make_test_case('test_failure', test_body=_failure)
-    }),
-    ('simple-expected-failure-test', {
-        'case': make_test_case('test_failure', test_body=_expected_failure)
-    }),
-    ('simple-unexpected-success-test', {
-        'case': make_test_case('test_failure', test_body=_unexpected_success)
-    }),
-    ('simple-skip-test', {
-        'case': make_test_case('test_failure', test_body=_skip)
-    }),
+deterministic_sample_cases_scenarios = _make_behavior_scenarios('body')
+
+
+"""
+A list that can be used with testscenarios to test deterministic cases
+that we cannot easily construct from our test behavior matrix.
+"""
+special_deterministic_sample_cases_scenarios = [
     ('teardown-fails', {'case': _TearDownFails('test_success')}),
 ]
 
