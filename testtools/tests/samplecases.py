@@ -5,6 +5,8 @@
 These are primarily of use in testing the test framework.
 """
 
+from testscenarios import multiply_scenarios
+
 from testtools import TestCase
 from testtools.matchers import (
     AfterPreprocessing,
@@ -47,11 +49,11 @@ class _ConstructedTest(TestCase):
         self._set_up = set_up
         self._test_body = test_body
         self._tear_down = tear_down
-        self._cleanups = cleanups
+        self._test_cleanups = cleanups
 
     def setUp(self):
         super(_ConstructedTest, self).setUp()
-        for cleanup in self._cleanups:
+        for cleanup in self._test_cleanups:
             self.addCleanup(cleanup, self)
         self._set_up(self)
 
@@ -125,7 +127,13 @@ def _make_behavior_scenarios(stage):
 
 def make_case_for_behavior_scenario(case):
     """Given a test with a behavior scenario installed, make a TestCase."""
-    return make_test_case(case.getUniqueString(), test_body=case.body_behavior)
+    return make_test_case(
+        case.getUniqueString(),
+        set_up=case.set_up_behavior,
+        test_body=case.body_behavior,
+        tear_down=case.tear_down_behavior,
+        cleanups=(case.cleanup_behavior,),
+    )
 
 
 class _TearDownFails(TestCase):
@@ -199,7 +207,12 @@ def _test_error_traceback(case, traceback_matcher):
 A list that can be used with testscenarios to test every deterministic sample
 case that we have.
 """
-deterministic_sample_cases_scenarios = _make_behavior_scenarios('body')
+deterministic_sample_cases_scenarios = multiply_scenarios(
+    _make_behavior_scenarios('set_up'),
+    _make_behavior_scenarios('body'),
+    _make_behavior_scenarios('tear_down'),
+    _make_behavior_scenarios('cleanup'),
+)
 
 
 """
