@@ -118,14 +118,14 @@ def _make_behavior_scenarios(stage):
     """Given a test stage, iterate over behavior scenarios for that stage.
 
     e.g.
-        >>> list(_make_behavior_scenarios('setUp'))
-        [('setUp=success', {'setUp_behavior': <function _success>}),
-         ('setUp=fail', {'setUp_behavior': <function _failure>}),
-         ('setUp=error', {'setUp_behavior': <function _error>}),
-         ('setUp=skip', {'setUp_behavior': <function _skip>}),
-         ('setUp=xfail', {'setUp_behavior': <function _expected_failure>),
-         ('setUp=uxsuccess',
-          {'setUp_behavior': <function _unexpected_success>})]
+        >>> list(_make_behavior_scenarios('set_up'))
+        [('set_up=success', {'set_up_behavior': <function _success>}),
+         ('set_up=fail', {'set_up_behavior': <function _failure>}),
+         ('set_up=error', {'set_up_behavior': <function _error>}),
+         ('set_up=skip', {'set_up_behavior': <function _skip>}),
+         ('set_up=xfail', {'set_up_behavior': <function _expected_failure>),
+         ('set_up=uxsuccess',
+          {'set_up_behavior': <function _unexpected_success>})]
 
     Ordering is not consistent.
     """
