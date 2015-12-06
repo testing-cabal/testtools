@@ -1158,7 +1158,7 @@ class TextTestResult(TestResult):
         self.stream.write(
             "\nRan %d test%s in %.3fs\n" % (
                 self.testsRun, plural,
-                self._delta_to_float(stop - self.__start, 4)))
+                self._delta_to_float(stop - self.__start, 3)))
         if self.wasSuccessful():
             self.stream.write("OK\n")
         else:
