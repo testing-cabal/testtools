@@ -350,7 +350,6 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         self.case.reactor = self._reactor
         spinner = self._make_spinner()
 
-        # XXX: jml: Review test coverage to see if this is sane.
         with NoTwistedLogObservers():
             # XXX: Would be nice if we could do
             # self.case.useFixture(CaptureTwistedLogs()) here, but

@@ -41,6 +41,8 @@ defer = try_import('twisted.internet.defer')
 failure = try_import('twisted.python.failure')
 log = try_import('twisted.python.log')
 DelayedCall = try_import('twisted.internet.base.DelayedCall')
+_get_global_publisher_and_observers = try_import(
+    'testtools.deferredruntest._get_global_publisher_and_observers')
 
 
 class MatchesEvents(object):
@@ -699,6 +701,24 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
                     'twisted-log': AsText(EndsWith(' foo\n')),
                     }),
                 ('stopTest', test)))
+
+    def test_do_not_log_to_twisted(self):
+        # By default, we don't log anything to the default Twisted loggers.
+        # XXX: We want to make this behaviour optional, and (ideally)
+        # deprecated.
+        messages = []
+        publisher, _ = _get_global_publisher_and_observers()
+        publisher.addObserver(messages.append)
+
+        class LogSomething(TestCase):
+            def test_something(self):
+                log.msg("foo")
+
+        test = LogSomething('test_something')
+        runner = self.make_runner(test)
+        result = self.make_result()
+        runner.run(result)
+        self.assertThat(messages, Equals([]))
 
     def test_debugging_unchanged_during_test_by_default(self):
         debugging = [(defer.Deferred.debug, DelayedCall.debug)]
