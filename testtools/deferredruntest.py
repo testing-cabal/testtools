@@ -112,9 +112,9 @@ class _TwistedLogObservers(Fixture):
         self._log_publisher = log.theLogPublisher
 
     def _setUp(self):
-        for observer in self._observers:
-            self._log_publisher.addObserver(observer)
-            self.addCleanup(self._log_publisher.removeObserver, observer)
+        _add_observers(self._log_publisher, self._observers)
+        self.addCleanup(
+            _remove_observers, self._log_publisher, self._observers)
 
 
 class _ErrorObserver(Fixture):
@@ -346,8 +346,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
                 spinner)
         for logged_error in error_fixture.logged_errors:
             successful = False
-            self._got_user_failure(
-                logged_error, tb_label='logged-error')
+            self._got_user_failure(logged_error, tb_label='logged-error')
 
         if unhandled:
             successful = False
