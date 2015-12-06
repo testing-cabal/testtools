@@ -97,9 +97,6 @@ def _remove_observers(publisher, observers):
 class _NoTwistedLogObservers(Fixture):
     """Completely but temporarily remove all Twisted log observers."""
 
-    # XXX: Direct tests. Currently tested indirectly via
-    # run_with_log_observers.
-
     def _setUp(self):
         publisher, real_observers = _get_global_publisher_and_observers()
         _remove_observers(publisher, real_observers)

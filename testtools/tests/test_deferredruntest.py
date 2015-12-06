@@ -15,6 +15,7 @@ from testtools import (
 from testtools.matchers import (
     AfterPreprocessing,
     ContainsAll,
+    ContainsDict,
     EndsWith,
     Equals,
     Is,
@@ -844,6 +845,64 @@ class TestRunWithLogObservers(NeedsTwistedTestCase):
         observers = list(log.theLogPublisher.observers)
         run_with_log_observers([], lambda: None)
         self.assertEqual(observers, log.theLogPublisher.observers)
+
+
+class TestNoTwistedLogObservers(NeedsTwistedTestCase):
+    """Tests for _NoTwistedLogObservers."""
+
+    def _get_logged_messages(self, function, *args, **kwargs):
+        """Run ``function`` and return ``(ret, logged_messages)``."""
+        messages = []
+        publisher, _ = _get_global_publisher_and_observers()
+        publisher.addObserver(messages.append)
+        try:
+            ret = function(*args, **kwargs)
+        finally:
+            publisher.removeObserver(messages.append)
+        return (ret, messages)
+
+    def test_default(self):
+        # The default behaviour is for messages logged to Twisted to actually
+        # go to the Twisted logs.
+        class SomeTest(TestCase):
+            def test_something(self):
+                log.msg('foo')
+
+        _, messages = self._get_logged_messages(SomeTest('test_something').run)
+        self.assertThat(
+            messages,
+            MatchesListwise([ContainsDict({'message': Equals(('foo',))})]))
+
+    def test_nothing_logged(self):
+        # Using _NoTwistedLogObservers means that nothing is logged to
+        # Twisted.
+        from testtools.deferredruntest import _NoTwistedLogObservers
+
+        class SomeTest(TestCase):
+            def test_something(self):
+                self.useFixture(_NoTwistedLogObservers())
+                log.msg('foo')
+
+        _, messages = self._get_logged_messages(SomeTest('test_something').run)
+        self.assertThat(messages, Equals([]))
+
+    def test_logging_restored(self):
+        # _NoTwistedLogObservers restores the original log observers.
+        from testtools.deferredruntest import _NoTwistedLogObservers
+
+        class SomeTest(TestCase):
+            def test_something(self):
+                self.useFixture(_NoTwistedLogObservers())
+                log.msg('foo')
+
+        def run_then_log():
+            SomeTest('test_something').run()
+            log.msg('bar')
+
+        _, messages = self._get_logged_messages(run_then_log)
+        self.assertThat(
+            messages,
+            MatchesListwise([ContainsDict({'message': Equals(('bar',))})]))
 
 
 def test_suite():
