@@ -336,17 +336,18 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         self.case.reactor = self._reactor
         spinner = self._make_spinner()
 
-        with _NoTwistedLogObservers():
-            self.case.useFixture(_CaptureTwistedLogs())
+        # XXX: We want to make the use of these two fixtures optional, and
+        # ideally, make it so they aren't used by default.
+        self.case.useFixture(_NoTwistedLogObservers())
+        self.case.useFixture(_CaptureTwistedLogs())
 
-            with _ErrorObserver(_log_observer) as error_fixture:
-                successful, unhandled = self._blocking_run_deferred(
-                    spinner)
-
-            for logged_error in error_fixture.logged_errors:
-                successful = False
-                self._got_user_failure(
-                    logged_error, tb_label='logged-error')
+        with _ErrorObserver(_log_observer) as error_fixture:
+            successful, unhandled = self._blocking_run_deferred(
+                spinner)
+        for logged_error in error_fixture.logged_errors:
+            successful = False
+            self._got_user_failure(
+                logged_error, tb_label='logged-error')
 
         if unhandled:
             successful = False
