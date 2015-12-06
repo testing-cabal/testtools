@@ -151,21 +151,11 @@ class _CaptureTwistedLogs(Fixture):
 
     LOG_DETAIL_NAME = 'twisted-log'
 
-    def __init__(self):
-        super(_CaptureTwistedLogs, self).__init__()
-        self._twisted_log = StringIO()
-
     def _setUp(self):
-        full_observer = log.FileLogObserver(self._twisted_log)
+        logs = StringIO()
+        full_observer = log.FileLogObserver(logs)
         self.useFixture(_TwistedLogObservers([full_observer.emit]))
-        # XXX: This isn't actually *useful* yet because Fixture clears details
-        # when it exits a context manager (which is the only way we currently
-        # use it).
-        self.addDetail(self.LOG_DETAIL_NAME, self.get_twisted_log())
-
-    def get_twisted_log(self):
-        """Return the contents of the Twisted log."""
-        return Content(UTF8_TEXT, self._twisted_log.getvalue)
+        self.addDetail(self.LOG_DETAIL_NAME, Content(UTF8_TEXT, logs.getvalue))
 
 
 def run_with_log_observers(observers, function, *args, **kwargs):
@@ -347,24 +337,16 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         spinner = self._make_spinner()
 
         with _NoTwistedLogObservers():
-            # XXX: Would be nice if we could do
-            # self.case.useFixture(_CaptureTwistedLogs()) here, but
-            # unfortunately that doesn't propagate details.
-            with _CaptureTwistedLogs() as capture_logs:
-                with _ErrorObserver(_log_observer) as error_fixture:
-                    successful, unhandled = self._blocking_run_deferred(
-                        spinner)
+            self.case.useFixture(_CaptureTwistedLogs())
 
-                for logged_error in error_fixture.logged_errors:
-                    successful = False
-                    self._got_user_failure(
-                        logged_error, tb_label='logged-error')
+            with _ErrorObserver(_log_observer) as error_fixture:
+                successful, unhandled = self._blocking_run_deferred(
+                    spinner)
 
-            # XXX: Actually, we want to add all details from capture_logs to
-            # the test case. Unfortunately, Fixture.__exit__ clears out those
-            # details.
-            self.case.addDetail(
-                capture_logs.LOG_DETAIL_NAME, capture_logs.get_twisted_log())
+            for logged_error in error_fixture.logged_errors:
+                successful = False
+                self._got_user_failure(
+                    logged_error, tb_label='logged-error')
 
         if unhandled:
             successful = False
