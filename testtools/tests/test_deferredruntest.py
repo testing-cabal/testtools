@@ -14,6 +14,7 @@ from testtools import (
     )
 from testtools.matchers import (
     AfterPreprocessing,
+    Contains,
     ContainsAll,
     ContainsDict,
     EndsWith,
@@ -954,6 +955,26 @@ class TestErrorObserver(NeedsTwistedTestCase):
             MatchesListwise([
                 AfterPreprocessing(lambda x: x.value, Equals(exception))]))
 
+
+class TestCaptureTwistedLogs(NeedsTwistedTestCase):
+    """Tests for _CaptureTwistedLogs."""
+
+    def test_captures_logs(self):
+        # _CaptureTwistedLogs stores all Twisted log messages as a detail.
+        from testtools.deferredruntest import _CaptureTwistedLogs
+
+        class SomeTest(TestCase):
+            def test_something(self):
+                self.useFixture(_CaptureTwistedLogs())
+                log.msg('foo')
+
+        test = SomeTest('test_something')
+        test.run()
+        self.assertThat(
+            test.getDetails(),
+            MatchesDict({
+                'twisted-log': AsText(Contains('foo')),
+            }))
 
 
 def test_suite():

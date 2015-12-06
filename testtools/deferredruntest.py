@@ -161,8 +161,7 @@ class _CaptureTwistedLogs(Fixture):
         # XXX: This isn't actually *useful* yet because Fixture clears details
         # when it exits a context manager (which is the only way we currently
         # use it).
-        self.addCleanup(
-            self.addDetail, self.LOG_DETAIL_NAME, self.get_twisted_log())
+        self.addDetail(self.LOG_DETAIL_NAME, self.get_twisted_log())
 
     def get_twisted_log(self):
         """Return the contents of the Twisted log."""
