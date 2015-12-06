@@ -154,6 +154,8 @@ class ErrorObserver(Fixture):
 class CaptureTwistedLogs(Fixture):
     """Capture all the Twisted logs and add them as a detail."""
 
+    LOG_DETAIL_NAME = 'twisted-log'
+
     def __init__(self):
         super(CaptureTwistedLogs, self).__init__()
         self._twisted_log = StringIO()
@@ -164,7 +166,8 @@ class CaptureTwistedLogs(Fixture):
         # XXX: This isn't actually *useful* yet because Fixture clears details
         # when it exits a context manager (which is the only way we currently
         # use it).
-        self.addCleanup(self.addDetail, 'twisted-log', self.get_twisted_log())
+        self.addCleanup(
+            self.addDetail, self.LOG_DETAIL_NAME, self.get_twisted_log())
 
     def get_twisted_log(self):
         """Return the contents of the Twisted log."""
@@ -187,7 +190,7 @@ _log_observer = _LogObserver()
 
 
 def flush_logged_errors(*error_types):
-    # XXX: I would like to deprecate this in favour of
+    # XXX: jml: I would like to deprecate this in favour of
     # ErrorObserver.flush_logged_errors so that I can avoid mutable global
     # state. However, I don't know how to make the correct instance of
     # ErrorObserver.flush_logged_errors available to the end user. I also
@@ -349,7 +352,9 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
 
         # XXX: jml: Review test coverage to see if this is sane.
         with NoTwistedLogObservers():
-            # XXX: jml: Maybe try self.case.useFixture(CaptureTwistedLogs())?
+            # XXX: Would be nice if we could do
+            # self.case.useFixture(CaptureTwistedLogs()) here, but
+            # unfortunately that doesn't propagate details.
             with CaptureTwistedLogs() as capture_logs:
                 with ErrorObserver(_log_observer) as error_fixture:
                     successful, unhandled = self._blocking_run_deferred(
@@ -360,10 +365,11 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
                     self._got_user_failure(
                         logged_error, tb_label='logged-error')
 
-            # XXX: Duplicates the 'twisted-log' name from the fixture
-            # because Fixture clears details after the 'with' block.
+            # XXX: Actually, we want to add all details from capture_logs to
+            # the test case. Unfortunately, Fixture.__exit__ clears out those
+            # details.
             self.case.addDetail(
-                'twisted-log', capture_logs.get_twisted_log())
+                capture_logs.LOG_DETAIL_NAME, capture_logs.get_twisted_log())
 
         if unhandled:
             successful = False
