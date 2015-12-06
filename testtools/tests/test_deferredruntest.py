@@ -905,6 +905,28 @@ class TestNoTwistedLogObservers(NeedsTwistedTestCase):
             MatchesListwise([ContainsDict({'message': Equals(('bar',))})]))
 
 
+class TestTwistedLogObservers(NeedsTwistedTestCase):
+    """Tests for _TwistedLogObservers."""
+
+    def test_logged_messages_go_to_observer(self):
+        # Using _TwistedLogObservers means messages logged to Twisted go to
+        # that observer while the fixture is active.
+        from testtools.deferredruntest import _TwistedLogObservers
+
+        messages = []
+
+        class SomeTest(TestCase):
+            def test_something(self):
+                self.useFixture(_TwistedLogObservers([messages.append]))
+                log.msg('foo')
+
+        SomeTest('test_something').run()
+        log.msg('bar')
+        self.assertThat(
+            messages,
+            MatchesListwise([ContainsDict({'message': Equals(('foo',))})]))
+
+
 def test_suite():
     from unittest2 import TestLoader, TestSuite
     return TestLoader().loadTestsFromName(__name__)

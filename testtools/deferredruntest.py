@@ -106,9 +106,6 @@ class _NoTwistedLogObservers(Fixture):
 class _TwistedLogObservers(Fixture):
     """Temporarily add Twisted log observers."""
 
-    # XXX: Direct tests. Currently tested indirectly via
-    # run_with_log_observers.
-
     def __init__(self, observers):
         super(_TwistedLogObservers, self).__init__()
         self._observers = observers
