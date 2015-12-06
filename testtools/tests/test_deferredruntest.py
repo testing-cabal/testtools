@@ -927,6 +927,35 @@ class TestTwistedLogObservers(NeedsTwistedTestCase):
             MatchesListwise([ContainsDict({'message': Equals(('foo',))})]))
 
 
+class TestErrorObserver(NeedsTwistedTestCase):
+    """Tests for _ErrorObserver."""
+
+    def test_captures_errors(self):
+        # _ErrorObserver stores all errors logged while it is active.
+        from testtools.deferredruntest import (
+            _ErrorObserver, _LogObserver, _NoTwistedLogObservers)
+
+        log_observer = _LogObserver()
+        error_observer = _ErrorObserver(log_observer)
+        exception = ValueError('bar')
+
+        class SomeTest(TestCase):
+            def test_something(self):
+                # Temporarily suppress default log observers to avoid spewing
+                # to stderr.
+                self.useFixture(_NoTwistedLogObservers())
+                self.useFixture(error_observer)
+                log.msg('foo')
+                log.err(exception)
+
+        SomeTest('test_something').run()
+        self.assertThat(
+            error_observer.logged_errors,
+            MatchesListwise([
+                AfterPreprocessing(lambda x: x.value, Equals(exception))]))
+
+
+
 def test_suite():
     from unittest2 import TestLoader, TestSuite
     return TestLoader().loadTestsFromName(__name__)
