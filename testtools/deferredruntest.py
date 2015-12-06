@@ -93,7 +93,7 @@ def _remove_observers(publisher, observers):
         publisher.removeObserver(observer)
 
 
-class NoTwistedLogObservers(Fixture):
+class _NoTwistedLogObservers(Fixture):
     """Completely but temporarily remove all Twisted log observers."""
 
     # XXX: Direct tests. Currently tested indirectly via
@@ -105,14 +105,14 @@ class NoTwistedLogObservers(Fixture):
         self.addCleanup(_add_observers, publisher, real_observers)
 
 
-class TwistedLogObservers(Fixture):
+class _TwistedLogObservers(Fixture):
     """Temporarily add Twisted log observers."""
 
     # XXX: Direct tests. Currently tested indirectly via
     # run_with_log_observers.
 
     def __init__(self, observers):
-        super(TwistedLogObservers, self).__init__()
+        super(_TwistedLogObservers, self).__init__()
         self._observers = observers
         self._log_publisher = log.theLogPublisher
 
@@ -122,20 +122,20 @@ class TwistedLogObservers(Fixture):
             self.addCleanup(self._log_publisher.removeObserver, observer)
 
 
-class ErrorObserver(Fixture):
+class _ErrorObserver(Fixture):
     """Capture logged errors.
 
     :ivar logged_errors: list of errors caught while fixture active.
     """
 
     def __init__(self, error_observer):
-        super(ErrorObserver, self).__init__()
+        super(_ErrorObserver, self).__init__()
         self._error_observer = error_observer
         self.logged_errors = []
 
     def _setUp(self):
         self.logged_errors = []
-        self.useFixture(TwistedLogObservers([self._error_observer.gotEvent]))
+        self.useFixture(_TwistedLogObservers([self._error_observer.gotEvent]))
         self.addCleanup(self._store_logged_errors)
 
     def _store_logged_errors(self):
@@ -151,18 +151,18 @@ class ErrorObserver(Fixture):
         return self._error_observer.flushErrors(*error_types)
 
 
-class CaptureTwistedLogs(Fixture):
+class _CaptureTwistedLogs(Fixture):
     """Capture all the Twisted logs and add them as a detail."""
 
     LOG_DETAIL_NAME = 'twisted-log'
 
     def __init__(self):
-        super(CaptureTwistedLogs, self).__init__()
+        super(_CaptureTwistedLogs, self).__init__()
         self._twisted_log = StringIO()
 
     def _setUp(self):
         full_observer = log.FileLogObserver(self._twisted_log)
-        self.useFixture(TwistedLogObservers([full_observer.emit]))
+        self.useFixture(_TwistedLogObservers([full_observer.emit]))
         # XXX: This isn't actually *useful* yet because Fixture clears details
         # when it exits a context manager (which is the only way we currently
         # use it).
@@ -177,8 +177,8 @@ class CaptureTwistedLogs(Fixture):
 def run_with_log_observers(observers, function, *args, **kwargs):
     """Run 'function' with the given Twisted log observers."""
     # XXX: DEPRECATE THIS
-    with NoTwistedLogObservers():
-        with TwistedLogObservers(observers):
+    with _NoTwistedLogObservers():
+        with _TwistedLogObservers(observers):
             return function(*args, **kwargs)
 
 
@@ -191,9 +191,9 @@ _log_observer = _LogObserver()
 
 def flush_logged_errors(*error_types):
     # XXX: jml: I would like to deprecate this in favour of
-    # ErrorObserver.flush_logged_errors so that I can avoid mutable global
+    # _ErrorObserver.flush_logged_errors so that I can avoid mutable global
     # state. However, I don't know how to make the correct instance of
-    # ErrorObserver.flush_logged_errors available to the end user. I also
+    # _ErrorObserver.flush_logged_errors available to the end user. I also
     # don't yet have a clear deprecation/migration path.
     return _log_observer.flushErrors(*error_types)
 
@@ -350,12 +350,12 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         self.case.reactor = self._reactor
         spinner = self._make_spinner()
 
-        with NoTwistedLogObservers():
+        with _NoTwistedLogObservers():
             # XXX: Would be nice if we could do
-            # self.case.useFixture(CaptureTwistedLogs()) here, but
+            # self.case.useFixture(_CaptureTwistedLogs()) here, but
             # unfortunately that doesn't propagate details.
-            with CaptureTwistedLogs() as capture_logs:
-                with ErrorObserver(_log_observer) as error_fixture:
+            with _CaptureTwistedLogs() as capture_logs:
+                with _ErrorObserver(_log_observer) as error_fixture:
                     successful, unhandled = self._blocking_run_deferred(
                         spinner)
 
