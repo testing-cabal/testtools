@@ -349,20 +349,21 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
 
         # XXX: jml: Review test coverage to see if this is sane.
         with NoTwistedLogObservers():
-            with ErrorObserver(_log_observer) as error_fixture:
-                # XXX: jml: Maybe try self.case.useFixture(CaptureTwistedLogs())?
-                with CaptureTwistedLogs() as capture_logs:
+            # XXX: jml: Maybe try self.case.useFixture(CaptureTwistedLogs())?
+            with CaptureTwistedLogs() as capture_logs:
+                with ErrorObserver(_log_observer) as error_fixture:
                     successful, unhandled = self._blocking_run_deferred(
                         spinner)
 
-                # XXX: Duplicates the 'twisted-log' name from the fixture
-                # because Fixture clears details after the 'with' block.
-                self.case.addDetail(
-                    'twisted-log', capture_logs.get_twisted_log())
+                for logged_error in error_fixture.logged_errors:
+                    successful = False
+                    self._got_user_failure(
+                        logged_error, tb_label='logged-error')
 
-            for logged_error in error_fixture.logged_errors:
-                successful = False
-                self._got_user_failure(logged_error, tb_label='logged-error')
+            # XXX: Duplicates the 'twisted-log' name from the fixture
+            # because Fixture clears details after the 'with' block.
+            self.case.addDetail(
+                'twisted-log', capture_logs.get_twisted_log())
 
         if unhandled:
             successful = False
