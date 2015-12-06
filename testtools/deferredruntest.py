@@ -13,6 +13,7 @@ __all__ = [
     'SynchronousDeferredRunTest',
     ]
 
+import warnings
 import sys
 
 from fixtures import Fixture
@@ -176,7 +177,9 @@ class _CaptureTwistedLogs(Fixture):
 
 def run_with_log_observers(observers, function, *args, **kwargs):
     """Run 'function' with the given Twisted log observers."""
-    # XXX: DEPRECATE THIS
+    warnings.warn(
+        'run_with_log_observers is deprecated since 1.8.2.',
+        DeprecationWarning, stacklevel=2)
     with _NoTwistedLogObservers():
         with _TwistedLogObservers(observers):
             return function(*args, **kwargs)

@@ -12,6 +12,8 @@ Changes
 * Add a new test dependency of testscenarios. (Robert Collins)
 * Make ``fixtures`` a real dependency, not just a test dependency.
   (Jonathan Lange)
+* ``testtools.deferredruntest.run_with_log_observers`` is deprecated.
+  (Jonathan Lange)
 
 1.8.1
 ~~~~~
