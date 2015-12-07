@@ -84,23 +84,14 @@ def _get_global_publisher_and_observers():
         return (publisher, list(publisher.observers))
 
 
-def _add_observers(publisher, observers):
-    for observer in observers:
-        publisher.addObserver(observer)
-
-
-def _remove_observers(publisher, observers):
-    for observer in observers:
-        publisher.removeObserver(observer)
-
-
 class _NoTwistedLogObservers(Fixture):
     """Completely but temporarily remove all Twisted log observers."""
 
     def _setUp(self):
         publisher, real_observers = _get_global_publisher_and_observers()
-        _remove_observers(publisher, real_observers)
-        self.addCleanup(_add_observers, publisher, real_observers)
+        for observer in reversed(real_observers):
+            publisher.removeObserver(observer)
+            self.addCleanup(publisher.addObserver, observer)
 
 
 class _TwistedLogObservers(Fixture):
@@ -112,9 +103,9 @@ class _TwistedLogObservers(Fixture):
         self._log_publisher = log.theLogPublisher
 
     def _setUp(self):
-        _add_observers(self._log_publisher, self._observers)
-        self.addCleanup(
-            _remove_observers, self._log_publisher, self._observers)
+        for observer in self._observers:
+            self._log_publisher.addObserver(observer)
+            self.addCleanup(self._log_publisher.removeObserver, observer)
 
 
 class _ErrorObserver(Fixture):
