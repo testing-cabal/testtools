@@ -10,10 +10,16 @@ Changes
 -------
 
 * Add a new test dependency of testscenarios. (Robert Collins)
+
 * Make ``fixtures`` a real dependency, not just a test dependency.
   (Jonathan Lange)
+
 * ``testtools.deferredruntest.run_with_log_observers`` is deprecated.
   (Jonathan Lange)
+
+* ``AsynchronousDeferredRunTest`` now has ``suppress_twisted_logging`` and
+  ``store_twisted_logs`` parameters that can be used to override the default
+  logging behaviour.  (Jonathan Lange, #942785)
 
 1.8.1
 ~~~~~

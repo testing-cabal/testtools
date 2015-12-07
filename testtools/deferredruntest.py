@@ -180,7 +180,8 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
     """
 
     def __init__(self, case, handlers=None, last_resort=None, reactor=None,
-                 timeout=0.005, debug=False):
+                 timeout=0.005, debug=False, suppress_twisted_logging=True,
+                 store_twisted_logs=True):
         """Construct an `AsynchronousDeferredRunTest`.
 
         Please be sure to always use keyword syntax, not positional, as the
@@ -201,6 +202,11 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         :param debug: Whether or not to enable Twisted's debugging.  Use this
             to get information about unhandled Deferreds and left-over
             DelayedCalls.  Defaults to False.
+        :param bool suppress_twisted_logging: If True, then suppress Twisted's
+            default logging while the test is being run. Defaults to True.
+        :param bool store_twisted_logs: If True, then store the Twisted logs
+            that took place during the run as the 'twisted-log' detail.
+            Defaults to True.
         """
         super(AsynchronousDeferredRunTest, self).__init__(
             case, handlers, last_resort)
@@ -209,16 +215,22 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         self._reactor = reactor
         self._timeout = timeout
         self._debug = debug
+        self._suppress_twisted_logging = suppress_twisted_logging
+        self._store_twisted_logs = store_twisted_logs
 
     @classmethod
-    def make_factory(cls, reactor=None, timeout=0.005, debug=False):
+    def make_factory(cls, reactor=None, timeout=0.005, debug=False,
+                     suppress_twisted_logging=True, store_twisted_logs=True):
         """Make a factory that conforms to the RunTest factory interface."""
         # This is horrible, but it means that the return value of the method
         # will be able to be assigned to a class variable *and* also be
         # invoked directly.
         class AsynchronousDeferredRunTestFactory:
             def __call__(self, case, handlers=None, last_resort=None):
-                return cls(case, handlers, last_resort, reactor, timeout, debug)
+                return cls(
+                    case, handlers, last_resort, reactor, timeout, debug,
+                    suppress_twisted_logging, store_twisted_logs,
+                )
         return AsynchronousDeferredRunTestFactory()
 
     @defer.deferredGenerator
@@ -318,10 +330,12 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         self.case.reactor = self._reactor
         spinner = self._make_spinner()
 
-        # XXX: We want to make the use of these two fixtures optional, and
-        # ideally, make it so they aren't used by default.
-        self.case.useFixture(_NoTwistedLogObservers())
-        self.case.useFixture(_CaptureTwistedLogs())
+        # XXX: Expose these fixtures and deprecate both of these options in
+        # favour of them.
+        if self._suppress_twisted_logging:
+            self.case.useFixture(_NoTwistedLogObservers())
+        if self._store_twisted_logs:
+            self.case.useFixture(_CaptureTwistedLogs())
 
         with _ErrorObserver(_log_observer) as error_fixture:
             successful, unhandled = self._blocking_run_deferred(

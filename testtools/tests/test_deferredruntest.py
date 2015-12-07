@@ -259,11 +259,15 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
     def make_result(self):
         return ExtendedTestResult()
 
-    def make_runner(self, test, timeout=None):
+    def make_runner(self, test, timeout=None, suppress_twisted_logging=True,
+                    store_twisted_logs=True):
         if timeout is None:
             timeout = self.make_timeout()
         return AsynchronousDeferredRunTest(
-            test, test.exception_handlers, timeout=timeout)
+            test, test.exception_handlers, timeout=timeout,
+            suppress_twisted_logging=suppress_twisted_logging,
+            store_twisted_logs=store_twisted_logs,
+        )
 
     def make_timeout(self):
         return 0.005
@@ -639,7 +643,7 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
                     f = failure.Failure()
                 log.err(f)
         test = LogAnError('test_something')
-        runner = self.make_runner(test)
+        runner = self.make_runner(test, store_twisted_logs=False)
         result = self.make_result()
         runner.run(result)
         self.assertThat(
@@ -648,10 +652,6 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
                 ('startTest', test),
                 ('addError', test, {
                     'logged-error': AsText(ContainsAll([
-                        'Traceback (most recent call last):',
-                        'ZeroDivisionError',
-                        ])),
-                    'twisted-log': AsText(ContainsAll([
                         'Traceback (most recent call last):',
                         'ZeroDivisionError',
                         ])),
@@ -670,28 +670,25 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
                 log.err(f)
                 flush_logged_errors(ZeroDivisionError)
         test = LogAnError('test_something')
-        runner = self.make_runner(test)
+        runner = self.make_runner(test, store_twisted_logs=False)
         result = self.make_result()
         runner.run(result)
         self.assertThat(
             result._events,
             MatchesEvents(
                 ('startTest', test),
-                ('addSuccess', test, {
-                    'twisted-log': AsText(ContainsAll([
-                        'Traceback (most recent call last):',
-                        'ZeroDivisionError',
-                        ])),
-                    }),
+                ('addSuccess', test),
                 ('stopTest', test)))
 
     def test_log_in_details(self):
+        # If store_twisted_logs is True, we include the Twisted logs as
+        # details.
         class LogAnError(TestCase):
             def test_something(self):
                 log.msg("foo")
                 1/0
         test = LogAnError('test_something')
-        runner = self.make_runner(test)
+        runner = self.make_runner(test, store_twisted_logs=True)
         result = self.make_result()
         runner.run(result)
         self.assertThat(
@@ -705,9 +702,8 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
                 ('stopTest', test)))
 
     def test_do_not_log_to_twisted(self):
-        # By default, we don't log anything to the default Twisted loggers.
-        # XXX: We want to make this behaviour optional, and (ideally)
-        # deprecated.
+        # If suppress_twisted_logging is True, we don't log anything to the
+        # default Twisted loggers.
         messages = []
         publisher, _ = _get_global_publisher_and_observers()
         publisher.addObserver(messages.append)
@@ -717,10 +713,29 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
                 log.msg("foo")
 
         test = LogSomething('test_something')
-        runner = self.make_runner(test)
+        runner = self.make_runner(test, suppress_twisted_logging=True)
         result = self.make_result()
         runner.run(result)
         self.assertThat(messages, Equals([]))
+
+    def test_log_to_twisted(self):
+        # If suppress_twisted_logging is False, we log to the default Twisted
+        # loggers.
+        messages = []
+        publisher, _ = _get_global_publisher_and_observers()
+        publisher.addObserver(messages.append)
+
+        class LogSomething(TestCase):
+            def test_something(self):
+                log.msg("foo")
+
+        test = LogSomething('test_something')
+        runner = self.make_runner(test, suppress_twisted_logging=False)
+        result = self.make_result()
+        runner.run(result)
+        self.assertThat(
+            messages,
+            MatchesListwise([ContainsDict({'message': Equals(('foo',))})]))
 
     def test_debugging_unchanged_during_test_by_default(self):
         debugging = [(defer.Deferred.debug, DelayedCall.debug)]
