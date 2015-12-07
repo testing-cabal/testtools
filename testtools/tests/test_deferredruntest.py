@@ -13,20 +13,21 @@ from testtools import (
     TestResult,
     )
 from testtools.matchers import (
-    AfterPreprocessing,
     ContainsAll,
     EndsWith,
     Equals,
     Is,
     KeysEqual,
-    MatchesDict,
     MatchesException,
-    MatchesListwise,
     Not,
     Raises,
     )
 from testtools.runtest import RunTest
 from testtools.testresult.doubles import ExtendedTestResult
+from testtools.tests.helpers import (
+    AsText,
+    MatchesEvents,
+)
 from testtools.tests.test_spinner import NeedsTwistedTestCase
 
 assert_fails_with = try_import('testtools.deferredruntest.assert_fails_with')
@@ -41,45 +42,6 @@ defer = try_import('twisted.internet.defer')
 failure = try_import('twisted.python.failure')
 log = try_import('twisted.python.log')
 DelayedCall = try_import('twisted.internet.base.DelayedCall')
-
-
-class MatchesEvents(object):
-    """Match a list of test result events.
-
-    Specify events as a data structure.  Ordinary Python objects within this
-    structure will be compared exactly, but you can also use matchers at any
-    point.
-    """
-
-    def __init__(self, *expected):
-        self._expected = expected
-
-    def _make_matcher(self, obj):
-        # This isn't very safe for general use, but is good enough to make
-        # some tests in this module more readable.
-        if hasattr(obj, 'match'):
-            return obj
-        elif isinstance(obj, tuple) or isinstance(obj, list):
-            return MatchesListwise(
-                [self._make_matcher(item) for item in obj])
-        elif isinstance(obj, dict):
-            return MatchesDict(dict(
-                (key, self._make_matcher(value))
-                for key, value in obj.items()))
-        else:
-            return Equals(obj)
-
-    def match(self, observed):
-        matcher = self._make_matcher(self._expected)
-        return matcher.match(observed)
-
-
-class AsText(AfterPreprocessing):
-    """Match the text of a Content instance."""
-
-    def __init__(self, matcher, annotate=True):
-        super(AsText, self).__init__(
-            lambda log: log.as_text(), matcher, annotate=annotate)
 
 
 class X(object):
