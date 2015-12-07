@@ -201,7 +201,6 @@ class TestCase(unittest.TestCase):
         """
         runTest = kwargs.pop('runTest', None)
         super(TestCase, self).__init__(*args, **kwargs)
-        self._cleanups = []
         self._reset()
         test_method = self._get_test_method()
         if runTest is None:
@@ -224,6 +223,7 @@ class TestCase(unittest.TestCase):
 
     def _reset(self):
         """Reset the test case as if it had never been run."""
+        self._cleanups = []
         self._unique_id_gen = itertools.count(1)
         # Generators to ensure unique traceback ids.  Maps traceback label to
         # iterators.
