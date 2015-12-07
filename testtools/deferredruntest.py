@@ -128,7 +128,7 @@ class _ErrorObserver(Fixture):
         return self._error_observer.flushErrors(*error_types)
 
 
-class _CaptureTwistedLogs(Fixture):
+class CaptureTwistedLogs(Fixture):
     """Capture all the Twisted logs and add them as a detail."""
 
     LOG_DETAIL_NAME = 'twisted-log'
@@ -335,7 +335,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         if self._suppress_twisted_logging:
             self.case.useFixture(_NoTwistedLogObservers())
         if self._store_twisted_logs:
-            self.case.useFixture(_CaptureTwistedLogs())
+            self.case.useFixture(CaptureTwistedLogs())
 
         with _ErrorObserver(_log_observer) as error_fixture:
             successful, unhandled = self._blocking_run_deferred(

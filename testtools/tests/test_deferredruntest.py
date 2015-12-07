@@ -972,15 +972,15 @@ class TestErrorObserver(NeedsTwistedTestCase):
 
 
 class TestCaptureTwistedLogs(NeedsTwistedTestCase):
-    """Tests for _CaptureTwistedLogs."""
+    """Tests for CaptureTwistedLogs."""
 
     def test_captures_logs(self):
-        # _CaptureTwistedLogs stores all Twisted log messages as a detail.
-        from testtools.deferredruntest import _CaptureTwistedLogs
+        # CaptureTwistedLogs stores all Twisted log messages as a detail.
+        from testtools.deferredruntest import CaptureTwistedLogs
 
         class SomeTest(TestCase):
             def test_something(self):
-                self.useFixture(_CaptureTwistedLogs())
+                self.useFixture(CaptureTwistedLogs())
                 log.msg('foo')
 
         test = SomeTest('test_something')

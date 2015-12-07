@@ -21,6 +21,10 @@ Changes
   ``store_twisted_logs`` parameters that can be used to override the default
   logging behaviour.  (Jonathan Lange, #942785)
 
+* New fixture ``CaptureTwistedLogs`` that can be used with
+  ``AsynchronousDeferredRunTest`` to attach a detail containing everything
+  logged to Twisted during the test run.  (Jonathan Lange, #1515362)
+
 1.8.1
 ~~~~~
 
