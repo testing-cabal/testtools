@@ -47,10 +47,14 @@ def make_test_case(test_method_name, set_up=None, test_body=None,
 
 
 class _ConstructedTest(TestCase):
-    """A test case where all of the stages."""
+    """A test case defined by arguments, rather than overrides."""
 
     def __init__(self, test_method_name, set_up, test_body, tear_down,
                  cleanups, pre_set_up, post_tear_down):
+        """Construct a test case.
+
+        See ``make_test_case`` for full documentation.
+        """
         setattr(self, test_method_name, self.test_case)
         super(_ConstructedTest, self).__init__(test_method_name)
         self._set_up = set_up
@@ -80,8 +84,7 @@ def _do_nothing(case):
     pass
 
 
-def _success(case):
-    pass
+_success = _do_nothing
 
 
 def _error(case):
@@ -101,7 +104,7 @@ def _expected_failure(case):
 
 
 def _unexpected_success(case):
-    case.expectFailure('arbitrary unexpected success', _success)
+    case.expectFailure('arbitrary unexpected success', _success, case)
 
 
 behaviors = [
