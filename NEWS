@@ -10,7 +10,13 @@ Changes
 -------
 
 * Add a new test dependency of testscenarios. (Robert Collins)
-  
+
+* ``addCleanup`` can now only be called during a test run.
+  (Jonathan Lange)
+
+* ``TestCase`` objects can now be run twice. All internal state is reset
+  between runs.  (Jonathan Lange)
+
 1.8.1
 ~~~~~
 
