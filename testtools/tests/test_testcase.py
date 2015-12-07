@@ -1583,59 +1583,82 @@ class TestOnException(TestCase):
 
 class TestPatchSupport(TestCase):
 
-    run_test_with = FullStackRunTest
+    run_tests_with = FullStackRunTest
 
     class Case(TestCase):
         def test(self):
             pass
 
+    def run_test(self, test_body):
+        """Run a test with ``test_body`` as the body.
+
+        :return: Whatever ``test_body`` returns.
+        """
+        log = []
+        def wrapper(case):
+            log.append(test_body(case))
+        case = make_test_case(self.getUniqueString(), test_body=wrapper)
+        case.run()
+        return log[0]
+
     def test_patch(self):
         # TestCase.patch masks obj.attribute with the new value.
         self.foo = 'original'
-        test = self.Case('test')
-        test.patch(self, 'foo', 'patched')
-        self.assertEqual('patched', self.foo)
+        def test_body(case):
+            case.patch(self, 'foo', 'patched')
+            return self.foo
+
+        result = self.run_test(test_body)
+        self.assertThat(result, Equals('patched'))
 
     def test_patch_restored_after_run(self):
         # TestCase.patch masks obj.attribute with the new value, but restores
         # the original value after the test is finished.
         self.foo = 'original'
-        test = self.Case('test')
-        test.patch(self, 'foo', 'patched')
-        test.run()
-        self.assertEqual('original', self.foo)
+        self.run_test(lambda case: case.patch(self, 'foo', 'patched'))
+        self.assertThat(self.foo, Equals('original'))
 
     def test_successive_patches_apply(self):
         # TestCase.patch can be called multiple times per test. Each time you
         # call it, it overrides the original value.
         self.foo = 'original'
-        test = self.Case('test')
-        test.patch(self, 'foo', 'patched')
-        test.patch(self, 'foo', 'second')
-        self.assertEqual('second', self.foo)
+        def test_body(case):
+            case.patch(self, 'foo', 'patched')
+            case.patch(self, 'foo', 'second')
+            return self.foo
+
+        result = self.run_test(test_body)
+        self.assertThat(result, Equals('second'))
 
     def test_successive_patches_restored_after_run(self):
         # TestCase.patch restores the original value, no matter how many times
         # it was called.
         self.foo = 'original'
-        test = self.Case('test')
-        test.patch(self, 'foo', 'patched')
-        test.patch(self, 'foo', 'second')
-        test.run()
-        self.assertEqual('original', self.foo)
+        def test_body(case):
+            case.patch(self, 'foo', 'patched')
+            case.patch(self, 'foo', 'second')
+            return self.foo
+
+        self.run_test(test_body)
+        self.assertThat(self.foo, Equals('original'))
 
     def test_patch_nonexistent_attribute(self):
         # TestCase.patch can be used to patch a non-existent attribute.
-        test = self.Case('test')
-        test.patch(self, 'doesntexist', 'patched')
-        self.assertEqual('patched', self.doesntexist)
+        def test_body(case):
+            case.patch(self, 'doesntexist', 'patched')
+            return self.doesntexist
+
+        result = self.run_test(test_body)
+        self.assertThat(result, Equals('patched'))
 
     def test_restore_nonexistent_attribute(self):
         # TestCase.patch can be used to patch a non-existent attribute, after
         # the test run, the attribute is then removed from the object.
-        test = self.Case('test')
-        test.patch(self, 'doesntexist', 'patched')
-        test.run()
+        def test_body(case):
+            case.patch(self, 'doesntexist', 'patched')
+            return self.doesntexist
+
+        self.run_test(test_body)
         marker = object()
         value = getattr(self, 'doesntexist', marker)
         self.assertIs(marker, value)
