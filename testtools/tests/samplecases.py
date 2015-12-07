@@ -51,7 +51,7 @@ class _ConstructedTest(TestCase):
 
     def __init__(self, test_method_name, set_up, test_body, tear_down,
                  cleanups, pre_set_up, post_tear_down):
-        setattr(self, test_method_name, test_body)
+        setattr(self, test_method_name, self.test_case)
         super(_ConstructedTest, self).__init__(test_method_name)
         self._set_up = set_up
         self._test_body = test_body
