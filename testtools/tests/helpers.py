@@ -151,3 +151,11 @@ class AsText(AfterPreprocessing):
     def __init__(self, matcher, annotate=True):
         super(AsText, self).__init__(
             lambda log: log.as_text(), matcher, annotate=annotate)
+
+
+def throw(function, *args, **kwargs):
+    """Call ``function`` with arguments and raise the result.
+
+    Use this when you want to raise within an expression.
+    """
+    raise function(*args, **kwargs)
