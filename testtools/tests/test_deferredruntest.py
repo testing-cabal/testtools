@@ -951,7 +951,7 @@ class TestErrorObserver(NeedsTwistedTestCase):
 
         SomeTest('test_something').run()
         self.assertThat(
-            error_observer.logged_errors,
+            error_observer.flush_logged_errors(),
             MatchesListwise([
                 AfterPreprocessing(lambda x: x.value, Equals(exception))]))
 

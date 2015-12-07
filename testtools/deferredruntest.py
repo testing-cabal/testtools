@@ -109,23 +109,14 @@ class _TwistedLogObservers(Fixture):
 
 
 class _ErrorObserver(Fixture):
-    """Capture logged errors.
-
-    :ivar logged_errors: list of errors caught while fixture active.
-    """
+    """Capture errors logged while fixture is active."""
 
     def __init__(self, error_observer):
         super(_ErrorObserver, self).__init__()
         self._error_observer = error_observer
-        self.logged_errors = []
 
     def _setUp(self):
-        self.logged_errors = []
         self.useFixture(_TwistedLogObservers([self._error_observer.gotEvent]))
-        self.addCleanup(self._store_logged_errors)
-
-    def _store_logged_errors(self):
-        self.logged_errors = self.flush_logged_errors()
 
     def flush_logged_errors(self, *error_types):
         """Clear errors of the given types from the logs.
@@ -335,7 +326,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         with _ErrorObserver(_log_observer) as error_fixture:
             successful, unhandled = self._blocking_run_deferred(
                 spinner)
-        for logged_error in error_fixture.logged_errors:
+        for logged_error in error_fixture.flush_logged_errors():
             successful = False
             self._got_user_failure(logged_error, tb_label='logged-error')
 
