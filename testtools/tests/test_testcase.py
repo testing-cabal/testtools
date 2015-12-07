@@ -30,6 +30,7 @@ from testtools.content import (
     )
 from testtools.matchers import (
     Annotate,
+    ContainsAll,
     DocTestMatches,
     Equals,
     HasLength,
@@ -48,12 +49,15 @@ from testtools.testresult.doubles import (
     )
 from testtools.tests.helpers import (
     an_exc_info,
+    AsText,
     FullStackRunTest,
     LoggingResult,
+    MatchesEvents,
     )
 from testtools.tests.samplecases import (
     deterministic_sample_cases_scenarios,
     make_case_for_behavior_scenario,
+    make_test_case,
     nondeterministic_sample_cases_scenarios,
 )
 
@@ -743,76 +747,42 @@ class TestAssertions(TestCase):
 class TestAddCleanup(TestCase):
     """Tests for TestCase.addCleanup."""
 
-    run_test_with = FullStackRunTest
+    run_tests_with = FullStackRunTest
 
-    class LoggingTest(TestCase):
-        """A test that logs calls to setUp, runTest and tearDown."""
-
-        def setUp(self):
-            TestCase.setUp(self)
-            self._calls = ['setUp']
-
-        def brokenSetUp(self):
-            # A tearDown that deliberately fails.
-            self._calls = ['brokenSetUp']
-            raise RuntimeError('Deliberate Failure')
-
-        def runTest(self):
-            self._calls.append('runTest')
-
-        def brokenTest(self):
-            raise RuntimeError('Deliberate broken test')
-
-        def tearDown(self):
-            self._calls.append('tearDown')
-            TestCase.tearDown(self)
-
-    def setUp(self):
-        TestCase.setUp(self)
-        self._result_calls = []
-        self.test = TestAddCleanup.LoggingTest('runTest')
-        self.logging_result = LoggingResult(self._result_calls)
-
-    def assertErrorLogEqual(self, messages):
-        self.assertEqual(messages, [call[0] for call in self._result_calls])
-
-    def assertTestLogEqual(self, messages):
-        """Assert that the call log equals 'messages'."""
-        case = self._result_calls[0][1]
-        self.assertEqual(messages, case._calls)
-
-    def logAppender(self, message):
-        """A cleanup that appends 'message' to the tests log.
-
-        Cleanups are callables that are added to a test by addCleanup. To
-        verify that our cleanups run in the right order, we add strings to a
-        list that acts as a log. This method returns a cleanup that will add
-        the given message to that log when run.
-        """
-        self.test._calls.append(message)
-
-    def test_fixture(self):
-        # A normal run of self.test logs 'setUp', 'runTest' and 'tearDown'.
-        # This test doesn't test addCleanup itself, it just sanity checks the
-        # fixture.
-        self.test.run(self.logging_result)
-        self.assertTestLogEqual(['setUp', 'runTest', 'tearDown'])
-
-    def test_cleanup_run_before_tearDown(self):
-        # Cleanup functions added with 'addCleanup' are called before tearDown
+    def test_cleanup_run_after_tearDown(self):
+        # Cleanup functions added with 'addCleanup' are called after tearDown
         # runs.
-        self.test.addCleanup(self.logAppender, 'cleanup')
-        self.test.run(self.logging_result)
-        self.assertTestLogEqual(['setUp', 'runTest', 'tearDown', 'cleanup'])
+        log = []
+        test = make_test_case(
+            self.getUniqueString(),
+            set_up=lambda _: log.append('setUp'),
+            test_body=lambda _: log.append('runTest'),
+            tear_down=lambda _: log.append('tearDown'),
+            cleanups=[lambda _: log.append('cleanup')],
+        )
+        test.run()
+        self.assertThat(
+            log, Equals(['setUp', 'runTest', 'tearDown', 'cleanup']))
 
     def test_add_cleanup_called_if_setUp_fails(self):
         # Cleanup functions added with 'addCleanup' are called even if setUp
         # fails. Note that tearDown has a different behavior: it is only
         # called when setUp succeeds.
-        self.test.setUp = self.test.brokenSetUp
-        self.test.addCleanup(self.logAppender, 'cleanup')
-        self.test.run(self.logging_result)
-        self.assertTestLogEqual(['brokenSetUp', 'cleanup'])
+        log = []
+
+        def broken_set_up(ignored):
+            log.append('brokenSetUp')
+            raise RuntimeError('Deliberate broken setUp')
+
+        test = make_test_case(
+            self.getUniqueString(),
+            set_up=broken_set_up,
+            test_body=lambda _: log.append('runTest'),
+            tear_down=lambda _: log.append('tearDown'),
+            cleanups=[lambda _: log.append('cleanup')],
+        )
+        test.run()
+        self.assertThat(log, Equals(['brokenSetUp', 'cleanup']))
 
     def test_addCleanup_called_in_reverse_order(self):
         # Cleanup functions added with 'addCleanup' are called in reverse
@@ -826,46 +796,83 @@ class TestAddCleanup(TestCase):
         #
         # When this happens, we generally want to clean up the second resource
         # before the first one, since the second depends on the first.
-        self.test.addCleanup(self.logAppender, 'first')
-        self.test.addCleanup(self.logAppender, 'second')
-        self.test.run(self.logging_result)
-        self.assertTestLogEqual(
-            ['setUp', 'runTest', 'tearDown', 'second', 'first'])
+        log = []
+        test = make_test_case(
+            self.getUniqueString(),
+            set_up=lambda _: log.append('setUp'),
+            test_body=lambda _: log.append('runTest'),
+            tear_down=lambda _: log.append('tearDown'),
+            cleanups=[
+                lambda _: log.append('first'),
+                lambda _: log.append('second'),
+            ],
+        )
+        test.run()
+        self.assertThat(
+            log, Equals(['setUp', 'runTest', 'tearDown', 'second', 'first']))
 
-    def test_tearDown_runs_after_cleanup_failure(self):
+    def test_tearDown_runs_on_cleanup_failure(self):
         # tearDown runs even if a cleanup function fails.
-        self.test.addCleanup(lambda: 1/0)
-        self.test.run(self.logging_result)
-        self.assertTestLogEqual(['setUp', 'runTest', 'tearDown'])
+        log = []
+        test = make_test_case(
+            self.getUniqueString(),
+            set_up=lambda _: log.append('setUp'),
+            test_body=lambda _: log.append('runTest'),
+            tear_down=lambda _: log.append('tearDown'),
+            cleanups=[lambda _: 1/0],
+        )
+        test.run()
+        self.assertThat(log, Equals(['setUp', 'runTest', 'tearDown']))
 
     def test_cleanups_continue_running_after_error(self):
         # All cleanups are always run, even if one or two of them fail.
-        self.test.addCleanup(self.logAppender, 'first')
-        self.test.addCleanup(lambda: 1/0)
-        self.test.addCleanup(self.logAppender, 'second')
-        self.test.run(self.logging_result)
-        self.assertTestLogEqual(
-            ['setUp', 'runTest', 'tearDown', 'second', 'first'])
+        log = []
+        test = make_test_case(
+            self.getUniqueString(),
+            set_up=lambda _: log.append('setUp'),
+            test_body=lambda _: log.append('runTest'),
+            tear_down=lambda _: log.append('tearDown'),
+            cleanups=[
+                lambda _: log.append('first'),
+                lambda _: 1/0,
+                lambda _: log.append('second'),
+            ],
+        )
+        test.run()
+        self.assertThat(
+            log, Equals(['setUp', 'runTest', 'tearDown', 'second', 'first']))
 
     def test_error_in_cleanups_are_captured(self):
         # If a cleanup raises an error, we want to record it and fail the the
         # test, even though we go on to run other cleanups.
-        self.test.addCleanup(lambda: 1/0)
-        self.test.run(self.logging_result)
-        self.assertErrorLogEqual(['startTest', 'addError', 'stopTest'])
+        test = make_test_case(self.getUniqueString(), cleanups=[lambda _: 1/0])
+        log = []
+        test.run(ExtendedTestResult(log))
+        self.assertThat(
+            log, MatchesEvents(
+                ('startTest', test),
+                ('addError', test, {
+                    'traceback': AsText(ContainsAll([
+                        'Traceback (most recent call last):',
+                        'ZeroDivisionError',
+                    ])),
+                }),
+                ('stopTest', test),
+            )
+        )
 
     def test_keyboard_interrupt_not_caught(self):
         # If a cleanup raises KeyboardInterrupt, it gets reraised.
-        def raiseKeyboardInterrupt():
+        def raise_keyboard_interrupt(ignored):
             raise KeyboardInterrupt()
-        self.test.addCleanup(raiseKeyboardInterrupt)
-        self.assertThat(lambda:self.test.run(self.logging_result),
-            Raises(MatchesException(KeyboardInterrupt)))
+        test = make_test_case(
+            self.getUniqueString(), cleanups=[raise_keyboard_interrupt])
+        self.assertThat(test.run, Raises(MatchesException(KeyboardInterrupt)))
 
     def test_all_errors_from_MultipleExceptions_reported(self):
         # When a MultipleExceptions exception is caught, all the errors are
         # reported.
-        def raiseMany():
+        def raise_many(ignored):
             try:
                 1/0
             except Exception:
@@ -875,37 +882,88 @@ class TestAddCleanup(TestCase):
             except Exception:
                 exc_info2 = sys.exc_info()
             raise MultipleExceptions(exc_info1, exc_info2)
-        self.test.addCleanup(raiseMany)
-        self.logging_result = ExtendedTestResult()
-        self.test.run(self.logging_result)
-        self.assertEqual(['startTest', 'addError', 'stopTest'],
-            [event[0] for event in self.logging_result._events])
-        self.assertEqual(set(['traceback', 'traceback-1']),
-            set(self.logging_result._events[1][2].keys()))
+
+        test = make_test_case(self.getUniqueString(), cleanups=[raise_many])
+        log = []
+        test.run(ExtendedTestResult(log))
+        self.assertThat(
+            log, MatchesEvents(
+                ('startTest', test),
+                ('addError', test, {
+                    'traceback': AsText(ContainsAll([
+                        'Traceback (most recent call last):',
+                        'ZeroDivisionError',
+                    ])),
+                    'traceback-1': AsText(ContainsAll([
+                        'Traceback (most recent call last):',
+                        'ZeroDivisionError',
+                    ])),
+                }),
+                ('stopTest', test),
+            )
+        )
 
     def test_multipleCleanupErrorsReported(self):
         # Errors from all failing cleanups are reported as separate backtraces.
-        self.test.addCleanup(lambda: 1/0)
-        self.test.addCleanup(lambda: 1/0)
-        self.logging_result = ExtendedTestResult()
-        self.test.run(self.logging_result)
-        self.assertEqual(['startTest', 'addError', 'stopTest'],
-            [event[0] for event in self.logging_result._events])
-        self.assertEqual(set(['traceback', 'traceback-1']),
-            set(self.logging_result._events[1][2].keys()))
+        test = make_test_case(self.getUniqueString(), cleanups=[
+            lambda _: 1/0,
+            lambda _: 1/0,
+        ])
+        log = []
+        test.run(ExtendedTestResult(log))
+        self.assertThat(
+            log, MatchesEvents(
+                ('startTest', test),
+                ('addError', test, {
+                    'traceback': AsText(ContainsAll([
+                        'Traceback (most recent call last):',
+                        'ZeroDivisionError',
+                    ])),
+                    'traceback-1': AsText(ContainsAll([
+                        'Traceback (most recent call last):',
+                        'ZeroDivisionError',
+                    ])),
+                }),
+                ('stopTest', test),
+            )
+        )
 
     def test_multipleErrorsCoreAndCleanupReported(self):
         # Errors from all failing cleanups are reported, with stopTest,
         # startTest inserted.
-        self.test = TestAddCleanup.LoggingTest('brokenTest')
-        self.test.addCleanup(lambda: 1/0)
-        self.test.addCleanup(lambda: 1/0)
-        self.logging_result = ExtendedTestResult()
-        self.test.run(self.logging_result)
-        self.assertEqual(['startTest', 'addError', 'stopTest'],
-            [event[0] for event in self.logging_result._events])
-        self.assertEqual(set(['traceback', 'traceback-1', 'traceback-2']),
-            set(self.logging_result._events[1][2].keys()))
+        def broken_test(ignored):
+            raise RuntimeError('Deliberately broken test')
+
+        test = make_test_case(
+            self.getUniqueString(),
+            test_body=broken_test,
+            cleanups=[
+                lambda _: 1/0,
+                lambda _: 1/0,
+            ]
+        )
+        log = []
+        test.run(ExtendedTestResult(log))
+        self.assertThat(
+            log, MatchesEvents(
+                ('startTest', test),
+                ('addError', test, {
+                    'traceback': AsText(ContainsAll([
+                        'Traceback (most recent call last):',
+                        'RuntimeError: Deliberately broken test',
+                    ])),
+                    'traceback-1': AsText(ContainsAll([
+                        'Traceback (most recent call last):',
+                        'ZeroDivisionError',
+                    ])),
+                    'traceback-2': AsText(ContainsAll([
+                        'Traceback (most recent call last):',
+                        'ZeroDivisionError',
+                    ])),
+                }),
+                ('stopTest', test),
+            )
+        )
 
 
 class TestRunTestUsage(TestCase):
