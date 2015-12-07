@@ -6,6 +6,12 @@ Changes and improvements to testtools_, grouped by release.
 Next
 ~~~~
 
+Improvements
+------------
+
+* ``MatchesListwise`` has more informative error when lengths don't match.
+  (Jonathan Lange)
+
 Changes
 -------
 
