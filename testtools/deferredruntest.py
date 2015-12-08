@@ -1,10 +1,6 @@
 # Copyright (c) 2010 testtools developers. See LICENSE for details.
 
-"""Individual test case execution for tests that return Deferreds.
-
-This module is highly experimental and is liable to change in ways that cause
-subtle failures in tests.  Use at your own peril.
-"""
+"""Individual test case execution for tests that return Deferreds."""
 
 __all__ = [
     'assert_fails_with',
@@ -90,18 +86,11 @@ def run_with_log_observers(observers, function, *args, **kwargs):
 _log_observer = _LogObserver()
 
 
-
 class AsynchronousDeferredRunTest(_DeferredRunTest):
     """Runner for tests that return Deferreds that fire asynchronously.
 
-    That is, this test runner assumes that the Deferreds will only fire if the
-    reactor is left to spin for a while.
-
-    Do not rely too heavily on the nuances of the behaviour of this class.
-    What it does to the reactor is black magic, and if we can find nicer ways
-    of doing it we will gladly break backwards compatibility.
-
-    This is highly experimental code.  Use at your own risk.
+    Use this runner when you have tests that return Deferreds that will only
+    fire if the reactor is left to spin for a while.
     """
 
     def __init__(self, case, handlers=None, last_resort=None, reactor=None,
@@ -143,7 +132,8 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         # invoked directly.
         class AsynchronousDeferredRunTestFactory:
             def __call__(self, case, handlers=None, last_resort=None):
-                return cls(case, handlers, last_resort, reactor, timeout, debug)
+                return cls(
+                    case, handlers, last_resort, reactor, timeout, debug)
         return AsynchronousDeferredRunTestFactory()
 
     @defer.deferredGenerator
@@ -188,6 +178,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         def clean_up(ignored=None):
             """Run the cleanups."""
             d = self._run_cleanups()
+
             def clean_up_done(result):
                 if result is not None:
                     self._exceptions.append(result)
@@ -307,8 +298,7 @@ def assert_fails_with(d, *exc_types, **kwargs):
     The normal way to use this is to return the result of 'assert_fails_with'
     from your unit test.
 
-    Note that this function is experimental and unstable.  Use at your own
-    peril; expect the API to change.
+    Equivalent to Twisted's ``assertFailure``.
 
     :param d: A Deferred that is expected to fail.
     :param exc_types: The exception types that the Deferred is expected to
@@ -325,9 +315,11 @@ def assert_fails_with(d, *exc_types, **kwargs):
         from testtools import TestCase
         failureException = TestCase.failureException
     expected_names = ", ".join(exc_type.__name__ for exc_type in exc_types)
+
     def got_success(result):
         raise failureException(
             "%s not raised (%r returned)" % (expected_names, result))
+
     def got_failure(failure):
         if failure.check(*exc_types):
             return failure.value
@@ -344,7 +336,8 @@ class UncleanReactorError(Exception):
     """Raised when the reactor has junk in it."""
 
     def __init__(self, junk):
-        Exception.__init__(self,
+        Exception.__init__(
+            self,
             "The reactor still thinks it needs to do things. Close all "
             "connections, kill all processes and make sure all delayed "
             "calls have either fired or been cancelled:\n%s"
