@@ -23,6 +23,7 @@ Contents:
    overview
    for-test-authors
    for-framework-folk
+   twisted-support
    hacking
    Changes to testtools <news>
    API reference documentation <api>
