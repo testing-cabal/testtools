@@ -4,10 +4,7 @@ Twisted support
 testtools provides support for running Twisted tests – tests that return a
 Deferred_ and rely on the Twisted reactor.
 
-You should not use this feature right now. We reserve the right to change the
-API and behaviour without telling you first.
-
-However, if you are going to, here's how you do it::
+Here's how to use it::
 
   from testtools import TestCase
   from testtools.deferredruntest import AsynchronousDeferredRunTest
@@ -20,8 +17,9 @@ However, if you are going to, here's how you do it::
           # ...
           return d
 
-In particular, note that you do *not* have to use a special base ``TestCase``
-in order to run Twisted tests.
+Note that you do *not* have to use a special base ``TestCase`` in order to run
+Twisted tests, you should just use the regular ``testtools.TestCase`` base
+class.
 
 You can also run individual tests within a test case class using the Twisted
 test runner::
@@ -36,7 +34,9 @@ test runner::
            # ...
            return d
 
-Here are some tips for converting your Trial tests into testtools tests.
+
+Converting Trial tests to testtools tests
+-----------------------------------------
 
 * Use the ``AsynchronousDeferredRunTest`` runner
 * Make sure to upcall to ``setUp`` and ``tearDown``
