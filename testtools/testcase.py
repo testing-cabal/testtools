@@ -562,7 +562,12 @@ class TestCase(unittest.TestCase):
         """
         if prefix is None:
             prefix = self.id()
-        unique_text = six.unichr(0x1e00 + self.getUniqueInteger() - 1)
+
+        # 0x1e00 is the start of a range of chars that are easy to see are
+        # unicode since they've got circles and dots and other diacriticals.
+        BASE_CP = 0x1e00
+
+        unique_text = six.unichr(BASE_CP + self.getUniqueInteger() - 1)
         return six.text_type('%s-%s') % (prefix, unique_text)
 
     def onException(self, exc_info, tb_label='traceback'):
