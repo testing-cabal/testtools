@@ -1077,6 +1077,38 @@ class TestUniqueFactories(TestCase):
         self.assertEqual(six.text_type('%s-%s') %
                          (self.id(), u'\u1e01'), second_result)
 
+    def test_mods(self):
+        # given a number and max, generate a list that's the mods.
+        # The list should contain no numbers >= mod
+        self.assertEqual([0], list(testcase._mods(0, 5)))
+        self.assertEqual([1], list(testcase._mods(1, 5)))
+        self.assertEqual([2], list(testcase._mods(2, 5)))
+        self.assertEqual([3], list(testcase._mods(3, 5)))
+        self.assertEqual([4], list(testcase._mods(4, 5)))
+        self.assertEqual([0, 1], list(testcase._mods(5, 5)))
+        self.assertEqual([1, 1], list(testcase._mods(6, 5)))
+        self.assertEqual([2, 1], list(testcase._mods(7, 5)))
+        self.assertEqual([0, 2], list(testcase._mods(10, 5)))
+        self.assertEqual([0, 0, 1], list(testcase._mods(25, 5)))
+        self.assertEqual([1, 0, 1], list(testcase._mods(26, 5)))
+        self.assertEqual([1], list(testcase._mods(1, 100)))
+        self.assertEqual([0, 1], list(testcase._mods(100, 100)))
+        self.assertEqual([0, 10], list(testcase._mods(1000, 100)))
+
+    def test_unique_text(self):
+        self.assertEqual(
+            u'\u1e00',
+            testcase._unique_text(base_cp=0x1e00, cp_range=5, index=0))
+        self.assertEqual(
+            u'\u1e01',
+            testcase._unique_text(base_cp=0x1e00, cp_range=5, index=1))
+        self.assertEqual(
+            u'\u1e00\u1e01',
+            testcase._unique_text(base_cp=0x1e00, cp_range=5, index=5))
+        self.assertEqual(
+            u'\u1e03\u1e02\u1e01',
+            testcase._unique_text(base_cp=0x1e00, cp_range=5, index=38))
+
 
 class TestCloneTestWithNewId(TestCase):
     """Tests for clone_test_with_new_id."""

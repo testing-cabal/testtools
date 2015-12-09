@@ -175,6 +175,22 @@ def gather_details(source_dict, target_dict):
         target_dict[name] = _copy_content(content_object)
 
 
+def _mods(i, mod):
+    (q, r) = divmod(i, mod)
+    while True:
+        yield r
+        if not q:
+            break
+        (q, r) = divmod(q, mod)
+
+
+def _unique_text(base_cp, cp_range, index):
+    s = six.text_type('')
+    for m in _mods(index, cp_range):
+        s += six.unichr(base_cp + m)
+    return s
+
+
 class TestCase(unittest.TestCase):
     """Extensions to the basic TestCase.
 
