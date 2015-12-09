@@ -1069,9 +1069,13 @@ class TestUniqueFactories(TestCase):
     def test_getUniqueText(self):
         # getUniqueText with no prefix returns current test ID followed by
         # a unique unicode character.
-        text_one = self.getUniqueText()
+        first_result = self.getUniqueText()
         self.assertEqual(six.text_type('%s-%s') %
-                         (self.id(), six.unichr(0x1e00)), text_one)
+                         (self.id(), u'\u1e00'), first_result)
+        # You get different text the next time getUniqueText is called.
+        second_result = self.getUniqueText()
+        self.assertEqual(six.text_type('%s-%s') %
+                         (self.id(), u'\u1e01'), second_result)
 
 
 class TestCloneTestWithNewId(TestCase):

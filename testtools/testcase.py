@@ -562,7 +562,8 @@ class TestCase(unittest.TestCase):
         """
         if prefix is None:
             prefix = self.id()
-        return six.text_type('%s-%s') % (prefix, six.unichr(0x1e00))
+        unique_text = six.unichr(0x1e00 + self.getUniqueInteger() - 1)
+        return six.text_type('%s-%s') % (prefix, unique_text)
 
     def onException(self, exc_info, tb_label='traceback'):
         """Called when an exception propogates from test code.
