@@ -1346,9 +1346,9 @@ fine.  However, sometimes it's useful to be able to create arbitrary objects
 at will, without having to make up silly sample data.
 
 To help with this, ``testtools.TestCase`` implements creation methods called
-``getUniqueString`` and ``getUniqueInteger``.  They return strings and integers
-that are unique within the context of the test that can be used to assemble
-more complex objects.  Here's a basic example where
+``getUniqueString`` and ``getUniqueInteger``.  They return strings and
+integers that are unique within the context of the test that can be used to
+assemble more complex objects.  Here's a basic example where
 ``getUniqueString`` is used instead of saying "foo" or "bar" or whatever::
 
   class SomeTest(TestCase):
