@@ -13,6 +13,7 @@ __all__ = [
     'skipIf',
     'skipUnless',
     'TestCase',
+    'unique_text_generator',
     ]
 
 import copy
@@ -29,6 +30,7 @@ from extras import (
 fixtures = try_import('fixtures')
 # To let setup.py work, make this a conditional import.
 unittest = try_imports(['unittest2', 'unittest'])
+import six
 
 from testtools import (
     content,
@@ -180,6 +182,44 @@ def gather_details(source_dict, target_dict):
             new_name = '%s-%d' % (name, advance_iterator(disambiguator))
         name = new_name
         target_dict[name] = _copy_content(content_object)
+
+
+def _mods(i, mod):
+    (q, r) = divmod(i, mod)
+    while True:
+        yield r
+        if not q:
+            break
+        (q, r) = divmod(q, mod)
+
+
+def _unique_text(base_cp, cp_range, index):
+    s = six.text_type('')
+    for m in _mods(index, cp_range):
+        s += six.unichr(base_cp + m)
+    return s
+
+
+def unique_text_generator(prefix):
+    """Generates unique text values.
+
+    Generates text values that are unique. Use this when you need arbitrary
+    text in your test, or as a helper for custom anonymous factory methods.
+
+    :param prefix: The prefix for text.
+    :return: text that looks like '<prefix>-<text_with_unicode>'.
+    :rtype: six.text_type
+    """
+    # 0x1e00 is the start of a range of glyphs that are easy to see are
+    # unicode since they've got circles and dots and other diacriticals.
+    # 0x1eff is the end of the range of these diacritical chars.
+    BASE_CP = 0x1e00
+    CP_RANGE = 0x1f00 - BASE_CP
+    index = 0
+    while True:
+        unique_text = _unique_text(BASE_CP, CP_RANGE, index)
+        yield six.text_type('%s-%s') % (prefix, unique_text)
+        index = index + 1
 
 
 class TestCase(unittest.TestCase):

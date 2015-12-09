@@ -1357,6 +1357,10 @@ details of certain variables don't actually matter.
 See pages 419-423 of `xUnit Test Patterns`_ by Gerard Meszaros for a detailed
 discussion of creation methods.
 
+``testcase.generate_unique_text()`` is similar to ``getUniqueString``, except
+it generates text that contains unicode characters. The value will be a
+``unicode`` object in Python 2 and a ``str`` object in Python 3.
+
 Test attributes
 ---------------
 

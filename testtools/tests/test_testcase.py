@@ -7,6 +7,8 @@ from pprint import pformat
 import sys
 import unittest
 
+import six
+
 from testtools import (
     DecorateTestCaseResult,
     ErrorHolder,
@@ -1117,7 +1119,7 @@ class TestExpectedFailure(TestWithDetails):
 
 
 class TestUniqueFactories(TestCase):
-    """Tests for getUniqueString and getUniqueInteger."""
+    """Tests for getUniqueString, getUniqueInteger, unique_text_generator."""
 
     run_test_with = FullStackRunTest
 
@@ -1144,6 +1146,51 @@ class TestUniqueFactories(TestCase):
         self.assertThat(name_one, Equals('foo-1'))
         name_two = self.getUniqueString('bar')
         self.assertThat(name_two, Equals('bar-2'))
+
+    def test_unique_text_generator(self):
+        # unique_text_generator yields the prefix's id followed by unique
+        # unicode string.
+        prefix = self.getUniqueString()
+        unique_text_generator = testcase.unique_text_generator(prefix)
+        first_result = next(unique_text_generator)
+        self.assertEqual(six.text_type('%s-%s') % (prefix, _u('\u1e00')),
+                         first_result)
+        # The next value yielded by unique_text_generator is different.
+        second_result = next(unique_text_generator)
+        self.assertEqual(six.text_type('%s-%s') % (prefix, _u('\u1e01')),
+                         second_result)
+
+    def test_mods(self):
+        # given a number and max, generate a list that's the mods.
+        # The list should contain no numbers >= mod
+        self.assertEqual([0], list(testcase._mods(0, 5)))
+        self.assertEqual([1], list(testcase._mods(1, 5)))
+        self.assertEqual([2], list(testcase._mods(2, 5)))
+        self.assertEqual([3], list(testcase._mods(3, 5)))
+        self.assertEqual([4], list(testcase._mods(4, 5)))
+        self.assertEqual([0, 1], list(testcase._mods(5, 5)))
+        self.assertEqual([1, 1], list(testcase._mods(6, 5)))
+        self.assertEqual([2, 1], list(testcase._mods(7, 5)))
+        self.assertEqual([0, 2], list(testcase._mods(10, 5)))
+        self.assertEqual([0, 0, 1], list(testcase._mods(25, 5)))
+        self.assertEqual([1, 0, 1], list(testcase._mods(26, 5)))
+        self.assertEqual([1], list(testcase._mods(1, 100)))
+        self.assertEqual([0, 1], list(testcase._mods(100, 100)))
+        self.assertEqual([0, 10], list(testcase._mods(1000, 100)))
+
+    def test_unique_text(self):
+        self.assertEqual(
+            u'\u1e00',
+            testcase._unique_text(base_cp=0x1e00, cp_range=5, index=0))
+        self.assertEqual(
+            u'\u1e01',
+            testcase._unique_text(base_cp=0x1e00, cp_range=5, index=1))
+        self.assertEqual(
+            u'\u1e00\u1e01',
+            testcase._unique_text(base_cp=0x1e00, cp_range=5, index=5))
+        self.assertEqual(
+            u'\u1e03\u1e02\u1e01',
+            testcase._unique_text(base_cp=0x1e00, cp_range=5, index=38))
 
 
 class TestCloneTestWithNewId(TestCase):
