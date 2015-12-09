@@ -565,11 +565,11 @@ class TestCase(unittest.TestCase):
         return '%s-%d' % (prefix, self.getUniqueInteger())
 
     def getUniqueText(self, prefix=None):
-        """Generate text unique to this test.
+        """Generate a text value unique to this test and invocation.
 
-        Returns text that is guaranteed to be unique to this instance. Use
-        this when you need arbitrary text in your test, or as a helper
-        for custom anonymous factory methods.
+        Returns a text value that is guaranteed to be unique to this
+        invocation. Use this when you need arbitrary text in your test, or as a
+        helper for custom anonymous factory methods.
 
         :param prefix: The prefix of the string. If not provided, defaults
             to the id of the test.
