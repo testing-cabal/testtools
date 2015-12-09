@@ -581,9 +581,12 @@ class TestCase(unittest.TestCase):
 
         # 0x1e00 is the start of a range of chars that are easy to see are
         # unicode since they've got circles and dots and other diacriticals.
+        # 0x1eff is the end of the range of these diacritical chars.
         BASE_CP = 0x1e00
+        CP_RANGE = 0x1f00 - BASE_CP
 
-        unique_text = six.unichr(BASE_CP + self.getUniqueInteger() - 1)
+        unique_text = _unique_text(BASE_CP, CP_RANGE,
+                                   self.getUniqueInteger() - 1)
         return six.text_type('%s-%s') % (prefix, unique_text)
 
     def onException(self, exc_info, tb_label='traceback'):
