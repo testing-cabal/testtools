@@ -1,12 +1,29 @@
 # Copyright (c) 2010 testtools developers. See LICENSE for details.
 
-"""Individual test case execution for tests that return Deferreds."""
+"""Individual test case execution for tests that return Deferreds.
+
+Example::
+
+    class TwistedTests(testtools.TestCase):
+
+        run_tests_with = AsynchronousDeferredRunTest
+
+        def test_something(self):
+            # Wait for 5 seconds and then fire with 'Foo'.
+            d = Deferred()
+            reactor.callLater(5, lambda: d.callback('Foo'))
+            d.addCallback(self.assertEqual, 'Foo')
+            return d
+
+When ``test_something`` is run, ``AsynchronousDeferredRunTest`` will run the
+reactor until ``d`` fires, and wait for all of its callbacks to be processed.
+"""
 
 __all__ = [
-    'assert_fails_with',
     'AsynchronousDeferredRunTest',
     'AsynchronousDeferredRunTestForBrokenTwisted',
     'SynchronousDeferredRunTest',
+    'assert_fails_with',
     ]
 
 import sys
@@ -45,7 +62,11 @@ class _DeferredRunTest(RunTest):
 
 
 class SynchronousDeferredRunTest(_DeferredRunTest):
-    """Runner for tests that return synchronous Deferreds."""
+    """Runner for tests that return synchronous Deferreds.
+
+    This runner doesn't touch the reactor at all. It assumes that tests return
+    Deferreds that have already fired.
+    """
 
     def _run_user(self, function, *args):
         d = defer.maybeDeferred(function, *args)
@@ -89,8 +110,8 @@ _log_observer = _LogObserver()
 class AsynchronousDeferredRunTest(_DeferredRunTest):
     """Runner for tests that return Deferreds that fire asynchronously.
 
-    Use this runner when you have tests that return Deferreds that will only
-    fire if the reactor is left to spin for a while.
+    Use this runner when you have tests that return Deferreds that will
+    only fire if the reactor is left to spin for a while.
     """
 
     def __init__(self, case, handlers=None, last_resort=None, reactor=None,
@@ -102,7 +123,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         compatibility with that we have to insert them before the local
         parameters.
 
-        :param case: The `TestCase` to run.
+        :param TestCase case: The `TestCase` to run.
         :param handlers: A list of exception handlers (ExceptionType, handler)
             where 'handler' is a callable that takes a `TestCase`, a
             ``testtools.TestResult`` and the exception raised.
@@ -110,7 +131,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
             exceptions (those for which there is no handler).
         :param reactor: The Twisted reactor to use.  If not given, we use the
             default reactor.
-        :param timeout: The maximum time allowed for running a test.  The
+        :param float timeout: The maximum time allowed for running a test.  The
             default is 0.005s.
         :param debug: Whether or not to enable Twisted's debugging.  Use this
             to get information about unhandled Deferreds and left-over
@@ -126,7 +147,15 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
 
     @classmethod
     def make_factory(cls, reactor=None, timeout=0.005, debug=False):
-        """Make a factory that conforms to the RunTest factory interface."""
+        """Make a factory that conforms to the RunTest factory interface.
+
+        Example::
+
+            class SomeTests(TestCase):
+                # Timeout tests after two minutes.
+                run_tests_with = AsynchronousDeferredRunTest.make_factory(
+                    timeout=120)
+        """
         # This is horrible, but it means that the return value of the method
         # will be able to be assigned to a class variable *and* also be
         # invoked directly.
@@ -293,21 +322,21 @@ class AsynchronousDeferredRunTestForBrokenTwisted(AsynchronousDeferredRunTest):
 
 
 def assert_fails_with(d, *exc_types, **kwargs):
-    """Assert that 'd' will fail with one of 'exc_types'.
+    """Assert that ``d`` will fail with one of ``exc_types``.
 
-    The normal way to use this is to return the result of 'assert_fails_with'
-    from your unit test.
+    The normal way to use this is to return the result of
+    ``assert_fails_with`` from your unit test.
 
     Equivalent to Twisted's ``assertFailure``.
 
-    :param d: A Deferred that is expected to fail.
-    :param exc_types: The exception types that the Deferred is expected to
+    :param Deferred d: A ``Deferred`` that is expected to fail.
+    :param *exc_types: The exception types that the Deferred is expected to
         fail with.
-    :param failureException: An optional keyword argument.  If provided, will
-        raise that exception instead of
+    :param type failureException: An optional keyword argument.  If provided,
+        will raise that exception instead of
         ``testtools.TestCase.failureException``.
-    :return: A Deferred that will fail with an ``AssertionError`` if 'd' does
-        not fail with one of the exception types.
+    :return: A ``Deferred`` that will fail with an ``AssertionError`` if ``d``
+        does not fail with one of the exception types.
     """
     failureException = kwargs.pop('failureException', None)
     if failureException is None:
