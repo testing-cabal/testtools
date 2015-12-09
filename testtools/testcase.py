@@ -21,6 +21,8 @@ import itertools
 import sys
 import types
 
+import six
+
 from extras import (
     safe_hasattr,
     try_import,
@@ -171,6 +173,22 @@ def gather_details(source_dict, target_dict):
             new_name = '%s-%d' % (name, advance_iterator(disambiguator))
         name = new_name
         target_dict[name] = _copy_content(content_object)
+
+
+def _mods(i, mod):
+    (q, r) = divmod(i, mod)
+    while True:
+        yield r
+        if not q:
+            break
+        (q, r) = divmod(q, mod)
+
+
+def _unique_text(base_cp, cp_range, index):
+    s = six.text_type('')
+    for m in _mods(index, cp_range):
+        s += six.unichr(base_cp + m)
+    return s
 
 
 class TestCase(unittest.TestCase):
@@ -545,6 +563,31 @@ class TestCase(unittest.TestCase):
         if prefix is None:
             prefix = self.id()
         return '%s-%d' % (prefix, self.getUniqueInteger())
+
+    def getUniqueText(self, prefix=None):
+        """Generate a text value unique to this test and invocation.
+
+        Returns a text value that is guaranteed to be unique to this
+        invocation. Use this when you need arbitrary text in your test, or as a
+        helper for custom anonymous factory methods.
+
+        :param prefix: The prefix of the string. If not provided, defaults
+            to the id of the test.
+        :return: text that looks like '<prefix>-<text_with_unicode>'.
+        :rtype: six.text_type
+        """
+        if prefix is None:
+            prefix = self.id()
+
+        # 0x1e00 is the start of a range of chars that are easy to see are
+        # unicode since they've got circles and dots and other diacriticals.
+        # 0x1eff is the end of the range of these diacritical chars.
+        BASE_CP = 0x1e00
+        CP_RANGE = 0x1f00 - BASE_CP
+
+        unique_text = _unique_text(BASE_CP, CP_RANGE,
+                                   self.getUniqueInteger() - 1)
+        return six.text_type('%s-%s') % (prefix, unique_text)
 
     def onException(self, exc_info, tb_label='traceback'):
         """Called when an exception propogates from test code.
