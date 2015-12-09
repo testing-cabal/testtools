@@ -7,6 +7,8 @@ from pprint import pformat
 import sys
 import unittest
 
+import six
+
 from testtools import (
     DecorateTestCaseResult,
     ErrorHolder,
@@ -1036,7 +1038,7 @@ class TestExpectedFailure(TestWithDetails):
 
 
 class TestUniqueFactories(TestCase):
-    """Tests for getUniqueString and getUniqueInteger."""
+    """Tests for getUniqueString, getUniqueInteger, and getUniqueText."""
 
     run_test_with = FullStackRunTest
 
@@ -1063,6 +1065,13 @@ class TestUniqueFactories(TestCase):
         self.assertThat(name_one, Equals('foo-1'))
         name_two = self.getUniqueString('bar')
         self.assertThat(name_two, Equals('bar-2'))
+
+    def test_getUniqueText(self):
+        # getUniqueText with no prefix returns current test ID followed by
+        # a unique unicode character.
+        text_one = self.getUniqueText()
+        self.assertEqual(six.text_type('%s-%s') %
+                         (self.id(), six.unichr(0x1e00)), text_one)
 
 
 class TestCloneTestWithNewId(TestCase):

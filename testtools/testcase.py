@@ -21,6 +21,8 @@ import itertools
 import sys
 import types
 
+import six
+
 from extras import (
     safe_hasattr,
     try_import,
@@ -545,6 +547,22 @@ class TestCase(unittest.TestCase):
         if prefix is None:
             prefix = self.id()
         return '%s-%d' % (prefix, self.getUniqueInteger())
+
+    def getUniqueText(self, prefix=None):
+        """Generate text unique to this test.
+
+        Returns text that is guaranteed to be unique to this instance. Use
+        this when you need arbitrary text in your test, or as a helper
+        for custom anonymous factory methods.
+
+        :param prefix: The prefix of the string. If not provided, defaults
+            to the id of the test.
+        :return: text that looks like '<prefix>-<text_with_unicode>'.
+        :rtype: six.text_type
+        """
+        if prefix is None:
+            prefix = self.id()
+        return six.text_type('%s-%s') % (prefix, six.unichr(0x1e00))
 
     def onException(self, exc_info, tb_label='traceback'):
         """Called when an exception propogates from test code.
