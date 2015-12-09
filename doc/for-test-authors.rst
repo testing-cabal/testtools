@@ -1437,6 +1437,7 @@ Here, ``repr(nullary)`` will be the same as ``repr(f)``.
 .. _fixtures: http://pypi.python.org/pypi/fixtures
 .. _unittest: http://docs.python.org/library/unittest.html
 .. _doctest: http://docs.python.org/library/doctest.html
+.. _Deferred: http://twistedmatrix.com/documents/current/core/howto/defer.html
 .. _discover: http://pypi.python.org/pypi/discover
 .. _Distutils: http://docs.python.org/library/distutils.html
 .. _`setup configuration`: http://docs.python.org/distutils/configfile.html
