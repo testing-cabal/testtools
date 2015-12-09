@@ -1038,7 +1038,7 @@ class TestExpectedFailure(TestWithDetails):
 
 
 class TestUniqueFactories(TestCase):
-    """Tests for getUniqueString, getUniqueInteger, and getUniqueText."""
+    """Tests for getUniqueString, getUniqueInteger, unique_text_generator."""
 
     run_test_with = FullStackRunTest
 
@@ -1066,14 +1066,15 @@ class TestUniqueFactories(TestCase):
         name_two = self.getUniqueString('bar')
         self.assertThat(name_two, Equals('bar-2'))
 
-    def test_getUniqueText(self):
-        # getUniqueText with no prefix returns current test ID followed by
-        # a unique unicode character.
-        first_result = self.getUniqueText()
+    def test_unique_text_generator(self):
+        # unique_text_generator yields the prefix's id followed by unique
+        # unicode string.
+        unique_text_generator = testcase.unique_text_generator(self)
+        first_result = unique_text_generator.next()
         self.assertEqual(six.text_type('%s-%s') %
                          (self.id(), u'\u1e00'), first_result)
-        # You get different text the next time getUniqueText is called.
-        second_result = self.getUniqueText()
+        # The next value yielded by unique_text_generator is different.
+        second_result = unique_text_generator.next()
         self.assertEqual(six.text_type('%s-%s') %
                          (self.id(), u'\u1e01'), second_result)
 

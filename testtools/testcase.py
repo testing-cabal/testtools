@@ -191,6 +191,33 @@ def _unique_text(base_cp, cp_range, index):
     return s
 
 
+def unique_text_generator(prefix):
+    """Generates unique text values.
+
+    Generates text values that are unique. Use this when you need arbitrary
+    text in your test, or as a helper for custom anonymous factory methods.
+
+    :param prefix: The prefix for text. If this is a TestCase the id is used.
+    :return: text that looks like '<prefix>-<text_with_unicode>'.
+    :rtype: six.text_type
+    """
+    if hasattr(prefix, 'id'):
+        prefix = prefix.id()
+
+    index = 0
+
+    # 0x1e00 is the start of a range of chars that are easy to see are
+    # unicode since they've got circles and dots and other diacriticals.
+    # 0x1eff is the end of the range of these diacritical chars.
+    BASE_CP = 0x1e00
+    CP_RANGE = 0x1f00 - BASE_CP
+
+    while True:
+        unique_text = _unique_text(BASE_CP, CP_RANGE, index)
+        yield six.text_type('%s-%s') % (prefix, unique_text)
+        index = index + 1
+
+
 class TestCase(unittest.TestCase):
     """Extensions to the basic TestCase.
 

@@ -1346,9 +1346,9 @@ fine.  However, sometimes it's useful to be able to create arbitrary objects
 at will, without having to make up silly sample data.
 
 To help with this, ``testtools.TestCase`` implements creation methods called
-``getUniqueString``, ``getUniqueInteger``, and ``getUniqueText``.  They return
-strings and integers that are unique within the context of the test that can be
-used to assemble more complex objects.  Here's a basic example where
+``getUniqueString`` and ``getUniqueInteger``.  They return strings and integers
+that are unique within the context of the test that can be used to assemble
+more complex objects.  Here's a basic example where
 ``getUniqueString`` is used instead of saying "foo" or "bar" or whatever::
 
   class SomeTest(TestCase):
@@ -1385,9 +1385,9 @@ details of certain variables don't actually matter.
 See pages 419-423 of `xUnit Test Patterns`_ by Gerard Meszaros for a detailed
 discussion of creation methods.
 
-``getUniqueText`` is similar to ``getUniqueString``, except it generates text
-that contains unicode characters. As such the value will be a unicode string
-in Python2 and a str in Python3.
+``testcase.generate_unique_text()`` is similar to ``getUniqueString``, except
+it generates text that contains unicode characters. As such the value will be a
+unicode string in Python2 and a str in Python3.
 
 Test attributes
 ---------------
