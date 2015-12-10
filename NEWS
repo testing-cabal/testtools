@@ -10,7 +10,11 @@ Changes
 -------
 
 * Add a new test dependency of testscenarios. (Robert Collins)
-  
+
+* Introduce the unique_text_generator generator function. Similar to the
+  getUniqueString() method, except it creates unique unicode text strings.
+  (Brant Knudson)
+
 1.8.1
 ~~~~~
 
