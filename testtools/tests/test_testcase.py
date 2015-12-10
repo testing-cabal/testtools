@@ -1071,11 +1071,11 @@ class TestUniqueFactories(TestCase):
         # unicode string.
         prefix = self.getUniqueString()
         unique_text_generator = testcase.unique_text_generator(prefix)
-        first_result = unique_text_generator.next()
+        first_result = next(unique_text_generator)
         self.assertEqual(six.text_type('%s-%s') %
                          (prefix, u'\u1e00'), first_result)
         # The next value yielded by unique_text_generator is different.
-        second_result = unique_text_generator.next()
+        second_result = next(unique_text_generator)
         self.assertEqual(six.text_type('%s-%s') %
                          (prefix, u'\u1e01'), second_result)
 
