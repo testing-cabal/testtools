@@ -42,6 +42,7 @@ __all__ = [
     'TimestampingStreamResult',
     'try_import',
     'try_imports',
+    'unique_text_generator',
     ]
 
 # Compat - removal announced in 0.9.25.
@@ -77,6 +78,7 @@ else:
         skip,
         skipIf,
         skipUnless,
+        unique_text_generator,
         )
     from testtools.testresult import (
         CopyStreamResult,

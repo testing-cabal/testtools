@@ -13,6 +13,7 @@ __all__ = [
     'skipIf',
     'skipUnless',
     'TestCase',
+    'unique_text_generator',
     ]
 
 import copy
