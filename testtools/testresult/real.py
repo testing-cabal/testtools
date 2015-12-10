@@ -31,6 +31,7 @@ import warnings
 from extras import safe_hasattr, try_import, try_imports
 parse_mime_type = try_import('mimeparse.parse_mime_type')
 Queue = try_imports(['Queue.Queue', 'queue.Queue'])
+from zope.interface import implements
 
 from pyrsistent import PClass, field, pmap_field, pset_field, pmap, pset, thaw
 
@@ -42,6 +43,8 @@ from testtools.content import (
     )
 from testtools.content_type import ContentType
 from testtools.tags import TagContext
+from testtools._itesttools import IExtendedTestResult
+
 # circular import
 # from testtools.testcase import PlaceHolder
 PlaceHolder = None
@@ -81,6 +84,8 @@ class TestResult(unittest.TestResult):
 
     :ivar skip_reasons: A dict of skip-reasons -> list of tests. See addSkip.
     """
+
+    implements(IExtendedTestResult)
 
     def __init__(self, failfast=False, tb_locals=False):
         # startTestRun resets all attributes, and older clients don't know to

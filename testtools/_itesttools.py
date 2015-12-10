@@ -77,6 +77,20 @@ class IRunTest(Interface):
         """Run the test."""
 
 
+# TODO:
+# - legacy test result interfaces
+# - document which test result interfaces are expected above
+# - stream result interface
+# - make TestControl an interface, use it by composition in
+#   ExtendedToOriginalDecorator
+# - figure out whether .errors, .skip_reasons, .failures, etc. should be
+#   on IExtendedTestResult or on a separate interface that TestResult also
+#   implements
+# - figure out what to do about failfast and tb_locals
+# - interface for TagContext?
+# - failureException?
+# - loading stuff, e.g. test_suite, load_tests?
+
 class ITestCaseStrategy(ITestCase):
     """What ``RunTest`` needs to run a test case.
 
@@ -131,4 +145,118 @@ class ITestCaseStrategy(ITestCase):
             traceback).
         :param tb_label: Used as the label for the traceback, if the traceback
             is to be attached as a detail.
+        """
+
+
+class IExtendedTestResult(Interface):
+    """Receives test events."""
+
+    def addExpectedFailure(test, err=None, details=None):
+        """``test`` failed with an expected failure.
+
+        For any given test, must be called after ``startTest`` was called for
+        that test, and before ``stopTest`` has been called for that test.
+
+        :param ITestCase test: The test that failed expectedly.
+        :param exc_info err: An exc_info tuple.
+        :param dict details: A map of names to ``Content`` objects.
+        """
+
+    def addError(test, err=None, details=None):
+        """``test`` failed with an unexpected error.
+
+        For any given test, must be called after ``startTest`` was called for
+        that test, and before ``stopTest`` has been called for that test.
+
+        :param ITestCase test: The test that raised an error.
+        :param exc_info err: An exc_info tuple.
+        :param dict details: A map of names to ``Content`` objects.
+        """
+
+    def addFailure(test, err=None, details=None):
+        """``test`` failed as assertion.
+
+        For any given test, must be called after ``startTest`` was called for
+        that test, and before ``stopTest`` has been called for that test.
+
+        :param ITestCase test: The test that raised an error.
+        :param exc_info err: An exc_info tuple.
+        :param dict details: A map of names to ``Content`` objects.
+        """
+
+    def addSkip(test, reason=None, details=None):
+        """``test`` was skipped, rather than run.
+
+        For any given test, must be called after ``startTest`` was called for
+        that test, and before ``stopTest`` has been called for that test.
+
+        :param ITestCase test: The test that raised an error.
+        :param reason: The reason for the test being skipped.
+        :param dict details: A map of names to ``Content`` objects.
+        """
+
+    def addSuccess(test, details=None):
+        """``test`` run successfully.
+
+        For any given test, must be called after ``startTest`` was called for
+        that test, and before ``stopTest`` has been called for that test.
+
+        :param ITestCase test: The test that raised an error.
+        :param dict details: A map of names to ``Content`` objects.
+        """
+
+    def addUnexpectedSuccess(test, details=None):
+        """``test`` was expected to fail, but succeeded.
+
+        For any given test, must be called after ``startTest`` was called for
+        that test, and before ``stopTest`` has been called for that test.
+
+        :param ITestCase test: The test that raised an error.
+        :param dict details: A map of names to ``Content`` objects.
+
+        """
+
+    def wasSuccessful():
+        """Has this result been successful so far?"""
+
+    def startTestRun():
+        """Started a run of (potentially many) tests."""
+
+    def stopTestRun():
+        """Finished a run of (potentially many) tests."""
+
+    def startTest(test):
+        """``test`` started executing.
+
+        Must be called after ``startTestRun`` and before ``stopTestRun``.
+
+        :param ITestCase test: The test that started.
+        """
+
+    def stopTest(test):
+        """``test`` stopped executing.
+
+        Must be called after ``startTestRun`` and before ``stopTestRun``.
+
+        :param ITestCase test: The test that stopped.
+        """
+
+    def tags(new_tags, gone_tags):
+        """Change tags for the following tests.
+
+        Updates ``current_tags`` such that all tags in ``new_tags`` are in
+        ``current_tags`` and none of ``gone_tags`` are in ``current_tags``.
+
+        :param set new_tags: A set of tags that will be applied to any
+            following tests.
+        :param set gone_tags: A set of tags that will no longer be applied to
+            following tests.
+        """
+
+    def time(timestamp):
+        """Tell the test result what the current time is.
+
+        :param datetime timestamp: Either a time with timezone information, or
+            ``None`` in which case the test result should get time from the
+            system.
         """
