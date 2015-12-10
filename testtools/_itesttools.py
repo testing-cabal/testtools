@@ -1,4 +1,5 @@
 # Copyright (c) 2015 testtools developers. See LICENSE for details.
+"""Interfaces used within testtools."""
 
 from zope.interface import Interface
 
