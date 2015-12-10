@@ -318,17 +318,30 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         self.case.reactor = self._reactor
         spinner = self._make_spinner()
 
-        # XXX: We want to make the use of these two fixtures optional, and
-        # ideally, make it so they aren't used by default.
-        self.case.useFixture(_NoTwistedLogObservers())
-        self.case.useFixture(_CaptureTwistedLogs())
+        # XXX: We want to make the use of these _NoTwistedLogObservers and
+        # _CaptureTwistedLogs optional, and ideally, make it so they aren't
+        # used by default.
 
-        with _ErrorObserver(_log_observer) as error_fixture:
-            successful, unhandled = self._blocking_run_deferred(
-                spinner)
-        for logged_error in error_fixture.flush_logged_errors():
-            successful = False
-            self._got_user_failure(logged_error, tb_label='logged-error')
+        # We can't just install these as fixtures on self.case, because we
+        # need the clean up to run even if the test times out.
+        with _NoTwistedLogObservers():
+            # Can't use with for _CaptureTwistedLogs, because details are gone
+            # after cleanup.
+            capture_logs = _CaptureTwistedLogs()
+            capture_logs.setUp()
+            try:
+                with _ErrorObserver(_log_observer) as error_fixture:
+                    successful, unhandled = self._blocking_run_deferred(
+                        spinner)
+                for logged_error in error_fixture.flush_logged_errors():
+                    successful = False
+                    self._got_user_failure(
+                        logged_error, tb_label='logged-error')
+            finally:
+                for name, detail in capture_logs.getDetails().items():
+                    self.case.addDetail(name, detail)
+                capture_logs.cleanUp()
+
 
         if unhandled:
             successful = False
