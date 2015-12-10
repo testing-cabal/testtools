@@ -20,6 +20,13 @@ class IRunnable(Interface):
         """Run the test."""
 
 
+class ITestSuite(IRunnable):
+    """A suite of tests."""
+
+    def __iter__():
+        """Iterate over the IRunnables in suite."""
+
+
 class ITestCase(IRunnable):
     """An individual test case."""
 

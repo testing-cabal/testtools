@@ -23,7 +23,7 @@ unittest2 = try_imports(['unittest2', 'unittest'])
 Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
 import testtools
-from testtools._itesttools import IRunnable
+from testtools._itesttools import ITestSuite
 
 
 def iterate_tests(test_suite_or_case):
@@ -41,7 +41,7 @@ def iterate_tests(test_suite_or_case):
 class ConcurrentTestSuite(unittest2.TestSuite):
     """A TestSuite whose run() calls out to a concurrency strategy."""
 
-    implements(IRunnable)
+    implements(ITestSuite)
 
     def __init__(self, suite, make_tests, wrap_result=None):
         """Create a ConcurrentTestSuite to execute suite.
@@ -122,7 +122,7 @@ class ConcurrentTestSuite(unittest2.TestSuite):
 class ConcurrentStreamTestSuite(object):
     """A TestSuite whose run() parallelises."""
 
-    implements(IRunnable)
+    implements(ITestSuite)
 
     def __init__(self, make_tests):
         """Create a ConcurrentTestSuite to execute tests returned by make_tests.
@@ -207,7 +207,7 @@ class ConcurrentStreamTestSuite(object):
 
 class FixtureSuite(unittest2.TestSuite):
 
-    implements(IRunnable)
+    implements(ITestSuite)
 
     def __init__(self, fixture, tests):
         super(FixtureSuite, self).__init__(tests)
