@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
 """ContentType - a MIME Content Type."""
 
@@ -34,6 +34,10 @@ class ContentType(object):
         else:
             params = ''
         return "%s/%s%s" % (self.type, self.subtype, params)
+
+    def is_text(self):
+        """True if this content type can be converted to text."""
+        return self.type == 'text'
 
 
 JSON = ContentType('application', 'json')

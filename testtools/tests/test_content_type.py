@@ -1,5 +1,7 @@
 # Copyright (c) 2008, 2012 testtools developers. See LICENSE for details.
 
+from hypothesis import given
+from hypothesis.strategies import dictionaries, text
 from testtools import TestCase
 from testtools.matchers import Equals, MatchesException, Raises
 from testtools.content_type import (
@@ -45,6 +47,12 @@ class TestContentType(TestCase):
         self.assertThat(
             repr(content_type), Equals('text/plain; baz="qux"; foo="bar"'))
 
+    @given(text(average_size=5),
+           dictionaries(text(average_size=5), text(average_size=5)))
+    def test_text_type_is_text(self, subtype, parameters):
+        content_type = ContentType('text', subtype, parameters)
+        self.assertThat(content_type.is_text(), Equals(True))
+
 
 class TestBuiltinContentTypes(TestCase):
 
@@ -53,6 +61,7 @@ class TestBuiltinContentTypes(TestCase):
         self.assertThat(UTF8_TEXT.type, Equals('text'))
         self.assertThat(UTF8_TEXT.subtype, Equals('plain'))
         self.assertThat(UTF8_TEXT.parameters, Equals({'charset': 'utf8'}))
+        self.assertThat(UTF8_TEXT.is_text(), Equals(True))
 
     def test_json_content(self):
         # The JSON content type represents implictly UTF-8 application/json.

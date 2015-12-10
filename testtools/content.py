@@ -104,7 +104,7 @@ class Content(object):
 
         :raises ValueError: If the content type is not text/\*.
         """
-        if self.content_type.type != "text":
+        if not self.content_type.is_text():
             raise ValueError("Not a text type %r" % self.content_type)
         return self._iter_text()
 
