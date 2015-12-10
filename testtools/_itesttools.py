@@ -1,7 +1,7 @@
 # Copyright (c) 2015 testtools developers. See LICENSE for details.
 """Interfaces used within testtools."""
 
-from zope.interface import Interface
+from zope.interface import Attribute, Interface
 
 
 class IRunnable(Interface):
@@ -89,19 +89,19 @@ class ITestCaseStrategy(ITestCase):
 
     Can be mutated externally.
     """
-    __testtools_tb_locals__ = False
+    __testtools_tb_locals__ = Attribute('__testtools_tb_locals__')
 
     """List of ``(function, args, kwargs)`` called in reverse order after test.
 
     This list is mutated by ``RunTest``.
     """
-    _cleanups = []
+    _cleanups = Attribute('_cleanups')
 
     """If non-False, then force the test to fail regardless of behavior.
 
     If not defined, assumed to be False.
     """
-    force_failure = False
+    force_failure = Attribute('force_failure')
 
     def defaultTestResult():
         """Construct a test result object for reporting results."""
