@@ -55,7 +55,7 @@ from testtools.testresult import (
     ExtendedToOriginalDecorator,
     TestResult,
     )
-from testtools._itesttools import ITestCase
+from testtools._itesttools import ITestCaseStrategy
 
 wraps = try_import('functools.wraps')
 
@@ -183,12 +183,12 @@ class TestCase(unittest.TestCase):
         (exception_class, handler(case, result, exception_value)) pairs.
     :ivar force_failure: Force testtools.RunTest to fail the test after the
         test has completed.
-    :cvar run_tests_with: A factory to make the ``RunTest`` to run tests with.
-        Defaults to ``RunTest``.  The factory is expected to take a test case
-        and an optional list of exception handlers.
+    :cvar IRunTestFactory run_tests_with: A factory to make the ``IRunTest`` to
+        run tests with. Defaults to ``RunTest``.  The factory is expected to
+        take a test case and a list of exception handlers.
     """
 
-    implements(ITestCase)
+    implements(ITestCaseStrategy)
 
     skipException = TestSkipped
 

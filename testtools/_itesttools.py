@@ -33,6 +33,18 @@ class ITestCase(IRunnable):
         """Return a short, human-readable description."""
 
 
+class IExceptionHandler(Interface):
+    """Handle an exception from user code."""
+
+    def __call__(test_case, test_result, exception_value):
+        """Handle an exception raised from user code.
+
+        :param TestCase test_case: The test that raised the exception.
+        :param TestResult test_result: Where to report the result to.
+        :param Exception exception_value: The raised exception.
+        """
+
+
 class IRunTestFactory(Interface):
     """Create a ``RunTest`` object."""
 
@@ -40,18 +52,30 @@ class IRunTestFactory(Interface):
         """Construct and return a ``RunTest``.
 
         :param ITestCase+ITestCaseStrategy test_case: The test case to run.
-        :param exception_handlers: List of (exception_type, exception_handler).
+        :param exception_handlers: List of (exception_type, IExceptionHandler).
             This list can be mutated any time.
-        :param last_resort: exception handler to be used as a last resort.
+        :param IExceptionHandler last_resort: exception handler to be used as
+            a last resort.
 
-        :return: A ``RunTest``.
+        :return: An ``IRunTest``.
         """
 
 
-class ITestCaseStrategy(Interface):
+class IRunTest(Interface):
+    """Called from inside ITestCase.run to actually run the test."""
+
+    # XXX: jml thinks this ought to be run(case, result), and IRunTestFactory
+    # shouldn't take a test_case at all.
+    def run(result):
+        """Run the test."""
+
+
+class ITestCaseStrategy(ITestCase):
     """What ``RunTest`` needs to run a test case.
 
     This is a test that has a ``setUp``, a test body, and a ``tearDown``.
+
+    Must also be an ``ITestCase`` so the results can be reported.
     """
 
     """Should local variables be captured in tracebacks?
