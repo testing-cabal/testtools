@@ -32,6 +32,21 @@ class ITestCase(IRunnable):
         """Return a short, human-readable description."""
 
 
+class IRunTestFactory(Interface):
+    """Create a ``RunTest`` object."""
+
+    def __call__(test_case, exception_handlers, last_resort=None):
+        """Construct and return a ``RunTest``.
+
+        :param ITestCase+ITestCaseStrategy test_case: The test case to run.
+        :param exception_handlers: List of (exception_type, exception_handler).
+            This list can be mutated any time.
+        :param last_resort: exception handler to be used as a last resort.
+
+        :return: A ``RunTest``.
+        """
+
+
 class ITestCaseStrategy(Interface):
     """What ``RunTest`` needs to run a test case.
 
