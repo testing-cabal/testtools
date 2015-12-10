@@ -212,6 +212,13 @@ class TestContent(TestCase):
         expected = Content(JSON, lambda: [_b('{"foo": "bar"}')])
         self.assertEqual(expected, json_content(data))
 
+    def test_json_content_as_text(self):
+        # JSON content can be converted to text, even though it's not strictly
+        # text content.
+        data = {'foo': 'bar'}
+        content = Content(JSON, lambda: [json.dumps(data).encode('utf8')])
+        self.assertThat(json.loads(content.as_text()), Equals(data))
+
 
 class TestStackLinesContent(TestCase):
 

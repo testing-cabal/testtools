@@ -68,6 +68,7 @@ class TestBuiltinContentTypes(TestCase):
         self.assertThat(JSON.type, Equals('application'))
         self.assertThat(JSON.subtype, Equals('json'))
         self.assertThat(JSON.parameters, Equals({}))
+        self.assertThat(JSON.is_text(), Equals(True))
 
 
 def test_suite():

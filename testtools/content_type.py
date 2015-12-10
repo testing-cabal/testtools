@@ -12,7 +12,8 @@ class ContentType(object):
         content type.
     """
 
-    def __init__(self, primary_type, sub_type, parameters=None):
+    def __init__(self, primary_type, sub_type, parameters=None,
+                 text_override=False):
         """Create a ContentType."""
         if None in (primary_type, sub_type):
             raise ValueError("None not permitted in %r, %r" % (
@@ -20,6 +21,7 @@ class ContentType(object):
         self.type = primary_type
         self.subtype = sub_type
         self.parameters = parameters or {}
+        self._text_override = text_override
 
     def __eq__(self, other):
         if type(other) != ContentType:
@@ -37,9 +39,9 @@ class ContentType(object):
 
     def is_text(self):
         """True if this content type can be converted to text."""
-        return self.type == 'text'
+        return self.type == 'text' or self._text_override
 
 
-JSON = ContentType('application', 'json')
+JSON = ContentType('application', 'json', text_override=True)
 
 UTF8_TEXT = ContentType('text', 'plain', {'charset': 'utf8'})
