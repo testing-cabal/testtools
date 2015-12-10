@@ -1069,14 +1069,15 @@ class TestUniqueFactories(TestCase):
     def test_unique_text_generator(self):
         # unique_text_generator yields the prefix's id followed by unique
         # unicode string.
-        unique_text_generator = testcase.unique_text_generator(self)
+        prefix = self.getUniqueString()
+        unique_text_generator = testcase.unique_text_generator(prefix)
         first_result = unique_text_generator.next()
         self.assertEqual(six.text_type('%s-%s') %
-                         (self.id(), u'\u1e00'), first_result)
+                         (prefix, u'\u1e00'), first_result)
         # The next value yielded by unique_text_generator is different.
         second_result = unique_text_generator.next()
         self.assertEqual(six.text_type('%s-%s') %
-                         (self.id(), u'\u1e01'), second_result)
+                         (prefix, u'\u1e01'), second_result)
 
     def test_mods(self):
         # given a number and max, generate a list that's the mods.

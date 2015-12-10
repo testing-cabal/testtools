@@ -197,13 +197,10 @@ def unique_text_generator(prefix):
     Generates text values that are unique. Use this when you need arbitrary
     text in your test, or as a helper for custom anonymous factory methods.
 
-    :param prefix: The prefix for text. If this is a TestCase the id is used.
+    :param prefix: The prefix for text.
     :return: text that looks like '<prefix>-<text_with_unicode>'.
     :rtype: six.text_type
     """
-    if hasattr(prefix, 'id'):
-        prefix = prefix.id()
-
     index = 0
 
     # 0x1e00 is the start of a range of chars that are easy to see are
