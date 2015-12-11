@@ -90,6 +90,13 @@ class IRunTest(Interface):
 # - interface for TagContext?
 # - failureException?
 # - loading stuff, e.g. test_suite, load_tests?
+# - Matchers, Mismatch?
+# - Tests for interface compliance
+# - Tests to make sure that users of objects are relying only on their
+#   interfaces and not the implementation
+# - Identify code that's intended to be used by subclassing and try to
+#   deprecate / limit that usage (or at least make an easily greppable note).
+
 
 class ITestCaseStrategy(ITestCase):
     """What ``RunTest`` needs to run a test case.
