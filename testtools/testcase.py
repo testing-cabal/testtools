@@ -22,8 +22,6 @@ import itertools
 import sys
 import types
 
-import six
-
 from extras import (
     safe_hasattr,
     try_import,
@@ -59,6 +57,7 @@ from testtools.testresult import (
     )
 
 wraps = try_import('functools.wraps')
+import six
 
 class TestSkipped(Exception):
     """Raised within TestCase.run() when a test is skipped."""
