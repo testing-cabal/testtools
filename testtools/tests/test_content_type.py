@@ -1,7 +1,5 @@
 # Copyright (c) 2008, 2012 testtools developers. See LICENSE for details.
 
-from hypothesis import given
-from hypothesis.strategies import dictionaries, text
 from testtools import TestCase
 from testtools.matchers import Equals, MatchesException, Raises
 from testtools.content_type import (
@@ -47,10 +45,9 @@ class TestContentType(TestCase):
         self.assertThat(
             repr(content_type), Equals('text/plain; baz="qux"; foo="bar"'))
 
-    @given(text(average_size=5),
-           dictionaries(text(average_size=5), text(average_size=5)))
-    def test_text_type_is_text(self, subtype, parameters):
-        content_type = ContentType('text', subtype, parameters)
+    def test_text_type_is_text(self):
+        subtype = 'arbitrary-subtype'
+        content_type = ContentType('text', subtype)
         self.assertThat(content_type.is_text(), Equals(True))
 
 
