@@ -69,7 +69,7 @@ class Content(object):
     """
 
     def __init__(self, content_type, get_bytes):
-        """Create a ContentType."""
+        """Create a Content."""
         if None in (content_type, get_bytes):
             raise ValueError("None not permitted in %r, %r" % (
                 content_type, get_bytes))
@@ -119,6 +119,17 @@ class Content(object):
     def __repr__(self):
         return "<Content type=%r, value=%r>" % (
             self.content_type, _join_b(self.iter_bytes()))
+
+    def map_bytes(self, function):
+        """Map ``function`` over data to create a new Content of the same type.
+
+        :param function: Unary callable that expects an iterable of bytes and
+            yields bytes.
+        :return: A ``Content`` object of the same type as ``self`` with bytes
+            that come from ``function``.
+        """
+        return self.__class__(
+            self.content_type, lambda: function(self.iter_bytes()))
 
 
 class StackLinesContent(Content):

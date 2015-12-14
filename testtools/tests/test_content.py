@@ -211,6 +211,28 @@ class TestContent(TestCase):
         expected = Content(JSON, lambda: [_b('{"foo": "bar"}')])
         self.assertEqual(expected, json_content(data))
 
+    def test_map_bytes_identical(self):
+        # Given the identity function, map_bytes returns a Content with the
+        # same data as the original.
+        data = 'some data'
+        content = Content(UTF8_TEXT, lambda: iter(data))
+        new_content = content.map_bytes(lambda x: x)
+        self.assertThat(new_content.as_text(), Equals(content.as_text()))
+
+    def test_map_bytes_different(self):
+        # For all functions that map iterable of data to iterable of data, and
+        # for data, iterating over the bytes of the content returned by
+        # map_bytes(f) is equivalent to mapping f over the iter_bytes of the
+        # original content.
+        data = 'some data'
+        function = lambda x: reversed(list(x))
+
+        content = Content(UTF8_TEXT, lambda: iter(data))
+        new_content = content.map_bytes(lambda x: function(x))
+        self.assertThat(
+            list(new_content.iter_bytes()),
+            Equals(list(function(content.iter_bytes()))))
+
 
 class TestStackLinesContent(TestCase):
 
