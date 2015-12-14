@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
 """Content - a MIME-like Content object."""
 
@@ -13,10 +13,8 @@ __all__ = [
     ]
 
 import codecs
-import inspect
 import json
 import os
-import sys
 
 from extras import try_import
 # To let setup.py work, make this a conditional import.
