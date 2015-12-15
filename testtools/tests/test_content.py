@@ -214,7 +214,7 @@ class TestContent(TestCase):
     def test_map_bytes_identical(self):
         # Given the identity function, map_bytes returns a Content with the
         # same data as the original.
-        data = 'some data'
+        data = _u('some data').encode('utf8')
         content = Content(UTF8_TEXT, lambda: iter(data))
         new_content = content.map_bytes(lambda x: x)
         self.assertThat(new_content.as_text(), Equals(content.as_text()))
@@ -224,7 +224,7 @@ class TestContent(TestCase):
         # for data, iterating over the bytes of the content returned by
         # map_bytes(f) is equivalent to mapping f over the iter_bytes of the
         # original content.
-        data = 'some data'
+        data = _u('some data').encode('utf8')
         function = lambda x: reversed(list(x))
 
         content = Content(UTF8_TEXT, lambda: iter(data))
