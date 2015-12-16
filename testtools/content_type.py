@@ -42,6 +42,7 @@ class ContentType(object):
         return self.type == 'text' or self._text_override
 
 
-JSON = ContentType('application', 'json', text_override=True)
+JSON = ContentType(
+    'application', 'json', {'charset': 'utf8'}, text_override=True)
 
 UTF8_TEXT = ContentType('text', 'plain', {'charset': 'utf8'})

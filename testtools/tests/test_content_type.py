@@ -64,7 +64,7 @@ class TestBuiltinContentTypes(TestCase):
         # The JSON content type represents implictly UTF-8 application/json.
         self.assertThat(JSON.type, Equals('application'))
         self.assertThat(JSON.subtype, Equals('json'))
-        self.assertThat(JSON.parameters, Equals({}))
+        self.assertThat(JSON.parameters, Equals({'charset': 'utf8'}))
         self.assertThat(JSON.is_text(), Equals(True))
 
 
