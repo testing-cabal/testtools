@@ -215,7 +215,7 @@ class TestContent(TestCase):
     def test_json_content_as_text(self):
         # JSON content can be converted to text, even though it's not strictly
         # text content.
-        data = {'foo': 'bar'}
+        data = {_u('foo'): _u('bar'), _u('qux'): _u("A\xA7")}
         content = Content(JSON, lambda: [json.dumps(data).encode('utf8')])
         self.assertThat(json.loads(content.as_text()), Equals(data))
 
