@@ -1,4 +1,5 @@
 from testtools import TestCase
+from testtools.compat import _u
 from testtools.matchers import (
     Equals,
     NotEquals,
@@ -26,7 +27,7 @@ class TestMatchesAllDictInterface(TestCase, TestMatchersInterface):
          matches_matcher)]
 
     describe_examples = [
-        ("""a: 1 == 1""", 1, matches_matcher),
+        (_u("""a: 1 == 1"""), 1, matches_matcher),
         ]
 
 
@@ -107,30 +108,30 @@ class TestMatchesDict(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ("Missing: {\n"
-         "  'baz': Not(Equals('qux')),\n"
-         "  'foo': Equals('bar'),\n"
-         "}",
+        (_u("Missing: {\n"
+            "  'baz': Not(Equals('qux')),\n"
+            "  'foo': Equals('bar'),\n"
+            "}"),
          {}, matches_matcher),
-        ("Differences: {\n"
-         "  'baz': 'qux' matches Equals('qux'),\n"
-         "}",
+        (_u("Differences: {\n"
+            "  'baz': 'qux' matches Equals('qux'),\n"
+            "}"),
          {'foo': 'bar', 'baz': 'qux'}, matches_matcher),
-        ("Differences: {\n"
-         "  'baz': 'qux' matches Equals('qux'),\n"
-         "  'foo': 'bar' != 'bop',\n"
-         "}",
+        (_u("Differences: {\n"
+            "  'baz': 'qux' matches Equals('qux'),\n"
+            "  'foo': 'bar' != 'bop',\n"
+            "}"),
          {'foo': 'bop', 'baz': 'qux'}, matches_matcher),
-        ("Extra: {\n"
-         "  'cat': 'dog',\n"
-         "}",
+        (_u("Extra: {\n"
+            "  'cat': 'dog',\n"
+            "}"),
          {'foo': 'bar', 'baz': 'quux', 'cat': 'dog'}, matches_matcher),
-        ("Extra: {\n"
-         "  'cat': 'dog',\n"
-         "}\n"
-         "Missing: {\n"
-         "  'baz': Not(Equals('qux')),\n"
-         "}",
+        (_u("Extra: {\n"
+            "  'cat': 'dog',\n"
+            "}\n"
+            "Missing: {\n"
+            "  'baz': Not(Equals('qux')),\n"
+            "}"),
          {'foo': 'bar', 'cat': 'dog'}, matches_matcher),
         ]
 
@@ -160,23 +161,23 @@ class TestContainsDict(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ("Missing: {\n"
-         "  'baz': Not(Equals('qux')),\n"
-         "  'foo': Equals('bar'),\n"
-         "}",
+        (_u("Missing: {\n"
+            "  'baz': Not(Equals('qux')),\n"
+            "  'foo': Equals('bar'),\n"
+            "}"),
          {}, matches_matcher),
-        ("Differences: {\n"
-         "  'baz': 'qux' matches Equals('qux'),\n"
-         "}",
+        (_u("Differences: {\n"
+            "  'baz': 'qux' matches Equals('qux'),\n"
+            "}"),
          {'foo': 'bar', 'baz': 'qux'}, matches_matcher),
-        ("Differences: {\n"
-         "  'baz': 'qux' matches Equals('qux'),\n"
-         "  'foo': 'bar' != 'bop',\n"
-         "}",
+        (_u("Differences: {\n"
+            "  'baz': 'qux' matches Equals('qux'),\n"
+            "  'foo': 'bar' != 'bop',\n"
+            "}"),
          {'foo': 'bop', 'baz': 'qux'}, matches_matcher),
-        ("Missing: {\n"
-         "  'baz': Not(Equals('qux')),\n"
-         "}",
+        (_u("Missing: {\n"
+            "  'baz': Not(Equals('qux')),\n"
+            "}"),
          {'foo': 'bar', 'cat': 'dog'}, matches_matcher),
         ]
 
@@ -201,23 +202,23 @@ class TestContainedByDict(TestCase, TestMatchersInterface):
 
     str_examples = [
         ("ContainedByDict({'baz': %s, 'foo': %s})" % (
-                Not(Equals('qux')), Equals('bar')),
+            Not(Equals('qux')), Equals('bar')),
          matches_matcher),
         ]
 
     describe_examples = [
-        ("Differences: {\n"
-         "  'baz': 'qux' matches Equals('qux'),\n"
-         "}",
+        (_u("Differences: {\n"
+            "  'baz': 'qux' matches Equals('qux'),\n"
+            "}"),
          {'foo': 'bar', 'baz': 'qux'}, matches_matcher),
-        ("Differences: {\n"
-         "  'baz': 'qux' matches Equals('qux'),\n"
-         "  'foo': 'bar' != 'bop',\n"
-         "}",
+        (_u("Differences: {\n"
+            "  'baz': 'qux' matches Equals('qux'),\n"
+            "  'foo': 'bar' != 'bop',\n"
+            "}"),
          {'foo': 'bop', 'baz': 'qux'}, matches_matcher),
-        ("Extra: {\n"
-         "  'cat': 'dog',\n"
-         "}",
+        (_u("Extra: {\n"
+            "  'cat': 'dog',\n"
+            "}"),
          {'foo': 'bar', 'cat': 'dog'}, matches_matcher),
         ]
 

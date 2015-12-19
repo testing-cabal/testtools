@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
 import os
 import shutil
@@ -6,6 +6,7 @@ import tarfile
 import tempfile
 
 from testtools import TestCase
+from testtools.compat import _u
 from testtools.matchers import (
     Contains,
     DocTestMatches,
@@ -51,7 +52,8 @@ class TestPathExists(TestCase, PathHelpers):
         doesntexist = os.path.join(self.mkdtemp(), 'doesntexist')
         mismatch = PathExists().match(doesntexist)
         self.assertThat(
-            "%s does not exist." % doesntexist, Equals(mismatch.describe()))
+            _u("%s does not exist.") % doesntexist,
+            Equals(mismatch.describe()))
 
 
 class TestDirExists(TestCase, PathHelpers):
@@ -72,7 +74,8 @@ class TestDirExists(TestCase, PathHelpers):
         self.touch(filename)
         mismatch = DirExists().match(filename)
         self.assertThat(
-            "%s is not a directory." % filename, Equals(mismatch.describe()))
+            _u("%s is not a directory.") % filename,
+            Equals(mismatch.describe()))
 
 
 class TestFileExists(TestCase, PathHelpers):
@@ -94,7 +97,7 @@ class TestFileExists(TestCase, PathHelpers):
         tempdir = self.mkdtemp()
         mismatch = FileExists().match(tempdir)
         self.assertThat(
-            "%s is not a file." % tempdir, Equals(mismatch.describe()))
+            _u("%s is not a file.") % tempdir, Equals(mismatch.describe()))
 
 
 class TestDirContains(TestCase, PathHelpers):
@@ -175,6 +178,8 @@ class TestFileContains(TestCase, PathHelpers):
         self.assertThat(
             Equals('Hello World!').match('Goodbye Cruel World!').describe(),
             Equals(mismatch.describe()))
+
+
 class TestTarballContains(TestCase, PathHelpers):
 
     def test_match(self):

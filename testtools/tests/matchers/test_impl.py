@@ -1,9 +1,9 @@
-# Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
 """Tests for matchers."""
 
 from testtools import (
-    Matcher, # check that Matcher is exposed at the top level for docs.
+    Matcher,  # check that Matcher is exposed at the top level for docs.
     TestCase,
     )
 from testtools.compat import (
@@ -32,13 +32,14 @@ class TestMismatch(TestCase):
     run_tests_with = FullStackRunTest
 
     def test_constructor_arguments(self):
-        mismatch = Mismatch("some description", {'detail': "things"})
-        self.assertEqual("some description", mismatch.describe())
+        mismatch = Mismatch(_u("some description"), {'detail': "things"})
+        self.assertEqual(_u("some description"), mismatch.describe())
         self.assertEqual({'detail': "things"}, mismatch.get_details())
 
     def test_constructor_no_arguments(self):
         mismatch = Mismatch()
-        self.assertThat(mismatch.describe,
+        self.assertThat(
+            mismatch.describe,
             Raises(MatchesException(NotImplementedError)))
         self.assertEqual({}, mismatch.get_details())
 

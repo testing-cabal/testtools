@@ -1,11 +1,11 @@
-# Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
 import doctest
 import re
 import sys
 
 from testtools import TestCase
-from testtools.compat import StringIO
+from testtools.compat import StringIO, _u
 from testtools.matchers import (
     Annotate,
     Equals,
@@ -67,19 +67,19 @@ class TestMatchesStructure(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ("""\
+        (_u("""\
 Differences: [
 3 != 1: x
-]""", SimpleClass(1, 2), MatchesStructure(x=Equals(3), y=Equals(2))),
-        ("""\
+]"""), SimpleClass(1, 2), MatchesStructure(x=Equals(3), y=Equals(2))),
+        (_u("""\
 Differences: [
 3 != 2: y
-]""", SimpleClass(1, 2), MatchesStructure(x=Equals(1), y=Equals(3))),
-        ("""\
+]"""), SimpleClass(1, 2), MatchesStructure(x=Equals(1), y=Equals(3))),
+        (_u("""\
 Differences: [
 0 != 1: x
 0 != 2: y
-]""", SimpleClass(1, 2), MatchesStructure(x=Equals(0), y=Equals(0))),
+]"""), SimpleClass(1, 2), MatchesStructure(x=Equals(0), y=Equals(0))),
         ]
 
     def test_fromExample(self):
@@ -122,7 +122,7 @@ class TestMatchesSetwise(TestCase):
         self.assertThat(
             actual_description,
             Annotate(
-                "%s matching %s" % (matcher, value),
+                _u("%s matching %s") % (matcher, value),
                 description_matcher))
 
     def test_matches(self):
@@ -198,9 +198,9 @@ class TestContainsAllInterface(TestCase, TestMatchersInterface):
         ContainsAll(['foo', 'bar'])),
         ]
 
-    describe_examples = [("""Differences: [
+    describe_examples = [(_u("""Differences: [
 'baz' not in 'foo'
-]""",
+]"""),
     'foo', ContainsAll(['foo', 'baz']))]
 
 
