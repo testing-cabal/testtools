@@ -1,9 +1,48 @@
 # Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
 import collections
-from testtools.compat import text
+from functools import partial
+
+from testtools.compat import text, _u
+from testtools.matchers import (
+    AfterPreprocessing,
+    Annotate,
+    IsInstance,
+    MatchesAll,
+    MatchesPredicate,
+)
 from testtools.matchers._imatcher import IMatcher, IMismatch
 from testtools.tests.helpers import FullStackRunTest
+
+
+def _provides(interface):
+    return MatchesPredicate(
+        lambda x: interface.providedBy(x),
+        _u("%s not provided by %%r" % interface),
+    )
+
+
+_valid_matcher = partial(_provides, IMatcher)
+
+
+def _valid_mismatch():
+    return MatchesAll(
+        _provides(IMismatch),
+        Annotate(
+            _u(".describe() should return text"),
+            AfterPreprocessing(
+                lambda x: x.describe(),
+                IsInstance(text),
+            ),
+        ),
+        Annotate(
+            _u(".get_details() should return a mapping"),
+            AfterPreprocessing(
+                lambda x: x.get_details(),
+                IsInstance(collections.Mapping),
+            ),
+        ),
+    )
 
 
 class TestMatchersInterface(object):
@@ -36,35 +75,6 @@ class TestMatchersInterface(object):
         # iter() and are thus mutated by other tests.
         for _, matchee, matcher in self.describe_examples:
             yield matcher.match(matchee)
-
-    def assert_provides(self, interface, obj):
-        """Assert ``obj`` provides ``interface``."""
-        # TODO: Provide a matcher for this.
-        self.assertTrue(
-            interface.providedBy(obj),
-            '%s not provided by %r' % (interface, obj))
-
-    def assert_matcher(self, matcher):
-        """Assert that ``matcher`` provides ``IMatcher``."""
-        # TODO: Provide ValidMatcher() matcher that does this.
-        self.assert_provides(IMatcher, matcher)
-
-    def assert_mismatch(self, mismatch):
-        """Assert that ``mismatch`` provides ``IMismatch``."""
-        # TODO: Provide ValidMismatch() matcher that does this.
-        self.assert_provides(IMismatch, mismatch)
-        description = mismatch.describe()
-        self.assertTrue(
-            isinstance(description, text),
-            "Description is not text, is %r instead: %r" % (
-                type(description), description))
-        details = mismatch.get_details()
-        self.assertTrue(
-            isinstance(details, collections.Mapping),
-            "details are not a map, are %r instead: %r" % (
-                type(details), details))
-        # TODO: In a follow-up branch, add an interface for content, and
-        # assert that the details all implement that interface.
 
     def test_matches_match(self):
         matcher = self.matches_matcher
@@ -101,9 +111,9 @@ class TestMatchersInterface(object):
     def test_matcher_provides_interface(self):
         # The matcher provides the IMatcher interface.
         for matcher in self._iter_matchers():
-            self.assert_matcher(matcher)
+            self.assertThat(matcher, _valid_matcher())
 
     def test_mismatches_provide_interface(self):
         # Mismatches provide the IMismatch interface.
         for mismatch in self._iter_mismatches():
-            self.assert_mismatch(mismatch)
+            self.assertThat(mismatch, _valid_mismatch())
