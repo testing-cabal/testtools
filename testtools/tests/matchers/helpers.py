@@ -1,6 +1,6 @@
 # Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
-from testtools.matchers._imatcher import IMatcher
+from testtools.matchers._imatcher import IMatcher, IMismatch
 from testtools.tests.helpers import FullStackRunTest
 
 
@@ -28,6 +28,13 @@ class TestMatchersInterface(object):
         self.assertEqual(
             True, IMatcher.providedBy(self.matches_matcher),
             'IMatcher not provided by %r' % (matcher,),
+        )
+
+    def assert_mismatch(self, mismatch):
+        """Assert that ``mismatch`` provides ``IMismatch``."""
+        self.assertEqual(
+            True, IMismatch.providedBy(mismatch),
+            'IMismatch not provided by %r' % (mismatch,),
         )
 
     def test_matches_match(self):
@@ -66,3 +73,8 @@ class TestMatchersInterface(object):
         # The matcher provides the IMatcher interface.
         for matcher in self._iter_matchers():
             self.assert_matcher(matcher)
+
+    def test_mismatches_provide_interface(self):
+        # Mismatches provide the IMismatch interface.
+        for mismatch in self._iter_mismatches():
+            self.assert_mismatch(mismatch)
