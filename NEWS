@@ -12,11 +12,21 @@ Improvements
 * ``MatchesListwise`` has more informative error when lengths don't match.
   (Jonathan Lange)
 
+* Explicit interfaces for matchers (``IMatcher``) and mismatches
+  (``IMismatch``), explicitly documenting the contract expected by
+  ``assertThat`` and ``MismatchError``. (Jonathan Lange)
+
 Changes
 -------
 
 * Add a new test dependency of testscenarios. (Robert Collins)
-  
+
+* New dependency on zope.interface. (Jonathan Lange)
+
+* The ``describe`` method on mismatches must return unicode on Python 2 and
+  str on Python 3. Mismatches that return ASCII-encoded bytes will continue
+  to work, but will emit deprecation warnings. (Jonathan Lange)
+
 1.8.1
 ~~~~~
 
