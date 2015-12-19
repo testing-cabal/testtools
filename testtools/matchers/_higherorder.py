@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
 __all__ = [
     'AfterPreprocessing',
@@ -11,7 +11,9 @@ __all__ = [
     ]
 
 import types
+from zope.interface import implementer
 
+from ._imatcher import IMatcher
 from ._impl import (
     Matcher,
     Mismatch,
@@ -19,6 +21,7 @@ from ._impl import (
     )
 
 
+@implementer(IMatcher)
 class MatchesAny(object):
     """Matches if any of the matchers it is created with match."""
 
@@ -39,6 +42,7 @@ class MatchesAny(object):
             str(matcher) for matcher in self.matchers])
 
 
+@implementer(IMatcher)
 class MatchesAll(object):
     """Matches if all of the matchers it is created with match."""
 
@@ -88,6 +92,7 @@ class MismatchesAll(Mismatch):
         return '\n'.join(descriptions)
 
 
+@implementer(IMatcher)
 class Not(object):
     """Inverts a matcher."""
 
@@ -116,6 +121,7 @@ class MatchedUnexpectedly(Mismatch):
         return "%r matches %s" % (self.other, self.matcher)
 
 
+@implementer(IMatcher)
 class Annotate(object):
     """Annotates a matcher with a descriptive string.
 
@@ -167,6 +173,7 @@ class PrefixedMismatch(MismatchDecorator):
         return '%s: %s' % (self.prefix, self.original.describe())
 
 
+@implementer(IMatcher)
 class AfterPreprocessing(object):
     """Matches if the value matches after passing through a function.
 
@@ -218,6 +225,7 @@ class AfterPreprocessing(object):
 AfterPreproccessing = AfterPreprocessing
 
 
+@implementer(IMatcher)
 class AllMatch(object):
     """Matches if all provided values match the given matcher."""
 
@@ -237,6 +245,7 @@ class AllMatch(object):
             return MismatchesAll(mismatches)
 
 
+@implementer(IMatcher)
 class AnyMatch(object):
     """Matches if any of the provided values match the given matcher."""
 

@@ -1,5 +1,6 @@
 # Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
+from testtools.matchers._imatcher import IMatcher
 from testtools.tests.helpers import FullStackRunTest
 
 
@@ -13,6 +14,13 @@ class TestMatchersInterface(object):
         # iter() and are thus mutated by other tests.
         for _, matchee, matcher in self.describe_examples:
             yield matcher.match(matchee)
+
+    def assert_matcher(self, matcher):
+        """Assert that ``matcher`` provides ``IMatcher``."""
+        self.assertEqual(
+            True, IMatcher.providedBy(self.matches_matcher),
+            'IMatcher not provided by %r' % (matcher,),
+        )
 
     def test_matches_match(self):
         matcher = self.matches_matcher
@@ -45,3 +53,7 @@ class TestMatchersInterface(object):
         for mismatch in self._iter_mismatches():
             details = mismatch.get_details()
             self.assertEqual(dict(details), details)
+
+    def test_matcher_provides_interface(self):
+        # The matcher provides the IMatcher interface.
+        self.assert_matcher(self.matches_matcher)

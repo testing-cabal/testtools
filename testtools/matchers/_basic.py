@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
 __all__ = [
     'Contains',
@@ -18,6 +18,8 @@ import operator
 from pprint import pformat
 import re
 
+from zope.interface import implementer
+
 from ..compat import (
     _isbytes,
     istext,
@@ -29,6 +31,7 @@ from ._higherorder import (
     MatchesPredicateWithParams,
     PostfixedMismatch,
     )
+from ._imatcher import IMatcher
 from ._impl import (
     Matcher,
     Mismatch,
@@ -45,6 +48,7 @@ def _format(thing):
     return pformat(thing)
 
 
+@implementer(IMatcher)
 class _BinaryComparison(object):
     """Matcher that compares an object to another object."""
 
@@ -216,6 +220,7 @@ class EndsWith(Matcher):
         return None
 
 
+@implementer(IMatcher)
 class IsInstance(object):
     """Matcher that wraps isinstance."""
 
@@ -290,6 +295,7 @@ class Contains(Matcher):
         return None
 
 
+@implementer(IMatcher)
 class MatchesRegex(object):
     """Matches if the matchee is matched by a regular expression."""
 
