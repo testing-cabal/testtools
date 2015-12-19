@@ -23,19 +23,19 @@ class TestMatchersInterface(object):
         for _, matchee, matcher in self.describe_examples:
             yield matcher.match(matchee)
 
+    def assert_provides(self, interface, obj):
+        """Assert ``obj`` provides ``interface``."""
+        self.assertTrue(
+            interface.providedBy(obj),
+            '%s not provided by %r' % (interface, obj))
+
     def assert_matcher(self, matcher):
         """Assert that ``matcher`` provides ``IMatcher``."""
-        self.assertEqual(
-            True, IMatcher.providedBy(self.matches_matcher),
-            'IMatcher not provided by %r' % (matcher,),
-        )
+        self.assert_provides(IMatcher, matcher)
 
     def assert_mismatch(self, mismatch):
         """Assert that ``mismatch`` provides ``IMismatch``."""
-        self.assertEqual(
-            True, IMismatch.providedBy(mismatch),
-            'IMismatch not provided by %r' % (mismatch,),
-        )
+        self.assert_provides(IMismatch, mismatch)
 
     def test_matches_match(self):
         matcher = self.matches_matcher
