@@ -8,6 +8,14 @@ class TestMatchersInterface(object):
 
     run_tests_with = FullStackRunTest
 
+    def _iter_matchers(self):
+        """Iterate through matchers from the sample data."""
+        yield self.matches_matcher
+        for _, matcher in self.str_examples:
+            yield matcher
+        for _, _, matcher in self.describe_examples:
+            yield matcher
+
     def _iter_mismatches(self):
         """Iterate through mismatches from the sample data."""
         # Don't iterate through matches_mismatches, because sometimes they are
@@ -56,4 +64,5 @@ class TestMatchersInterface(object):
 
     def test_matcher_provides_interface(self):
         # The matcher provides the IMatcher interface.
-        self.assert_matcher(self.matches_matcher)
+        for matcher in self._iter_matchers():
+            self.assert_matcher(matcher)
