@@ -17,14 +17,17 @@ __all__ = [
     'MismatchError',
     ]
 
+from zope.interface import implementer
 from testtools.compat import (
     _isbytes,
     istext,
     str_is_unicode,
     text_repr
     )
+from ._imatcher import IMatcher, IMismatch
 
 
+@implementer(IMatcher)
 class Matcher(object):
     """A pattern matcher.
 
@@ -53,6 +56,7 @@ class Matcher(object):
         raise NotImplementedError(self.__str__)
 
 
+@implementer(IMismatch)
 class Mismatch(object):
     """An object describing a mismatch detected by a Matcher."""
 
@@ -143,6 +147,7 @@ class MismatchError(AssertionError):
             return self.__unicode__().encode("ascii", "backslashreplace")
 
 
+@implementer(IMismatch)
 class MismatchDecorator(object):
     """Decorate a ``Mismatch``.
 
