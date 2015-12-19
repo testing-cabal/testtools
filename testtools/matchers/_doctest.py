@@ -65,7 +65,7 @@ class DocTestMatches(object):
         """
         if not example.endswith('\n'):
             example += '\n'
-        self.want = example # required variable name by doctest.
+        self.want = example  # required variable name by doctest.
         self.flags = flags
         self._checker = _NonManglingOutputChecker()
 
@@ -105,4 +105,4 @@ class DocTestMismatch(Mismatch):
             return s
         # GZ 2011-08-24: This is actually pretty bogus, most C0 codes should
         #                be escaped, in addition to non-ascii bytes.
-        return s.decode("latin1").encode("ascii", "backslashreplace")
+        return s.decode("latin1")

@@ -1,6 +1,7 @@
-# Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
 from testtools import TestCase
+from testtools.compat import _u
 from testtools.matchers import (
     DocTestMatches,
     Equals,
@@ -104,6 +105,7 @@ class TestAfterPreprocessing(TestCase, TestMatchersInterface):
         ("1 != 0", 2,
          AfterPreprocessing(parity, Equals(1), annotate=False)),
         ]
+
 
 class TestMatchersAnyInterface(TestCase, TestMatchersInterface):
 
@@ -209,17 +211,17 @@ def is_even(x):
 
 class TestMatchesPredicate(TestCase, TestMatchersInterface):
 
-    matches_matcher = MatchesPredicate(is_even, "%s is not even")
+    matches_matcher = MatchesPredicate(is_even, _u("%s is not even"))
     matches_matches = [2, 4, 6, 8]
     matches_mismatches = [3, 5, 7, 9]
 
     str_examples = [
-        ("MatchesPredicate(%r, %r)" % (is_even, "%s is not even"),
-         MatchesPredicate(is_even, "%s is not even")),
+        ("MatchesPredicate(%r, %r)" % (is_even, _u("%s is not even")),
+         MatchesPredicate(is_even, _u("%s is not even"))),
         ]
 
     describe_examples = [
-        ('7 is not even', 7, MatchesPredicate(is_even, "%s is not even")),
+        ('7 is not even', 7, MatchesPredicate(is_even, _u("%s is not even"))),
         ]
 
 
@@ -236,16 +238,16 @@ class TestMatchesPredicateWithParams(TestCase, TestMatchersInterface):
 
     str_examples = [
         ("MatchesPredicateWithParams(%r, %r)(%s)" % (
-            between, "{0} is not between {1} and {2}", "1, 2"),
+            between, _u("{0} is not between {1} and {2}"), "1, 2"),
          MatchesPredicateWithParams(
-            between, "{0} is not between {1} and {2}")(1, 2)),
+             between, _u("{0} is not between {1} and {2}"))(1, 2)),
         ("Between(1, 2)", MatchesPredicateWithParams(
-            between, "{0} is not between {1} and {2}", "Between")(1, 2)),
+            between, _u("{0} is not between {1} and {2}"), "Between")(1, 2)),
         ]
 
     describe_examples = [
         ('1 is not between 2 and 3', 1, MatchesPredicateWithParams(
-            between, "{0} is not between {1} and {2}")(2, 3)),
+            between, _u("{0} is not between {1} and {2}"))(2, 3)),
         ]
 
 

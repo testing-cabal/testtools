@@ -13,7 +13,8 @@ __all__ = [
 import types
 from zope.interface import implementer
 
-from ._imatcher import IMatcher
+from testtools.compat import _u, text
+from ._imatcher import IMatcher, _text_deprecation
 from ._impl import (
     Matcher,
     Mismatch,
@@ -118,7 +119,7 @@ class MatchedUnexpectedly(Mismatch):
         self.other = other
 
     def describe(self):
-        return "%r matches %s" % (self.other, self.matcher)
+        return _u("%r matches %s") % (self.other, self.matcher)
 
 
 @implementer(IMatcher)
@@ -285,7 +286,9 @@ class MatchesPredicate(Matcher):
             a value that will be interpreted as a boolean.
         :param message: A message to describe a mismatch.  It will be formatted
             with '%' and be given whatever was passed to ``match()``. Thus, it
-            needs to contain exactly one thing like '%s', '%d' or '%f'.
+            needs to contain exactly one thing like '%s', '%d' or '%f'. It must
+            be text, not bytes (i.e. ``unicode`` on Python 2, ``str`` on
+            Python 3)
         """
         self.predicate = predicate
         self.message = message
@@ -324,6 +327,9 @@ def MatchesPredicateWithParams(predicate, message, name=None):
     :param message: A format string for describing mis-matches.
     :param name: Optional replacement name for the matcher.
     """
+    if not isinstance(message, text):
+        _text_deprecation(message)
+
     def construct_matcher(*args, **kwargs):
         return _MatchesPredicateWithParams(
             predicate, message, name, *args, **kwargs)

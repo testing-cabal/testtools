@@ -1,5 +1,6 @@
 # Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
+from testtools.compat import text
 from testtools.matchers._imatcher import IMatcher, IMismatch
 from testtools.tests.helpers import FullStackRunTest
 
@@ -36,6 +37,11 @@ class TestMatchersInterface(object):
     def assert_mismatch(self, mismatch):
         """Assert that ``mismatch`` provides ``IMismatch``."""
         self.assert_provides(IMismatch, mismatch)
+        description = mismatch.describe()
+        self.assertTrue(
+            isinstance(description, text),
+            "Description is not text, is %r instead: %r" % (
+                type(description), description))
 
     def test_matches_match(self):
         matcher = self.matches_matcher

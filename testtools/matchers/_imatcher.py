@@ -2,6 +2,7 @@
 
 """Interfaces for matchers and mismatches."""
 
+import warnings
 
 from zope.interface import Interface
 
@@ -31,6 +32,9 @@ class IMismatch(Interface):
 
         This should be human-readable text. i.e. ``unicode`` on Python 2 or
         ``str`` on Python 3.
+
+        In testtools 1.8.1 and prior, this was allowed to be ASCII-encoded
+        bytes, or an object castable to a string. Now, it *must* be text.
         """
 
     def get_details():
@@ -50,3 +54,11 @@ class IMismatch(Interface):
             which items from this dict are passed
             ``testtools.TestCase.addDetail``.
         """
+
+
+def _text_deprecation(obj):
+    warnings.warn(
+        'Must pass text (unicode on Python 2, str on Python 3)',
+        DeprecationWarning,
+        stacklevel=3,
+    )

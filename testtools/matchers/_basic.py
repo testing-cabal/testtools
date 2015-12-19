@@ -22,6 +22,7 @@ from zope.interface import implementer
 
 from ..compat import (
     _isbytes,
+    _u,
     istext,
     str_is_unicode,
     text_repr,
@@ -79,11 +80,11 @@ class _BinaryMismatch(Mismatch):
         left = repr(self.expected)
         right = repr(self.other)
         if len(left) + len(right) > 70:
-            return "%s:\nreference = %s\nactual    = %s\n" % (
+            return _u("%s:\nreference = %s\nactual    = %s\n") % (
                 self._mismatch_string, _format(self.expected),
                 _format(self.other))
         else:
-            return "%s %s %s" % (left, self._mismatch_string, right)
+            return _u("%s %s %s") % (left, self._mismatch_string, right)
 
 
 class Equals(_BinaryComparison):
@@ -252,9 +253,9 @@ class NotAnInstance(Mismatch):
         if len(self.types) == 1:
             typestr = self.types[0].__name__
         else:
-            typestr = 'any of (%s)' % ', '.join(type.__name__ for type in
-                    self.types)
-        return "'%s' is not an instance of %s" % (self.matchee, typestr)
+            typestr = _u('any of (%s)') % _u(', ').join(
+                type.__name__ for type in self.types)
+        return _u("'%s' is not an instance of %s") % (self.matchee, typestr)
 
 
 class DoesNotContain(Mismatch):
@@ -269,7 +270,7 @@ class DoesNotContain(Mismatch):
         self.needle = needle
 
     def describe(self):
-        return "%r not in %r" % (self.needle, self.matchee)
+        return _u("%r not in %r") % (self.needle, self.matchee)
 
 
 class Contains(Matcher):
@@ -329,4 +330,5 @@ def has_len(x, y):
     return len(x) == y
 
 
-HasLength = MatchesPredicateWithParams(has_len, "len({0}) != {1}", "HasLength")
+HasLength = MatchesPredicateWithParams(
+    has_len, _u("len({0}) != {1}"), _u("HasLength"))
