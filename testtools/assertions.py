@@ -1,7 +1,9 @@
 from testtools.matchers import (
     Annotate,
+    IMatcher,
+    IMismatch,
     MismatchError,
-    )
+)
 
 
 def assert_that(matchee, matcher, message='', verbose=False):
@@ -12,11 +14,12 @@ def assert_that(matchee, matcher, message='', verbose=False):
     features
 
     :param matchee: An object to match with matcher.
-    :param matcher: An object meeting the testtools.Matcher protocol.
+    :param IMatcher matcher: The matcher to match with.
     :raises MismatchError: When matcher does not match thing.
     """
-    matcher = Annotate.if_message(message, matcher)
+    matcher = Annotate.if_message(message, IMatcher(matcher, matcher))
     mismatch = matcher.match(matchee)
     if not mismatch:
         return
-    raise MismatchError(matchee, matcher, mismatch, verbose)
+    raise MismatchError(
+        matchee, matcher, IMismatch(mismatch, mismatch), verbose)
