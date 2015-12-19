@@ -22,6 +22,7 @@ from testtools.matchers._impl import (
     MismatchError,
     )
 from testtools.tests.helpers import FullStackRunTest
+from .helpers import _valid_mismatch
 
 # Silence pyflakes.
 Matcher
@@ -42,6 +43,11 @@ class TestMismatch(TestCase):
             mismatch.describe,
             Raises(MatchesException(NotImplementedError)))
         self.assertEqual({}, mismatch.get_details())
+
+    def test_valid_mismatch(self):
+        # Mismatch returns objects that implement IMismatch correctly.
+        mismatch = Mismatch(_u("some description"), {'detail': "things"})
+        self.assertThat(mismatch, _valid_mismatch())
 
 
 class TestMismatchError(TestCase):
@@ -110,18 +116,24 @@ class TestMismatchDecorator(TestCase):
 
     run_tests_with = FullStackRunTest
 
+    def test_valid_mismatch(self):
+        # MismatchDecorator implements IMismatch correctly.
+        x = Mismatch(_u("description"), {'foo': 'bar'})
+        decorated = MismatchDecorator(x)
+        self.assertThat(decorated, _valid_mismatch())
+
     def test_forwards_description(self):
-        x = Mismatch("description", {'foo': 'bar'})
+        x = Mismatch(_u("description"), {'foo': 'bar'})
         decorated = MismatchDecorator(x)
         self.assertEqual(x.describe(), decorated.describe())
 
     def test_forwards_details(self):
-        x = Mismatch("description", {'foo': 'bar'})
+        x = Mismatch(_u("description"), {'foo': 'bar'})
         decorated = MismatchDecorator(x)
         self.assertEqual(x.get_details(), decorated.get_details())
 
     def test_repr(self):
-        x = Mismatch("description", {'foo': 'bar'})
+        x = Mismatch(_u("description"), {'foo': 'bar'})
         decorated = MismatchDecorator(x)
         self.assertEqual(
             '<testtools.matchers.MismatchDecorator(%r)>' % (x,),
