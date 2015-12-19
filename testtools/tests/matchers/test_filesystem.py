@@ -254,9 +254,9 @@ class TestHasPermissions(TestCase, PathHelpers, TestMatchersInterface):
 
         tempdir = self.mkdtemp()
         file1 = self.touch(os.path.join(tempdir, 'file1'))
-        os.chmod(file1, 0777)
+        os.chmod(file1, int('0777', 8))
         file2 = self.touch(os.path.join(tempdir, 'file2'))
-        os.chmod(file2, 0644)
+        os.chmod(file2, int('0644', 8))
 
         self.matches_matcher = HasPermissions('0777')
         self.matches_matches = [file1]
