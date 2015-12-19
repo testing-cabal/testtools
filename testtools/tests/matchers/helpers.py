@@ -1,11 +1,24 @@
 # Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
+import collections
 from testtools.compat import text
 from testtools.matchers._imatcher import IMatcher, IMismatch
 from testtools.tests.helpers import FullStackRunTest
 
 
 class TestMatchersInterface(object):
+    """Show that a matcher implements the matcher interface correctly.
+
+    :ivar matches_matcher: An instance of the matcher being tested.
+    :ivar matches_matches: An iterable of things that match the instance.
+    :ivar matches_mismatches: An iterable of things that do *not* match the
+        instance.
+    :ivar str_examples: An iterable of (string, matcher), where ``string`` is
+        the expected result of ``str(matcher)``.
+    :ivar describe_examples: An iterable of (text, candidate, matcher), where
+        ``text`` is the expected description of the mismatch resulting from
+        matching ``candidate`` against ``matcher``.
+    """
 
     run_tests_with = FullStackRunTest
 
@@ -26,22 +39,32 @@ class TestMatchersInterface(object):
 
     def assert_provides(self, interface, obj):
         """Assert ``obj`` provides ``interface``."""
+        # TODO: Provide a matcher for this.
         self.assertTrue(
             interface.providedBy(obj),
             '%s not provided by %r' % (interface, obj))
 
     def assert_matcher(self, matcher):
         """Assert that ``matcher`` provides ``IMatcher``."""
+        # TODO: Provide ValidMatcher() matcher that does this.
         self.assert_provides(IMatcher, matcher)
 
     def assert_mismatch(self, mismatch):
         """Assert that ``mismatch`` provides ``IMismatch``."""
+        # TODO: Provide ValidMismatch() matcher that does this.
         self.assert_provides(IMismatch, mismatch)
         description = mismatch.describe()
         self.assertTrue(
             isinstance(description, text),
             "Description is not text, is %r instead: %r" % (
                 type(description), description))
+        details = mismatch.get_details()
+        self.assertTrue(
+            isinstance(details, collections.Mapping),
+            "details are not a map, are %r instead: %r" % (
+                type(details), details))
+        # TODO: In a follow-up branch, add an interface for content, and
+        # assert that the details all implement that interface.
 
     def test_matches_match(self):
         matcher = self.matches_matcher
