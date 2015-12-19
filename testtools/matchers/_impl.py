@@ -70,6 +70,8 @@ class Mismatch(object):
             to the empty dict.
         """
         if description:
+            if not isinstance(description, text):
+                _text_deprecation(description)
             self._description = description
         if details is None:
             details = {}
