@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
 from testtools.tests.helpers import FullStackRunTest
 
@@ -6,6 +6,13 @@ from testtools.tests.helpers import FullStackRunTest
 class TestMatchersInterface(object):
 
     run_tests_with = FullStackRunTest
+
+    def _iter_mismatches(self):
+        """Iterate through mismatches from the sample data."""
+        # Don't iterate through matches_mismatches, because sometimes they are
+        # iter() and are thus mutated by other tests.
+        for _, matchee, matcher in self.describe_examples:
+            yield matcher.match(matchee)
 
     def test_matches_match(self):
         matcher = self.matches_matcher
@@ -35,8 +42,6 @@ class TestMatchersInterface(object):
     def test_mismatch_details(self):
         # The mismatch object must provide get_details, which must return a
         # dictionary mapping names to Content objects.
-        examples = self.describe_examples
-        for difference, matchee, matcher in examples:
-            mismatch = matcher.match(matchee)
+        for mismatch in self._iter_mismatches():
             details = mismatch.get_details()
             self.assertEqual(dict(details), details)
