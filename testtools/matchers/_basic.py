@@ -57,7 +57,7 @@ class _BinaryComparison(object):
     def match(self, other):
         if self.comparator(other, self.expected):
             return None
-        return _BinaryMismatch(self.expected, self.mismatch_string, other)
+        return _BinaryMismatch(other, self.mismatch_string, self.expected)
 
     def comparator(self, expected, other):
         raise NotImplementedError(self.comparator)
@@ -111,14 +111,14 @@ class LessThan(_BinaryComparison):
     """Matches if the item is less than the matchers reference object."""
 
     comparator = operator.__lt__
-    mismatch_string = 'is not >'
+    mismatch_string = '>='
 
 
 class GreaterThan(_BinaryComparison):
     """Matches if the item is greater than the matchers reference object."""
 
     comparator = operator.__gt__
-    mismatch_string = 'is not <'
+    mismatch_string = '<='
 
 
 class SameMembers(Matcher):

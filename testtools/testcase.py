@@ -346,8 +346,8 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message to include in the error.
         """
-        matcher = Equals(expected)
-        self.assertThat(observed, matcher, message)
+        matcher = Equals(observed)
+        self.assertThat(expected, matcher, message)
 
     failUnlessEqual = assertEquals = assertEqual
 

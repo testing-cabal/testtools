@@ -12,6 +12,11 @@ Improvements
 * ``MatchesListwise`` has more informative error when lengths don't match.
   (Jonathan Lange)
 
+* The short form of errors for failed binary comparisions will now put the
+  expected value on the _right_. This means that ``assertThat(2, Equals(3))``
+  will raise an error saying ``2 != 3``.
+  (Jonathan Lange, #1525227)
+
 Changes
 -------
 

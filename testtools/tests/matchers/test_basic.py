@@ -100,7 +100,7 @@ class TestEqualsInterface(TestCase, TestMatchersInterface):
 
     str_examples = [("Equals(1)", Equals(1)), ("Equals('1')", Equals('1'))]
 
-    describe_examples = [("1 != 2", 2, Equals(1))]
+    describe_examples = [("2 != 1", 2, Equals(1))]
 
 
 class TestNotEqualsInterface(TestCase, TestMatchersInterface):
@@ -126,7 +126,7 @@ class TestIsInterface(TestCase, TestMatchersInterface):
 
     str_examples = [("Is(2)", Is(2))]
 
-    describe_examples = [("1 is not 2", 2, Is(1))]
+    describe_examples = [("2 is not 1", 2, Is(1))]
 
 
 class TestIsInstanceInterface(TestCase, TestMatchersInterface):
@@ -160,8 +160,8 @@ class TestLessThanInterface(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ('4 is not > 5', 5, LessThan(4)),
-        ('4 is not > 4', 4, LessThan(4)),
+        ('5 >= 4', 5, LessThan(4)),
+        ('4 >= 4', 4, LessThan(4)),
         ]
 
 
@@ -176,8 +176,8 @@ class TestGreaterThanInterface(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ('5 is not < 4', 4, GreaterThan(5)),
-        ('4 is not < 4', 4, GreaterThan(4)),
+        ('4 <= 5', 4, GreaterThan(5)),
+        ('4 <= 4', 4, GreaterThan(4)),
         ]
 
 
