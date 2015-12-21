@@ -34,7 +34,6 @@ from testtools.matchers import (
     Equals,
     HasLength,
     MatchesException,
-    MismatchError,
     Raises,
     )
 from testtools.testcase import (
