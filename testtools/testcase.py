@@ -48,6 +48,7 @@ from testtools.matchers import (
     Not,
     Raises,
     )
+from testtools.matchers._basic import _FlippedEquals
 from testtools.monkey import patch
 from testtools.runtest import RunTest
 from testtools.testresult import (
@@ -346,8 +347,8 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message to include in the error.
         """
-        matcher = Equals(observed)
-        self.assertThat(expected, matcher, message)
+        matcher = _FlippedEquals(expected)
+        self.assertThat(observed, matcher, message)
 
     failUnlessEqual = assertEquals = assertEqual
 

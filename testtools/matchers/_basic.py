@@ -66,19 +66,35 @@ class _BinaryComparison(object):
 class _BinaryMismatch(Mismatch):
     """Two things did not match."""
 
-    def __init__(self, expected, mismatch_string, other):
-        self.expected = expected
+    def __init__(self, actual, mismatch_string, reference,
+                 reference_on_right=True):
+        self._actual = actual
         self._mismatch_string = mismatch_string
-        self.other = other
+        self._reference = reference
+        self._reference_on_right = reference_on_right
+
+    @property
+    def expected(self):
+        # XXX: Deprecated.
+        return self._reference
+
+    @property
+    def other(self):
+        # XXX: Deprecated.
+        return self._actual
 
     def describe(self):
-        left = repr(self.expected)
-        right = repr(self.other)
-        if len(left) + len(right) > 70:
+        actual = repr(self._actual)
+        reference = repr(self._reference)
+        if len(actual) + len(reference) > 70:
             return "%s:\nreference = %s\nactual    = %s\n" % (
-                self._mismatch_string, _format(self.expected),
-                _format(self.other))
+                self._mismatch_string, _format(self._reference),
+                _format(self._actual))
         else:
+            if self._reference_on_right:
+                left, right = actual, reference
+            else:
+                left, right = reference, actual
             return "%s %s %s" % (left, self._mismatch_string, right)
 
 
@@ -87,6 +103,26 @@ class Equals(_BinaryComparison):
 
     comparator = operator.eq
     mismatch_string = '!='
+
+
+class _FlippedEquals(object):
+    """Matches if the items are equal.
+
+    Exactly like ``Equals`` except that the short mismatch message is "
+    $reference != $actual" rather than "$actual != $reference". This allows
+    for ``TestCase.assertEqual`` to use a matcher but still have the order of
+    items in the error message align with the order of items in the call to
+    the assertion.
+    """
+
+    def __init__(self, expected):
+        self._expected = expected
+
+    def match(self, other):
+        mismatch = Equals(self._expected).match(other)
+        if not mismatch:
+            return None
+        return _BinaryMismatch(other, '!=', self._expected, False)
 
 
 class NotEquals(_BinaryComparison):
@@ -143,7 +179,7 @@ class SameMembers(Matcher):
         return PostfixedMismatch(
             "\nmissing:    %s\nextra:      %s" % (
                 _format(expected_only), _format(observed_only)),
-            _BinaryMismatch(self.expected, 'elements differ', observed))
+            _BinaryMismatch(observed, 'elements differ', self.expected))
 
 
 class DoesNotStartWith(Mismatch):
