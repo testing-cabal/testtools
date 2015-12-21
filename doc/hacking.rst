@@ -179,6 +179,8 @@ Membership in the pypi testtools project as maintainer.
 
 Membership in the https://launchpad.net/~testtools-committers.
 
+No in-progress Critical bugs on the next_ milestone.
+
 Tasks
 +++++
 
@@ -202,3 +204,4 @@ Tasks
 .. _Sphinx: http://sphinx.pocoo.org/
 .. _restructuredtext: http://docutils.sourceforge.net/rst.html
 .. _testing-cabal: https://github.com/organizations/testing-cabal/
+.. _next: https://launchpad.net/testtools/+milestone/next
