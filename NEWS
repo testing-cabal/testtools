@@ -16,7 +16,10 @@ Changes
 -------
 
 * Add a new test dependency of testscenarios. (Robert Collins)
-  
+
+* ``TestCase.skip`` deprecated. Use ``skipTest`` instead.
+  (Jonathan Lange, #988893)
+
 1.8.1
 ~~~~~
 
