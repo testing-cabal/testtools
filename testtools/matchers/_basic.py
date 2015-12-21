@@ -17,6 +17,7 @@ __all__ = [
 import operator
 from pprint import pformat
 import re
+import warnings
 
 from ..compat import (
     _isbytes,
@@ -75,12 +76,20 @@ class _BinaryMismatch(Mismatch):
 
     @property
     def expected(self):
-        # XXX: Deprecated.
+        warnings.warn(
+            '%s.expected deprecated after 1.8.1' % (self.__class__.__name__,),
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self._reference
 
     @property
     def other(self):
-        # XXX: Deprecated.
+        warnings.warn(
+            '%s.other deprecated after 1.8.1' % (self.__class__.__name__,),
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self._actual
 
     def describe(self):

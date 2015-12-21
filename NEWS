@@ -21,7 +21,11 @@ Changes
 -------
 
 * Add a new test dependency of testscenarios. (Robert Collins)
-  
+
+* Getting ``expected`` or ``observed`` attributes from binary comparison
+  mismatches (e.g. ``Equals(2).match(3).expected``) is now deprecated.
+  (Jonathan Lange)
+
 1.8.1
 ~~~~~
 
