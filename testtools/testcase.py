@@ -20,6 +20,7 @@ import functools
 import itertools
 import sys
 import types
+import warnings
 
 from extras import (
     safe_hasattr,
@@ -291,9 +292,12 @@ class TestCase(unittest.TestCase):
         """
         raise self.skipException(reason)
 
-    # skipTest is how python2.7 spells this. Sometime in the future
-    # This should be given a deprecation decorator - RBC 20100611.
-    skip = skipTest
+    def skip(self, reason):
+        """DEPRECATED: Use skipTest instead."""
+        warnings.warn(
+            'Only valid in 1.8.1 and earlier. Use skipTest instead.',
+            DeprecationWarning, stacklevel=2)
+        self.skipTest(reason)
 
     def _formatTypes(self, classOrIterable):
         """Format a class or a bunch of classes for display in an error."""
