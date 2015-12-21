@@ -1172,7 +1172,7 @@ Improvements
 * Malformed SyntaxErrors no longer blow up the test suite.  (Martin [gz])
 
 * ``MismatchesAll.describe`` no longer appends a trailing newline.
-  (Michael Hudrrson-Doyle, #686790)
+  (Michael Hudson-Doyle, #686790)
 
 * New helpers for conditionally importing modules, ``try_import`` and
   ``try_imports``.  (Jonathan Lange)
