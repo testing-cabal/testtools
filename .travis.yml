@@ -5,6 +5,7 @@ python:
   - "2.7"
   - "3.3"
   - "3.4"
+  - "3.5"
   - "pypy"
 
 # We have to pin Jinja2 < 2.7  for Python 3.2 because 2.7 drops/breaks support:
