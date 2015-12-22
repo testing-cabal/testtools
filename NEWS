@@ -11,8 +11,9 @@ Changes
 
 * Add a new test dependency of testscenarios. (Robert Collins)
 
-* New method ``Content.map_bytes`` that can be used to return a new ``Content``
-  object of the same type with data based on the original. (Jonathan Lange)
+* New function ``map_bytes`` that can be used to map a ``Content`` object to a
+  new ``Content`` of the same content type with data based on the original.
+  (Jonathan Lange)
 
 1.8.1
 ~~~~~

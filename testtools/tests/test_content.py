@@ -19,6 +19,7 @@ from testtools.content import (
     content_from_stream,
     JSON,
     json_content,
+    map_bytes,
     StackLinesContent,
     StacktraceContent,
     TracebackContent,
@@ -216,7 +217,7 @@ class TestContent(TestCase):
         # same data as the original.
         data = [_u('some data').encode('utf8')]
         content = Content(UTF8_TEXT, lambda: data)
-        new_content = content.map_bytes(lambda x: x)
+        new_content = map_bytes(lambda x: x, content)
         self.assertThat(new_content.as_text(), Equals(content.as_text()))
 
     def test_map_bytes_different(self):
@@ -228,7 +229,7 @@ class TestContent(TestCase):
         function = lambda x: reversed(list(x))
 
         content = Content(UTF8_TEXT, lambda: iter(data))
-        new_content = content.map_bytes(lambda x: function(x))
+        new_content = map_bytes(function, content)
         self.assertThat(
             list(new_content.iter_bytes()),
             Equals(list(function(content.iter_bytes()))))

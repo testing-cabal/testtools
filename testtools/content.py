@@ -120,16 +120,19 @@ class Content(object):
         return "<Content type=%r, value=%r>" % (
             self.content_type, _join_b(self.iter_bytes()))
 
-    def map_bytes(self, function):
-        """Map ``function`` over data to create a new Content of the same type.
 
-        :param function: Unary callable that expects an iterable of bytes and
-            yields bytes.
-        :return: A ``Content`` object of the same type as ``self`` with bytes
-            that come from ``function``.
-        """
-        return self.__class__(
-            self.content_type, lambda: function(self.iter_bytes()))
+def map_bytes(function, content):
+    """Map ``function`` over data in ``content``.
+
+    Creates a new Content of the same content type as ``content``.
+
+    :param function: Unary callable that expects an iterable of bytes and
+        yields bytes.
+    :param content: A content object.
+    :return: A ``Content`` object with bytes that come from ``function``.
+    """
+    return Content(
+        content.content_type, lambda: function(content.iter_bytes()))
 
 
 class StackLinesContent(Content):
