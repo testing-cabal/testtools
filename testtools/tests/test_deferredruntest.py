@@ -707,6 +707,7 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
         messages = []
         publisher, _ = _get_global_publisher_and_observers()
         publisher.addObserver(messages.append)
+        self.addCleanup(publisher.removeObserver, messages.append)
 
         class LogSomething(TestCase):
             def test_something(self):
@@ -736,6 +737,36 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
         self.assertThat(
             messages,
             MatchesListwise([ContainsDict({'message': Equals(('foo',))})]))
+
+    def test_restore_observers(self):
+        # We restore the original observers.
+        publisher, observers = _get_global_publisher_and_observers()
+
+        class LogSomething(TestCase):
+            def test_something(self):
+                pass
+
+        test = LogSomething('test_something')
+        runner = self.make_runner(test)
+        result = self.make_result()
+        runner.run(result)
+        self.assertThat(
+            _get_global_publisher_and_observers()[1], Equals(observers))
+
+    def test_restore_observers_after_timeout(self):
+        # We restore the original observers even if the test times out.
+        publisher, observers = _get_global_publisher_and_observers()
+
+        class LogSomething(TestCase):
+            def test_something(self):
+                return defer.Deferred()
+
+        test = LogSomething('test_something')
+        runner = self.make_runner(test, timeout=0.0001)
+        result = self.make_result()
+        runner.run(result)
+        self.assertThat(
+            _get_global_publisher_and_observers()[1], Equals(observers))
 
     def test_debugging_unchanged_during_test_by_default(self):
         debugging = [(defer.Deferred.debug, DelayedCall.debug)]

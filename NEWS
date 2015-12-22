@@ -6,6 +6,14 @@ Changes and improvements to testtools_, grouped by release.
 Next
 ~~~~
 
+Improvements
+------------
+
+* Python 3.5 added to the list of supported platforms. (Jonathan Lange)
+
+* ``MatchesListwise`` has more informative error when lengths don't match.
+  (Jonathan Lange)
+
 Changes
 -------
 
@@ -24,6 +32,8 @@ Changes
 * New fixture ``CaptureTwistedLogs`` that can be used with
   ``AsynchronousDeferredRunTest`` to attach a detail containing everything
   logged to Twisted during the test run.  (Jonathan Lange, #1515362)
+
+* Last release of testtools to support Python 3.2. (Jonathan Lange)
 
 1.8.1
 ~~~~~
