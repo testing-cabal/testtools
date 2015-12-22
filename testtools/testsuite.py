@@ -4,12 +4,12 @@
 
 __metaclass__ = type
 __all__ = [
-  'ConcurrentTestSuite',
-  'ConcurrentStreamTestSuite',
-  'filter_by_ids',
-  'iterate_tests',
-  'sorted_tests',
-  ]
+    'ConcurrentTestSuite',
+    'ConcurrentStreamTestSuite',
+    'filter_by_ids',
+    'iterate_tests',
+    'sorted_tests',
+]
 
 import sys
 import threading
@@ -104,7 +104,7 @@ class ConcurrentTestSuite(unittest2.TestSuite):
         try:
             try:
                 test.run(process_result)
-            except Exception as e:
+            except Exception:
                 # The run logic itself failed.
                 case = testtools.ErrorHolder(
                     "broken-runner",
@@ -188,7 +188,7 @@ class ConcurrentStreamTestSuite(object):
         try:
             try:
                 test.run(process_result)
-            except Exception as e:
+            except Exception:
                 # The run logic itself failed.
                 case = testtools.ErrorHolder(
                     "broken-runner-'%s'" % (route_code,),
@@ -221,8 +221,7 @@ def _flatten_tests(suite_or_case, unpack_outer=False):
     except TypeError:
         # Not iterable, assume it's a test case.
         return [(suite_or_case.id(), suite_or_case)]
-    if (type(suite_or_case) in (unittest.TestSuite,) or
-        unpack_outer):
+    if (type(suite_or_case) in (unittest.TestSuite,) or unpack_outer):
         # Plain old test suite (or any others we may add).
         result = []
         for test in tests:
@@ -244,7 +243,7 @@ def _flatten_tests(suite_or_case, unpack_outer=False):
 
 def filter_by_ids(suite_or_case, test_ids):
     """Remove tests from suite_or_case where their id is not in test_ids.
-    
+
     :param suite_or_case: A test suite or test case.
     :param test_ids: Something that supports the __contains__ protocol.
     :return: suite_or_case, unless suite_or_case was a case that itself
