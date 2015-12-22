@@ -301,22 +301,23 @@ def filter_by_ids(suite_or_case, test_ids):
     return suite_or_case
 
 
+# XXX: Python 2.6. Replace this with Counter when we drop 2.6 support.
+def _counter(xs):
+    """Return a dict mapping values of xs to number of times they appear."""
+    counts = {}
+    for x in xs:
+        times = counts.setdefault(x, 0)
+        counts[x] = times + 1
+    return counts
+
+
 def sorted_tests(suite_or_case, unpack_outer=False):
     """Sort suite_or_case while preserving non-vanilla TestSuites."""
     # Duplicate test id can induce TypeError in Python 3.3.
     # Detect the duplicate test ids, raise exception when found.
-    seen = dict()
-    for test_case in iterate_tests(suite_or_case):
-        test_id = test_case.id()
-        if test_id not in seen.keys():
-            seen[test_id] = 1
-        else:
-            seen[test_id] += 1
-
+    seen = _counter(case.id() for case in iterate_tests(suite_or_case))
     duplicates = dict(
-        (test_id, seen[test_id])
-        for test_id, count in seen.items() if count > 1)
-
+        (test_id, count) for test_id, count in seen.items() if count > 1)
     if duplicates:
         raise ValueError('Duplicate test ids detected: %s' % (duplicates,))
 
