@@ -174,6 +174,19 @@ def run_with_log_observers(observers, function, *args, **kwargs):
 _log_observer = _LogObserver()
 
 
+# XXX: Should really be in python-fixtures
+class _CompoundFixture(Fixture):
+    """A fixture that combines many fixtures."""
+
+    def __init__(self, fixtures):
+        super(_CompoundFixture, self).__init__()
+        self._fixtures = fixtures
+
+    def _setUp(self):
+        for fixture in self._fixtures:
+            self.useFixture(fixture)
+
+
 def flush_logged_errors(*error_types):
     # XXX: jml: I would like to deprecate this in favour of
     # _ErrorObserver.flush_logged_errors so that I can avoid mutable global
@@ -342,27 +355,21 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         # XXX: We want to make the use of these _NoTwistedLogObservers and
         # _CaptureTwistedLogs optional, and ideally, make it so they aren't
         # used by default.
+        logging_fixture = _CompoundFixture(
+            [_NoTwistedLogObservers(), _CaptureTwistedLogs()])
 
         # We can't just install these as fixtures on self.case, because we
         # need the clean up to run even if the test times out.
-        with _NoTwistedLogObservers():
-            # Can't use with for _CaptureTwistedLogs, because details are gone
-            # after cleanup.
-            capture_logs = _CaptureTwistedLogs()
-            capture_logs.setUp()
-            try:
-                with _ErrorObserver(_log_observer) as error_fixture:
-                    successful, unhandled = self._blocking_run_deferred(
-                        spinner)
-                for logged_error in error_fixture.flush_logged_errors():
-                    successful = False
-                    self._got_user_failure(
-                        logged_error, tb_label='logged-error')
-            finally:
-                for name, detail in capture_logs.getDetails().items():
-                    self.case.addDetail(name, detail)
-                capture_logs.cleanUp()
-
+        with logging_fixture as capture_logs:
+            for name, detail in capture_logs.getDetails().items():
+                self.case.addDetail(name, detail)
+            with _ErrorObserver(_log_observer) as error_fixture:
+                successful, unhandled = self._blocking_run_deferred(
+                    spinner)
+            for logged_error in error_fixture.flush_logged_errors():
+                successful = False
+                self._got_user_failure(
+                    logged_error, tb_label='logged-error')
 
         if unhandled:
             successful = False
