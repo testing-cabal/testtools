@@ -19,6 +19,13 @@ testtools
    :members:
 
 
+testtools.deferredruntest
+-------------------------
+
+.. automodule:: testtools.deferredruntest
+   :members:
+
+
 testtools.matchers
 ------------------
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
 __all__ = [
     'ContainsAll',
@@ -58,10 +58,10 @@ class MatchesListwise(object):
         self.first_only = first_only
 
     def match(self, values):
-        from ._basic import Equals
+        from ._basic import HasLength
         mismatches = []
         length_mismatch = Annotate(
-            "Length mismatch", Equals(len(self.matchers))).match(len(values))
+            "Length mismatch", HasLength(len(self.matchers))).match(values)
         if length_mismatch:
             mismatches.append(length_mismatch)
         for matcher, value in zip(self.matchers, values):
