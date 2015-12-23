@@ -8,8 +8,10 @@ __all__ = [
     ]
 
 import sys
+from zope.interface import classImplements, implements
 
 from testtools.testresult import ExtendedToOriginalDecorator
+from testtools._itesttools import IRunTestFactory, IRunTest
 
 
 class MultipleExceptions(Exception):
@@ -30,7 +32,7 @@ class RunTest(object):
     Subclassing or replacing RunTest can be useful to add functionality to the
     way that tests are run in a given project.
 
-    :ivar case: The test case that is to be run.
+    :ivar ITestCaseStrategy case: The test case that is to be run.
     :ivar result: The result object a case is reporting to.
     :ivar handlers: A list of (ExceptionClass, handler_function) for
         exceptions that should be caught if raised from the user
@@ -46,6 +48,9 @@ class RunTest(object):
     :ivar _exceptions: A list of caught exceptions, used to do the single
         reporting of error/failure/skip etc.
     """
+
+    classImplements(IRunTestFactory)
+    implements(IRunTest)
 
     def __init__(self, case, handlers=None, last_resort=None):
         """Create a RunTest to run a case.

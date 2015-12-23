@@ -19,13 +19,14 @@ import copy
 import functools
 import itertools
 import sys
-import types
 
 from extras import (
     safe_hasattr,
     try_import,
     try_imports,
     )
+from zope.interface import implements
+
 # To let setup.py work, make this a conditional import.
 unittest = try_imports(['unittest2', 'unittest'])
 
@@ -55,6 +56,7 @@ from testtools.testresult import (
     ExtendedToOriginalDecorator,
     TestResult,
     )
+from testtools._itesttools import ITestCaseStrategy
 
 wraps = try_import('functools.wraps')
 
@@ -185,10 +187,12 @@ class TestCase(unittest.TestCase):
         (exception_class, handler(case, result, exception_value)) pairs.
     :ivar force_failure: Force testtools.RunTest to fail the test after the
         test has completed.
-    :cvar run_tests_with: A factory to make the ``RunTest`` to run tests with.
-        Defaults to ``RunTest``.  The factory is expected to take a test case
-        and an optional list of exception handlers.
+    :cvar IRunTestFactory run_tests_with: A factory to make the ``IRunTest`` to
+        run tests with. Defaults to ``RunTest``.  The factory is expected to
+        take a test case and a list of exception handlers.
     """
+
+    implements(ITestCaseStrategy)
 
     skipException = TestSkipped
 

@@ -4,16 +4,18 @@
 
 __metaclass__ = type
 __all__ = [
-  'ConcurrentTestSuite',
-  'ConcurrentStreamTestSuite',
-  'filter_by_ids',
-  'iterate_tests',
-  'sorted_tests',
-  ]
+    'ConcurrentTestSuite',
+    'ConcurrentStreamTestSuite',
+    'filter_by_ids',
+    'iterate_tests',
+    'sorted_tests',
+]
 
 import sys
 import threading
 import unittest
+
+from zope.interface import implements
 
 from extras import safe_hasattr, try_imports
 # This is just to let setup.py work, as testtools is imported in setup.py.
@@ -21,6 +23,7 @@ unittest2 = try_imports(['unittest2', 'unittest'])
 Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
 import testtools
+from testtools._itesttools import ITestSuite
 
 
 def iterate_tests(test_suite_or_case):
@@ -37,6 +40,8 @@ def iterate_tests(test_suite_or_case):
 
 class ConcurrentTestSuite(unittest2.TestSuite):
     """A TestSuite whose run() calls out to a concurrency strategy."""
+
+    implements(ITestSuite)
 
     def __init__(self, suite, make_tests, wrap_result=None):
         """Create a ConcurrentTestSuite to execute suite.
@@ -116,6 +121,8 @@ class ConcurrentTestSuite(unittest2.TestSuite):
 
 class ConcurrentStreamTestSuite(object):
     """A TestSuite whose run() parallelises."""
+
+    implements(ITestSuite)
 
     def __init__(self, make_tests):
         """Create a ConcurrentTestSuite to execute tests returned by make_tests.
@@ -199,6 +206,8 @@ class ConcurrentStreamTestSuite(object):
 
 
 class FixtureSuite(unittest2.TestSuite):
+
+    implements(ITestSuite)
 
     def __init__(self, fixture, tests):
         super(FixtureSuite, self).__init__(tests)
