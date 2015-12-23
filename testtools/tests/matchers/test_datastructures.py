@@ -37,6 +37,8 @@ class TestMatchesListwise(TestCase):
 
     run_tests_with = FullStackRunTest
 
+    # XXX: Add interface tests.
+
     def test_docstring(self):
         failure_count, output = run_doctest(
             MatchesListwise, "MatchesListwise")
@@ -69,16 +71,16 @@ class TestMatchesStructure(TestCase, TestMatchersInterface):
     describe_examples = [
         ("""\
 Differences: [
-3 != 1: x
+1 != 3: x
 ]""", SimpleClass(1, 2), MatchesStructure(x=Equals(3), y=Equals(2))),
         ("""\
 Differences: [
-3 != 2: y
+2 != 3: y
 ]""", SimpleClass(1, 2), MatchesStructure(x=Equals(1), y=Equals(3))),
         ("""\
 Differences: [
-0 != 1: x
-0 != 2: y
+1 != 0: x
+2 != 0: y
 ]""", SimpleClass(1, 2), MatchesStructure(x=Equals(0), y=Equals(0))),
         ]
 
