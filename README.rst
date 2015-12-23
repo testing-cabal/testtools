@@ -93,3 +93,5 @@ Thanks
  * Christian Kampka
  * Gavin Panella
  * Martin Pool
+ * Julia Varlamova
+ * ClusterHQ Ltd

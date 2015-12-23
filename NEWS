@@ -19,6 +19,8 @@ Improvements
   will raise an error saying ``2 != 3``.
   (Jonathan Lange, #1525227)
 
+* Tests for ``assertRaisesRegexp``. (Julia Varlamova, Jonathan Lange)
+
 Changes
 -------
 
