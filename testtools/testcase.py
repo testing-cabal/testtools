@@ -162,6 +162,9 @@ def _copy_content(content_object):
 def gather_details(source_dict, target_dict):
     """Merge the details from ``source_dict`` into ``target_dict``.
 
+    ``gather_details`` evaluates all details in ``source_dict``. Do not use it
+    if the details are not ready to be evaluated.
+
     :param source_dict: A dictionary of details will be gathered.
     :param target_dict: A dictionary into which details will be gathered.
     """
