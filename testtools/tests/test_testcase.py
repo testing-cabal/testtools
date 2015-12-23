@@ -374,6 +374,26 @@ class TestAssertions(TestCase):
             Raises(
                 MatchesException(self.failureException, '.*%r.*' % (foo,))))
 
+    def test_assertRaisesRegexp(self):
+        # assertRaisesRegexp asserts that function raises particular exception
+        # with particular message.
+        self.assertRaisesRegexp(RuntimeError, "M\w*e", self.raiseError,
+                                RuntimeError, "Message")
+
+    def test_assertRaisesRegexp_wrong_error_type(self):
+        # If function raises an exception of unexpected type,
+        # assertRaisesRegexp re-raises it.
+        self.assertRaises(ValueError, self.assertRaisesRegexp, RuntimeError,
+                          "M\w*e", self.raiseError, ValueError, "Message")
+
+    def test_assertRaisesRegexp_wrong_message(self):
+        # If function raises an exception with unexpected message
+        # assertRaisesRegexp fails.
+        self.assertFails(
+            '"Expected" does not match "Observed"',
+            self.assertRaisesRegexp, RuntimeError, "Expected",
+            self.raiseError, RuntimeError, "Observed")
+
     def assertFails(self, message, function, *args, **kwargs):
         """Assert that function raises a failure with the given message."""
         failure = self.assertRaises(
