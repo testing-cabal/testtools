@@ -1,10 +1,9 @@
-# Copyright (c) 2009-2011 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
 """Test ConcurrentTestSuite and related things."""
 
-__metaclass__ = type
-
 import doctest
+from pprint import pformat
 import unittest
 import unittest2
 
@@ -333,7 +332,8 @@ class TestSortedTests(TestCase):
             ValueError, sorted_tests, unittest.TestSuite([a, b, c, d]))
         self.assertThat(
             str(error),
-            Equals("Duplicate test ids detected: {'a': 2, 'b': 2}"))
+            Equals("Duplicate test ids detected: %s" % (
+                pformat({'a': 2, 'b': 2}),)))
 
 
 def test_suite():
