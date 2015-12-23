@@ -1,8 +1,7 @@
-# Copyright (c) 2009-2011 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
 """Test suites and related things."""
 
-__metaclass__ = type
 __all__ = [
     'ConcurrentTestSuite',
     'ConcurrentStreamTestSuite',
@@ -11,6 +10,7 @@ __all__ = [
     'sorted_tests',
 ]
 
+from pprint import pformat
 import sys
 import threading
 import unittest
@@ -319,7 +319,8 @@ def sorted_tests(suite_or_case, unpack_outer=False):
     duplicates = dict(
         (test_id, count) for test_id, count in seen.items() if count > 1)
     if duplicates:
-        raise ValueError('Duplicate test ids detected: %s' % (duplicates,))
+        raise ValueError(
+            'Duplicate test ids detected: %s' % (pformat(duplicates),))
 
     tests = _flatten_tests(suite_or_case, unpack_outer=unpack_outer)
     tests.sort()
