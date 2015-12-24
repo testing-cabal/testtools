@@ -19,7 +19,6 @@ import copy
 import functools
 import itertools
 import sys
-import types
 import warnings
 
 from extras import (
@@ -40,7 +39,6 @@ from testtools.compat import (
 from testtools.matchers import (
     Annotate,
     Contains,
-    Equals,
     MatchesAll,
     MatchesException,
     MismatchError,
@@ -59,6 +57,7 @@ from testtools.testresult import (
 
 wraps = try_import('functools.wraps')
 
+
 class TestSkipped(Exception):
     """Raised within TestCase.run() when a test is skipped."""
 TestSkipped = try_import('unittest.case.SkipTest', TestSkipped)
@@ -75,6 +74,7 @@ _UnexpectedSuccess = try_import(
     'unittest.case._UnexpectedSuccess', _UnexpectedSuccess)
 _UnexpectedSuccess = try_import(
     'unittest2.case._UnexpectedSuccess', _UnexpectedSuccess)
+
 
 class _ExpectedFailure(Exception):
     """An expected failure occured.
@@ -420,12 +420,14 @@ class TestCase(unittest.TestCase):
             def match(self, matchee):
                 if not issubclass(matchee[0], excClass):
                     reraise(*matchee)
+
         class CaptureMatchee(object):
             def match(self, matchee):
                 self.matchee = matchee[1]
         capture = CaptureMatchee()
-        matcher = Raises(MatchesAll(ReRaiseOtherTypes(),
-                MatchesException(excClass), capture))
+        matcher = Raises(
+            MatchesAll(ReRaiseOtherTypes(),
+                       MatchesException(excClass), capture))
         our_callable = Nullary(callableObj, *args, **kwargs)
         self.assertThat(our_callable, matcher)
         return capture.matchee
@@ -467,13 +469,14 @@ class TestCase(unittest.TestCase):
         """Check that matchee is matched by matcher, but delay the assertion failure.
 
         This method behaves similarly to ``assertThat``, except that a failed
-        match does not exit the test immediately. The rest of the test code will
-        continue to run, and the test will be marked as failing after the test
-        has finished.
+        match does not exit the test immediately. The rest of the test code
+        will continue to run, and the test will be marked as failing after the
+        test has finished.
 
         :param matchee: An object to match with matcher.
         :param matcher: An object meeting the testtools.Matcher protocol.
         :param message: If specified, show this message with any failed match.
+
         """
         mismatch_error = self._matchHelper(matchee, matcher, message, verbose)
 
@@ -555,7 +558,7 @@ class TestCase(unittest.TestCase):
         return '%s-%d' % (prefix, self.getUniqueInteger())
 
     def onException(self, exc_info, tb_label='traceback'):
-        """Called when an exception propogates from test code.
+        """Called when an exception propagates from test code.
 
         :seealso addOnException:
         """
@@ -806,7 +809,8 @@ def ErrorHolder(test_id, error, short_description=None, details=None):
     :param short_description: An optional short description of the test.
     :param details: Outcome details as accepted by addSuccess etc.
     """
-    return PlaceHolder(test_id, short_description=short_description,
+    return PlaceHolder(
+        test_id, short_description=short_description,
         details=details, outcome='addError', error=error)
 
 
@@ -901,6 +905,7 @@ def skipIf(condition, reason):
     """A decorator to skip a test if the condition is true."""
     if condition:
         return skip(reason)
+
     def _id(obj):
         return obj
     return _id
@@ -910,6 +915,7 @@ def skipUnless(condition, reason):
     """A decorator to skip a test unless the condition is true."""
     if not condition:
         return skip(reason)
+
     def _id(obj):
         return obj
     return _id
