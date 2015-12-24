@@ -1145,9 +1145,20 @@ class TestDetailsProvided(TestWithDetails):
         class Case(TestCase):
             def test(this):
                 this.addDetail("foo", self.get_content())
-                self.skip('yo')
+                self.skipTest('yo')
         self.assertDetailsProvided(Case("test"), "addSkip",
             ["foo", "reason"])
+
+    def test_addSkip_different_exception(self):
+        # No traceback is included if the skip exception is changed and a skip
+        # is raised.
+        class Case(TestCase):
+            skipException = ValueError
+
+            def test(this):
+                this.addDetail("foo", self.get_content())
+                this.skipTest('yo')
+        self.assertDetailsProvided(Case("test"), "addSkip", ["foo", "reason"])
 
     def test_addSucccess(self):
         class Case(TestCase):

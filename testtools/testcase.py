@@ -560,7 +560,7 @@ class TestCase(unittest.TestCase):
         :seealso addOnException:
         """
         if exc_info[0] not in [
-            TestSkipped, _UnexpectedSuccess, _ExpectedFailure]:
+                TestSkipped, _UnexpectedSuccess, _ExpectedFailure]:
             self._report_traceback(exc_info, tb_label=tb_label)
         for handler in self.__exception_handlers:
             handler(exc_info)
