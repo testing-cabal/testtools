@@ -21,6 +21,9 @@ Improvements
 
 * Tests for ``assertRaisesRegexp``. (Julia Varlamova, Jonathan Lange)
 
+* Tests that customize ``skipException`` no longer get tracebacks for skipped
+  tests.  (Jonathan Lange)
+
 Changes
 -------
 
