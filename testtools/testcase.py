@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
 """Test case related stuff."""
 
@@ -19,7 +19,6 @@ import copy
 import functools
 import itertools
 import sys
-import types
 import warnings
 
 from extras import (
@@ -40,7 +39,6 @@ from testtools.compat import (
 from testtools.matchers import (
     Annotate,
     Contains,
-    Equals,
     MatchesAll,
     MatchesException,
     MismatchError,
@@ -59,8 +57,11 @@ from testtools.testresult import (
 
 wraps = try_import('functools.wraps')
 
+
 class TestSkipped(Exception):
     """Raised within TestCase.run() when a test is skipped."""
+
+
 TestSkipped = try_import('unittest.case.SkipTest', TestSkipped)
 TestSkipped = try_import('unittest2.case.SkipTest', TestSkipped)
 
@@ -75,6 +76,7 @@ _UnexpectedSuccess = try_import(
     'unittest.case._UnexpectedSuccess', _UnexpectedSuccess)
 _UnexpectedSuccess = try_import(
     'unittest2.case._UnexpectedSuccess', _UnexpectedSuccess)
+
 
 class _ExpectedFailure(Exception):
     """An expected failure occured.
