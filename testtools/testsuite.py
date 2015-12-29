@@ -1,16 +1,16 @@
-# Copyright (c) 2009-2011 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
 """Test suites and related things."""
 
-__metaclass__ = type
 __all__ = [
-  'ConcurrentTestSuite',
-  'ConcurrentStreamTestSuite',
-  'filter_by_ids',
-  'iterate_tests',
-  'sorted_tests',
-  ]
+    'ConcurrentTestSuite',
+    'ConcurrentStreamTestSuite',
+    'filter_by_ids',
+    'iterate_tests',
+    'sorted_tests',
+]
 
+from pprint import pformat
 import sys
 import threading
 import unittest
@@ -104,7 +104,7 @@ class ConcurrentTestSuite(unittest2.TestSuite):
         try:
             try:
                 test.run(process_result)
-            except Exception as e:
+            except Exception:
                 # The run logic itself failed.
                 case = testtools.ErrorHolder(
                     "broken-runner",
@@ -188,7 +188,7 @@ class ConcurrentStreamTestSuite(object):
         try:
             try:
                 test.run(process_result)
-            except Exception as e:
+            except Exception:
                 # The run logic itself failed.
                 case = testtools.ErrorHolder(
                     "broken-runner-'%s'" % (route_code,),
@@ -221,8 +221,7 @@ def _flatten_tests(suite_or_case, unpack_outer=False):
     except TypeError:
         # Not iterable, assume it's a test case.
         return [(suite_or_case.id(), suite_or_case)]
-    if (type(suite_or_case) in (unittest.TestSuite,) or
-        unpack_outer):
+    if (type(suite_or_case) in (unittest.TestSuite,) or unpack_outer):
         # Plain old test suite (or any others we may add).
         result = []
         for test in tests:
@@ -244,7 +243,7 @@ def _flatten_tests(suite_or_case, unpack_outer=False):
 
 def filter_by_ids(suite_or_case, test_ids):
     """Remove tests from suite_or_case where their id is not in test_ids.
-    
+
     :param suite_or_case: A test suite or test case.
     :param test_ids: Something that supports the __contains__ protocol.
     :return: suite_or_case, unless suite_or_case was a case that itself
@@ -302,17 +301,27 @@ def filter_by_ids(suite_or_case, test_ids):
     return suite_or_case
 
 
+# XXX: Python 2.6. Replace this with Counter when we drop 2.6 support.
+def _counter(xs):
+    """Return a dict mapping values of xs to number of times they appear."""
+    counts = {}
+    for x in xs:
+        times = counts.setdefault(x, 0)
+        counts[x] = times + 1
+    return counts
+
+
 def sorted_tests(suite_or_case, unpack_outer=False):
     """Sort suite_or_case while preserving non-vanilla TestSuites."""
     # Duplicate test id can induce TypeError in Python 3.3.
-    # Detect the duplicate test id, raise exception when found.
-    seen = set()
-    for test_case in iterate_tests(suite_or_case):
-        test_id = test_case.id()
-        if test_id not in seen:
-            seen.add(test_id)
-        else:
-            raise ValueError('Duplicate test id detected: %s' % (test_id,))
+    # Detect the duplicate test ids, raise exception when found.
+    seen = _counter(case.id() for case in iterate_tests(suite_or_case))
+    duplicates = dict(
+        (test_id, count) for test_id, count in seen.items() if count > 1)
+    if duplicates:
+        raise ValueError(
+            'Duplicate test ids detected: %s' % (pformat(duplicates),))
+
     tests = _flatten_tests(suite_or_case, unpack_outer=unpack_outer)
     tests.sort()
     return unittest.TestSuite([test for (sort_key, test) in tests])
