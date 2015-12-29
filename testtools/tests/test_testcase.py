@@ -384,6 +384,26 @@ class TestAssertions(TestCase):
             Raises(
                 MatchesException(self.failureException, '.*%r.*' % (foo,))))
 
+    def test_assertRaisesRegexp(self):
+        # assertRaisesRegexp asserts that function raises particular exception
+        # with particular message.
+        self.assertRaisesRegexp(RuntimeError, "M\w*e", self.raiseError,
+                                RuntimeError, "Message")
+
+    def test_assertRaisesRegexp_wrong_error_type(self):
+        # If function raises an exception of unexpected type,
+        # assertRaisesRegexp re-raises it.
+        self.assertRaises(ValueError, self.assertRaisesRegexp, RuntimeError,
+                          "M\w*e", self.raiseError, ValueError, "Message")
+
+    def test_assertRaisesRegexp_wrong_message(self):
+        # If function raises an exception with unexpected message
+        # assertRaisesRegexp fails.
+        self.assertFails(
+            '"Expected" does not match "Observed"',
+            self.assertRaisesRegexp, RuntimeError, "Expected",
+            self.raiseError, RuntimeError, "Observed")
+
     def assertFails(self, message, function, *args, **kwargs):
         """Assert that function raises a failure with the given message."""
         failure = self.assertRaises(
@@ -505,14 +525,14 @@ class TestAssertions(TestCase):
     def test_assertIs_fails(self):
         # assertIs raises assertion errors if one object is not identical to
         # another.
-        self.assertFails('None is not 42', self.assertIs, None, 42)
+        self.assertFails('42 is not None', self.assertIs, None, 42)
         self.assertFails('[42] is not [42]', self.assertIs, [42], [42])
 
     def test_assertIs_fails_with_message(self):
         # assertIs raises assertion errors if one object is not identical to
         # another, and includes a user-supplied message, if it's provided.
         self.assertFails(
-            'None is not 42: foo bar', self.assertIs, None, 42, 'foo bar')
+            '42 is not None: foo bar', self.assertIs, None, 42, 'foo bar')
 
     def test_assertIsNot(self):
         # assertIsNot asserts that an object is not identical to another
@@ -722,7 +742,7 @@ class TestAssertions(TestCase):
     def test_assertIsNone(self):
         self.assertIsNone(None)
 
-        expected_error = 'None is not 0'
+        expected_error = '0 is not None'
         self.assertFails(expected_error, self.assertIsNone, 0)
 
     def test_assertIsNotNone(self):
@@ -1184,9 +1204,20 @@ class TestDetailsProvided(TestWithDetails):
         class Case(TestCase):
             def test(this):
                 this.addDetail("foo", self.get_content())
-                self.skip('yo')
+                self.skipTest('yo')
         self.assertDetailsProvided(Case("test"), "addSkip",
             ["foo", "reason"])
+
+    def test_addSkip_different_exception(self):
+        # No traceback is included if the skip exception is changed and a skip
+        # is raised.
+        class Case(TestCase):
+            skipException = ValueError
+
+            def test(this):
+                this.addDetail("foo", self.get_content())
+                this.skipTest('yo')
+        self.assertDetailsProvided(Case("test"), "addSkip", ["foo", "reason"])
 
     def test_addSucccess(self):
         class Case(TestCase):

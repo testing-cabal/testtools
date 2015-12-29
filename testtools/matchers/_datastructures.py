@@ -39,12 +39,12 @@ class MatchesListwise(object):
     >>> MatchesListwise([Equals(1), Equals(2)]).match([1, 2])
     >>> print (MatchesListwise([Equals(1), Equals(2)]).match([2, 1]).describe())
     Differences: [
-    1 != 2
     2 != 1
+    1 != 2
     ]
     >>> matcher = MatchesListwise([Equals(1), Equals(2)], first_only=True)
     >>> print (matcher.match([3, 4]).describe())
-    1 != 3
+    3 != 1
     """
 
     def __init__(self, matchers, first_only=False):

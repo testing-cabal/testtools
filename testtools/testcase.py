@@ -20,6 +20,7 @@ import functools
 import itertools
 import sys
 import types
+import warnings
 
 from extras import (
     safe_hasattr,
@@ -48,6 +49,7 @@ from testtools.matchers import (
     Not,
     Raises,
     )
+from testtools.matchers._basic import _FlippedEquals
 from testtools.monkey import patch
 from testtools.runtest import RunTest
 from testtools.testresult import (
@@ -160,6 +162,9 @@ def _copy_content(content_object):
 
 def gather_details(source_dict, target_dict):
     """Merge the details from ``source_dict`` into ``target_dict``.
+
+    ``gather_details`` evaluates all details in ``source_dict``. Do not use it
+    if the details are not ready to be evaluated.
 
     :param source_dict: A dictionary of details will be gathered.
     :param target_dict: A dictionary into which details will be gathered.
@@ -295,9 +300,12 @@ class TestCase(unittest.TestCase):
         """
         raise self.skipException(reason)
 
-    # skipTest is how python2.7 spells this. Sometime in the future
-    # This should be given a deprecation decorator - RBC 20100611.
-    skip = skipTest
+    def skip(self, reason):
+        """DEPRECATED: Use skipTest instead."""
+        warnings.warn(
+            'Only valid in 1.8.1 and earlier. Use skipTest instead.',
+            DeprecationWarning, stacklevel=2)
+        self.skipTest(reason)
 
     def _formatTypes(self, classOrIterable):
         """Format a class or a bunch of classes for display in an error."""
@@ -350,7 +358,7 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message to include in the error.
         """
-        matcher = Equals(expected)
+        matcher = _FlippedEquals(expected)
         self.assertThat(observed, matcher, message)
 
     failUnlessEqual = assertEquals = assertEqual
@@ -556,7 +564,7 @@ class TestCase(unittest.TestCase):
         :seealso addOnException:
         """
         if exc_info[0] not in [
-            TestSkipped, _UnexpectedSuccess, _ExpectedFailure]:
+                self.skipException, _UnexpectedSuccess, _ExpectedFailure]:
             self._report_traceback(exc_info, tb_label=tb_label)
         for handler in self.__exception_handlers:
             handler(exc_info)
