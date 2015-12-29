@@ -31,7 +31,7 @@ under the same license as Python, see LICENSE for details.
 Required Dependencies
 ---------------------
 
- * Python 2.6+ or 3.0+ / pypy (2.x+)
+ * Python 2.6+ or 3.2+ / pypy (2.x+)
 
 If you would like to use testtools for earlier Python's, please use testtools
 0.9.15.
@@ -93,3 +93,5 @@ Thanks
  * Christian Kampka
  * Gavin Panella
  * Martin Pool
+ * Julia Varlamova
+ * ClusterHQ Ltd
