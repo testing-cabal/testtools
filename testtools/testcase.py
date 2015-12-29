@@ -62,8 +62,11 @@ class TestSkipped(Exception):
     """Raised within TestCase.run() when a test is skipped."""
 
 
-TestSkipped = try_import('unittest.case.SkipTest', TestSkipped)
+# The order here matters. We want to default to the standard library if it's
+# available. After we drop Python 2.6 support, we should drop the 'unittest2'
+# attempt here and deprecate TestSkipped.
 TestSkipped = try_import('unittest2.case.SkipTest', TestSkipped)
+TestSkipped = try_import('unittest.case.SkipTest', TestSkipped)
 
 
 class _UnexpectedSuccess(Exception):

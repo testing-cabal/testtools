@@ -43,6 +43,10 @@ Changes
 * Report on all duplicate test ids when sorting test suites that contain
   duplicate ids.  (Thomas Bechtold, Jonathan Lange)
 
+* On Pythons greater than 2.6, ``TestSkipped`` will default to
+  ``unittest.SkipTest``, even if ``unittest2`` is installed.
+  (Jonathan Lange, #1529143)
+
 1.8.1
 ~~~~~
 
