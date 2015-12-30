@@ -6,6 +6,10 @@
 class DeferredNotFired(Exception):
     """Raised when we extract a result from a Deferred that's not fired yet."""
 
+    def __init__(self, deferred):
+        super(DeferredNotFired, self).__init__(
+            "%r has not fired yet." % (deferred,))
+
 
 def extract_result(deferred):
     """Extract the result from a fired deferred.
@@ -27,4 +31,4 @@ def extract_result(deferred):
     elif len(successes) == 1:
         return successes[0]
     else:
-        raise DeferredNotFired("%r has not fired yet." % (deferred,))
+        raise DeferredNotFired(deferred)
