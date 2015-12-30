@@ -44,8 +44,8 @@ class TestAllMatch(TestCase, TestMatchersInterface):
 
     describe_examples = [
         ('Differences: [\n'
-         '10 is not > 11\n'
-         '10 is not > 10\n'
+         '11 >= 10\n'
+         '10 >= 10\n'
          ']',
          [11, 9, 10],
          AllMatch(LessThan(10))),
@@ -75,9 +75,9 @@ class TestAnyMatch(TestCase, TestMatchersInterface):
 
     describe_examples = [
         ('Differences: [\n'
-         '7 != 11\n'
-         '7 != 9\n'
-         '7 != 10\n'
+         '11 != 7\n'
+         '9 != 7\n'
+         '10 != 7\n'
          ']',
          [11, 9, 10],
          AnyMatch(Equals(7))),
@@ -99,11 +99,12 @@ class TestAfterPreprocessing(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ("1 != 0: after <function parity> on 2", 2,
+        ("0 != 1: after <function parity> on 2", 2,
          AfterPreprocessing(parity, Equals(1))),
-        ("1 != 0", 2,
+        ("0 != 1", 2,
          AfterPreprocessing(parity, Equals(1), annotate=False)),
         ]
+
 
 class TestMatchersAnyInterface(TestCase, TestMatchersInterface):
 
@@ -160,7 +161,7 @@ class TestAnnotate(TestCase, TestMatchersInterface):
     str_examples = [
         ("Annotate('foo', Equals(1))", Annotate("foo", Equals(1)))]
 
-    describe_examples = [("1 != 2: foo", 2, Annotate('foo', Equals(1)))]
+    describe_examples = [("2 != 1: foo", 2, Annotate('foo', Equals(1)))]
 
     def test_if_message_no_message(self):
         # Annotate.if_message returns the given matcher if there is no

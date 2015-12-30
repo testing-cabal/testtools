@@ -1,12 +1,9 @@
-# Copyright (c) 2009-2011 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
 """Test ConcurrentTestSuite and related things."""
 
-__metaclass__ = type
-
 import doctest
-from functools import partial
-import sys
+from pprint import pformat
 import unittest
 import unittest2
 
@@ -20,13 +17,14 @@ from testtools import (
     TestByTestResult,
     TestCase,
     )
-from testtools.compat import _b, _u
-from testtools.matchers import DocTestMatches
-from testtools.testsuite import FixtureSuite, iterate_tests, sorted_tests
+from testtools.compat import _u
+from testtools.matchers import DocTestMatches, Equals
+from testtools.testsuite import FixtureSuite, sorted_tests
 from testtools.tests.helpers import LoggingResult
 from testtools.testresult.doubles import StreamResult as LoggingStream
 
 FunctionFixture = try_import('fixtures.FunctionFixture')
+
 
 class Sample(TestCase):
     def __hash__(self):
@@ -322,6 +320,20 @@ class TestSortedTests(TestCase):
         c = PlaceHolder('a')
         self.assertRaises(
             ValueError, sorted_tests, unittest.TestSuite([a, b, c]))
+
+    def test_multiple_duplicates(self):
+        # If there are multiple duplicates on a test suite, we report on them
+        # all.
+        a = PlaceHolder('a')
+        b = PlaceHolder('b')
+        c = PlaceHolder('a')
+        d = PlaceHolder('b')
+        error = self.assertRaises(
+            ValueError, sorted_tests, unittest.TestSuite([a, b, c, d]))
+        self.assertThat(
+            str(error),
+            Equals("Duplicate test ids detected: %s" % (
+                pformat({'a': 2, 'b': 2}),)))
 
 
 def test_suite():

@@ -55,41 +55,61 @@ class Test_BinaryMismatch(TestCase):
     def test_long_bytes(self):
         one_line_b = self._long_b.replace(_b("\n"), _b(" "))
         mismatch = _BinaryMismatch(one_line_b, "!~", self._long_b)
-        self.assertEqual(mismatch.describe(),
-            "%s:\nreference = %s\nactual    = %s\n" % ("!~",
+        self.assertEqual(
+            mismatch.describe(),
+            "%s:\nreference = %s\nactual    = %s\n" % (
+                "!~",
+                text_repr(self._long_b, multiline=True),
                 text_repr(one_line_b),
-                text_repr(self._long_b, multiline=True)))
+            )
+        )
 
     def test_long_unicode(self):
         one_line_u = self._long_u.replace("\n", " ")
         mismatch = _BinaryMismatch(one_line_u, "!~", self._long_u)
-        self.assertEqual(mismatch.describe(),
-            "%s:\nreference = %s\nactual    = %s\n" % ("!~",
+        self.assertEqual(
+            mismatch.describe(),
+            "%s:\nreference = %s\nactual    = %s\n" % (
+                "!~",
+                text_repr(self._long_u, multiline=True),
                 text_repr(one_line_u),
-                text_repr(self._long_u, multiline=True)))
+            )
+        )
 
     def test_long_mixed_strings(self):
         mismatch = _BinaryMismatch(self._long_b, "!~", self._long_u)
-        self.assertEqual(mismatch.describe(),
-            "%s:\nreference = %s\nactual    = %s\n" % ("!~",
+        self.assertEqual(
+            mismatch.describe(),
+            "%s:\nreference = %s\nactual    = %s\n" % (
+                "!~",
+                text_repr(self._long_u, multiline=True),
                 text_repr(self._long_b, multiline=True),
-                text_repr(self._long_u, multiline=True)))
+            )
+        )
 
     def test_long_bytes_and_object(self):
         obj = object()
         mismatch = _BinaryMismatch(self._long_b, "!~", obj)
-        self.assertEqual(mismatch.describe(),
-            "%s:\nreference = %s\nactual    = %s\n" % ("!~",
+        self.assertEqual(
+            mismatch.describe(),
+            "%s:\nreference = %s\nactual    = %s\n" % (
+                "!~",
+                repr(obj),
                 text_repr(self._long_b, multiline=True),
-                repr(obj)))
+            )
+        )
 
     def test_long_unicode_and_object(self):
         obj = object()
         mismatch = _BinaryMismatch(self._long_u, "!~", obj)
-        self.assertEqual(mismatch.describe(),
-            "%s:\nreference = %s\nactual    = %s\n" % ("!~",
+        self.assertEqual(
+            mismatch.describe(),
+            "%s:\nreference = %s\nactual    = %s\n" % (
+                "!~",
+                repr(obj),
                 text_repr(self._long_u, multiline=True),
-                repr(obj)))
+            )
+        )
 
 
 class TestEqualsInterface(TestCase, TestMatchersInterface):
@@ -100,7 +120,14 @@ class TestEqualsInterface(TestCase, TestMatchersInterface):
 
     str_examples = [("Equals(1)", Equals(1)), ("Equals('1')", Equals('1'))]
 
-    describe_examples = [("1 != 2", 2, Equals(1))]
+    describe_examples = [
+        ("2 != 1", 2, Equals(1)),
+        (("!=:\n"
+          "reference = 'abcdefghijklmnopqrstuvwxyz0123456789'\n"
+          "actual    = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'\n"),
+         'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+         Equals('abcdefghijklmnopqrstuvwxyz0123456789')),
+    ]
 
 
 class TestNotEqualsInterface(TestCase, TestMatchersInterface):
@@ -126,7 +153,7 @@ class TestIsInterface(TestCase, TestMatchersInterface):
 
     str_examples = [("Is(2)", Is(2))]
 
-    describe_examples = [("1 is not 2", 2, Is(1))]
+    describe_examples = [("2 is not 1", 2, Is(1))]
 
 
 class TestIsInstanceInterface(TestCase, TestMatchersInterface):
@@ -160,8 +187,8 @@ class TestLessThanInterface(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ('4 is not > 5', 5, LessThan(4)),
-        ('4 is not > 4', 4, LessThan(4)),
+        ('5 >= 4', 5, LessThan(4)),
+        ('4 >= 4', 4, LessThan(4)),
         ]
 
 
@@ -176,8 +203,8 @@ class TestGreaterThanInterface(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ('5 is not < 4', 4, GreaterThan(5)),
-        ('4 is not < 4', 4, GreaterThan(4)),
+        ('4 <= 5', 4, GreaterThan(5)),
+        ('4 <= 4', 4, GreaterThan(4)),
         ]
 
 
