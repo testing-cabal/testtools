@@ -63,33 +63,6 @@ class TestNotReentrant(NeedsTwistedTestCase):
         self.assertEqual(2, len(calls))
 
 
-class TestExtractResult(NeedsTwistedTestCase):
-
-    def test_not_fired(self):
-        # _spinner.extract_result raises _spinner.DeferredNotFired if it's
-        # given a Deferred that has not fired.
-        self.assertThat(lambda:_spinner.extract_result(defer.Deferred()),
-            Raises(MatchesException(_spinner.DeferredNotFired)))
-
-    def test_success(self):
-        # _spinner.extract_result returns the value of the Deferred if it has
-        # fired successfully.
-        marker = object()
-        d = defer.succeed(marker)
-        self.assertThat(_spinner.extract_result(d), Equals(marker))
-
-    def test_failure(self):
-        # _spinner.extract_result raises the failure's exception if it's given
-        # a Deferred that is failing.
-        try:
-            1/0
-        except ZeroDivisionError:
-            f = Failure()
-        d = defer.fail(f)
-        self.assertThat(lambda:_spinner.extract_result(d),
-            Raises(MatchesException(ZeroDivisionError)))
-
-
 class TestTrapUnhandledErrors(NeedsTwistedTestCase):
 
     def test_no_deferreds(self):
