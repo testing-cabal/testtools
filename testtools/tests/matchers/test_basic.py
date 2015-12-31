@@ -125,8 +125,8 @@ class TestEqualsInterface(TestCase, TestMatchersInterface):
         (_u("!=:\n"
             "reference = 'abcdefghijklmnopqrstuvwxyz0123456789'\n"
             "actual    = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'\n"),
-         _u('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'),
-         Equals(_u('abcdefghijklmnopqrstuvwxyz0123456789'))),
+         'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+         Equals('abcdefghijklmnopqrstuvwxyz0123456789')),
     ]
 
 
