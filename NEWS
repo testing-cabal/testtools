@@ -18,6 +18,16 @@ Improvements
   (``IMismatch``), explicitly documenting the contract expected by
   ``assertThat`` and ``MismatchError``. (Jonathan Lange)
 
+* The short form of errors for failed binary comparisions will now put the
+  expected value on the _right_. This means that ``assertThat(2, Equals(3))``
+  will raise an error saying ``2 != 3``.
+  (Jonathan Lange, #1525227)
+
+* Tests for ``assertRaisesRegexp``. (Julia Varlamova, Jonathan Lange)
+
+* Tests that customize ``skipException`` no longer get tracebacks for skipped
+  tests.  (Jonathan Lange)
+
 Changes
 -------
 
@@ -31,6 +41,19 @@ Changes
 
 * Last release of testtools to support Python 3.2. (Jonathan Lange)
 
+* ``TestCase.skip`` deprecated. Use ``skipTest`` instead.
+  (Jonathan Lange, #988893)
+
+* Getting ``expected`` or ``observed`` attributes from binary comparison
+  mismatches (e.g. ``Equals(2).match(3).expected``) is now deprecated.
+  (Jonathan Lange)
+
+* Last release of testtools to support Python 3.2. (Jonathan Lange)
+
+* Last release of testtools to support Python 2.6. (Jonathan Lange)
+
+* Report on all duplicate test ids when sorting test suites that contain
+  duplicate ids.  (Thomas Bechtold, Jonathan Lange)
 
 1.8.1
 ~~~~~

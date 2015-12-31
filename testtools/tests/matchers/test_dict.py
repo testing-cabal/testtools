@@ -103,7 +103,7 @@ class TestMatchesDict(TestCase, TestMatchersInterface):
 
     str_examples = [
         ("MatchesDict({'baz': %s, 'foo': %s})" % (
-                Not(Equals('qux')), Equals('bar')),
+            Not(Equals('qux')), Equals('bar')),
          matches_matcher),
         ]
 
@@ -119,7 +119,7 @@ class TestMatchesDict(TestCase, TestMatchersInterface):
          {'foo': 'bar', 'baz': 'qux'}, matches_matcher),
         (_u("Differences: {\n"
             "  'baz': 'qux' matches Equals('qux'),\n"
-            "  'foo': 'bar' != 'bop',\n"
+            "  'foo': 'bop' != 'bar',\n"
             "}"),
          {'foo': 'bop', 'baz': 'qux'}, matches_matcher),
         (_u("Extra: {\n"
@@ -156,7 +156,7 @@ class TestContainsDict(TestCase, TestMatchersInterface):
 
     str_examples = [
         ("ContainsDict({'baz': %s, 'foo': %s})" % (
-                Not(Equals('qux')), Equals('bar')),
+            Not(Equals('qux')), Equals('bar')),
          matches_matcher),
         ]
 
@@ -172,7 +172,7 @@ class TestContainsDict(TestCase, TestMatchersInterface):
          {'foo': 'bar', 'baz': 'qux'}, matches_matcher),
         (_u("Differences: {\n"
             "  'baz': 'qux' matches Equals('qux'),\n"
-            "  'foo': 'bar' != 'bop',\n"
+            "  'foo': 'bop' != 'bar',\n"
             "}"),
          {'foo': 'bop', 'baz': 'qux'}, matches_matcher),
         (_u("Missing: {\n"
@@ -213,7 +213,7 @@ class TestContainedByDict(TestCase, TestMatchersInterface):
          {'foo': 'bar', 'baz': 'qux'}, matches_matcher),
         (_u("Differences: {\n"
             "  'baz': 'qux' matches Equals('qux'),\n"
-            "  'foo': 'bar' != 'bop',\n"
+            "  'foo': 'bop' != 'bar',\n"
             "}"),
          {'foo': 'bop', 'baz': 'qux'}, matches_matcher),
         (_u("Extra: {\n"
