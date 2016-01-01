@@ -18,6 +18,7 @@ Failure = try_import('twisted.python.failure.Failure')
 
 
 class TestExtractResult(NeedsTwistedTestCase):
+    """Tests for ``extract_result``."""
 
     def test_not_fired(self):
         # _spinner.extract_result raises _spinner.DeferredNotFired if it's
