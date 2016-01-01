@@ -49,9 +49,7 @@ def make_failure(exc_value):
 
 
 class NoResultTests(NeedsTwistedTestCase):
-    """
-    Tests for ``no_result``.
-    """
+    """Tests for ``no_result``."""
 
     def match(self, thing):
         return no_result().match(thing)
