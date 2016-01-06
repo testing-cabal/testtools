@@ -5,8 +5,10 @@
 from extras import try_import
 
 from testtools.compat import _u
+from testtools.content import TracebackContent
 from testtools._deferredmatchers import (
     no_result,
+    successful,
 )
 from testtools.matchers import (
     AfterPreprocessing,
@@ -60,7 +62,7 @@ class NoResultTests(NeedsTwistedTestCase):
 
     def test_successful_does_no_match(self):
         # A Deferred that's fired successfully does not match no_result.
-        result = None
+        result = object()
         deferred = defer.succeed(result)
         mismatch = self.match(deferred)
         self.assertThat(
@@ -92,8 +94,6 @@ class NoResultTests(NeedsTwistedTestCase):
     def test_failure_after_assertion(self):
         # We can create a Deferred, assert that it hasn't fired, then fire it
         # with a failure and collect the result.
-
-        # XXX: Ask Jean-Paul about whether this is good behaviour.
         deferred = defer.Deferred()
         self.assertThat(deferred, no_result())
         results = []
@@ -101,6 +101,55 @@ class NoResultTests(NeedsTwistedTestCase):
         fail = make_failure(RuntimeError('arbitrary failure'))
         deferred.errback(fail)
         self.assertThat(results, Equals([fail]))
+
+
+class SuccessResultTests(NeedsTwistedTestCase):
+
+    def match(self, matcher, value):
+        return successful(matcher).match(value)
+
+    def test_successful_result_passes(self):
+        # A Deferred that has fired successfully matches against the value it
+        # was fired with.
+        result = object()
+        deferred = defer.succeed(result)
+        self.assertThat(self.match(Is(result), deferred), Is(None))
+
+    def test_different_successful_result_fails(self):
+        # A Deferred that has fired successfully matches against the value it
+        # was fired with.
+        result = object()
+        deferred = defer.succeed(result)
+        matcher = Is(None)  # Something that doesn't match `result`.
+        mismatch = matcher.match(result)
+        self.assertThat(
+            self.match(matcher, deferred),
+            mismatches(Equals(mismatch.describe()),
+                       Equals(mismatch.get_details())))
+
+    def test_not_fired_fails(self):
+        # A Deferred that has not yet fired fails to match.
+        deferred = defer.Deferred()
+        arbitrary_matcher = Is(None)
+        self.assertThat(
+            self.match(arbitrary_matcher, deferred),
+            mismatches(Equals(_u('%r has not fired') % (deferred,))))
+
+    def test_failing_fails(self):
+        # A Deferred that has fired with a failure fails to match.
+        deferred = defer.Deferred()
+        fail = make_failure(RuntimeError('arbitrary failure'))
+        deferred.errback(fail)
+        arbitrary_matcher = Is(None)
+        self.assertThat(
+            self.match(arbitrary_matcher, deferred),
+            mismatches(
+                Equals(u'Success result expected on %r, found failure result '
+                       u'instead: %r' % (deferred, fail)),
+                Equals({'traceback': TracebackContent(
+                    (fail.type, fail.value, fail.getTracebackObject()), None,
+                )}),
+            ))
 
 
 def test_suite():
