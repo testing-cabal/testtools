@@ -5,6 +5,8 @@
 Depends on Twisted.
 """
 
+# XXX: None of these are published yet. Decide where & how to make them public.
+
 from testtools.compat import _u
 from testtools.content import TracebackContent
 from testtools.matchers import Mismatch
@@ -32,11 +34,14 @@ class _NoResult(object):
 # XXX: Maybe just a constant, rather than a function?
 def no_result():
     """Match a Deferred that has not yet fired."""
+    # TODO: Example in docstrings
     return _NoResult()
 
 
 def _not_fired(deferred):
     """Create a mismatch indicating ``deferred`` hasn't fired."""
+    # XXX: Make sure that the error messages we generate are the same as the
+    # error messages that Twisted returns.
     return Mismatch(_u('{} has not fired'.format(deferred)))
 
 
@@ -74,7 +79,6 @@ class _Successful(object):
                     successes, failures)))
         elif failures:
             [failure] = failures
-            # XXX: attach the traceback
             return Mismatch(
                 _u('Success result expected on %r, found failure result '
                    'instead: %r' % (deferred, failure)),
@@ -87,8 +91,15 @@ class _Successful(object):
             return _not_fired(deferred)
 
 
+# XXX: The Twisted name is successResultOf. Do we want to use that name?
 def successful(matcher):
+    # XXX: Docstring, include examples.
     return _Successful(matcher)
 
 
 # XXX: Add a convenience for successful(Equals)?
+
+
+# TODO: failure.
+
+# TODO: helpers for adding matcher-based assertions in callbacks.
