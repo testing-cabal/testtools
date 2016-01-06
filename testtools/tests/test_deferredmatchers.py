@@ -8,6 +8,7 @@ from testtools.compat import _u
 from testtools.content import TracebackContent
 from testtools._deferredmatchers import (
     no_result,
+    failed,
     successful,
 )
 from testtools.matchers import (
@@ -20,7 +21,7 @@ from testtools.tests.test_spinner import NeedsTwistedTestCase
 
 
 defer = try_import('twisted.internet.defer')
-failure = try_import('twisted.python.failure')
+Failure = try_import('twisted.python.failure.Failure')
 
 
 def mismatches(description, details=None):
@@ -47,7 +48,7 @@ def make_failure(exc_value):
     try:
         raise exc_value
     except:
-        return failure.Failure()
+        return Failure()
 
 
 class NoResultTests(NeedsTwistedTestCase):
@@ -150,6 +151,52 @@ class SuccessResultTests(NeedsTwistedTestCase):
                     (fail.type, fail.value, fail.getTracebackObject()), None,
                 )}),
             ))
+
+
+class FailureResultTests(NeedsTwistedTestCase):
+
+    def match(self, matcher, value):
+        return failed(matcher).match(value)
+
+    def test_failure_passes(self):
+        # A Deferred that has fired with a failure matches against the value
+        # it was fired with.
+        fail = make_failure(RuntimeError('arbitrary failure'))
+        deferred = defer.fail(fail)
+        self.assertThat(self.match(Is(fail), deferred), Is(None))
+
+    def test_different_failure_fails(self):
+        # A Deferred that has fired with a failure matches against the value
+        # it was fired with.
+        fail = make_failure(RuntimeError('arbitrary failure'))
+        deferred = defer.fail(fail)
+        matcher = Is(None)  # Something that doesn't match `fail`.
+        mismatch = matcher.match(fail)
+        self.assertThat(
+            self.match(matcher, deferred),
+            mismatches(Equals(mismatch.describe()),
+                       Equals(mismatch.get_details())))
+
+    def test_success_fails(self):
+        # A Deferred that has fired successfully fails to match.
+        result = object()
+        deferred = defer.succeed(result)
+        matcher = Is(None)  # Can be any matcher
+        self.assertThat(
+            self.match(matcher, deferred),
+            mismatches(Equals(_u(
+                'Failure result expected on %r, found success '
+                'result (%r) instead' % (deferred, result)))))
+
+    def test_no_result_fails(self):
+        # A Deferred that has not fired fails to match.
+        deferred = defer.Deferred()
+        matcher = Is(None)  # Can be any matcher
+        self.assertThat(
+            self.match(matcher, deferred),
+            mismatches(Equals(_u(
+                'Failure result expected on %r, found no result instead'
+                % (deferred,)))))
 
 
 def test_suite():

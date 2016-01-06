@@ -99,7 +99,42 @@ def successful(matcher):
 
 # XXX: Add a convenience for successful(Equals)?
 
+class _Failed(object):
+    """Matches a Deferred that has failed."""
 
-# TODO: failure.
+    def __init__(self, matcher):
+        self._matcher = matcher
+
+    def match(self, deferred):
+        successes = []
+        failures = []
+        deferred.addCallbacks(successes.append, failures.append)
+        # XXX: This duplicates structure (oh for pattern matching!). Can I do
+        # some sort of OO trickery to avoid this?
+        if successes and failures:
+            raise AssertionError(
+                _u('Impossible condition, success: {} and failure: {}'.format(
+                    successes, failures)))
+        elif failures:
+            [failure] = failures
+            return self._matcher.match(failure)
+        elif successes:
+            [success] = successes
+            return Mismatch(
+                _u('Failure result expected on %r, found success '
+                   'result (%r) instead' % (deferred, success)), {})
+        else:
+            return Mismatch(
+                _u('Failure result expected on %r, found no result instead'
+                   % (deferred,)))
+
+
+# XXX: The Twisted name is failureResultOf. Do we want to use that name?
+#
+# XXX: failureResultOf also takes an *args of expected exception types. Do we
+# want to provide that?
+def failed(matcher):
+    # XXX: Docstring, with examples.
+    return _Failed(matcher)
 
 # TODO: helpers for adding matcher-based assertions in callbacks.
