@@ -5,7 +5,8 @@
 Depends on Twisted.
 """
 
-# XXX: None of these are published yet. Decide where & how to make them public.
+# TODO: None of these are published yet. Decide where & how to make them
+# public.
 
 from testtools.compat import _u
 from testtools.content import TracebackContent
@@ -21,14 +22,16 @@ class _NoResult(object):
 
         def callback(x):
             result.append(x)
-            # XXX: assertNoResult returns `x` here, but then swallows it if
-            # it's a failure. I think this is better behaviour, even if it
-            # results in a double traceback.
+            # assertNoResult returns `x` here, but then swallows it if it's a
+            # failure. I think this is better behaviour, even if it results in
+            # a double traceback. -- jml
             return x
         deferred.addBoth(callback)
         if result:
+            # TODO: Include failure traceback if available.
             return Mismatch(
-                _u('%r has already fired with %r' % (deferred, result[0])))
+                _u('No result expected on %r, found %r instead'
+                   % (deferred, result[0])))
 
 
 # XXX: Maybe just a constant, rather than a function?
@@ -36,13 +39,6 @@ def no_result():
     """Match a Deferred that has not yet fired."""
     # TODO: Example in docstrings
     return _NoResult()
-
-
-def _not_fired(deferred):
-    """Create a mismatch indicating ``deferred`` hasn't fired."""
-    # XXX: Make sure that the error messages we generate are the same as the
-    # error messages that Twisted returns.
-    return Mismatch(_u('{} has not fired'.format(deferred)))
 
 
 def _failure_content(failure):
@@ -88,7 +84,9 @@ class _Successful(object):
             [result] = successes
             return self._matcher.match(result)
         else:
-            return _not_fired(deferred)
+            return Mismatch(
+                _u('Success result expected on {}, found no result '
+                   'instead'.format(deferred)))
 
 
 # XXX: The Twisted name is successResultOf. Do we want to use that name?

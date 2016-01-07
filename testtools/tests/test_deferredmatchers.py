@@ -68,7 +68,8 @@ class NoResultTests(NeedsTwistedTestCase):
         mismatch = self.match(deferred)
         self.assertThat(
             mismatch, mismatches(Equals(_u(
-                '%r has already fired with %r' % (deferred, result)))))
+                'No result expected on %r, found %r instead'
+                % (deferred, result)))))
 
     def test_failed_does_not_match(self):
         # A Deferred that's failed does not match no_result.
@@ -79,7 +80,8 @@ class NoResultTests(NeedsTwistedTestCase):
         mismatch = self.match(deferred)
         self.assertThat(
             mismatch, mismatches(Equals(_u(
-                '%r has already fired with %r' % (deferred, fail)))))
+                'No result expected on %r, found %r instead'
+                % (deferred, fail)))))
 
     def test_success_after_assertion(self):
         # We can create a Deferred, assert that it hasn't fired, then fire it
@@ -134,7 +136,9 @@ class SuccessResultTests(NeedsTwistedTestCase):
         arbitrary_matcher = Is(None)
         self.assertThat(
             self.match(arbitrary_matcher, deferred),
-            mismatches(Equals(_u('%r has not fired') % (deferred,))))
+            mismatches(
+                Equals(_u('Success result expected on %r, found no result '
+                          'instead') % (deferred,))))
 
     def test_failing_fails(self):
         # A Deferred that has fired with a failure fails to match.
