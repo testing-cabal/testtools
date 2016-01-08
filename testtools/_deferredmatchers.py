@@ -7,10 +7,62 @@ Depends on Twisted.
 
 # TODO: None of these are published yet. Decide where & how to make them
 # public.
+from functools import partial
 
 from testtools.compat import _u
 from testtools.content import TracebackContent
 from testtools.matchers import Mismatch
+
+
+class ImpossibleDeferredError(Exception):
+    """
+    Raised if a Deferred somehow triggers both a success and a failure.
+    """
+
+    def __init__(self, deferred, successes, failures):
+        super(ImpossibleDeferredError, self).__init__(
+            'Impossible condition on {}, got both success ({}) and '
+            'failure ({})'.format(deferred, successes, failures)
+        )
+
+
+def _on_deferred_result(deferred, on_success, on_failure, on_no_result):
+    """
+    Synchronously apply callbacks to the result of a ``Deferred``.
+
+    :param Deferred deferred: A synchronous Deferred.
+    :param Callable[[Any], T] on_success: Called if the Deferred fires
+        successfully.
+    :param Callable[[Failure], T] on_failure: Called if the Deferred
+        fires unsuccessfully.
+    :param Callable[[], T] on_no_result: Called if the Deferred has not
+        yet fired.
+
+    :raises ImpossibleDeferredError: If the Deferred somehow
+        triggers both a success and a failure.
+    :raises TypeError: If the Deferred somehow triggers more than one success,
+        or more than one failure.
+
+    :return: Whatever is returned by the triggered callback.
+    :rtype: ``T``
+    """
+    # XXX: I desperately want to decompose this into an Either and a Maybe,
+    # and a thing that returns Maybe (Either Failure a) given a synchronous
+    # Deferred. I am restraining myself.
+    successes = []
+    failures = []
+    deferred.addCallbacks(successes.append, failures.append)
+
+    if successes and failures:
+        raise ImpossibleDeferredError(deferred, successes, failures)
+    elif failures:
+        [failure] = failures
+        return on_failure(failure)
+    elif successes:
+        [result] = successes
+        return on_success(result)
+    else:
+        return on_no_result()
 
 
 class _NoResult(object):
@@ -60,33 +112,28 @@ class _Successful(object):
         """Construct a ``_Successful`` matcher."""
         self._matcher = matcher
 
+    @staticmethod
+    def _got_failure(deferred, failure):
+        return Mismatch(
+            _u('Success result expected on %r, found failure result '
+               'instead: %r' % (deferred, failure)),
+            {'traceback': _failure_content(failure)},
+        )
+
+    @staticmethod
+    def _got_no_result(deferred):
+        return Mismatch(
+            _u('Success result expected on {}, found no result '
+               'instead'.format(deferred)))
+
     def match(self, deferred):
         """Match against the successful result of ``deferred``."""
-        successes = []
-        failures = []
-
-        def callback(x):
-            successes.append(x)
-        deferred.addCallbacks(callback, failures.append)
-
-        if successes and failures:
-            raise AssertionError(
-                _u('Impossible condition, success: {} and failure: {}'.format(
-                    successes, failures)))
-        elif failures:
-            [failure] = failures
-            return Mismatch(
-                _u('Success result expected on %r, found failure result '
-                   'instead: %r' % (deferred, failure)),
-                {'traceback': _failure_content(failure)},
-            )
-        elif successes:
-            [result] = successes
-            return self._matcher.match(result)
-        else:
-            return Mismatch(
-                _u('Success result expected on {}, found no result '
-                   'instead'.format(deferred)))
+        return _on_deferred_result(
+            deferred,
+            on_success=self._matcher.match,
+            on_failure=partial(self._got_failure, deferred),
+            on_no_result=partial(self._got_no_result, deferred),
+        )
 
 
 # XXX: The Twisted name is successResultOf. Do we want to use that name?
@@ -103,28 +150,25 @@ class _Failed(object):
     def __init__(self, matcher):
         self._matcher = matcher
 
+    @staticmethod
+    def _got_success(deferred, success):
+        return Mismatch(
+            _u('Failure result expected on %r, found success '
+               'result (%r) instead' % (deferred, success)), {})
+
+    @staticmethod
+    def _got_no_result(deferred):
+        return Mismatch(
+            _u('Failure result expected on %r, found no result instead'
+               % (deferred,)))
+
     def match(self, deferred):
-        successes = []
-        failures = []
-        deferred.addCallbacks(successes.append, failures.append)
-        # XXX: This duplicates structure (oh for pattern matching!). Can I do
-        # some sort of OO trickery to avoid this?
-        if successes and failures:
-            raise AssertionError(
-                _u('Impossible condition, success: {} and failure: {}'.format(
-                    successes, failures)))
-        elif failures:
-            [failure] = failures
-            return self._matcher.match(failure)
-        elif successes:
-            [success] = successes
-            return Mismatch(
-                _u('Failure result expected on %r, found success '
-                   'result (%r) instead' % (deferred, success)), {})
-        else:
-            return Mismatch(
-                _u('Failure result expected on %r, found no result instead'
-                   % (deferred,)))
+        return _on_deferred_result(
+            deferred,
+            on_success=partial(self._got_success, deferred),
+            on_failure=self._matcher.match,
+            on_no_result=partial(self._got_no_result, deferred),
+        )
 
 
 # XXX: The Twisted name is failureResultOf. Do we want to use that name?
