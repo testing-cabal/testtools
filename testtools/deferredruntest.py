@@ -31,8 +31,8 @@ import sys
 from testtools.compat import StringIO
 from testtools.content import text_content
 from testtools.runtest import RunTest, _raise_force_fail_error
-from testtools._deferred import extract_result
 from testtools._spinner import (
+    extract_result,
     NoResultError,
     Spinner,
     TimeoutError,
