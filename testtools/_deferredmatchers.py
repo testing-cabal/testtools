@@ -34,13 +34,13 @@ def _on_deferred_result(deferred, on_success, on_failure, on_no_result):
     The value of ``deferred`` will be preserved, so that other callbacks and
     errbacks can be added to ``deferred``.
 
-    :param Deferred deferred: A synchronous Deferred.
-    :param Callable[[Any], T] on_success: Called if the Deferred fires
-        successfully.
-    :param Callable[[Failure], T] on_failure: Called if the Deferred
-        fires unsuccessfully.
-    :param Callable[[], T] on_no_result: Called if the Deferred has not
-        yet fired.
+    :param Deferred[A] deferred: A synchronous Deferred.
+    :param Callable[[Deferred[A], A], T] on_success: Called if the Deferred
+        fires successfully.
+    :param Callable[[Deferred[A], Failure], T] on_failure: Called if the
+        Deferred fires unsuccessfully.
+    :param Callable[[Deferred[A]], T] on_no_result: Called if the Deferred has
+        not yet fired.
 
     :raises ImpossibleDeferredError: If the Deferred somehow
         triggers both a success and a failure.
@@ -69,12 +69,12 @@ def _on_deferred_result(deferred, on_success, on_failure, on_no_result):
         raise ImpossibleDeferredError(deferred, successes, failures)
     elif failures:
         [failure] = failures
-        return on_failure(failure)
+        return on_failure(deferred, failure)
     elif successes:
         [result] = successes
-        return on_success(result)
+        return on_success(deferred, result)
     else:
-        return on_no_result()
+        return on_no_result(deferred)
 
 
 class _NoResult(object):
@@ -90,9 +90,9 @@ class _NoResult(object):
         """Match ``deferred`` if it hasn't fired."""
         return _on_deferred_result(
             deferred,
-            on_success=partial(self._got_result, deferred),
-            on_failure=partial(self._got_result, deferred),
-            on_no_result=lambda: None,
+            on_success=self._got_result,
+            on_failure=self._got_result,
+            on_no_result=lambda _: None,
         )
 
 
@@ -141,9 +141,9 @@ class _Successful(object):
         """Match against the successful result of ``deferred``."""
         return _on_deferred_result(
             deferred,
-            on_success=self._matcher.match,
-            on_failure=partial(self._got_failure, deferred),
-            on_no_result=partial(self._got_no_result, deferred),
+            on_success=lambda _, value: self._matcher.match(value),
+            on_failure=self._got_failure,
+            on_no_result=self._got_no_result,
         )
 
 
@@ -181,9 +181,9 @@ class _Failed(object):
     def match(self, deferred):
         return _on_deferred_result(
             deferred,
-            on_success=partial(self._got_success, deferred),
-            on_failure=partial(self._got_failure, deferred),
-            on_no_result=partial(self._got_no_result, deferred),
+            on_success=self._got_success,
+            on_failure=self._got_failure,
+            on_no_result=self._got_no_result,
         )
 
 
