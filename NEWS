@@ -43,6 +43,9 @@ Changes
 * Report on all duplicate test ids when sorting test suites that contain
   duplicate ids.  (Thomas Bechtold, Jonathan Lange)
 
+* Add ``readthedocs-requirements.txt`` so readthedocs.org can build the
+  Twisted API documentation. (Jonathan Lange)
+
 1.8.1
 ~~~~~
 
