@@ -89,8 +89,8 @@ class _Successful(object):
     @staticmethod
     def _got_no_result(deferred):
         return Mismatch(
-            _u('Success result expected on {}, found no result '
-               'instead'.format(deferred)))
+            _u('Success result expected on %r, found no result '
+               'instead' % (deferred,)))
 
     def match(self, deferred):
         """Match against the successful result of ``deferred``."""
@@ -142,7 +142,7 @@ class _Failed(object):
     def _got_success(deferred, success):
         return Mismatch(
             _u('Failure result expected on %r, found success '
-               'result (%r) instead' % (deferred, success)), {})
+               'result (%r) instead' % (deferred, success)))
 
     @staticmethod
     def _got_no_result(deferred):
