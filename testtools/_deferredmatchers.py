@@ -15,9 +15,7 @@ from testtools.matchers import Mismatch
 
 
 class ImpossibleDeferredError(Exception):
-    """
-    Raised if a Deferred somehow triggers both a success and a failure.
-    """
+    """Raised if a Deferred somehow triggers both a success and a failure."""
 
     def __init__(self, deferred, successes, failures):
         super(ImpossibleDeferredError, self).__init__(
