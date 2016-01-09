@@ -192,8 +192,10 @@ def successful(matcher):
     Use this instead of
     :py:meth:`twisted.trial.unittest.SynchronousTestCase.successResultOf`.
 
-    :param matcher: A matcher to match against the result of a Deferred.
-    :return: A matcher that can be applied to a synchronous Deferred.
+    :param matcher: A matcher to match against the result of a
+        :class:`~twisted.internet.defer.Deferred`.
+    :return: A matcher that can be applied to a synchronous
+        :class:`~twisted.internet.defer.Deferred`.
     """
     return _Successful(matcher)
 
@@ -252,17 +254,15 @@ def failed(matcher):
     :py:meth:`twisted.trial.unittest.SynchronousTestCase.failureResultOf`.
 
     :param matcher: A matcher to match against the result of a failing
-        Deferred.
-    :return: A matcher that can be applied to a synchronous Deferred.
+        :class:`~twisted.internet.defer.Deferred`.
+    :return: A matcher that can be applied to a synchronous
+        :class:`~twisted.internet.defer.Deferred`.
     """
     return _Failed(matcher)
 
 # TODO: helpers for adding matcher-based assertions in callbacks.
 
 # TODO: Move the non-matcher stuff to _deferred.
-
-# TODO: Figure out how to just say "Deferred" and get sphinx to link to
-# Deferred (i.e. to not have to give fully qualified Python name each time).
 
 # TODO: Fix configuration so that Twisted is included as dependency when we
 # build on rtfd.

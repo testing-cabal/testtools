@@ -5,18 +5,20 @@ Matching Deferreds
 ------------------
 
 testtools provides support for making assertions about synchronous
-:py:class:`twisted.internet.defer.Deferred`\s.
+:py:class:`~twisted.internet.defer.Deferred`\s.
 
-A "synchronous" :py:class:`.Deferred` is one that does not need the reactor or
-any other asynchronous process in order to fire.
+A "synchronous" :py:class:`~twisted.internet.defer.Deferred` is one that does
+not need the reactor or any other asynchronous process in order to fire.
 
-Normal application code can't know when a :py:class:`.Deferred` is going to
-fire, because that is generally left up to the reactor. Well-written unit
-tests provide fake reactors, or don't use the reactor at all, so that
-:py:class:`.Deferred`\s fire synchronously.
+Normal application code can't know when a
+:py:class:`~twisted.internet.defer.Deferred` is going to fire, because that is
+generally left up to the reactor. Well-written unit tests provide fake
+reactors, or don't use the reactor at all, so that
+:py:class:`~twisted.internet.defer.Deferred`\s fire synchronously.
 
 These matchers allow you to make assertions about when and how
-:py:class:`.Deferred`\s fire, and about what values they fire with.
+:py:class:`~twisted.internet.defer.Deferred`\s fire, and about what values
+they fire with.
 
 See also `Testing Deferreds without the reactor`_ and the `Deferred howto`_.
 
@@ -32,8 +34,8 @@ Running tests in the reactor
 ----------------------------
 
 testtools provides support for running asynchronous Twisted tests: tests that
-return a :py:class:`.Deferred` and run the reactor until it fires and its
-callback chain is completed.
+return a :py:class:`~twisted.internet.defer.Deferred` and run the reactor
+until it fires and its callback chain is completed.
 
 Here's how to use it::
 
