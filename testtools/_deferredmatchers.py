@@ -82,22 +82,20 @@ def _on_deferred_result(deferred, on_success, on_failure, on_no_result):
 class _NoResult(object):
     """Matches a Deferred that has not yet fired."""
 
+    @staticmethod
+    def _got_result(deferred, result):
+        return Mismatch(
+            _u('No result expected on %r, found %r instead'
+               % (deferred, result)))
+
     def match(self, deferred):
         """Match ``deferred`` if it hasn't fired."""
-        result = []
-
-        def callback(x):
-            result.append(x)
-            # assertNoResult returns `x` here, but then swallows it if it's a
-            # failure. I think this is better behaviour, even if it results in
-            # a double traceback. -- jml
-            return x
-        deferred.addBoth(callback)
-        if result:
-            # TODO: Include failure traceback if available.
-            return Mismatch(
-                _u('No result expected on %r, found %r instead'
-                   % (deferred, result[0])))
+        return _on_deferred_result(
+            deferred,
+            on_success=partial(self._got_result, deferred),
+            on_failure=partial(self._got_result, deferred),
+            on_no_result=lambda: None,
+        )
 
 
 # XXX: Maybe just a constant, rather than a function?
