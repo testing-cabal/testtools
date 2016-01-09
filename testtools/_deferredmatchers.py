@@ -258,3 +258,7 @@ def failed(matcher):
     return _Failed(matcher)
 
 # TODO: helpers for adding matcher-based assertions in callbacks.
+
+# TODO: Move the non-matcher stuff to _deferred.
+
+# TODO: Use intersphinx to link to the Twisted API docs (if possible).
