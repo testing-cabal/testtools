@@ -1,9 +1,9 @@
-# Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
 """Tests for matchers."""
 
 from testtools import (
-    Matcher, # check that Matcher is exposed at the top level for docs.
+    Matcher,  # check that Matcher is exposed at the top level for docs.
     TestCase,
     )
 from testtools.compat import (
@@ -22,6 +22,7 @@ from testtools.matchers._impl import (
     MismatchError,
     )
 from testtools.tests.helpers import FullStackRunTest
+from .helpers import _valid_mismatch
 
 # Silence pyflakes.
 Matcher
@@ -32,15 +33,21 @@ class TestMismatch(TestCase):
     run_tests_with = FullStackRunTest
 
     def test_constructor_arguments(self):
-        mismatch = Mismatch("some description", {'detail': "things"})
-        self.assertEqual("some description", mismatch.describe())
+        mismatch = Mismatch(_u("some description"), {'detail': "things"})
+        self.assertEqual(_u("some description"), mismatch.describe())
         self.assertEqual({'detail': "things"}, mismatch.get_details())
 
     def test_constructor_no_arguments(self):
         mismatch = Mismatch()
-        self.assertThat(mismatch.describe,
+        self.assertThat(
+            mismatch.describe,
             Raises(MatchesException(NotImplementedError)))
         self.assertEqual({}, mismatch.get_details())
+
+    def test_valid_mismatch(self):
+        # Mismatch returns objects that implement IMismatch correctly.
+        mismatch = Mismatch(_u("some description"), {'detail': "things"})
+        self.assertThat(mismatch, _valid_mismatch())
 
 
 class TestMismatchError(TestCase):
@@ -109,18 +116,24 @@ class TestMismatchDecorator(TestCase):
 
     run_tests_with = FullStackRunTest
 
+    def test_valid_mismatch(self):
+        # MismatchDecorator implements IMismatch correctly.
+        x = Mismatch(_u("description"), {'foo': 'bar'})
+        decorated = MismatchDecorator(x)
+        self.assertThat(decorated, _valid_mismatch())
+
     def test_forwards_description(self):
-        x = Mismatch("description", {'foo': 'bar'})
+        x = Mismatch(_u("description"), {'foo': 'bar'})
         decorated = MismatchDecorator(x)
         self.assertEqual(x.describe(), decorated.describe())
 
     def test_forwards_details(self):
-        x = Mismatch("description", {'foo': 'bar'})
+        x = Mismatch(_u("description"), {'foo': 'bar'})
         decorated = MismatchDecorator(x)
         self.assertEqual(x.get_details(), decorated.get_details())
 
     def test_repr(self):
-        x = Mismatch("description", {'foo': 'bar'})
+        x = Mismatch(_u("description"), {'foo': 'bar'})
         decorated = MismatchDecorator(x)
         self.assertEqual(
             '<testtools.matchers.MismatchDecorator(%r)>' % (x,),

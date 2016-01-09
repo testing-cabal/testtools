@@ -17,14 +17,18 @@ __all__ = [
     'MismatchError',
     ]
 
+from zope.interface import implementer
 from testtools.compat import (
     _isbytes,
     istext,
     str_is_unicode,
-    text_repr
+    text_repr,
+    text,
     )
+from ._imatcher import IMatcher, IMismatch, _text_deprecation
 
 
+@implementer(IMatcher)
 class Matcher(object):
     """A pattern matcher.
 
@@ -53,6 +57,7 @@ class Matcher(object):
         raise NotImplementedError(self.__str__)
 
 
+@implementer(IMismatch)
 class Mismatch(object):
     """An object describing a mismatch detected by a Matcher."""
 
@@ -65,6 +70,8 @@ class Mismatch(object):
             to the empty dict.
         """
         if description:
+            if not isinstance(description, text):
+                _text_deprecation(description)
             self._description = description
         if details is None:
             details = {}
@@ -117,11 +124,13 @@ class MismatchError(AssertionError):
         super(MismatchError, self).__init__()
         self.matchee = matchee
         self.matcher = matcher
-        self.mismatch = mismatch
+        self.mismatch = IMismatch(mismatch, mismatch)
         self.verbose = verbose
 
     def __str__(self):
         difference = self.mismatch.describe()
+        if not isinstance(difference, text):
+            _text_deprecation(difference)
         if self.verbose:
             # GZ 2011-08-24: Smelly API? Better to take any object and special
             #                case text inside?
@@ -143,6 +152,7 @@ class MismatchError(AssertionError):
             return self.__unicode__().encode("ascii", "backslashreplace")
 
 
+@implementer(IMismatch)
 class MismatchDecorator(object):
     """Decorate a ``Mismatch``.
 
@@ -154,9 +164,11 @@ class MismatchDecorator(object):
     def __init__(self, original):
         """Construct a `MismatchDecorator`.
 
-        :param original: A `Mismatch` object to decorate.
+        :param IMismatch original: A mismatch object to decorate. Will attempt
+            to adapt ``original`` to ``IMismatch``. If this is not possible,
+            will use ``original`` directly.
         """
-        self.original = original
+        self.original = IMismatch(original, original)
 
     def __repr__(self):
         return '<testtools.matchers.MismatchDecorator(%r)>' % (self.original,)

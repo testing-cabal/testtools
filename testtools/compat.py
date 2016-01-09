@@ -1,6 +1,6 @@
 # Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
-"""Compatibility support for python 2 and 3."""
+"""Compatibility support for Python 2 and 3."""
 
 __metaclass__ = type
 __all__ = [
@@ -21,9 +21,7 @@ import codecs
 import io
 import locale
 import os
-import re
 import sys
-import traceback
 import unicodedata
 
 from extras import try_import, try_imports
@@ -68,6 +66,7 @@ if sys.version_info > (3, 0):
         return (type,)
     str_is_unicode = True
     text_or_bytes = (str, bytes)
+    text = str
 else:
     import __builtin__ as builtins
     def _u(s):
@@ -86,6 +85,7 @@ else:
         return (type, types.ClassType)
     str_is_unicode = sys.platform == "cli"
     text_or_bytes = (unicode, str)
+    text = unicode
 
 _u.__doc__ = __u_doc
 

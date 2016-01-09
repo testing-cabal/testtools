@@ -9,12 +9,15 @@ __all__ = [
 
 """Matchers that operate with knowledge of Python data structures."""
 
+from zope.interface import implementer
+
 from ..helpers import map_values
 from ._higherorder import (
     Annotate,
     MatchesAll,
     MismatchesAll,
     )
+from ._imatcher import IMatcher
 from ._impl import Mismatch
 
 
@@ -29,6 +32,7 @@ def ContainsAll(items):
     return MatchesAll(*map(Contains, items), first_only=False)
 
 
+@implementer(IMatcher)
 class MatchesListwise(object):
     """Matches if each matcher matches the corresponding value.
 
@@ -74,6 +78,7 @@ class MatchesListwise(object):
             return MismatchesAll(mismatches)
 
 
+@implementer(IMatcher)
 class MatchesStructure(object):
     """Matcher that matches an object structurally.
 
@@ -149,6 +154,7 @@ class MatchesStructure(object):
         return MatchesListwise(matchers).match(values)
 
 
+@implementer(IMatcher)
 class MatchesSetwise(object):
     """Matches if all the matchers match elements of the value being matched.
 

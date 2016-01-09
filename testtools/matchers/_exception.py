@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
 __all__ = [
     'MatchesException',
@@ -9,6 +9,7 @@ __all__ = [
 import sys
 
 from testtools.compat import (
+    _u,
     classtypes,
     istext,
     )
@@ -17,7 +18,7 @@ from ._higherorder import AfterPreproccessing
 from ._impl import (
     Matcher,
     Mismatch,
-    )
+)
 
 
 _error_repr = BaseException.__repr__
@@ -54,20 +55,22 @@ class MatchesException(Matcher):
             value_re = AfterPreproccessing(str, MatchesRegex(value_re), False)
         self.value_re = value_re
         expected_type = type(self.expected)
-        self._is_instance = not any(issubclass(expected_type, class_type)
-                for class_type in classtypes() + (tuple,))
+        self._is_instance = not any(
+            issubclass(expected_type, class_type)
+            for class_type in classtypes() + (tuple,))
 
     def match(self, other):
         if type(other) != tuple:
-            return Mismatch('%r is not an exc_info tuple' % other)
+            return Mismatch(_u('%r is not an exc_info tuple') % other)
         expected_class = self.expected
         if self._is_instance:
             expected_class = expected_class.__class__
         if not issubclass(other[0], expected_class):
-            return Mismatch('%r is not a %r' % (other[0], expected_class))
+            return Mismatch(_u('%r is not a %r') % (other[0], expected_class))
         if self._is_instance:
             if other[1].args != self.expected.args:
-                return Mismatch('%s has different arguments to %s.' % (
+                return Mismatch(
+                    _u('%s has different arguments to %s.') % (
                         _error_repr(other[1]), _error_repr(self.expected)))
         elif self.value_re is not None:
             return self.value_re.match(other[1])

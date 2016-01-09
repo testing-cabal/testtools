@@ -1,6 +1,7 @@
-# Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
 from testtools import TestCase
+from testtools.compat import _u
 from testtools.matchers import (
     DocTestMatches,
     Equals,
@@ -43,10 +44,10 @@ class TestAllMatch(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ('Differences: [\n'
-         '11 >= 10\n'
-         '10 >= 10\n'
-         ']',
+        (_u('Differences: [\n'
+            '11 >= 10\n'
+            '10 >= 10\n'
+            ']'),
          [11, 9, 10],
          AllMatch(LessThan(10))),
         ]
@@ -74,11 +75,11 @@ class TestAnyMatch(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ('Differences: [\n'
-         '11 != 7\n'
-         '9 != 7\n'
-         '10 != 7\n'
-         ']',
+        (_u('Differences: [\n'
+            '11 != 7\n'
+            '9 != 7\n'
+            '10 != 7\n'
+            ']'),
          [11, 9, 10],
          AnyMatch(Equals(7))),
         ]
@@ -99,9 +100,9 @@ class TestAfterPreprocessing(TestCase, TestMatchersInterface):
         ]
 
     describe_examples = [
-        ("0 != 1: after <function parity> on 2", 2,
+        (_u("0 != 1: after <function parity> on 2"), 2,
          AfterPreprocessing(parity, Equals(1))),
-        ("0 != 1", 2,
+        (_u("0 != 1"), 2,
          AfterPreprocessing(parity, Equals(1), annotate=False)),
         ]
 
@@ -117,7 +118,7 @@ class TestMatchersAnyInterface(TestCase, TestMatchersInterface):
         MatchesAny(DocTestMatches("1"), DocTestMatches("2"))),
         ]
 
-    describe_examples = [("""Differences: [
+    describe_examples = [(_u("""Differences: [
 Expected:
     1
 Got:
@@ -128,8 +129,7 @@ Expected:
 Got:
     3
 
-]""",
-        "3", MatchesAny(DocTestMatches("1"), DocTestMatches("2")))]
+]"""), "3", MatchesAny(DocTestMatches("1"), DocTestMatches("2")))]
 
 
 class TestMatchesAllInterface(TestCase, TestMatchersInterface):
@@ -143,13 +143,13 @@ class TestMatchesAllInterface(TestCase, TestMatchersInterface):
          MatchesAll(NotEquals(1), NotEquals(2)))]
 
     describe_examples = [
-        ("""Differences: [
+        (_u("""Differences: [
 1 == 1
-]""",
+]"""),
          1, MatchesAll(NotEquals(1), NotEquals(2))),
-        ("1 == 1", 1,
+        (_u("1 == 1"), 1,
          MatchesAll(NotEquals(2), NotEquals(1), Equals(3), first_only=True)),
-        ]
+    ]
 
 
 class TestAnnotate(TestCase, TestMatchersInterface):
@@ -161,7 +161,7 @@ class TestAnnotate(TestCase, TestMatchersInterface):
     str_examples = [
         ("Annotate('foo', Equals(1))", Annotate("foo", Equals(1)))]
 
-    describe_examples = [("2 != 1: foo", 2, Annotate('foo', Equals(1)))]
+    describe_examples = [(_u("2 != 1: foo"), 2, Annotate('foo', Equals(1)))]
 
     def test_if_message_no_message(self):
         # Annotate.if_message returns the given matcher if there is no
@@ -201,7 +201,7 @@ class TestNotInterface(TestCase, TestMatchersInterface):
         ("Not(Equals(1))", Not(Equals(1))),
         ("Not(Equals('1'))", Not(Equals('1')))]
 
-    describe_examples = [('1 matches Equals(1)', 1, Not(Equals(1)))]
+    describe_examples = [(_u('1 matches Equals(1)'), 1, Not(Equals(1)))]
 
 
 def is_even(x):
@@ -210,17 +210,17 @@ def is_even(x):
 
 class TestMatchesPredicate(TestCase, TestMatchersInterface):
 
-    matches_matcher = MatchesPredicate(is_even, "%s is not even")
+    matches_matcher = MatchesPredicate(is_even, _u("%s is not even"))
     matches_matches = [2, 4, 6, 8]
     matches_mismatches = [3, 5, 7, 9]
 
     str_examples = [
-        ("MatchesPredicate(%r, %r)" % (is_even, "%s is not even"),
-         MatchesPredicate(is_even, "%s is not even")),
+        ("MatchesPredicate(%r, %r)" % (is_even, _u("%s is not even")),
+         MatchesPredicate(is_even, _u("%s is not even"))),
         ]
 
     describe_examples = [
-        ('7 is not even', 7, MatchesPredicate(is_even, "%s is not even")),
+        ('7 is not even', 7, MatchesPredicate(is_even, _u("%s is not even"))),
         ]
 
 
@@ -237,16 +237,16 @@ class TestMatchesPredicateWithParams(TestCase, TestMatchersInterface):
 
     str_examples = [
         ("MatchesPredicateWithParams(%r, %r)(%s)" % (
-            between, "{0} is not between {1} and {2}", "1, 2"),
+            between, _u("{0} is not between {1} and {2}"), "1, 2"),
          MatchesPredicateWithParams(
-            between, "{0} is not between {1} and {2}")(1, 2)),
+             between, _u("{0} is not between {1} and {2}"))(1, 2)),
         ("Between(1, 2)", MatchesPredicateWithParams(
-            between, "{0} is not between {1} and {2}", "Between")(1, 2)),
+            between, _u("{0} is not between {1} and {2}"), "Between")(1, 2)),
         ]
 
     describe_examples = [
-        ('1 is not between 2 and 3', 1, MatchesPredicateWithParams(
-            between, "{0} is not between {1} and {2}")(2, 3)),
+        (_u('1 is not between 2 and 3'), 1, MatchesPredicateWithParams(
+            between, _u("{0} is not between {1} and {2}"))(2, 3)),
         ]
 
 

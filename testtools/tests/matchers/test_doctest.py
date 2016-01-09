@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
 import doctest
 
@@ -13,21 +13,24 @@ from testtools.tests.helpers import FullStackRunTest
 from testtools.tests.matchers.helpers import TestMatchersInterface
 
 
-
 class TestDocTestMatchesInterface(TestCase, TestMatchersInterface):
 
     matches_matcher = DocTestMatches("Ran 1 test in ...s", doctest.ELLIPSIS)
     matches_matches = ["Ran 1 test in 0.000s", "Ran 1 test in 1.234s"]
     matches_mismatches = ["Ran 1 tests in 0.000s", "Ran 2 test in 0.000s"]
 
-    str_examples = [("DocTestMatches('Ran 1 test in ...s\\n')",
-        DocTestMatches("Ran 1 test in ...s")),
+    str_examples = [
+        ("DocTestMatches('Ran 1 test in ...s\\n')",
+         DocTestMatches("Ran 1 test in ...s")),
         ("DocTestMatches('foo\\n', flags=8)", DocTestMatches("foo", flags=8)),
-        ]
+    ]
 
-    describe_examples = [('Expected:\n    Ran 1 tests in ...s\nGot:\n'
-        '    Ran 1 test in 0.123s\n', "Ran 1 test in 0.123s",
-        DocTestMatches("Ran 1 tests in ...s", doctest.ELLIPSIS))]
+    describe_examples = [(
+        _u('Expected:\n    Ran 1 tests in ...s\nGot:\n'
+           '    Ran 1 test in 0.123s\n'),
+        "Ran 1 test in 0.123s",
+        DocTestMatches("Ran 1 tests in ...s", doctest.ELLIPSIS))
+    ]
 
 
 class TestDocTestMatchesInterfaceUnicode(TestCase, TestMatchersInterface):
@@ -36,9 +39,10 @@ class TestDocTestMatchesInterfaceUnicode(TestCase, TestMatchersInterface):
     matches_matches = [_u("\xa7"), _u("\xa7 more\n")]
     matches_mismatches = ["\\xa7", _u("more \xa7"), _u("\n\xa7")]
 
-    str_examples = [("DocTestMatches(%r)" % (_u("\xa7\n"),),
-        DocTestMatches(_u("\xa7"))),
-        ]
+    str_examples = [
+        ("DocTestMatches(%r)" % (_u("\xa7\n"),),
+         DocTestMatches(_u("\xa7"))),
+    ]
 
     describe_examples = [(
         _u("Expected:\n    \xa7\nGot:\n    a\n"),
@@ -68,7 +72,8 @@ class TestDocTestMatchesSpecific(TestCase):
         """
         header = _b("\x89PNG\r\n\x1a\n...")
         if str_is_unicode:
-            self.assertRaises(TypeError,
+            self.assertRaises(
+                TypeError,
                 DocTestMatches, header, doctest.ELLIPSIS)
             return
         matcher = DocTestMatches(header, doctest.ELLIPSIS)

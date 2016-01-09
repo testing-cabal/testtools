@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
 """All the matchers.
 
@@ -13,6 +13,11 @@ $ python -c 'import testtools.matchers; print testtools.matchers.__all__'
 """
 
 __all__ = [
+    # Interfaces
+    'IMatcher',
+    'IMismatch',
+
+    # Matchers
     'AfterPreprocessing',
     'AllMatch',
     'Annotate',
@@ -109,6 +114,10 @@ from ._higherorder import (
     MatchesPredicateWithParams,
     Not,
     )
+from ._imatcher import (
+    IMatcher,
+    IMismatch,
+)
 
 # XXX: These are not explicitly included in __all__.  It's unclear how much of
 # the public interface they really are.

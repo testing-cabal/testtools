@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
 """Matchers for things related to the filesystem."""
 
@@ -15,6 +15,7 @@ __all__ = [
 import os
 import tarfile
 
+from testtools.compat import _u
 from ._basic import Equals
 from ._higherorder import (
     MatchesAll,
@@ -32,14 +33,14 @@ def PathExists():
 
       assertThat('/some/path', PathExists())
     """
-    return MatchesPredicate(os.path.exists, "%s does not exist.")
+    return MatchesPredicate(os.path.exists, _u("%s does not exist."))
 
 
 def DirExists():
     """Matches if the path exists and is a directory."""
     return MatchesAll(
         PathExists(),
-        MatchesPredicate(os.path.isdir, "%s is not a directory."),
+        MatchesPredicate(os.path.isdir, _u("%s is not a directory.")),
         first_only=True)
 
 
@@ -47,7 +48,7 @@ def FileExists():
     """Matches if the given path exists and is a file."""
     return MatchesAll(
         PathExists(),
-        MatchesPredicate(os.path.isfile, "%s is not a file."),
+        MatchesPredicate(os.path.isfile, _u("%s is not a file.")),
         first_only=True)
 
 

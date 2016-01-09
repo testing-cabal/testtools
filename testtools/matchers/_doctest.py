@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
 __all__ = [
     'DocTestMatches',
@@ -7,8 +7,11 @@ __all__ = [
 import doctest
 import re
 
+from zope.interface import implementer
+
 from ..compat import str_is_unicode
 from ._impl import Mismatch
+from ._imatcher import IMatcher
 
 
 class _NonManglingOutputChecker(doctest.OutputChecker):
@@ -49,6 +52,7 @@ class _NonManglingOutputChecker(doctest.OutputChecker):
         del __F, __f, __g, _indent
 
 
+@implementer(IMatcher)
 class DocTestMatches(object):
     """See if a string matches a doctest example."""
 
@@ -61,7 +65,7 @@ class DocTestMatches(object):
         """
         if not example.endswith('\n'):
             example += '\n'
-        self.want = example # required variable name by doctest.
+        self.want = example  # required variable name by doctest.
         self.flags = flags
         self._checker = _NonManglingOutputChecker()
 
@@ -101,4 +105,4 @@ class DocTestMismatch(Mismatch):
             return s
         # GZ 2011-08-24: This is actually pretty bogus, most C0 codes should
         #                be escaped, in addition to non-ascii bytes.
-        return s.decode("latin1").encode("ascii", "backslashreplace")
+        return s.decode("latin1")

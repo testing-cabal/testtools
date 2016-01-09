@@ -1,12 +1,9 @@
-# Copyright (c) 2010 testtools developers. See LICENSE for details.
+# Copyright (c) 2010-2015 testtools developers. See LICENSE for details.
 
 """Tests for miscellaneous compatibility functions"""
 
 import io
-import linecache2 as linecache
-import os
 import sys
-import tempfile
 import traceback
 
 import testtools
@@ -16,17 +13,15 @@ from testtools.compat import (
     _u,
     reraise,
     str_is_unicode,
+    text,
     text_repr,
     unicode_output_stream,
-    )
+)
 from testtools.matchers import (
-    Equals,
     Is,
     IsInstance,
-    MatchesException,
     Not,
-    Raises,
-    )
+)
 
 
 class _FakeOutputStream(object):
@@ -37,6 +32,13 @@ class _FakeOutputStream(object):
 
     def write(self, obj):
         self.writelog.append(obj)
+
+
+class TestText(testtools.TestCase):
+    """Tests for ``text``."""
+
+    def test_unicode_literal_is_text(self):
+        self.assertThat(_u('foo'), IsInstance(text))
 
 
 class TestUnicodeOutputStream(testtools.TestCase):
@@ -76,7 +78,7 @@ class TestUnicodeOutputStream(testtools.TestCase):
         unicode_output_stream(sout).write(self.uni)
         self.assertEqual([_b("pa?\xe8?n")], sout.writelog)
 
-    @testtools.skipIf(str_is_unicode, "Tests behaviour when str is not unicode")
+    @testtools.skipIf(str_is_unicode, "Tests behavior when str is not unicode")
     def test_unicode_encodings_wrapped_when_str_is_not_unicode(self):
         """A unicode encoding is wrapped but needs no error handler"""
         sout = _FakeOutputStream()
@@ -86,7 +88,7 @@ class TestUnicodeOutputStream(testtools.TestCase):
         uout.write(self.uni)
         self.assertEqual([_b("pa\xc9\xaa\xce\xb8\xc9\x99n")], sout.writelog)
 
-    @testtools.skipIf(not str_is_unicode, "Tests behaviour when str is unicode")
+    @testtools.skipIf(not str_is_unicode, "Tests behavior when str is unicode")
     def test_unicode_encodings_not_wrapped_when_str_is_unicode(self):
         # No wrapping needed if native str type is unicode
         sout = _FakeOutputStream()
@@ -256,7 +258,6 @@ class TestTextRepr(testtools.TestCase):
             self.assertEqual(eval(actual), u)
 
 
-
 class TestReraise(testtools.TestCase):
     """Tests for trivial reraise wrapper needed for Python 2/3 changes"""
 
@@ -273,7 +274,8 @@ class TestReraise(testtools.TestCase):
         self.assertIs(_exc_info[0], _new_exc_info[0])
         self.assertIs(_exc_info[1], _new_exc_info[1])
         expected_tb = traceback.extract_tb(_exc_info[2])
-        self.assertEqual(expected_tb,
+        self.assertEqual(
+            expected_tb,
             traceback.extract_tb(_new_exc_info[2])[-len(expected_tb):])
 
     def test_custom_exception_no_args(self):

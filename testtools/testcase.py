@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2011 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
 """Test case related stuff."""
 
@@ -19,7 +19,6 @@ import copy
 import functools
 import itertools
 import sys
-import types
 import warnings
 
 from extras import (
@@ -44,6 +43,8 @@ from testtools.matchers import (
     MatchesAll,
     MatchesException,
     MismatchError,
+    IMatcher,
+    IMismatch,
     Is,
     IsInstance,
     Not,
@@ -58,6 +59,7 @@ from testtools.testresult import (
     )
 
 wraps = try_import('functools.wraps')
+
 
 class TestSkipped(Exception):
     """Raised within TestCase.run() when a test is skipped."""
@@ -75,6 +77,7 @@ _UnexpectedSuccess = try_import(
     'unittest.case._UnexpectedSuccess', _UnexpectedSuccess)
 _UnexpectedSuccess = try_import(
     'unittest2.case._UnexpectedSuccess', _UnexpectedSuccess)
+
 
 class _ExpectedFailure(Exception):
     """An expected failure occured.
@@ -435,7 +438,7 @@ class TestCase(unittest.TestCase):
         """Assert that matchee is matched by matcher.
 
         :param matchee: An object to match with matcher.
-        :param matcher: An object meeting the testtools.Matcher protocol.
+        :param IMatcher matcher: The matcher to match with
         :raises MismatchError: When matcher does not match thing.
         """
         mismatch_error = self._matchHelper(matchee, matcher, message, verbose)
@@ -472,7 +475,7 @@ class TestCase(unittest.TestCase):
         has finished.
 
         :param matchee: An object to match with matcher.
-        :param matcher: An object meeting the testtools.Matcher protocol.
+        :param IMatcher matcher: The matcher to match with.
         :param message: If specified, show this message with any failed match.
         """
         mismatch_error = self._matchHelper(matchee, matcher, message, verbose)
@@ -487,10 +490,11 @@ class TestCase(unittest.TestCase):
             self.force_failure = True
 
     def _matchHelper(self, matchee, matcher, message, verbose):
-        matcher = Annotate.if_message(message, matcher)
+        matcher = Annotate.if_message(message, IMatcher(matcher, matcher))
         mismatch = matcher.match(matchee)
         if not mismatch:
             return
+        mismatch = IMismatch(mismatch, mismatch)
         for (name, value) in mismatch.get_details().items():
             self.addDetailUniqueName(name, value)
         return MismatchError(matchee, matcher, mismatch, verbose)

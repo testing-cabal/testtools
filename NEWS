@@ -14,6 +14,10 @@ Improvements
 * ``MatchesListwise`` has more informative error when lengths don't match.
   (Jonathan Lange)
 
+* Explicit interfaces for matchers (``IMatcher``) and mismatches
+  (``IMismatch``), explicitly documenting the contract expected by
+  ``assertThat`` and ``MismatchError``. (Jonathan Lange)
+
 * The short form of errors for failed binary comparisions will now put the
   expected value on the _right_. This means that ``assertThat(2, Equals(3))``
   will raise an error saying ``2 != 3``.
@@ -32,6 +36,14 @@ Changes
 -------
 
 * Add a new test dependency of testscenarios. (Robert Collins)
+
+* New dependency on zope.interface. (Jonathan Lange)
+
+* The ``describe`` method on mismatches must return unicode on Python 2 and
+  str on Python 3. Mismatches that return ASCII-encoded bytes will continue
+  to work, but will emit deprecation warnings. (Jonathan Lange)
+
+* Last release of testtools to support Python 3.2. (Jonathan Lange)
 
 * ``TestCase.skip`` deprecated. Use ``skipTest`` instead.
   (Jonathan Lange, #988893)

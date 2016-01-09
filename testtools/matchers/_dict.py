@@ -1,9 +1,10 @@
-# Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
 __all__ = [
     'KeysEqual',
     ]
 
+from testtools.compat import _u
 from ..helpers import (
     dict_subtract,
     filter_values,
@@ -54,12 +55,12 @@ class DictMismatches(Mismatch):
         self.mismatches = mismatches
 
     def describe(self):
-        lines = ['{']
+        lines = [_u('{')]
         lines.extend(
-            ['  %r: %s,' % (key, mismatch.describe())
+            [_u('  %r: %s,') % (key, mismatch.describe())
              for (key, mismatch) in sorted(self.mismatches.items())])
-        lines.append('}')
-        return '\n'.join(lines)
+        lines.append(_u('}'))
+        return _u('\n').join(lines)
 
 
 def _dict_to_mismatch(data, to_mismatch=None,

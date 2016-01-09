@@ -3,6 +3,7 @@
 import sys
 
 from testtools import TestCase
+from testtools.compat import _u
 from testtools.matchers import (
     AfterPreprocessing,
     Equals,
@@ -37,10 +38,10 @@ class TestMatchesExceptionInstanceInterface(TestCase, TestMatchersInterface):
          MatchesException(Exception('foo')))
         ]
     describe_examples = [
-        ("%r is not a %r" % (Exception, ValueError),
+        (_u("%r is not a %r") % (Exception, ValueError),
          error_base_foo,
          MatchesException(ValueError("foo"))),
-        ("ValueError('bar',) has different arguments to ValueError('foo',).",
+        (_u("ValueError('bar',) has different arguments to ValueError('foo',)."),
          error_bar,
          MatchesException(ValueError("foo"))),
         ]
@@ -60,7 +61,7 @@ class TestMatchesExceptionTypeInterface(TestCase, TestMatchersInterface):
          MatchesException(Exception))
         ]
     describe_examples = [
-        ("%r is not a %r" % (Exception, ValueError),
+        (_u("%r is not a %r") % (Exception, ValueError),
          error_base_foo,
          MatchesException(ValueError)),
         ]
@@ -80,7 +81,7 @@ class TestMatchesExceptionTypeReInterface(TestCase, TestMatchersInterface):
          MatchesException(Exception, 'fo.'))
         ]
     describe_examples = [
-        ("'bar' does not match /fo./",
+        (_u("'bar' does not match /fo./"),
          error_bar, MatchesException(ValueError, "fo.")),
         ]
 
@@ -100,7 +101,7 @@ class TestMatchesExceptionTypeMatcherInterface(TestCase, TestMatchersInterface):
          MatchesException(Exception, Equals('foo')))
         ]
     describe_examples = [
-        ("%r != 5" % (error_bar[1],),
+        (_u("%r != 5") % (error_bar[1],),
          error_bar, MatchesException(ValueError, Equals(5))),
         ]
 

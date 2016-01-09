@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
 __all__ = [
     'Contains',
@@ -19,8 +19,11 @@ from pprint import pformat
 import re
 import warnings
 
+from zope.interface import implementer
+
 from ..compat import (
     _isbytes,
+    _u,
     istext,
     str_is_unicode,
     text_repr,
@@ -30,6 +33,7 @@ from ._higherorder import (
     MatchesPredicateWithParams,
     PostfixedMismatch,
     )
+from ._imatcher import IMatcher
 from ._impl import (
     Matcher,
     Mismatch,
@@ -46,6 +50,7 @@ def _format(thing):
     return pformat(thing)
 
 
+@implementer(IMatcher)
 class _BinaryComparison(object):
     """Matcher that compares an object to another object."""
 
@@ -96,7 +101,7 @@ class _BinaryMismatch(Mismatch):
         actual = repr(self._actual)
         reference = repr(self._reference)
         if len(actual) + len(reference) > 70:
-            return "%s:\nreference = %s\nactual    = %s\n" % (
+            return _u("%s:\nreference = %s\nactual    = %s\n") % (
                 self._mismatch_string, _format(self._reference),
                 _format(self._actual))
         else:
@@ -104,7 +109,7 @@ class _BinaryMismatch(Mismatch):
                 left, right = actual, reference
             else:
                 left, right = reference, actual
-            return "%s %s %s" % (left, self._mismatch_string, right)
+            return _u("%s %s %s") % (left, self._mismatch_string, right)
 
 
 class Equals(_BinaryComparison):
@@ -261,6 +266,7 @@ class EndsWith(Matcher):
         return None
 
 
+@implementer(IMatcher)
 class IsInstance(object):
     """Matcher that wraps isinstance."""
 
@@ -292,9 +298,9 @@ class NotAnInstance(Mismatch):
         if len(self.types) == 1:
             typestr = self.types[0].__name__
         else:
-            typestr = 'any of (%s)' % ', '.join(type.__name__ for type in
-                    self.types)
-        return "'%s' is not an instance of %s" % (self.matchee, typestr)
+            typestr = _u('any of (%s)') % _u(', ').join(
+                type.__name__ for type in self.types)
+        return _u("'%s' is not an instance of %s") % (self.matchee, typestr)
 
 
 class DoesNotContain(Mismatch):
@@ -309,7 +315,7 @@ class DoesNotContain(Mismatch):
         self.needle = needle
 
     def describe(self):
-        return "%r not in %r" % (self.needle, self.matchee)
+        return _u("%r not in %r") % (self.needle, self.matchee)
 
 
 class Contains(Matcher):
@@ -335,6 +341,7 @@ class Contains(Matcher):
         return None
 
 
+@implementer(IMatcher)
 class MatchesRegex(object):
     """Matches if the matchee is matched by a regular expression."""
 
@@ -368,4 +375,5 @@ def has_len(x, y):
     return len(x) == y
 
 
-HasLength = MatchesPredicateWithParams(has_len, "len({0}) != {1}", "HasLength")
+HasLength = MatchesPredicateWithParams(
+    has_len, _u("len({0}) != {1}"), _u("HasLength"))
