@@ -261,4 +261,8 @@ def failed(matcher):
 
 # TODO: Move the non-matcher stuff to _deferred.
 
-# TODO: Use intersphinx to link to the Twisted API docs (if possible).
+# TODO: Figure out how to just say "Deferred" and get sphinx to link to
+# Deferred (i.e. to not have to give fully qualified Python name each time).
+
+# TODO: Fix configuration so that Twisted is included as dependency when we
+# build on rtfd.

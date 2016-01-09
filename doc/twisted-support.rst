@@ -5,24 +5,20 @@ Matching Deferreds
 ------------------
 
 testtools provides support for making assertions about synchronous
-:py:class:`Deferred`\s.
+:py:class:`twisted.internet.defer.Deferred`\s.
 
 A "synchronous" :py:class:`.Deferred` is one that does not need the reactor or
 any other asynchronous process in order to fire.
 
-Normal application code can't know when a :py:class:`Deferred` is going to
+Normal application code can't know when a :py:class:`.Deferred` is going to
 fire, because that is generally left up to the reactor. Well-written unit
 tests provide fake reactors, or don't use the reactor at all, so that
-:py:class:`Deferred`\s fire synchronously.
+:py:class:`.Deferred`\s fire synchronously.
 
 These matchers allow you to make assertions about when and how
-:py:class:`Deferred`\s fire, and about what values they fire with.
+:py:class:`.Deferred`\s fire, and about what values they fire with.
 
-See also `Testing Deferreds without the reactor`_.
-
-
-.. _Testing Deferreds without the reactor:
-   http://twistedmatrix.com/documents/current/core/howto/trial.html#testing-deferreds-without-the-reactor
+See also `Testing Deferreds without the reactor`_ and the `Deferred howto`_.
 
 .. autofunction:: testtools._deferredmatchers.successful
 
@@ -36,8 +32,8 @@ Running tests in the reactor
 ----------------------------
 
 testtools provides support for running asynchronous Twisted tests: tests that
-return a Deferred_ and run the reactor until it fires and its callback chain
-is completed.
+return a :py:class:`.Deferred` and run the reactor until it fires and its
+callback chain is completed.
 
 Here's how to use it::
 
@@ -79,13 +75,19 @@ Converting Trial tests to testtools tests
 * Don't use ``setUpClass`` or ``tearDownClass``
 * Don't expect setting ``.todo``, ``.timeout`` or ``.skip`` attributes to do
   anything
-* ``flushLoggedErrors`` is
+* Replace
+  :py:meth:`twisted.trial.unittest.SynchronousTestCase.flushLoggedErrors`
+  with
   :py:func:`testtools.deferredruntest.flush_logged_errors`
-* ``assertFailure`` is :py:func:`testtools.deferredruntest.assert_fails_with`
+* Replace :py:meth:`twisted.trial.unittest.TestCase.assertFailure` with
+  :py:func:`testtools.deferredruntest.assert_fails_with`
 * Trial spins the reactor a couple of times before cleaning it up,
   :py:class:`testtools.deferredruntest.AsynchronousDeferredRunTest` does not. If
   you rely on this behavior, use
   :py:class:`testtools.deferredruntest.AsynchronousDeferredRunTestForBrokenTwisted`.
 
 
-.. _Deferred: http://twistedmatrix.com/documents/current/core/howto/defer.html
+.. _Deferred Howto: http://twistedmatrix.com/documents/current/core/howto/defer.html
+.. _Testing Deferreds without the reactor:
+   http://twistedmatrix.com/documents/current/core/howto/trial.html#testing-deferreds-without-the-reactor
+
