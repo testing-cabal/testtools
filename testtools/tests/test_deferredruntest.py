@@ -85,6 +85,9 @@ class AsText(AfterPreprocessing):
 class X(object):
     """Tests that we run as part of our tests, nested to avoid discovery."""
 
+    # XXX: After testing-cabal/testtools#165 lands, fix up all of these to be
+    # scenario tests for RunTest.
+
     class Base(TestCase):
         def setUp(self):
             super(X.Base, self).setUp()
@@ -134,6 +137,14 @@ class X(object):
             self.calls.append('test')
             self.addCleanup(lambda: 1/0)
 
+    class ExpectThatFailure(Base):
+        """Calling expectThat with a failing match fails the test."""
+        expected_calls = ['setUp', 'test', 'tearDown', 'clean-up']
+        expected_results = [('addFailure', AssertionError)]
+        def test_something(self):
+            self.calls.append('test')
+            self.expectThat(object(), Is(object()))
+
     class TestIntegration(NeedsTwistedTestCase):
 
         def assertResultsMatch(self, test, result):
@@ -176,7 +187,8 @@ def make_integration_tests():
         X.ErrorInTearDown,
         X.FailureInTest,
         X.ErrorInCleanup,
-        ]
+        X.ExpectThatFailure,
+    ]
     base_test = X.TestIntegration('test_runner')
     integration_tests = []
     for runner_name, runner in runners:

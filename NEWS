@@ -24,6 +24,10 @@ Improvements
 * Tests that customize ``skipException`` no longer get tracebacks for skipped
   tests.  (Jonathan Lange)
 
+* A failing ``expectThat`` now fails tests run with
+  ``AsynchronousDeferredRunTest``.  (Jonathan Lange, #1532452)
+
+
 Changes
 -------
 
