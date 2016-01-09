@@ -27,8 +27,14 @@ class ImpossibleDeferredError(Exception):
 
 
 def _on_deferred_result(deferred, on_success, on_failure, on_no_result):
-    """
-    Synchronously apply callbacks to the result of a ``Deferred``.
+    """Handle the result of a synchronous ``Deferred``.
+
+    If ``deferred`` has fire successfully, call ``on_success``.
+    If ``deferred`` has failed, call ``on_failure``.
+    If ``deferred`` has not yet fired, call ``on_no_result``.
+
+    The value of ``deferred`` will be preserved, so that other callbacks and
+    errbacks can be added to ``deferred``.
 
     :param Deferred deferred: A synchronous Deferred.
     :param Callable[[Any], T] on_success: Called if the Deferred fires
@@ -51,7 +57,15 @@ def _on_deferred_result(deferred, on_success, on_failure, on_no_result):
     # Deferred. I am restraining myself.
     successes = []
     failures = []
-    deferred.addCallbacks(successes.append, failures.append)
+
+    def capture(value, values):
+        values.append(value)
+        return value
+
+    deferred.addCallbacks(
+        partial(capture, values=successes),
+        partial(capture, values=failures),
+    )
 
     if successes and failures:
         raise ImpossibleDeferredError(deferred, successes, failures)
@@ -114,6 +128,7 @@ class _Successful(object):
 
     @staticmethod
     def _got_failure(deferred, failure):
+        deferred.addErrback(lambda _: None)
         return Mismatch(
             _u('Success result expected on %r, found failure result '
                'instead: %r' % (deferred, failure)),
@@ -150,6 +165,11 @@ class _Failed(object):
     def __init__(self, matcher):
         self._matcher = matcher
 
+    def _got_failure(self, deferred, failure):
+        # We have handled the failure, so suppress its output.
+        deferred.addErrback(lambda _: None)
+        return self._matcher.match(failure)
+
     @staticmethod
     def _got_success(deferred, success):
         return Mismatch(
@@ -166,7 +186,7 @@ class _Failed(object):
         return _on_deferred_result(
             deferred,
             on_success=partial(self._got_success, deferred),
-            on_failure=self._matcher.match,
+            on_failure=partial(self._got_failure, deferred),
             on_no_result=partial(self._got_no_result, deferred),
         )
 
