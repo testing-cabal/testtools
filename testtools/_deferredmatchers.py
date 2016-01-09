@@ -1,8 +1,17 @@
 # Copyright (c) testtools developers. See LICENSE for details.
 
-"""Matchers that operate on Deferreds.
+"""Matchers that operate on synchronous Deferreds.
 
-Depends on Twisted.
+A "synchronous" Deferred is one that does not need the reactor or any other
+asynchronous process in order to fire.
+
+Normal application code can't know when a Deferred is going to fire, because
+that is generally left up to the reactor. Well-written unit tests provide fake
+reactors, or don't use the reactor at all, so that Deferreds fire
+synchronously.
+
+These matchers allow you to make assertions about when and how Deferreds fire,
+and about what values they fire with.
 """
 
 # TODO: None of these are published yet. Decide where & how to make them
@@ -50,9 +59,6 @@ def _on_deferred_result(deferred, on_success, on_failure, on_no_result):
     :return: Whatever is returned by the triggered callback.
     :rtype: ``T``
     """
-    # XXX: I desperately want to decompose this into an Either and a Maybe,
-    # and a thing that returns Maybe (Either Failure a) given a synchronous
-    # Deferred. I am restraining myself.
     successes = []
     failures = []
 
@@ -98,8 +104,30 @@ class _NoResult(object):
 
 # XXX: Maybe just a constant, rather than a function?
 def no_result():
-    """Match a Deferred that has not yet fired."""
-    # TODO: Example in docstrings
+    """Match a Deferred that has not yet fired.
+
+    For example, this will pass::
+
+        assert_that(defer.Deferred(), no_result())
+
+    But this will fail:
+
+    >>> assert_that(defer.succeed(None), no_result())
+    Traceback (most recent call last):
+      ...
+      File "testtools/assertions.py", line 22, in assert_that
+        raise MismatchError(matchee, matcher, mismatch, verbose)
+    testtools.matchers._impl.MismatchError: No result expected on <Deferred at ... current result: None>, found None instead
+
+    As will this:
+
+    >>> assert_that(defer.fail(RuntimeError('foo')), no_result())
+    Traceback (most recent call last):
+      ...
+      File "testtools/assertions.py", line 22, in assert_that
+        raise MismatchError(matchee, matcher, mismatch, verbose)
+    testtools.matchers._impl.MismatchError: No result expected on <Deferred at ... current result: <twisted.python.failure.Failure <type 'exceptions.RuntimeError'>>>, found <twisted.python.failure.Failure <type 'exceptions.RuntimeError'>> instead
+    """
     return _NoResult()
 
 
@@ -149,11 +177,26 @@ class _Successful(object):
 
 # XXX: The Twisted name is successResultOf. Do we want to use that name?
 def successful(matcher):
-    # XXX: Docstring, include examples.
+    """Match a Deferred that has fired successfully.
+
+    For example::
+
+        fires_with_the_answer = successful(Equals(42))
+        deferred = defer.succeed(42)
+        assert_that(deferred, fires_with_the_answer)
+
+    This assertion will pass. However, if ``deferred`` had fired with a
+    different value, or had failed, or had not fired at all, then it would
+    fail.
+
+    Use this instead of
+    :py:meth:`twisted.trial.unittest.SynchronousTestCase.successResultOf`.
+
+    :param matcher: A matcher to match against the result of a Deferred.
+    :return: A matcher that can be applied to a synchronous Deferred.
+    """
     return _Successful(matcher)
 
-
-# XXX: Add a convenience for successful(Equals)?
 
 class _Failed(object):
     """Matches a Deferred that has failed."""
@@ -192,7 +235,26 @@ class _Failed(object):
 # XXX: failureResultOf also takes an *args of expected exception types. Do we
 # want to provide that?
 def failed(matcher):
-    # XXX: Docstring, with examples.
+    """Match a Deferred that has failed.
+
+    For example::
+
+        error = RuntimeError('foo')
+        fails_at_runtime = failed(Equals(error))
+        deferred = defer.fail(error)
+        assert_that(deferred, fails_at_runtime)
+
+    This assertion will pass. However, if ``deferred`` had fired successfully,
+    had failed with a different error, or had not fired at all, then it would
+    fail.
+
+    Use this instead of
+    :py:meth:`twisted.trial.unittest.SynchronousTestCase.failureResultOf`.
+
+    :param matcher: A matcher to match against the result of a failing
+        Deferred.
+    :return: A matcher that can be applied to a synchronous Deferred.
+    """
     return _Failed(matcher)
 
 # TODO: helpers for adding matcher-based assertions in callbacks.
