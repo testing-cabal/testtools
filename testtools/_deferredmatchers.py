@@ -186,8 +186,3 @@ def failed(matcher):
         :class:`~twisted.internet.defer.Deferred`.
     """
     return _Failed(matcher)
-
-# TODO: helpers for adding matcher-based assertions in callbacks.
-
-# TODO: Fix configuration so that Twisted is included as dependency when we
-# build on rtfd.
