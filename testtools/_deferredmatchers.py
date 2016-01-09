@@ -16,71 +16,10 @@ and about what values they fire with.
 
 # TODO: None of these are published yet. Decide where & how to make them
 # public.
-from functools import partial
-
 from testtools.compat import _u
-from testtools.content import TracebackContent
 from testtools.matchers import Mismatch
 
-
-class ImpossibleDeferredError(Exception):
-    """Raised if a Deferred somehow triggers both a success and a failure."""
-
-    def __init__(self, deferred, successes, failures):
-        super(ImpossibleDeferredError, self).__init__(
-            'Impossible condition on {}, got both success ({}) and '
-            'failure ({})'.format(deferred, successes, failures)
-        )
-
-
-def _on_deferred_result(deferred, on_success, on_failure, on_no_result):
-    """Handle the result of a synchronous ``Deferred``.
-
-    If ``deferred`` has fire successfully, call ``on_success``.
-    If ``deferred`` has failed, call ``on_failure``.
-    If ``deferred`` has not yet fired, call ``on_no_result``.
-
-    The value of ``deferred`` will be preserved, so that other callbacks and
-    errbacks can be added to ``deferred``.
-
-    :param Deferred[A] deferred: A synchronous Deferred.
-    :param Callable[[Deferred[A], A], T] on_success: Called if the Deferred
-        fires successfully.
-    :param Callable[[Deferred[A], Failure], T] on_failure: Called if the
-        Deferred fires unsuccessfully.
-    :param Callable[[Deferred[A]], T] on_no_result: Called if the Deferred has
-        not yet fired.
-
-    :raises ImpossibleDeferredError: If the Deferred somehow
-        triggers both a success and a failure.
-    :raises TypeError: If the Deferred somehow triggers more than one success,
-        or more than one failure.
-
-    :return: Whatever is returned by the triggered callback.
-    :rtype: ``T``
-    """
-    successes = []
-    failures = []
-
-    def capture(value, values):
-        values.append(value)
-        return value
-
-    deferred.addCallbacks(
-        partial(capture, values=successes),
-        partial(capture, values=failures),
-    )
-
-    if successes and failures:
-        raise ImpossibleDeferredError(deferred, successes, failures)
-    elif failures:
-        [failure] = failures
-        return on_failure(deferred, failure)
-    elif successes:
-        [result] = successes
-        return on_success(deferred, result)
-    else:
-        return on_no_result(deferred)
+from ._deferred import failure_content, on_deferred_result
 
 
 class _NoResult(object):
@@ -94,7 +33,7 @@ class _NoResult(object):
 
     def match(self, deferred):
         """Match ``deferred`` if it hasn't fired."""
-        return _on_deferred_result(
+        return on_deferred_result(
             deferred,
             on_success=self._got_result,
             on_failure=self._got_result,
@@ -131,18 +70,6 @@ def no_result():
     return _NoResult()
 
 
-def _failure_content(failure):
-    """Create a Content object for a Failure.
-
-    :param Failure failure: The failure to create content for.
-    :rtype: ``Content``
-    """
-    return TracebackContent(
-        (failure.type, failure.value, failure.getTracebackObject()),
-        None,
-    )
-
-
 class _Successful(object):
     """Matches a Deferred that has fired successfully."""
 
@@ -156,7 +83,7 @@ class _Successful(object):
         return Mismatch(
             _u('Success result expected on %r, found failure result '
                'instead: %r' % (deferred, failure)),
-            {'traceback': _failure_content(failure)},
+            {'traceback': failure_content(failure)},
         )
 
     @staticmethod
@@ -167,7 +94,7 @@ class _Successful(object):
 
     def match(self, deferred):
         """Match against the successful result of ``deferred``."""
-        return _on_deferred_result(
+        return on_deferred_result(
             deferred,
             on_success=lambda _, value: self._matcher.match(value),
             on_failure=self._got_failure,
@@ -224,7 +151,7 @@ class _Failed(object):
                % (deferred,)))
 
     def match(self, deferred):
-        return _on_deferred_result(
+        return on_deferred_result(
             deferred,
             on_success=self._got_success,
             on_failure=self._got_failure,
@@ -261,8 +188,6 @@ def failed(matcher):
     return _Failed(matcher)
 
 # TODO: helpers for adding matcher-based assertions in callbacks.
-
-# TODO: Move the non-matcher stuff to _deferred.
 
 # TODO: Fix configuration so that Twisted is included as dependency when we
 # build on rtfd.
