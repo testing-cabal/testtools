@@ -149,8 +149,9 @@ class SuccessResultTests(NeedsTwistedTestCase):
         self.assertThat(
             self.match(arbitrary_matcher, deferred),
             mismatches(
-                Equals(u'Success result expected on %r, found failure result '
-                       u'instead: %r' % (deferred, fail)),
+                Equals(
+                    _u('Success result expected on %r, found failure result '
+                       'instead: %r' % (deferred, fail))),
                 Equals({'traceback': TracebackContent(
                     (fail.type, fail.value, fail.getTracebackObject()), None,
                 )}),
