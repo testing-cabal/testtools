@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2016 testtools developers. See LICENSE for details.
 
 """Content - a MIME-like Content object."""
 
@@ -10,6 +10,7 @@ __all__ = [
     'json_content',
     'text_content',
     'TracebackContent',
+    'map_bytes',
     ]
 
 import codecs
