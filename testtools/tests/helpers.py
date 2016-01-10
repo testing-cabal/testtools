@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2016 testtools developers. See LICENSE for details.
 
 """Helpers for tests."""
 
@@ -29,6 +29,7 @@ try:
     raise Exception
 except Exception:
     an_exc_info = sys.exc_info()
+
 
 # Deprecated: This classes attributes are somewhat non deterministic which
 # leads to hard to predict tests (because Python upstream are changing things.
@@ -153,9 +154,14 @@ class AsText(AfterPreprocessing):
             lambda log: log.as_text(), matcher, annotate=annotate)
 
 
-def throw(function, *args, **kwargs):
-    """Call ``function`` with arguments and raise the result.
+def raise_(exception):
+    """Raise ``exception``.
 
-    Use this when you want to raise within an expression.
+    Useful for raising exceptions when it is inconvenient to use a statement
+    (e.g. in a lambda).
+
+    :param Exception exception: An exception to raise.
+    :raises: Whatever exception is
+
     """
-    raise function(*args, **kwargs)
+    raise exception

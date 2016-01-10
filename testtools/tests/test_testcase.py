@@ -53,7 +53,7 @@ from testtools.tests.helpers import (
     FullStackRunTest,
     LoggingResult,
     MatchesEvents,
-    throw,
+    raise_,
     )
 from testtools.tests.samplecases import (
     deterministic_sample_cases_scenarios,
@@ -885,7 +885,8 @@ class TestAddCleanup(TestCase):
     def test_keyboard_interrupt_not_caught(self):
         # If a cleanup raises KeyboardInterrupt, it gets reraised.
         test = make_test_case(
-            self.getUniqueString(), cleanups=[lambda _: throw(KeyboardInterrupt)])
+            self.getUniqueString(), cleanups=[
+                lambda _: raise_(KeyboardInterrupt())])
         self.assertThat(test.run, Raises(MatchesException(KeyboardInterrupt)))
 
     def test_all_errors_from_MultipleExceptions_reported(self):
@@ -952,7 +953,8 @@ class TestAddCleanup(TestCase):
         # startTest inserted.
         test = make_test_case(
             self.getUniqueString(),
-            test_body=lambda _: throw(RuntimeError, 'Deliberately broken test'),
+            test_body=lambda _: raise_(
+                RuntimeError('Deliberately broken test')),
             cleanups=[
                 lambda _: 1/0,
                 lambda _: 1/0,
