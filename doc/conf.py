@@ -197,6 +197,7 @@ latex_documents = [
 #latex_use_modindex = True
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/2', None),
+    'py2': ('https://docs.python.org/2', None),
+    'py3': ('https://docs.python.org/3', None),
     'twisted': ('https://twistedmatrix.com/documents/current/api/', None),
 }

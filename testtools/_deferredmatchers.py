@@ -6,12 +6,13 @@ A "synchronous" Deferred is one that does not need the reactor or any other
 asynchronous process in order to fire.
 
 Normal application code can't know when a Deferred is going to fire, because
-that is generally left up to the reactor. Well-written unit tests provide fake
-reactors, or don't use the reactor at all, so that Deferreds fire
+that is generally left up to the reactor. Unit tests can (and should!) provide
+fake reactors, or don't use the reactor at all, so that Deferreds fire
 synchronously.
 
 These matchers allow you to make assertions about when and how Deferreds fire,
 and about what values they fire with.
+
 """
 
 # TODO: None of these are published yet. Decide where & how to make them
@@ -160,9 +161,6 @@ class _Failed(object):
 
 
 # XXX: The Twisted name is failureResultOf. Do we want to use that name?
-#
-# XXX: failureResultOf also takes an *args of expected exception types. Do we
-# want to provide that?
 def failed(matcher):
     """Match a Deferred that has failed.
 

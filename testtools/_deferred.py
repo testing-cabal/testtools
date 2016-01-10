@@ -11,8 +11,8 @@ class DeferredNotFired(Exception):
     """Raised when we extract a result from a Deferred that's not fired yet."""
 
     def __init__(self, deferred):
-        super(DeferredNotFired, self).__init__(
-            "%r has not fired yet." % (deferred,))
+        msg = "%r has not fired yet." % (deferred,)
+        super(DeferredNotFired, self).__init__(msg)
 
 
 def extract_result(deferred):
@@ -24,8 +24,10 @@ def extract_result(deferred):
     case, you can use this function to convert the result back into the usual
     form for a synchronous API, i.e. the result itself or a raised exception.
 
-    It would be very bad form to use this as some way of checking if a
-    Deferred has fired.
+    As a rule, this function should not be used when operating with
+    asynchronous Deferreds (i.e. for normal use of Deferreds in application
+    code). In those cases, it is better to add callbacks and errbacks as
+    needed.
     """
     failures = []
     successes = []
@@ -42,10 +44,10 @@ class ImpossibleDeferredError(Exception):
     """Raised if a Deferred somehow triggers both a success and a failure."""
 
     def __init__(self, deferred, successes, failures):
+        msg = ('Impossible condition on %r, got both success (%r) and '
+               'failure (%r)')
         super(ImpossibleDeferredError, self).__init__(
-            'Impossible condition on {}, got both success ({}) and '
-            'failure ({})'.format(deferred, successes, failures)
-        )
+            msg % (deferred, successes, failures))
 
 
 def on_deferred_result(deferred, on_success, on_failure, on_no_result):
