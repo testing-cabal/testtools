@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2016 testtools developers. See LICENSE for details.
 
 """Helpers for tests."""
 
@@ -12,6 +12,12 @@ from extras import safe_hasattr
 
 from testtools import TestResult
 from testtools.content import StackLinesContent
+from testtools.matchers import (
+    AfterPreprocessing,
+    Equals,
+    MatchesDict,
+    MatchesListwise,
+)
 from testtools import runtest
 
 
@@ -23,6 +29,7 @@ try:
     raise Exception
 except Exception:
     an_exc_info = sys.exc_info()
+
 
 # Deprecated: This classes attributes are somewhat non deterministic which
 # leads to hard to predict tests (because Python upstream are changing things.
@@ -106,3 +113,55 @@ class FullStackRunTest(runtest.RunTest):
         return run_with_stack_hidden(
             False,
             super(FullStackRunTest, self)._run_user, fn, *args, **kwargs)
+
+
+class MatchesEvents(object):
+    """Match a list of test result events.
+
+    Specify events as a data structure.  Ordinary Python objects within this
+    structure will be compared exactly, but you can also use matchers at any
+    point.
+    """
+
+    def __init__(self, *expected):
+        self._expected = expected
+
+    def _make_matcher(self, obj):
+        # This isn't very safe for general use, but is good enough to make
+        # some tests in this module more readable.
+        if hasattr(obj, 'match'):
+            return obj
+        elif isinstance(obj, tuple) or isinstance(obj, list):
+            return MatchesListwise(
+                [self._make_matcher(item) for item in obj])
+        elif isinstance(obj, dict):
+            return MatchesDict(dict(
+                (key, self._make_matcher(value))
+                for key, value in obj.items()))
+        else:
+            return Equals(obj)
+
+    def match(self, observed):
+        matcher = self._make_matcher(self._expected)
+        return matcher.match(observed)
+
+
+class AsText(AfterPreprocessing):
+    """Match the text of a Content instance."""
+
+    def __init__(self, matcher, annotate=True):
+        super(AsText, self).__init__(
+            lambda log: log.as_text(), matcher, annotate=annotate)
+
+
+def raise_(exception):
+    """Raise ``exception``.
+
+    Useful for raising exceptions when it is inconvenient to use a statement
+    (e.g. in a lambda).
+
+    :param Exception exception: An exception to raise.
+    :raises: Whatever exception is
+
+    """
+    raise exception

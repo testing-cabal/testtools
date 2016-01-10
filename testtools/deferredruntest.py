@@ -34,7 +34,7 @@ from fixtures import Fixture
 from testtools.compat import StringIO
 from testtools.content import Content, text_content
 from testtools.content_type import UTF8_TEXT
-from testtools.runtest import RunTest
+from testtools.runtest import RunTest, _raise_force_fail_error
 from testtools._spinner import (
     extract_result,
     NoResultError,
@@ -331,8 +331,15 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
             d.addBoth(clean_up)
             return d
 
+        def force_failure(ignored):
+            if getattr(self.case, 'force_failure', None):
+                d = self._run_user(_raise_force_fail_error)
+                d.addCallback(fails.append)
+                return d
+
         d = self._run_user(self.case._run_setup, self.result)
         d.addCallback(set_up_done)
+        d.addBoth(force_failure)
         d.addBoth(lambda ignored: len(fails) == 0)
         return d
 
