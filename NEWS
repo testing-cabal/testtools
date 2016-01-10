@@ -24,6 +24,10 @@ Improvements
 * Tests that customize ``skipException`` no longer get tracebacks for skipped
   tests.  (Jonathan Lange)
 
+* A failing ``expectThat`` now fails tests run with
+  ``AsynchronousDeferredRunTest``.  (Jonathan Lange, #1532452)
+
+
 Changes
 -------
 
@@ -32,7 +36,13 @@ Changes
 * Make ``fixtures`` a real dependency, not just a test dependency.
   (Jonathan Lange)
 
-* ``testtools.deferredruntest.run_with_log_observers`` is deprecated.
+* ``run_with_log_observers`` is deprecated.
+
+* ``addCleanup`` can now only be called within a test run.
+  (Jonathan Lange)
+
+* ``TestCase`` objects can now be run twice. All internal state is reset
+  between runs.  (Jonathan Lange)
 
 * ``TestCase.skip`` deprecated. Use ``skipTest`` instead.
   (Jonathan Lange, #988893)
