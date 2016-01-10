@@ -25,12 +25,14 @@ they fire with.
 
 See also `Testing Deferreds without the reactor`_ and the `Deferred howto`_.
 
-.. autofunction:: testtools._deferredmatchers.successful
+.. autofunction:: testtools.twistedsupport.successful
+   :noindex:
 
-.. autofunction:: testtools._deferredmatchers.failed
+.. autofunction:: testtools.twistedsupport.failed
+   :noindex:
 
-.. autodata:: testtools._deferredmatchers.NO_RESULT
-
+.. autodata:: testtools.twistedsupport.NO_RESULT
+   :noindex:
 
 
 Running tests in the reactor
@@ -43,7 +45,7 @@ until it fires and its callback chain is completed.
 Here's how to use it::
 
   from testtools import TestCase
-  from testtools.deferredruntest import AsynchronousDeferredRunTest
+  from testtools.twistedsupport import AsynchronousDeferredRunTest
 
   class MyTwistedTests(TestCase):
 
@@ -74,7 +76,7 @@ test runner::
 Converting Trial tests to testtools tests
 -----------------------------------------
 
-* Use the :py:class:`testtools.deferredruntest.AsynchronousDeferredRunTest` runner
+* Use the :py:class:`~testtools.twistedsupport.AsynchronousDeferredRunTest` runner
 * Make sure to upcall to :py:meth:`.TestCase.setUp` and
   :py:meth:`.TestCase.tearDown`
 * Don't use ``setUpClass`` or ``tearDownClass``
@@ -83,13 +85,13 @@ Converting Trial tests to testtools tests
 * Replace
   :py:meth:`twisted.trial.unittest.SynchronousTestCase.flushLoggedErrors`
   with
-  :py:func:`testtools.deferredruntest.flush_logged_errors`
+  :py:func:`~testtools.twistedsupport.flush_logged_errors`
 * Replace :py:meth:`twisted.trial.unittest.TestCase.assertFailure` with
-  :py:func:`testtools.deferredruntest.assert_fails_with`
+  :py:func:`~testtools.twistedsupport.assert_fails_with`
 * Trial spins the reactor a couple of times before cleaning it up,
-  :py:class:`testtools.deferredruntest.AsynchronousDeferredRunTest` does not. If
+  :py:class:`~testtools.twistedsupport.AsynchronousDeferredRunTest` does not. If
   you rely on this behavior, use
-  :py:class:`testtools.deferredruntest.AsynchronousDeferredRunTestForBrokenTwisted`.
+  :py:class:`~testtools.twistedsupport.AsynchronousDeferredRunTestForBrokenTwisted`.
 
 
 .. _Deferred Howto: http://twistedmatrix.com/documents/current/core/howto/defer.html

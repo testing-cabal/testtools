@@ -1,4 +1,4 @@
-# Copyright (c) 2010 testtools developers. See LICENSE for details.
+# Copyright (c) 2010-2016 testtools developers. See LICENSE for details.
 
 """Individual test case execution for tests that return Deferreds.
 
@@ -365,6 +365,23 @@ def assert_fails_with(d, *exc_types, **kwargs):
 
 
 def flush_logged_errors(*error_types):
+    """Flush errors of the given types from the global Twisted log.
+
+    Any errors logged during a test will be bubbled up to the test result,
+    marking the test as erroring. Use this function to declare that logged
+    errors were expected behavior.
+
+    For example::
+
+        try:
+            1/0
+        except ZeroDivisionError:
+            log.err()
+        # Prevent logged ZeroDivisionError from failing the test.
+        flush_logged_errors(ZeroDivisionError)
+
+    :param error_types: A variable argument list of exception types.
+    """
     return _log_observer.flushErrors(*error_types)
 
 

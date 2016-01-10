@@ -6,11 +6,6 @@ from extras import try_import
 
 from testtools.compat import _u
 from testtools.content import TracebackContent
-from testtools._deferredmatchers import (
-    NO_RESULT,
-    failed,
-    successful,
-)
 from testtools.matchers import (
     AfterPreprocessing,
     Equals,
@@ -18,6 +13,11 @@ from testtools.matchers import (
     MatchesDict,
 )
 from testtools.tests.test_spinner import NeedsTwistedTestCase
+from testtools.twistedsupport import (
+    NO_RESULT,
+    failed,
+    successful,
+)
 
 
 defer = try_import('twisted.internet.defer')

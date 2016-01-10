@@ -27,6 +27,13 @@ Improvements
 * A failing ``expectThat`` now fails tests run with
   ``AsynchronousDeferredRunTest``.  (Jonathan Lange, #1532452)
 
+* New ``testtools.twistedsupport`` module that collects all of our Twisted
+  support code in one place, including that currently available under
+  ``testtools.deferredruntest``.  (Jonathan Lange)
+
+* New matchers for testing ``Deferred`` code: ``failed``, ``successful``, and
+  ``NO_RESULT``.  (Jonathan Lange, Tristan Seligmann, #1369134)
+
 
 Changes
 -------
