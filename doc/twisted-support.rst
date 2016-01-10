@@ -1,6 +1,9 @@
 Twisted support
 ===============
 
+testtools provides support for testing Twisted code.
+
+
 Matching Deferreds
 ------------------
 

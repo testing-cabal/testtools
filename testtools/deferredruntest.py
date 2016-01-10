@@ -337,7 +337,7 @@ def assert_fails_with(d, *exc_types, **kwargs):
     Equivalent to Twisted's ``assertFailure``.
 
     :param Deferred d: A ``Deferred`` that is expected to fail.
-    :param *exc_types: The exception types that the Deferred is expected to
+    :param exc_types: The exception types that the Deferred is expected to
         fail with.
     :param type failureException: An optional keyword argument.  If provided,
         will raise that exception instead of
