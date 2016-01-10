@@ -24,6 +24,10 @@ Improvements
 * Tests that customize ``skipException`` no longer get tracebacks for skipped
   tests.  (Jonathan Lange)
 
+* A failing ``expectThat`` now fails tests run with
+  ``AsynchronousDeferredRunTest``.  (Jonathan Lange, #1532452)
+
+
 Changes
 -------
 
@@ -32,6 +36,12 @@ Changes
 * New function ``map_bytes`` that can be used to map a ``Content`` object to a
   new ``Content`` of the same content type with data based on the original.
   (Jonathan Lange)
+
+* ``addCleanup`` can now only be called within a test run.
+  (Jonathan Lange)
+
+* ``TestCase`` objects can now be run twice. All internal state is reset
+  between runs.  (Jonathan Lange)
 
 * ``TestCase.skip`` deprecated. Use ``skipTest`` instead.
   (Jonathan Lange, #988893)
