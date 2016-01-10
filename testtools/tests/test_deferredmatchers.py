@@ -13,11 +13,11 @@ from testtools.matchers import (
     MatchesDict,
 )
 from testtools.tests.test_spinner import NeedsTwistedTestCase
-from testtools.twistedsupport import (
-    NO_RESULT,
-    failed,
-    successful,
-)
+
+
+NO_RESULT = try_import('testtools.twistedsupport.NO_RESULT')
+failed = try_import('testtools.twistedsupport.failed')
+successful = try_import('testtools.twistedsupport.successful')
 
 
 defer = try_import('twisted.internet.defer')
