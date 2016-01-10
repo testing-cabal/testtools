@@ -9,7 +9,7 @@ from testtools import (
     TestCase,
     TestResult,
     )
-from testtools.matchers import MatchesException, Is, Raises
+from testtools.matchers import HasLength, MatchesException, Is, Raises
 from testtools.testresult.doubles import ExtendedTestResult
 from testtools.tests.helpers import FullStackRunTest
 
@@ -68,9 +68,13 @@ class TestRunTest(TestCase):
         self.assertEqual(['foo'], log)
 
     def test__run_prepared_result_does_not_mask_keyboard(self):
+        tearDownRuns = []
         class Case(TestCase):
             def test(self):
                 raise KeyboardInterrupt("go")
+            def _run_teardown(self, result):
+                tearDownRuns.append(self)
+                return super(Case, self)._run_teardown(result)
         case = Case('test')
         run = RunTest(case)
         run.result = ExtendedTestResult()
@@ -79,7 +83,7 @@ class TestRunTest(TestCase):
         self.assertEqual(
             [('startTest', case), ('stopTest', case)], run.result._events)
         # tearDown is still run though!
-        self.assertEqual(True, getattr(case, '_TestCase__teardown_called'))
+        self.assertThat(tearDownRuns, HasLength(1))
 
     def test__run_user_calls_onException(self):
         case = self.make_case()
