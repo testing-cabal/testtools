@@ -1,6 +1,5 @@
-# Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
-import json
 import os
 import tempfile
 import unittest
@@ -20,6 +19,7 @@ from testtools.content import (
     content_from_stream,
     JSON,
     json_content,
+    map_bytes,
     StackLinesContent,
     StacktraceContent,
     TracebackContent,
@@ -211,6 +211,28 @@ class TestContent(TestCase):
         data = {'foo': 'bar'}
         expected = Content(JSON, lambda: [_b('{"foo": "bar"}')])
         self.assertEqual(expected, json_content(data))
+
+    def test_map_bytes_identical(self):
+        # Given the identity function, map_bytes returns a Content with the
+        # same data as the original.
+        data = [_u('some data').encode('utf8')]
+        content = Content(UTF8_TEXT, lambda: data)
+        new_content = map_bytes(lambda x: x, content)
+        self.assertThat(new_content.as_text(), Equals(content.as_text()))
+
+    def test_map_bytes_different(self):
+        # For all functions that map iterable of data to iterable of data, and
+        # for data, iterating over the bytes of the content returned by
+        # map_bytes(f) is equivalent to mapping f over the iter_bytes of the
+        # original content.
+        data = _u('some data').encode('utf8')
+        function = lambda x: reversed(list(x))
+
+        content = Content(UTF8_TEXT, lambda: iter(data))
+        new_content = map_bytes(function, content)
+        self.assertThat(
+            list(new_content.iter_bytes()),
+            Equals(list(function(content.iter_bytes()))))
 
 
 class TestStackLinesContent(TestCase):

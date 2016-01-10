@@ -33,13 +33,15 @@ Changes
 
 * Add a new test dependency of testscenarios. (Robert Collins)
 
+* New function ``map_bytes`` that can be used to map a ``Content`` object to a
+  new ``Content`` of the same content type with data based on the original.
+  (Jonathan Lange)
+
 * ``addCleanup`` can now only be called within a test run.
   (Jonathan Lange)
 
 * ``TestCase`` objects can now be run twice. All internal state is reset
   between runs.  (Jonathan Lange)
-
-* Last release of testtools to support Python 3.2. (Jonathan Lange)
 
 * ``TestCase.skip`` deprecated. Use ``skipTest`` instead.
   (Jonathan Lange, #988893)

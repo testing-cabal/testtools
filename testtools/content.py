@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2016 testtools developers. See LICENSE for details.
 
 """Content - a MIME-like Content object."""
 
@@ -10,13 +10,12 @@ __all__ = [
     'json_content',
     'text_content',
     'TracebackContent',
+    'map_bytes',
     ]
 
 import codecs
-import inspect
 import json
 import os
-import sys
 
 from extras import try_import
 # To let setup.py work, make this a conditional import.
@@ -71,7 +70,7 @@ class Content(object):
     """
 
     def __init__(self, content_type, get_bytes):
-        """Create a ContentType."""
+        """Create a Content."""
         if None in (content_type, get_bytes):
             raise ValueError("None not permitted in %r, %r" % (
                 content_type, get_bytes))
@@ -121,6 +120,20 @@ class Content(object):
     def __repr__(self):
         return "<Content type=%r, value=%r>" % (
             self.content_type, _join_b(self.iter_bytes()))
+
+
+def map_bytes(function, content):
+    """Map ``function`` over data in ``content``.
+
+    Creates a new Content of the same content type as ``content``.
+
+    :param function: Unary callable that expects an iterable of bytes and
+        yields bytes.
+    :param content: A content object.
+    :return: A ``Content`` object with bytes that come from ``function``.
+    """
+    return Content(
+        content.content_type, lambda: function(content.iter_bytes()))
 
 
 class StackLinesContent(Content):
