@@ -7,7 +7,7 @@ from extras import try_import
 from testtools.compat import _u
 from testtools.content import TracebackContent
 from testtools._deferredmatchers import (
-    no_result,
+    NO_RESULT,
     failed,
     successful,
 )
@@ -52,17 +52,17 @@ def make_failure(exc_value):
 
 
 class NoResultTests(NeedsTwistedTestCase):
-    """Tests for ``no_result``."""
+    """Tests for ``NO_RESULT``."""
 
     def match(self, thing):
-        return no_result().match(thing)
+        return NO_RESULT.match(thing)
 
     def test_unfired_matches(self):
-        # A Deferred that hasn't fired matches no_result.
+        # A Deferred that hasn't fired matches NO_RESULT.
         self.assertThat(self.match(defer.Deferred()), Is(None))
 
     def test_successful_does_no_match(self):
-        # A Deferred that's fired successfully does not match no_result.
+        # A Deferred that's fired successfully does not match NO_RESULT.
         result = object()
         deferred = defer.succeed(result)
         mismatch = self.match(deferred)
@@ -72,7 +72,7 @@ class NoResultTests(NeedsTwistedTestCase):
                 % (deferred, result)))))
 
     def test_failed_does_not_match(self):
-        # A Deferred that's failed does not match no_result.
+        # A Deferred that's failed does not match NO_RESULT.
         fail = make_failure(RuntimeError('arbitrary failure'))
         deferred = defer.fail(fail)
         # Suppress unhandled error in Deferred.
@@ -87,7 +87,7 @@ class NoResultTests(NeedsTwistedTestCase):
         # We can create a Deferred, assert that it hasn't fired, then fire it
         # and collect the result.
         deferred = defer.Deferred()
-        self.assertThat(deferred, no_result())
+        self.assertThat(deferred, NO_RESULT)
         results = []
         deferred.addCallback(results.append)
         marker = object()
@@ -98,7 +98,7 @@ class NoResultTests(NeedsTwistedTestCase):
         # We can create a Deferred, assert that it hasn't fired, then fire it
         # with a failure and collect the result.
         deferred = defer.Deferred()
-        self.assertThat(deferred, no_result())
+        self.assertThat(deferred, NO_RESULT)
         results = []
         deferred.addErrback(results.append)
         fail = make_failure(RuntimeError('arbitrary failure'))

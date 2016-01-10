@@ -26,7 +26,7 @@ See also `Testing Deferreds without the reactor`_ and the `Deferred howto`_.
 
 .. autofunction:: testtools._deferredmatchers.failed
 
-.. autofunction:: testtools._deferredmatchers.no_result
+.. autodata:: testtools._deferredmatchers.NO_RESULT
 
 
 

@@ -42,33 +42,31 @@ class _NoResult(object):
         )
 
 
-# XXX: Maybe just a constant, rather than a function?
-def no_result():
-    """Match a Deferred that has not yet fired.
+NO_RESULT = _NoResult()
+"""Match a Deferred that has not yet fired.
 
-    For example, this will pass::
+For example, this will pass::
 
-        assert_that(defer.Deferred(), no_result())
+    assert_that(defer.Deferred(), NO_RESULT)
 
-    But this will fail:
+But this will fail:
 
-    >>> assert_that(defer.succeed(None), no_result())
-    Traceback (most recent call last):
-      ...
-      File "testtools/assertions.py", line 22, in assert_that
-        raise MismatchError(matchee, matcher, mismatch, verbose)
-    testtools.matchers._impl.MismatchError: No result expected on <Deferred at ... current result: None>, found None instead
+>>> assert_that(defer.succeed(None), NO_RESULT)
+Traceback (most recent call last):
+  ...
+  File "testtools/assertions.py", line 22, in assert_that
+    raise MismatchError(matchee, matcher, mismatch, verbose)
+testtools.matchers._impl.MismatchError: No result expected on <Deferred at ... current result: None>, found None instead
 
-    As will this:
+As will this:
 
-    >>> assert_that(defer.fail(RuntimeError('foo')), no_result())
-    Traceback (most recent call last):
-      ...
-      File "testtools/assertions.py", line 22, in assert_that
-        raise MismatchError(matchee, matcher, mismatch, verbose)
-    testtools.matchers._impl.MismatchError: No result expected on <Deferred at ... current result: <twisted.python.failure.Failure <type 'exceptions.RuntimeError'>>>, found <twisted.python.failure.Failure <type 'exceptions.RuntimeError'>> instead
-    """
-    return _NoResult()
+>>> assert_that(defer.fail(RuntimeError('foo')), NO_RESULT)
+Traceback (most recent call last):
+  ...
+  File "testtools/assertions.py", line 22, in assert_that
+    raise MismatchError(matchee, matcher, mismatch, verbose)
+testtools.matchers._impl.MismatchError: No result expected on <Deferred at ... current result: <twisted.python.failure.Failure <type 'exceptions.RuntimeError'>>>, found <twisted.python.failure.Failure <type 'exceptions.RuntimeError'>> instead
+"""
 
 
 class _Successful(object):
