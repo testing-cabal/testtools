@@ -16,13 +16,13 @@ __all__ = [
     'flush_logged_errors',
 ]
 
-from ._deferredmatchers import (
+from testtools._deferredmatchers import (
     succeeded,
     failed,
     NO_RESULT,
 )
 
-from .deferredruntest import (
+from testtools.deferredruntest import (
     AsynchronousDeferredRunTest,
     AsynchronousDeferredRunTestForBrokenTwisted,
     SynchronousDeferredRunTest,
