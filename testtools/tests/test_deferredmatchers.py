@@ -17,7 +17,7 @@ from testtools.tests.test_spinner import NeedsTwistedTestCase
 
 NO_RESULT = try_import('testtools.twistedsupport.NO_RESULT')
 failed = try_import('testtools.twistedsupport.failed')
-successful = try_import('testtools.twistedsupport.successful')
+succeeded = try_import('testtools.twistedsupport.succeeded')
 
 
 defer = try_import('twisted.internet.defer')
@@ -61,7 +61,7 @@ class NoResultTests(NeedsTwistedTestCase):
         # A Deferred that hasn't fired matches NO_RESULT.
         self.assertThat(self.match(defer.Deferred()), Is(None))
 
-    def test_successful_does_no_match(self):
+    def test_succeeded_does_no_match(self):
         # A Deferred that's fired successfully does not match NO_RESULT.
         result = object()
         deferred = defer.succeed(result)
@@ -109,16 +109,16 @@ class NoResultTests(NeedsTwistedTestCase):
 class SuccessResultTests(NeedsTwistedTestCase):
 
     def match(self, matcher, value):
-        return successful(matcher).match(value)
+        return succeeded(matcher).match(value)
 
-    def test_successful_result_passes(self):
+    def test_succeeded_result_passes(self):
         # A Deferred that has fired successfully matches against the value it
         # was fired with.
         result = object()
         deferred = defer.succeed(result)
         self.assertThat(self.match(Is(result), deferred), Is(None))
 
-    def test_different_successful_result_fails(self):
+    def test_different_succeeded_result_fails(self):
         # A Deferred that has fired successfully matches against the value it
         # was fired with.
         result = object()

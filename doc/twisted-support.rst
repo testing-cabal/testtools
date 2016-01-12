@@ -25,7 +25,7 @@ they fire with.
 
 See also `Testing Deferreds without the reactor`_ and the `Deferred howto`_.
 
-.. autofunction:: testtools.twistedsupport.successful
+.. autofunction:: testtools.twistedsupport.succeeded
    :noindex:
 
 .. autofunction:: testtools.twistedsupport.failed

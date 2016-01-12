@@ -12,11 +12,8 @@ synchronously.
 
 These matchers allow you to make assertions about when and how Deferreds fire,
 and about what values they fire with.
-
 """
 
-# TODO: None of these are published yet. Decide where & how to make them
-# public.
 from testtools.compat import _u
 from testtools.matchers import Mismatch
 
@@ -69,11 +66,11 @@ testtools.matchers._impl.MismatchError: No result expected on <Deferred at ... c
 """
 
 
-class _Successful(object):
+class _Succeeded(object):
     """Matches a Deferred that has fired successfully."""
 
     def __init__(self, matcher):
-        """Construct a ``_Successful`` matcher."""
+        """Construct a ``_Succeeded`` matcher."""
         self._matcher = matcher
 
     @staticmethod
@@ -101,13 +98,12 @@ class _Successful(object):
         )
 
 
-# XXX: The Twisted name is successResultOf. Do we want to use that name?
-def successful(matcher):
+def succeeded(matcher):
     """Match a Deferred that has fired successfully.
 
     For example::
 
-        fires_with_the_answer = successful(Equals(42))
+        fires_with_the_answer = succeeded(Equals(42))
         deferred = defer.succeed(42)
         assert_that(deferred, fires_with_the_answer)
 
@@ -123,7 +119,7 @@ def successful(matcher):
     :return: A matcher that can be applied to a synchronous
         :class:`~twisted.internet.defer.Deferred`.
     """
-    return _Successful(matcher)
+    return _Succeeded(matcher)
 
 
 class _Failed(object):
@@ -158,7 +154,6 @@ class _Failed(object):
         )
 
 
-# XXX: The Twisted name is failureResultOf. Do we want to use that name?
 def failed(matcher):
     """Match a Deferred that has failed.
 

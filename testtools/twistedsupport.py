@@ -4,7 +4,7 @@
 
 __all__ = [
     # Matchers
-    'successful',
+    'succeeded',
     'failed',
     'NO_RESULT',
 
@@ -17,7 +17,7 @@ __all__ = [
 ]
 
 from ._deferredmatchers import (
-    successful,
+    succeeded,
     failed,
     NO_RESULT,
 )
