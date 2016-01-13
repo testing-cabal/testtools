@@ -31,7 +31,7 @@ See also `Testing Deferreds without the reactor`_ and the `Deferred howto`_.
 .. autofunction:: testtools.twistedsupport.failed
    :noindex:
 
-.. autodata:: testtools.twistedsupport.NO_RESULT
+.. autofunction:: testtools.twistedsupport.has_no_result
    :noindex:
 
 

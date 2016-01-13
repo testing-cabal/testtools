@@ -6,7 +6,7 @@ __all__ = [
     # Matchers
     'succeeded',
     'failed',
-    'NO_RESULT',
+    'has_no_result',
 
     # Running tests
     'AsynchronousDeferredRunTest',
@@ -19,7 +19,7 @@ __all__ = [
 from testtools._deferredmatchers import (
     succeeded,
     failed,
-    NO_RESULT,
+    has_no_result,
 )
 
 from testtools.deferredruntest import (

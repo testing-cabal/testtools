@@ -32,7 +32,7 @@ Improvements
   ``testtools.deferredruntest``.  (Jonathan Lange)
 
 * New matchers for testing ``Deferred`` code: ``failed``, ``succeeded``, and
-  ``NO_RESULT``.  (Jonathan Lange, Tristan Seligmann, #1369134)
+  ``has_no_result``.  (Jonathan Lange, Tristan Seligmann, #1369134)
 
 * ``TestCase`` objects can now be run twice. All internal state is reset
   between runs. In particular, testtools tests can now be run with

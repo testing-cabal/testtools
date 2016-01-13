@@ -30,5 +30,3 @@ testtools.twistedsupport
 
 .. automodule:: testtools.twistedsupport
    :members:
-
-   .. autodata:: NO_RESULT

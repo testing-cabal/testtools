@@ -15,7 +15,7 @@ from testtools.matchers import (
 from testtools.tests.test_spinner import NeedsTwistedTestCase
 
 
-NO_RESULT = try_import('testtools.twistedsupport.NO_RESULT')
+has_no_result = try_import('testtools.twistedsupport.has_no_result')
 failed = try_import('testtools.twistedsupport.failed')
 succeeded = try_import('testtools.twistedsupport.succeeded')
 
@@ -52,17 +52,17 @@ def make_failure(exc_value):
 
 
 class NoResultTests(NeedsTwistedTestCase):
-    """Tests for ``NO_RESULT``."""
+    """Tests for ``has_no_result``."""
 
     def match(self, thing):
-        return NO_RESULT.match(thing)
+        return has_no_result().match(thing)
 
     def test_unfired_matches(self):
-        # A Deferred that hasn't fired matches NO_RESULT.
+        # A Deferred that hasn't fired matches has_no_result().
         self.assertThat(self.match(defer.Deferred()), Is(None))
 
     def test_succeeded_does_no_match(self):
-        # A Deferred that's fired successfully does not match NO_RESULT.
+        # A Deferred that's fired successfully does not match has_no_result().
         result = object()
         deferred = defer.succeed(result)
         mismatch = self.match(deferred)
@@ -72,7 +72,7 @@ class NoResultTests(NeedsTwistedTestCase):
                 % (deferred, result)))))
 
     def test_failed_does_not_match(self):
-        # A Deferred that's failed does not match NO_RESULT.
+        # A Deferred that's failed does not match has_no_result().
         fail = make_failure(RuntimeError('arbitrary failure'))
         deferred = defer.fail(fail)
         # Suppress unhandled error in Deferred.
@@ -87,7 +87,7 @@ class NoResultTests(NeedsTwistedTestCase):
         # We can create a Deferred, assert that it hasn't fired, then fire it
         # and collect the result.
         deferred = defer.Deferred()
-        self.assertThat(deferred, NO_RESULT)
+        self.assertThat(deferred, has_no_result())
         results = []
         deferred.addCallback(results.append)
         marker = object()
@@ -98,7 +98,7 @@ class NoResultTests(NeedsTwistedTestCase):
         # We can create a Deferred, assert that it hasn't fired, then fire it
         # with a failure and collect the result.
         deferred = defer.Deferred()
-        self.assertThat(deferred, NO_RESULT)
+        self.assertThat(deferred, has_no_result())
         results = []
         deferred.addErrback(results.append)
         fail = make_failure(RuntimeError('arbitrary failure'))
