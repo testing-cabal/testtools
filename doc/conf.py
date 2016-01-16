@@ -22,7 +22,10 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -38,7 +41,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'testtools'
-copyright = u'2010, The testtools authors'
+copyright = u'2010-2016, The testtools authors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -192,3 +195,9 @@ latex_documents = [
 
 # If false, no module index is generated.
 #latex_use_modindex = True
+
+intersphinx_mapping = {
+    'py2': ('https://docs.python.org/2', None),
+    'py3': ('https://docs.python.org/3', None),
+    'twisted': ('https://twistedmatrix.com/documents/current/api/', None),
+}
