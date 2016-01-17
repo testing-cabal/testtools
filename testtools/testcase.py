@@ -27,6 +27,7 @@ from extras import (
     try_import,
     try_imports,
     )
+fixtures = try_import('fixtures')
 # To let setup.py work, make this a conditional import.
 unittest = try_imports(['unittest2', 'unittest'])
 
@@ -51,7 +52,10 @@ from testtools.matchers import (
     )
 from testtools.matchers._basic import _FlippedEquals
 from testtools.monkey import patch
-from testtools.runtest import RunTest
+from testtools.runtest import (
+    MultipleExceptions,
+    RunTest,
+    )
 from testtools.testresult import (
     ExtendedToOriginalDecorator,
     TestResult,
@@ -677,6 +681,10 @@ class TestCase(unittest.TestCase):
         """
         try:
             fixture.setUp()
+        except MultipleExceptions as e:
+            if e.args[-1][0] is fixtures.fixture.SetupError:
+                gather_details(e.args[-1][1].args[0], self.getDetails())
+            raise
         except:
             exc_info = sys.exc_info()
             try:
