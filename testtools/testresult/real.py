@@ -1349,6 +1349,8 @@ class ExtendedToOriginalDecorator(object):
         self._tags = TagContext()
         # Only used for old TestResults that do not have failfast.
         self._failfast = False
+        # Used for old TestResults that do not have stop.
+        self._shouldStop = False
 
     def __repr__(self):
         return '<%s %r>' % (self.__class__.__name__, self.decorated)
@@ -1485,9 +1487,15 @@ class ExtendedToOriginalDecorator(object):
             return
         return method(offset, whence)
 
-    @property
-    def shouldStop(self):
-        return self.decorated.shouldStop
+    def _get_shouldStop(self):
+        return getattr(self.decorated, 'shouldStop', self._shouldStop)
+
+    def _set_shouldStop(self, value):
+        if safe_hasattr(self.decorated, 'shouldStop'):
+            self.decorated.shouldStop = value
+        else:
+            self._shouldStop = value
+    shouldStop = property(_get_shouldStop, _set_shouldStop)
 
     def startTest(self, test):
         self._tags = TagContext(self._tags)
@@ -1501,7 +1509,10 @@ class ExtendedToOriginalDecorator(object):
             return
 
     def stop(self):
-        return self.decorated.stop()
+        method = getattr(self.decorated, 'stop', None)
+        if method:
+            return method()
+        self.shouldStop = True
 
     def stopTest(self, test):
         self._tags = self._tags.parent
