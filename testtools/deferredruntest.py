@@ -1,4 +1,4 @@
-# Copyright (c) 2010-2015 testtools developers. See LICENSE for details.
+# Copyright (c) 2010-2016 testtools developers. See LICENSE for details.
 
 """Individual test case execution for tests that return Deferreds.
 
@@ -35,8 +35,8 @@ from testtools.compat import StringIO
 from testtools.content import Content, text_content
 from testtools.content_type import UTF8_TEXT
 from testtools.runtest import RunTest, _raise_force_fail_error
+from testtools._deferred import extract_result
 from testtools._spinner import (
-    extract_result,
     NoResultError,
     Spinner,
     TimeoutError,
@@ -188,6 +188,23 @@ class _CompoundFixture(Fixture):
 
 
 def flush_logged_errors(*error_types):
+    """Flush errors of the given types from the global Twisted log.
+
+    Any errors logged during a test will be bubbled up to the test result,
+    marking the test as erroring. Use this function to declare that logged
+    errors were expected behavior.
+
+    For example::
+
+        try:
+            1/0
+        except ZeroDivisionError:
+            log.err()
+        # Prevent logged ZeroDivisionError from failing the test.
+        flush_logged_errors(ZeroDivisionError)
+
+    :param error_types: A variable argument list of exception types.
+    """
     # XXX: jml: I would like to deprecate this in favour of
     # _ErrorObserver.flush_logged_errors so that I can avoid mutable global
     # state. However, I don't know how to make the correct instance of
@@ -451,7 +468,7 @@ def assert_fails_with(d, *exc_types, **kwargs):
     Equivalent to Twisted's ``assertFailure``.
 
     :param Deferred d: A ``Deferred`` that is expected to fail.
-    :param *exc_types: The exception types that the Deferred is expected to
+    :param exc_types: The exception types that the Deferred is expected to
         fail with.
     :param type failureException: An optional keyword argument.  If provided,
         will raise that exception instead of
