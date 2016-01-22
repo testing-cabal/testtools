@@ -173,6 +173,17 @@ class Spinner(object):
         self._cancel_timeout()
         self._success = result
 
+    def _fake_stop(self):
+        """Use to replace ``reactor.stop`` while running a test.
+
+        Calling ``reactor.stop`` makes it impossible re-start the reactor.
+        Since the default signal handlers for TERM, BREAK and INT all call
+        ``reactor.stop()``, we patch it over with ``reactor.crash()``
+
+        Spinner never calls this method.
+        """
+        self._reactor.crash()
+
     def _stop_reactor(self, ignored=None):
         """Stop the reactor!"""
         self._reactor.crash()
@@ -268,7 +279,8 @@ class Spinner(object):
             # with crash.  XXX: It might be a better idea to either install
             # custom signal handlers or to override the methods that are
             # Twisted's signal handlers.
-            stop, self._reactor.stop = self._reactor.stop, self._reactor.crash
+            real_stop, self._reactor.stop = self._reactor.stop, self._fake_stop
+
             def run_function():
                 d = defer.maybeDeferred(function, *args, **kwargs)
                 d.addCallbacks(self._got_success, self._got_failure)
@@ -277,7 +289,7 @@ class Spinner(object):
                 self._reactor.callWhenRunning(run_function)
                 self._reactor.run()
             finally:
-                self._reactor.stop = stop
+                self._reactor.stop = real_stop
                 self._restore_signals()
             try:
                 return self._get_result()
