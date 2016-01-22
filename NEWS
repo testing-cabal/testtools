@@ -27,6 +27,13 @@ Improvements
 * A failing ``expectThat`` now fails tests run with
   ``AsynchronousDeferredRunTest``.  (Jonathan Lange, #1532452)
 
+* New ``testtools.twistedsupport`` package that collects all of our Twisted
+  support code in one place, including that currently available under
+  ``testtools.deferredruntest``.  (Jonathan Lange)
+
+* New matchers for testing ``Deferred`` code: ``failed``, ``succeeded``, and
+  ``has_no_result``.  (Jonathan Lange, Tristan Seligmann, #1369134)
+
 * ``TestCase`` objects can now be run twice. All internal state is reset
   between runs. In particular, testtools tests can now be run with
   ``trial -u``.  (Jonathan Lange, #1517879)

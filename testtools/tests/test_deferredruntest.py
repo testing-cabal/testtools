@@ -1,4 +1,4 @@
-# Copyright (c) 2010-2011 testtools developers. See LICENSE for details.
+# Copyright (c) 2010-2016 testtools developers. See LICENSE for details.
 
 """Tests for the DeferredRunTest single test execution logic."""
 
