@@ -297,6 +297,39 @@ class TestRunInReactor(NeedsTwistedTestCase):
     def test_fast_sigint_raises_no_result_error_second_time(self):
         self.test_fast_sigint_raises_no_result_error()
 
+    def test_fires_after_timeout(self):
+        # If we timeout, but the Deferred actually ends up firing after the
+        # time out (perhaps because Spinner's clean-up code is buggy, or
+        # perhaps because the code responsible for the callback is in a
+        # thread), then the next run of a spinner works as intended,
+        # completely isolated from the previous run.
+
+        # Ensure we've timed out, and that we have a handle on the Deferred
+        # that didn't fire.
+        reactor = self.make_reactor()
+        spinner1 = self.make_spinner(reactor)
+        timeout = self.make_timeout()
+        deferred1 = defer.Deferred()
+        self.expectThat(
+            lambda: spinner1.run(timeout, lambda: deferred1),
+            Raises(MatchesException(_spinner.TimeoutError)))
+
+        # Make a Deferred that will fire *after* deferred1 as long as the
+        # reactor keeps spinning. We don't care that it's a callback of
+        # deferred1 per se, only that it strictly fires afterwards.
+        marker = object()
+        deferred2 = defer.Deferred()
+        deferred1.addCallback(
+            lambda ignored: reactor.callLater(0, deferred2.callback, marker))
+
+        def fire_other():
+            """Fire Deferred from the last spin while waiting for this one."""
+            deferred1.callback(object())
+            return deferred2
+
+        spinner2 = self.make_spinner(reactor)
+        self.assertThat(spinner2.run(3 * timeout, fire_other), Is(marker))
+
 
 def test_suite():
     from unittest import TestLoader

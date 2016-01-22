@@ -153,6 +153,7 @@ class Spinner(object):
         self._saved_signals = []
         self._junk = []
         self._debug = debug
+        self._spinning = False
 
     def _cancel_timeout(self):
         if self._timeout_call:
@@ -186,7 +187,10 @@ class Spinner(object):
 
     def _stop_reactor(self, ignored=None):
         """Stop the reactor!"""
-        self._reactor.crash()
+        # XXX: Would like to emit a warning when called when *not* spinning.
+        if self._spinning:
+            self._reactor.crash()
+            self._spinning = False
 
     def _timed_out(self, function, timeout):
         e = TimeoutError(function, timeout)
@@ -287,6 +291,7 @@ class Spinner(object):
                 d.addBoth(self._stop_reactor)
             try:
                 self._reactor.callWhenRunning(run_function)
+                self._spinning = True
                 self._reactor.run()
             finally:
                 self._reactor.stop = real_stop
