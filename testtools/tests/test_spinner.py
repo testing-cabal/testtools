@@ -328,7 +328,7 @@ class TestRunInReactor(NeedsTwistedTestCase):
             return deferred2
 
         spinner2 = self.make_spinner(reactor)
-        self.assertThat(spinner2.run(3 * timeout, fire_other), Is(marker))
+        self.assertThat(spinner2.run(timeout, fire_other), Is(marker))
 
 
 def test_suite():
