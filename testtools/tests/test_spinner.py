@@ -1,4 +1,4 @@
-# Copyright (c) 2010 testtools developers. See LICENSE for details.
+# Copyright (c) testtools developers. See LICENSE for details.
 
 """Tests for the evil Twisted reactor-spinning we do."""
 
@@ -118,7 +118,7 @@ class TestRunInReactor(NeedsTwistedTestCase):
         # If the given function raises an error, run_in_reactor re-raises that
         # error.
         self.assertThat(
-            lambda:self.make_spinner().run(self.make_timeout(), lambda: 1/0),
+            lambda: self.make_spinner().run(self.make_timeout(), lambda: 1/0),
             Raises(MatchesException(ZeroDivisionError)))
 
     def test_keyword_arguments(self):
@@ -162,7 +162,7 @@ class TestRunInReactor(NeedsTwistedTestCase):
         # _spinner.TimeoutError.
         timeout = self.make_timeout()
         self.assertThat(
-            lambda:self.make_spinner().run(timeout, lambda: defer.Deferred()),
+            lambda: self.make_spinner().run(timeout, lambda: defer.Deferred()),
             Raises(MatchesException(_spinner.TimeoutError)))
 
     def test_no_junk_by_default(self):
@@ -228,7 +228,8 @@ class TestRunInReactor(NeedsTwistedTestCase):
         reactor = self.make_reactor()
         spinner = self.make_spinner(reactor)
         port = spinner.run(
-            self.make_timeout(), reactor.listenTCP, 0, ServerFactory(), interface='127.0.0.1')
+            self.make_timeout(), reactor.listenTCP, 0, ServerFactory(),
+            interface='127.0.0.1')
         self.assertThat(spinner.get_junk(), Equals([port]))
 
     def test_will_not_run_with_previous_junk(self):
@@ -249,7 +250,8 @@ class TestRunInReactor(NeedsTwistedTestCase):
         reactor = self.make_reactor()
         spinner = self.make_spinner(reactor)
         timeout = self.make_timeout()
-        port = spinner.run(timeout, reactor.listenTCP, 0, ServerFactory(), interface='127.0.0.1')
+        port = spinner.run(timeout, reactor.listenTCP, 0, ServerFactory(),
+                           interface='127.0.0.1')
         junk = spinner.clear_junk()
         self.assertThat(junk, Equals([port]))
         self.assertThat(spinner.get_junk(), Equals([]))
@@ -264,7 +266,8 @@ class TestRunInReactor(NeedsTwistedTestCase):
         spinner = self.make_spinner(reactor)
         timeout = self.make_timeout()
         reactor.callLater(timeout, os.kill, os.getpid(), SIGINT)
-        self.assertThat(lambda:spinner.run(timeout * 5, defer.Deferred),
+        self.assertThat(
+            lambda: spinner.run(timeout * 5, defer.Deferred),
             Raises(MatchesException(_spinner.NoResultError)))
         self.assertEqual([], spinner._clean())
 
@@ -285,7 +288,8 @@ class TestRunInReactor(NeedsTwistedTestCase):
         spinner = self.make_spinner(reactor)
         timeout = self.make_timeout()
         reactor.callWhenRunning(os.kill, os.getpid(), SIGINT)
-        self.assertThat(lambda:spinner.run(timeout * 5, defer.Deferred),
+        self.assertThat(
+            lambda: spinner.run(timeout * 5, defer.Deferred),
             Raises(MatchesException(_spinner.NoResultError)))
         self.assertEqual([], spinner._clean())
 

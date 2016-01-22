@@ -1,4 +1,4 @@
-# Copyright (c) 2010 testtools developers. See LICENSE for details.
+# Copyright (c) testtools developers. See LICENSE for details.
 
 """Evil reactor-spinning logic for running Twisted tests.
 
