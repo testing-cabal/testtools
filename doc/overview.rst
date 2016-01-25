@@ -4,8 +4,7 @@ testtools: tasteful testing for Python
 
 testtools is a set of extensions to the Python standard library's unit testing
 framework. These extensions have been derived from many years of experience
-with unit testing in Python and come from many different sources. testtools
-supports Python versions all the way back to Python 2.6.
+with unit testing in Python and come from many different sources.
 
 What better way to start than with a contrived code snippet?::
 
@@ -93,9 +92,10 @@ Cross-Python compatibility
 --------------------------
 
 testtools gives you the very latest in unit testing technology in a way that
-will work with Python 2.6, 2.7, 3.2, 3.3, 3.4, and 3.5.
+will work with Python 2.7, 3.3, 3.4, 3.5, and pypy.
 
 If you wish to use testtools with Python 2.4 or 2.5, then please use testtools
-0.9.15. Up to then we supported Python 2.4 and 2.5, but we found the
-constraints involved in not using the newer language features onerous as we
-added more support for versions post Python 3.
+0.9.15.
+
+If you wish to use testtools with Python 2.6 or 3.2, then please use testtools
+1.9.0.
