@@ -34,7 +34,7 @@ matrix:
         # pip 8.0+ breaks on Python 3.2.
         - PIP="<8"
         # setuptools 19.4.1 breaks on Python 3.2.
-        - SETUPTOOLS="<19.6"
+        - SETUPTOOLS="<19.4.1"
     - python: "pypy"
       env: TWISTED_REQ="Twisted==13.0.0"
     - python: "pypy"
