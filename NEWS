@@ -3,8 +3,15 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
-Next
-~~~~
+1.9.0
+~~~~~
+
+Many new fixes in this branch, including lots of work around Twisted support.
+
+This is the first release that explicitly supports Python 3.5 and the last
+release that supports Python 2.6 or 3.2.
+
+Thanks to all who contributed!
 
 Improvements
 ------------
