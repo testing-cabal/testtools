@@ -38,6 +38,11 @@ Improvements
   between runs. In particular, testtools tests can now be run with
   ``trial -u``.  (Jonathan Lange, #1517879)
 
+* Fixed bug where if an asynchronous ``Deferred`` test times out but the
+  ``Deferred`` then fires, the entire test run would abort with
+  ``KeyboardInterrupt``, failing the currently running test.
+  (Jonathan Lange, James Westby)
+
 
 Changes
 -------
