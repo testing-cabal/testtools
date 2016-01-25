@@ -32,7 +32,7 @@ matrix:
         - JINJA_REQ="jinja2<2.7, Pygments<2.0"
         - SPHINX="<1.3"
         # pip 8.0+ breaks on Python 3.2.
-        - PIP_VERSION="<8.0"
+        - PIP_VERSION="<8"
     - python: "pypy"
       env: TWISTED_REQ="Twisted==13.0.0"
     - python: "pypy"
@@ -40,7 +40,7 @@ matrix:
     - python: "pypy3"
       env:
         - SPHINX="<1.3"
-        - PIP_VERSION="<8.0"
+        - PIP_VERSION="<8"
 
 install:
   - pip install -U pip$PIP_VERSION wheel setuptools
