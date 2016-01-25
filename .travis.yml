@@ -33,6 +33,8 @@ matrix:
         - SPHINX="<1.3"
         # pip 8.0+ breaks on Python 3.2.
         - PIP="<8"
+        # setuptools 19.6 breaks on Python 3.2.
+        - SETUPTOOLS="<19.6"
     - python: "pypy"
       env: TWISTED_REQ="Twisted==13.0.0"
     - python: "pypy"
@@ -41,9 +43,11 @@ matrix:
       env:
         - SPHINX="<1.3"
         - PIP="<8"
+        # setuptools 19.6 breaks on Python 3.2.
+        - SETUPTOOLS="<19.6"
 
 install:
-  - pip install -U pip$PIP wheel setuptools
+  - pip install -U pip$PIP wheel setuptools$SETUPTOOLS
   - pip install $JINJA_REQ sphinx$SPHINX $TWISTED_REQ
   - pip install .[test]
 
