@@ -66,7 +66,7 @@ utc = UTC()
 
 
 class TestResult(unittest.TestResult):
-    """Subclass of unittest.TestResult extending the protocol for flexability.
+    """Subclass of unittest.TestResult extending the protocol for flexibility.
 
     This test result supports an experimental protocol for providing additional
     data to in test outcomes. All the outcome methods take an optional dict
