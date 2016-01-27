@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2016 testtools developers. See LICENSE for details.
 
 """Doubles of test result objects, useful for testing unittest code."""
 
@@ -20,13 +20,16 @@ class LoggingBase(object):
         if event_log is None:
             event_log = []
         self._events = event_log
-        self.shouldStop = False
-        self._was_successful = True
-        self.testsRun = 0
 
 
 class Python26TestResult(LoggingBase):
     """A precisely python 2.6 like test result, that logs."""
+
+    def __init__(self, event_log=None):
+        super(Python26TestResult, self).__init__(event_log=event_log)
+        self.shouldStop = False
+        self._was_successful = True
+        self.testsRun = 0
 
     def addError(self, test, err):
         self._was_successful = False
@@ -153,16 +156,11 @@ class ExtendedTestResult(Python27TestResult):
         return self._was_successful
 
 
-class StreamResult(object):
+class StreamResult(LoggingBase):
     """A StreamResult implementation for testing.
 
     All events are logged to _events.
     """
-
-    def __init__(self, event_log=None):
-        if event_log is None:
-            event_log = []
-        self._events = event_log
 
     def startTestRun(self):
         self._events.append(('startTestRun',))
