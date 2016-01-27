@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2016 testtools developers. See LICENSE for details.
 
 """Test TestResults and related things."""
 
@@ -135,7 +135,22 @@ def make_exception_info(exceptionFactory, *args, **kwargs):
         return sys.exc_info()
 
 
-class Python26Contract(object):
+class TestControlContract(object):
+    """Stopping test runs."""
+
+    def test_initially_not_shouldStop(self):
+        # A result is not set to stop initially.
+        result = self.makeResult()
+        self.assertFalse(result.shouldStop)
+
+    def test_stop_sets_shouldStop(self):
+        # Calling 'stop()' sets 'shouldStop' to True.
+        result = self.makeResult()
+        result.stop()
+        self.assertTrue(result.shouldStop)
+
+
+class Python26Contract(TestControlContract):
 
     def test_fresh_result_is_successful(self):
         # A result is considered successful before any tests are run.
@@ -165,11 +180,6 @@ class Python26Contract(object):
         result.addSuccess(self)
         result.stopTest(self)
         self.assertTrue(result.wasSuccessful())
-
-    def test_stop_sets_shouldStop(self):
-        result = self.makeResult()
-        result.stop()
-        self.assertTrue(result.shouldStop)
 
 
 class Python27Contract(Python26Contract):
@@ -1102,15 +1112,10 @@ testtools.matchers._impl.MismatchError: Differences: [
         self.assertEqual("foo.bar", result.unexpectedSuccesses[0].id())
 
 
-class TestTestControl(TestCase):
+class TestTestControl(TestCase, TestControlContract):
 
-    def test_default(self):
-        self.assertEqual(False, TestControl().shouldStop)
-
-    def test_stop(self):
-        control = TestControl()
-        control.stop()
-        self.assertEqual(True, control.shouldStop)
+    def makeResult(self):
+        return TestControl()
 
 
 class TestTestResult(TestCase):
