@@ -83,6 +83,7 @@ from testtools.testresult.doubles import (
     Python27TestResult,
     ExtendedTestResult,
     StreamResult as LoggingStreamResult,
+    TwistedTestResult,
     )
 from testtools.testresult.real import (
     _details_to_str,
@@ -460,6 +461,12 @@ class TestAdaptedPython27TestResultContract(TestCase, DetailsContract):
 
     def makeResult(self):
         return ExtendedToOriginalDecorator(Python27TestResult())
+
+
+class TestAdaptedTwistedTestResultContract(TestCase, DetailsContract):
+
+    def makeResult(self):
+        return ExtendedToOriginalDecorator(TwistedTestResult())
 
 
 class TestAdaptedStreamResult(TestCase, DetailsContract):
