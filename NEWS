@@ -17,6 +17,9 @@ Changes
   ``AsynchronousDeferredRunTest`` to attach a detail containing everything
   logged to Twisted during the test run.  (Jonathan Lange, #1515362)
 
+* Python 2.6 and 3.2 are no longer supported. If you want to use either of
+  these versions of Python, use testtools 1.9.0. (Jonathan Lange)
+
 
 1.9.0
 ~~~~~
