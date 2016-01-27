@@ -1,4 +1,4 @@
-# Copyright (c) 2010 testtools developers. See LICENSE for details.
+# Copyright (c) testtools developers. See LICENSE for details.
 
 """Tests for the evil Twisted reactor-spinning we do."""
 
@@ -63,33 +63,6 @@ class TestNotReentrant(NeedsTwistedTestCase):
         self.assertEqual(2, len(calls))
 
 
-class TestExtractResult(NeedsTwistedTestCase):
-
-    def test_not_fired(self):
-        # _spinner.extract_result raises _spinner.DeferredNotFired if it's
-        # given a Deferred that has not fired.
-        self.assertThat(lambda:_spinner.extract_result(defer.Deferred()),
-            Raises(MatchesException(_spinner.DeferredNotFired)))
-
-    def test_success(self):
-        # _spinner.extract_result returns the value of the Deferred if it has
-        # fired successfully.
-        marker = object()
-        d = defer.succeed(marker)
-        self.assertThat(_spinner.extract_result(d), Equals(marker))
-
-    def test_failure(self):
-        # _spinner.extract_result raises the failure's exception if it's given
-        # a Deferred that is failing.
-        try:
-            1/0
-        except ZeroDivisionError:
-            f = Failure()
-        d = defer.fail(f)
-        self.assertThat(lambda:_spinner.extract_result(d),
-            Raises(MatchesException(ZeroDivisionError)))
-
-
 class TestTrapUnhandledErrors(NeedsTwistedTestCase):
 
     def test_no_deferreds(self):
@@ -145,7 +118,7 @@ class TestRunInReactor(NeedsTwistedTestCase):
         # If the given function raises an error, run_in_reactor re-raises that
         # error.
         self.assertThat(
-            lambda:self.make_spinner().run(self.make_timeout(), lambda: 1/0),
+            lambda: self.make_spinner().run(self.make_timeout(), lambda: 1/0),
             Raises(MatchesException(ZeroDivisionError)))
 
     def test_keyword_arguments(self):
@@ -189,7 +162,7 @@ class TestRunInReactor(NeedsTwistedTestCase):
         # _spinner.TimeoutError.
         timeout = self.make_timeout()
         self.assertThat(
-            lambda:self.make_spinner().run(timeout, lambda: defer.Deferred()),
+            lambda: self.make_spinner().run(timeout, lambda: defer.Deferred()),
             Raises(MatchesException(_spinner.TimeoutError)))
 
     def test_no_junk_by_default(self):
@@ -255,7 +228,8 @@ class TestRunInReactor(NeedsTwistedTestCase):
         reactor = self.make_reactor()
         spinner = self.make_spinner(reactor)
         port = spinner.run(
-            self.make_timeout(), reactor.listenTCP, 0, ServerFactory(), interface='127.0.0.1')
+            self.make_timeout(), reactor.listenTCP, 0, ServerFactory(),
+            interface='127.0.0.1')
         self.assertThat(spinner.get_junk(), Equals([port]))
 
     def test_will_not_run_with_previous_junk(self):
@@ -276,7 +250,8 @@ class TestRunInReactor(NeedsTwistedTestCase):
         reactor = self.make_reactor()
         spinner = self.make_spinner(reactor)
         timeout = self.make_timeout()
-        port = spinner.run(timeout, reactor.listenTCP, 0, ServerFactory(), interface='127.0.0.1')
+        port = spinner.run(timeout, reactor.listenTCP, 0, ServerFactory(),
+                           interface='127.0.0.1')
         junk = spinner.clear_junk()
         self.assertThat(junk, Equals([port]))
         self.assertThat(spinner.get_junk(), Equals([]))
@@ -291,7 +266,8 @@ class TestRunInReactor(NeedsTwistedTestCase):
         spinner = self.make_spinner(reactor)
         timeout = self.make_timeout()
         reactor.callLater(timeout, os.kill, os.getpid(), SIGINT)
-        self.assertThat(lambda:spinner.run(timeout * 5, defer.Deferred),
+        self.assertThat(
+            lambda: spinner.run(timeout * 5, defer.Deferred),
             Raises(MatchesException(_spinner.NoResultError)))
         self.assertEqual([], spinner._clean())
 
@@ -312,13 +288,47 @@ class TestRunInReactor(NeedsTwistedTestCase):
         spinner = self.make_spinner(reactor)
         timeout = self.make_timeout()
         reactor.callWhenRunning(os.kill, os.getpid(), SIGINT)
-        self.assertThat(lambda:spinner.run(timeout * 5, defer.Deferred),
+        self.assertThat(
+            lambda: spinner.run(timeout * 5, defer.Deferred),
             Raises(MatchesException(_spinner.NoResultError)))
         self.assertEqual([], spinner._clean())
 
     @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
     def test_fast_sigint_raises_no_result_error_second_time(self):
         self.test_fast_sigint_raises_no_result_error()
+
+    def test_fires_after_timeout(self):
+        # If we timeout, but the Deferred actually ends up firing after the
+        # time out (perhaps because Spinner's clean-up code is buggy, or
+        # perhaps because the code responsible for the callback is in a
+        # thread), then the next run of a spinner works as intended,
+        # completely isolated from the previous run.
+
+        # Ensure we've timed out, and that we have a handle on the Deferred
+        # that didn't fire.
+        reactor = self.make_reactor()
+        spinner1 = self.make_spinner(reactor)
+        timeout = self.make_timeout()
+        deferred1 = defer.Deferred()
+        self.expectThat(
+            lambda: spinner1.run(timeout, lambda: deferred1),
+            Raises(MatchesException(_spinner.TimeoutError)))
+
+        # Make a Deferred that will fire *after* deferred1 as long as the
+        # reactor keeps spinning. We don't care that it's a callback of
+        # deferred1 per se, only that it strictly fires afterwards.
+        marker = object()
+        deferred2 = defer.Deferred()
+        deferred1.addCallback(
+            lambda ignored: reactor.callLater(0, deferred2.callback, marker))
+
+        def fire_other():
+            """Fire Deferred from the last spin while waiting for this one."""
+            deferred1.callback(object())
+            return deferred2
+
+        spinner2 = self.make_spinner(reactor)
+        self.assertThat(spinner2.run(timeout, fire_other), Is(marker))
 
 
 def test_suite():

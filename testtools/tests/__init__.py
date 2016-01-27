@@ -1,4 +1,4 @@
-# Copyright (c) 2008-2013 testtools developers. See LICENSE for details.
+# Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
 """Tests for testtools itself."""
 
@@ -14,6 +14,8 @@ def test_suite():
         test_compat,
         test_content,
         test_content_type,
+        test_deferred,
+        test_deferredmatchers,
         test_deferredruntest,
         test_distutilscmd,
         test_fixturesupport,
@@ -34,6 +36,8 @@ def test_suite():
         test_compat,
         test_content,
         test_content_type,
+        test_deferred,
+        test_deferredmatchers,
         test_deferredruntest,
         test_distutilscmd,
         test_fixturesupport,

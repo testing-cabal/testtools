@@ -1,4 +1,4 @@
-# Copyright (c) 2010-2011 testtools developers. See LICENSE for details.
+# Copyright (c) 2010-2016 testtools developers. See LICENSE for details.
 
 """Tests for the DeferredRunTest single test execution logic."""
 
@@ -13,20 +13,21 @@ from testtools import (
     TestResult,
     )
 from testtools.matchers import (
-    AfterPreprocessing,
     ContainsAll,
     EndsWith,
     Equals,
     Is,
     KeysEqual,
-    MatchesDict,
     MatchesException,
-    MatchesListwise,
     Not,
     Raises,
     )
 from testtools.runtest import RunTest
 from testtools.testresult.doubles import ExtendedTestResult
+from testtools.tests.helpers import (
+    AsText,
+    MatchesEvents,
+)
 from testtools.tests.test_spinner import NeedsTwistedTestCase
 
 assert_fails_with = try_import('testtools.deferredruntest.assert_fails_with')
@@ -43,47 +44,11 @@ log = try_import('twisted.python.log')
 DelayedCall = try_import('twisted.internet.base.DelayedCall')
 
 
-class MatchesEvents(object):
-    """Match a list of test result events.
-
-    Specify events as a data structure.  Ordinary Python objects within this
-    structure will be compared exactly, but you can also use matchers at any
-    point.
-    """
-
-    def __init__(self, *expected):
-        self._expected = expected
-
-    def _make_matcher(self, obj):
-        # This isn't very safe for general use, but is good enough to make
-        # some tests in this module more readable.
-        if hasattr(obj, 'match'):
-            return obj
-        elif isinstance(obj, tuple) or isinstance(obj, list):
-            return MatchesListwise(
-                [self._make_matcher(item) for item in obj])
-        elif isinstance(obj, dict):
-            return MatchesDict(dict(
-                (key, self._make_matcher(value))
-                for key, value in obj.items()))
-        else:
-            return Equals(obj)
-
-    def match(self, observed):
-        matcher = self._make_matcher(self._expected)
-        return matcher.match(observed)
-
-
-class AsText(AfterPreprocessing):
-    """Match the text of a Content instance."""
-
-    def __init__(self, matcher, annotate=True):
-        super(AsText, self).__init__(
-            lambda log: log.as_text(), matcher, annotate=annotate)
-
-
 class X(object):
     """Tests that we run as part of our tests, nested to avoid discovery."""
+
+    # XXX: After testing-cabal/testtools#165 lands, fix up all of these to be
+    # scenario tests for RunTest.
 
     class Base(TestCase):
         def setUp(self):
@@ -134,6 +99,14 @@ class X(object):
             self.calls.append('test')
             self.addCleanup(lambda: 1/0)
 
+    class ExpectThatFailure(Base):
+        """Calling expectThat with a failing match fails the test."""
+        expected_calls = ['setUp', 'test', 'tearDown', 'clean-up']
+        expected_results = [('addFailure', AssertionError)]
+        def test_something(self):
+            self.calls.append('test')
+            self.expectThat(object(), Is(object()))
+
     class TestIntegration(NeedsTwistedTestCase):
 
         def assertResultsMatch(self, test, result):
@@ -176,7 +149,8 @@ def make_integration_tests():
         X.ErrorInTearDown,
         X.FailureInTest,
         X.ErrorInCleanup,
-        ]
+        X.ExpectThatFailure,
+    ]
     base_test = X.TestIntegration('test_runner')
     integration_tests = []
     for runner_name, runner in runners:

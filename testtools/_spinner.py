@@ -1,4 +1,4 @@
-# Copyright (c) 2010 testtools developers. See LICENSE for details.
+# Copyright (c) testtools developers. See LICENSE for details.
 
 """Evil reactor-spinning logic for running Twisted tests.
 
@@ -7,8 +7,6 @@ you couldn't write this yourself, you should not be using it.
 """
 
 __all__ = [
-    'DeferredNotFired',
-    'extract_result',
     'NoResultError',
     'not_reentrant',
     'ReentryError',
@@ -52,33 +50,6 @@ def not_reentrant(function, _calls={}):
         finally:
             _calls[function] = False
     return mergeFunctionMetadata(function, decorated)
-
-
-class DeferredNotFired(Exception):
-    """Raised when we extract a result from a Deferred that's not fired yet."""
-
-
-def extract_result(deferred):
-    """Extract the result from a fired deferred.
-
-    It can happen that you have an API that returns Deferreds for
-    compatibility with Twisted code, but is in fact synchronous, i.e. the
-    Deferreds it returns have always fired by the time it returns.  In this
-    case, you can use this function to convert the result back into the usual
-    form for a synchronous API, i.e. the result itself or a raised exception.
-
-    It would be very bad form to use this as some way of checking if a
-    Deferred has fired.
-    """
-    failures = []
-    successes = []
-    deferred.addCallbacks(successes.append, failures.append)
-    if len(failures) == 1:
-        failures[0].raiseException()
-    elif len(successes) == 1:
-        return successes[0]
-    else:
-        raise DeferredNotFired("%r has not fired yet." % (deferred,))
 
 
 def trap_unhandled_errors(function, *args, **kwargs):
@@ -182,6 +153,7 @@ class Spinner(object):
         self._saved_signals = []
         self._junk = []
         self._debug = debug
+        self._spinning = False
 
     def _cancel_timeout(self):
         if self._timeout_call:
@@ -202,9 +174,23 @@ class Spinner(object):
         self._cancel_timeout()
         self._success = result
 
+    def _fake_stop(self):
+        """Use to replace ``reactor.stop`` while running a test.
+
+        Calling ``reactor.stop`` makes it impossible re-start the reactor.
+        Since the default signal handlers for TERM, BREAK and INT all call
+        ``reactor.stop()``, we patch it over with ``reactor.crash()``
+
+        Spinner never calls this method.
+        """
+        self._reactor.crash()
+
     def _stop_reactor(self, ignored=None):
         """Stop the reactor!"""
-        self._reactor.crash()
+        # XXX: Would like to emit a warning when called when *not* spinning.
+        if self._spinning:
+            self._reactor.crash()
+            self._spinning = False
 
     def _timed_out(self, function, timeout):
         e = TimeoutError(function, timeout)
@@ -297,16 +283,18 @@ class Spinner(object):
             # with crash.  XXX: It might be a better idea to either install
             # custom signal handlers or to override the methods that are
             # Twisted's signal handlers.
-            stop, self._reactor.stop = self._reactor.stop, self._reactor.crash
+            real_stop, self._reactor.stop = self._reactor.stop, self._fake_stop
+
             def run_function():
                 d = defer.maybeDeferred(function, *args, **kwargs)
                 d.addCallbacks(self._got_success, self._got_failure)
                 d.addBoth(self._stop_reactor)
             try:
                 self._reactor.callWhenRunning(run_function)
+                self._spinning = True
                 self._reactor.run()
             finally:
-                self._reactor.stop = stop
+                self._reactor.stop = real_stop
                 self._restore_signals()
             try:
                 return self._get_result()

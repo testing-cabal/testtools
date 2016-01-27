@@ -206,16 +206,7 @@ class TestCase(unittest.TestCase):
         """
         runTest = kwargs.pop('runTest', None)
         super(TestCase, self).__init__(*args, **kwargs)
-        self._cleanups = []
-        self._unique_id_gen = itertools.count(1)
-        # Generators to ensure unique traceback ids.  Maps traceback label to
-        # iterators.
-        self._traceback_id_gens = {}
-        self.__setup_called = False
-        self.__teardown_called = False
-        # __details is lazy-initialized so that a constructed-but-not-run
-        # TestCase is safe to use with clone_test_with_new_id.
-        self.__details = None
+        self._reset()
         test_method = self._get_test_method()
         if runTest is None:
             runTest = getattr(
@@ -234,6 +225,19 @@ class TestCase(unittest.TestCase):
             (_UnexpectedSuccess, self._report_unexpected_success),
             (Exception, self._report_error),
             ]
+
+    def _reset(self):
+        """Reset the test case as if it had never been run."""
+        self._cleanups = []
+        self._unique_id_gen = itertools.count(1)
+        # Generators to ensure unique traceback ids.  Maps traceback label to
+        # iterators.
+        self._traceback_id_gens = {}
+        self.__setup_called = False
+        self.__teardown_called = False
+        # __details is lazy-initialized so that a constructed-but-not-run
+        # TestCase is safe to use with clone_test_with_new_id.
+        self.__details = None
 
     def __eq__(self, other):
         eq = getattr(unittest.TestCase, '__eq__', None)
@@ -563,7 +567,7 @@ class TestCase(unittest.TestCase):
         :seealso addOnException:
         """
         if exc_info[0] not in [
-            TestSkipped, _UnexpectedSuccess, _ExpectedFailure]:
+                self.skipException, _UnexpectedSuccess, _ExpectedFailure]:
             self._report_traceback(exc_info, tb_label=tb_label)
         for handler in self.__exception_handlers:
             handler(exc_info)
@@ -607,6 +611,7 @@ class TestCase(unittest.TestCase):
         result.addUnexpectedSuccess(self, details=self.getDetails())
 
     def run(self, result=None):
+        self._reset()
         try:
             run_test = self.__RunTest(
                 self, self.exception_handlers, last_resort=self._report_error)

@@ -18,16 +18,15 @@ testtools
 .. automodule:: testtools
    :members:
 
-
-testtools.deferredruntest
--------------------------
-
-.. automodule:: testtools.deferredruntest
-   :members:
-
-
 testtools.matchers
 ------------------
 
 .. automodule:: testtools.matchers
+   :members:
+
+
+testtools.twistedsupport
+-------------------------
+
+.. automodule:: testtools.twistedsupport
    :members:

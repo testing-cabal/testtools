@@ -6,6 +6,23 @@ Changes and improvements to testtools_, grouped by release.
 Next
 ~~~~
 
+Changes
+-------
+
+* Python 2.6 and 3.2 are no longer supported. If you want to use either of
+  these versions of Python, use testtools 1.9.0. (Jonathan Lange)
+
+
+1.9.0
+~~~~~
+
+Many new fixes in this branch, including lots of work around Twisted support.
+
+This is the first release that explicitly supports Python 3.5 and the last
+release that supports Python 2.6 or 3.2.
+
+Thanks to all who contributed!
+
 Improvements
 ------------
 
@@ -21,10 +38,36 @@ Improvements
 
 * Tests for ``assertRaisesRegexp``. (Julia Varlamova, Jonathan Lange)
 
+* Tests that customize ``skipException`` no longer get tracebacks for skipped
+  tests.  (Jonathan Lange, #1518101)
+
+* A failing ``expectThat`` now fails tests run with
+  ``AsynchronousDeferredRunTest``.  (Jonathan Lange, #1532452)
+
+* New ``testtools.twistedsupport`` package that collects all of our Twisted
+  support code in one place, including that currently available under
+  ``testtools.deferredruntest``.  (Jonathan Lange)
+
+* New matchers for testing ``Deferred`` code: ``failed``, ``succeeded``, and
+  ``has_no_result``.  (Jonathan Lange, Tristan Seligmann, #1369134)
+
+* ``TestCase`` objects can now be run twice. All internal state is reset
+  between runs. In particular, testtools tests can now be run with
+  ``trial -u``.  (Jonathan Lange, #1517879)
+
+* Fixed bug where if an asynchronous ``Deferred`` test times out but the
+  ``Deferred`` then fires, the entire test run would abort with
+  ``KeyboardInterrupt``, failing the currently running test.
+  (Jonathan Lange, James Westby)
+
+
 Changes
 -------
 
 * Add a new test dependency of testscenarios. (Robert Collins)
+
+* ``addCleanup`` can now only be called within a test run.
+  (Jonathan Lange)
 
 * ``TestCase.skip`` deprecated. Use ``skipTest`` instead.
   (Jonathan Lange, #988893)
@@ -35,8 +78,13 @@ Changes
 
 * Last release of testtools to support Python 3.2. (Jonathan Lange)
 
+* Last release of testtools to support Python 2.6. (Jonathan Lange)
+
 * Report on all duplicate test ids when sorting test suites that contain
-  duplicate ids.  (Thomas Bechtold, Jonathan Lange)
+  duplicate ids.  (Thomas Bechtold, Jonathan Lange, #1390082)
+
+* Add ``readthedocs-requirements.txt`` so readthedocs.org can build the
+  Twisted API documentation. (Jonathan Lange)
 
 1.8.1
 ~~~~~

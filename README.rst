@@ -28,26 +28,22 @@ copyright Steve Purcell and the Python Software Foundation, it is distributed
 under the same license as Python, see LICENSE for details.
 
 
-Required Dependencies
----------------------
+Supported platforms
+-------------------
 
- * Python 2.6+ or 3.2+ / pypy (2.x+)
+ * Python 2.7+ or 3.3+ / pypy (2.x+)
 
-If you would like to use testtools for earlier Python's, please use testtools
-0.9.15.
+If you would like to use testtools for earlier Pythons, please use testtools
+1.9.0, or for *really* old Pythons, testtools 0.9.15.
 
- * extras (helpers that we intend to push into Python itself in the near
-   future).
-
- * The most recent unittest2 (backports of the latest unittest API from
-   cPython, which we use to avoid code duplication).
+testtools probably works on all OSes that Python works on, but is most heavily
+tested on Linux and OS X.
 
 
 Optional Dependencies
 ---------------------
 
-If you would like to use our undocumented, unsupported Twisted support, then
-you will need Twisted.
+If you would like to use our Twisted support, then you will need Twisted.
 
 If you want to use ``fixtures`` then you can either install fixtures (e.g. from
 https://launchpad.net/python-fixtures or http://pypi.python.org/pypi/fixtures)
