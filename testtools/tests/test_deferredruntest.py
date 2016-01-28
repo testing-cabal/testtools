@@ -12,6 +12,7 @@ from testtools import (
     TestCase,
     TestResult,
     )
+from testtools._deferreddebug import DebugTwisted
 from testtools.matchers import (
     ContainsAll,
     EndsWith,
@@ -381,6 +382,10 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
     def test_unhandled_error_from_deferred(self):
         # If there's a Deferred with an unhandled error, the test fails.  Each
         # unhandled error is reported with a separate traceback.
+
+        # We're interested in the behavior when debugging is disabled. When
+        # debugging is enabled, we get more stack traces.
+        self.useFixture(DebugTwisted(False))
         class SomeCase(TestCase):
             def test_cruft(self):
                 # Note we aren't returning the Deferred so that the error will
@@ -408,6 +413,10 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
         # If there's a Deferred with an unhandled error, the test fails.  Each
         # unhandled error is reported with a separate traceback, and the error
         # is still reported.
+
+        # We're interested in the behavior when debugging is disabled. When
+        # debugging is enabled, we get more stack traces.
+        self.useFixture(DebugTwisted(False))
         class SomeCase(TestCase):
             def test_cruft(self):
                 # Note we aren't returning the Deferred so that the error will
@@ -566,6 +575,10 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
     def test_only_addError_once(self):
         # Even if the reactor is unclean and the test raises an error and the
         # cleanups raise errors, we only called addError once per test.
+
+        # We're interested in the behavior when debugging is disabled. When
+        # debugging is enabled, we get more stack traces.
+        self.useFixture(DebugTwisted(False))
         reactor = self.make_reactor()
         class WhenItRains(TestCase):
             def it_pours(self):
