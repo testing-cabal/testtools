@@ -1365,6 +1365,34 @@ class TestSkipping(TestCase):
         test.run(result)
         self.assertEqual('addSuccess', result._events[1][0])
 
+    def test_skipIf_class_decorator(self):
+        """
+        ``skipIf`` can be used as a class decorator.
+        """
+        @skipIf(True, "skipping this test")
+        class SkippingTest(TestCase):
+            def test_in_a_skipped_testcase(self):
+                self.fail()
+        result = Python26TestResult()
+        test = SkippingTest("test_in_a_skipped_testcase")
+        test.run(result)
+        self.assertEqual('addSuccess', result._events[1][0])
+
+    def test_skipIf_setup_decorator(self):
+        """
+        When ``skipIf`` is used to decorate ``setUp`` all tests are skipped.
+        """
+        class SkippingTest(TestCase):
+            @skipIf(True, "skipping this test")
+            def setUp(self):
+                pass
+            def test_that_triggers_a_skipped_setup(self):
+                self.fail()
+        result = Python26TestResult()
+        test = SkippingTest("test_that_triggers_a_skipped_setup")
+        test.run(result)
+        self.assertEqual('addSuccess', result._events[1][0])
+
     def test_skipUnless_decorator(self):
         class SkippingTest(TestCase):
             @skipUnless(False, "skipping this test")
