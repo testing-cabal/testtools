@@ -16,12 +16,12 @@ __all__ = [
     'trap_unhandled_errors',
     ]
 
+from fixtures import Fixture
 import signal
 
-from testtools.monkey import MonkeyPatcher
+from testtools._deferreddebug import DebugTwisted
 
 from twisted.internet import defer
-from twisted.internet.base import DelayedCall
 from twisted.internet.interfaces import IReactorThreads
 from twisted.python.failure import Failure
 from twisted.python.util import mergeFunctionMetadata
@@ -265,12 +265,12 @@ class Spinner(object):
         :return: Whatever is at the end of the function's callback chain.  If
             it's an error, then raise that.
         """
-        debug = MonkeyPatcher()
         if self._debug:
-            debug.add_patch(defer.Deferred, 'debug', True)
-            debug.add_patch(DelayedCall, 'debug', True)
-        debug.patch()
-        try:
+            debug_settings = DebugTwisted(True)
+        else:
+            debug_settings = Fixture()
+
+        with debug_settings:
             junk = self.get_junk()
             if junk:
                 raise StaleJunkError(junk)
@@ -300,5 +300,3 @@ class Spinner(object):
                 return self._get_result()
             finally:
                 self._clean()
-        finally:
-            debug.restore()

@@ -12,6 +12,9 @@ Changes
 * Python 2.6 and 3.2 are no longer supported. If you want to use either of
   these versions of Python, use testtools 1.9.0. (Jonathan Lange)
 
+* Make ``fixtures`` a real dependency, not just a test dependency.
+  (Jonathan Lange)
+
 
 1.9.0
 ~~~~~
