@@ -66,6 +66,11 @@ Changes
 
 * Add a new test dependency of testscenarios. (Robert Collins)
 
+* Make ``fixtures`` a real dependency, not just a test dependency.
+  (Jonathan Lange)
+
+* ``run_with_log_observers`` is deprecated.
+
 * ``addCleanup`` can now only be called within a test run.
   (Jonathan Lange)
 

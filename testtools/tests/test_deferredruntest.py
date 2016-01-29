@@ -13,12 +13,17 @@ from testtools import (
     TestResult,
     )
 from testtools.matchers import (
+    AfterPreprocessing,
+    Contains,
     ContainsAll,
+    ContainsDict,
     EndsWith,
     Equals,
     Is,
     KeysEqual,
+    MatchesDict,
     MatchesException,
+    MatchesListwise,
     Not,
     Raises,
     )
@@ -42,6 +47,8 @@ defer = try_import('twisted.internet.defer')
 failure = try_import('twisted.python.failure')
 log = try_import('twisted.python.log')
 DelayedCall = try_import('twisted.internet.base.DelayedCall')
+_get_global_publisher_and_observers = try_import(
+    'testtools.deferredruntest._get_global_publisher_and_observers')
 
 
 class X(object):
@@ -674,6 +681,55 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
                     }),
                 ('stopTest', test)))
 
+    def test_do_not_log_to_twisted(self):
+        # By default, we don't log anything to the default Twisted loggers.
+        # XXX: We want to make this behaviour optional, and (ideally)
+        # deprecated.
+        messages = []
+        publisher, _ = _get_global_publisher_and_observers()
+        publisher.addObserver(messages.append)
+        self.addCleanup(publisher.removeObserver, messages.append)
+
+        class LogSomething(TestCase):
+            def test_something(self):
+                log.msg("foo")
+
+        test = LogSomething('test_something')
+        runner = self.make_runner(test)
+        result = self.make_result()
+        runner.run(result)
+        self.assertThat(messages, Equals([]))
+
+    def test_restore_observers(self):
+        # We restore the original observers.
+        publisher, observers = _get_global_publisher_and_observers()
+
+        class LogSomething(TestCase):
+            def test_something(self):
+                pass
+
+        test = LogSomething('test_something')
+        runner = self.make_runner(test)
+        result = self.make_result()
+        runner.run(result)
+        self.assertThat(
+            _get_global_publisher_and_observers()[1], Equals(observers))
+
+    def test_restore_observers_after_timeout(self):
+        # We restore the original observers even if the test times out.
+        publisher, observers = _get_global_publisher_and_observers()
+
+        class LogSomething(TestCase):
+            def test_something(self):
+                return defer.Deferred()
+
+        test = LogSomething('test_something')
+        runner = self.make_runner(test, timeout=0.0001)
+        result = self.make_result()
+        runner.run(result)
+        self.assertThat(
+            _get_global_publisher_and_observers()[1], Equals(observers))
+
     def test_debugging_unchanged_during_test_by_default(self):
         debugging = [(defer.Deferred.debug, DelayedCall.debug)]
         class SomeCase(TestCase):
@@ -798,6 +854,135 @@ class TestRunWithLogObservers(NeedsTwistedTestCase):
         observers = list(log.theLogPublisher.observers)
         run_with_log_observers([], lambda: None)
         self.assertEqual(observers, log.theLogPublisher.observers)
+
+
+class TestNoTwistedLogObservers(NeedsTwistedTestCase):
+    """Tests for _NoTwistedLogObservers."""
+
+    def _get_logged_messages(self, function, *args, **kwargs):
+        """Run ``function`` and return ``(ret, logged_messages)``."""
+        messages = []
+        publisher, _ = _get_global_publisher_and_observers()
+        publisher.addObserver(messages.append)
+        try:
+            ret = function(*args, **kwargs)
+        finally:
+            publisher.removeObserver(messages.append)
+        return (ret, messages)
+
+    def test_default(self):
+        # The default behaviour is for messages logged to Twisted to actually
+        # go to the Twisted logs.
+        class SomeTest(TestCase):
+            def test_something(self):
+                log.msg('foo')
+
+        _, messages = self._get_logged_messages(SomeTest('test_something').run)
+        self.assertThat(
+            messages,
+            MatchesListwise([ContainsDict({'message': Equals(('foo',))})]))
+
+    def test_nothing_logged(self):
+        # Using _NoTwistedLogObservers means that nothing is logged to
+        # Twisted.
+        from testtools.deferredruntest import _NoTwistedLogObservers
+
+        class SomeTest(TestCase):
+            def test_something(self):
+                self.useFixture(_NoTwistedLogObservers())
+                log.msg('foo')
+
+        _, messages = self._get_logged_messages(SomeTest('test_something').run)
+        self.assertThat(messages, Equals([]))
+
+    def test_logging_restored(self):
+        # _NoTwistedLogObservers restores the original log observers.
+        from testtools.deferredruntest import _NoTwistedLogObservers
+
+        class SomeTest(TestCase):
+            def test_something(self):
+                self.useFixture(_NoTwistedLogObservers())
+                log.msg('foo')
+
+        def run_then_log():
+            SomeTest('test_something').run()
+            log.msg('bar')
+
+        _, messages = self._get_logged_messages(run_then_log)
+        self.assertThat(
+            messages,
+            MatchesListwise([ContainsDict({'message': Equals(('bar',))})]))
+
+
+class TestTwistedLogObservers(NeedsTwistedTestCase):
+    """Tests for _TwistedLogObservers."""
+
+    def test_logged_messages_go_to_observer(self):
+        # Using _TwistedLogObservers means messages logged to Twisted go to
+        # that observer while the fixture is active.
+        from testtools.deferredruntest import _TwistedLogObservers
+
+        messages = []
+
+        class SomeTest(TestCase):
+            def test_something(self):
+                self.useFixture(_TwistedLogObservers([messages.append]))
+                log.msg('foo')
+
+        SomeTest('test_something').run()
+        log.msg('bar')
+        self.assertThat(
+            messages,
+            MatchesListwise([ContainsDict({'message': Equals(('foo',))})]))
+
+
+class TestErrorObserver(NeedsTwistedTestCase):
+    """Tests for _ErrorObserver."""
+
+    def test_captures_errors(self):
+        # _ErrorObserver stores all errors logged while it is active.
+        from testtools.deferredruntest import (
+            _ErrorObserver, _LogObserver, _NoTwistedLogObservers)
+
+        log_observer = _LogObserver()
+        error_observer = _ErrorObserver(log_observer)
+        exception = ValueError('bar')
+
+        class SomeTest(TestCase):
+            def test_something(self):
+                # Temporarily suppress default log observers to avoid spewing
+                # to stderr.
+                self.useFixture(_NoTwistedLogObservers())
+                self.useFixture(error_observer)
+                log.msg('foo')
+                log.err(exception)
+
+        SomeTest('test_something').run()
+        self.assertThat(
+            error_observer.flush_logged_errors(),
+            MatchesListwise([
+                AfterPreprocessing(lambda x: x.value, Equals(exception))]))
+
+
+class TestCaptureTwistedLogs(NeedsTwistedTestCase):
+    """Tests for _CaptureTwistedLogs."""
+
+    def test_captures_logs(self):
+        # _CaptureTwistedLogs stores all Twisted log messages as a detail.
+        from testtools.deferredruntest import _CaptureTwistedLogs
+
+        class SomeTest(TestCase):
+            def test_something(self):
+                self.useFixture(_CaptureTwistedLogs())
+                log.msg('foo')
+
+        test = SomeTest('test_something')
+        test.run()
+        self.assertThat(
+            test.getDetails(),
+            MatchesDict({
+                'twisted-log': AsText(Contains('foo')),
+            }))
 
 
 def test_suite():
