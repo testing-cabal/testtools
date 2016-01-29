@@ -878,14 +878,16 @@ def skip(reason):
         # attributes.
         test_item.__unittest_skip__ = True
         test_item.__unittest_skip_why__ = reason
-        if wraps is not None:
-            @wraps(test_item)
-            def skip_wrapper(*args, **kwargs):
-                raise TestCase.skipException(reason)
-        else:
-            def skip_wrapper(test_item):
-                test_item.skip(reason)
-        return skip_wrapper
+        if not isinstance(test_item, (type, types.ClassType)):
+            if wraps is not None:
+                @wraps(test_item)
+                def skip_wrapper(*args, **kwargs):
+                    raise TestCase.skipException(reason)
+            else:
+                def skip_wrapper(test_item):
+                    test_item.skip(reason)
+            test_item = skip_wrapper
+        return test_item
     return decorator
 
 
