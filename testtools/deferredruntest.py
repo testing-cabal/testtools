@@ -154,7 +154,8 @@ class _CaptureTwistedLogs(Fixture):
         logs = StringIO()
         full_observer = log.FileLogObserver(logs)
         self.useFixture(_TwistedLogObservers([full_observer.emit]))
-        self.addDetail(self.LOG_DETAIL_NAME, Content(UTF8_TEXT, logs.getvalue))
+        self.addDetail(self.LOG_DETAIL_NAME,
+                       Content(UTF8_TEXT, lambda: [logs.getvalue()]))
 
 
 def run_with_log_observers(observers, function, *args, **kwargs):
@@ -174,7 +175,8 @@ def run_with_log_observers(observers, function, *args, **kwargs):
 _log_observer = _LogObserver()
 
 
-# XXX: Should really be in python-fixtures
+# XXX: Should really be in python-fixtures.
+# See https://github.com/testing-cabal/fixtures/pull/22.
 class _CompoundFixture(Fixture):
     """A fixture that combines many fixtures."""
 
@@ -384,6 +386,8 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
 
         # We can't just install these as fixtures on self.case, because we
         # need the clean up to run even if the test times out.
+        #
+        # See https://bugs.launchpad.net/testtools/+bug/897196.
         with logging_fixture as capture_logs:
             for name, detail in capture_logs.getDetails().items():
                 self.case.addDetail(name, detail)
