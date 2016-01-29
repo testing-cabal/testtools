@@ -21,6 +21,10 @@ Improvements
   report the lack of result as a test error. This ought to make weird
   concurrency interaction bugs easier to understand. (Jonathan Lange)
 
+* Previously, when gathering details caused by a setUp() failure,
+  a traceback occurred if the fixture used the newer _setUp().
+  This had the side effect of not clearing up fixtures nor gathering details
+  properly.  This is now fixed.  (Julian Edwards #1469759)
 
 2.0.0
 ~~~~~

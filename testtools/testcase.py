@@ -685,7 +685,8 @@ class TestCase(unittest.TestCase):
         try:
             fixture.setUp()
         except MultipleExceptions as e:
-            if e.args[-1][0] is fixtures.fixture.SetupError:
+            if (fixtures is not None and
+                    e.args[-1][0] is fixtures.fixture.SetupError):
                 gather_details(e.args[-1][1].args[0], self.getDetails())
             raise
         except:
