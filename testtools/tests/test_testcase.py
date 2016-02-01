@@ -1092,12 +1092,20 @@ class TestUniqueFactories(TestCase):
         prefix = self.getUniqueString()
         unique_text_generator = testcase.unique_text_generator(prefix)
         first_result = next(unique_text_generator)
+        if sys.version_info[:2] == (3, 2):
+            expected_value = '\u1e00'
+        else:
+            expected_value = u'\u1e00'
         self.assertEqual(six.text_type('%s-%s') %
-                         (prefix, u'\u1e00'), first_result)
+                         (prefix, expected_value), first_result)
         # The next value yielded by unique_text_generator is different.
+        if sys.version_info[:2] == (3, 2):
+            expected_value = '\u1e01'
+        else:
+            expected_value = u'\u1e01'
         second_result = next(unique_text_generator)
         self.assertEqual(six.text_type('%s-%s') %
-                         (prefix, u'\u1e01'), second_result)
+                         (prefix, expected_value), second_result)
 
     def test_mods(self):
         # given a number and max, generate a list that's the mods.
