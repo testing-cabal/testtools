@@ -146,7 +146,26 @@ class _ErrorObserver(Fixture):
 
 
 class CaptureTwistedLogs(Fixture):
-    """Capture all the Twisted logs and add them as a detail."""
+    """Capture all the Twisted logs and add them as a detail.
+
+    Much of the time, you won't need to use this directly, as
+    :py:class:`AsynchronousDeferredRunTest` captures Twisted logs when the
+    ``store_twisted_logs`` is set to ``True`` (which it is by default).
+
+    However, if you want to do custom processing of Twisted's logs, then this
+    class can be useful.
+
+    For example::
+
+        class TwistedTests(TestCase):
+            run_tests_with(
+                partial(AsynchronousDeferredRunTest, store_twisted_logs=False))
+
+            def setUp(self):
+                super(TwistedTests, self).setUp()
+                twisted_logs = self.useFixture(CaptureTwistedLogs())
+                # ... do something with twisted_logs ...
+    """
 
     LOG_DETAIL_NAME = 'twisted-log'
 
@@ -225,7 +244,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
     def __init__(self, case, handlers=None, last_resort=None, reactor=None,
                  timeout=0.005, debug=False, suppress_twisted_logging=True,
                  store_twisted_logs=True):
-        """Construct an `AsynchronousDeferredRunTest`.
+        """Construct an ``AsynchronousDeferredRunTest``.
 
         Please be sure to always use keyword syntax, not positional, as the
         base class may add arguments in future - and for core code

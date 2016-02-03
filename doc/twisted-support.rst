@@ -1,3 +1,5 @@
+.. _twisted-support:
+
 Twisted support
 ===============
 
@@ -71,6 +73,47 @@ test runner::
        def test_twisted(self):
            # ...
            return d
+
+See :py:class:`~testtools.twistedsupport.AsynchronousDeferredRunTest` and
+:py:class:`~testtools.twistedsupport.AsynchronousDeferredRunTestForBrokenTwisted`
+for more information.
+
+
+Controlling the Twisted logs
+----------------------------
+
+Users of Twisted Trial will be accustomed to all tests logging to
+``_trial_temp/test.log``. By default,
+:py:class:`~testtools.twistedsupport.AsynchronousDeferredRunTest` will *not*
+do this, but will instead:
+
+ 1. suppress all messages logged during the test run
+ 2. attach them as the ``twisted-log`` detail (see :ref:`details`) which is
+    shown if the test fails
+
+The first behavior is controlled by the ``suppress_twisted_logging`` parameter
+to ``AsynchronousDeferredRunTest``, which is set to ``True`` by default. The
+second is controlled by the ``store_twisted_logs`` parameter, which is also
+``True`` by default.
+
+If ``store_twisted_logs`` is set to ``False``, you can still get the logs
+attached as a detail by using the
+:py:class:`~testtools.twistedsupport.CaptureTwistedLogs` fixture. Using the
+:py:class:`~testtools.twistedsupport.CaptureTwistedLogs` fixture is equivalent
+to setting ``store_twisted_logs`` to ``True``.
+
+For example::
+
+    class DoNotCaptureLogsTests(TestCase):
+        run_tests_with = partial(AsynchronousDeferredRunTest,
+                                 store_twisted_logs=False)
+
+        def test_foo(self):
+            log.msg('logs from this test are not attached')
+
+        def test_bar(self):
+            self.useFixture(CaptureTwistedLogs())
+            log.msg('logs from this test *are* attached')
 
 
 Converting Trial tests to testtools tests
