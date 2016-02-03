@@ -92,9 +92,9 @@ do this, but will instead:
     shown if the test fails
 
 The first behavior is controlled by the ``suppress_twisted_logging`` parameter
-to ``AsynchronousDeferredRunTest``, which is set to ``True`` by default. The
-second is controlled by the ``store_twisted_logs`` parameter, which is also
-``True`` by default.
+to :py:class:`~testtools.twistedsupport.AsynchronousDeferredRunTest`, which is
+set to ``True`` by default. The second is controlled by the
+``store_twisted_logs`` parameter, which is also ``True`` by default.
 
 If ``store_twisted_logs`` is set to ``False``, you can still get the logs
 attached as a detail by using the
