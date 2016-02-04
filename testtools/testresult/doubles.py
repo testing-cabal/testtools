@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2016 testtools developers. See LICENSE for details.
 
 """Doubles of test result objects, useful for testing unittest code."""
 
@@ -6,6 +6,7 @@ __all__ = [
     'Python26TestResult',
     'Python27TestResult',
     'ExtendedTestResult',
+    'TwistedTestResult',
     'StreamResult',
     ]
 
@@ -20,13 +21,16 @@ class LoggingBase(object):
         if event_log is None:
             event_log = []
         self._events = event_log
-        self.shouldStop = False
-        self._was_successful = True
-        self.testsRun = 0
 
 
 class Python26TestResult(LoggingBase):
     """A precisely python 2.6 like test result, that logs."""
+
+    def __init__(self, event_log=None):
+        super(Python26TestResult, self).__init__(event_log=event_log)
+        self.shouldStop = False
+        self._was_successful = True
+        self.testsRun = 0
 
     def addError(self, test, err):
         self._was_successful = False
@@ -153,16 +157,57 @@ class ExtendedTestResult(Python27TestResult):
         return self._was_successful
 
 
-class StreamResult(object):
+class TwistedTestResult(LoggingBase):
+    """
+    Emulate the relevant bits of :py:class:`twisted.trial.itrial.IReporter`.
+
+    Used to ensure that we can use ``trial`` as a test runner.
+    """
+
+    def __init__(self, event_log=None):
+        super(TwistedTestResult, self).__init__(event_log=event_log)
+        self._was_successful = True
+        self.testsRun = 0
+
+    def startTest(self, test):
+        self.testsRun += 1
+        self._events.append(('startTest', test))
+
+    def stopTest(self, test):
+        self._events.append(('stopTest', test))
+
+    def addSuccess(self, test):
+        self._events.append(('addSuccess', test))
+
+    def addError(self, test, error):
+        self._was_successful = False
+        self._events.append(('addError', test, error))
+
+    def addFailure(self, test, error):
+        self._was_successful = False
+        self._events.append(('addFailure', test, error))
+
+    def addExpectedFailure(self, test, failure, todo=None):
+        self._events.append(('addExpectedFailure', test, failure))
+
+    def addUnexpectedSuccess(self, test, todo=None):
+        self._events.append(('addUnexpectedSuccess', test))
+
+    def addSkip(self, test, reason):
+        self._events.append(('addSkip', test, reason))
+
+    def wasSuccessful(self):
+        return self._was_successful
+
+    def done(self):
+        pass
+
+
+class StreamResult(LoggingBase):
     """A StreamResult implementation for testing.
 
     All events are logged to _events.
     """
-
-    def __init__(self, event_log=None):
-        if event_log is None:
-            event_log = []
-        self._events = event_log
 
     def startTestRun(self):
         self._events.append(('startTestRun',))
