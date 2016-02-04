@@ -7,29 +7,20 @@ import signal
 
 from extras import try_import
 
-from testtools import (
-    skipIf,
-    TestCase,
-    )
+from testtools import skipIf
 from testtools.matchers import (
     Equals,
     Is,
     MatchesException,
     Raises,
     )
+from ._helpers import NeedsTwistedTestCase
 
-_spinner = try_import('testtools._spinner')
+
+_spinner = try_import('testtools.twistedsupport._spinner')
 
 defer = try_import('twisted.internet.defer')
 Failure = try_import('twisted.python.failure.Failure')
-
-
-class NeedsTwistedTestCase(TestCase):
-
-    def setUp(self):
-        super(NeedsTwistedTestCase, self).setUp()
-        if defer is None or Failure is None:
-            self.skipTest("Need Twisted to run")
 
 
 class TestNotReentrant(NeedsTwistedTestCase):
