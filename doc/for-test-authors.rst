@@ -984,6 +984,7 @@ exception or mangle the display.  In most cases simply avoiding the ``%s``
 format specifier and using ``%r`` instead will be enough.  For examples of
 more complex formatting see the ``testtools.matchers`` implementatons.
 
+.. _details:
 
 Details
 =======
@@ -1254,7 +1255,7 @@ Twisted support
 ---------------
 
 testtools provides support for running Twisted tests – tests that return a
-Deferred_ and rely on the Twisted reactor. See (XXX - jml - insert link)
+Deferred_ and rely on the Twisted reactor. See :ref:`twisted-support`.
 
 force_failure
 -------------

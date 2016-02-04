@@ -12,6 +12,7 @@ __all__ = [
     'AsynchronousDeferredRunTest',
     'AsynchronousDeferredRunTestForBrokenTwisted',
     'SynchronousDeferredRunTest',
+    'CaptureTwistedLogs',
     'assert_fails_with',
     'flush_logged_errors',
 ]
@@ -26,6 +27,7 @@ from testtools.deferredruntest import (
     AsynchronousDeferredRunTest,
     AsynchronousDeferredRunTestForBrokenTwisted,
     SynchronousDeferredRunTest,
+    CaptureTwistedLogs,
     assert_fails_with,
     flush_logged_errors,
 )

@@ -30,3 +30,4 @@ testtools.twistedsupport
 
 .. automodule:: testtools.twistedsupport
    :members:
+   :special-members: __init__
