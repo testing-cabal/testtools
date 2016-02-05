@@ -438,11 +438,11 @@ class TestCase(unittest.TestCase):
     failUnlessRaises = assertRaises
 
     def assertThat(self, matchee, matcher, message='', verbose=False):
-        """Assert that matchee is matched by matcher.
+        """Assert that ``matchee`` is matched by ``matcher``.
 
-        :param matchee: An object to match with matcher.
-        :param matcher: An object meeting the testtools.Matcher protocol.
-        :raises MismatchError: When matcher does not match thing.
+        :param matchee: An object to match with ``matcher``.
+        :param IMatcher matcher: A matcher that ``matchee`` is matched against.
+        :raises MismatchError: When ``matcher`` does not match thing.
         """
         mismatch_error = self._matchHelper(matchee, matcher, message, verbose)
         if mismatch_error is not None:
@@ -470,15 +470,15 @@ class TestCase(unittest.TestCase):
         self.addDetail(full_name, content_object)
 
     def expectThat(self, matchee, matcher, message='', verbose=False):
-        """Check that matchee is matched by matcher, but delay the assertion failure.
+        """Check that ``matchee`` is matched by ``matcher``, but delay the failure.
 
         This method behaves similarly to ``assertThat``, except that a failed
         match does not exit the test immediately. The rest of the test code
         will continue to run, and the test will be marked as failing after the
         test has finished.
 
-        :param matchee: An object to match with matcher.
-        :param matcher: An object meeting the testtools.Matcher protocol.
+        :param matchee: An object to match with ``matcher``.
+        :param IMatcher matcher: A matcher that ``matchee`` is matched against.
         :param message: If specified, show this message with any failed match.
 
         """

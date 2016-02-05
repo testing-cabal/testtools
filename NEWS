@@ -12,6 +12,9 @@ Improvements
 * ``TestResult`` objects that don't implement ``stop``/``shouldStop`` are now
   handled sanely.  (Jonathan Lange)
 
+* Export explicit ``IMatcher`` and ``IMismatch`` interfaces, and update API
+  documentation to use those terms.  (Jonathan Lange)
+
 2.0.0
 ~~~~~
 
