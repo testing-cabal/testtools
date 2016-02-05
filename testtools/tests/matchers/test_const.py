@@ -7,9 +7,7 @@ from testtools.tests.matchers.helpers import TestMatchersInterface
 
 
 class TestAlwaysInterface(TestMatchersInterface, TestCase):
-    """
-    :py:func:`~testtools.matchers.always` always matches.
-    """
+    """:py:func:`~testtools.matchers.always` always matches."""
     matches_matcher = always()
     matches_matches = [42, object(), 'hi mom']
     matches_mismatches = []
@@ -19,9 +17,7 @@ class TestAlwaysInterface(TestMatchersInterface, TestCase):
 
 
 class TestNeverInterface(TestMatchersInterface, TestCase):
-    """
-    :py:func:`~testtools.matchers.never` never matches.
-    """
+    """:py:func:`~testtools.matchers.never` never matches."""
     matches_matcher = never()
     matches_matches = []
     matches_mismatches = [42, object(), 'hi mom']

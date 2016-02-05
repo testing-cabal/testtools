@@ -20,8 +20,7 @@ class _Always(object):
 
 
 def always():
-    """
-    Always match.
+    """Always match.
 
     That is::
 
@@ -46,8 +45,7 @@ class _Never(object):
 
 
 def never():
-    """
-    Never match.
+    """Never match.
 
     That is::
 
