@@ -12,6 +12,9 @@ from ._impl import Mismatch
 class _Always(object):
     """Always matches."""
 
+    def __str__(self):
+        return 'always()'
+
     def match(self, value):
         return None
 
@@ -23,6 +26,9 @@ def always():
 
 class _Never(object):
     """Never matches."""
+
+    def __str__(self):
+        return 'never()'
 
     def match(self, value):
         return Mismatch(
