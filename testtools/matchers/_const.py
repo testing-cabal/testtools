@@ -20,7 +20,17 @@ class _Always(object):
 
 
 def always():
-    """Always match."""
+    """
+    Always match.
+
+    That is::
+
+        self.assertThat(x, always())
+
+    Will always match and never fail, no matter what ``x`` is. Most useful when
+    passed to other higher-order matchers (e.g.
+    :py:class:`~testtools.matchers.MatchesListwise`).
+    """
     return _Always()
 
 
@@ -36,5 +46,15 @@ class _Never(object):
 
 
 def never():
-    """Never match."""
+    """
+    Never match.
+
+    That is::
+
+        self.assertThat(x, never())
+
+    Will never match and always fail, no matter what ``x`` is. Included for
+    completeness with :py:func:`.always`, but if you find a use for this, let
+    us know!
+    """
     return _Never()
