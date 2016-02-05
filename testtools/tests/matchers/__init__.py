@@ -7,6 +7,7 @@ from unittest import TestSuite
 def test_suite():
     from testtools.tests.matchers import (
         test_basic,
+        test_const,
         test_datastructures,
         test_dict,
         test_doctest,
@@ -17,6 +18,7 @@ def test_suite():
         )
     modules = [
         test_basic,
+        test_const,
         test_datastructures,
         test_dict,
         test_doctest,
