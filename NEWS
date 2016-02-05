@@ -6,6 +6,18 @@ Changes and improvements to testtools_, grouped by release.
 Next
 ~~~~
 
+Improvements
+------------
+
+* ``TestResult`` objects that don't implement ``stop``/``shouldStop`` are now
+  handled sanely.  (Jonathan Lange)
+
+2.0.0
+~~~~~
+
+Just a few tweaks to our Twisted support. Major version bump to indicate that
+Python 2.6 & 3.2 are no longer supported.
+
 Changes
 -------
 
