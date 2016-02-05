@@ -15,7 +15,7 @@ $ python -c 'import testtools.matchers; print testtools.matchers.__all__'
 __all__ = [
     'AfterPreprocessing',
     'AllMatch',
-    'always',
+    'Always',
     'Annotate',
     'AnyMatch',
     'Contains',
@@ -46,7 +46,7 @@ __all__ = [
     'MatchesRegex',
     'MatchesSetwise',
     'MatchesStructure',
-    'never',
+    'Never',
     'NotEquals',
     'Not',
     'PathExists',
@@ -71,8 +71,8 @@ from ._basic import (
     StartsWith,
     )
 from ._const import (
-    always,
-    never,
+    Always,
+    Never,
     )
 from ._datastructures import (
     ContainsAll,

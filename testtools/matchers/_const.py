@@ -1,8 +1,8 @@
 # Copyright (c) 2016 testtools developers. See LICENSE for details.
 
 __all__ = [
-    'always',
-    'never',
+    'Always',
+    'Never',
     ]
 
 from testtools.compat import _u
@@ -13,18 +13,18 @@ class _Always(object):
     """Always matches."""
 
     def __str__(self):
-        return 'always()'
+        return 'Always()'
 
     def match(self, value):
         return None
 
 
-def always():
+def Always():
     """Always match.
 
     That is::
 
-        self.assertThat(x, always())
+        self.assertThat(x, Always())
 
     Will always match and never fail, no matter what ``x`` is. Most useful when
     passed to other higher-order matchers (e.g.
@@ -37,22 +37,22 @@ class _Never(object):
     """Never matches."""
 
     def __str__(self):
-        return 'never()'
+        return 'Never()'
 
     def match(self, value):
         return Mismatch(
             _u('Inevitable mismatch on %r' % (value,)))
 
 
-def never():
+def Never():
     """Never match.
 
     That is::
 
-        self.assertThat(x, never())
+        self.assertThat(x, Never())
 
     Will never match and always fail, no matter what ``x`` is. Included for
-    completeness with :py:func:`.always`, but if you find a use for this, let
+    completeness with :py:func:`.Always`, but if you find a use for this, let
     us know!
     """
     return _Never()
