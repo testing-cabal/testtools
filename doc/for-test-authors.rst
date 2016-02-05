@@ -628,6 +628,20 @@ assertions.
 Below are a few of the combining matchers that come with testtools.
 
 
+always
+~~~~~~
+
+.. autofunction:: testtools.matchers.always
+   :noindex:
+
+
+never
+~~~~~
+
+.. autofunction:: testtools.matchers.never
+   :noindex:
+
+
 Not
 ~~~
 
