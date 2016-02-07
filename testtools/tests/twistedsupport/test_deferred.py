@@ -9,9 +9,13 @@ from testtools.matchers import (
     MatchesException,
     Raises,
     )
-from testtools.tests.test_spinner import NeedsTwistedTestCase
+from ._helpers import NeedsTwistedTestCase
 
-from testtools._deferred import DeferredNotFired, extract_result
+
+DeferredNotFired = try_import(
+    'testtools.twistedsupport._deferred.DeferredNotFired')
+extract_result = try_import(
+    'testtools.twistedsupport._deferred.extract_result')
 
 defer = try_import('twisted.internet.defer')
 Failure = try_import('twisted.python.failure.Failure')
