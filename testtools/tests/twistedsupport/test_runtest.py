@@ -12,7 +12,6 @@ from testtools import (
     TestCase,
     TestResult,
     )
-from testtools.twistedsupport._deferreddebug import DebugTwisted
 from testtools.matchers import (
     AfterPreprocessing,
     Contains,
@@ -35,6 +34,9 @@ from testtools.tests.helpers import (
     MatchesEvents,
 )
 from ._helpers import NeedsTwistedTestCase
+
+DebugTwisted = try_import(
+    'testtools.twistedsupport._deferreddebug.DebugTwisted')
 
 assert_fails_with = try_import('testtools.twistedsupport.assert_fails_with')
 AsynchronousDeferredRunTest = try_import(
