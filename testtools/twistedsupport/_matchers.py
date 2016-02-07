@@ -164,7 +164,8 @@ def failed(matcher):
     For example::
 
         error = RuntimeError('foo')
-        fails_at_runtime = failed(Equals(error))
+        fails_at_runtime = failed(
+            AfterPreprocessing(lambda f: f.value, Equals(error)))
         deferred = defer.fail(error)
         assert_that(deferred, fails_at_runtime)
 
