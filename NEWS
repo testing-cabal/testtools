@@ -12,6 +12,8 @@ Improvements
 * ``TestResult`` objects that don't implement ``stop``/``shouldStop`` are now
   handled sanely.  (Jonathan Lange)
 
+* New ``Always`` and ``Never`` matchers. (Tristan Seligmann, #947026)
+
 2.0.0
 ~~~~~
 

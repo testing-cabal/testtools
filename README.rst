@@ -91,3 +91,4 @@ Thanks
  * Martin Pool
  * Julia Varlamova
  * ClusterHQ Ltd
+ * Tristan Seligmann
