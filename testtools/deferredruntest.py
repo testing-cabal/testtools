@@ -1,4 +1,4 @@
-# Copyright (c) testtools developers. See LICENSE for details.
+# Copyright (c) 2016 testtools developers. See LICENSE for details.
 
 """Backwards compatibility for testtools.twistedsupport."""
 
