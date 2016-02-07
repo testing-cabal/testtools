@@ -1,4 +1,4 @@
-# Copyright (c) 2016 testtools developers. See LICENSE for details.
+# Copyright (c) testtools developers. See LICENSE for details.
 
 """Support for testing code that uses Twisted."""
 
@@ -17,13 +17,13 @@ __all__ = [
     'flush_logged_errors',
 ]
 
-from ._matchers import (
+from testtools._deferredmatchers import (
     succeeded,
     failed,
     has_no_result,
 )
 
-from ._runtest import (
+from testtools.deferredruntest import (
     AsynchronousDeferredRunTest,
     AsynchronousDeferredRunTestForBrokenTwisted,
     SynchronousDeferredRunTest,

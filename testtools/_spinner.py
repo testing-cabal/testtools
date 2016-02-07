@@ -19,7 +19,7 @@ __all__ = [
 from fixtures import Fixture
 import signal
 
-from ._deferreddebug import DebugTwisted
+from testtools._deferreddebug import DebugTwisted
 
 from twisted.internet import defer
 from twisted.internet.interfaces import IReactorThreads

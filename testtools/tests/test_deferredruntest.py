@@ -12,7 +12,7 @@ from testtools import (
     TestCase,
     TestResult,
     )
-from testtools.twistedsupport._deferreddebug import DebugTwisted
+from testtools._deferreddebug import DebugTwisted
 from testtools.matchers import (
     AfterPreprocessing,
     Contains,
@@ -34,22 +34,22 @@ from testtools.tests.helpers import (
     AsText,
     MatchesEvents,
 )
-from ._helpers import NeedsTwistedTestCase
+from testtools.tests.test_spinner import NeedsTwistedTestCase
 
-assert_fails_with = try_import('testtools.twistedsupport.assert_fails_with')
+assert_fails_with = try_import('testtools.deferredruntest.assert_fails_with')
 AsynchronousDeferredRunTest = try_import(
-    'testtools.twistedsupport.AsynchronousDeferredRunTest')
+    'testtools.deferredruntest.AsynchronousDeferredRunTest')
 flush_logged_errors = try_import(
-    'testtools.twistedsupport.flush_logged_errors')
+    'testtools.deferredruntest.flush_logged_errors')
 SynchronousDeferredRunTest = try_import(
-    'testtools.twistedsupport.SynchronousDeferredRunTest')
+    'testtools.deferredruntest.SynchronousDeferredRunTest')
 
 defer = try_import('twisted.internet.defer')
 failure = try_import('twisted.python.failure')
 log = try_import('twisted.python.log')
 DelayedCall = try_import('twisted.internet.base.DelayedCall')
 _get_global_publisher_and_observers = try_import(
-    'testtools.twistedsupport._runtest._get_global_publisher_and_observers')
+    'testtools.deferredruntest._get_global_publisher_and_observers')
 
 
 class X(object):
@@ -913,7 +913,7 @@ class TestNoTwistedLogObservers(NeedsTwistedTestCase):
     def test_nothing_logged(self):
         # Using _NoTwistedLogObservers means that nothing is logged to
         # Twisted.
-        from testtools.twistedsupport._runtest import _NoTwistedLogObservers
+        from testtools.deferredruntest import _NoTwistedLogObservers
 
         class SomeTest(TestCase):
             def test_something(self):
@@ -925,7 +925,7 @@ class TestNoTwistedLogObservers(NeedsTwistedTestCase):
 
     def test_logging_restored(self):
         # _NoTwistedLogObservers restores the original log observers.
-        from testtools.twistedsupport._runtest import _NoTwistedLogObservers
+        from testtools.deferredruntest import _NoTwistedLogObservers
 
         class SomeTest(TestCase):
             def test_something(self):
@@ -948,7 +948,7 @@ class TestTwistedLogObservers(NeedsTwistedTestCase):
     def test_logged_messages_go_to_observer(self):
         # Using _TwistedLogObservers means messages logged to Twisted go to
         # that observer while the fixture is active.
-        from testtools.twistedsupport._runtest import _TwistedLogObservers
+        from testtools.deferredruntest import _TwistedLogObservers
 
         messages = []
 
@@ -969,7 +969,7 @@ class TestErrorObserver(NeedsTwistedTestCase):
 
     def test_captures_errors(self):
         # _ErrorObserver stores all errors logged while it is active.
-        from testtools.twistedsupport._runtest import (
+        from testtools.deferredruntest import (
             _ErrorObserver, _LogObserver, _NoTwistedLogObservers)
 
         log_observer = _LogObserver()
@@ -997,7 +997,7 @@ class TestCaptureTwistedLogs(NeedsTwistedTestCase):
 
     def test_captures_logs(self):
         # CaptureTwistedLogs stores all Twisted log messages as a detail.
-        from testtools.twistedsupport import CaptureTwistedLogs
+        from testtools.deferredruntest import CaptureTwistedLogs
 
         class SomeTest(TestCase):
             def test_something(self):

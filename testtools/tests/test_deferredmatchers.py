@@ -12,7 +12,7 @@ from testtools.matchers import (
     Is,
     MatchesDict,
 )
-from ._helpers import NeedsTwistedTestCase
+from testtools.tests.test_spinner import NeedsTwistedTestCase
 
 
 has_no_result = try_import('testtools.twistedsupport.has_no_result')
