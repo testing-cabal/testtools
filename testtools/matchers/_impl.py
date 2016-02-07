@@ -1,4 +1,4 @@
-# Copyright (c) testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2016 testtools developers. See LICENSE for details.
 
 """Matchers, a way to express complex assertions outside the testcase.
 
