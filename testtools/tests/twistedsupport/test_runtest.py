@@ -469,8 +469,8 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
         runner = self.make_runner(test, timeout * 5)
         result = self.make_result()
         reactor.callLater(timeout, os.kill, os.getpid(), SIGINT)
-        self.assertThat(lambda:runner.run(result),
-            Raises(MatchesException(KeyboardInterrupt)))
+        runner.run(result)
+        self.assertThat(result.shouldStop, Equals(True))
 
     @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
     def test_fast_keyboard_interrupt_stops_test_run(self):
@@ -488,8 +488,8 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
         runner = self.make_runner(test, timeout * 5)
         result = self.make_result()
         reactor.callWhenRunning(os.kill, os.getpid(), SIGINT)
-        self.assertThat(lambda:runner.run(result),
-            Raises(MatchesException(KeyboardInterrupt)))
+        runner.run(result)
+        self.assertThat(result.shouldStop, Equals(True))
 
     def test_timeout_causes_test_error(self):
         # If a test times out, it reports itself as having failed with a
