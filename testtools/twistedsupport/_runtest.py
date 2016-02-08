@@ -395,7 +395,9 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         except NoResultError:
             # We didn't get a result at all!  This could be for any number of
             # reasons, but most likely someone hit Ctrl-C during the test.
-            raise KeyboardInterrupt
+            self._got_user_exception(sys.exc_info())
+            self.result.stop()
+            return False, []
         except TimeoutError:
             # The function took too long to run.
             self._log_user_exception(TimeoutError(self.case, self._timeout))
