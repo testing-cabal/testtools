@@ -14,6 +14,8 @@ Improvements
 
 * New ``Always`` and ``Never`` matchers. (Tristan Seligmann, #947026)
 
+* Fixed example in ``failed`` docstring. (Jonathan Lange, Github #208)
+
 2.0.0
 ~~~~~
 
