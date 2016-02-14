@@ -16,6 +16,12 @@ Improvements
 
 * Fixed example in ``failed`` docstring. (Jonathan Lange, Github #208)
 
+* Rather than explicitly raising a ``KeyboardInterrupt`` if we get no result
+  from a ``Deferred``, we tell the test result to stop running tests and
+  report the lack of result as a test error. This ought to make weird
+  concurrency interaction bugs easier to understand. (Jonathan Lange)
+
+
 2.0.0
 ~~~~~
 
