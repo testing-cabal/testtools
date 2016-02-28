@@ -132,6 +132,10 @@ Changes
 * Add ``readthedocs-requirements.txt`` so readthedocs.org can build the
   Twisted API documentation. (Jonathan Lange)
 
+* Introduce the unique_text_generator generator function. Similar to the
+  getUniqueString() method, except it creates unique unicode text strings.
+  (Brant Knudson)
+
 1.8.1
 ~~~~~
 

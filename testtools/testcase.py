@@ -62,6 +62,7 @@ from testtools.testresult import (
     )
 
 wraps = try_import('functools.wraps')
+import six
 
 
 class TestSkipped(Exception):
