@@ -32,9 +32,7 @@ from extras import safe_hasattr, try_import, try_imports
 parse_mime_type = try_import('mimeparse.parse_mime_type')
 Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
-from pyrsistent import PClass, field, pmap_field, pset_field, pmap, pset, thaw
-
-from testtools.compat import str_is_unicode, text_or_bytes, _u, _b
+from testtools.compat import str_is_unicode, _u, _b
 from testtools.content import (
     Content,
     text_content,
@@ -634,40 +632,47 @@ class StreamTagger(CopyStreamResult):
         super(StreamTagger, self).status(*args, **kwargs)
 
 
-class _TestRecord(PClass):
+class _TestRecord(object):
     """Representation of a test."""
 
-    """The test id."""
-    id = field(text_or_bytes, mandatory=True)
+    def __init__(self, id, tags, details, status, timestamps):
+        # The test id.
+        self.id = id
 
-    """Tags for the test."""
-    tags = pset_field(text_or_bytes, optional=False)
+        # Tags for the test.
+        self.tags = tags
 
-    """File attachments."""
-    # XXX: Documentation says these are unicode, but tests pass in str.
-    details = pmap_field(text_or_bytes, Content, optional=False)
+        # File attachments.
+        self.details = details
 
-    """One of the StreamResult status codes."""
-    status = field(
-        text_or_bytes, mandatory=True,
-        invariant=lambda x: (x in STATES, 'Invalid state'))
+        # One of the StreamResult status codes.
+        self.status = status
 
-    """Pair of timestamps (x, y).
-
-    x is the first timestamp we received for this test, y is the one that
-    triggered the notification. y can be None if the test hanged.
-    """
-    timestamps = field(tuple, mandatory=True)
+        # Pair of timestamps (x, y).
+        # x is the first timestamp we received for this test, y is the one that
+        # triggered the notification. y can be None if the test hanged.
+        self.timestamps = timestamps
 
     @classmethod
     def create(cls, test_id, timestamp):
         return cls(
             id=test_id,
-            tags=pset(),
-            details=pmap(),
+            tags=set(),
+            details={},
             status='unknown',
             timestamps=(timestamp, None),
         )
+
+    def set(self, *args, **kwargs):
+        if args:
+            setattr(self, args[0], args[1])
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+        return self
+
+    def transform(self, data, value):
+        getattr(self, data[0])[data[1]] = value
+        return self
 
     def to_dict(self):
         """Convert record into a "test dict".
@@ -688,8 +693,8 @@ class _TestRecord(PClass):
         """
         return {
             'id': self.id,
-            'tags': thaw(self.tags),
-            'details': thaw(self.details),
+            'tags': self.tags,
+            'details': self.details,
             'status': self.status,
             'timestamps': list(self.timestamps),
         }
@@ -733,8 +738,8 @@ class _TestRecord(PClass):
         return PlaceHolder(
             self.id,
             outcome=outcome,
-            details=thaw(self.details),
-            tags=thaw(self.tags),
+            details=self.details,
+            tags=self.tags,
             timestamps=self.timestamps,
         )
 
@@ -760,7 +765,7 @@ def _make_content_type(mime_type=None):
     return ContentType(primary, sub, parameters)
 
 
-_status_map = pmap({
+_status_map = {
     'inprogress': 'addFailure',
     'unknown': 'addFailure',
     'success': 'addSuccess',
@@ -768,7 +773,7 @@ _status_map = pmap({
     'fail': 'addFailure',
     'xfail': 'addExpectedFailure',
     'uxsuccess': 'addUnexpectedSuccess',
-})
+}
 
 
 class _StreamToTestRecord(StreamResult):
