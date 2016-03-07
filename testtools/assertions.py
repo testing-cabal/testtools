@@ -14,7 +14,6 @@ def assert_that(matchee, matcher, message='', verbose=False):
     :param matchee: An object to match with ``matcher``.
     :param IMatcher matcher: An object meeting the testtools.Matcher protocol.
     :raises MismatchError: When ``matcher`` does not match ``matchee``.
-
     """
     matcher = Annotate.if_message(message, matcher)
     mismatch = matcher.match(matchee)

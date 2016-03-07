@@ -122,14 +122,12 @@ class Mismatch(IMismatch):
         self._details = details
 
     def describe(self):
-        """Describe the mismatch."""
         try:
             return self._description
         except AttributeError:
             raise NotImplementedError(self.describe)
 
     def get_details(self):
-        """Get extra details about the mismatch."""
         return getattr(self, '_details', {})
 
     def __repr__(self):
