@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2016 testtools developers. See LICENSE for details.
 
 """Matchers, a way to express complex assertions outside the testcase.
 
@@ -11,6 +11,7 @@ $ python -c 'import testtools.matchers; print testtools.matchers.__all__'
 """
 
 __all__ = [
+    'IMatcher',
     'Matcher',
     'Mismatch',
     'MismatchDecorator',
@@ -25,25 +26,33 @@ from testtools.compat import (
     )
 
 
-class Matcher(object):
+class IMatcher(object):
     """A pattern matcher.
 
-    A Matcher must implement match and __str__ to be used by
-    testtools.TestCase.assertThat. Matcher.match(thing) returns None when
-    thing is completely matched, and a Mismatch object otherwise.
+    This describes the IMatcher protocol that any matcher must implement.
+
+    A Matcher must implement ``match`` and ``__str__`` to be used by
+    :py:method:`testtools.TestCase.assertThat`.
 
     Matchers can be useful outside of test cases, as they are simply a
-    pattern matching language expressed as objects.
+    pattern-matching language expressed as objects.
 
-    testtools.matchers is inspired by hamcrest, but is pythonic rather than
-    a Java transcription.
+    :py:module:`testtools.matchers` is inspired by hamcrest, but is Pythonic
+    rather than a Java transcription.
     """
 
     def match(self, something):
-        """Return None if this matcher matches something, a Mismatch otherwise.
+        """Match against ``something``.
+
+        :param something: The thing to be matched against. Type will vary based
+            on matcher implementation.
+        :return: ``None`` if ``something`` matched, an :py:class:`IMismatch`
+            if it did not.
+        :rtype: Optional[IMismatch]
         """
         raise NotImplementedError(self.match)
 
+    # XXX: We have a bug saying that this ought to be __repr__. jml agrees.
     def __str__(self):
         """Get a sensible human representation of the matcher.
 
@@ -53,7 +62,49 @@ class Matcher(object):
         raise NotImplementedError(self.__str__)
 
 
-class Mismatch(object):
+Matcher = IMatcher
+
+
+class IMismatch(object):
+    """A mismatch detected by an IMatcher.
+
+    Describes the protocol that mismatches are required to implement.
+    """
+
+    # XXX: jml would like to extend this interface to include the thing that
+    # failed to match.
+
+    def describe(self):
+        """Describe the mismatch.
+
+        :return: Either a human-readable string or something that can be cast
+            to a string. On Python 2, this should be either ``unicode`` or a
+            plain ASCII ``str``, and care should be taken to escape control
+            characters.
+        """
+        raise NotImplementedError(self.describe)
+
+    def get_details(self):
+        """Get extra details about the mismatch.
+
+        This allows the mismatch to provide extra information beyond the basic
+        description, including large text or binary files, or debugging internals
+        without having to force it to fit in the output of :py:method:`describe`.
+
+        The testtools assertion :py:method:`~testtools.TestCase.assertThat`
+        will query :py:method:`get_details` and attach all its values to the
+        test, permitting them to be reported in whatever manner the test
+        environment chooses.
+
+        :return: a dict mapping names to Content objects. name is a string to
+            name the detail, and the Content object is the detail to add
+            to the result. For more information see the API to which items from
+            this dict are passed testtools.TestCase.addDetail.
+        """
+        raise NotImplementedError(self.get_details)
+
+
+class Mismatch(IMismatch):
     """An object describing a mismatch detected by a Matcher."""
 
     def __init__(self, description=None, details=None):
@@ -71,33 +122,12 @@ class Mismatch(object):
         self._details = details
 
     def describe(self):
-        """Describe the mismatch.
-
-        This should be either a human-readable string or castable to a string.
-        In particular, is should either be plain ascii or unicode on Python 2,
-        and care should be taken to escape control characters.
-        """
         try:
             return self._description
         except AttributeError:
             raise NotImplementedError(self.describe)
 
     def get_details(self):
-        """Get extra details about the mismatch.
-
-        This allows the mismatch to provide extra information beyond the basic
-        description, including large text or binary files, or debugging internals
-        without having to force it to fit in the output of 'describe'.
-
-        The testtools assertion assertThat will query get_details and attach
-        all its values to the test, permitting them to be reported in whatever
-        manner the test environment chooses.
-
-        :return: a dict mapping names to Content objects. name is a string to
-            name the detail, and the Content object is the detail to add
-            to the result. For more information see the API to which items from
-            this dict are passed testtools.TestCase.addDetail.
-        """
         return getattr(self, '_details', {})
 
     def __repr__(self):
@@ -143,7 +173,7 @@ class MismatchError(AssertionError):
             return self.__unicode__().encode("ascii", "backslashreplace")
 
 
-class MismatchDecorator(object):
+class MismatchDecorator(IMismatch):
     """Decorate a ``Mismatch``.
 
     Forwards all messages to the original mismatch object.  Probably the best

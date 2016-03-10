@@ -30,6 +30,9 @@ Improvements
   This had the side effect of not clearing up fixtures nor gathering details
   properly.  This is now fixed. (Julian Edwards, #1469759)
 
+* Export explicit ``IMatcher`` and ``IMismatch`` interfaces, and update API
+  documentation to use those terms.  (Jonathan Lange)
+
 2.0.0
 ~~~~~
 
