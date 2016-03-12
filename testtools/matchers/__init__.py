@@ -33,6 +33,7 @@ __all__ = [
     'HasLength',
     'HasPermissions',
     'Is',
+    'IsDeprecated',
     'IsInstance',
     'KeysEqual',
     'LessThan',
@@ -55,6 +56,8 @@ __all__ = [
     'SamePath',
     'StartsWith',
     'TarballContains',
+    'Warnings',
+    'WarningMessage'
     ]
 
 from ._basic import (
@@ -114,6 +117,11 @@ from ._higherorder import (
     MatchesPredicate,
     MatchesPredicateWithParams,
     Not,
+    )
+from ._warnings import (
+    IsDeprecated,
+    WarningMessage,
+    Warnings,
     )
 
 # XXX: These are not explicitly included in __all__.  It's unclear how much of
