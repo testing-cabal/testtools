@@ -392,6 +392,25 @@ This is actually a convenience function that combines two other matchers:
 Raises_ and MatchesException_.
 
 
+The is_deprecated helper
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Matches if a callable produces a warning whose message matches the specified
+matcher. For example::
+
+  def old_func(x):
+      warnings.warn('old_func is deprecated use new_func instead')
+      return new_func(x)
+
+  def test_warning_example(self):
+      self.assertThat(
+        lambda: old_func(42),
+        is_deprecated(Contains('old_func is deprecated')))
+
+This is just a convenience function that combines Warnings_ and
+`warning_message`_.
+
+
 DocTestMatches
 ~~~~~~~~~~~~~~
 
@@ -467,6 +486,13 @@ example::
       self.assertThat(exc_info, MatchesException(RuntimeError('bar')))
 
 Most of the time, you will want to uses `The raises helper`_ instead.
+
+
+warning_message
+~~~~~~~~~~~~~~~
+
+Match against various attributes–category, message and filename to name a few—of
+a `warning.WarningMessage`, which can be captured by `Warnings`_.
 
 
 NotEquals
@@ -909,6 +935,28 @@ Although note that this could also be written as::
       self.assertThat(lambda: 1/0, raises(ZeroDivisionError))
 
 See also MatchesException_ and `the raises helper`_
+
+
+Warnings
+~~~~~~~~
+
+Captures all warnings produced by a callable as a list of
+`warning.WarningMessage` and matches against it. For example, if you want to
+assert that a callable emits exactly one warning::
+
+  def soon_to_be_old_func():
+      warnings.warn('soon_to_be_old_func will be deprecated next version',
+                    PendingDeprecationWarning, 2)
+
+  def test_warnings_example(self):
+      self.assertThat(
+          soon_to_be_old_func,
+          Warnings(HasLength(1)))
+
+Deprecating something and making an assertion about the deprecation message is a
+very common test with which `the is_deprecated helper`_ can assist. For making
+more specific matches against warnings `warning_message`_ can construct a
+matcher that can be combined with `Warnings`_.
 
 
 Writing your own matchers
