@@ -24,11 +24,16 @@ def warning_message(category_type, message=None, filename=None, lineno=None,
     """
     Create a matcher that will match `warnings.WarningMessage`\s.
 
-    :param category_type: A warning type.
-    :param message_matcher: Match the warning message against this.
-    :param filename_matcher: Match the warning filename against this.
-    :param lineno_matcher: Match the warning line number against this.
-    :param line_matcher: Match the warning line of code against this.
+    :param type category_type: A warning type, for example
+    `DeprecationWarning`.
+    :param message_matcher: A matcher object that will be evaluated against
+    warning's message.
+    :param filename_matcher: A matcher object that will be evaluated against
+    the warning's filename.
+    :param lineno_matcher: A matcher object that will be evaluated against the
+    warning's line number.
+    :param line_matcher: A matcher object that will be evaluated against the
+    warning's line of source code.
     """
     category_matcher = Is(category_type)
     message_matcher = message or Always()
