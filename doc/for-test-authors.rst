@@ -491,7 +491,7 @@ Most of the time, you will want to uses `The raises helper`_ instead.
 warning_message
 ~~~~~~~~~~~~~~~
 
-Match against various attributes–category, message and filename to name a few—of
+Match against various attributes (category, message and filename to name a few) of
 a `warning.WarningMessage`, which can be captured by `Warnings`_.
 
 
