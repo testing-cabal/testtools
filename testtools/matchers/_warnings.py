@@ -24,6 +24,16 @@ def warning_message(category_type, message=None, filename=None, lineno=None,
     """
     Create a matcher that will match `warnings.WarningMessage`\s.
 
+    For example, to match captured `DeprecationWarning`\s with a message about
+    some ``foo`` being replaced with ``bar``:
+
+    .. code-block:: python
+
+       warning_message(DeprecationWarning,
+                       message=MatchesAll(
+                           Contains('foo is deprecated'),
+                           Contains('use bar instead')))
+
     :param type category_type: A warning type, for example
     `DeprecationWarning`.
     :param message_matcher: A matcher object that will be evaluated against
