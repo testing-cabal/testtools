@@ -60,7 +60,7 @@ def warning_message(category_type, message=None, filename=None, lineno=None,
 
 class Warnings(object):
     """
-    Match if the matchee produces deprecation warnings.
+    Match if the matchee produces warnings.
     """
     def __init__(self, warnings_matcher=None):
         """
