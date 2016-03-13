@@ -30,6 +30,9 @@ Improvements
   This had the side effect of not clearing up fixtures nor gathering details
   properly.  This is now fixed. (Julian Edwards, #1469759)
 
+* New ``Warnings`` matcher, and ``warning_message`` and ``is_deprecated``
+  functions for matching emitted warnings. (Jonathan Jacobs, Github #223)
+
 2.0.0
 ~~~~~
 

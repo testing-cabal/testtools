@@ -92,3 +92,4 @@ Thanks
  * Julia Varlamova
  * ClusterHQ Ltd
  * Tristan Seligmann
+ * Jonathan Jacobs
