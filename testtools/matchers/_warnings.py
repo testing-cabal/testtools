@@ -86,13 +86,10 @@ class Warnings(object):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
             matchee()
-            if not w:
-                mismatch = Mismatch('Expected at least one warning, got none')
-            elif self.warnings_matcher:
-                mismatch = self.warnings_matcher.match(w)
-            else:
-                mismatch = None
-            return mismatch
+            if self.warnings_matcher is not None:
+                return self.warnings_matcher.match(w)
+            elif not w:
+                return Mismatch('Expected at least one warning, got none')
 
     def __str__(self):
         return 'Warnings({!s})'.format(self.warnings_matcher)
