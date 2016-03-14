@@ -10,7 +10,7 @@ from testtools.matchers import (
     MatchesListwise,
     Contains,
     )
-from testtools.matchers._warnings import Warnings, is_deprecated, warning_message
+from testtools.matchers._warnings import Warnings, IsDeprecated, WarningMessage
 from testtools.tests.helpers import FullStackRunTest
 from testtools.tests.matchers.helpers import TestMatchersInterface
 
@@ -30,11 +30,11 @@ def make_warning_message(message, category, filename=None, lineno=None, line=Non
 
 class TestWarningMessageCategoryTypeInterface(TestCase, TestMatchersInterface):
     """
-    Tests for `testtools.matchers._warnings.warning_message`.
+    Tests for `testtools.matchers._warnings.WarningMessage`.
 
     In particular matching the ``category_type``.
     """
-    matches_matcher = warning_message(category_type=DeprecationWarning)
+    matches_matcher = WarningMessage(category_type=DeprecationWarning)
     warning_foo = make_warning_message('foo', DeprecationWarning)
     warning_bar = make_warning_message('bar', SyntaxWarning)
     warning_base = make_warning_message('base', Warning)
@@ -47,12 +47,12 @@ class TestWarningMessageCategoryTypeInterface(TestCase, TestMatchersInterface):
 
 class TestWarningMessageMessageInterface(TestCase, TestMatchersInterface):
     """
-    Tests for `testtools.matchers._warnings.warning_message`.
+    Tests for `testtools.matchers._warnings.WarningMessage`.
 
     In particular matching the ``message``.
     """
-    matches_matcher = warning_message(category_type=DeprecationWarning,
-                                      message=Equals('foo'))
+    matches_matcher = WarningMessage(category_type=DeprecationWarning,
+                                     message=Equals('foo'))
     warning_foo = make_warning_message('foo', DeprecationWarning)
     warning_bar = make_warning_message('bar', DeprecationWarning)
     matches_matches = [warning_foo]
@@ -64,12 +64,12 @@ class TestWarningMessageMessageInterface(TestCase, TestMatchersInterface):
 
 class TestWarningMessageFilenameInterface(TestCase, TestMatchersInterface):
     """
-    Tests for `testtools.matchers._warnings.warning_message`.
+    Tests for `testtools.matchers._warnings.WarningMessage`.
 
     In particular matching the ``filename``.
     """
-    matches_matcher = warning_message(category_type=DeprecationWarning,
-                                      filename=Equals('a'))
+    matches_matcher = WarningMessage(category_type=DeprecationWarning,
+                                     filename=Equals('a'))
     warning_foo = make_warning_message('foo', DeprecationWarning, filename='a')
     warning_bar = make_warning_message('bar', DeprecationWarning, filename='b')
     matches_matches = [warning_foo]
@@ -81,12 +81,12 @@ class TestWarningMessageFilenameInterface(TestCase, TestMatchersInterface):
 
 class TestWarningMessageLineNumberInterface(TestCase, TestMatchersInterface):
     """
-    Tests for `testtools.matchers._warnings.warning_message`.
+    Tests for `testtools.matchers._warnings.WarningMessage`.
 
     In particular matching the ``lineno``.
     """
-    matches_matcher = warning_message(category_type=DeprecationWarning,
-                                      lineno=Equals(42))
+    matches_matcher = WarningMessage(category_type=DeprecationWarning,
+                                     lineno=Equals(42))
     warning_foo = make_warning_message('foo', DeprecationWarning, lineno=42)
     warning_bar = make_warning_message('bar', DeprecationWarning, lineno=21)
     matches_matches = [warning_foo]
@@ -98,12 +98,12 @@ class TestWarningMessageLineNumberInterface(TestCase, TestMatchersInterface):
 
 class TestWarningMessageLineInterface(TestCase, TestMatchersInterface):
     """
-    Tests for `testtools.matchers._warnings.warning_message`.
+    Tests for `testtools.matchers._warnings.WarningMessage`.
 
     In particular matching the ``line``.
     """
-    matches_matcher = warning_message(category_type=DeprecationWarning,
-                                      line=Equals('x'))
+    matches_matcher = WarningMessage(category_type=DeprecationWarning,
+                                     line=Equals('x'))
     warning_foo = make_warning_message('foo', DeprecationWarning, line='x')
     warning_bar = make_warning_message('bar', DeprecationWarning, line='y')
     matches_matches = [warning_foo]
@@ -156,26 +156,26 @@ class TestWarningsMatcherInterface(TestCase, TestMatchersInterface):
 
 class TestWarningMessage(TestCase):
     """
-    Tests for `testtools.matchers._warnings.warning_message`.
+    Tests for `testtools.matchers._warnings.WarningMessage`.
     """
     run_tests_with = FullStackRunTest
 
     def test_category(self):
         def old_func():
             warnings.warn('old_func is deprecated', DeprecationWarning, 2)
-        self.assertThat(old_func, is_deprecated(Contains('old_func')))
+        self.assertThat(old_func, IsDeprecated(Contains('old_func')))
 
 
 class TestIsDeprecated(TestCase):
     """
-    Tests for `testtools.matchers._warnings.is_deprecated`.
+    Tests for `testtools.matchers._warnings.IsDeprecated`.
     """
     run_tests_with = FullStackRunTest
 
     def test_warning(self):
         def old_func():
             warnings.warn('old_func is deprecated', DeprecationWarning, 2)
-        self.assertThat(old_func, is_deprecated(Contains('old_func')))
+        self.assertThat(old_func, IsDeprecated(Contains('old_func')))
 
 
 def test_suite():

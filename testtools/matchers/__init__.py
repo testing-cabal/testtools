@@ -33,7 +33,7 @@ __all__ = [
     'HasLength',
     'HasPermissions',
     'Is',
-    'is_deprecated',
+    'IsDeprecated',
     'IsInstance',
     'KeysEqual',
     'LessThan',
@@ -57,7 +57,7 @@ __all__ = [
     'StartsWith',
     'TarballContains',
     'Warnings',
-    'warning_message'
+    'WarningMessage'
     ]
 
 from ._basic import (
@@ -119,8 +119,8 @@ from ._higherorder import (
     Not,
     )
 from ._warnings import (
-    is_deprecated,
-    warning_message,
+    IsDeprecated,
+    WarningMessage,
     Warnings,
     )
 

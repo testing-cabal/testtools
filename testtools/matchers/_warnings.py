@@ -2,8 +2,8 @@
 
 __all__ = [
     'Warnings',
-    'warning_message',
-    'is_deprecated']
+    'WarningMessage',
+    'IsDeprecated']
 
 import warnings
 
@@ -19,8 +19,8 @@ from ._higherorder import (
 from ._impl import Mismatch
 
 
-def warning_message(category_type, message=None, filename=None, lineno=None,
-                    line=None):
+def WarningMessage(category_type, message=None, filename=None, lineno=None,
+                   line=None):
     """
     Create a matcher that will match `warnings.WarningMessage`\s.
 
@@ -29,10 +29,10 @@ def warning_message(category_type, message=None, filename=None, lineno=None,
 
     .. code-block:: python
 
-       warning_message(DeprecationWarning,
-                       message=MatchesAll(
-                           Contains('foo is deprecated'),
-                           Contains('use bar instead')))
+       WarningMessage(DeprecationWarning,
+                      message=MatchesAll(
+                          Contains('foo is deprecated'),
+                          Contains('use bar instead')))
 
     :param type category_type: A warning type, for example
     `DeprecationWarning`.
@@ -98,7 +98,7 @@ class Warnings(object):
         return 'Warnings({!s})'.format(self.warnings_matcher)
 
 
-def is_deprecated(message):
+def IsDeprecated(message):
     """
     Make a matcher that checks that a callable produces exactly one
     `DeprecationWarning`.
@@ -107,6 +107,6 @@ def is_deprecated(message):
     """
     return Warnings(
         MatchesListwise([
-            warning_message(
+            WarningMessage(
                 category_type=DeprecationWarning,
                 message=message)]))

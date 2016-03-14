@@ -392,7 +392,7 @@ This is actually a convenience function that combines two other matchers:
 Raises_ and MatchesException_.
 
 
-The is_deprecated helper
+The IsDeprecated helper
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Matches if a callable produces a warning whose message matches the specified
@@ -405,10 +405,10 @@ matcher. For example::
   def test_warning_example(self):
       self.assertThat(
         lambda: old_func(42),
-        is_deprecated(Contains('old_func is deprecated')))
+        IsDeprecated(Contains('old_func is deprecated')))
 
 This is just a convenience function that combines Warnings_ and
-`warning_message`_.
+`WarningMessage`_.
 
 
 DocTestMatches
@@ -488,7 +488,7 @@ example::
 Most of the time, you will want to uses `The raises helper`_ instead.
 
 
-warning_message
+WarningMessage
 ~~~~~~~~~~~~~~~
 
 Match against various attributes (category, message and filename to name a few) of
@@ -954,8 +954,8 @@ assert that a callable emits exactly one warning::
           Warnings(HasLength(1)))
 
 Deprecating something and making an assertion about the deprecation message is a
-very common test with which `the is_deprecated helper`_ can assist. For making
-more specific matches against warnings `warning_message`_ can construct a
+very common test with which `the IsDeprecated helper`_ can assist. For making
+more specific matches against warnings `WarningMessage`_ can construct a
 matcher that can be combined with `Warnings`_.
 
 
