@@ -385,10 +385,15 @@ class TestCase(unittest.TestCase):
         Handlers are called before the outcome (such as addFailure) that
         the exception has caused.
 
+        Each handler is passed an `exc_info` tuple that contains the raised
+        Exception, exception parameters and the stack trace.
+
         Handlers are called in first-added, first-called order, and if they
         raise an exception, that will propogate out of the test running
         machinery, halting test processing. As a result, do not call code that
         may unreasonably fail.
+
+        :seealso onException:
         """
         self.__exception_handlers.append(handler)
 
