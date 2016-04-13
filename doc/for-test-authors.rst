@@ -1285,7 +1285,6 @@ from testtools, you do not have to worry about this.
 
 In older versions of testtools, ``skipTest`` was known as ``skip``. Since
 Python 2.7 added ``skipTest`` support, the ``skip`` name is now deprecated.
-No warning is emitted yet – some time in the future we may do so.
 
 
 addOnException
