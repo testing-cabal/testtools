@@ -74,6 +74,9 @@ class TestDirExists(TestCase, PathHelpers):
         self.assertThat(
             "%s is not a directory." % filename, Equals(mismatch.describe()))
 
+    def test__str__(self):
+        self.assertEqual("DirExists()", str(DirExists()))
+
 
 class TestFileExists(TestCase, PathHelpers):
 

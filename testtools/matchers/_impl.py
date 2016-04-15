@@ -168,6 +168,19 @@ class MismatchDecorator(object):
         return self.original.get_details()
 
 
+class OverrideDescription(object):
+
+    def __init__(self, description, wrapped):
+        self._description = description
+        self._wrapped = wrapped
+
+    def __getattr__(self, attr):
+        return getattr(self._wrapped, attr)
+
+    def __str__(self):
+        return self._description
+
+
 # Signal that this is part of the testing framework, and that code from this
 # should not normally appear in tracebacks.
 __unittest = True
