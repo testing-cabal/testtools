@@ -173,8 +173,8 @@ class CaptureTwistedLogs(Fixture):
         logs = StringIO()
         full_observer = log.FileLogObserver(logs)
         self.useFixture(_TwistedLogObservers([full_observer.emit]))
-        self.addDetail(self.LOG_DETAIL_NAME,
-                       Content(UTF8_TEXT, lambda: [logs.getvalue()]))
+        self.addDetail(self.LOG_DETAIL_NAME, Content(
+            UTF8_TEXT, lambda: [logs.getvalue().encode("utf-8")]))
 
 
 def run_with_log_observers(observers, function, *args, **kwargs):
