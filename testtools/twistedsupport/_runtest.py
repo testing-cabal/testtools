@@ -303,7 +303,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
                 )
         return AsynchronousDeferredRunTestFactory()
 
-    @defer.deferredGenerator
+    @defer.inlineCallbacks
     def _run_cleanups(self):
         """Run the cleanups on the test case.
 
@@ -311,18 +311,17 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         asynchronous Deferreds.  As such, we take the responsibility for
         running the cleanups, rather than letting TestCase do it.
         """
+        last_exception = None
         while self.case._cleanups:
             f, args, kwargs = self.case._cleanups.pop()
             d = defer.maybeDeferred(f, *args, **kwargs)
-            thing = defer.waitForDeferred(d)
-            yield thing
             try:
-                thing.getResult()
+                yield d
             except Exception:
                 exc_info = sys.exc_info()
                 self.case._report_traceback(exc_info)
                 last_exception = exc_info[1]
-        yield last_exception
+        defer.returnValue(last_exception)
 
     def _make_spinner(self):
         """Make the `Spinner` to be used to run the tests."""
