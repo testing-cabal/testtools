@@ -33,7 +33,9 @@ def PathExists():
 
       assertThat('/some/path', PathExists())
     """
-    return MatchesPredicate(os.path.exists, "%s does not exist.")
+    return OverrideDescription(
+        'PathExists()',
+        MatchesPredicate(os.path.exists, "%s does not exist."))
 
 
 def DirExists():
@@ -48,10 +50,12 @@ def DirExists():
 
 def FileExists():
     """Matches if the given path exists and is a file."""
-    return MatchesAll(
-        PathExists(),
-        MatchesPredicate(os.path.isfile, "%s is not a file."),
-        first_only=True)
+    return OverrideDescription(
+        "FileExists()",
+        MatchesAll(
+            PathExists(),
+            MatchesPredicate(os.path.isfile, "%s is not a file."),
+            first_only=True))
 
 
 class DirContains(Matcher):
