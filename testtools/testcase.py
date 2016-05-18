@@ -27,7 +27,6 @@ from extras import (
     try_import,
     try_imports,
     )
-fixtures = try_import('fixtures')
 # To let setup.py work, make this a conditional import.
 unittest = try_imports(['unittest2', 'unittest'])
 import six
@@ -182,6 +181,12 @@ def gather_details(source_dict, target_dict):
             new_name = '%s-%d' % (name, advance_iterator(disambiguator))
         name = new_name
         target_dict[name] = _copy_content(content_object)
+
+
+# Circular import: fixtures imports gather_details from here, we import
+# fixtures, leading to gather_details not being available and fixtures being
+# unable to import it.
+fixtures = try_import('fixtures')
 
 
 def _mods(i, mod):
