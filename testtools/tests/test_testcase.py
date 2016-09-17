@@ -1967,6 +1967,39 @@ class TestDecorateTestCaseResult(TestCase):
         self.assertRaises(AttributeError, getattr, orig, 'thing')
 
 
+class TestTCaseExpectThat(TestCase):
+
+    def setUp(self):
+        super(TestTCaseExpectThat, self).setUp()
+        self.passed = None
+        self.message = 'default'
+
+    def expectThat(self, matcher, matchee, message='', verbose=False):
+        passed, message = super(TestTCaseExpectThat, self).expectThat(matcher, matchee, message, verbose)
+        self.passed = passed
+        self.message = message
+        return passed, message
+
+    def test_expectthat_success(self):
+        s, m = self.expectThat(True, Equals(True))
+        assert s
+        assert s == self.passed
+        assert m is self.message is None
+
+    def test_expectthat_failure(self):
+        s, m = self.expectThat(False, Equals(True))
+        # set to False, since we want this test to "pass" via expectThat
+        # we only care about the assertion statements for this feature.
+        self.force_failure = False
+        # we also need the details stack to be empty
+        setattr(self, '__details', None)
+        assert self.passed is not None
+        assert not self.passed
+        assert s == self.passed
+        assert self.message == 'False != True'
+        assert m == self.message
+
+
 def test_suite():
     from unittest import TestLoader
     return TestLoader().loadTestsFromName(__name__)

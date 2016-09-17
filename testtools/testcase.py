@@ -529,7 +529,8 @@ class TestCase(unittest.TestCase):
         :param matchee: An object to match with matcher.
         :param matcher: An object meeting the testtools.Matcher protocol.
         :param message: If specified, show this message with any failed match.
-
+        :return: A tuple containing whether the condition succeed or failed,
+            and if it failed the mismatch details explaining why.
         """
         mismatch_error = self._matchHelper(matchee, matcher, message, verbose)
 
@@ -541,6 +542,9 @@ class TestCase(unittest.TestCase):
                 )
             )
             self.force_failure = True
+            return False, str(mismatch_error)
+        else:
+            return True, None
 
     def _matchHelper(self, matchee, matcher, message, verbose):
         matcher = Annotate.if_message(message, matcher)
