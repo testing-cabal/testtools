@@ -7,21 +7,9 @@ python:
   - "3.5"
   - "pypy"
 
-# Twisted tests currently only work on Python 2.
-matrix:
-  include:
-    - python: "2.7"
-      env: TWISTED_REQ="Twisted==13.0.0"
-    - python: "2.7"
-      env: TWISTED_REQ="Twisted"
-    - python: "pypy"
-      env: TWISTED_REQ="Twisted==13.0.0"
-    - python: "pypy"
-      env: TWISTED_REQ="Twisted"
-
 install:
   - pip install -U pip wheel setuptools
-  - pip install sphinx $TWISTED_REQ
+  - pip install sphinx Twisted
   - pip install .[test]
 
 script:
