@@ -2,6 +2,10 @@
 
 """Doubles of test result objects, useful for testing unittest code."""
 
+from collections import namedtuple
+
+from testtools.tags import TagContext
+
 __all__ = [
     'Python26TestResult',
     'Python27TestResult',
@@ -9,9 +13,6 @@ __all__ = [
     'TwistedTestResult',
     'StreamResult',
     ]
-
-
-from testtools.tags import TagContext
 
 
 class LoggingBase(object):
@@ -219,6 +220,14 @@ class StreamResult(LoggingBase):
                runnable=True, file_name=None, file_bytes=None, eof=False,
                mime_type=None, route_code=None, timestamp=None):
         self._events.append(
-            ('status', test_id, test_status, test_tags,
-             runnable, file_name, file_bytes, eof, mime_type, route_code,
-             timestamp))
+            _StatusEvent(
+                'status', test_id, test_status, test_tags, runnable,
+                file_name, file_bytes, eof, mime_type, route_code,
+                timestamp))
+
+
+# Convenience for easier access to status fields
+_StatusEvent = namedtuple(
+    "_Event", [
+        "name", "test_id", "test_status", "test_tags", "runnable", "file_name",
+        "file_bytes", "eof", "mime_type", "route_code", "timestamp"])

@@ -6,6 +6,12 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+Improvements
+------------
+
+* New ``ResourcedToStreamDecorator`` for tracking lifecycle events of
+  test resources, and possibly integrate with subunit.
+
 2.2.0
 ~~~~~
 

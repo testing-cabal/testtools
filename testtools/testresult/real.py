@@ -6,6 +6,7 @@ __all__ = [
     'ExtendedToOriginalDecorator',
     'ExtendedToStreamDecorator',
     'MultiTestResult',
+    'ResourcedToStreamDecorator',
     'StreamFailFast',
     'StreamResult',
     'StreamSummary',
@@ -1686,6 +1687,58 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
         if not self._started:
             self.startTestRun()
         return super(ExtendedToStreamDecorator, self).wasSuccessful()
+
+
+class ResourcedToStreamDecorator(ExtendedToStreamDecorator):
+    """Report ``testresources``-related activity to StreamResult objects.
+
+    Implement the resource lifecycle TestResult protocol extension supported
+    by the ``testresources.TestResourceManager`` class. At each stage of a
+    resource's lifecycle, a stream event with relevant details will be
+    emitted.
+
+    Each stream event will have its test_id field set to the resource manager's
+    identifier (see ``testresources.TestResourceManager.id()``) plus the method
+    being executed (either 'make' or 'clean').
+
+    The test_status will be either 'inprogress' or 'success'.
+
+    The runnable flag will be set to False.
+    """
+
+    def startMakeResource(self, resource):
+        self._convertResourceLifecycle(resource, 'make', 'start')
+
+    def stopMakeResource(self, resource):
+        self._convertResourceLifecycle(resource, 'make', 'stop')
+
+    def startCleanResource(self, resource):
+        self._convertResourceLifecycle(resource, 'clean', 'start')
+
+    def stopCleanResource(self, resource):
+        self._convertResourceLifecycle(resource, 'clean', 'stop')
+
+    def _convertResourceLifecycle(self, resource, method, phase):
+        """Convert a resource lifecycle report to a stream event."""
+
+        # If the resource implements the TestResourceManager.id() API, let's
+        # use it, otherwise fallback to the class name.
+        if safe_hasattr(resource, "id"):
+            resource_id = resource.id()
+        else:
+            resource_id = "%s.%s" % (
+                resource.__class__.__module__, resource.__class__.__name__)
+
+        test_id = '%s.%s' % (resource_id, method)
+
+        if phase == 'start':
+            test_status = 'inprogress'
+        else:
+            test_status = 'success'
+
+        self.status(
+            test_id=test_id, test_status=test_status, runnable=False,
+            timestamp=self._now())
 
 
 class StreamToExtendedDecorator(StreamResult):
