@@ -14,4 +14,6 @@ install:
 
 script:
   - python -m testtools.run testtools.tests.test_suite
+  # Sphinx only supports 2.7 or >= 3.4
+  - if [ ${TRAVIS_PYTHON_VERSION} = "3.3" ]; then travis_terminate 0; fi
   - make clean-sphinx docs
