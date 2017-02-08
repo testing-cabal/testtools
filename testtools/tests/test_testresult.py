@@ -825,6 +825,18 @@ class TestStreamToDict(TestCase):
         self.assertEqual(["A", "B"], tests[0]['timestamps'])
         self.assertEqual(["C", None], tests[1]['timestamps'])
 
+    def test_files_skipped(self):
+        tests = []
+        result = StreamToDict(tests.append)
+        result.startTestRun()
+        result.status(file_name="some log.txt",
+            file_bytes="", eof=True,
+            mime_type="text/plain; charset=utf8", test_id="foo.bar")
+        result.stopTestRun()
+        self.assertThat(tests, HasLength(1))
+        details = tests[0]['details']
+        self.assertNotIn("some log.txt", details)
+
 
 class TestExtendedToStreamDecorator(TestCase):
 

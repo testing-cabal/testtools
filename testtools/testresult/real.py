@@ -832,7 +832,7 @@ class _StreamToTestRecord(StreamResult):
 
         case = case.got_timestamp(timestamp)
 
-        if file_name is not None:
+        if file_name is not None and file_bytes:
             case = case.got_file(file_name, file_bytes, mime_type)
 
         if test_tags is not None:
