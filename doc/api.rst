@@ -18,6 +18,14 @@ testtools
 .. automodule:: testtools
    :members:
 
+testtools.assertions
+--------------------
+
+.. automodule:: testtools.assertions
+   :members:
+
+
+
 testtools.matchers
 ------------------
 
