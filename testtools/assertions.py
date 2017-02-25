@@ -1,3 +1,7 @@
+# Copyright (c) 2008-2017 testtools developers. See LICENSE for details.
+
+"""Assertion helpers."""
+
 from testtools.matchers import (
     Annotate,
     MismatchError,
