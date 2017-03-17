@@ -235,15 +235,17 @@ class KeysEqual(Matcher):
     def __init__(self, *expected):
         """Create a `KeysEqual` Matcher.
 
-        :param expected: The keys the dict is expected to have.  If a dict,
-            then we use the keys of that dict, if a collection, we assume it
-            is a collection of expected keys.
+        :param expected: The keys the matchee is expected to have. As a
+            special case, if a single argument is specified, and it is a
+            mapping, then we use its keys as the expected set.
         """
         super(KeysEqual, self).__init__()
-        try:
-            self.expected = expected[0].keys()
-        except AttributeError:
-            self.expected = list(expected)
+        if len(expected) == 1:
+            try:
+                expected = expected[0].keys()
+            except AttributeError:
+                pass
+        self.expected = list(expected)
 
     def __str__(self):
         return "KeysEqual(%s)" % ', '.join(map(repr, self.expected))
