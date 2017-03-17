@@ -4,8 +4,6 @@ __all__ = [
     'KeysEqual',
     ]
 
-from collections import Mapping
-
 from ..helpers import (
     dict_subtract,
     filter_values,
@@ -242,10 +240,12 @@ class KeysEqual(Matcher):
             mapping, then we use its keys as the expected set.
         """
         super(KeysEqual, self).__init__()
-        if len(expected) == 1 and isinstance(expected[0], Mapping):
-            self.expected = expected[0].keys()
-        else:
-            self.expected = expected
+        if len(expected) == 1:
+            try:
+                expected = expected[0].keys()
+            except AttributeError:
+                pass
+        self.expected = list(expected)
 
     def __str__(self):
         return "KeysEqual(%s)" % ', '.join(map(repr, self.expected))
