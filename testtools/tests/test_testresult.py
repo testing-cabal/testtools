@@ -15,10 +15,11 @@ import sys
 import tempfile
 import threading
 from unittest import TestSuite
-
-from extras import safe_hasattr, try_imports
+from extras import safe_hasattr, try_imports, try_import
 
 Queue = try_imports(['Queue.Queue', 'queue.Queue'])
+
+testresources = try_import('testresources')
 
 from testtools import (
     CopyStreamResult,
@@ -26,6 +27,7 @@ from testtools import (
     ExtendedToStreamDecorator,
     MultiTestResult,
     PlaceHolder,
+    ResourcedToStreamDecorator,
     StreamFailFast,
     StreamResult,
     StreamResultRouter,
@@ -590,6 +592,12 @@ class TestExtendedToStreamDecoratorContract(TestCase, TestStreamResultContract):
         return ExtendedToStreamDecorator(StreamResult())
 
 
+class TestResourcedToStreamDecoratorContract(TestCase, TestStreamResultContract):
+
+    def _make_result(self):
+        return ResourcedToStreamDecorator(StreamResult())
+
+
 class TestStreamSummaryResultContract(TestCase, TestStreamResultContract):
 
     def _make_result(self):
@@ -930,6 +938,71 @@ class TestExtendedToStreamDecorator(TestCase):
               None,
               now),
              ('stopTestRun',)], log._events)
+
+
+class TestResourcedToStreamDecorator(TestCase):
+
+    def setUp(self):
+        super(TestResourcedToStreamDecorator, self).setUp()
+        if testresources is None:
+            self.skipTest('Need testresources')
+
+    def test_startMakeResource(self):
+        log = LoggingStreamResult()
+        result = ResourcedToStreamDecorator(log)
+        timestamp = datetime.datetime.utcfromtimestamp(3.476)
+        result.startTestRun()
+        result.time(timestamp)
+        resource = testresources.TestResourceManager()
+        result.startMakeResource(resource)
+        [_, event] = log._events
+        self.assertEqual(
+            'testresources.TestResourceManager.make', event.test_id)
+        self.assertEqual('inprogress', event.test_status)
+        self.assertFalse(event.runnable)
+        self.assertEqual(timestamp, event.timestamp)
+
+    def test_startMakeResource_with_custom_id_method(self):
+        log = LoggingStreamResult()
+        result = ResourcedToStreamDecorator(log)
+        resource = testresources.TestResourceManager()
+        resource.id = lambda: 'nice.resource'
+        result.startTestRun()
+        result.startMakeResource(resource)
+        self.assertEqual('nice.resource.make', log._events[1].test_id)
+
+    def test_stopMakeResource(self):
+        log = LoggingStreamResult()
+        result = ResourcedToStreamDecorator(log)
+        resource = testresources.TestResourceManager()
+        result.startTestRun()
+        result.stopMakeResource(resource)
+        [_, event] = log._events
+        self.assertEqual(
+            'testresources.TestResourceManager.make', event.test_id)
+        self.assertEqual('success', event.test_status)
+
+    def test_startCleanResource(self):
+        log = LoggingStreamResult()
+        result = ResourcedToStreamDecorator(log)
+        resource = testresources.TestResourceManager()
+        result.startTestRun()
+        result.startCleanResource(resource)
+        [_, event] = log._events
+        self.assertEqual(
+            'testresources.TestResourceManager.clean', event.test_id)
+        self.assertEqual('inprogress', event.test_status)
+
+    def test_stopCleanResource(self):
+        log = LoggingStreamResult()
+        result = ResourcedToStreamDecorator(log)
+        resource = testresources.TestResourceManager()
+        result.startTestRun()
+        result.stopCleanResource(resource)
+        [_, event] = log._events
+        self.assertEqual(
+            'testresources.TestResourceManager.clean', event.test_id)
+        self.assertEqual('success', event.test_status)
 
 
 class TestStreamFailFast(TestCase):
