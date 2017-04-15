@@ -323,5 +323,5 @@ def sorted_tests(suite_or_case, unpack_outer=False):
             'Duplicate test ids detected: %s' % (pformat(duplicates),))
 
     tests = _flatten_tests(suite_or_case, unpack_outer=unpack_outer)
-    tests.sort()
+    tests = sorted(tests, key=lambda x: x[0])
     return unittest.TestSuite([test for (sort_key, test) in tests])
