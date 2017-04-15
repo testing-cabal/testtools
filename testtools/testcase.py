@@ -461,6 +461,13 @@ class TestCase(unittest.TestCase):
             matcher = IsInstance(klass)
         self.assertThat(obj, matcher, msg)
 
+    def assertNotIsInstance(self, obj, klass, msg=None):
+        if isinstance(klass, tuple):
+            matcher = Not(IsInstance(*klass))
+        else:
+            matcher = Not(IsInstance(klass))
+        self.assertThat(obj, matcher, msg)
+
     def assertRaises(self, excClass, callableObj, *args, **kwargs):
         """Fail unless an exception of class excClass is thrown
            by callableObj when invoked with arguments args and keyword
