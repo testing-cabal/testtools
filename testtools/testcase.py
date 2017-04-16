@@ -727,6 +727,7 @@ class TestCase(unittest.TestCase):
         :return: The fixture, after setting it up and scheduling a cleanup for
            it.
         """
+        self.addCleanup(fixture.cleanUp)
         try:
             fixture.setUp()
         except MultipleExceptions as e:
@@ -755,7 +756,6 @@ class TestCase(unittest.TestCase):
                 # encountered.
                 reraise(*exc_info)
         else:
-            self.addCleanup(fixture.cleanUp)
             self.addCleanup(
                 gather_details, fixture.getDetails(), self.getDetails())
             return fixture
