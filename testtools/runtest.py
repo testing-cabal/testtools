@@ -7,7 +7,9 @@ __all__ = [
     'RunTest',
     ]
 
+import cProfile
 import sys
+import os
 
 from testtools.testresult import ExtendedToOriginalDecorator
 
@@ -64,6 +66,11 @@ class RunTest(object):
         self.exception_caught = object()
         self._exceptions = []
         self.last_resort = last_resort or (lambda case, result, exc: None)
+        self._cprof_dir = os.environ.get("TESTTOOLS_CPROFILE")
+        if os.environ.get("TESTTOOLS_CPROFILE"):
+            self._pr = cProfile.Profile()
+        else:
+            self._pr = None
 
     def run(self, result=None):
         """Run self.case reporting activity to result.
@@ -76,9 +83,17 @@ class RunTest(object):
             actual_result.startTestRun()
         else:
             actual_result = result
+        if self._pr:
+            self._pr.enable()
         try:
             return self._run_one(actual_result)
         finally:
+            if self._pr:
+                self._pr.disable()
+                self._pr.dump_stats("%s.%s.%s.cprof"
+                                    % (self.case.__class__.__module__,
+                                       self.case.__class__.__name__,
+                                       self.case._get_test_method().__name__))
             if result is None:
                 actual_result.stopTestRun()
 
