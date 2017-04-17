@@ -45,6 +45,11 @@ class TestContentType(TestCase):
         self.assertThat(
             repr(content_type), Equals('text/plain; baz="qux"; foo="bar"'))
 
+    def test_text_type_is_text(self):
+        subtype = 'arbitrary-subtype'
+        content_type = ContentType('text', subtype)
+        self.assertThat(content_type.is_text(), Equals(True))
+
 
 class TestBuiltinContentTypes(TestCase):
 
@@ -53,12 +58,14 @@ class TestBuiltinContentTypes(TestCase):
         self.assertThat(UTF8_TEXT.type, Equals('text'))
         self.assertThat(UTF8_TEXT.subtype, Equals('plain'))
         self.assertThat(UTF8_TEXT.parameters, Equals({'charset': 'utf8'}))
+        self.assertThat(UTF8_TEXT.is_text(), Equals(True))
 
     def test_json_content(self):
         # The JSON content type represents implictly UTF-8 application/json.
         self.assertThat(JSON.type, Equals('application'))
         self.assertThat(JSON.subtype, Equals('json'))
-        self.assertThat(JSON.parameters, Equals({}))
+        self.assertThat(JSON.parameters, Equals({'charset': 'utf8'}))
+        self.assertThat(JSON.is_text(), Equals(True))
 
 
 def test_suite():

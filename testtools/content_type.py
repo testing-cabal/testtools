@@ -1,4 +1,4 @@
-# Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
+# Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
 """ContentType - a MIME Content Type."""
 
@@ -12,7 +12,8 @@ class ContentType(object):
         content type.
     """
 
-    def __init__(self, primary_type, sub_type, parameters=None):
+    def __init__(self, primary_type, sub_type, parameters=None,
+                 text_override=False):
         """Create a ContentType."""
         if None in (primary_type, sub_type):
             raise ValueError("None not permitted in %r, %r" % (
@@ -20,6 +21,7 @@ class ContentType(object):
         self.type = primary_type
         self.subtype = sub_type
         self.parameters = parameters or {}
+        self._text_override = text_override
 
     def __eq__(self, other):
         if type(other) != ContentType:
@@ -35,7 +37,12 @@ class ContentType(object):
             params = ''
         return "%s/%s%s" % (self.type, self.subtype, params)
 
+    def is_text(self):
+        """True if this content type can be converted to text."""
+        return self.type == 'text' or self._text_override
 
-JSON = ContentType('application', 'json')
+
+JSON = ContentType(
+    'application', 'json', {'charset': 'utf8'}, text_override=True)
 
 UTF8_TEXT = ContentType('text', 'plain', {'charset': 'utf8'})
