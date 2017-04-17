@@ -153,6 +153,10 @@ Changes
 * Add ``readthedocs-requirements.txt`` so readthedocs.org can build the
   Twisted API documentation. (Jonathan Lange)
 
+* On Pythons greater than 2.6, ``TestSkipped`` will default to
+  ``unittest.SkipTest``, even if ``unittest2`` is installed.
+  (Jonathan Lange, #1529143)
+
 1.8.1
 ~~~~~
 
