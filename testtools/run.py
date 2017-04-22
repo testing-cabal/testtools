@@ -260,8 +260,14 @@ class TestProgram(unittest.TestProgram):
 ################
 
 def main(argv, stdout):
-    program = TestProgram(argv=argv, testRunner=partial(TestToolsTestRunner, stdout=stdout),
-        stdout=stdout)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--failfast', action='store_true', default=None)
+    args, unknown = parser.parse_known_args(argv)
+
+    testRunner = partial(TestToolsTestRunner, stdout=stdout)
+    program = TestProgram(argv=unknown, testRunner=testRunner,
+                          failfast=args.failfast, stdout=stdout)
+
 
 if __name__ == '__main__':
     main(sys.argv, sys.stdout)
