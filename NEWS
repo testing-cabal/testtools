@@ -3,14 +3,25 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
-NEXT
-~~~~
+2.3.0
+~~~~~
 
 Improvements
 ------------
 
 * New ``ResourcedToStreamDecorator`` for tracking lifecycle events of
-  test resources, and possibly integrate with subunit.
+  test resources, and possibly integrate with subunit. (Free Ekanayaka,
+  Github #243)
+
+* Make ``KeysEqual`` usable with no arguments, i.e. match a dict with
+  no keys. (Gavin Panella, Github #241)
+
+* Add ``testtools.assertions`` to the documented API modules. (Free
+  Ekanayaka, Github #257).
+
+* Don't add file details without content. (Thomas Herve, Github #252)
+
+* Make ``testtools.twistedsupport and tests work on Python 3. (Free Ekanayaka)
 
 2.2.0
 ~~~~~
