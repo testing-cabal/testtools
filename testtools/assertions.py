@@ -12,7 +12,7 @@ def assert_that(matchee, matcher, message='', verbose=False):
     """Assert that matchee is matched by matcher.
 
     This should only be used when you need to use a function based
-    matcher, assertThat in Testtools.Testcase is prefered and has more
+    matcher, assertThat in Testtools.Testcase is preferred and has more
     features
 
     :param matchee: An object to match with matcher.

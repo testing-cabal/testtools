@@ -297,7 +297,7 @@ TestResult.addSkip
 
 This method is called on result objects when a test skips. The
 ``testtools.TestResult`` class records skips in its ``skip_reasons`` instance
-dict. The can be reported on in much the same way as succesful tests.
+dict. The can be reported on in much the same way as successful tests.
 
 
 TestResult.time
@@ -393,7 +393,7 @@ Extensions to TestSuite
 ConcurrentTestSuite
 -------------------
 
-A TestSuite for parallel testing. This is used in conjuction with a helper that
+A TestSuite for parallel testing. This is used in conjunction with a helper that
 runs a single suite in some parallel fashion (for instance, forking, handing
 off to a subprocess, to a compute cloud, or simple threads).
 ConcurrentTestSuite uses the helper to get a number of separate runnable

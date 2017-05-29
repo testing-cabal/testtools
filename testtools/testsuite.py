@@ -250,7 +250,7 @@ def filter_by_ids(suite_or_case, test_ids):
         fails the predicate when it will return a new unittest.TestSuite with
         no contents.
 
-    This helper exists to provide backwards compatability with older versions
+    This helper exists to provide backwards compatibility with older versions
     of Python (currently all versions :)) that don't have a native
     filter_by_ids() method on Test(Case|Suite).
 
@@ -267,10 +267,10 @@ def filter_by_ids(suite_or_case, test_ids):
 
     For anything else, it is not filtered - it is returned as-is.
 
-    To provide compatability with this routine for a custom TestSuite, just
+    To provide compatibility with this routine for a custom TestSuite, just
     define a filter_by_ids() method that will return a TestSuite equivalent to
     the original minus any tests not in test_ids.
-    Similarly to provide compatability for a custom TestCase that does
+    Similarly to provide compatibility for a custom TestCase that does
     something unusual define filter_by_ids to return a new TestCase object
     that will only run test_ids that are in the provided container. If none
     would run, return an empty TestSuite().

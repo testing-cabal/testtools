@@ -104,7 +104,7 @@ Improvements
 * ``MatchesListwise`` has more informative error when lengths don't match.
   (Jonathan Lange)
 
-* The short form of errors for failed binary comparisions will now put the
+* The short form of errors for failed binary comparisons will now put the
   expected value on the _right_. This means that ``assertThat(2, Equals(3))``
   will raise an error saying ``2 != 3``.
   (Jonathan Lange, #1525227)
@@ -274,7 +274,7 @@ Changes
   our exception lookup priorities to support it. Regular skips done through
   raise self.skipException will continue to work, since they were always caught
   in our code - its because the suite type being used to implement setUpClass
-  has changed that an issue occured.
+  has changed that an issue occurred.
   (Robert Collins, #1393068)
 
 1.2.1
@@ -295,7 +295,7 @@ Changes
 * Depends on unittest2 for discovery functionality and the ``TestProgram`` base
   class. This brings in many fixes made to discovery where previously we were
   only using the discovery package or the version in the release of Python
-  that the test execution was occuring on. (Robert Collins, #1271133)
+  that the test execution was occurring on. (Robert Collins, #1271133)
 
 * Fixed unit tests which were failing under pypy due to a change in the way
   pypy formats tracebacks. (Thomi Richards)
