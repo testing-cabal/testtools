@@ -389,14 +389,14 @@ class TestAssertions(TestCase):
     def test_assertRaisesRegexp(self):
         # assertRaisesRegexp asserts that function raises particular exception
         # with particular message.
-        self.assertRaisesRegexp(RuntimeError, "M\w*e", self.raiseError,
+        self.assertRaisesRegexp(RuntimeError, r"M\w*e", self.raiseError,
                                 RuntimeError, "Message")
 
     def test_assertRaisesRegexp_wrong_error_type(self):
         # If function raises an exception of unexpected type,
         # assertRaisesRegexp re-raises it.
         self.assertRaises(ValueError, self.assertRaisesRegexp, RuntimeError,
-                          "M\w*e", self.raiseError, ValueError, "Message")
+                          r"M\w*e", self.raiseError, ValueError, "Message")
 
     def test_assertRaisesRegexp_wrong_message(self):
         # If function raises an exception with unexpected message

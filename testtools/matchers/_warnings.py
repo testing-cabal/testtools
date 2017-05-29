@@ -21,7 +21,7 @@ from ._impl import Mismatch
 
 def WarningMessage(category_type, message=None, filename=None, lineno=None,
                    line=None):
-    """
+    r"""
     Create a matcher that will match `warnings.WarningMessage`\s.
 
     For example, to match captured `DeprecationWarning`\s with a message about

@@ -395,7 +395,7 @@ class TestMatchesRegex(TestCase, TestMatchersInterface):
 
     describe_examples = [
         ("'c' does not match /a|b/", 'c', MatchesRegex('a|b')),
-        ("'c' does not match /a\d/", 'c', MatchesRegex(r'a\d')),
+        ("'c' does not match /a\\d/", 'c', MatchesRegex(r'a\d')),
         ("%r does not match /\\s+\\xa7/" % (_b('c'),),
             _b('c'), MatchesRegex(_b("\\s+\xA7"))),
         ("%r does not match /\\s+\\xa7/" % (_u('c'),),

@@ -150,27 +150,27 @@ class TestMatchesSetwise(TestCase):
         self.assertMismatchWithDescriptionMatching(
             [3], MatchesSetwise(Equals(1), Equals(2), Equals(3)),
             MatchesRegex(
-                'There were 2 matchers left over: Equals\([12]\), '
-                'Equals\([12]\)'))
+                r'There were 2 matchers left over: Equals\([12]\), '
+                r'Equals\([12]\)'))
 
     def test_two_too_many_values(self):
         self.assertMismatchWithDescriptionMatching(
             [1, 2, 3, 4], MatchesSetwise(Equals(1), Equals(2)),
             MatchesRegex(
-                'There were 2 values left over: \[[34], [34]\]'))
+                r'There were 2 values left over: \[[34], [34]\]'))
 
     def test_mismatch_and_too_many_matchers(self):
         self.assertMismatchWithDescriptionMatching(
             [2, 3], MatchesSetwise(Equals(0), Equals(1), Equals(2)),
             MatchesRegex(
-                '.*There was 1 mismatch and 1 extra matcher: Equals\([01]\)',
+                r'.*There was 1 mismatch and 1 extra matcher: Equals\([01]\)',
                 re.S))
 
     def test_mismatch_and_too_many_values(self):
         self.assertMismatchWithDescriptionMatching(
             [2, 3, 4], MatchesSetwise(Equals(1), Equals(2)),
             MatchesRegex(
-                '.*There was 1 mismatch and 1 extra value: \[[34]\]',
+                r'.*There was 1 mismatch and 1 extra value: \[[34]\]',
                 re.S))
 
     def test_mismatch_and_two_too_many_matchers(self):
@@ -179,13 +179,13 @@ class TestMatchesSetwise(TestCase):
                 Equals(0), Equals(1), Equals(2), Equals(3)),
             MatchesRegex(
                 '.*There was 1 mismatch and 2 extra matchers: '
-                'Equals\([012]\), Equals\([012]\)', re.S))
+                r'Equals\([012]\), Equals\([012]\)', re.S))
 
     def test_mismatch_and_two_too_many_values(self):
         self.assertMismatchWithDescriptionMatching(
             [2, 3, 4, 5], MatchesSetwise(Equals(1), Equals(2)),
             MatchesRegex(
-                '.*There was 1 mismatch and 2 extra values: \[[145], [145]\]',
+                r'.*There was 1 mismatch and 2 extra values: \[[145], [145]\]',
                 re.S))
 
 
