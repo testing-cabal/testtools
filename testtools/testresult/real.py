@@ -969,7 +969,7 @@ class StreamSummary(StreamResult):
         self._hook.stopTestRun()
 
     def wasSuccessful(self):
-        """Return False if any failure has occured.
+        """Return False if any failure has occurred.
 
         Note that incomplete tests can only be detected when stopTestRun is
         called, so that should be called before checking wasSuccessful.

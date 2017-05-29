@@ -81,7 +81,7 @@ class MatchesException(Matcher):
 class Raises(Matcher):
     """Match if the matchee raises an exception when called.
 
-    Exceptions which are not subclasses of Exception propogate out of the
+    Exceptions which are not subclasses of Exception propagate out of the
     Raises.match call unless they are explicitly matched.
     """
 

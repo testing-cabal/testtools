@@ -82,7 +82,7 @@ _UnexpectedSuccess = try_import(
 
 
 class _ExpectedFailure(Exception):
-    """An expected failure occured.
+    """An expected failure occurred.
 
     Note that this exception is private plumbing in testtools' testcase
     module.
@@ -391,7 +391,7 @@ class TestCase(unittest.TestCase):
         the exception has caused.
 
         Handlers are called in first-added, first-called order, and if they
-        raise an exception, that will propogate out of the test running
+        raise an exception, that will propagate out of the test running
         machinery, halting test processing. As a result, do not call code that
         may unreasonably fail.
         """
