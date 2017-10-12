@@ -15,7 +15,7 @@ Coding style
 In general, follow `PEP 8`_ except where consistency with the standard
 library's unittest_ module would suggest otherwise.
 
-testtools currently supports Python 2.6 and later, including Python 3.
+testtools currently supports Python 2.7 and Python 3.3 and later.
 
 Copyright assignment
 --------------------
@@ -144,7 +144,7 @@ including conformance with this HACKING file.
 
 Changes which all users should be made aware of should be documented in NEWS.
 
-We are now in full backwards compatibility mode - no more releases < 1.0.0, and 
+We are now in full backwards compatibility mode - no more releases < 1.0.0, and
 breaking compatibility will require consensus on the testtools-dev mailing list.
 Exactly what constitutes a backwards incompatible change is vague, but coarsely:
 

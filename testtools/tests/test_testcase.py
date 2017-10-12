@@ -1095,7 +1095,6 @@ class TestExpectedFailure(TestWithDetails):
         self.assertDetailsProvided(case, "addUnexpectedSuccess",
             ["foo", "reason"])
 
-    @skipIf(not hasattr(unittest, 'expectedFailure'), 'Need py27+')
     def test_unittest_expectedFailure_decorator_works_with_failure(self):
         class ReferenceTest(TestCase):
             @unittest.expectedFailure
@@ -1106,7 +1105,6 @@ class TestExpectedFailure(TestWithDetails):
         result = test.run()
         self.assertEqual(True, result.wasSuccessful())
 
-    @skipIf(not hasattr(unittest, 'expectedFailure'), 'Need py27+')
     def test_unittest_expectedFailure_decorator_works_with_success(self):
         class ReferenceTest(TestCase):
             @unittest.expectedFailure
@@ -1450,12 +1448,6 @@ class TestRunTwiceNondeterministic(TestCase):
             second_result._events, self.expected_second_result)
 
 
-require_py27_minimum = skipIf(
-    sys.version < '2.7',
-    "Requires python 2.7 or greater"
-)
-
-
 class TestSkipping(TestCase):
     """Tests for skipping of tests functionality."""
 
@@ -1635,7 +1627,6 @@ class TestSkipping(TestCase):
             reason
         )
 
-    @require_py27_minimum
     def test_unittest_skip_decorator_does_not_run_setUp(self):
         reason = self.getUniqueString()
         self.check_skip_decorator_does_not_run_setup(
@@ -1643,7 +1634,6 @@ class TestSkipping(TestCase):
             reason
         )
 
-    @require_py27_minimum
     def test_unittest_skipIf_decorator_does_not_run_setUp(self):
         reason = self.getUniqueString()
         self.check_skip_decorator_does_not_run_setup(
@@ -1651,7 +1641,6 @@ class TestSkipping(TestCase):
             reason
         )
 
-    @require_py27_minimum
     def test_unittest_skipUnless_decorator_does_not_run_setUp(self):
         reason = self.getUniqueString()
         self.check_skip_decorator_does_not_run_setup(
