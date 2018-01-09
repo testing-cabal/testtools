@@ -19,3 +19,4 @@ testtools.egg-info
 /.eggs/
 AUTHORS
 ChangeLog
+.idea
