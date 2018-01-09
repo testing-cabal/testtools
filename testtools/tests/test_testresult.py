@@ -2599,7 +2599,7 @@ class TestNonAsciiResults(TestCase):
         self.assertIn(self._as_output(_u("\uFFFD\uFFFD\uFFFD")), textoutput)
 
     def _local_os_error_matcher(self):
-        if sys.version_info > (3, 3):
+        if sys.version_info > (3, 4):
             return MatchesAny(Contains("FileExistsError: "),
                               Contains("PermissionError: "))
         elif os.name != "nt":

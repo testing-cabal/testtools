@@ -31,7 +31,7 @@ under the same license as Python, see LICENSE for details.
 Supported platforms
 -------------------
 
- * Python 2.7+ or 3.3+ / pypy (2.x+)
+ * Python 2.7 or 3.4+ / pypy (2.x+)
 
 If you would like to use testtools for earlier Pythons, please use testtools
 1.9.0, or for *really* old Pythons, testtools 0.9.15.
@@ -46,7 +46,7 @@ Optional Dependencies
 If you would like to use our Twisted support, then you will need Twisted.
 
 If you want to use ``fixtures`` then you can either install fixtures (e.g. from
-https://launchpad.net/python-fixtures or http://pypi.python.org/pypi/fixtures)
+https://launchpad.net/python-fixtures or https://pypi.python.org/pypi/fixtures)
 or alternatively just make sure your fixture objects obey the same protocol.
 
 
@@ -54,7 +54,7 @@ Bug reports and patches
 -----------------------
 
 Please report bugs using Launchpad at <https://bugs.launchpad.net/testtools>.
-Patches should be submitted as Github pull requests, or mailed to the authors.
+Patches should be submitted as GitHub pull requests, or mailed to the authors.
 See ``doc/hacking.rst`` for more details.
 
 There's no mailing list for this project yet, however the testing-in-python
