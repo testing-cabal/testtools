@@ -1586,6 +1586,28 @@ class TestSkipping(TestCase):
         test.run(result)
         self.assertEqual('addSuccess', events[1][0])
 
+    def test_skip_decorator_shared(self):
+        def shared(testcase):
+            testcase.fail('nope')
+
+        class SkippingTest(TestCase):
+            test_skip = skipIf(True, "skipping this test")(shared)
+
+        class NotSkippingTest(TestCase):
+            test_no_skip = skipIf(False, "skipping this test")(shared)
+
+        events = []
+        result = Python26TestResult(events)
+        test = SkippingTest("test_skip")
+        test.run(result)
+        self.assertEqual('addSuccess', events[1][0])
+
+        events2 = []
+        result2 = Python26TestResult(events2)
+        test2 = NotSkippingTest("test_no_skip")
+        test2.run(result2)
+        self.assertEqual('addFailure', events2[1][0])
+
     def check_skip_decorator_does_not_run_setup(self, decorator, reason):
         class SkippingTest(TestCase):
 
