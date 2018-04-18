@@ -93,3 +93,4 @@ Thanks
  * ClusterHQ Ltd
  * Tristan Seligmann
  * Jonathan Jacobs
+ * Zane Bitter
