@@ -10,7 +10,8 @@ python:
 
 install:
   - pip install -U pip wheel setuptools
-  - pip install sphinx Twisted
+  - if [ ${TRAVIS_PYTHON_VERSION} != "3.3" ]; then pip install sphinx; fi
+  - pip install Twisted
   - pip install .[test]
 
 script:
