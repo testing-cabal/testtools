@@ -32,15 +32,22 @@ class TestMatchesExceptionInstanceInterface(TestCase, TestMatchersInterface):
     matches_matches = [error_foo]
     matches_mismatches = [error_bar, error_base_foo]
 
+    if sys.version_info >= (3, 7):
+        # exception's repr has changed
+        _e = ''
+    else:
+        _e = ','
+
     str_examples = [
-        ("MatchesException(Exception('foo',))",
+        ("MatchesException(Exception('foo'%s))" % _e,
          MatchesException(Exception('foo')))
         ]
     describe_examples = [
         ("%r is not a %r" % (Exception, ValueError),
          error_base_foo,
          MatchesException(ValueError("foo"))),
-        ("ValueError('bar',) has different arguments to ValueError('foo',).",
+        ("ValueError('bar'%s) has different arguments to ValueError('foo'%s)."
+         % (_e, _e),
          error_bar,
          MatchesException(ValueError("foo"))),
         ]
