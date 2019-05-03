@@ -16,6 +16,7 @@ __all__ = [
     'unique_text_generator',
     ]
 
+import collections
 import copy
 import functools
 import itertools
@@ -27,8 +28,7 @@ from extras import (
     try_import,
     try_imports,
     )
-# To let setup.py work, make this a conditional import.
-unittest = try_imports(['unittest2', 'unittest'])
+import unittest
 import six
 
 from testtools import (
@@ -66,7 +66,6 @@ wraps = try_import('functools.wraps')
 class TestSkipped(Exception):
     """Raised within TestCase.run() when a test is skipped."""
 TestSkipped = try_import('unittest.case.SkipTest', TestSkipped)
-TestSkipped = try_import('unittest2.case.SkipTest', TestSkipped)
 
 
 class _UnexpectedSuccess(Exception):
@@ -77,8 +76,6 @@ class _UnexpectedSuccess(Exception):
     """
 _UnexpectedSuccess = try_import(
     'unittest.case._UnexpectedSuccess', _UnexpectedSuccess)
-_UnexpectedSuccess = try_import(
-    'unittest2.case._UnexpectedSuccess', _UnexpectedSuccess)
 
 
 class _ExpectedFailure(Exception):
@@ -89,8 +86,6 @@ class _ExpectedFailure(Exception):
     """
 _ExpectedFailure = try_import(
     'unittest.case._ExpectedFailure', _ExpectedFailure)
-_ExpectedFailure = try_import(
-    'unittest2.case._ExpectedFailure', _ExpectedFailure)
 
 
 # Copied from unittest before python 3.4 release. Used to maintain
@@ -496,6 +491,23 @@ class TestCase(unittest.TestCase):
         mismatch_error = self._matchHelper(matchee, matcher, message, verbose)
         if mismatch_error is not None:
             raise mismatch_error
+
+    def assertItemsEqual(self, a, b, message=''):
+        """An unordered sequence specific comparison. It asserts that
+        actual_seq and expected_seq have the same element counts.
+        Equivalent to::
+            self.assertEqual(Counter(iter(actual_seq)),
+                             Counter(iter(expected_seq)))
+        Asserts that each element has the same count in both sequences.
+        Example:
+            - [0, 1, 1] and [1, 0, 1] compare equal.
+            - [0, 0, 1] and [0, 1] compare unequal.
+        """
+        if hasattr(self, 'assertCountEqual'):
+            self.assertCountEqual(a, b, message)
+        else:
+            self.assertEqual(collections.Counter(iter(a)),
+                             collections.Counter(iter(b)))
 
     def addDetailUniqueName(self, name, content_object):
         """Add a detail to the test, but ensure it's name is unique.

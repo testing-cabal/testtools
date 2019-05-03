@@ -10,7 +10,7 @@ from textwrap import dedent
 from extras import try_import
 fixtures = try_import('fixtures')
 testresources = try_import('testresources')
-import unittest2
+import unittest
 
 import testtools
 from testtools import TestCase, run, skipUnless
@@ -195,13 +195,13 @@ testtools.runexample.TestFoo.test_quux
         broken = self.useFixture(SampleTestFixture(broken=True))
         out = StringIO()
         # XXX: http://bugs.python.org/issue22811
-        unittest2.defaultTestLoader._top_level_dir = None
+        unittest.defaultTestLoader._top_level_dir = None
         exc = self.assertRaises(
             SystemExit,
             run.main, ['prog', 'discover', '-l', broken.package.base, '*.py'], out)
         self.assertEqual(2, exc.args[0])
         self.assertThat(out.getvalue(), DocTestMatches("""\
-unittest2.loader._FailedTest.runexample
+unittest.loader._FailedTest.runexample
 Failed to import test module: runexample
 Traceback (most recent call last):
   File ".../loader.py", line ..., in _find_test_path
@@ -345,7 +345,7 @@ OK
         pkg = self.useFixture(SampleLoadTestsPackage())
         out = StringIO()
         # XXX: http://bugs.python.org/issue22811
-        unittest2.defaultTestLoader._top_level_dir = None
+        unittest.defaultTestLoader._top_level_dir = None
         self.assertEqual(None, run.main(
             ['prog', 'discover', '-l', pkg.package.base], out))
         self.assertEqual(dedent("""\
