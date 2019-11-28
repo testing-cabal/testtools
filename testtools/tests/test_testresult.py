@@ -9,6 +9,7 @@ import datetime
 import doctest
 from itertools import chain, combinations
 import os
+import platform
 import re
 import shutil
 import sys
@@ -2678,12 +2679,16 @@ class TestNonAsciiResults(TestCase):
 
     def test_syntax_error(self):
         """Syntax errors should still have fancy special-case formatting"""
+        if platform.python_implementation() == "PyPy":
+            spaces = '           '
+        else:
+            spaces = '          '
         textoutput = self._test_external_case("exec ('f(a, b c)')")
         self.assertIn(self._as_output(
             '  File "<string>", line 1\n'
             '    f(a, b c)\n'
             + ' ' * self._error_on_character +
-            '          ^\n'
+            spaces + '^\n'
             'SyntaxError: '
             ), textoutput)
 

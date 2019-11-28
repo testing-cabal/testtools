@@ -26,7 +26,6 @@ import warnings
 from extras import (
     safe_hasattr,
     try_import,
-    try_imports,
     )
 import unittest
 import six
