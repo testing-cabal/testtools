@@ -31,7 +31,7 @@ under the same license as Python, see LICENSE for details.
 Supported platforms
 -------------------
 
- * Python 2.7 or 3.5+ / pypy (2.x+)
+ * Python 2.7 or 3.5+ / PyPy
 
 If you would like to use testtools for earlier Pythons, please use testtools
 1.9.0, or for *really* old Pythons, testtools 0.9.15.
@@ -94,3 +94,4 @@ Thanks
  * Tristan Seligmann
  * Jonathan Jacobs
  * Jelmer Vernooĳ
+ * Hugo van Kemenade
