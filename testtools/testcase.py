@@ -20,19 +20,14 @@ import copy
 import functools
 import itertools
 import sys
+import unittest
 import warnings
 
 from extras import (
     safe_hasattr,
     try_import,
     )
-# To let setup.py work, make this a conditional import.
-# Don't use extras.try_imports, as it interferes with PyCharm's unittest
-# detection algorithm. See: https://youtrack.jetbrains.com/issue/PY-26630
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
+
 import six
 
 from testtools import (
@@ -70,7 +65,7 @@ wraps = try_import('functools.wraps')
 class TestSkipped(Exception):
     """Raised within TestCase.run() when a test is skipped."""
 TestSkipped = try_import('unittest.case.SkipTest', TestSkipped)
-TestSkipped = try_import('unittest2.case.SkipTest', TestSkipped)
+TestSkipped = try_import('unittest.case.SkipTest', TestSkipped)
 
 
 class _UnexpectedSuccess(Exception):
@@ -82,7 +77,7 @@ class _UnexpectedSuccess(Exception):
 _UnexpectedSuccess = try_import(
     'unittest.case._UnexpectedSuccess', _UnexpectedSuccess)
 _UnexpectedSuccess = try_import(
-    'unittest2.case._UnexpectedSuccess', _UnexpectedSuccess)
+    'unittest.case._UnexpectedSuccess', _UnexpectedSuccess)
 
 
 class _ExpectedFailure(Exception):
@@ -94,7 +89,7 @@ class _ExpectedFailure(Exception):
 _ExpectedFailure = try_import(
     'unittest.case._ExpectedFailure', _ExpectedFailure)
 _ExpectedFailure = try_import(
-    'unittest2.case._ExpectedFailure', _ExpectedFailure)
+    'unittest.case._ExpectedFailure', _ExpectedFailure)
 
 
 # Copied from unittest before python 3.4 release. Used to maintain

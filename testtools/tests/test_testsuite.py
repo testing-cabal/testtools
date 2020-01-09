@@ -5,7 +5,6 @@
 import doctest
 from pprint import pformat
 import unittest
-import unittest2
 
 from extras import try_import
 
@@ -223,9 +222,9 @@ TypeError: run() takes ...1 ...argument...2...given...
                 raise cls.skipException('foo')
             def test_notrun(self):
                 pass
-        # Test discovery uses the default suite from unittest2 (unless users
+        # Test discovery uses the default suite from unittest (unless users
         # deliberately change things, in which case they keep both pieces).
-        suite = unittest2.TestSuite([Skips("test_notrun")])
+        suite = unittest.TestSuite([Skips("test_notrun")])
         log = []
         result = LoggingResult(log)
         suite.run(result)
@@ -240,9 +239,9 @@ TypeError: run() takes ...1 ...argument...2...given...
                 super(Simples, cls).setUpClass()
             def test_simple(self):
                 pass
-        # Test discovery uses the default suite from unittest2 (unless users
+        # Test discovery uses the default suite from unittest (unless users
         # deliberately change things, in which case they keep both pieces).
-        suite = unittest2.TestSuite([Simples("test_simple")])
+        suite = unittest.TestSuite([Simples("test_simple")])
         log = []
         result = LoggingResult(log)
         suite.run(result)

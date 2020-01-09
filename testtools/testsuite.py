@@ -18,7 +18,6 @@ import unittest
 
 from extras import safe_hasattr, try_imports
 # This is just to let setup.py work, as testtools is imported in setup.py.
-unittest2 = try_imports(['unittest2', 'unittest'])
 Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
 import testtools
@@ -36,7 +35,7 @@ def iterate_tests(test_suite_or_case):
                 yield subtest
 
 
-class ConcurrentTestSuite(unittest2.TestSuite):
+class ConcurrentTestSuite(unittest.TestSuite):
     """A TestSuite whose run() calls out to a concurrency strategy."""
 
     def __init__(self, suite, make_tests, wrap_result=None):
@@ -199,7 +198,7 @@ class ConcurrentStreamTestSuite(object):
             process_result.stopTestRun()
 
 
-class FixtureSuite(unittest2.TestSuite):
+class FixtureSuite(unittest.TestSuite):
 
     def __init__(self, fixture, tests):
         super(FixtureSuite, self).__init__(tests)

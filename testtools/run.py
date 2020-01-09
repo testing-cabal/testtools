@@ -12,10 +12,9 @@ import argparse
 from functools import partial
 import os.path
 import sys
+import unittest
 
 from extras import safe_hasattr, try_imports
-# To let setup.py work, make this a conditional import.
-unittest = try_imports(['unittest2', 'unittest'])
 
 from testtools import TextTestResult, testcase
 from testtools.compat import classtypes, istext, unicode_output_stream
@@ -50,7 +49,7 @@ def list_test(test):
         describing things that failed to import.
     """
     unittest_import_strs = set([
-        'unittest2.loader.ModuleImportFailure.',
+        'unittest.loader.ModuleImportFailure.',
         'unittest.loader.ModuleImportFailure.',
         'discover.ModuleImportFailure.'
         ])
