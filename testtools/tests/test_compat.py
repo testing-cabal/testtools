@@ -2,6 +2,7 @@
 
 """Tests for miscellaneous compatibility functions"""
 
+import ast
 import io
 import linecache2 as linecache
 import os
@@ -198,28 +199,28 @@ class TestTextRepr(testtools.TestCase):
             actual = text_repr(b, multiline=False)
             # Add self.assertIsInstance check?
             self.assertEqual(actual, self.b_prefix + expected)
-            self.assertEqual(eval(actual), b)
+            self.assertEqual(ast.literal_eval(actual), b)
 
     def test_ascii_examples_oneline_unicode(self):
         for s, expected, _ in self.ascii_examples:
             u = _u(s)
             actual = text_repr(u, multiline=False)
             self.assertEqual(actual, self.u_prefix + expected)
-            self.assertEqual(eval(actual), u)
+            self.assertEqual(ast.literal_eval(actual), u)
 
     def test_ascii_examples_multiline_bytes(self):
         for s, _, expected in self.ascii_examples:
             b = _b(s)
             actual = text_repr(b, multiline=True)
             self.assertEqual(actual, self.b_prefix + expected)
-            self.assertEqual(eval(actual), b)
+            self.assertEqual(ast.literal_eval(actual), b)
 
     def test_ascii_examples_multiline_unicode(self):
         for s, _, expected in self.ascii_examples:
             u = _u(s)
             actual = text_repr(u, multiline=True)
             self.assertEqual(actual, self.u_prefix + expected)
-            self.assertEqual(eval(actual), u)
+            self.assertEqual(ast.literal_eval(actual), u)
 
     def test_ascii_examples_defaultline_bytes(self):
         for s, one, multi in self.ascii_examples:
@@ -235,25 +236,25 @@ class TestTextRepr(testtools.TestCase):
         for b, expected, _ in self.bytes_examples:
             actual = text_repr(b, multiline=False)
             self.assertEqual(actual, self.b_prefix + expected)
-            self.assertEqual(eval(actual), b)
+            self.assertEqual(ast.literal_eval(actual), b)
 
     def test_bytes_examples_multiline(self):
         for b, _, expected in self.bytes_examples:
             actual = text_repr(b, multiline=True)
             self.assertEqual(actual, self.b_prefix + expected)
-            self.assertEqual(eval(actual), b)
+            self.assertEqual(ast.literal_eval(actual), b)
 
     def test_unicode_examples_oneline(self):
         for u, expected, _ in self.unicode_examples:
             actual = text_repr(u, multiline=False)
             self.assertEqual(actual, self.u_prefix + expected)
-            self.assertEqual(eval(actual), u)
+            self.assertEqual(ast.literal_eval(actual), u)
 
     def test_unicode_examples_multiline(self):
         for u, _, expected in self.unicode_examples:
             actual = text_repr(u, multiline=True)
             self.assertEqual(actual, self.u_prefix + expected)
-            self.assertEqual(eval(actual), u)
+            self.assertEqual(ast.literal_eval(actual), u)
 
 
 

@@ -26,10 +26,14 @@ import warnings
 from extras import (
     safe_hasattr,
     try_import,
-    try_imports,
     )
 # To let setup.py work, make this a conditional import.
-unittest = try_imports(['unittest2', 'unittest'])
+# Don't use extras.try_imports, as it interferes with PyCharm's unittest
+# detection algorithm. See: https://youtrack.jetbrains.com/issue/PY-26630
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
 import six
 
 from testtools import (
