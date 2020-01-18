@@ -115,7 +115,7 @@ class _TwistedLogObservers(Fixture):
     """Temporarily add Twisted log observers."""
 
     def __init__(self, observers):
-        super(_TwistedLogObservers, self).__init__()
+        super().__init__()
         self._observers = observers
         self._log_publisher = log.theLogPublisher
 
@@ -129,7 +129,7 @@ class _ErrorObserver(Fixture):
     """Capture errors logged while fixture is active."""
 
     def __init__(self, error_observer):
-        super(_ErrorObserver, self).__init__()
+        super().__init__()
         self._error_observer = error_observer
 
     def _setUp(self):
@@ -200,7 +200,7 @@ class _CompoundFixture(Fixture):
     """A fixture that combines many fixtures."""
 
     def __init__(self, fixtures):
-        super(_CompoundFixture, self).__init__()
+        super().__init__()
         self._fixtures = fixtures
 
     def _setUp(self):
@@ -270,7 +270,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
             that took place during the run as the 'twisted-log' detail.
             Defaults to True.
         """
-        super(AsynchronousDeferredRunTest, self).__init__(
+        super().__init__(
             case, handlers, last_resort)
         if reactor is None:
             from twisted.internet import reactor
@@ -475,8 +475,7 @@ class AsynchronousDeferredRunTestForBrokenTwisted(AsynchronousDeferredRunTest):
     """
 
     def _make_spinner(self):
-        spinner = super(
-            AsynchronousDeferredRunTestForBrokenTwisted, self)._make_spinner()
+        spinner = super()._make_spinner()
         spinner._OBLIGATORY_REACTOR_ITERATIONS = 2
         return spinner
 

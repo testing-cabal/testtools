@@ -21,7 +21,7 @@ from testtools.matchers import (
     )
 
 
-class _FakeOutputStream(object):
+class _FakeOutputStream:
     """A simple file-like object for testing"""
 
     def __init__(self):
@@ -37,7 +37,7 @@ class TestUnicodeOutputStream(testtools.TestCase):
     uni = "pa\u026a\u03b8\u0259n"
 
     def setUp(self):
-        super(TestUnicodeOutputStream, self).setUp()
+        super().setUp()
         if sys.platform == "cli":
             self.skip("IronPython shouldn't wrap streams to do encoding")
 

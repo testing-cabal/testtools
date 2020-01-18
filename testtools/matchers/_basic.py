@@ -43,7 +43,7 @@ def _format(thing):
     return pformat(thing)
 
 
-class _BinaryComparison(object):
+class _BinaryComparison:
     """Matcher that compares an object to another object."""
 
     def __init__(self, expected):
@@ -111,7 +111,7 @@ class Equals(_BinaryComparison):
     mismatch_string = '!='
 
 
-class _FlippedEquals(object):
+class _FlippedEquals:
     """Matches if the items are equal.
 
     Exactly like ``Equals`` except that the short mismatch message is "
@@ -171,7 +171,7 @@ class SameMembers(Matcher):
     """
 
     def __init__(self, expected):
-        super(SameMembers, self).__init__()
+        super().__init__()
         self.expected = expected
 
     def __str__(self):
@@ -258,7 +258,7 @@ class EndsWith(Matcher):
         return None
 
 
-class IsInstance(object):
+class IsInstance:
     """Matcher that wraps isinstance."""
 
     def __init__(self, *types):
@@ -332,7 +332,7 @@ class Contains(Matcher):
         return None
 
 
-class MatchesRegex(object):
+class MatchesRegex:
     """Matches if the matchee is matched by a regular expression."""
 
     def __init__(self, pattern, flags=0):

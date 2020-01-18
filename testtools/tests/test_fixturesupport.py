@@ -24,7 +24,7 @@ LoggingFixture = try_import('fixtures.tests.helpers.LoggingFixture')
 class TestFixtureSupport(TestCase):
 
     def setUp(self):
-        super(TestFixtureSupport, self).setUp()
+        super().setUp()
         if fixtures is None or LoggingFixture is None:
             self.skipTest("Need fixtures")
 

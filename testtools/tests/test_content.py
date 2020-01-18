@@ -80,7 +80,7 @@ class TestContent(TestCase):
     def test_iter_text_decodes(self):
         content_type = ContentType("text", "strange", {"charset": "utf8"})
         content = Content(
-            content_type, lambda: ["bytes\xea".encode("utf8")])
+            content_type, lambda: ["bytes\xea".encode()])
         self.assertEqual(["bytes\xea"], list(content.iter_text()))
 
     def test_iter_text_default_charset_iso_8859_1(self):
@@ -93,7 +93,7 @@ class TestContent(TestCase):
     def test_as_text(self):
         content_type = ContentType("text", "strange", {"charset": "utf8"})
         content = Content(
-            content_type, lambda: ["bytes\xea".encode("utf8")])
+            content_type, lambda: ["bytes\xea".encode()])
         self.assertEqual("bytes\xea", content.as_text())
 
     def test_from_file(self):

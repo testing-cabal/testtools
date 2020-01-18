@@ -31,8 +31,8 @@ APP_NAME = 'testtools-lp-release'
 CACHE_DIR = os.path.expanduser('~/.launchpadlib/cache')
 SERVICE_ROOT = uris.LPNET_SERVICE_ROOT
 
-FIX_COMMITTED = u"Fix Committed"
-FIX_RELEASED = u"Fix Released"
+FIX_COMMITTED = "Fix Committed"
+FIX_RELEASED = "Fix Released"
 
 # Launchpad file type for a tarball upload.
 CODE_RELEASE_TARBALL = 'Code Release Tarball'

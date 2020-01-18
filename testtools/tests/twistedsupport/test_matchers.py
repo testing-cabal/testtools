@@ -149,8 +149,8 @@ class SuccessResultTests(NeedsTwistedTestCase):
             self.match(arbitrary_matcher, deferred),
             mismatches(
                 Equals(
-                    ('Success result expected on %r, found failure result '
-                     'instead: %r' % (deferred, fail))),
+                    'Success result expected on %r, found failure result '
+                     'instead: %r' % (deferred, fail)),
                 Equals({'traceback': TracebackContent(
                     (fail.type, fail.value, fail.getTracebackObject()), None,
                 )}),
@@ -188,9 +188,9 @@ class FailureResultTests(NeedsTwistedTestCase):
         matcher = Is(None)  # Can be any matcher
         self.assertThat(
             self.match(matcher, deferred),
-            mismatches(Equals((
+            mismatches(Equals(
                 'Failure result expected on %r, found success '
-                'result (%r) instead' % (deferred, result)))))
+                'result (%r) instead' % (deferred, result))))
 
     def test_no_result_fails(self):
         # A Deferred that has not fired fails to match.
@@ -198,9 +198,9 @@ class FailureResultTests(NeedsTwistedTestCase):
         matcher = Is(None)  # Can be any matcher
         self.assertThat(
             self.match(matcher, deferred),
-            mismatches(Equals((
+            mismatches(Equals(
                 'Failure result expected on %r, found no result instead'
-                % (deferred,)))))
+                % (deferred,))))
 
 
 def test_suite():

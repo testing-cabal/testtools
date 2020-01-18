@@ -29,7 +29,7 @@ def ContainsAll(items):
     return MatchesAll(*map(Contains, items), first_only=False)
 
 
-class MatchesListwise(object):
+class MatchesListwise:
     """Matches if each matcher matches the corresponding value.
 
     More easily explained by example than in words:
@@ -74,7 +74,7 @@ class MatchesListwise(object):
             return MismatchesAll(mismatches)
 
 
-class MatchesStructure(object):
+class MatchesStructure:
     """Matcher that matches an object structurally.
 
     'Structurally' here means that attributes of the object being matched are
@@ -149,7 +149,7 @@ class MatchesStructure(object):
         return MatchesListwise(matchers).match(values)
 
 
-class MatchesSetwise(object):
+class MatchesSetwise:
     """Matches if all the matchers match elements of the value being matched.
 
     That is, each element in the 'observed' set must match exactly one matcher

@@ -8,7 +8,7 @@ __all__ = [
     ]
 
 
-class MonkeyPatcher(object):
+class MonkeyPatcher:
     """A set of monkey-patches that can be applied and removed all together.
 
     Use this to cover up attributes with new objects. Particularly useful for

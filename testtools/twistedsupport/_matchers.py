@@ -19,7 +19,7 @@ from testtools.matchers import Mismatch
 from ._deferred import failure_content, on_deferred_result
 
 
-class _NoResult(object):
+class _NoResult:
     """Matches a Deferred that has not yet fired."""
 
     @staticmethod
@@ -69,7 +69,7 @@ def has_no_result():
     return _NO_RESULT
 
 
-class _Succeeded(object):
+class _Succeeded:
     """Matches a Deferred that has fired successfully."""
 
     def __init__(self, matcher):
@@ -125,7 +125,7 @@ def succeeded(matcher):
     return _Succeeded(matcher)
 
 
-class _Failed(object):
+class _Failed:
     """Matches a Deferred that has failed."""
 
     def __init__(self, matcher):

@@ -134,7 +134,7 @@ def make_exception_info(exceptionFactory, *args, **kwargs):
         return sys.exc_info()
 
 
-class TestControlContract(object):
+class TestControlContract:
     """Stopping test runs."""
 
     def test_initially_not_shouldStop(self):
@@ -501,7 +501,7 @@ class TestStreamToExtendedContract(TestCase, DetailsContract):
             StreamToExtendedDecorator(ExtendedTestResult()))
 
 
-class TestStreamResultContract(object):
+class TestStreamResultContract:
 
     def _make_result(self):
         raise NotImplementedError(self._make_result)
@@ -677,7 +677,7 @@ class TestDoubleStreamResultEvents(TestCase):
 class TestCopyStreamResultCopies(TestCase):
 
     def setUp(self):
-        super(TestCopyStreamResultCopies, self).setUp()
+        super().setUp()
         self.target1 = LoggingStreamResult()
         self.target2 = LoggingStreamResult()
         self.targets = [self.target1._events, self.target2._events]
@@ -940,7 +940,7 @@ class TestExtendedToStreamDecorator(TestCase):
 class TestResourcedToStreamDecorator(TestCase):
 
     def setUp(self):
-        super(TestResourcedToStreamDecorator, self).setUp()
+        super().setUp()
         if testresources is None:
             self.skipTest('Need testresources')
 
@@ -1343,7 +1343,7 @@ class TestMultiTestResult(TestCase):
     """Tests for 'MultiTestResult'."""
 
     def setUp(self):
-        super(TestMultiTestResult, self).setUp()
+        super().setUp()
         self.result1 = LoggingResult([])
         self.result2 = LoggingResult([])
         self.multiResult = MultiTestResult(self.result1, self.result2)
@@ -1451,7 +1451,7 @@ class TestMultiTestResult(TestCase):
         # values the `stopTestRun`s that it forwards to.
         class Result(LoggingResult):
             def stopTestRun(self):
-                super(Result, self).stopTestRun()
+                super().stopTestRun()
                 return 'foo'
         multi_result = MultiTestResult(Result([]), Result([]))
         result = multi_result.stopTestRun()
@@ -1475,7 +1475,7 @@ class TestTextTestResult(TestCase):
     """Tests for 'TextTestResult'."""
 
     def setUp(self):
-        super(TestTextTestResult, self).setUp()
+        super().setUp()
         self.result = TextTestResult(io.StringIO())
 
     def getvalue(self):
@@ -2854,7 +2854,7 @@ traceback
 class TestByTestResultTests(TestCase):
 
     def setUp(self):
-        super(TestByTestResultTests, self).setUp()
+        super().setUp()
         self.log = []
         self.result = TestByTestResult(self.on_test)
         now = iter(range(5))

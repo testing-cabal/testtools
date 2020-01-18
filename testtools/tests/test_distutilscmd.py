@@ -37,7 +37,7 @@ def test_suite():
 """))])
 
         def setUp(self):
-            super(SampleTestFixture, self).setUp()
+            super().setUp()
             self.useFixture(self.package)
             testtools.__path__.append(self.package.base)
             self.addCleanup(testtools.__path__.remove, self.package.base)
@@ -46,7 +46,7 @@ def test_suite():
 class TestCommandTest(TestCase):
 
     def setUp(self):
-        super(TestCommandTest, self).setUp()
+        super().setUp()
         if fixtures is None:
             self.skipTest("Need fixtures")
 

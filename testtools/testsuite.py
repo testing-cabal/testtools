@@ -32,8 +32,7 @@ def iterate_tests(test_suite_or_case):
         yield test_suite_or_case
     else:
         for test in suite:
-            for subtest in iterate_tests(test):
-                yield subtest
+            yield from iterate_tests(test)
 
 
 class ConcurrentTestSuite(unittest2.TestSuite):
@@ -54,7 +53,7 @@ class ConcurrentTestSuite(unittest2.TestSuite):
             use a ``ThreadsafeForwardingResult`` wrapped around the result
             passed to ``run()``.
         """
-        super(ConcurrentTestSuite, self).__init__([suite])
+        super().__init__([suite])
         self.make_tests = make_tests
         if wrap_result:
             self._wrap_result = wrap_result
@@ -115,7 +114,7 @@ class ConcurrentTestSuite(unittest2.TestSuite):
             queue.put(test)
 
 
-class ConcurrentStreamTestSuite(object):
+class ConcurrentStreamTestSuite:
     """A TestSuite whose run() parallelises."""
 
     def __init__(self, make_tests):
@@ -128,7 +127,7 @@ class ConcurrentStreamTestSuite(object):
             case is a TestCase-like object with a run(result) method, and
             route_code is either None or a unicode string.
         """
-        super(ConcurrentStreamTestSuite, self).__init__()
+        super().__init__()
         self.make_tests = make_tests
 
     def run(self, result):
@@ -202,13 +201,13 @@ class ConcurrentStreamTestSuite(object):
 class FixtureSuite(unittest2.TestSuite):
 
     def __init__(self, fixture, tests):
-        super(FixtureSuite, self).__init__(tests)
+        super().__init__(tests)
         self._fixture = fixture
 
     def run(self, result):
         self._fixture.setUp()
         try:
-            super(FixtureSuite, self).run(result)
+            super().run(result)
         finally:
             self._fixture.cleanUp()
 

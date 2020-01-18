@@ -67,7 +67,7 @@ def list_test(test):
     return test_ids, errors
 
 
-class TestToolsTestRunner(object):
+class TestToolsTestRunner:
     """ A thunk object to support unittest.TestProgram."""
 
     def __init__(self, verbosity=None, failfast=None, buffer=None,
@@ -198,7 +198,7 @@ class TestProgram(unittest.TestProgram):
         del self.testLoader.errors[:]
 
     def _getParentArgParser(self):
-        parser = super(TestProgram, self)._getParentArgParser()
+        parser = super()._getParentArgParser()
         # XXX: Local edit (see http://bugs.python.org/issue22860)
         parser.add_argument('-l', '--list', dest='listtests', default=False,
             action='store_true', help='List tests rather than executing them')
@@ -208,7 +208,7 @@ class TestProgram(unittest.TestProgram):
         return parser
 
     def _do_discovery(self, argv, Loader=None):
-        super(TestProgram, self)._do_discovery(argv, Loader=Loader)
+        super()._do_discovery(argv, Loader=Loader)
         # XXX: Local edit (see http://bugs.python.org/issue22860)
         self.test = sorted_tests(self.test)
 

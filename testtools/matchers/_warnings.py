@@ -68,7 +68,7 @@ def WarningMessage(category_type, message=None, filename=None, lineno=None,
             line_matcher))
 
 
-class Warnings(object):
+class Warnings:
     """
     Match if the matchee produces warnings.
     """

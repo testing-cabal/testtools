@@ -53,7 +53,7 @@ def _iter_chunks(stream, chunk_size, seek_offset=None, seek_whence=0):
         chunk = stream.read(chunk_size)
 
 
-class Content(object):
+class Content:
     """A MIME-like Content object.
 
     'Content' objects can be serialised to bytes using the iter_bytes method.
@@ -150,7 +150,7 @@ class StackLinesContent(Content):
         value = prefix_content + \
             self._stack_lines_to_unicode(stack_lines) + \
             postfix_content
-        super(StackLinesContent, self).__init__(
+        super().__init__(
             content_type, lambda: [value.encode("utf8")])
 
     def _stack_lines_to_unicode(self, stack_lines):
@@ -200,7 +200,7 @@ class TracebackContent(Content):
             limit=limit, capture_locals=capture_locals).format())
         content_type = ContentType('text', 'x-traceback',
             {"language": "python", "charset": "utf8"})
-        super(TracebackContent, self).__init__(
+        super().__init__(
             content_type, lambda: [x.encode('utf8') for x in stack_lines])
 
 
@@ -280,11 +280,10 @@ def content_from_file(path, content_type=None, chunk_size=DEFAULT_CHUNK_SIZE,
         content_type = UTF8_TEXT
     def reader():
         with open(path, 'rb') as stream:
-            for chunk in _iter_chunks(stream,
+            yield from _iter_chunks(stream,
                                       chunk_size,
                                       seek_offset,
-                                      seek_whence):
-                yield chunk
+                                      seek_whence)
     return content_from_reader(reader, content_type, buffer_now)
 
 

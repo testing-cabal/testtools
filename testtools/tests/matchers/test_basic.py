@@ -35,7 +35,7 @@ class Test_BinaryMismatch(TestCase):
     _long_b = _b(_long_string)
     _long_u = _long_string
 
-    class CustomRepr(object):
+    class CustomRepr:
         def __init__(self, repr_string):
             self._repr_string = repr_string
         def __repr__(self):

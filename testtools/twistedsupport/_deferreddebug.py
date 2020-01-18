@@ -9,7 +9,7 @@ class DebugTwisted(Fixture):
     """Set debug options for Twisted."""
 
     def __init__(self, debug=True):
-        super(DebugTwisted, self).__init__()
+        super().__init__()
         self._debug_setting = debug
 
     def _setUp(self):

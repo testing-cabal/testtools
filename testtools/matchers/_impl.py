@@ -22,7 +22,7 @@ from testtools.compat import (
     )
 
 
-class Matcher(object):
+class Matcher:
     """A pattern matcher.
 
     A Matcher must implement match and __str__ to be used by
@@ -50,7 +50,7 @@ class Matcher(object):
         raise NotImplementedError(self.__str__)
 
 
-class Mismatch(object):
+class Mismatch:
     """An object describing a mismatch detected by a Matcher."""
 
     def __init__(self, description=None, details=None):
@@ -111,7 +111,7 @@ class MismatchError(AssertionError):
     # characters are in the matchee, matcher or mismatch.
 
     def __init__(self, matchee, matcher, mismatch, verbose=False):
-        super(MismatchError, self).__init__()
+        super().__init__()
         self.matchee = matchee
         self.matcher = matcher
         self.mismatch = mismatch
@@ -133,7 +133,7 @@ class MismatchError(AssertionError):
             return difference
 
 
-class MismatchDecorator(object):
+class MismatchDecorator:
     """Decorate a ``Mismatch``.
 
     Forwards all messages to the original mismatch object.  Probably the best

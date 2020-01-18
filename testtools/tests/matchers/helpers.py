@@ -3,7 +3,7 @@
 from testtools.tests.helpers import FullStackRunTest
 
 
-class TestMatchersInterface(object):
+class TestMatchersInterface:
 
     run_tests_with = FullStackRunTest
 

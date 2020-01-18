@@ -53,7 +53,7 @@ def test_suite():
             'runexample', [('__init__.py', init_contents)])
 
         def setUp(self):
-            super(SampleTestFixture, self).setUp()
+            super().setUp()
             self.useFixture(self.package)
             testtools.__path__.append(self.package.base)
             self.addCleanup(testtools.__path__.remove, self.package.base)
@@ -65,7 +65,7 @@ if fixtures and testresources:
         """Creates a test suite that uses testresources."""
 
         def __init__(self):
-            super(SampleResourcedFixture, self).__init__()
+            super().__init__()
             self.package = fixtures.PythonPackage(
             'resourceexample', [('__init__.py', _b("""
 from fixtures import Fixture
@@ -101,7 +101,7 @@ def test_suite():
 """))])
 
         def setUp(self):
-            super(SampleResourcedFixture, self).setUp()
+            super().setUp()
             self.useFixture(self.package)
             self.addCleanup(testtools.__path__.remove, self.package.base)
             testtools.__path__.append(self.package.base)
@@ -112,7 +112,7 @@ if fixtures:
         """Creates a test suite package using load_tests."""
 
         def __init__(self):
-            super(SampleLoadTestsPackage, self).__init__()
+            super().__init__()
             self.package = fixtures.PythonPackage(
             'discoverexample', [('__init__.py', _b("""
 from testtools import TestCase, clone_test_with_new_id
@@ -127,7 +127,7 @@ def load_tests(loader, tests, pattern):
 """))])
 
         def setUp(self):
-            super(SampleLoadTestsPackage, self).setUp()
+            super().setUp()
             self.useFixture(self.package)
             self.addCleanup(sys.path.remove, self.package.base)
 
@@ -135,7 +135,7 @@ def load_tests(loader, tests, pattern):
 class TestRun(TestCase):
 
     def setUp(self):
-        super(TestRun, self).setUp()
+        super().setUp()
         if fixtures is None:
             self.skipTest("Need fixtures")
 

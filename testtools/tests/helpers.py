@@ -38,55 +38,55 @@ class LoggingResult(TestResult):
 
     def __init__(self, log):
         self._events = log
-        super(LoggingResult, self).__init__()
+        super().__init__()
 
     def startTest(self, test):
         self._events.append(('startTest', test))
-        super(LoggingResult, self).startTest(test)
+        super().startTest(test)
 
     def stop(self):
         self._events.append('stop')
-        super(LoggingResult, self).stop()
+        super().stop()
 
     def stopTest(self, test):
         self._events.append(('stopTest', test))
-        super(LoggingResult, self).stopTest(test)
+        super().stopTest(test)
 
     def addFailure(self, test, error):
         self._events.append(('addFailure', test, error))
-        super(LoggingResult, self).addFailure(test, error)
+        super().addFailure(test, error)
 
     def addError(self, test, error):
         self._events.append(('addError', test, error))
-        super(LoggingResult, self).addError(test, error)
+        super().addError(test, error)
 
     def addSkip(self, test, reason):
         self._events.append(('addSkip', test, reason))
-        super(LoggingResult, self).addSkip(test, reason)
+        super().addSkip(test, reason)
 
     def addSuccess(self, test):
         self._events.append(('addSuccess', test))
-        super(LoggingResult, self).addSuccess(test)
+        super().addSuccess(test)
 
     def startTestRun(self):
         self._events.append('startTestRun')
-        super(LoggingResult, self).startTestRun()
+        super().startTestRun()
 
     def stopTestRun(self):
         self._events.append('stopTestRun')
-        super(LoggingResult, self).stopTestRun()
+        super().stopTestRun()
 
     def done(self):
         self._events.append('done')
-        super(LoggingResult, self).done()
+        super().done()
 
     def tags(self, new_tags, gone_tags):
         self._events.append(('tags', new_tags, gone_tags))
-        super(LoggingResult, self).tags(new_tags, gone_tags)
+        super().tags(new_tags, gone_tags)
 
     def time(self, a_datetime):
         self._events.append(('time', a_datetime))
-        super(LoggingResult, self).time(a_datetime)
+        super().time(a_datetime)
 
 
 def is_stack_hidden():
@@ -112,10 +112,10 @@ class FullStackRunTest(runtest.RunTest):
     def _run_user(self, fn, *args, **kwargs):
         return run_with_stack_hidden(
             False,
-            super(FullStackRunTest, self)._run_user, fn, *args, **kwargs)
+            super()._run_user, fn, *args, **kwargs)
 
 
-class MatchesEvents(object):
+class MatchesEvents:
     """Match a list of test result events.
 
     Specify events as a data structure.  Ordinary Python objects within this
@@ -150,7 +150,7 @@ class AsText(AfterPreprocessing):
     """Match the text of a Content instance."""
 
     def __init__(self, matcher, annotate=True):
-        super(AsText, self).__init__(
+        super().__init__(
             lambda log: log.as_text(), matcher, annotate=annotate)
 
 

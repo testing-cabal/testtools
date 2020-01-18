@@ -202,9 +202,9 @@ def _mods(i, mod):
 
 
 def _unique_text(base_cp, cp_range, index):
-    s = six.text_type('')
+    s = ''
     for m in _mods(index, cp_range):
-        s += six.unichr(base_cp + m)
+        s += chr(base_cp + m)
     return s
 
 
@@ -226,7 +226,7 @@ def unique_text_generator(prefix):
     index = 0
     while True:
         unique_text = _unique_text(BASE_CP, CP_RANGE, index)
-        yield six.text_type('%s-%s') % (prefix, unique_text)
+        yield '{}-{}'.format(prefix, unique_text)
         index = index + 1
 
 
@@ -257,7 +257,7 @@ class TestCase(unittest.TestCase):
             ``TestCase.run_tests_with`` if given.
         """
         runTest = kwargs.pop('runTest', None)
-        super(TestCase, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._reset()
         test_method = self._get_test_method()
         if runTest is None:
@@ -472,12 +472,12 @@ class TestCase(unittest.TestCase):
            deemed to have suffered an error, exactly as for an
            unexpected exception.
         """
-        class ReRaiseOtherTypes(object):
+        class ReRaiseOtherTypes:
             def match(self, matchee):
                 if not issubclass(matchee[0], excClass):
                     reraise(*matchee)
 
-        class CaptureMatchee(object):
+        class CaptureMatchee:
             def match(self, matchee):
                 self.matchee = matchee[1]
         capture = CaptureMatchee()
@@ -764,7 +764,7 @@ class TestCase(unittest.TestCase):
             return fixture
 
     def setUp(self):
-        super(TestCase, self).setUp()
+        super().setUp()
         if self.__setup_called:
             raise ValueError(
                 "In File: %s\n"
@@ -775,7 +775,7 @@ class TestCase(unittest.TestCase):
         self.__setup_called = True
 
     def tearDown(self):
-        super(TestCase, self).tearDown()
+        super().tearDown()
         if self.__teardown_called:
             raise ValueError(
                 "In File: %s\n"
@@ -786,7 +786,7 @@ class TestCase(unittest.TestCase):
         self.__teardown_called = True
 
 
-class PlaceHolder(object):
+class PlaceHolder:
     """A placeholder test.
 
     `PlaceHolder` implements much of the same interface as TestCase and is
@@ -922,7 +922,7 @@ def attr(*args):
     return decorate
 
 
-class WithAttributes(object):
+class WithAttributes:
     """A mix-in class for modifying test id by attributes.
 
     e.g.
@@ -935,7 +935,7 @@ class WithAttributes(object):
     """
 
     def id(self):
-        orig = super(WithAttributes, self).id()
+        orig = super().id()
         # Depends on testtools.TestCase._get_test_method, be nice to support
         # plain unittest.
         fn = self._get_test_method()
@@ -1036,7 +1036,7 @@ class ExpectedException:
         return True
 
 
-class Nullary(object):
+class Nullary:
     """Turn a callable into a nullary callable.
 
     The advantage of this over ``lambda: f(*args, **kwargs)`` is that it
@@ -1055,7 +1055,7 @@ class Nullary(object):
         return repr(self._callable_object)
 
 
-class DecorateTestCaseResult(object):
+class DecorateTestCaseResult:
     """Decorate a TestCase and permit customisation of the result for runs."""
 
     def __init__(self, case, callout, before_run=None, after_run=None):

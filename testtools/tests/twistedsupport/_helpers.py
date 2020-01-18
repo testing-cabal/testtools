@@ -13,6 +13,6 @@ defer = try_import('twisted.internet.defer')
 class NeedsTwistedTestCase(TestCase):
 
     def setUp(self):
-        super(NeedsTwistedTestCase, self).setUp()
+        super().setUp()
         if defer is None:
             self.skipTest("Need Twisted to run")

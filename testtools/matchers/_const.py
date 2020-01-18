@@ -8,7 +8,7 @@ __all__ = [
 from ._impl import Mismatch
 
 
-class _Always(object):
+class _Always:
     """Always matches."""
 
     def __str__(self):
@@ -32,7 +32,7 @@ def Always():
     return _Always()
 
 
-class _Never(object):
+class _Never:
     """Never matches."""
 
     def __str__(self):

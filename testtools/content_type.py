@@ -3,7 +3,7 @@
 """ContentType - a MIME Content Type."""
 
 
-class ContentType(object):
+class ContentType:
     """A content type from http://www.iana.org/assignments/media-types/
 
     :ivar type: The primary type, e.g. "text" or "application"

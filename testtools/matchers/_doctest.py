@@ -48,7 +48,7 @@ class _NonManglingOutputChecker(doctest.OutputChecker):
         del __F, __f, __g, _indent
 
 
-class DocTestMatches(object):
+class DocTestMatches:
     """See if a string matches a doctest example."""
 
     def __init__(self, example, flags=0):

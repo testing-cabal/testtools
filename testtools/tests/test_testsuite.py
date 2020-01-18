@@ -40,7 +40,7 @@ class TestConcurrentTestSuiteRun(TestCase):
         log = []
         def on_test(test, status, start_time, stop_time, tags, details):
             log.append((test.id(), status, set(details.keys())))
-        class BrokenTest(object):
+        class BrokenTest:
             # Simple break - no result parameter to run()
             def __call__(self):
                 pass
@@ -164,7 +164,7 @@ class TestConcurrentStreamTestSuiteRun(TestCase):
     def test_broken_runner(self):
         # If the object called breaks, the stream is informed about it
         # regardless.
-        class BrokenTest(object):
+        class BrokenTest:
             # broken - no result parameter!
             def __call__(self):
                 pass
@@ -236,7 +236,7 @@ TypeError: run() takes ...1 ...argument...2...given...
         class Simples(TestCase):
             @classmethod
             def setUpClass(cls):
-                super(Simples, cls).setUpClass()
+                super().setUpClass()
             def test_simple(self):
                 pass
         # Test discovery uses the default suite from unittest2 (unless users
@@ -253,7 +253,7 @@ TypeError: run() takes ...1 ...argument...2...given...
 class TestFixtureSuite(TestCase):
 
     def setUp(self):
-        super(TestFixtureSuite, self).setUp()
+        super().setUp()
         if FunctionFixture is None:
             self.skip("Need fixtures")
 

@@ -16,7 +16,7 @@ from testtools.matchers import (
     )
 
 
-class AssertThatTests(object):
+class AssertThatTests:
     """A mixin containing shared tests for assertThat and assert_that."""
 
     def assert_that_callable(self, *args, **kwargs):
@@ -29,14 +29,14 @@ class AssertThatTests(object):
         self.assert_that_callable(failure, DocTestMatches(message, ELLIPSIS))
 
     def test_assertThat_matches_clean(self):
-        class Matcher(object):
+        class Matcher:
             def match(self, foo):
                 return None
         self.assert_that_callable("foo", Matcher())
 
     def test_assertThat_mismatch_raises_description(self):
         calls = []
-        class Mismatch(object):
+        class Mismatch:
             def __init__(self, thing):
                 self.thing = thing
             def describe(self):
@@ -44,7 +44,7 @@ class AssertThatTests(object):
                 return "object is not a thing"
             def get_details(self):
                 return {}
-        class Matcher(object):
+        class Matcher:
             def match(self, thing):
                 calls.append(('match', thing))
                 return Mismatch(thing)

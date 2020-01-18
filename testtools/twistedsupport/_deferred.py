@@ -12,7 +12,7 @@ class DeferredNotFired(Exception):
 
     def __init__(self, deferred):
         msg = "{!r} has not fired yet.".format(deferred)
-        super(DeferredNotFired, self).__init__(msg)
+        super().__init__(msg)
 
 
 def extract_result(deferred):
@@ -46,7 +46,7 @@ class ImpossibleDeferredError(Exception):
     def __init__(self, deferred, successes, failures):
         msg = ('Impossible condition on %r, got both success (%r) and '
                'failure (%r)')
-        super(ImpossibleDeferredError, self).__init__(
+        super().__init__(
             msg % (deferred, successes, failures))
 
 
