@@ -31,7 +31,7 @@ under the same license as Python, see LICENSE for details.
 Supported platforms
 -------------------
 
- * Python 2.7 or 3.5+ / PyPy
+ * Python 3.5+ or PyPy3
 
 If you would like to use testtools for earlier Pythons, consult the compatibility docs:
 
