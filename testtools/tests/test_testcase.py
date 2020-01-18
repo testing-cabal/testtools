@@ -7,8 +7,6 @@ from pprint import pformat
 import sys
 import unittest
 
-import six
-
 from testtools import (
     DecorateTestCaseResult,
     ErrorHolder,

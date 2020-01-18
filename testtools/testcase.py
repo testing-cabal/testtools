@@ -33,7 +33,6 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
-import six
 
 from testtools import (
     content,
@@ -216,7 +215,7 @@ def unique_text_generator(prefix):
 
     :param prefix: The prefix for text.
     :return: text that looks like '<prefix>-<text_with_unicode>'.
-    :rtype: six.text_type
+    :rtype: str
     """
     # 0x1e00 is the start of a range of glyphs that are easy to see are
     # unicode since they've got circles and dots and other diacriticals.

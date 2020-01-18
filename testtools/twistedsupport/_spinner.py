@@ -19,8 +19,6 @@ __all__ = [
 from fixtures import Fixture
 import signal
 
-import six
-
 from ._deferreddebug import DebugTwisted
 
 from twisted.internet import defer
