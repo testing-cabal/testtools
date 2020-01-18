@@ -3,6 +3,7 @@
 """Tests for the test runner logic."""
 
 import doctest
+import io
 from unittest import TestSuite
 import sys
 from textwrap import dedent
@@ -16,8 +17,6 @@ import testtools
 from testtools import TestCase, run, skipUnless
 from testtools.compat import (
     _b,
-    _u,
-    StringIO,
     )
 from testtools.matchers import (
     Contains,
@@ -147,7 +146,7 @@ class TestRun(TestCase):
             def list(self, test):
                 tests.append({case.id() for case
                     in testtools.testsuite.iterate_tests(test)})
-        out = StringIO()
+        out = io.StringIO()
         try:
             program = run.TestProgram(
                 argv=['prog', '-l', 'testtools.runexample.test_suite'],
@@ -167,7 +166,7 @@ class TestRun(TestCase):
                 tests.append({case.id() for case
                     in testtools.testsuite.iterate_tests(test)})
                 tests.append(loader)
-        out = StringIO()
+        out = io.StringIO()
         try:
             program = run.TestProgram(
                 argv=['prog', '-l', 'testtools.runexample.test_suite'],
@@ -181,7 +180,7 @@ class TestRun(TestCase):
 
     def test_run_list(self):
         self.useFixture(SampleTestFixture())
-        out = StringIO()
+        out = io.StringIO()
         try:
             run.main(['prog', '-l', 'testtools.runexample.test_suite'], out)
         except SystemExit:
@@ -193,7 +192,7 @@ testtools.runexample.TestFoo.test_quux
 
     def test_run_list_failed_import(self):
         broken = self.useFixture(SampleTestFixture(broken=True))
-        out = StringIO()
+        out = io.StringIO()
         # XXX: http://bugs.python.org/issue22811
         unittest2.defaultTestLoader._top_level_dir = None
         exc = self.assertRaises(
@@ -217,7 +216,7 @@ SyntaxError: invalid syntax
 
     def test_run_orders_tests(self):
         self.useFixture(SampleTestFixture())
-        out = StringIO()
+        out = io.StringIO()
         # We load two tests - one that exists and one that doesn't, and we
         # should get the one that exists and neither the one that doesn't nor
         # the unmentioned one that does.
@@ -243,7 +242,7 @@ testtools.runexample.missingtest
 
     def test_run_load_list(self):
         self.useFixture(SampleTestFixture())
-        out = StringIO()
+        out = io.StringIO()
         # We load two tests - one that exists and one that doesn't, and we
         # should get the one that exists and neither the one that doesn't nor
         # the unmentioned one that does.
@@ -323,18 +322,18 @@ testtools.resourceexample.TestFoo.test_foo
     def test_stdout_honoured(self):
         self.useFixture(SampleTestFixture())
         tests = []
-        out = StringIO()
+        out = io.StringIO()
         exc = self.assertRaises(SystemExit, run.main,
             argv=['prog', 'testtools.runexample.test_suite'],
             stdout=out)
         self.assertEqual((0,), exc.args)
         self.assertThat(
             out.getvalue(),
-            MatchesRegex(_u("""Tests running...
+            MatchesRegex("""Tests running...
 
 Ran 2 tests in \\d.\\d\\d\\ds
 OK
-""")))
+"""))
 
     @skipUnless(fixtures, "fixtures not present")
     def test_issue_16662(self):
@@ -343,7 +342,7 @@ OK
         # to all testtools users regardless of Python version.
         # See http://bugs.python.org/issue16662
         pkg = self.useFixture(SampleLoadTestsPackage())
-        out = StringIO()
+        out = io.StringIO()
         # XXX: http://bugs.python.org/issue22811
         unittest2.defaultTestLoader._top_level_dir = None
         self.assertEqual(None, run.main(

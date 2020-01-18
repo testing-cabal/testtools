@@ -24,7 +24,6 @@ from testtools import (
     )
 from testtools.compat import (
     _b,
-    _u,
     )
 from testtools.content import (
     text_content,
@@ -686,8 +685,8 @@ class TestAssertions(TestCase):
     def test_assertThat_verbose_unicode(self):
         # When assertThat is given matchees or matchers that contain non-ASCII
         # unicode strings, we can still provide a meaningful error.
-        matchee = _u('\xa7')
-        matcher = Equals(_u('a'))
+        matchee = '\xa7'
+        matcher = Equals('a')
         expected = (
             'Match failed. Matchee: %s\n'
             'Matcher: %s\n'
@@ -727,7 +726,7 @@ class TestAssertions(TestCase):
         self.assertFails(expected_error, self.failUnlessEqual, a, b)
 
     def test_assertEqual_non_ascii_str_with_newlines(self):
-        message = _u("Be careful mixing unicode and bytes")
+        message = "Be careful mixing unicode and bytes"
         a = "a\n\xa7\n"
         b = "Just a longish string so the more verbose output form is used."
         expected_error = '\n'.join([
@@ -1151,11 +1150,11 @@ class TestUniqueFactories(TestCase):
         prefix = self.getUniqueString()
         unique_text_generator = testcase.unique_text_generator(prefix)
         first_result = next(unique_text_generator)
-        self.assertEqual(six.text_type('%s-%s') % (prefix, _u('\u1e00')),
+        self.assertEqual(six.text_type('%s-%s') % (prefix, '\u1e00'),
                          first_result)
         # The next value yielded by unique_text_generator is different.
         second_result = next(unique_text_generator)
-        self.assertEqual(six.text_type('%s-%s') % (prefix, _u('\u1e01')),
+        self.assertEqual(six.text_type('%s-%s') % (prefix, '\u1e01'),
                          second_result)
 
     def test_mods(self):

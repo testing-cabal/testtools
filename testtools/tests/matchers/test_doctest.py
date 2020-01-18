@@ -4,9 +4,7 @@ import doctest
 
 from testtools import TestCase
 from testtools.compat import (
-    str_is_unicode,
     _b,
-    _u,
     )
 from testtools.matchers._doctest import DocTestMatches
 from testtools.tests.helpers import FullStackRunTest
@@ -32,18 +30,18 @@ class TestDocTestMatchesInterface(TestCase, TestMatchersInterface):
 
 class TestDocTestMatchesInterfaceUnicode(TestCase, TestMatchersInterface):
 
-    matches_matcher = DocTestMatches(_u("\xa7..."), doctest.ELLIPSIS)
-    matches_matches = [_u("\xa7"), _u("\xa7 more\n")]
-    matches_mismatches = ["\\xa7", _u("more \xa7"), _u("\n\xa7")]
+    matches_matcher = DocTestMatches("\xa7...", doctest.ELLIPSIS)
+    matches_matches = ["\xa7", "\xa7 more\n"]
+    matches_mismatches = ["\\xa7", "more \xa7", "\n\xa7"]
 
-    str_examples = [("DocTestMatches({!r})".format(_u("\xa7\n")),
-        DocTestMatches(_u("\xa7"))),
+    str_examples = [("DocTestMatches({!r})".format("\xa7\n"),
+        DocTestMatches("\xa7")),
         ]
 
     describe_examples = [(
-        _u("Expected:\n    \xa7\nGot:\n    a\n"),
+        "Expected:\n    \xa7\nGot:\n    a\n",
         "a",
-        DocTestMatches(_u("\xa7"), doctest.ELLIPSIS))]
+        DocTestMatches("\xa7", doctest.ELLIPSIS))]
 
 
 class TestDocTestMatchesSpecific(TestCase):
@@ -67,14 +65,8 @@ class TestDocTestMatchesSpecific(TestCase):
         and under Python 3 using bytes objects will reasonably raise an error.
         """
         header = _b("\x89PNG\r\n\x1a\n...")
-        if str_is_unicode:
-            self.assertRaises(TypeError,
-                DocTestMatches, header, doctest.ELLIPSIS)
-            return
-        matcher = DocTestMatches(header, doctest.ELLIPSIS)
-        mismatch = matcher.match(_b("GIF89a\1\0\1\0\0\0\0;"))
-        # Must be treatable as unicode text, the exact output matters less
-        self.assertTrue(unicode(mismatch.describe()))
+        self.assertRaises(TypeError,
+            DocTestMatches, header, doctest.ELLIPSIS)
 
 
 def test_suite():

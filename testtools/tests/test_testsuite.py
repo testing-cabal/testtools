@@ -17,7 +17,6 @@ from testtools import (
     TestByTestResult,
     TestCase,
     )
-from testtools.compat import _u
 from testtools.matchers import DocTestMatches, Equals
 from testtools.testsuite import FixtureSuite, sorted_tests
 from testtools.tests.helpers import LoggingResult
@@ -191,7 +190,7 @@ TypeError: run() takes ...1 ...argument...2...given...
         events[2] = events[2][:6] + (None,) + events[2][7:]
         events[3] = events[3][:6] + (None,) + events[3][7:]
         self.assertEqual([
-            ('status', "broken-runner-'0'", 'inprogress', None, True, None, None, False, None, _u('0'), None),
+            ('status', "broken-runner-'0'", 'inprogress', None, True, None, None, False, None, '0', None),
             ('status', "broken-runner-'0'", None, None, True, 'traceback', None,
              False,
              'text/x-traceback; charset="utf8"; language="python"',
@@ -207,12 +206,12 @@ TypeError: run() takes ...1 ...argument...2...given...
              'text/x-traceback; charset="utf8"; language="python"',
              '0',
              None),
-             ('status', "broken-runner-'0'", 'fail', set(), True, None, None, False, None, _u('0'), None)
+             ('status', "broken-runner-'0'", 'fail', set(), True, None, None, False, None, '0', None)
             ], events)
 
     def split_suite(self, suite):
         tests = list(enumerate(iterate_tests(suite)))
-        return [(test, _u(str(pos))) for pos, test in tests]
+        return [(test, str(pos)) for pos, test in tests]
 
     def test_setupclass_skip(self):
         # We should support setupclass skipping using cls.skipException.

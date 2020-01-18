@@ -39,7 +39,6 @@ from testtools import (
     content,
     )
 from testtools.compat import (
-    advance_iterator,
     reraise,
     )
 from testtools.matchers import (
@@ -182,7 +181,7 @@ def gather_details(source_dict, target_dict):
         new_name = name
         disambiguator = itertools.count(1)
         while new_name in target_dict:
-            new_name = '%s-%d' % (name, advance_iterator(disambiguator))
+            new_name = '%s-%d' % (name, next(disambiguator))
         name = new_name
         target_dict[name] = _copy_content(content_object)
 
@@ -597,7 +596,7 @@ class TestCase(unittest.TestCase):
         Use this when you need an arbitrary integer in your test, or as a
         helper for custom anonymous factory methods.
         """
-        return advance_iterator(self._unique_id_gen)
+        return next(self._unique_id_gen)
 
     def getUniqueString(self, prefix=None):
         """Get a string unique to this test.
@@ -650,7 +649,7 @@ class TestCase(unittest.TestCase):
         id_gen = self._traceback_id_gens.setdefault(
             tb_label, itertools.count(0))
         while True:
-            tb_id = advance_iterator(id_gen)
+            tb_id = next(id_gen)
             if tb_id:
                 tb_label = '%s-%d' % (tb_label, tb_id)
             if tb_label not in self.getDetails():

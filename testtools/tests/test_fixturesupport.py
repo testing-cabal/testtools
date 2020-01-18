@@ -9,7 +9,7 @@ from testtools import (
     content,
     content_type,
     )
-from testtools.compat import _b, _u
+from testtools.compat import _b
 from testtools.matchers import (
     Contains,
     Equals,
@@ -93,8 +93,8 @@ class TestFixtureSupport(TestCase):
         self.assertEqual('addSuccess', result._events[-2][0])
         details = result._events[-2][2]
         self.assertEqual(['aaa', 'bbb'], sorted(details))
-        self.assertEqual(_u('foo'), details['aaa'].as_text())
-        self.assertEqual(_u('bar'), details['bbb'].as_text())
+        self.assertEqual('foo', details['aaa'].as_text())
+        self.assertEqual('bar', details['bbb'].as_text())
 
     def test_useFixture_details_captured_from_setUp(self):
         # Details added during fixture set-up are gathered even if setUp()

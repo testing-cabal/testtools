@@ -33,7 +33,7 @@ from extras import safe_hasattr, try_import, try_imports
 parse_mime_type = try_import('mimeparse.parse_mime_type')
 Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
-from testtools.compat import str_is_unicode, _u, _b
+from testtools.compat import _b
 from testtools.content import (
     Content,
     text_content,
@@ -1839,7 +1839,7 @@ class StreamToQueue(StreamResult):
         """Adjust route_code on the way through."""
         if route_code is None:
             return self.routing_code
-        return self.routing_code + _u("/") + route_code
+        return self.routing_code + "/" + route_code
 
 
 class TestResultDecorator(object):
@@ -2027,20 +2027,6 @@ class TimestampingStreamResult(CopyStreamResult):
 class _StringException(Exception):
     """An exception made from an arbitrary string."""
 
-    if not str_is_unicode:
-        def __init__(self, string):
-            if type(string) is not unicode:
-                raise TypeError(
-                    "_StringException expects unicode, got {!r}".format(string))
-            Exception.__init__(self, string)
-
-        def __str__(self):
-            return self.args[0].encode("utf-8")
-
-        def __unicode__(self):
-            return self.args[0]
-    # For 3.0 and above the default __str__ is fine, so we don't define one.
-
     def __hash__(self):
         return id(self)
 
@@ -2101,4 +2087,4 @@ def _details_to_str(details, special=None):
     if (binary_attachments or empty_attachments) and text_attachments:
         lines.append('\n')
     lines.append('\n'.join(text_attachments))
-    return _u('').join(lines)
+    return ''.join(lines)

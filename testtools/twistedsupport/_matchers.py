@@ -14,7 +14,6 @@ These matchers allow you to make assertions about when and how Deferreds fire,
 and about what values they fire with.
 """
 
-from testtools.compat import _u
 from testtools.matchers import Mismatch
 
 from ._deferred import failure_content, on_deferred_result
@@ -26,8 +25,8 @@ class _NoResult(object):
     @staticmethod
     def _got_result(deferred, result):
         return Mismatch(
-            _u('No result expected on %r, found %r instead'
-               % (deferred, result)))
+            'No result expected on %r, found %r instead'
+            % (deferred, result))
 
     def match(self, deferred):
         """Match ``deferred`` if it hasn't fired."""
@@ -81,16 +80,16 @@ class _Succeeded(object):
     def _got_failure(deferred, failure):
         deferred.addErrback(lambda _: None)
         return Mismatch(
-            _u('Success result expected on %r, found failure result '
-               'instead: %r' % (deferred, failure)),
+            'Success result expected on %r, found failure result '
+            'instead: %r' % (deferred, failure),
             {'traceback': failure_content(failure)},
         )
 
     @staticmethod
     def _got_no_result(deferred):
         return Mismatch(
-            _u('Success result expected on %r, found no result '
-               'instead' % (deferred,)))
+            'Success result expected on %r, found no result '
+            'instead' % (deferred,))
 
     def match(self, deferred):
         """Match against the successful result of ``deferred``."""
@@ -140,14 +139,14 @@ class _Failed(object):
     @staticmethod
     def _got_success(deferred, success):
         return Mismatch(
-            _u('Failure result expected on %r, found success '
-               'result (%r) instead' % (deferred, success)))
+            'Failure result expected on %r, found success '
+            'result (%r) instead' % (deferred, success))
 
     @staticmethod
     def _got_no_result(deferred):
         return Mismatch(
-            _u('Failure result expected on %r, found no result instead'
-               % (deferred,)))
+            'Failure result expected on %r, found no result instead'
+            % (deferred,))
 
     def match(self, deferred):
         return on_deferred_result(

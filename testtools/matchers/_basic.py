@@ -20,9 +20,6 @@ import re
 import warnings
 
 from ..compat import (
-    _isbytes,
-    istext,
-    str_is_unicode,
     text_repr,
     )
 from ..helpers import list_subtract
@@ -41,7 +38,7 @@ def _format(thing):
     Blocks of text with newlines are formatted as triple-quote
     strings. Everything else is pretty-printed.
     """
-    if istext(thing) or _isbytes(thing):
+    if isinstance(thing, (str, bytes)):
         return text_repr(thing)
     return pformat(thing)
 
@@ -357,7 +354,7 @@ class MatchesRegex(object):
     def match(self, value):
         if not re.match(self.pattern, value, self.flags):
             pattern = self.pattern
-            if not isinstance(pattern, str_is_unicode and str or unicode):
+            if not isinstance(pattern, str):
                 pattern = pattern.decode("latin1")
             pattern = pattern.encode("unicode_escape").decode("ascii")
             return Mismatch("{!r} does not match /{}/".format(

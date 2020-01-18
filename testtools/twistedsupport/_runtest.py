@@ -26,12 +26,12 @@ __all__ = [
     'assert_fails_with',
     ]
 
+import io
 import warnings
 import sys
 
 from fixtures import Fixture
 
-from testtools.compat import StringIO
 from testtools.content import Content, text_content
 from testtools.content_type import UTF8_TEXT
 from testtools.runtest import RunTest, _raise_force_fail_error
@@ -170,7 +170,7 @@ class CaptureTwistedLogs(Fixture):
     LOG_DETAIL_NAME = 'twisted-log'
 
     def _setUp(self):
-        logs = StringIO()
+        logs = io.StringIO()
         full_observer = log.FileLogObserver(logs)
         self.useFixture(_TwistedLogObservers([full_observer.emit]))
         self.addDetail(self.LOG_DETAIL_NAME, Content(

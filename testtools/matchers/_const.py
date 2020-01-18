@@ -5,7 +5,6 @@ __all__ = [
     'Never',
     ]
 
-from testtools.compat import _u
 from ._impl import Mismatch
 
 
@@ -41,7 +40,7 @@ class _Never(object):
 
     def match(self, value):
         return Mismatch(
-            _u('Inevitable mismatch on {!r}'.format(value)))
+            'Inevitable mismatch on {!r}'.format(value))
 
 
 def Never():

@@ -17,8 +17,8 @@ from extras import safe_hasattr, try_imports
 # To let setup.py work, make this a conditional import.
 unittest = try_imports(['unittest2', 'unittest'])
 
-from testtools import TextTestResult, testcase
-from testtools.compat import classtypes, istext, unicode_output_stream
+from testtools import TextTestResult
+from testtools.compat import unicode_output_stream
 from testtools.testsuite import filter_by_ids, iterate_tests, sorted_tests
 
 
@@ -137,7 +137,7 @@ class TestProgram(unittest.TestProgram):
                     buffer=None, stdout=None, tb_locals=False):
         if module == __name__:
             self.module = None
-        elif istext(module):
+        elif isinstance(module, str):
             self.module = __import__(module)
             for part in module.split('.')[1:]:
                 self.module = getattr(self.module, part)

@@ -8,6 +8,7 @@ import codecs
 import datetime
 import doctest
 from itertools import chain, combinations
+import io
 import os
 import platform
 import re
@@ -51,11 +52,6 @@ from testtools import (
 from testtools.compat import (
     _b,
     _get_exception_encoding,
-    _r,
-    _u,
-    advance_iterator,
-    str_is_unicode,
-    StringIO,
     )
 from testtools.content import (
     Content,
@@ -205,13 +201,13 @@ class Python27Contract(Python26Contract):
         # Calling addSkip(test, reason) completes ok.
         result = self.makeResult()
         result.startTest(self)
-        result.addSkip(self, _u("Skipped for some reason"))
+        result.addSkip(self, "Skipped for some reason")
 
     def test_addSkip_is_success(self):
         # addSkip does not fail the test run.
         result = self.makeResult()
         result.startTest(self)
-        result.addSkip(self, _u("Skipped for some reason"))
+        result.addSkip(self, "Skipped for some reason")
         result.stopTest(self)
         self.assertTrue(result.wasSuccessful())
 
@@ -433,7 +429,7 @@ class TestTextTestResultContract(TestCase, StartTestRunContract):
     run_test_with = FullStackRunTest
 
     def makeResult(self):
-        return TextTestResult(StringIO())
+        return TextTestResult(io.StringIO())
 
 
 class TestThreadSafeForwardingResultContract(TestCase, StartTestRunContract):
@@ -524,14 +520,14 @@ class TestStreamResultContract(object):
         inputs = list(dict(
             eof=True,
             mime_type="text/plain",
-            route_code=_u("1234"),
-            test_id=_u("foo"),
+            route_code="1234",
+            test_id="foo",
             timestamp=now,
             ).items())
         param_dicts = self._power_set(inputs)
         for kwargs in param_dicts:
-            result.status(file_name=_u("foo"), file_bytes=_b(""), **kwargs)
-            result.status(file_name=_u("foo"), file_bytes=_b("bar"), **kwargs)
+            result.status(file_name="foo", file_bytes=_b(""), **kwargs)
+            result.status(file_name="foo", file_bytes=_b("bar"), **kwargs)
 
     def test_test_status(self):
         # Tests non-file attachment parameter combinations.
@@ -539,7 +535,7 @@ class TestStreamResultContract(object):
         result.startTestRun()
         self.addCleanup(result.stopTestRun)
         now = datetime.datetime.now(utc)
-        args = [[_u("foo"), s] for s in [
+        args = [["foo", s] for s in [
             'exists',
             'inprogress',
             'xfail',
@@ -551,7 +547,7 @@ class TestStreamResultContract(object):
         inputs = list(dict(
             runnable=False,
             test_tags={'quux'},
-            route_code=_u("1234"),
+            route_code="1234",
             timestamp=now,
             ).items())
         param_dicts = self._power_set(inputs)
@@ -796,7 +792,7 @@ class TestStreamToDict(TestCase):
         self.assertEqual("unknown", test['status'])
         details = test['details']
         self.assertEqual(
-            _u("1234 log message"), details['some log.txt'].as_text())
+            "1234 log message", details['some log.txt'].as_text())
         self.assertEqual(
             _b("Traceback..."),
             _b('').join(details['another file'].iter_bytes()))
@@ -817,7 +813,7 @@ class TestStreamToDict(TestCase):
         test = tests[0]
         self.assertEqual("id", test['id'])
         details = test['details']
-        self.assertEqual(_u("a"), details['file'].as_text())
+        self.assertEqual("a", details['file'].as_text())
         self.assertEqual(
             "text/plain; charset=\"utf8\"",
             repr(details['file'].content_type))
@@ -900,7 +896,7 @@ class TestExtendedToStreamDecorator(TestCase):
         now = datetime.datetime.now(utc)
         result.time(now)
         result.startTest(self)
-        result.addError(self, details={'foo': text_content(_u(""))})
+        result.addError(self, details={'foo': text_content("")})
         result.stopTest(self)
         result.stopTestRun()
         self.assertEqual([
@@ -1140,7 +1136,7 @@ class TestStreamSummary(TestCase):
         result.status("foo.bar", "skip")
         self.assertThat(result.skipped, HasLength(1))
         self.assertEqual("foo.bar", result.skipped[0][0].id())
-        self.assertEqual(_u("Missing dependency"), result.skipped[0][1])
+        self.assertEqual("Missing dependency", result.skipped[0][1])
 
     def _report_files(self, result):
         result.status(file_name="some log.txt",
@@ -1156,7 +1152,7 @@ testtools.matchers._impl.MismatchError: Differences: [
 ]
 """), eof=True, mime_type="text/plain; charset=utf8", test_id="foo.bar")
 
-    files_message = Equals(_u("""some log.txt: {{{1234 log message}}}
+    files_message = Equals("""some log.txt: {{{1234 log message}}}
 
 Traceback (most recent call last):
   File "testtools/tests/test_testresult.py", line 607, in test_stopTestRun
@@ -1165,7 +1161,7 @@ testtools.matchers._impl.MismatchError: Differences: [
 [('startTestRun',), ('stopTestRun',)] != []
 [('startTestRun',), ('stopTestRun',)] != []
 ]
-"""))
+""")
 
     def test_status_fail(self):
         # when fail is seen, a synthetic test is reported with all files
@@ -1217,15 +1213,15 @@ class TestTestResult(TestCase):
         # Calling addSkip on a TestResult records the test that was skipped in
         # its skip_reasons dict.
         result = self.makeResult()
-        result.addSkip(self, _u("Skipped for some reason"))
-        self.assertEqual({_u("Skipped for some reason"):[self]},
+        result.addSkip(self, "Skipped for some reason")
+        self.assertEqual({"Skipped for some reason":[self]},
             result.skip_reasons)
-        result.addSkip(self, _u("Skipped for some reason"))
-        self.assertEqual({_u("Skipped for some reason"):[self, self]},
+        result.addSkip(self, "Skipped for some reason")
+        self.assertEqual({"Skipped for some reason":[self, self]},
             result.skip_reasons)
-        result.addSkip(self, _u("Skipped for another reason"))
-        self.assertEqual({_u("Skipped for some reason"):[self, self],
-            _u("Skipped for another reason"):[self]},
+        result.addSkip(self, "Skipped for another reason")
+        self.assertEqual({"Skipped for some reason":[self, self],
+            "Skipped for another reason":[self]},
             result.skip_reasons)
 
     def test_now_datetime_now(self):
@@ -1408,7 +1404,7 @@ class TestMultiTestResult(TestCase):
     def test_addSkipped(self):
         # Calling `addSkip` on a `MultiTestResult` calls addSkip on its
         # results.
-        reason = _u("Skipped for some reason")
+        reason = "Skipped for some reason"
         self.multiResult.addSkip(self, reason)
         self.assertResultLogsEqual([('addSkip', self, reason)])
 
@@ -1480,7 +1476,7 @@ class TestTextTestResult(TestCase):
 
     def setUp(self):
         super(TestTextTestResult, self).setUp()
-        self.result = TextTestResult(StringIO())
+        self.result = TextTestResult(io.StringIO())
 
     def getvalue(self):
         return self.result.stream.getvalue()
@@ -1490,7 +1486,7 @@ class TestTextTestResult(TestCase):
         self.assertEqual("fp", result.stream)
 
     def reset_output(self):
-        self.result.stream = StringIO()
+        self.result.stream = io.StringIO()
 
     def test_startTestRun(self):
         self.result.startTestRun()
@@ -1503,7 +1499,7 @@ class TestTextTestResult(TestCase):
         self.result.stopTest(test)
         self.result.startTest(test)
         self.result.stopTest(test)
-        self.result.stream = StringIO()
+        self.result.stream = io.StringIO()
         self.result.stopTestRun()
         self.assertThat(self.getvalue(),
             DocTestMatches("\nRan 2 tests in ...s\n...", doctest.ELLIPSIS))
@@ -1779,7 +1775,7 @@ class TestThreadSafeForwardingResult(TestCase):
         # Once we receive an addSkip event, we forward all of the events for
         # that test, as we now know that test is complete.
         [result], events = self.make_results(1)
-        reason = _u("Skipped for some reason")
+        reason = "Skipped for some reason"
         start_time = datetime.datetime.utcfromtimestamp(4.489)
         end_time = datetime.datetime.utcfromtimestamp(5.476)
         result.time(start_time)
@@ -2497,9 +2493,9 @@ class TestNonAsciiResults(TestCase):
     """
 
     _sample_texts = (
-        _u("pa\u026a\u03b8\u0259n"), # Unicode encodings only
-        _u("\u5357\u7121"), # In ISO 2022 encodings
-        _u("\xa7\xa7\xa7"), # In ISO 8859 encodings
+        "pa\u026a\u03b8\u0259n", # Unicode encodings only
+        "\u5357\u7121", # In ISO 2022 encodings
+        "\xa7\xa7\xa7", # In ISO 8859 encodings
         )
 
     _is_pypy = "__pypy__" in sys.builtin_module_names
@@ -2558,20 +2554,18 @@ class TestNonAsciiResults(TestCase):
         self.addCleanup(sys.path.remove, self.dir)
         module = __import__(self.modname)
         self.addCleanup(sys.modules.pop, self.modname)
-        stream = StringIO()
+        stream = io.StringIO()
         self._run(stream, module.Test())
         return stream.getvalue()
 
     def _get_sample_text(self, encoding="unicode_internal"):
-        if encoding is None and str_is_unicode:
+        if encoding is None:
            encoding = "unicode_internal"
         for u in self._sample_texts:
             try:
                 b = u.encode(encoding)
                 if u == b.decode(encoding):
-                   if str_is_unicode:
-                       return u, u
-                   return u, b
+                   return u, u
             except (LookupError, UnicodeError):
                 pass
         self.skip("Could not find a sample text for encoding: %r" % encoding)
@@ -2582,14 +2576,14 @@ class TestNonAsciiResults(TestCase):
     def test_non_ascii_failure_string(self):
         """Assertion contents can be non-ascii and should get decoded"""
         text, raw = self._get_sample_text(_get_exception_encoding())
-        textoutput = self._test_external_case("self.fail(%s)" % _r(raw))
+        textoutput = self._test_external_case("self.fail(%s)" % ascii(raw))
         self.assertIn(self._as_output(text), textoutput)
 
     def test_non_ascii_failure_string_via_exec(self):
         """Assertion via exec can be non-ascii and still gets decoded"""
         text, raw = self._get_sample_text(_get_exception_encoding())
         textoutput = self._test_external_case(
-            testline='exec ("self.fail(%s)")' % _r(raw))
+            testline='exec ("self.fail(%s)")' % ascii(raw))
         self.assertIn(self._as_output(text), textoutput)
 
     def test_control_characters_in_failure_string(self):
@@ -2597,7 +2591,7 @@ class TestNonAsciiResults(TestCase):
         textoutput = self._test_external_case("self.fail('\\a\\a\\a')")
         self.expectFailure("Defense against the beeping horror unimplemented",
             self.assertNotIn, self._as_output("\a\a\a"), textoutput)
-        self.assertIn(self._as_output(_u("\uFFFD\uFFFD\uFFFD")), textoutput)
+        self.assertIn(self._as_output("\uFFFD\uFFFD\uFFFD"), textoutput)
 
     def _local_os_error_matcher(self):
         if sys.version_info > (3, 4):
@@ -2617,14 +2611,11 @@ class TestNonAsciiResults(TestCase):
 
     def test_assertion_text_shift_jis(self):
         """A terminal raw backslash in an encoded string is weird but fine"""
-        example_text = _u("\u5341")
+        example_text = "\u5341"
         textoutput = self._test_external_case(
             coding="shift_jis",
             testline="self.fail('%s')" % example_text)
-        if str_is_unicode:
-            output_text = example_text
-        else:
-            output_text = "b%r" % example_text.encode("shift_jis")
+        output_text = example_text
         self.assertIn(self._as_output("AssertionError: %s" % output_text),
             textoutput)
 
@@ -2646,7 +2637,7 @@ class TestNonAsciiResults(TestCase):
             "        return self.args[0]\n")
         textoutput = self._test_external_case(
             modulelevel=exception_class,
-            testline="raise FancyError(%s)" % _r(example_text))
+            testline="raise FancyError(%s)" % ascii(example_text))
         self.assertIn(self._as_output(example_text), textoutput)
 
     def test_unprintable_exception(self):
@@ -2704,11 +2695,11 @@ class TestNonAsciiResults(TestCase):
         self._write_module("bad", "iso-8859-1",
             "# coding: iso-8859-1\n! = 0 # %s\n" % text)
         textoutput = self._run_external_case()
-        self.assertIn(self._as_output(_u(
+        self.assertIn(self._as_output(
             #'bad.py", line 2\n'
             '    ! = 0 # %s\n'
             '    ^\n'
-            'SyntaxError: ') %
+            'SyntaxError: ' %
             (text,)), textoutput)
 
     def test_syntax_error_line_iso_8859_5(self):
@@ -2721,7 +2712,7 @@ class TestNonAsciiResults(TestCase):
         self.assertThat(
             textoutput,
             MatchesRegex(
-                self._as_output(_u(
+                self._as_output((
                 #'bad.py", line 2\n'
                 '.*%% = 0 # %s\n'
                 + ' ' * self._error_on_character +
@@ -2741,7 +2732,7 @@ class TestNonAsciiResults(TestCase):
         # pypy uses cpython's multibyte codecs so has their behavior here
         if self._is_pypy:
             self._error_on_character = True
-        self.assertIn(self._as_output(_u(
+        self.assertIn(self._as_output((
             #'bad.py", line 2\n'
             '    $ = 0 # %s\n'
             + ' ' * self._error_on_character +
@@ -2753,12 +2744,12 @@ class TestNonAsciiResults(TestCase):
         """Syntax error on a utf-8 line shows the line decoded"""
         text, raw = self._get_sample_text("utf-8")
         textoutput = self._setup_external_case("import bad")
-        self._write_module("bad", "utf-8", _u("\ufeff^ = 0 # %s\n") % text)
+        self._write_module("bad", "utf-8", "\ufeff^ = 0 # %s\n" % text)
         textoutput = self._run_external_case()
         self.assertThat(
             textoutput,
             MatchesRegex(
-                self._as_output(_u(
+                self._as_output((
                     '.*bad.py", line 1\n'
                     '\\s*\\^ = 0 # %s\n'
                     + ' ' * self._error_on_character +
@@ -2776,9 +2767,7 @@ class TestNonAsciiResultsWithUnittest(TestNonAsciiResults):
         return _Runner(stream).run(test)
 
     def _as_output(self, text):
-        if str_is_unicode:
-            return text
-        return text.encode("utf-8")
+        return text
 
 
 class TestDetailsToStr(TestCase):
@@ -2789,7 +2778,7 @@ class TestDetailsToStr(TestCase):
 
     def test_binary_content(self):
         content = content_from_stream(
-            StringIO('foo'), content_type=ContentType('image', 'jpeg'))
+            io.StringIO('foo'), content_type=ContentType('image', 'jpeg'))
         string = _details_to_str({'attachment': content})
         self.assertThat(
             string, Equals("""\
@@ -2837,7 +2826,7 @@ Empty attachments:
 
     def test_lots_of_different_attachments(self):
         jpg = lambda x: content_from_stream(
-            StringIO(x), ContentType('image', 'jpeg'))
+            io.StringIO(x), ContentType('image', 'jpeg'))
         attachments = {
             'attachment': text_content('foo'),
             'attachment-1': text_content('traceback'),
@@ -2869,7 +2858,7 @@ class TestByTestResultTests(TestCase):
         self.log = []
         self.result = TestByTestResult(self.on_test)
         now = iter(range(5))
-        self.result._now = lambda: advance_iterator(now)
+        self.result._now = lambda: next(now)
 
     def assertCalled(self, **kwargs):
         defaults = {

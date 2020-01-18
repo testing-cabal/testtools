@@ -8,8 +8,6 @@ from extras import try_import
 
 from testtools.compat import (
     _b,
-    _u,
-    BytesIO,
     )
 fixtures = try_import('fixtures')
 
@@ -66,11 +64,11 @@ class TestCommandTest(TestCase):
             dist.run_command('test')
         self.assertThat(
             stdout.getDetails()['stdout'].as_text(),
-            MatchesRegex(_u("""Tests running...
+            MatchesRegex("""Tests running...
 
 Ran 2 tests in \\d.\\d\\d\\ds
 OK
-""")))
+"""))
 
     def test_test_suite(self):
         self.useFixture(SampleTestFixture())
@@ -88,11 +86,11 @@ OK
             dist.run_command('test')
         self.assertThat(
             stdout.getDetails()['stdout'].as_text(),
-            MatchesRegex(_u("""Tests running...
+            MatchesRegex("""Tests running...
 
 Ran 2 tests in \\d.\\d\\d\\ds
 OK
-""")))
+"""))
 
 
 def test_suite():

@@ -6,9 +6,6 @@ from testtools import (
 from testtools.assertions import (
     assert_that,
     )
-from testtools.compat import (
-    _u,
-    )
 from testtools.content import (
     TracebackContent,
     )
@@ -119,8 +116,8 @@ class AssertThatTests(object):
     def test_assertThat_verbose_unicode(self):
         # When assertThat is given matchees or matchers that contain non-ASCII
         # unicode strings, we can still provide a meaningful error.
-        matchee = _u('\xa7')
-        matcher = Equals(_u('a'))
+        matchee = '\xa7'
+        matcher = Equals('a')
         expected = (
             'Match failed. Matchee: %s\n'
             'Matcher: %s\n'

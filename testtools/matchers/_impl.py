@@ -18,9 +18,6 @@ __all__ = [
     ]
 
 from testtools.compat import (
-    _isbytes,
-    istext,
-    str_is_unicode,
     text_repr
     )
 
@@ -125,7 +122,7 @@ class MismatchError(AssertionError):
         if self.verbose:
             # GZ 2011-08-24: Smelly API? Better to take any object and special
             #                case text inside?
-            if istext(self.matchee) or _isbytes(self.matchee):
+            if isinstance(self.matchee, (str, bytes)):
                 matchee = text_repr(self.matchee, multiline=False)
             else:
                 matchee = repr(self.matchee)
@@ -134,13 +131,6 @@ class MismatchError(AssertionError):
                 % (matchee, self.matcher, difference))
         else:
             return difference
-
-    if not str_is_unicode:
-
-        __unicode__ = __str__
-
-        def __str__(self):
-            return self.__unicode__().encode("ascii", "backslashreplace")
 
 
 class MismatchDecorator(object):

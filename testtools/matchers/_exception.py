@@ -8,10 +8,6 @@ __all__ = [
 
 import sys
 
-from testtools.compat import (
-    classtypes,
-    istext,
-    )
 from ._basic import MatchesRegex
 from ._higherorder import AfterPreproccessing
 from ._impl import (
@@ -50,12 +46,12 @@ class MatchesException(Matcher):
         """
         Matcher.__init__(self)
         self.expected = exception
-        if istext(value_re):
+        if isinstance(value_re, str):
             value_re = AfterPreproccessing(str, MatchesRegex(value_re), False)
         self.value_re = value_re
         expected_type = type(self.expected)
         self._is_instance = not any(issubclass(expected_type, class_type)
-                for class_type in classtypes() + (tuple,))
+                for class_type in (type, tuple))
 
     def match(self, other):
         if type(other) != tuple:
