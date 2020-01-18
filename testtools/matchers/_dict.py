@@ -36,7 +36,7 @@ class MatchesAllDict(Matcher):
         self.matchers = matchers
 
     def __str__(self):
-        return 'MatchesAllDict(%s)' % (_format_matcher_dict(self.matchers),)
+        return 'MatchesAllDict({})'.format(_format_matcher_dict(self.matchers))
 
     def match(self, observed):
         mismatches = {}
@@ -56,7 +56,7 @@ class DictMismatches(Mismatch):
     def describe(self):
         lines = ['{']
         lines.extend(
-            ['  %r: %s,' % (key, mismatch.describe())
+            ['  {!r}: {},'.format(key, mismatch.describe())
              for (key, mismatch) in sorted(self.mismatches.items())])
         lines.append('}')
         return '\n'.join(lines)
@@ -133,7 +133,7 @@ class _SuperDictOf(Matcher):
 
 def _format_matcher_dict(matchers):
     return '{%s}' % (
-        ', '.join(sorted('%r: %s' % (k, v) for k, v in matchers.items())))
+        ', '.join(sorted('{!r}: {}'.format(k, v) for k, v in matchers.items())))
 
 
 class _CombinedMatcher(Matcher):
@@ -156,12 +156,12 @@ class _CombinedMatcher(Matcher):
         return repr(expected)
 
     def __str__(self):
-        return '%s(%s)' % (
+        return '{}({})'.format(
             self.__class__.__name__, self.format_expected(self._expected))
 
     def match(self, observed):
-        matchers = dict(
-            (k, v(self._expected)) for k, v in self.matcher_factories.items())
+        matchers = {
+            k: v(self._expected) for k, v in self.matcher_factories.items()}
         return MatchesAllDict(matchers).match(observed)
 
 

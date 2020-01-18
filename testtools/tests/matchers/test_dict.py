@@ -125,7 +125,7 @@ class TestMatchesDict(TestCase, TestMatchersInterface):
         ]
 
     str_examples = [
-        ("MatchesDict({'baz': %s, 'foo': %s})" % (
+        ("MatchesDict({{'baz': {}, 'foo': {}}})".format(
             Not(Equals('qux')), Equals('bar')),
          matches_matcher),
         ]
@@ -178,7 +178,7 @@ class TestContainsDict(TestCase, TestMatchersInterface):
         ]
 
     str_examples = [
-        ("ContainsDict({'baz': %s, 'foo': %s})" % (
+        ("ContainsDict({{'baz': {}, 'foo': {}}})".format(
             Not(Equals('qux')), Equals('bar')),
          matches_matcher),
         ]
@@ -224,7 +224,7 @@ class TestContainedByDict(TestCase, TestMatchersInterface):
         ]
 
     str_examples = [
-        ("ContainedByDict({'baz': %s, 'foo': %s})" % (
+        ("ContainedByDict({{'baz': {}, 'foo': {}}})".format(
             Not(Equals('qux')), Equals('bar')),
          matches_matcher),
         ]

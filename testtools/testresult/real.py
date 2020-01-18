@@ -591,7 +591,7 @@ class StreamResultRouter(StreamResult):
         """
         policy_method = StreamResultRouter._policies.get(policy, None)
         if not policy_method:
-            raise ValueError("bad policy %r" % (policy,))
+            raise ValueError("bad policy {!r}".format(policy))
         policy_method(self, sink, **policy_args)
         if do_start_stop_run:
             self._sinks.append(sink)
@@ -601,7 +601,7 @@ class StreamResultRouter(StreamResult):
     def _map_route_code_prefix(self, sink, route_prefix, consume_route=False):
         if '/' in route_prefix:
             raise TypeError(
-                "%r is more than one route step long" % (route_prefix,))
+                "{!r} is more than one route step long".format(route_prefix))
         self._route_code_prefixes[route_prefix] = (sink, consume_route)
     _policies['route_code_prefix'] = _map_route_code_prefix
 
@@ -1038,7 +1038,7 @@ class MultiTestResult(TestResult):
         super(MultiTestResult, self).__init__()
 
     def __repr__(self):
-        return '<%s (%s)>' % (
+        return '<{} ({})>'.format(
             self.__class__.__name__, ', '.join(map(repr, self._results)))
 
     def _dispatch(self, message, *args, **kwargs):
@@ -1140,7 +1140,7 @@ class TextTestResult(TestResult):
     def _show_list(self, label, error_list):
         for test, output in error_list:
             self.stream.write(self.sep1)
-            self.stream.write("%s: %s\n" % (label, test.id()))
+            self.stream.write("{}: {}\n".format(label, test.id()))
             self.stream.write(self.sep2)
             self.stream.write(output)
 
@@ -1159,7 +1159,7 @@ class TextTestResult(TestResult):
         self._show_list('FAIL', self.failures)
         for test in self.unexpectedSuccesses:
             self.stream.write(
-                "%sUNEXPECTED SUCCESS: %s\n%s" % (
+                "{}UNEXPECTED SUCCESS: {}\n{}".format(
                     self.sep1, test.id(), self.sep2))
         self.stream.write(
             "\nRan %d test%s in %.3fs\n" % (
@@ -1218,7 +1218,7 @@ class ThreadsafeForwardingResult(TestResult):
         self._test_tags = set(), set()
 
     def __repr__(self):
-        return '<%s %r>' % (self.__class__.__name__, self.result)
+        return '<{} {!r}>'.format(self.__class__.__name__, self.result)
 
     def _any_tags(self, tags):
         return bool(tags[0] or tags[1])
@@ -1359,7 +1359,7 @@ class ExtendedToOriginalDecorator(object):
         self._shouldStop = False
 
     def __repr__(self):
-        return '<%s %r>' % (self.__class__.__name__, self.decorated)
+        return '<{} {!r}>'.format(self.__class__.__name__, self.decorated)
 
     def __getattr__(self, name):
         return getattr(self.decorated, name)
@@ -1726,10 +1726,10 @@ class ResourcedToStreamDecorator(ExtendedToStreamDecorator):
         if safe_hasattr(resource, "id"):
             resource_id = resource.id()
         else:
-            resource_id = "%s.%s" % (
+            resource_id = "{}.{}".format(
                 resource.__class__.__module__, resource.__class__.__name__)
 
-        test_id = '%s.%s' % (resource_id, method)
+        test_id = '{}.{}'.format(resource_id, method)
 
         if phase == 'start':
             test_status = 'inprogress'
@@ -2031,7 +2031,7 @@ class _StringException(Exception):
         def __init__(self, string):
             if type(string) is not unicode:
                 raise TypeError(
-                    "_StringException expects unicode, got %r" % (string,))
+                    "_StringException expects unicode, got {!r}".format(string))
             Exception.__init__(self, string)
 
         def __str__(self):
@@ -2082,7 +2082,7 @@ def _details_to_str(details, special=None):
             continue
         # We want the 'special' attachment to be at the bottom.
         if key == special:
-            special_content = '%s\n' % (text,)
+            special_content = '{}\n'.format(text)
             continue
         text_attachments.append(_format_text_attachment(key, text))
     if text_attachments and not text_attachments[-1].endswith('\n'):
@@ -2093,11 +2093,11 @@ def _details_to_str(details, special=None):
     if binary_attachments:
         lines.append('Binary content:\n')
         for name, content_type in binary_attachments:
-            lines.append('  %s (%s)\n' % (name, content_type))
+            lines.append('  {} ({})\n'.format(name, content_type))
     if empty_attachments:
         lines.append('Empty attachments:\n')
         for name in empty_attachments:
-            lines.append('  %s\n' % (name,))
+            lines.append('  {}\n'.format(name))
     if (binary_attachments or empty_attachments) and text_attachments:
         lines.append('\n')
     lines.append('\n'.join(text_attachments))

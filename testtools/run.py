@@ -49,11 +49,11 @@ def list_test(test):
     :return: A tuple of test ids that would run and error strings
         describing things that failed to import.
     """
-    unittest_import_strs = set([
+    unittest_import_strs = {
         'unittest2.loader.ModuleImportFailure.',
         'unittest.loader.ModuleImportFailure.',
         'discover.ModuleImportFailure.'
-        ])
+        }
     test_ids = []
     errors = []
     for test in iterate_tests(test):
@@ -180,7 +180,7 @@ class TestProgram(unittest.TestProgram):
                 lines = source.readlines()
             finally:
                 source.close()
-            test_ids = set(line.strip().decode('utf-8') for line in lines)
+            test_ids = {line.strip().decode('utf-8') for line in lines}
             self.test = filter_by_ids(self.test, test_ids)
         # XXX: Local edit (see http://bugs.python.org/issue22860)
         if not self.listtests:

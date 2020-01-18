@@ -176,7 +176,7 @@ class ConcurrentStreamTestSuite(object):
                 elif event == 'startTestRun':
                     pass
                 else:
-                    raise ValueError('unknown event type %r' % (event,))
+                    raise ValueError('unknown event type {!r}'.format(event))
         except:
             for thread, process_result in threads.values():
                 # Signal to each TestControl in the ExtendedToStreamDecorator
@@ -192,7 +192,7 @@ class ConcurrentStreamTestSuite(object):
             except Exception:
                 # The run logic itself failed.
                 case = testtools.ErrorHolder(
-                    "broken-runner-'%s'" % (route_code,),
+                    "broken-runner-'{}'".format(route_code),
                     error=sys.exc_info())
                 case.run(process_result)
         finally:
@@ -307,11 +307,11 @@ def sorted_tests(suite_or_case, unpack_outer=False):
     # Duplicate test id can induce TypeError in Python 3.3.
     # Detect the duplicate test ids, raise exception when found.
     seen = Counter(case.id() for case in iterate_tests(suite_or_case))
-    duplicates = dict(
-        (test_id, count) for test_id, count in seen.items() if count > 1)
+    duplicates = {
+        test_id: count for test_id, count in seen.items() if count > 1}
     if duplicates:
         raise ValueError(
-            'Duplicate test ids detected: %s' % (pformat(duplicates),))
+            'Duplicate test ids detected: {}'.format(pformat(duplicates)))
 
     tests = _flatten_tests(suite_or_case, unpack_outer=unpack_outer)
     tests.sort()

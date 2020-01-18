@@ -166,7 +166,7 @@ def make_integration_tests():
     for runner_name, runner in runners:
         for test in tests:
             new_test = clone_test_with_new_id(
-                base_test, '%s(%s, %s)' % (
+                base_test, '{}({}, {})'.format(
                     base_test.id(),
                     runner_name,
                     test.__name__))
@@ -805,7 +805,7 @@ class TestAssertFailsWith(NeedsTwistedTestCase):
             failure.trap(self.failureException)
             self.assertThat(
                 str(failure.value),
-                Equals("RuntimeError not raised (%r returned)" % (marker,)))
+                Equals("RuntimeError not raised ({!r} returned)".format(marker)))
         d.addCallbacks(
             lambda x: self.fail("Should not have succeeded"), check_result)
         return d
@@ -868,7 +868,7 @@ class TestAssertFailsWith(NeedsTwistedTestCase):
             failure.trap(CustomException)
             self.assertThat(
                 str(failure.value),
-                Equals("RuntimeError not raised (%r returned)" % (marker,)))
+                Equals("RuntimeError not raised ({!r} returned)".format(marker)))
         return d.addCallbacks(
             lambda x: self.fail("Should not have succeeded"), check_result)
 

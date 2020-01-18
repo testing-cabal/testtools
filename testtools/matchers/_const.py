@@ -41,7 +41,7 @@ class _Never(object):
 
     def match(self, value):
         return Mismatch(
-            _u('Inevitable mismatch on %r' % (value,)))
+            _u('Inevitable mismatch on {!r}'.format(value)))
 
 
 def Never():

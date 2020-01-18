@@ -135,9 +135,9 @@ class MatchesEvents(object):
             return MatchesListwise(
                 [self._make_matcher(item) for item in obj])
         elif isinstance(obj, dict):
-            return MatchesDict(dict(
-                (key, self._make_matcher(value))
-                for key, value in obj.items()))
+            return MatchesDict({
+                key: self._make_matcher(value)
+                for key, value in obj.items()})
         else:
             return Equals(obj)
 

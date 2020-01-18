@@ -145,8 +145,8 @@ class TestRun(TestCase):
         tests = []
         class CaptureList(run.TestToolsTestRunner):
             def list(self, test):
-                tests.append(set([case.id() for case
-                    in testtools.testsuite.iterate_tests(test)]))
+                tests.append({case.id() for case
+                    in testtools.testsuite.iterate_tests(test)})
         out = StringIO()
         try:
             program = run.TestProgram(
@@ -155,8 +155,8 @@ class TestRun(TestCase):
         except SystemExit:
             exc_info = sys.exc_info()
             raise AssertionError("-l tried to exit. %r" % exc_info[1])
-        self.assertEqual([set(['testtools.runexample.TestFoo.test_bar',
-            'testtools.runexample.TestFoo.test_quux'])], tests)
+        self.assertEqual([{'testtools.runexample.TestFoo.test_bar',
+            'testtools.runexample.TestFoo.test_quux'}], tests)
 
     def test_run_list_with_loader(self):
         # list() is attempted with a loader first.
@@ -164,8 +164,8 @@ class TestRun(TestCase):
         tests = []
         class CaptureList(run.TestToolsTestRunner):
             def list(self, test, loader=None):
-                tests.append(set([case.id() for case
-                    in testtools.testsuite.iterate_tests(test)]))
+                tests.append({case.id() for case
+                    in testtools.testsuite.iterate_tests(test)})
                 tests.append(loader)
         out = StringIO()
         try:
@@ -175,8 +175,8 @@ class TestRun(TestCase):
         except SystemExit:
             exc_info = sys.exc_info()
             raise AssertionError("-l tried to exit. %r" % exc_info[1])
-        self.assertEqual([set(['testtools.runexample.TestFoo.test_bar',
-            'testtools.runexample.TestFoo.test_quux']), program.testLoader],
+        self.assertEqual([{'testtools.runexample.TestFoo.test_bar',
+            'testtools.runexample.TestFoo.test_quux'}, program.testLoader],
             tests)
 
     def test_run_list(self):

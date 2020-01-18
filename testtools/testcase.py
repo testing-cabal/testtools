@@ -300,7 +300,7 @@ class TestCase(unittest.TestCase):
 
     def __repr__(self):
         # We add id to the repr because it makes testing testtools easier.
-        return "<%s id=0x%0x>" % (self.id(), id(self))
+        return "<{} id=0x{:0x}>".format(self.id(), id(self))
 
     def addDetail(self, name, content_object):
         """Add a detail to be reported with this test's outcome.
@@ -826,7 +826,7 @@ class PlaceHolder(object):
         internal = [self._outcome, self._test_id, self._details]
         if self._short_description is not None:
             internal.append(self._short_description)
-        return "<%s.%s(%s)>" % (
+        return "<{}.{}({})>".format(
             self.__class__.__module__,
             self.__class__.__name__,
             ", ".join(map(repr, internal)))

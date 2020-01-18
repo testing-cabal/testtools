@@ -36,7 +36,7 @@ class TestDocTestMatchesInterfaceUnicode(TestCase, TestMatchersInterface):
     matches_matches = [_u("\xa7"), _u("\xa7 more\n")]
     matches_mismatches = ["\\xa7", _u("more \xa7"), _u("\n\xa7")]
 
-    str_examples = [("DocTestMatches(%r)" % (_u("\xa7\n"),),
+    str_examples = [("DocTestMatches({!r})".format(_u("\xa7\n")),
         DocTestMatches(_u("\xa7"))),
         ]
 

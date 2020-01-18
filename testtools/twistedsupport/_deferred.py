@@ -11,7 +11,7 @@ class DeferredNotFired(Exception):
     """Raised when we extract a result from a Deferred that's not fired yet."""
 
     def __init__(self, deferred):
-        msg = "%r has not fired yet." % (deferred,)
+        msg = "{!r} has not fired yet.".format(deferred)
         super(DeferredNotFired, self).__init__(msg)
 
 

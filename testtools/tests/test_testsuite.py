@@ -49,7 +49,7 @@ class TestConcurrentTestSuiteRun(TestCase):
         original_suite = unittest.TestSuite([BrokenTest()])
         suite = ConcurrentTestSuite(original_suite, self.split_suite)
         suite.run(TestByTestResult(on_test))
-        self.assertEqual([('broken-runner', 'error', set(['traceback']))], log)
+        self.assertEqual([('broken-runner', 'error', {'traceback'})], log)
 
     def test_trivial(self):
         log = []
@@ -110,7 +110,7 @@ class TestConcurrentStreamTestSuiteRun(TestCase):
         # Ignore event order: we're testing the code is all glued together,
         # which just means we can pump events through and they get route codes
         # added appropriately.
-        self.assertEqual(set([
+        self.assertEqual({
             ('status',
              'testtools.tests.test_testsuite.Sample.test_method1',
              'inprogress',
@@ -159,8 +159,8 @@ class TestConcurrentStreamTestSuiteRun(TestCase):
              '1',
              None,
              ),
-            ]), set(event[0:3] + (freeze(event[3]),) + event[4:10] + (None,)
-                for event in result._events))
+            }, {event[0:3] + (freeze(event[3]),) + event[4:10] + (None,)
+                for event in result._events})
 
     def test_broken_runner(self):
         # If the object called breaks, the stream is informed about it
@@ -332,8 +332,8 @@ class TestSortedTests(TestCase):
             ValueError, sorted_tests, unittest.TestSuite([a, b, c, d]))
         self.assertThat(
             str(error),
-            Equals("Duplicate test ids detected: %s" % (
-                pformat({'a': 2, 'b': 2}),)))
+            Equals("Duplicate test ids detected: {}".format(
+                pformat({'a': 2, 'b': 2}))))
 
 
 def test_suite():

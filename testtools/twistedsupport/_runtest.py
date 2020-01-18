@@ -507,12 +507,12 @@ def assert_fails_with(d, *exc_types, **kwargs):
 
     def got_success(result):
         raise failureException(
-            "%s not raised (%r returned)" % (expected_names, result))
+            "{} not raised ({!r} returned)".format(expected_names, result))
 
     def got_failure(failure):
         if failure.check(*exc_types):
             return failure.value
-        raise failureException("%s raised instead of %s:\n %s" % (
+        raise failureException("{} raised instead of {}:\n {}".format(
             failure.type.__name__, expected_names, failure.getTraceback()))
     return d.addCallbacks(got_success, got_failure)
 
@@ -534,4 +534,4 @@ class UncleanReactorError(Exception):
             ret = str(junk)
         else:
             ret = repr(junk)
-        return '  %s\n' % (ret,)
+        return '  {}\n'.format(ret)

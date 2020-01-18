@@ -73,7 +73,7 @@ class Content(object):
     def __init__(self, content_type, get_bytes):
         """Create a ContentType."""
         if None in (content_type, get_bytes):
-            raise ValueError("None not permitted in %r, %r" % (
+            raise ValueError("None not permitted in {!r}, {!r}".format(
                 content_type, get_bytes))
         self.content_type = content_type
         self._get_bytes = get_bytes
@@ -119,7 +119,7 @@ class Content(object):
             yield final
 
     def __repr__(self):
-        return "<Content type=%r, value=%r>" % (
+        return "<Content type={!r}, value={!r}>".format(
             self.content_type, _join_b(self.iter_bytes()))
 
 

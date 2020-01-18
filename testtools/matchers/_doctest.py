@@ -70,7 +70,7 @@ class DocTestMatches(object):
             flagstr = ", flags=%d" % self.flags
         else:
             flagstr = ""
-        return 'DocTestMatches(%r%s)' % (self.want, flagstr)
+        return 'DocTestMatches({!r}{})'.format(self.want, flagstr)
 
     def _with_nl(self, actual):
         result = self.want.__class__(actual)

@@ -99,7 +99,7 @@ class TestPlaceHolder(TestCase):
         # repr(placeholder) shows you how the object was constructed.
         test = PlaceHolder("test id", "description")
         self.assertEqual(
-            "<testtools.testcase.PlaceHolder('addSuccess', %r, {}, %r)>" % (
+            "<testtools.testcase.PlaceHolder('addSuccess', {!r}, {{}}, {!r})>".format(
             test.id(), test.shortDescription()), repr(test))
 
     def test_repr_custom_outcome(self):
@@ -177,7 +177,7 @@ class TestPlaceHolder(TestCase):
 
     def test_supports_tags(self):
         result = ExtendedTestResult()
-        tags = set(['foo', 'bar'])
+        tags = {'foo', 'bar'}
         case = PlaceHolder("foo", tags=tags)
         case.run(result)
         self.assertEqual([
@@ -353,7 +353,7 @@ class TestAssertions(TestCase):
         self.assertEqual(1, len(raisedExceptions))
         self.assertTrue(
             exception is raisedExceptions[0],
-            "%r is not %r" % (exception, raisedExceptions[0]))
+            "{!r} is not {!r}".format(exception, raisedExceptions[0]))
 
     def test_assertRaises_with_multiple_exceptions(self):
         # assertRaises((ExceptionOne, ExceptionTwo), function) asserts that
@@ -384,7 +384,7 @@ class TestAssertions(TestCase):
         self.assertThat(
             lambda: self.assertRaises(Exception, foo),
             Raises(
-                MatchesException(self.failureException, '.*%r.*' % (foo,))))
+                MatchesException(self.failureException, '.*{!r}.*'.format(foo))))
 
     def test_assertRaisesRegexp(self):
         # assertRaisesRegexp asserts that function raises particular exception
@@ -423,7 +423,7 @@ class TestAssertions(TestCase):
         # 'haystack'.
         self.assertFails('3 not in [0, 1, 2]', self.assertIn, 3, [0, 1, 2])
         self.assertFails(
-            '%r not in %r' % ('qux', 'foo bar baz'),
+            '{!r} not in {!r}'.format('qux', 'foo bar baz'),
             self.assertIn, 'qux', 'foo bar baz')
 
     def test_assertIn_failure_with_message(self):
@@ -432,7 +432,7 @@ class TestAssertions(TestCase):
         self.assertFails('3 not in [0, 1, 2]: foo bar', self.assertIn, 3,
                          [0, 1, 2], 'foo bar')
         self.assertFails(
-            '%r not in %r: foo bar' % ('qux', 'foo bar baz'),
+            '{!r} not in {!r}: foo bar'.format('qux', 'foo bar baz'),
             self.assertIn, 'qux', 'foo bar baz', 'foo bar')
 
 
@@ -736,7 +736,7 @@ class TestAssertions(TestCase):
             'a',
             repr('\xa7')[1:-1],
             "'''",
-            'actual    = %r' % (b,),
+            'actual    = {!r}'.format(b),
             ': ' + message,
             ])
         self.assertFails(expected_error, self.assertEqual, a, b, message)
@@ -763,7 +763,7 @@ class TestAssertions(TestCase):
         test = Test('test')
         result = ExtendedTestResult()
         test.run(result)
-        self.assertEqual(set(['traceback', 'traceback-1']),
+        self.assertEqual({'traceback', 'traceback-1'},
             set(result._events[1][2].keys()))
 
 

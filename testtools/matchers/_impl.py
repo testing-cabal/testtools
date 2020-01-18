@@ -101,7 +101,7 @@ class Mismatch(object):
         return getattr(self, '_details', {})
 
     def __repr__(self):
-        return  "<testtools.matchers.Mismatch object at %x attributes=%r>" % (
+        return  "<testtools.matchers.Mismatch object at {:x} attributes={!r}>".format(
             id(self), self.__dict__)
 
 
@@ -159,7 +159,7 @@ class MismatchDecorator(object):
         self.original = original
 
     def __repr__(self):
-        return '<testtools.matchers.MismatchDecorator(%r)>' % (self.original,)
+        return '<testtools.matchers.MismatchDecorator({!r})>'.format(self.original)
 
     def describe(self):
         return self.original.describe()

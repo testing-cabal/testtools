@@ -119,12 +119,12 @@ class TestMatchesSetwise(TestCase):
                                               description_matcher):
         mismatch = matcher.match(value)
         if mismatch is None:
-            self.fail("%s matched %s" % (matcher, value))
+            self.fail("{} matched {}".format(matcher, value))
         actual_description = mismatch.describe()
         self.assertThat(
             actual_description,
             Annotate(
-                "%s matching %s" % (matcher, value),
+                "{} matching {}".format(matcher, value),
                 description_matcher))
 
     def test_matches(self):

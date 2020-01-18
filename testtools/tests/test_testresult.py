@@ -264,22 +264,22 @@ class TagsContract(Python27Contract):
         # 'current_tags'.
         result = self.makeResult()
         result.startTestRun()
-        result.tags(set(['foo']), set())
-        self.assertEqual(set(['foo']), result.current_tags)
+        result.tags({'foo'}, set())
+        self.assertEqual({'foo'}, result.current_tags)
 
     def test_removing_tags(self):
         # Tags are removed using 'tags'.
         result = self.makeResult()
         result.startTestRun()
-        result.tags(set(['foo']), set())
-        result.tags(set(), set(['foo']))
+        result.tags({'foo'}, set())
+        result.tags(set(), {'foo'})
         self.assertEqual(set(), result.current_tags)
 
     def test_startTestRun_resets_tags(self):
         # startTestRun makes a new test run, and thus clears all the tags.
         result = self.makeResult()
         result.startTestRun()
-        result.tags(set(['foo']), set())
+        result.tags({'foo'}, set())
         result.startTestRun()
         self.assertEqual(set(), result.current_tags)
 
@@ -287,42 +287,42 @@ class TagsContract(Python27Contract):
         # Tags can be added after a test has run.
         result = self.makeResult()
         result.startTestRun()
-        result.tags(set(['foo']), set())
+        result.tags({'foo'}, set())
         result.startTest(self)
-        result.tags(set(['bar']), set())
-        self.assertEqual(set(['foo', 'bar']), result.current_tags)
+        result.tags({'bar'}, set())
+        self.assertEqual({'foo', 'bar'}, result.current_tags)
 
     def test_tags_added_in_test_are_reverted(self):
         # Tags added during a test run are then reverted once that test has
         # finished.
         result = self.makeResult()
         result.startTestRun()
-        result.tags(set(['foo']), set())
+        result.tags({'foo'}, set())
         result.startTest(self)
-        result.tags(set(['bar']), set())
+        result.tags({'bar'}, set())
         result.addSuccess(self)
         result.stopTest(self)
-        self.assertEqual(set(['foo']), result.current_tags)
+        self.assertEqual({'foo'}, result.current_tags)
 
     def test_tags_removed_in_test(self):
         # Tags can be removed during tests.
         result = self.makeResult()
         result.startTestRun()
-        result.tags(set(['foo']), set())
+        result.tags({'foo'}, set())
         result.startTest(self)
-        result.tags(set(), set(['foo']))
+        result.tags(set(), {'foo'})
         self.assertEqual(set(), result.current_tags)
 
     def test_tags_removed_in_test_are_restored(self):
         # Tags removed during tests are restored once that test has finished.
         result = self.makeResult()
         result.startTestRun()
-        result.tags(set(['foo']), set())
+        result.tags({'foo'}, set())
         result.startTest(self)
-        result.tags(set(), set(['foo']))
+        result.tags(set(), {'foo'})
         result.addSuccess(self)
         result.stopTest(self)
-        self.assertEqual(set(['foo']), result.current_tags)
+        self.assertEqual({'foo'}, result.current_tags)
 
 
 class DetailsContract(TagsContract):
@@ -550,7 +550,7 @@ class TestStreamResultContract(object):
         ]]
         inputs = list(dict(
             runnable=False,
-            test_tags=set(['quux']),
+            test_tags={'quux'},
             route_code=_u("1234"),
             timestamp=now,
             ).items())
@@ -670,11 +670,11 @@ class TestDoubleStreamResultEvents(TestCase):
         result = LoggingStreamResult()
         result.startTestRun()
         now = datetime.datetime.now(utc)
-        result.status("foo", "success", test_tags=set(['tag']),
+        result.status("foo", "success", test_tags={'tag'},
             runnable=False, route_code='abc', timestamp=now)
         self.assertEqual(
             [('startTestRun',),
-             ('status', 'foo', 'success', set(['tag']), False, None, None, False, None, 'abc', now)],
+             ('status', 'foo', 'success', {'tag'}, False, None, None, False, None, 'abc', now)],
             result._events)
 
 
@@ -700,12 +700,12 @@ class TestCopyStreamResultCopies(TestCase):
     def test_status(self):
         self.result.startTestRun()
         now = datetime.datetime.now(utc)
-        self.result.status("foo", "success", test_tags=set(['tag']),
+        self.result.status("foo", "success", test_tags={'tag'},
             runnable=False, file_name="foo", file_bytes=b'bar', eof=True,
             mime_type="text/json", route_code='abc', timestamp=now)
         self.assertThat(self.targets,
             AllMatch(Equals([('startTestRun',),
-                ('status', 'foo', 'success', set(['tag']), False, "foo",
+                ('status', 'foo', 'success', {'tag'}, False, "foo",
                  b'bar', True, "text/json", 'abc', now)
                 ])))
 
@@ -717,14 +717,14 @@ class TestStreamTagger(TestCase):
         result = StreamTagger([log], add=['foo'])
         result.startTestRun()
         result.status()
-        result.status(test_tags=set(['bar']))
+        result.status(test_tags={'bar'})
         result.status(test_tags=None)
         result.stopTestRun()
         self.assertEqual([
             ('startTestRun',),
-            ('status', None, None, set(['foo']), True, None, None, False, None, None, None),
-            ('status', None, None, set(['foo', 'bar']), True, None, None, False, None, None, None),
-            ('status', None, None, set(['foo']), True, None, None, False, None, None, None),
+            ('status', None, None, {'foo'}, True, None, None, False, None, None, None),
+            ('status', None, None, {'foo', 'bar'}, True, None, None, False, None, None, None),
+            ('status', None, None, {'foo'}, True, None, None, False, None, None, None),
             ('stopTestRun',),
             ], log._events)
 
@@ -734,17 +734,17 @@ class TestStreamTagger(TestCase):
         result.startTestRun()
         result.status()
         result.status(test_tags=None)
-        result.status(test_tags=set(['foo']))
-        result.status(test_tags=set(['bar']))
-        result.status(test_tags=set(['foo', 'bar']))
+        result.status(test_tags={'foo'})
+        result.status(test_tags={'bar'})
+        result.status(test_tags={'foo', 'bar'})
         result.stopTestRun()
         self.assertEqual([
             ('startTestRun',),
             ('status', None, None, None, True, None, None, False, None, None, None),
             ('status', None, None, None, True, None, None, False, None, None, None),
             ('status', None, None, None, True, None, None, False, None, None, None),
-            ('status', None, None, set(['bar']), True, None, None, False, None, None, None),
-            ('status', None, None, set(['bar']), True, None, None, False, None, None, None),
+            ('status', None, None, {'bar'}, True, None, None, False, None, None, None),
+            ('status', None, None, {'bar'}, True, None, None, False, None, None, None),
             ('stopTestRun',),
             ], log._events)
 
@@ -1359,7 +1359,7 @@ class TestMultiTestResult(TestCase):
 
     def test_repr(self):
         self.assertEqual(
-            '<MultiTestResult (%r, %r)>' % (
+            '<MultiTestResult ({!r}, {!r})>'.format(
                 ExtendedToOriginalDecorator(self.result1),
                 ExtendedToOriginalDecorator(self.result2)),
             repr(self.multiResult))
@@ -1464,8 +1464,8 @@ class TestMultiTestResult(TestCase):
     def test_tags(self):
         # Calling `tags` on a `MultiTestResult` calls `tags` on all its
         # `TestResult`s.
-        added_tags = set(['foo', 'bar'])
-        removed_tags = set(['eggs'])
+        added_tags = {'foo', 'bar'}
+        removed_tags = {'eggs'}
         self.multiResult.tags(added_tags, removed_tags)
         self.assertResultLogsEqual([('tags', added_tags, removed_tags)])
 
@@ -1623,7 +1623,7 @@ class TestThreadSafeForwardingResult(TestCase):
         # Tags need to be batched for each test, so they aren't forwarded
         # until a test runs.
         [result], events = self.make_results(1)
-        result.tags(set(['foo']), set(['bar']))
+        result.tags({'foo'}, {'bar'})
         self.assertEqual([], events)
 
     def test_global_tags_simple(self):
@@ -1633,7 +1633,7 @@ class TestThreadSafeForwardingResult(TestCase):
         # way for a global tag on an input stream to affect tests from other
         # streams - we can just always issue test local tags.
         [result], events = self.make_results(1)
-        result.tags(set(['foo']), set())
+        result.tags({'foo'}, set())
         result.time(1)
         result.startTest(self)
         result.time(2)
@@ -1642,7 +1642,7 @@ class TestThreadSafeForwardingResult(TestCase):
             [('time', 1),
              ('startTest', self),
              ('time', 2),
-             ('tags', set(['foo']), set()),
+             ('tags', {'foo'}, set()),
              ('addSuccess', self),
              ('stopTest', self),
              ], events)
@@ -1655,8 +1655,8 @@ class TestThreadSafeForwardingResult(TestCase):
         # speaking incidental - they could be issued separately (in-order) and
         # still be legitimate.
         [result], events = self.make_results(1)
-        result.tags(set(['foo', 'bar']), set(['baz', 'qux']))
-        result.tags(set(['cat', 'qux']), set(['bar', 'dog']))
+        result.tags({'foo', 'bar'}, {'baz', 'qux'})
+        result.tags({'cat', 'qux'}, {'bar', 'dog'})
         result.time(1)
         result.startTest(self)
         result.time(2)
@@ -1665,7 +1665,7 @@ class TestThreadSafeForwardingResult(TestCase):
             [('time', 1),
              ('startTest', self),
              ('time', 2),
-             ('tags', set(['cat', 'foo', 'qux']), set(['dog', 'bar', 'baz'])),
+             ('tags', {'cat', 'foo', 'qux'}, {'dog', 'bar', 'baz'}),
              ('addSuccess', self),
              ('stopTest', self),
              ], events)
@@ -1678,15 +1678,15 @@ class TestThreadSafeForwardingResult(TestCase):
         [result], events = self.make_results(1)
         result.time(1)
         result.startTest(self)
-        result.tags(set(['foo']), set([]))
-        result.tags(set(), set(['bar']))
+        result.tags({'foo'}, set())
+        result.tags(set(), {'bar'})
         result.time(2)
         result.addSuccess(self)
         self.assertEqual(
             [('time', 1),
              ('startTest', self),
              ('time', 2),
-             ('tags', set(['foo']), set(['bar'])),
+             ('tags', {'foo'}, {'bar'}),
              ('addSuccess', self),
              ('stopTest', self),
              ], events)
@@ -1698,7 +1698,7 @@ class TestThreadSafeForwardingResult(TestCase):
         a, b = PlaceHolder('a'), PlaceHolder('b')
         result.time(1)
         result.startTest(a)
-        result.tags(set(['foo']), set([]))
+        result.tags({'foo'}, set())
         result.time(2)
         result.addSuccess(a)
         result.stopTest(a)
@@ -1711,7 +1711,7 @@ class TestThreadSafeForwardingResult(TestCase):
             [('time', 1),
              ('startTest', a),
              ('time', 2),
-             ('tags', set(['foo']), set()),
+             ('tags', {'foo'}, set()),
              ('addSuccess', a),
              ('stopTest', a),
              ('time', 3),
@@ -1851,34 +1851,34 @@ class TestMergeTags(TestCase):
     def test_merge_unseen_gone_tag(self):
         # If an incoming "gone" tag isn't currently tagged one way or the
         # other, add it to the "gone" tags.
-        current_tags = set(['present']), set(['missing'])
-        changing_tags = set(), set(['going'])
-        expected = set(['present']), set(['missing', 'going'])
+        current_tags = {'present'}, {'missing'}
+        changing_tags = set(), {'going'}
+        expected = {'present'}, {'missing', 'going'}
         self.assertEqual(
             expected, _merge_tags(current_tags, changing_tags))
 
     def test_merge_incoming_gone_tag_with_current_new_tag(self):
         # If one of the incoming "gone" tags is one of the existing "new"
         # tags, then it overrides the "new" tag, leaving it marked as "gone".
-        current_tags = set(['present', 'going']), set(['missing'])
-        changing_tags = set(), set(['going'])
-        expected = set(['present']), set(['missing', 'going'])
+        current_tags = {'present', 'going'}, {'missing'}
+        changing_tags = set(), {'going'}
+        expected = {'present'}, {'missing', 'going'}
         self.assertEqual(
             expected, _merge_tags(current_tags, changing_tags))
 
     def test_merge_unseen_new_tag(self):
-        current_tags = set(['present']), set(['missing'])
-        changing_tags = set(['coming']), set()
-        expected = set(['coming', 'present']), set(['missing'])
+        current_tags = {'present'}, {'missing'}
+        changing_tags = {'coming'}, set()
+        expected = {'coming', 'present'}, {'missing'}
         self.assertEqual(
             expected, _merge_tags(current_tags, changing_tags))
 
     def test_merge_incoming_new_tag_with_current_gone_tag(self):
         # If one of the incoming "new" tags is currently marked as "gone",
         # then it overrides the "gone" tag, leaving it marked as "new".
-        current_tags = set(['present']), set(['coming', 'missing'])
-        changing_tags = set(['coming']), set()
-        expected = set(['coming', 'present']), set(['missing'])
+        current_tags = {'present'}, {'coming', 'missing'}
+        changing_tags = {'coming'}, set()
+        expected = {'coming', 'present'}, {'missing'}
         self.assertEqual(
             expected, _merge_tags(current_tags, changing_tags))
 
@@ -2033,7 +2033,7 @@ class TestStreamToQueue(TestCase):
             self.assertEqual("status", event_dict['event'])
             self.assertEqual("test", event_dict['test_id'])
             self.assertEqual("fail", event_dict['test_status'])
-            self.assertEqual(set(["quux"]), event_dict['test_tags'])
+            self.assertEqual({"quux"}, event_dict['test_tags'])
             self.assertEqual(False, event_dict['runnable'])
             self.assertEqual("file", event_dict['file_name'])
             self.assertEqual(_b("content"), event_dict['file_bytes'])
@@ -2043,12 +2043,12 @@ class TestStreamToQueue(TestCase):
             self.assertEqual(route, event_dict['route_code'])
             self.assertEqual(time, event_dict['timestamp'])
         queue, result = self.make_result()
-        result.status("test", "fail", test_tags=set(["quux"]), runnable=False,
+        result.status("test", "fail", test_tags={"quux"}, runnable=False,
             file_name="file", file_bytes=_b("content"), eof=True,
             mime_type="quux", route_code=None, timestamp=None)
         self.assertEqual(1, queue.qsize())
         a_time = datetime.datetime.now(utc)
-        result.status("test", "fail", test_tags=set(["quux"]), runnable=False,
+        result.status("test", "fail", test_tags={"quux"}, runnable=False,
             file_name="file", file_bytes=_b("content"), eof=True,
             mime_type="quux", route_code="bar", timestamp=a_time)
         self.assertEqual(2, queue.qsize())
@@ -2285,16 +2285,16 @@ class TestExtendedToOriginalResultDecorator(
 
     def test_tags_py26(self):
         self.make_26_result()
-        self.converter.tags(set([1]), set([2]))
+        self.converter.tags({1}, {2})
 
     def test_tags_py27(self):
         self.make_27_result()
-        self.converter.tags(set([1]), set([2]))
+        self.converter.tags({1}, {2})
 
     def test_tags_pyextended(self):
         self.make_extended_result()
-        self.converter.tags(set([1]), set([2]))
-        self.assertEqual([('tags', set([1]), set([2]))], self.result._events)
+        self.converter.tags({1}, {2})
+        self.assertEqual([('tags', {1}, {2})], self.result._events)
 
     def test_time_py26(self):
         self.make_26_result()
@@ -2908,7 +2908,7 @@ class TestByTestResultTests(TestCase):
         self.result.startTest(self)
         self.result.addSuccess(self)
         self.result.stopTest(self)
-        self.assertCalled(status='success', tags=set(['foo']))
+        self.assertCalled(status='success', tags={'foo'})
 
     def test_local_tags(self):
         self.result.tags(['foo'], [])
@@ -2916,7 +2916,7 @@ class TestByTestResultTests(TestCase):
         self.result.tags(['bar'], [])
         self.result.addSuccess(self)
         self.result.stopTest(self)
-        self.assertCalled(status='success', tags=set(['foo', 'bar']))
+        self.assertCalled(status='success', tags={'foo', 'bar'})
 
     def test_add_error(self):
         self.result.startTest(self)
@@ -3025,7 +3025,7 @@ class TestTagger(TestCase):
 
     def test_tags_tests(self):
         result = ExtendedTestResult()
-        tagger = Tagger(result, set(['foo']), set(['bar']))
+        tagger = Tagger(result, {'foo'}, {'bar'})
         test1, test2 = self, make_test()
         tagger.startTest(test1)
         tagger.addSuccess(test1)
@@ -3035,11 +3035,11 @@ class TestTagger(TestCase):
         tagger.stopTest(test2)
         self.assertEqual(
             [('startTest', test1),
-             ('tags', set(['foo']), set(['bar'])),
+             ('tags', {'foo'}, {'bar'}),
              ('addSuccess', test1),
              ('stopTest', test1),
              ('startTest', test2),
-             ('tags', set(['foo']), set(['bar'])),
+             ('tags', {'foo'}, {'bar'}),
              ('addSuccess', test2),
              ('stopTest', test2),
              ], result._events)

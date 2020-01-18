@@ -59,14 +59,14 @@ class TestAnyMatch(TestCase, TestMatchersInterface):
         ['grass', 'cow', 'steak', 'milk', 'elephant'],
         (13, 'elephant'),
         ['elephant', 'elephant', 'elephant'],
-        set(['hippo', 'rhino', 'elephant']),
+        {'hippo', 'rhino', 'elephant'},
         ]
     matches_mismatches = [
         [],
         ['grass', 'cow', 'steak', 'milk'],
         (13, 12, 10),
         ['element', 'hephalump', 'pachyderm'],
-        set(['hippo', 'rhino', 'diplodocus']),
+        {'hippo', 'rhino', 'diplodocus'},
         ]
 
     str_examples = [
@@ -215,7 +215,7 @@ class TestMatchesPredicate(TestCase, TestMatchersInterface):
     matches_mismatches = [3, 5, 7, 9]
 
     str_examples = [
-        ("MatchesPredicate(%r, %r)" % (is_even, "%s is not even"),
+        ("MatchesPredicate({!r}, {!r})".format(is_even, "%s is not even"),
          MatchesPredicate(is_even, "%s is not even")),
         ]
 
@@ -236,7 +236,7 @@ class TestMatchesPredicateWithParams(TestCase, TestMatchersInterface):
     matches_mismatches = [0, 1, 9, 10]
 
     str_examples = [
-        ("MatchesPredicateWithParams(%r, %r)(%s)" % (
+        ("MatchesPredicateWithParams({!r}, {!r})({})".format(
             between, "{0} is not between {1} and {2}", "1, 2"),
          MatchesPredicateWithParams(
             between, "{0} is not between {1} and {2}")(1, 2)),
