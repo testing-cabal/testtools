@@ -2594,13 +2594,8 @@ class TestNonAsciiResults(TestCase):
         self.assertIn(self._as_output("\uFFFD\uFFFD\uFFFD"), textoutput)
 
     def _local_os_error_matcher(self):
-        if sys.version_info > (3, 4):
-            return MatchesAny(Contains("FileExistsError: "),
-                              Contains("PermissionError: "))
-        elif os.name != "nt":
-            return Contains(self._as_output("OSError: "))
-        else:
-            return Contains(self._as_output("WindowsError: "))
+        return MatchesAny(Contains("FileExistsError: "),
+                          Contains("PermissionError: "))
 
     def test_os_error(self):
         """Locale error messages from the OS shouldn't break anything"""
