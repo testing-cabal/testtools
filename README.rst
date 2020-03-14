@@ -33,11 +33,12 @@ Supported platforms
 
  * Python 2.7 or 3.5+ / PyPy
 
-If you would like to use testtools for earlier Pythons, please use testtools
-1.9.0, or for *really* old Pythons, testtools 0.9.15.
+If you would like to use testtools for earlier Pythons, consult the compatibility docs:
+
+ * https://testtools.readthedocs.io/en/latest/overview.html#cross-python-compatibility
 
 testtools probably works on all OSes that Python works on, but is most heavily
-tested on Linux and OS X.
+tested on Linux and macOS.
 
 
 Optional Dependencies
