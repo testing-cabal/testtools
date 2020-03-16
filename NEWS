@@ -3,6 +3,15 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
+NEXT
+~~~~
+
+Improvements
+------------
+* The skip, skipIf, and skipUnless decorators can now be used as class
+  decorators as well as test method decorators, just as they can in
+  unittest.
+
 2.4.0
 ~~~~~
 
