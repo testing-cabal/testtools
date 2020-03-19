@@ -20,6 +20,7 @@ import copy
 import functools
 import itertools
 import sys
+import types
 import warnings
 
 from extras import (
@@ -61,8 +62,6 @@ from testtools.testresult import (
     ExtendedToOriginalDecorator,
     TestResult,
     )
-
-wraps = try_import('functools.wraps')
 
 
 class TestSkipped(Exception):
@@ -944,6 +943,12 @@ class WithAttributes:
         return orig + '[' + ','.join(sorted(attributes)) + ']'
 
 
+class_types = [type]
+if getattr(types, 'ClassType', None) is not None:
+    class_types.append(types.ClassType)
+class_types = tuple(class_types)
+
+
 def skip(reason):
     """A decorator to skip unit tests.
 
@@ -952,20 +957,19 @@ def skip(reason):
     @unittest.skip decorator.
     """
     def decorator(test_item):
+        if not isinstance(test_item, class_types):
+            @functools.wraps(test_item)
+            def skip_wrapper(*args, **kwargs):
+                raise TestCase.skipException(reason)
+            test_item = skip_wrapper
+
         # This attribute signals to RunTest._run_core that the entire test
         # must be skipped - including setUp and tearDown. This makes us
         # compatible with testtools.skip* functions, which set the same
         # attributes.
         test_item.__unittest_skip__ = True
         test_item.__unittest_skip_why__ = reason
-        if wraps is not None:
-            @wraps(test_item)
-            def skip_wrapper(*args, **kwargs):
-                raise TestCase.skipException(reason)
-        else:
-            def skip_wrapper(test_item):
-                test_item.skip(reason)
-        return skip_wrapper
+        return test_item
     return decorator
 
 

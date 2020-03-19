@@ -96,3 +96,4 @@ Thanks
  * Jonathan Jacobs
  * Jelmer Vernooĳ
  * Hugo van Kemenade
+ * Zane Bitter
