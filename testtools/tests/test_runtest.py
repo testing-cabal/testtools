@@ -74,7 +74,7 @@ class TestRunTest(TestCase):
                 raise KeyboardInterrupt("go")
             def _run_teardown(self, result):
                 tearDownRuns.append(self)
-                return super(Case, self)._run_teardown(result)
+                return super()._run_teardown(result)
         case = Case('test')
         run = RunTest(case)
         run.result = ExtendedTestResult()
@@ -284,7 +284,7 @@ class TestTestCaseSupportForRunTest(TestCase):
         marker = object()
         class FooRunTest(RunTest):
             def __init__(self, case, handlers=None, bar=None):
-                super(FooRunTest, self).__init__(case, handlers)
+                super().__init__(case, handlers)
                 self.bar = bar
             def run(self, result=None):
                 return self.bar

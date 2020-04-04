@@ -7,6 +7,7 @@ treated as a test error. If a Python is not available, then it is skipped.
 """
 
 from datetime import datetime
+import io
 import os
 import subprocess
 import sys
@@ -22,7 +23,6 @@ from testtools import (
     PlaceHolder,
     TestCase,
     )
-from testtools.compat import BytesIO
 from testtools.content import text_content
 
 
@@ -69,7 +69,7 @@ def run_for_python(version, result, tests):
     # XXX: This buffers everything. Bad for memory, bad for getting progress
     # on jenkins.
     output, error = process.communicate()
-    protocol.readFrom(BytesIO(output))
+    protocol.readFrom(io.BytesIO(output))
     if error:
         result.startTest(test)
         result.addError(test, details={
@@ -89,5 +89,5 @@ def now():
 if __name__ == '__main__':
     sys.path.append(ROOT)
     result = TestProtocolClient(sys.stdout)
-    for version in '2.7 3.5 3.6 3.7 3.8'.split():
+    for version in '3.5 3.6 3.7 3.8'.split():
         run_for_python(version, result, sys.argv[1:])

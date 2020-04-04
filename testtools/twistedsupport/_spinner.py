@@ -19,8 +19,6 @@ __all__ = [
 from fixtures import Fixture
 import signal
 
-import six
-
 from ._deferreddebug import DebugTwisted
 
 from twisted.internet import defer
@@ -76,24 +74,17 @@ def trap_unhandled_errors(function, *args, **kwargs):
     # an instance doesn't work with Python 3 and viceversa overriding __del__
     # via inheritance doesn't work with Python 2. So we handle the two cases
     # differently. TODO: perhaps there's a way to have a single code path?
-    if six.PY2:
-        def DebugInfo():
-            info = real_DebugInfo()
-            debug_infos.append(info)
-            return info
-    else:
+    class DebugInfo(real_DebugInfo):
 
-        class DebugInfo(real_DebugInfo):
+        _runRealDel = True
 
-            _runRealDel = True
+        def __init__(self):
+            real_DebugInfo.__init__(self)
+            debug_infos.append(self)
 
-            def __init__(self):
-                real_DebugInfo.__init__(self)
-                debug_infos.append(self)
-
-            def __del__(self):
-                if self._runRealDel:
-                    real_DebugInfo.__del__(self)
+        def __del__(self):
+            if self._runRealDel:
+                real_DebugInfo.__del__(self)
 
     defer.DebugInfo = DebugInfo
     try:
@@ -106,10 +97,7 @@ def trap_unhandled_errors(function, *args, **kwargs):
             errors.append(info)
             # Disable the destructor that logs to error. We are already
             # catching the error here.
-            if six.PY2:
-                info.__del__ = lambda: None
-            else:
-                info._runRealDel = False
+            info._runRealDel = False
     return result, errors
 
 
@@ -118,7 +106,7 @@ class TimeoutError(Exception):
 
     def __init__(self, function, timeout):
         Exception.__init__(self,
-            "%r took longer than %s seconds" % (function, timeout))
+            "{!r} took longer than {} seconds".format(function, timeout))
 
 
 class NoResultError(Exception):
@@ -139,7 +127,7 @@ class StaleJunkError(Exception):
             "Use clear_junk() to clear it out: %r" % (junk,))
 
 
-class Spinner(object):
+class Spinner:
     """Spin the reactor until a function is done.
 
     This class emulates the behaviour of twisted.trial in that it grotesquely

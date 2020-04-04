@@ -26,12 +26,12 @@ __all__ = [
     'assert_fails_with',
     ]
 
+import io
 import warnings
 import sys
 
 from fixtures import Fixture
 
-from testtools.compat import StringIO
 from testtools.content import Content, text_content
 from testtools.content_type import UTF8_TEXT
 from testtools.runtest import RunTest, _raise_force_fail_error
@@ -115,7 +115,7 @@ class _TwistedLogObservers(Fixture):
     """Temporarily add Twisted log observers."""
 
     def __init__(self, observers):
-        super(_TwistedLogObservers, self).__init__()
+        super().__init__()
         self._observers = observers
         self._log_publisher = log.theLogPublisher
 
@@ -129,7 +129,7 @@ class _ErrorObserver(Fixture):
     """Capture errors logged while fixture is active."""
 
     def __init__(self, error_observer):
-        super(_ErrorObserver, self).__init__()
+        super().__init__()
         self._error_observer = error_observer
 
     def _setUp(self):
@@ -170,7 +170,7 @@ class CaptureTwistedLogs(Fixture):
     LOG_DETAIL_NAME = 'twisted-log'
 
     def _setUp(self):
-        logs = StringIO()
+        logs = io.StringIO()
         full_observer = log.FileLogObserver(logs)
         self.useFixture(_TwistedLogObservers([full_observer.emit]))
         self.addDetail(self.LOG_DETAIL_NAME, Content(
@@ -200,7 +200,7 @@ class _CompoundFixture(Fixture):
     """A fixture that combines many fixtures."""
 
     def __init__(self, fixtures):
-        super(_CompoundFixture, self).__init__()
+        super().__init__()
         self._fixtures = fixtures
 
     def _setUp(self):
@@ -270,7 +270,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
             that took place during the run as the 'twisted-log' detail.
             Defaults to True.
         """
-        super(AsynchronousDeferredRunTest, self).__init__(
+        super().__init__(
             case, handlers, last_resort)
         if reactor is None:
             from twisted.internet import reactor
@@ -475,8 +475,7 @@ class AsynchronousDeferredRunTestForBrokenTwisted(AsynchronousDeferredRunTest):
     """
 
     def _make_spinner(self):
-        spinner = super(
-            AsynchronousDeferredRunTestForBrokenTwisted, self)._make_spinner()
+        spinner = super()._make_spinner()
         spinner._OBLIGATORY_REACTOR_ITERATIONS = 2
         return spinner
 
@@ -507,12 +506,12 @@ def assert_fails_with(d, *exc_types, **kwargs):
 
     def got_success(result):
         raise failureException(
-            "%s not raised (%r returned)" % (expected_names, result))
+            "{} not raised ({!r} returned)".format(expected_names, result))
 
     def got_failure(failure):
         if failure.check(*exc_types):
             return failure.value
-        raise failureException("%s raised instead of %s:\n %s" % (
+        raise failureException("{} raised instead of {}:\n {}".format(
             failure.type.__name__, expected_names, failure.getTraceback()))
     return d.addCallbacks(got_success, got_failure)
 
@@ -534,4 +533,4 @@ class UncleanReactorError(Exception):
             ret = str(junk)
         else:
             ret = repr(junk)
-        return '  %s\n' % (ret,)
+        return '  {}\n'.format(ret)

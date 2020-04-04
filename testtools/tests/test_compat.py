@@ -4,33 +4,24 @@
 
 import ast
 import io
-import linecache2 as linecache
-import os
 import sys
-import tempfile
 import traceback
 
 import testtools
 
 from testtools.compat import (
     _b,
-    _u,
     reraise,
-    str_is_unicode,
     text_repr,
     unicode_output_stream,
     )
 from testtools.matchers import (
-    Equals,
     Is,
-    IsInstance,
-    MatchesException,
     Not,
-    Raises,
     )
 
 
-class _FakeOutputStream(object):
+class _FakeOutputStream:
     """A simple file-like object for testing"""
 
     def __init__(self):
@@ -43,10 +34,10 @@ class _FakeOutputStream(object):
 class TestUnicodeOutputStream(testtools.TestCase):
     """Test wrapping output streams so they work with arbitrary unicode"""
 
-    uni = _u("pa\u026a\u03b8\u0259n")
+    uni = "pa\u026a\u03b8\u0259n"
 
     def setUp(self):
-        super(TestUnicodeOutputStream, self).setUp()
+        super().setUp()
         if sys.platform == "cli":
             self.skip("IronPython shouldn't wrap streams to do encoding")
 
@@ -77,39 +68,12 @@ class TestUnicodeOutputStream(testtools.TestCase):
         unicode_output_stream(sout).write(self.uni)
         self.assertEqual([_b("pa?\xe8?n")], sout.writelog)
 
-    @testtools.skipIf(str_is_unicode, "Tests behaviour when str is not unicode")
-    def test_unicode_encodings_wrapped_when_str_is_not_unicode(self):
-        """A unicode encoding is wrapped but needs no error handler"""
-        sout = _FakeOutputStream()
-        sout.encoding = "utf-8"
-        uout = unicode_output_stream(sout)
-        self.assertEqual(uout.errors, "strict")
-        uout.write(self.uni)
-        self.assertEqual([_b("pa\xc9\xaa\xce\xb8\xc9\x99n")], sout.writelog)
-
-    @testtools.skipIf(not str_is_unicode, "Tests behaviour when str is unicode")
-    def test_unicode_encodings_not_wrapped_when_str_is_unicode(self):
-        # No wrapping needed if native str type is unicode
-        sout = _FakeOutputStream()
-        sout.encoding = "utf-8"
-        uout = unicode_output_stream(sout)
-        self.assertIs(uout, sout)
-
     def test_stringio(self):
         """A StringIO object should maybe get an ascii native str type"""
-        try:
-            from cStringIO import StringIO
-            newio = False
-        except ImportError:
-            from io import StringIO
-            newio = True
-        sout = StringIO()
+        sout = io.StringIO()
         soutwrapper = unicode_output_stream(sout)
         soutwrapper.write(self.uni)
-        if newio:
-            self.assertEqual(self.uni, sout.getvalue())
-        else:
-            self.assertEqual("pa???n", sout.getvalue())
+        self.assertEqual(self.uni, sout.getvalue())
 
     def test_io_stringio(self):
         # io.StringIO only accepts unicode so should be returned as itself.
@@ -121,14 +85,14 @@ class TestUnicodeOutputStream(testtools.TestCase):
         bytes_io = io.BytesIO()
         self.assertThat(bytes_io, Not(Is(unicode_output_stream(bytes_io))))
         # Will error if s was not wrapped properly.
-        unicode_output_stream(bytes_io).write(_u('foo'))
+        unicode_output_stream(bytes_io).write('foo')
 
     def test_io_textwrapper(self):
         # textwrapper is unicode, should be returned as itself.
         text_io = io.TextIOWrapper(io.BytesIO())
         self.assertThat(unicode_output_stream(text_io), Is(text_io))
         # To be sure...
-        unicode_output_stream(text_io).write(_u('foo'))
+        unicode_output_stream(text_io).write('foo')
 
 
 class TestTextRepr(testtools.TestCase):
@@ -173,25 +137,25 @@ class TestTextRepr(testtools.TestCase):
     # Unicode doesn't escape printable characters as per the Python 3 model
     unicode_examples = (
         # C1 codes are unprintable
-        (_u("\x80"), "'\\x80'", "'''\\\n\\x80'''"),
-        (_u("\x9F"), "'\\x9f'", "'''\\\n\\x9f'''"),
+        ("\x80", "'\\x80'", "'''\\\n\\x80'''"),
+        ("\x9F", "'\\x9f'", "'''\\\n\\x9f'''"),
         # No-break space is unprintable
-        (_u("\xA0"), "'\\xa0'", "'''\\\n\\xa0'''"),
+        ("\xA0", "'\\xa0'", "'''\\\n\\xa0'''"),
         # Letters latin alphabets are printable
-        (_u("\xA1"), _u("'\xa1'"), _u("'''\\\n\xa1'''")),
-        (_u("\xFF"), _u("'\xff'"), _u("'''\\\n\xff'''")),
-        (_u("\u0100"), _u("'\u0100'"), _u("'''\\\n\u0100'''")),
+        ("\xA1", "'\xa1'", "'''\\\n\xa1'''"),
+        ("\xFF", "'\xff'", "'''\\\n\xff'''"),
+        ("\u0100", "'\u0100'", "'''\\\n\u0100'''"),
         # Line and paragraph seperators are unprintable
-        (_u("\u2028"), "'\\u2028'", "'''\\\n\\u2028'''"),
-        (_u("\u2029"), "'\\u2029'", "'''\\\n\\u2029'''"),
+        ("\u2028", "'\\u2028'", "'''\\\n\\u2028'''"),
+        ("\u2029", "'\\u2029'", "'''\\\n\\u2029'''"),
         # Unpaired surrogates are unprintable
-        (_u("\uD800"), "'\\ud800'", "'''\\\n\\ud800'''"),
-        (_u("\uDFFF"), "'\\udfff'", "'''\\\n\\udfff'''"),
+        ("\uD800", "'\\ud800'", "'''\\\n\\ud800'''"),
+        ("\uDFFF", "'\\udfff'", "'''\\\n\\udfff'''"),
         # Unprintable general categories not fully tested: Cc, Cf, Co, Cn, Zs
         )
 
     b_prefix = repr(_b(""))[:-2]
-    u_prefix = repr(_u(""))[:-2]
+    u_prefix = repr("")[:-2]
 
     def test_ascii_examples_oneline_bytes(self):
         for s, expected, _ in self.ascii_examples:
@@ -203,7 +167,7 @@ class TestTextRepr(testtools.TestCase):
 
     def test_ascii_examples_oneline_unicode(self):
         for s, expected, _ in self.ascii_examples:
-            u = _u(s)
+            u = s
             actual = text_repr(u, multiline=False)
             self.assertEqual(actual, self.u_prefix + expected)
             self.assertEqual(ast.literal_eval(actual), u)
@@ -217,10 +181,9 @@ class TestTextRepr(testtools.TestCase):
 
     def test_ascii_examples_multiline_unicode(self):
         for s, _, expected in self.ascii_examples:
-            u = _u(s)
-            actual = text_repr(u, multiline=True)
+            actual = text_repr(s, multiline=True)
             self.assertEqual(actual, self.u_prefix + expected)
-            self.assertEqual(ast.literal_eval(actual), u)
+            self.assertEqual(ast.literal_eval(actual), s)
 
     def test_ascii_examples_defaultline_bytes(self):
         for s, one, multi in self.ascii_examples:
@@ -230,7 +193,7 @@ class TestTextRepr(testtools.TestCase):
     def test_ascii_examples_defaultline_unicode(self):
         for s, one, multi in self.ascii_examples:
             expected = "\n" in s and multi or one
-            self.assertEqual(text_repr(_u(s)), self.u_prefix + expected)
+            self.assertEqual(text_repr(s), self.u_prefix + expected)
 
     def test_bytes_examples_oneline(self):
         for b, expected, _ in self.bytes_examples:

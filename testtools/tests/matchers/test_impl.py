@@ -7,9 +7,7 @@ from testtools import (
     TestCase,
     )
 from testtools.compat import (
-    str_is_unicode,
     text_repr,
-    _u,
     )
 from testtools.matchers import (
     Equals,
@@ -58,8 +56,8 @@ class TestMismatchError(TestCase):
         self.assertEqual(mismatch.describe(), str(e))
 
     def test_default_description_unicode(self):
-        matchee = _u('\xa7')
-        matcher = Equals(_u('a'))
+        matchee = '\xa7'
+        matcher = Equals('a')
         mismatch = matcher.match(matchee)
         e = MismatchError(matchee, matcher, mismatch)
         self.assertEqual(mismatch.describe(), str(e))
@@ -82,8 +80,8 @@ class TestMismatchError(TestCase):
     def test_verbose_unicode(self):
         # When assertThat is given matchees or matchers that contain non-ASCII
         # unicode strings, we can still provide a meaningful error.
-        matchee = _u('\xa7')
-        matcher = Equals(_u('a'))
+        matchee = '\xa7'
+        matcher = Equals('a')
         mismatch = matcher.match(matchee)
         expected = (
             'Match failed. Matchee: %s\n'
@@ -94,15 +92,7 @@ class TestMismatchError(TestCase):
                 mismatch.describe(),
                 ))
         e = MismatchError(matchee, matcher, mismatch, True)
-        if str_is_unicode:
-            actual = str(e)
-        else:
-            actual = unicode(e)
-            # Using str() should still work, and return ascii only
-            self.assertEqual(
-                expected.replace(matchee, matchee.encode("unicode-escape")),
-                str(e).decode("ascii"))
-        self.assertEqual(expected, actual)
+        self.assertEqual(expected, str(e))
 
 
 class TestMismatchDecorator(TestCase):
@@ -123,7 +113,7 @@ class TestMismatchDecorator(TestCase):
         x = Mismatch("description", {'foo': 'bar'})
         decorated = MismatchDecorator(x)
         self.assertEqual(
-            '<testtools.matchers.MismatchDecorator(%r)>' % (x,),
+            '<testtools.matchers.MismatchDecorator({!r})>'.format(x),
             repr(decorated))
 
 

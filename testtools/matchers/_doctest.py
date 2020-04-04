@@ -7,7 +7,6 @@ __all__ = [
 import doctest
 import re
 
-from ..compat import str_is_unicode
 from ._impl import Mismatch
 
 
@@ -49,7 +48,7 @@ class _NonManglingOutputChecker(doctest.OutputChecker):
         del __F, __f, __g, _indent
 
 
-class DocTestMatches(object):
+class DocTestMatches:
     """See if a string matches a doctest example."""
 
     def __init__(self, example, flags=0):
@@ -70,7 +69,7 @@ class DocTestMatches(object):
             flagstr = ", flags=%d" % self.flags
         else:
             flagstr = ""
-        return 'DocTestMatches(%r%s)' % (self.want, flagstr)
+        return 'DocTestMatches({!r}{})'.format(self.want, flagstr)
 
     def _with_nl(self, actual):
         result = self.want.__class__(actual)
@@ -96,9 +95,4 @@ class DocTestMismatch(Mismatch):
         self.with_nl = with_nl
 
     def describe(self):
-        s = self.matcher._describe_difference(self.with_nl)
-        if str_is_unicode or isinstance(s, unicode):
-            return s
-        # GZ 2011-08-24: This is actually pretty bogus, most C0 codes should
-        #                be escaped, in addition to non-ascii bytes.
-        return s.decode("latin1").encode("ascii", "backslashreplace")
+        return self.matcher._describe_difference(self.with_nl)

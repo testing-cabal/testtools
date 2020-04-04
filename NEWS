@@ -3,6 +3,39 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
+NEXT
+~~~~
+
+Improvements
+------------
+* The skip, skipIf, and skipUnless decorators can now be used as class
+  decorators as well as test method decorators, just as they can in
+  unittest.
+
+2.4.0
+~~~~~
+
+Improvements
+------------
+
+* Add support for Python 3.7, 3.8 and PyPy3.
+  (Hugo van Kemenade)
+
+* Drop support for Python 3.4 (EOL).
+  (Jelmer Vernooĳ)
+
+* Avoid using eval(). (Ross Burton)
+
+* PyCharm IDE unittest detection compatibility fix.
+  (Adam Harwell)
+
+* Drop support for Python 3.3 (EOL).
+  (Robert Collins)
+
+* Spelling fixes. (Free Ekanayaka)
+
+* Python 3.6 invalid escape sequence deprecation fixes. (Ville Skyttä)
+
 2.3.0
 ~~~~~
 

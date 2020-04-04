@@ -1,6 +1,6 @@
 # Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
 
-import json
+import io
 import os
 import tempfile
 import unittest
@@ -8,10 +8,6 @@ import unittest
 from testtools import TestCase, skipUnless
 from testtools.compat import (
     _b,
-    _u,
-    BytesIO,
-    StringIO,
-    str_is_unicode,
     )
 from testtools.content import (
     attach_file,
@@ -84,12 +80,12 @@ class TestContent(TestCase):
     def test_iter_text_decodes(self):
         content_type = ContentType("text", "strange", {"charset": "utf8"})
         content = Content(
-            content_type, lambda: [_u("bytes\xea").encode("utf8")])
-        self.assertEqual([_u("bytes\xea")], list(content.iter_text()))
+            content_type, lambda: ["bytes\xea".encode()])
+        self.assertEqual(["bytes\xea"], list(content.iter_text()))
 
     def test_iter_text_default_charset_iso_8859_1(self):
         content_type = ContentType("text", "strange")
-        text = _u("bytes\xea")
+        text = "bytes\xea"
         iso_version = text.encode("ISO-8859-1")
         content = Content(content_type, lambda: [iso_version])
         self.assertEqual([text], list(content.iter_text()))
@@ -97,8 +93,8 @@ class TestContent(TestCase):
     def test_as_text(self):
         content_type = ContentType("text", "strange", {"charset": "utf8"})
         content = Content(
-            content_type, lambda: [_u("bytes\xea").encode("utf8")])
-        self.assertEqual(_u("bytes\xea"), content.as_text())
+            content_type, lambda: ["bytes\xea".encode()])
+        self.assertEqual("bytes\xea", content.as_text())
 
     def test_from_file(self):
         fd, path = tempfile.mkstemp()
@@ -150,13 +146,13 @@ class TestContent(TestCase):
             list(content.iter_bytes()), Equals([_b('data')]))
 
     def test_from_stream(self):
-        data = StringIO('some data')
+        data = io.StringIO('some data')
         content = content_from_stream(data, UTF8_TEXT, chunk_size=2)
         self.assertThat(
             list(content.iter_bytes()), Equals(['so', 'me', ' d', 'at', 'a']))
 
     def test_from_stream_default_type(self):
-        data = StringIO('some data')
+        data = io.StringIO('some data')
         content = content_from_stream(data)
         self.assertThat(content.content_type, Equals(UTF8_TEXT))
 
@@ -173,25 +169,24 @@ class TestContent(TestCase):
             ''.join(content.iter_text()), Equals('some data'))
 
     def test_from_stream_with_simple_seek(self):
-        data = BytesIO(_b('some data'))
+        data = io.BytesIO(_b('some data'))
         content = content_from_stream(
             data, UTF8_TEXT, chunk_size=50, seek_offset=5)
         self.assertThat(
             list(content.iter_bytes()), Equals([_b('data')]))
 
     def test_from_stream_with_whence_seek(self):
-        data = BytesIO(_b('some data'))
+        data = io.BytesIO(_b('some data'))
         content = content_from_stream(
             data, UTF8_TEXT, chunk_size=50, seek_offset=-4, seek_whence=2)
         self.assertThat(
             list(content.iter_bytes()), Equals([_b('data')]))
 
     def test_from_text(self):
-        data = _u("some data")
+        data = "some data"
         expected = Content(UTF8_TEXT, lambda: [data.encode('utf8')])
         self.assertEqual(expected, text_content(data))
 
-    @skipUnless(str_is_unicode, "Test only applies in python 3.")
     def test_text_content_raises_TypeError_when_passed_bytes(self):
         data = _b("Some Bytes")
         self.assertRaises(TypeError, text_content, data)
