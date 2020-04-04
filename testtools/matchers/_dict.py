@@ -32,11 +32,11 @@ class MatchesAllDict(Matcher):
     """
 
     def __init__(self, matchers):
-        super(MatchesAllDict, self).__init__()
+        super().__init__()
         self.matchers = matchers
 
     def __str__(self):
-        return 'MatchesAllDict(%s)' % (_format_matcher_dict(self.matchers),)
+        return 'MatchesAllDict({})'.format(_format_matcher_dict(self.matchers))
 
     def match(self, observed):
         mismatches = {}
@@ -50,13 +50,13 @@ class DictMismatches(Mismatch):
     """A mismatch with a dict of child mismatches."""
 
     def __init__(self, mismatches, details=None):
-        super(DictMismatches, self).__init__(None, details=details)
+        super().__init__(None, details=details)
         self.mismatches = mismatches
 
     def describe(self):
         lines = ['{']
         lines.extend(
-            ['  %r: %s,' % (key, mismatch.describe())
+            ['  {!r}: {},'.format(key, mismatch.describe())
              for (key, mismatch) in sorted(self.mismatches.items())])
         lines.append('}')
         return '\n'.join(lines)
@@ -86,7 +86,7 @@ class _MatchCommonKeys(Matcher):
     """
 
     def __init__(self, dict_of_matchers):
-        super(_MatchCommonKeys, self).__init__()
+        super().__init__()
         self._matchers = dict_of_matchers
 
     def _compare_dicts(self, expected, observed):
@@ -108,7 +108,7 @@ class _SubDictOf(Matcher):
     """Matches if the matched dict only has keys that are in given dict."""
 
     def __init__(self, super_dict, format_value=repr):
-        super(_SubDictOf, self).__init__()
+        super().__init__()
         self.super_dict = super_dict
         self.format_value = format_value
 
@@ -123,7 +123,7 @@ class _SuperDictOf(Matcher):
     """
 
     def __init__(self, sub_dict, format_value=repr):
-        super(_SuperDictOf, self).__init__()
+        super().__init__()
         self.sub_dict = sub_dict
         self.format_value = format_value
 
@@ -133,7 +133,7 @@ class _SuperDictOf(Matcher):
 
 def _format_matcher_dict(matchers):
     return '{%s}' % (
-        ', '.join(sorted('%r: %s' % (k, v) for k, v in matchers.items())))
+        ', '.join(sorted('{!r}: {}'.format(k, v) for k, v in matchers.items())))
 
 
 class _CombinedMatcher(Matcher):
@@ -149,19 +149,19 @@ class _CombinedMatcher(Matcher):
     matcher_factories = {}
 
     def __init__(self, expected):
-        super(_CombinedMatcher, self).__init__()
+        super().__init__()
         self._expected = expected
 
     def format_expected(self, expected):
         return repr(expected)
 
     def __str__(self):
-        return '%s(%s)' % (
+        return '{}({})'.format(
             self.__class__.__name__, self.format_expected(self._expected))
 
     def match(self, observed):
-        matchers = dict(
-            (k, v(self._expected)) for k, v in self.matcher_factories.items())
+        matchers = {
+            k: v(self._expected) for k, v in self.matcher_factories.items()}
         return MatchesAllDict(matchers).match(observed)
 
 
@@ -239,7 +239,7 @@ class KeysEqual(Matcher):
             special case, if a single argument is specified, and it is a
             mapping, then we use its keys as the expected set.
         """
-        super(KeysEqual, self).__init__()
+        super().__init__()
         if len(expected) == 1:
             try:
                 expected = expected[0].keys()

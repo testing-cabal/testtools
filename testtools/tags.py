@@ -3,7 +3,7 @@
 """Tag support."""
 
 
-class TagContext(object):
+class TagContext:
     """A tag context."""
 
     def __init__(self, parent=None):

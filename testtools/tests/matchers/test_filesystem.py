@@ -23,7 +23,7 @@ from testtools.matchers._filesystem import (
     )
 
 
-class PathHelpers(object):
+class PathHelpers:
 
     def mkdtemp(self):
         directory = tempfile.mkdtemp()

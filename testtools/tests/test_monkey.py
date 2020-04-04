@@ -22,7 +22,7 @@ class MonkeyPatcherTest(TestCase):
     """
 
     def setUp(self):
-        super(MonkeyPatcherTest, self).setUp()
+        super().setUp()
         self.test_object = TestObj()
         self.original_object = TestObj()
         self.monkey_patcher = MonkeyPatcher()

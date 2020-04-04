@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # testtools documentation build configuration file, created by
 # sphinx-quickstart on Sun Nov 28 13:45:40 2010.
@@ -40,8 +39,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'testtools'
-copyright = u'2010-2016, The testtools authors'
+project = 'testtools'
+copyright = '2010-2016, The testtools authors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -175,8 +174,8 @@ htmlhelp_basename = 'testtoolsdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'testtools.tex', u'testtools Documentation',
-   u'The testtools authors', 'manual'),
+  ('index', 'testtools.tex', 'testtools Documentation',
+   'The testtools authors', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of

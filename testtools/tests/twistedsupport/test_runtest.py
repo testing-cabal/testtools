@@ -54,7 +54,7 @@ _get_global_publisher_and_observers = try_import(
     'testtools.twistedsupport._runtest._get_global_publisher_and_observers')
 
 
-class X(object):
+class X:
     """Tests that we run as part of our tests, nested to avoid discovery."""
 
     # XXX: After testing-cabal/testtools#165 lands, fix up all of these to be
@@ -166,7 +166,7 @@ def make_integration_tests():
     for runner_name, runner in runners:
         for test in tests:
             new_test = clone_test_with_new_id(
-                base_test, '%s(%s, %s)' % (
+                base_test, '{}({}, {})'.format(
                     base_test.id(),
                     runner_name,
                     test.__name__))
@@ -215,7 +215,7 @@ class TestSynchronousDeferredRunTest(NeedsTwistedTestCase):
     def test_setUp_followed_by_test(self):
         class SomeCase(TestCase):
             def setUp(self):
-                super(SomeCase, self).setUp()
+                super().setUp()
                 return defer.succeed(None)
             def test_failure(self):
                 return defer.maybeDeferred(self.fail, "Egads!")
@@ -261,7 +261,7 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
         d = defer.Deferred().addCallback(call_log.append)
         class SomeCase(TestCase):
             def setUp(self):
-                super(SomeCase, self).setUp()
+                super().setUp()
                 call_log.append('setUp')
                 return d
             def test_something(self):
@@ -292,14 +292,14 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
         c.addCallback(lambda x: call_log.append('c'))
         class SomeCase(TestCase):
             def setUp(self):
-                super(SomeCase, self).setUp()
+                super().setUp()
                 call_log.append('setUp')
                 return a
             def test_success(self):
                 call_log.append('test')
                 return b
             def tearDown(self):
-                super(SomeCase, self).tearDown()
+                super().tearDown()
                 call_log.append('tearDown')
                 return c
         test = SomeCase('test_success')
@@ -805,7 +805,7 @@ class TestAssertFailsWith(NeedsTwistedTestCase):
             failure.trap(self.failureException)
             self.assertThat(
                 str(failure.value),
-                Equals("RuntimeError not raised (%r returned)" % (marker,)))
+                Equals("RuntimeError not raised ({!r} returned)".format(marker)))
         d.addCallbacks(
             lambda x: self.fail("Should not have succeeded"), check_result)
         return d
@@ -868,7 +868,7 @@ class TestAssertFailsWith(NeedsTwistedTestCase):
             failure.trap(CustomException)
             self.assertThat(
                 str(failure.value),
-                Equals("RuntimeError not raised (%r returned)" % (marker,)))
+                Equals("RuntimeError not raised ({!r} returned)".format(marker)))
         return d.addCallbacks(
             lambda x: self.fail("Should not have succeeded"), check_result)
 

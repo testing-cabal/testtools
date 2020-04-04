@@ -67,8 +67,7 @@ mechanism for doing so::
 
 where 'exampletest' is a module that contains unit tests.  By default,
 ``testtools.run`` will *not* recursively search the module or package for unit
-tests.  To do this, you will need to either have the discover_ module
-installed or have Python 2.7 or later, and then run::
+tests.  To do this, run::
 
   $ python -m testtools.run discover packagecontainingtests
 
@@ -144,9 +143,6 @@ asserting more things about the exception than just the type::
       e = self.assertRaises(TypeError, silly.square, "orange")
       self.assertEqual("orange", e.bad_value)
       self.assertEqual("Cannot square 'orange', not a number.", str(e))
-
-Note that this is incompatible with the ``assertRaises`` in unittest2 and
-Python2.7.
 
 
 ExpectedException

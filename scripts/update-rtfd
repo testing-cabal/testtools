@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-from StringIO import StringIO
 from urllib2 import urlopen
 
 

@@ -1,6 +1,5 @@
 # Copyright (c) 2011 testtools developers. See LICENSE for details.
 
-from __future__ import with_statement
 
 import sys
 

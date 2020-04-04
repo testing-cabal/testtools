@@ -143,7 +143,7 @@ class HasPermissions(Matcher):
         :param octal_permissions: A four digit octal string, representing the
             intended access permissions. e.g. '0775' for rwxrwxr-x.
         """
-        super(HasPermissions, self).__init__()
+        super().__init__()
         self.octal_permissions = octal_permissions
 
     def match(self, filename):
@@ -159,7 +159,7 @@ class SamePath(Matcher):
     """
 
     def __init__(self, path):
-        super(SamePath, self).__init__()
+        super().__init__()
         self.path = path
 
     def match(self, other_path):
@@ -174,7 +174,7 @@ class TarballContains(Matcher):
     """
 
     def __init__(self, paths):
-        super(TarballContains, self).__init__()
+        super().__init__()
         self.paths = paths
         self.path_matcher = Equals(sorted(self.paths))
 

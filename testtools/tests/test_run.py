@@ -3,6 +3,7 @@
 """Tests for the test runner logic."""
 
 import doctest
+import io
 from unittest import TestSuite
 import sys
 from textwrap import dedent
@@ -16,8 +17,6 @@ import testtools
 from testtools import TestCase, run, skipUnless
 from testtools.compat import (
     _b,
-    _u,
-    StringIO,
     )
 from testtools.matchers import (
     Contains,
@@ -54,7 +53,7 @@ def test_suite():
             'runexample', [('__init__.py', init_contents)])
 
         def setUp(self):
-            super(SampleTestFixture, self).setUp()
+            super().setUp()
             self.useFixture(self.package)
             testtools.__path__.append(self.package.base)
             self.addCleanup(testtools.__path__.remove, self.package.base)
@@ -66,7 +65,7 @@ if fixtures and testresources:
         """Creates a test suite that uses testresources."""
 
         def __init__(self):
-            super(SampleResourcedFixture, self).__init__()
+            super().__init__()
             self.package = fixtures.PythonPackage(
             'resourceexample', [('__init__.py', _b("""
 from fixtures import Fixture
@@ -102,7 +101,7 @@ def test_suite():
 """))])
 
         def setUp(self):
-            super(SampleResourcedFixture, self).setUp()
+            super().setUp()
             self.useFixture(self.package)
             self.addCleanup(testtools.__path__.remove, self.package.base)
             testtools.__path__.append(self.package.base)
@@ -113,7 +112,7 @@ if fixtures:
         """Creates a test suite package using load_tests."""
 
         def __init__(self):
-            super(SampleLoadTestsPackage, self).__init__()
+            super().__init__()
             self.package = fixtures.PythonPackage(
             'discoverexample', [('__init__.py', _b("""
 from testtools import TestCase, clone_test_with_new_id
@@ -128,7 +127,7 @@ def load_tests(loader, tests, pattern):
 """))])
 
         def setUp(self):
-            super(SampleLoadTestsPackage, self).setUp()
+            super().setUp()
             self.useFixture(self.package)
             self.addCleanup(sys.path.remove, self.package.base)
 
@@ -136,7 +135,7 @@ def load_tests(loader, tests, pattern):
 class TestRun(TestCase):
 
     def setUp(self):
-        super(TestRun, self).setUp()
+        super().setUp()
         if fixtures is None:
             self.skipTest("Need fixtures")
 
@@ -145,9 +144,9 @@ class TestRun(TestCase):
         tests = []
         class CaptureList(run.TestToolsTestRunner):
             def list(self, test):
-                tests.append(set([case.id() for case
-                    in testtools.testsuite.iterate_tests(test)]))
-        out = StringIO()
+                tests.append({case.id() for case
+                    in testtools.testsuite.iterate_tests(test)})
+        out = io.StringIO()
         try:
             program = run.TestProgram(
                 argv=['prog', '-l', 'testtools.runexample.test_suite'],
@@ -155,8 +154,8 @@ class TestRun(TestCase):
         except SystemExit:
             exc_info = sys.exc_info()
             raise AssertionError("-l tried to exit. %r" % exc_info[1])
-        self.assertEqual([set(['testtools.runexample.TestFoo.test_bar',
-            'testtools.runexample.TestFoo.test_quux'])], tests)
+        self.assertEqual([{'testtools.runexample.TestFoo.test_bar',
+            'testtools.runexample.TestFoo.test_quux'}], tests)
 
     def test_run_list_with_loader(self):
         # list() is attempted with a loader first.
@@ -164,10 +163,10 @@ class TestRun(TestCase):
         tests = []
         class CaptureList(run.TestToolsTestRunner):
             def list(self, test, loader=None):
-                tests.append(set([case.id() for case
-                    in testtools.testsuite.iterate_tests(test)]))
+                tests.append({case.id() for case
+                    in testtools.testsuite.iterate_tests(test)})
                 tests.append(loader)
-        out = StringIO()
+        out = io.StringIO()
         try:
             program = run.TestProgram(
                 argv=['prog', '-l', 'testtools.runexample.test_suite'],
@@ -175,13 +174,13 @@ class TestRun(TestCase):
         except SystemExit:
             exc_info = sys.exc_info()
             raise AssertionError("-l tried to exit. %r" % exc_info[1])
-        self.assertEqual([set(['testtools.runexample.TestFoo.test_bar',
-            'testtools.runexample.TestFoo.test_quux']), program.testLoader],
+        self.assertEqual([{'testtools.runexample.TestFoo.test_bar',
+            'testtools.runexample.TestFoo.test_quux'}, program.testLoader],
             tests)
 
     def test_run_list(self):
         self.useFixture(SampleTestFixture())
-        out = StringIO()
+        out = io.StringIO()
         try:
             run.main(['prog', '-l', 'testtools.runexample.test_suite'], out)
         except SystemExit:
@@ -193,7 +192,7 @@ testtools.runexample.TestFoo.test_quux
 
     def test_run_list_failed_import(self):
         broken = self.useFixture(SampleTestFixture(broken=True))
-        out = StringIO()
+        out = io.StringIO()
         # XXX: http://bugs.python.org/issue22811
         unittest2.defaultTestLoader._top_level_dir = None
         exc = self.assertRaises(
@@ -217,7 +216,7 @@ SyntaxError: invalid syntax
 
     def test_run_orders_tests(self):
         self.useFixture(SampleTestFixture())
-        out = StringIO()
+        out = io.StringIO()
         # We load two tests - one that exists and one that doesn't, and we
         # should get the one that exists and neither the one that doesn't nor
         # the unmentioned one that does.
@@ -243,7 +242,7 @@ testtools.runexample.missingtest
 
     def test_run_load_list(self):
         self.useFixture(SampleTestFixture())
-        out = StringIO()
+        out = io.StringIO()
         # We load two tests - one that exists and one that doesn't, and we
         # should get the one that exists and neither the one that doesn't nor
         # the unmentioned one that does.
@@ -323,18 +322,18 @@ testtools.resourceexample.TestFoo.test_foo
     def test_stdout_honoured(self):
         self.useFixture(SampleTestFixture())
         tests = []
-        out = StringIO()
+        out = io.StringIO()
         exc = self.assertRaises(SystemExit, run.main,
             argv=['prog', 'testtools.runexample.test_suite'],
             stdout=out)
         self.assertEqual((0,), exc.args)
         self.assertThat(
             out.getvalue(),
-            MatchesRegex(_u("""Tests running...
+            MatchesRegex("""Tests running...
 
 Ran 2 tests in \\d.\\d\\d\\ds
 OK
-""")))
+"""))
 
     @skipUnless(fixtures, "fixtures not present")
     def test_issue_16662(self):
@@ -343,7 +342,7 @@ OK
         # to all testtools users regardless of Python version.
         # See http://bugs.python.org/issue16662
         pkg = self.useFixture(SampleLoadTestsPackage())
-        out = StringIO()
+        out = io.StringIO()
         # XXX: http://bugs.python.org/issue22811
         unittest2.defaultTestLoader._top_level_dir = None
         self.assertEqual(None, run.main(

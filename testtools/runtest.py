@@ -19,7 +19,7 @@ class MultipleExceptions(Exception):
     """
 
 
-class RunTest(object):
+class RunTest:
     """An object to run a test.
 
     RunTest objects are used to implement the internal logic involved in

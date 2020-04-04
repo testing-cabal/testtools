@@ -7,8 +7,6 @@ from pprint import pformat
 import sys
 import unittest
 
-import six
-
 from testtools import (
     DecorateTestCaseResult,
     ErrorHolder,
@@ -24,7 +22,6 @@ from testtools import (
     )
 from testtools.compat import (
     _b,
-    _u,
     )
 from testtools.content import (
     text_content,
@@ -100,7 +97,7 @@ class TestPlaceHolder(TestCase):
         # repr(placeholder) shows you how the object was constructed.
         test = PlaceHolder("test id", "description")
         self.assertEqual(
-            "<testtools.testcase.PlaceHolder('addSuccess', %r, {}, %r)>" % (
+            "<testtools.testcase.PlaceHolder('addSuccess', {!r}, {{}}, {!r})>".format(
             test.id(), test.shortDescription()), repr(test))
 
     def test_repr_custom_outcome(self):
@@ -178,7 +175,7 @@ class TestPlaceHolder(TestCase):
 
     def test_supports_tags(self):
         result = ExtendedTestResult()
-        tags = set(['foo', 'bar'])
+        tags = {'foo', 'bar'}
         case = PlaceHolder("foo", tags=tags)
         case.run(result)
         self.assertEqual([
@@ -292,16 +289,16 @@ class TestAssertions(TestCase):
 
     def test_formatTypes_single(self):
         # Given a single class, _formatTypes returns the name.
-        class Foo(object):
+        class Foo:
             pass
         self.assertEqual('Foo', self._formatTypes(Foo))
 
     def test_formatTypes_multiple(self):
         # Given multiple types, _formatTypes returns the names joined by
         # commas.
-        class Foo(object):
+        class Foo:
             pass
-        class Bar(object):
+        class Bar:
             pass
         self.assertEqual('Foo, Bar', self._formatTypes([Foo, Bar]))
 
@@ -354,7 +351,7 @@ class TestAssertions(TestCase):
         self.assertEqual(1, len(raisedExceptions))
         self.assertTrue(
             exception is raisedExceptions[0],
-            "%r is not %r" % (exception, raisedExceptions[0]))
+            "{!r} is not {!r}".format(exception, raisedExceptions[0]))
 
     def test_assertRaises_with_multiple_exceptions(self):
         # assertRaises((ExceptionOne, ExceptionTwo), function) asserts that
@@ -385,7 +382,7 @@ class TestAssertions(TestCase):
         self.assertThat(
             lambda: self.assertRaises(Exception, foo),
             Raises(
-                MatchesException(self.failureException, '.*%r.*' % (foo,))))
+                MatchesException(self.failureException, '.*{!r}.*'.format(foo))))
 
     def test_assertRaisesRegexp(self):
         # assertRaisesRegexp asserts that function raises particular exception
@@ -424,7 +421,7 @@ class TestAssertions(TestCase):
         # 'haystack'.
         self.assertFails('3 not in [0, 1, 2]', self.assertIn, 3, [0, 1, 2])
         self.assertFails(
-            '%r not in %r' % ('qux', 'foo bar baz'),
+            '{!r} not in {!r}'.format('qux', 'foo bar baz'),
             self.assertIn, 'qux', 'foo bar baz')
 
     def test_assertIn_failure_with_message(self):
@@ -433,7 +430,7 @@ class TestAssertions(TestCase):
         self.assertFails('3 not in [0, 1, 2]: foo bar', self.assertIn, 3,
                          [0, 1, 2], 'foo bar')
         self.assertFails(
-            '%r not in %r: foo bar' % ('qux', 'foo bar baz'),
+            '{!r} not in {!r}: foo bar'.format('qux', 'foo bar baz'),
             self.assertIn, 'qux', 'foo bar baz', 'foo bar')
 
 
@@ -467,7 +464,7 @@ class TestAssertions(TestCase):
     def test_assertIsInstance(self):
         # assertIsInstance asserts that an object is an instance of a class.
 
-        class Foo(object):
+        class Foo:
             """Simple class for testing assertIsInstance."""
 
         foo = Foo()
@@ -477,10 +474,10 @@ class TestAssertions(TestCase):
         # assertIsInstance asserts that an object is an instance of one of a
         # group of classes.
 
-        class Foo(object):
+        class Foo:
             """Simple class for testing assertIsInstance."""
 
-        class Bar(object):
+        class Bar:
             """Another simple class for testing assertIsInstance."""
 
         foo = Foo()
@@ -491,7 +488,7 @@ class TestAssertions(TestCase):
         # assertIsInstance(obj, klass) fails the test when obj is not an
         # instance of klass.
 
-        class Foo(object):
+        class Foo:
             """Simple class for testing assertIsInstance."""
 
         self.assertFails(
@@ -502,10 +499,10 @@ class TestAssertions(TestCase):
         # assertIsInstance(obj, (klass1, klass2)) fails the test when obj is
         # not an instance of klass1 or klass2.
 
-        class Foo(object):
+        class Foo:
             """Simple class for testing assertIsInstance."""
 
-        class Bar(object):
+        class Bar:
             """Another simple class for testing assertIsInstance."""
 
         self.assertFails(
@@ -560,14 +557,14 @@ class TestAssertions(TestCase):
             "foo bar")
 
     def test_assertThat_matches_clean(self):
-        class Matcher(object):
+        class Matcher:
             def match(self, foo):
                 return None
         self.assertThat("foo", Matcher())
 
     def test_assertThat_mismatch_raises_description(self):
         calls = []
-        class Mismatch(object):
+        class Mismatch:
             def __init__(self, thing):
                 self.thing = thing
             def describe(self):
@@ -575,7 +572,7 @@ class TestAssertions(TestCase):
                 return "object is not a thing"
             def get_details(self):
                 return {}
-        class Matcher(object):
+        class Matcher:
             def match(self, thing):
                 calls.append(('match', thing))
                 return Mismatch(thing)
@@ -619,7 +616,7 @@ class TestAssertions(TestCase):
             expected, self.assertThat, matchee, matcher, verbose=True)
 
     def test_expectThat_matches_clean(self):
-        class Matcher(object):
+        class Matcher:
             def match(self, foo):
                 return None
         self.expectThat("foo", Matcher())
@@ -687,8 +684,8 @@ class TestAssertions(TestCase):
     def test_assertThat_verbose_unicode(self):
         # When assertThat is given matchees or matchers that contain non-ASCII
         # unicode strings, we can still provide a meaningful error.
-        matchee = _u('\xa7')
-        matcher = Equals(_u('a'))
+        matchee = '\xa7'
+        matcher = Equals('a')
         expected = (
             'Match failed. Matchee: %s\n'
             'Matcher: %s\n'
@@ -728,7 +725,7 @@ class TestAssertions(TestCase):
         self.assertFails(expected_error, self.failUnlessEqual, a, b)
 
     def test_assertEqual_non_ascii_str_with_newlines(self):
-        message = _u("Be careful mixing unicode and bytes")
+        message = "Be careful mixing unicode and bytes"
         a = "a\n\xa7\n"
         b = "Just a longish string so the more verbose output form is used."
         expected_error = '\n'.join([
@@ -737,7 +734,7 @@ class TestAssertions(TestCase):
             'a',
             repr('\xa7')[1:-1],
             "'''",
-            'actual    = %r' % (b,),
+            'actual    = {!r}'.format(b),
             ': ' + message,
             ])
         self.assertFails(expected_error, self.assertEqual, a, b, message)
@@ -764,7 +761,7 @@ class TestAssertions(TestCase):
         test = Test('test')
         result = ExtendedTestResult()
         test.run(result)
-        self.assertEqual(set(['traceback', 'traceback-1']),
+        self.assertEqual({'traceback', 'traceback-1'},
             set(result._events[1][2].keys()))
 
 
@@ -1152,11 +1149,11 @@ class TestUniqueFactories(TestCase):
         prefix = self.getUniqueString()
         unique_text_generator = testcase.unique_text_generator(prefix)
         first_result = next(unique_text_generator)
-        self.assertEqual(six.text_type('%s-%s') % (prefix, _u('\u1e00')),
+        self.assertEqual('{}-{}'.format(prefix, '\u1e00'),
                          first_result)
         # The next value yielded by unique_text_generator is different.
         second_result = next(unique_text_generator)
-        self.assertEqual(six.text_type('%s-%s') % (prefix, _u('\u1e01')),
+        self.assertEqual('{}-{}'.format(prefix, '\u1e01'),
                          second_result)
 
     def test_mods(self):
@@ -1179,16 +1176,16 @@ class TestUniqueFactories(TestCase):
 
     def test_unique_text(self):
         self.assertEqual(
-            u'\u1e00',
+            '\u1e00',
             testcase._unique_text(base_cp=0x1e00, cp_range=5, index=0))
         self.assertEqual(
-            u'\u1e01',
+            '\u1e01',
             testcase._unique_text(base_cp=0x1e00, cp_range=5, index=1))
         self.assertEqual(
-            u'\u1e00\u1e01',
+            '\u1e00\u1e01',
             testcase._unique_text(base_cp=0x1e00, cp_range=5, index=5))
         self.assertEqual(
-            u'\u1e03\u1e02\u1e01',
+            '\u1e03\u1e02\u1e01',
             testcase._unique_text(base_cp=0x1e00, cp_range=5, index=38))
 
 
@@ -1284,12 +1281,12 @@ class TestDetailsProvided(TestWithDetails):
 
     def test_addDetails_from_Mismatch(self):
         content = self.get_content()
-        class Mismatch(object):
+        class Mismatch:
             def describe(self):
                 return "Mismatch"
             def get_details(self):
                 return {"foo": content}
-        class Matcher(object):
+        class Matcher:
             def match(self, thing):
                 return Mismatch()
             def __str__(self):
@@ -1302,12 +1299,12 @@ class TestDetailsProvided(TestWithDetails):
 
     def test_multiple_addDetails_from_Mismatch(self):
         content = self.get_content()
-        class Mismatch(object):
+        class Mismatch:
             def describe(self):
                 return "Mismatch"
             def get_details(self):
                 return {"foo": content, "bar": content}
-        class Matcher(object):
+        class Matcher:
             def match(self, thing):
                 return Mismatch()
             def __str__(self):
@@ -1320,12 +1317,12 @@ class TestDetailsProvided(TestWithDetails):
 
     def test_addDetails_with_same_name_as_key_from_get_details(self):
         content = self.get_content()
-        class Mismatch(object):
+        class Mismatch:
             def describe(self):
                 return "Mismatch"
             def get_details(self):
                 return {"foo": content}
-        class Matcher(object):
+        class Matcher:
             def match(self, thing):
                 return Mismatch()
             def __str__(self):
@@ -1657,7 +1654,7 @@ class TestSkipping(TestCase):
             setup_ran = False
 
             def setUp(self):
-                super(SkippingTest, self).setUp()
+                super().setUp()
                 self.setup_ran = True
 
             # Use the decorator passed to us:
@@ -1864,7 +1861,7 @@ class TestTestCaseSuper(TestCase):
             setup_called = False
             def setUp(self):
                 self.setup_called = True
-                super(OtherBaseCase, self).setUp()
+                super().setUp()
         class OurCase(TestCase, OtherBaseCase):
             def runTest(self):
                 pass
@@ -1878,7 +1875,7 @@ class TestTestCaseSuper(TestCase):
             teardown_called = False
             def tearDown(self):
                 self.teardown_called = True
-                super(OtherBaseCase, self).tearDown()
+                super().tearDown()
         class OurCase(TestCase, OtherBaseCase):
             def runTest(self):
                 pass
@@ -1963,7 +1960,7 @@ class TestAttributes(TestCase):
 class TestDecorateTestCaseResult(TestCase):
 
     def setUp(self):
-        super(TestDecorateTestCaseResult, self).setUp()
+        super().setUp()
         self.log = []
 
     def make_result(self, result):
