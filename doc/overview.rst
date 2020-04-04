@@ -102,4 +102,4 @@ If you wish to use testtools with Python 2.6 or 3.2, then please use testtools
 
 If you wish to use testtools with Python 3.3 or 3.4, then please use testtools 2.3.0.
 
-TODO If you wish to use testtools with Python 2.7, then please use testtools TBA.
+If you wish to use testtools with Python 2.7, then please use testtools 2.4.0.
