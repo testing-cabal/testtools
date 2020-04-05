@@ -29,7 +29,6 @@ from extras import (
     try_import,
     )
 import unittest
-import six
 
 from testtools import (
     content,
