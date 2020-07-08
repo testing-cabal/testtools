@@ -1,0 +1,18 @@
+language: python
+cache: pip
+
+python:
+  - "3.5"
+  - "3.6"
+  - "3.7"
+  - "3.8"
+  - "pypy3"
+
+install:
+  - pip install -U pip wheel setuptools
+  - pip install sphinx Twisted
+  - pip install .[test]
+
+script:
+  - python -m testtools.run testtools.tests.test_suite
+  - make clean-sphinx docs
