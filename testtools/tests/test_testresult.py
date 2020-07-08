@@ -2741,6 +2741,9 @@ class TestNonAsciiResults(TestCase):
         textoutput = self._setup_external_case("import bad")
         self._write_module("bad", "utf-8", "\ufeff^ = 0 # %s\n" % text)
         textoutput = self._run_external_case()
+        # Python 3.9 no longer prints the '\ufeff'
+        if sys.version_info >= (3,9):
+            textoutput = textoutput.replace('\ufeff', '')
         self.assertThat(
             textoutput,
             MatchesRegex(
