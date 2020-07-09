@@ -454,21 +454,6 @@ class TestCase(unittest.TestCase):
             matcher = IsInstance(klass)
         self.assertThat(obj, matcher, msg)
 
-    def assertItemsEqual(self, expected, observed, message=None):
-        """Assert that items in 'expected' are equal to items in 'observed'.
-
-        It is equivalent to assertEqual(sorted(expected), sorted(observed))
-
-        NOTE: items don't have to be hashable
-
-        :param expected: The expected value.
-        :param observed: The observed value.
-        :param message: An optional message to include in the error.
-        """
-        matcher = _FlippedEquals(sorted(expected))
-        matchee = sorted(observed)
-        self.assertThat(matchee, matcher, message)
-
     def assertRaises(self, excClass, callableObj, *args, **kwargs):
         """Fail unless an exception of class excClass is thrown
            by callableObj when invoked with arguments args and keyword
