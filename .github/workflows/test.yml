@@ -10,9 +10,24 @@ jobs:
       matrix:
         python-version: [3.5, 3.6, 3.7, 3.8, pypy3]
         os: [ubuntu-18.04]
+        include:
+          # Dev versions
+          - { python-version: 3.9-dev, os: ubuntu-20.04 }
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python }} (deadsnakes)
+        uses: deadsnakes/action@v1.0.0
+        if: endsWith(matrix.python-version, '-dev')
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set up Python ${{ matrix.python-version }}
+        if: "!endsWith(matrix.python-version, '-dev')"
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
 
       - name: Ubuntu cache
         uses: actions/cache@v1
@@ -24,11 +39,6 @@ jobs:
             }}
           restore-keys: |
             ${{ matrix.os }}-${{ matrix.python-version }}-
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: |
