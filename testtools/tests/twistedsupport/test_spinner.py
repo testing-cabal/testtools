@@ -141,12 +141,12 @@ class TestRunInReactor(NeedsTwistedTestCase):
             None, (getattr(signal, name, None) for name in signals)))
         for sig in signals:
             self.addCleanup(signal.signal, sig, signal.getsignal(sig))
-        new_hdlrs = set(lambda *a: None for _ in signals)
+        new_hdlrs = list(lambda *a: None for _ in signals)
         for sig, hdlr in zip(signals, new_hdlrs):
             signal.signal(sig, hdlr)
         spinner = self.make_spinner()
         spinner.run(self.make_timeout(), lambda: None)
-        self.assertEqual(new_hdlrs, set(map(signal.getsignal, signals)))
+        self.assertItemsEqual(new_hdlrs, list(map(signal.getsignal, signals)))
 
     def test_timeout(self):
         # If the function takes too long to run, we raise a
