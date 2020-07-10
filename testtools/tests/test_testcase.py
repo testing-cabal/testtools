@@ -2040,6 +2040,17 @@ class TestDecorateTestCaseResult(TestCase):
         self.assertRaises(AttributeError, getattr, orig, 'thing')
 
 
+class TestSubTest(TestCase):
+
+    def test_successeful_sub_test(self):
+        subtest_executed = False
+
+        with self.subTest('this is a sub-test'):
+            subtest_executed = True
+
+        self.assertTrue(subtest_executed)
+
+
 def test_suite():
     from unittest import TestLoader
     return TestLoader().loadTestsFromName(__name__)
