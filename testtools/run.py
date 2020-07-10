@@ -25,8 +25,7 @@ from testtools.testsuite import filter_by_ids, iterate_tests, sorted_tests
 defaultTestLoader = unittest.defaultTestLoader
 defaultTestLoaderCls = unittest.TestLoader
 have_discover = True
-# This shouldn't really be public - its legacy.  Try to set it if we can, and
-# if we can't just stub it out to None.
+
 discover_impl = getattr(unittest, 'loader', None)
 
 # Kept for API compatibility, but no longer used.

@@ -27,7 +27,6 @@ from extras import (
     safe_hasattr,
     try_import,
     )
-
 import unittest
 
 from testtools import (
@@ -488,6 +487,7 @@ class TestCase(unittest.TestCase):
         if mismatch_error is not None:
             raise mismatch_error
 
+    assertItemsEqual = unittest.TestCase.assertCountEqual
     def addDetailUniqueName(self, name, content_object):
         """Add a detail to the test, but ensure it's name is unique.
 
