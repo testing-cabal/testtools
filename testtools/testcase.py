@@ -27,9 +27,7 @@ from extras import (
     safe_hasattr,
     try_import,
     )
-# To let setup.py work, make this a conditional import.
-# Don't use extras.try_imports, as it interferes with PyCharm's unittest
-# detection algorithm. See: https://youtrack.jetbrains.com/issue/PY-26630
+
 import unittest
 
 from testtools import (
