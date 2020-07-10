@@ -25,7 +25,6 @@ from testtools.testsuite import filter_by_ids, iterate_tests, sorted_tests
 defaultTestLoader = unittest.defaultTestLoader
 defaultTestLoaderCls = unittest.TestLoader
 have_discover = True
-
 discover_impl = getattr(unittest, 'loader', None)
 
 # Kept for API compatibility, but no longer used.
