@@ -15,10 +15,9 @@ __all__ = [
 import codecs
 import json
 import os
+import traceback
 
 from extras import try_import
-# To let setup.py work, make this a conditional import.
-traceback = try_import('traceback2')
 
 from testtools.compat import (
     _b,
