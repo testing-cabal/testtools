@@ -13,8 +13,8 @@ from functools import partial
 import os.path
 import sys
 
-from extras import safe_hasattr, try_imports
-# To let setup.py work, make this a conditional import.
+from extras import safe_hasattr
+
 import unittest
 
 from testtools import TextTestResult
@@ -47,7 +47,6 @@ def list_test(test):
         describing things that failed to import.
     """
     unittest_import_strs = {
-        'unittest2.loader.ModuleImportFailure.',
         'unittest.loader.ModuleImportFailure.',
         'discover.ModuleImportFailure.'
         }

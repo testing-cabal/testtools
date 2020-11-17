@@ -16,7 +16,6 @@ __all__ = [
     'unique_text_generator',
     ]
 
-import collections
 import copy
 import functools
 import itertools
