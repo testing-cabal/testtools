@@ -17,11 +17,6 @@ import os
 import sys
 import unicodedata
 
-from extras import try_import
-
-# To let setup.py work, make this a conditional import.
-linecache = try_import('linecache2')
-
 
 def reraise(exc_class, exc_obj, exc_tb, _marker=object()):
     """Re-raise an exception received from sys.exc_info() or similar."""
