@@ -1,11 +1,11 @@
 # Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
 
 import doctest
+import io
 import re
 import sys
 
 from testtools import TestCase
-from testtools.compat import StringIO
 from testtools.matchers import (
     Annotate,
     Equals,
@@ -28,7 +28,7 @@ def run_doctest(obj, name):
     t = p.get_doctest(
         obj.__doc__, sys.modules[obj.__module__].__dict__, name, '', 0)
     r = doctest.DocTestRunner()
-    output = StringIO()
+    output = io.StringIO()
     r.run(t, out=output.write)
     return r.failures, output.getvalue()
 
@@ -119,12 +119,12 @@ class TestMatchesSetwise(TestCase):
                                               description_matcher):
         mismatch = matcher.match(value)
         if mismatch is None:
-            self.fail("%s matched %s" % (matcher, value))
+            self.fail("{} matched {}".format(matcher, value))
         actual_description = mismatch.describe()
         self.assertThat(
             actual_description,
             Annotate(
-                "%s matching %s" % (matcher, value),
+                "{} matching {}".format(matcher, value),
                 description_matcher))
 
     def test_matches(self):

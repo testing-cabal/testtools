@@ -56,7 +56,7 @@ class _ConstructedTest(TestCase):
         See ``make_test_case`` for full documentation.
         """
         setattr(self, test_method_name, self.test_case)
-        super(_ConstructedTest, self).__init__(test_method_name)
+        super().__init__(test_method_name)
         self._set_up = set_up
         self._test_body = test_body
         self._tear_down = tear_down
@@ -66,7 +66,7 @@ class _ConstructedTest(TestCase):
 
     def setUp(self):
         self._pre_set_up(self)
-        super(_ConstructedTest, self).setUp()
+        super().setUp()
         for cleanup in self._test_cleanups:
             self.addCleanup(cleanup, self)
         self._set_up(self)
@@ -76,7 +76,7 @@ class _ConstructedTest(TestCase):
 
     def tearDown(self):
         self._tear_down(self)
-        super(_ConstructedTest, self).tearDown()
+        super().tearDown()
         self._post_tear_down(self)
 
 
@@ -133,8 +133,8 @@ def _make_behavior_scenarios(stage):
     Ordering is not consistent.
     """
     return (
-        ('%s=%s' % (stage, behavior),
-         {'%s_behavior' % (stage,): function})
+        ('{}={}'.format(stage, behavior),
+         {'{}_behavior'.format(stage): function})
         for (behavior, function) in behaviors
     )
 
@@ -167,14 +167,14 @@ class _SetUpFailsOnGlobalState(TestCase):
     def setUp(self):
         if not self.first_run:
             return
-        super(_SetUpFailsOnGlobalState, self).setUp()
+        super().setUp()
 
     def test_success(self):
         pass
 
     def tearDown(self):
         if not self.first_run:
-            super(_SetUpFailsOnGlobalState, self).tearDown()
+            super().tearDown()
         self.__class__.first_run = False
 
     @classmethod

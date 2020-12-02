@@ -19,7 +19,7 @@ from ._impl import (
     )
 
 
-class MatchesAny(object):
+class MatchesAny:
     """Matches if any of the matchers it is created with match."""
 
     def __init__(self, *matchers):
@@ -39,7 +39,7 @@ class MatchesAny(object):
             str(matcher) for matcher in self.matchers])
 
 
-class MatchesAll(object):
+class MatchesAll:
     """Matches if all of the matchers it is created with match."""
 
     def __init__(self, *matchers, **options):
@@ -88,14 +88,14 @@ class MismatchesAll(Mismatch):
         return '\n'.join(descriptions)
 
 
-class Not(object):
+class Not:
     """Inverts a matcher."""
 
     def __init__(self, matcher):
         self.matcher = matcher
 
     def __str__(self):
-        return 'Not(%s)' % (self.matcher,)
+        return 'Not({})'.format(self.matcher)
 
     def match(self, other):
         mismatch = self.matcher.match(other)
@@ -113,10 +113,10 @@ class MatchedUnexpectedly(Mismatch):
         self.other = other
 
     def describe(self):
-        return "%r matches %s" % (self.other, self.matcher)
+        return "{!r} matches {}".format(self.other, self.matcher)
 
 
-class Annotate(object):
+class Annotate:
     """Annotates a matcher with a descriptive string.
 
     Mismatches are then described as '<mismatch>: <annotation>'.
@@ -134,7 +134,7 @@ class Annotate(object):
         return cls(annotation, matcher)
 
     def __str__(self):
-        return 'Annotate(%r, %s)' % (self.annotation, self.matcher)
+        return 'Annotate({!r}, {})'.format(self.annotation, self.matcher)
 
     def match(self, other):
         mismatch = self.matcher.match(other)
@@ -146,12 +146,12 @@ class PostfixedMismatch(MismatchDecorator):
     """A mismatch annotated with a descriptive string."""
 
     def __init__(self, annotation, mismatch):
-        super(PostfixedMismatch, self).__init__(mismatch)
+        super().__init__(mismatch)
         self.annotation = annotation
         self.mismatch = mismatch
 
     def describe(self):
-        return '%s: %s' % (self.original.describe(), self.annotation)
+        return '{}: {}'.format(self.original.describe(), self.annotation)
 
 
 AnnotatedMismatch = PostfixedMismatch
@@ -160,14 +160,14 @@ AnnotatedMismatch = PostfixedMismatch
 class PrefixedMismatch(MismatchDecorator):
 
     def __init__(self, prefix, mismatch):
-        super(PrefixedMismatch, self).__init__(mismatch)
+        super().__init__(mismatch)
         self.prefix = prefix
 
     def describe(self):
-        return '%s: %s' % (self.prefix, self.original.describe())
+        return '{}: {}'.format(self.prefix, self.original.describe())
 
 
-class AfterPreprocessing(object):
+class AfterPreprocessing:
     """Matches if the value matches after passing through a function.
 
     This can be used to aid in creating trivial matchers as functions, for
@@ -199,14 +199,14 @@ class AfterPreprocessing(object):
         return str(self.preprocessor)
 
     def __str__(self):
-        return "AfterPreprocessing(%s, %s)" % (
+        return "AfterPreprocessing({}, {})".format(
             self._str_preprocessor(), self.matcher)
 
     def match(self, value):
         after = self.preprocessor(value)
         if self.annotate:
             matcher = Annotate(
-                "after %s on %r" % (self._str_preprocessor(), value),
+                "after {} on {!r}".format(self._str_preprocessor(), value),
                 self.matcher)
         else:
             matcher = self.matcher
@@ -218,14 +218,14 @@ class AfterPreprocessing(object):
 AfterPreproccessing = AfterPreprocessing
 
 
-class AllMatch(object):
+class AllMatch:
     """Matches if all provided values match the given matcher."""
 
     def __init__(self, matcher):
         self.matcher = matcher
 
     def __str__(self):
-        return 'AllMatch(%s)' % (self.matcher,)
+        return 'AllMatch({})'.format(self.matcher)
 
     def match(self, values):
         mismatches = []
@@ -237,14 +237,14 @@ class AllMatch(object):
             return MismatchesAll(mismatches)
 
 
-class AnyMatch(object):
+class AnyMatch:
     """Matches if any of the provided values match the given matcher."""
 
     def __init__(self, matcher):
         self.matcher = matcher
 
     def __str__(self):
-        return 'AnyMatch(%s)' % (self.matcher,)
+        return 'AnyMatch({})'.format(self.matcher)
 
     def match(self, values):
         mismatches = []
@@ -282,7 +282,7 @@ class MatchesPredicate(Matcher):
         self.message = message
 
     def __str__(self):
-        return '%s(%r, %r)' % (
+        return '{}({!r}, {!r})'.format(
             self.__class__.__name__, self.predicate, self.message)
 
     def match(self, x):
@@ -356,11 +356,11 @@ class _MatchesPredicateWithParams(Matcher):
         kwargs = ["%s=%s" % item for item in self.kwargs.items()]
         args = ", ".join(args + kwargs)
         if self.name is None:
-            name = 'MatchesPredicateWithParams(%r, %r)' % (
+            name = 'MatchesPredicateWithParams({!r}, {!r})'.format(
                 self.predicate, self.message)
         else:
             name = self.name
-        return '%s(%s)' % (name, args)
+        return '{}({})'.format(name, args)
 
     def match(self, x):
         if not self.predicate(x, *self.args, **self.kwargs):

@@ -17,8 +17,8 @@ from extras import safe_hasattr, try_imports
 # To let setup.py work, make this a conditional import.
 unittest = try_imports(['unittest2', 'unittest'])
 
-from testtools import TextTestResult, testcase
-from testtools.compat import classtypes, istext, unicode_output_stream
+from testtools import TextTestResult
+from testtools.compat import unicode_output_stream
 from testtools.testsuite import filter_by_ids, iterate_tests, sorted_tests
 
 
@@ -49,11 +49,11 @@ def list_test(test):
     :return: A tuple of test ids that would run and error strings
         describing things that failed to import.
     """
-    unittest_import_strs = set([
+    unittest_import_strs = {
         'unittest2.loader.ModuleImportFailure.',
         'unittest.loader.ModuleImportFailure.',
         'discover.ModuleImportFailure.'
-        ])
+        }
     test_ids = []
     errors = []
     for test in iterate_tests(test):
@@ -67,7 +67,7 @@ def list_test(test):
     return test_ids, errors
 
 
-class TestToolsTestRunner(object):
+class TestToolsTestRunner:
     """ A thunk object to support unittest.TestProgram."""
 
     def __init__(self, verbosity=None, failfast=None, buffer=None,
@@ -137,7 +137,7 @@ class TestProgram(unittest.TestProgram):
                     buffer=None, stdout=None, tb_locals=False):
         if module == __name__:
             self.module = None
-        elif istext(module):
+        elif isinstance(module, str):
             self.module = __import__(module)
             for part in module.split('.')[1:]:
                 self.module = getattr(self.module, part)
@@ -180,7 +180,7 @@ class TestProgram(unittest.TestProgram):
                 lines = source.readlines()
             finally:
                 source.close()
-            test_ids = set(line.strip().decode('utf-8') for line in lines)
+            test_ids = {line.strip().decode('utf-8') for line in lines}
             self.test = filter_by_ids(self.test, test_ids)
         # XXX: Local edit (see http://bugs.python.org/issue22860)
         if not self.listtests:
@@ -198,7 +198,7 @@ class TestProgram(unittest.TestProgram):
         del self.testLoader.errors[:]
 
     def _getParentArgParser(self):
-        parser = super(TestProgram, self)._getParentArgParser()
+        parser = super()._getParentArgParser()
         # XXX: Local edit (see http://bugs.python.org/issue22860)
         parser.add_argument('-l', '--list', dest='listtests', default=False,
             action='store_true', help='List tests rather than executing them')
@@ -208,7 +208,7 @@ class TestProgram(unittest.TestProgram):
         return parser
 
     def _do_discovery(self, argv, Loader=None):
-        super(TestProgram, self)._do_discovery(argv, Loader=Loader)
+        super()._do_discovery(argv, Loader=Loader)
         # XXX: Local edit (see http://bugs.python.org/issue22860)
         self.test = sorted_tests(self.test)
 

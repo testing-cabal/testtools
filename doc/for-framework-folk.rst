@@ -350,9 +350,8 @@ TextTestResult
 A ``TestResult`` that provides a text UI very similar to the Python standard
 library UI. Key differences are that its supports the extended outcomes and
 details API, and is completely encapsulated into the result object, permitting
-it to be used without a 'TestRunner' object. Not all the Python 2.7 outcomes
-are displayed (yet). It is also a 'quiet' result with no dots or verbose mode.
-These limitations will be corrected soon.
+it to be used without a 'TestRunner' object.  It is also a 'quiet' result with
+no dots or verbose mode. These limitations will be corrected soon.
 
 
 ExtendedToOriginalDecorator

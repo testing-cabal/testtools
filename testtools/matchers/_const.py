@@ -5,11 +5,10 @@ __all__ = [
     'Never',
     ]
 
-from testtools.compat import _u
 from ._impl import Mismatch
 
 
-class _Always(object):
+class _Always:
     """Always matches."""
 
     def __str__(self):
@@ -33,7 +32,7 @@ def Always():
     return _Always()
 
 
-class _Never(object):
+class _Never:
     """Never matches."""
 
     def __str__(self):
@@ -41,7 +40,7 @@ class _Never(object):
 
     def match(self, value):
         return Mismatch(
-            _u('Inevitable mismatch on %r' % (value,)))
+            'Inevitable mismatch on {!r}'.format(value))
 
 
 def Never():

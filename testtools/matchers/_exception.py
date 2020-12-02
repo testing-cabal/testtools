@@ -8,10 +8,6 @@ __all__ = [
 
 import sys
 
-from testtools.compat import (
-    classtypes,
-    istext,
-    )
 from ._basic import MatchesRegex
 from ._higherorder import AfterPreproccessing
 from ._impl import (
@@ -50,12 +46,12 @@ class MatchesException(Matcher):
         """
         Matcher.__init__(self)
         self.expected = exception
-        if istext(value_re):
+        if isinstance(value_re, str):
             value_re = AfterPreproccessing(str, MatchesRegex(value_re), False)
         self.value_re = value_re
         expected_type = type(self.expected)
         self._is_instance = not any(issubclass(expected_type, class_type)
-                for class_type in classtypes() + (tuple,))
+                for class_type in (type, tuple))
 
     def match(self, other):
         if type(other) != tuple:
@@ -64,10 +60,10 @@ class MatchesException(Matcher):
         if self._is_instance:
             expected_class = expected_class.__class__
         if not issubclass(other[0], expected_class):
-            return Mismatch('%r is not a %r' % (other[0], expected_class))
+            return Mismatch('{!r} is not a {!r}'.format(other[0], expected_class))
         if self._is_instance:
             if other[1].args != self.expected.args:
-                return Mismatch('%s has different arguments to %s.' % (
+                return Mismatch('{} has different arguments to {}.'.format(
                         _error_repr(other[1]), _error_repr(self.expected)))
         elif self.value_re is not None:
             return self.value_re.match(other[1])
@@ -99,7 +95,7 @@ class Raises(Matcher):
     def match(self, matchee):
         try:
             result = matchee()
-            return Mismatch('%r returned %r' % (matchee, result))
+            return Mismatch('{!r} returned {!r}'.format(matchee, result))
         # Catch all exceptions: Raises() should be able to match a
         # KeyboardInterrupt or SystemExit.
         except:

@@ -6,7 +6,7 @@ Bugs and patches
 ----------------
 
 `File bugs <https://bugs.launchpad.net/testtools/+filebug>` on Launchpad, and
-`send patches <https://github.com/testing-cabal/testtools/>` on Github.
+`send patches <https://github.com/testing-cabal/testtools/>` on GitHub.
 
 
 Coding style
@@ -15,12 +15,12 @@ Coding style
 In general, follow `PEP 8`_ except where consistency with the standard
 library's unittest_ module would suggest otherwise.
 
-testtools currently supports Python 2.7 and Python 3.4 and later.
+testtools supports Python 3.5 and later.
 
 Copyright assignment
 --------------------
 
-Part of testtools raison d'etre is to provide Python with improvements to the
+Part of testtools raison d'être is to provide Python with improvements to the
 testing code it ships. For that reason we require all contributions (that are
 non-trivial) to meet one of the following rules:
 
@@ -114,7 +114,7 @@ Tests belong in ``testtools/tests/``.
 Committing to trunk
 -------------------
 
-Testtools is maintained using git, with its master repo at
+Testtools is maintained using Git, with its master repo at
 https://github.com/testing-cabal/testtools. This gives every contributor the
 ability to commit their work to their own branches. However permission must be
 granted to allow contributors to commit to the trunk branch.
@@ -128,7 +128,7 @@ Code Review
 -----------
 
 All code must be reviewed before landing on trunk. The process is to create a
-branch on Github, and make a pull request into trunk. It will then be reviewed
+branch on GitHub, and make a pull request into trunk. It will then be reviewed
 before it can be merged to trunk. It will be reviewed by someone:
 
 * not the author
@@ -173,7 +173,7 @@ Releasing
 Prerequisites
 +++++++++++++
 
-Membership in the testing-cabal org on github as committer.
+Membership in the testing-cabal org on GitHub as committer.
 
 Membership in the pypi testtools project as maintainer.
 
@@ -196,7 +196,7 @@ Tasks
    #. Marks all the Fix Committed bugs as Fix Released
    #. Creates a new milestone
 #. If a new series has been created (e.g. 0.10.0), make the series on Launchpad.
-#. Push trunk to Github, ``git push --tags origin master``
+#. Push trunk to GitHub, ``git push --tags origin master``
 
 .. _PEP 8: http://www.python.org/dev/peps/pep-0008/
 .. _unittest: http://docs.python.org/library/unittest.html
