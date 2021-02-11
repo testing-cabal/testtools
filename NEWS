@@ -25,6 +25,11 @@ Changes
   moved to the ``extras`` package. It is no longer useless on Python 3-only
   projects.
 
+* The ``try_imports`` utility has been removed from ``testtools.helpers``.
+  This was a compat wrapper introduced in 0.9.25 when the utility itself was
+  moved to the ``extras`` package. It is no longer used within testtools and
+  has therefore been dropped.
+
 2.4.0
 ~~~~~
 

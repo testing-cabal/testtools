@@ -29,16 +29,15 @@ import sys
 import unittest
 import warnings
 
-from extras import try_import, try_imports
+from extras import try_import
 parse_mime_type = try_import('mimeparse.parse_mime_type')
-Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
 from testtools.compat import _b
 from testtools.content import (
     Content,
     text_content,
     TracebackContent,
-    )
+)
 from testtools.content_type import ContentType
 from testtools.tags import TagContext
 # circular import

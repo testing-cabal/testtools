@@ -2,15 +2,11 @@
 
 __all__ = [
     'try_import',
-    'try_imports',
 ]
 
 import sys
 
-from extras import (
-    try_import,
-    try_imports,
-)
+from extras import try_import
 
 
 def map_values(function, dictionary):

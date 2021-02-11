@@ -42,16 +42,12 @@ __all__ = [
     'ThreadsafeForwardingResult',
     'TimestampingStreamResult',
     'try_import',
-    'try_imports',
     'unique_text_generator',
     ]
 
 # Compat - removal announced in 0.9.25.
 try:
-    from extras import (
-        try_import,
-        try_imports,
-        )
+    from extras import try_import
 except ImportError:
     # Support reading __init__ for __version__ without extras, because pip does
     # not support setup_requires.

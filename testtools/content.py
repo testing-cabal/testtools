@@ -13,19 +13,14 @@ __all__ = [
     ]
 
 import codecs
+import functools
 import json
 import os
 import traceback
 
-from extras import try_import
-
-from testtools.compat import (
-    _b,
-)
+from testtools.compat import _b
 from testtools.content_type import ContentType, JSON, UTF8_TEXT
 
-
-functools = try_import('functools')
 
 _join_b = _b("").join
 

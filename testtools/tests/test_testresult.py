@@ -7,19 +7,20 @@ __metaclass__ = type
 import codecs
 import datetime
 import doctest
-from itertools import chain, combinations
 import io
+from itertools import chain
+from itertools import combinations
 import os
 import platform
+from queue import Queue
 import re
 import shutil
 import sys
 import tempfile
 import threading
 from unittest import TestSuite
-from extras import try_imports, try_import
 
-Queue = try_imports(['Queue.Queue', 'queue.Queue'])
+from extras import try_import
 
 testresources = try_import('testresources')
 

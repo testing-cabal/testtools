@@ -4,9 +4,10 @@
 
 import doctest
 import io
-from unittest import TestSuite
 import sys
 from textwrap import dedent
+import unittest
+from unittest import TestSuite
 
 from extras import try_import
 fixtures = try_import('fixtures')
@@ -15,14 +16,12 @@ import unittest
 
 import testtools
 from testtools import TestCase, run, skipUnless
-from testtools.compat import (
-    _b,
-    )
+from testtools.compat import _b
 from testtools.matchers import (
     Contains,
     DocTestMatches,
     MatchesRegex,
-    )
+)
 
 
 if fixtures:

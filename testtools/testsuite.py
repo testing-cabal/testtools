@@ -12,13 +12,10 @@ __all__ = [
 
 from collections import Counter
 from pprint import pformat
+from queue import Queue
 import sys
 import threading
 import unittest
-
-from extras import try_imports
-# This is just to let setup.py work, as testtools is imported in setup.py.
-Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
 import testtools
 

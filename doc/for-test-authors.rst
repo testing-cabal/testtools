@@ -1449,18 +1449,6 @@ You can do::
    defer = try_import('twisted.internet.defer')
 
 
-Instead of::
-
-  try:
-      from StringIO import StringIO
-  except ImportError:
-      from io import StringIO
-
-You can do::
-
-  StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
-
-
 Nullary callables
 -----------------
 
