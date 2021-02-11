@@ -22,12 +22,9 @@ import itertools
 import sys
 import types
 import warnings
-
-from extras import (
-    safe_hasattr,
-    try_import,
-    )
 import unittest
+
+from extras import try_import
 
 from testtools import (
     content,
@@ -733,8 +730,10 @@ class TestCase(unittest.TestCase):
                 # the fixture.  Ideally this whole try/except is not
                 # really needed any more, however, we keep this code to
                 # remain compatible with the older setUp().
-                if (safe_hasattr(fixture, '_details') and
-                        fixture._details is not None):
+                if (
+                    hasattr(fixture, '_details') and
+                    fixture._details is not None
+                ):
                     gather_details(fixture.getDetails(), self.getDetails())
             except:
                 # Report the setUp exception, then raise the error during
@@ -903,7 +902,7 @@ def attr(*args):
         alter its id to enumerate the added attributes.
     """
     def decorate(fn):
-        if not safe_hasattr(fn, '__testtools_attrs'):
+        if not hasattr(fn, '__testtools_attrs'):
             fn.__testtools_attrs = set()
         fn.__testtools_attrs.update(args)
         return fn

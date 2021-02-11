@@ -1,19 +1,16 @@
 # Copyright (c) 2010-2012 testtools developers. See LICENSE for details.
 
 __all__ = [
-    'safe_hasattr',
     'try_import',
     'try_imports',
-    ]
+]
 
 import sys
 
-# Compat - removal announced in 0.9.25.
 from extras import (
-    safe_hasattr,
     try_import,
     try_imports,
-    )
+)
 
 
 def map_values(function, dictionary):

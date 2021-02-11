@@ -17,7 +17,7 @@ import sys
 import tempfile
 import threading
 from unittest import TestSuite
-from extras import safe_hasattr, try_imports, try_import
+from extras import try_imports, try_import
 
 Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
@@ -2191,7 +2191,7 @@ class TestExtendedToOriginalResultDecorator(
         self.make_26_result()
         self.assertEqual(False, self.converter.failfast)
         self.converter.failfast = True
-        self.assertFalse(safe_hasattr(self.converter.decorated, 'failfast'))
+        self.assertFalse(hasattr(self.converter.decorated, 'failfast'))
 
     def test_failfast_py27(self):
         self.make_27_result()

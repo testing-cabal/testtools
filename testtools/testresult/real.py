@@ -29,7 +29,7 @@ import sys
 import unittest
 import warnings
 
-from extras import safe_hasattr, try_import, try_imports
+from extras import try_import, try_imports
 parse_mime_type = try_import('mimeparse.parse_mime_type')
 Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
@@ -1481,7 +1481,7 @@ class ExtendedToOriginalDecorator:
         return getattr(self.decorated, 'failfast', self._failfast)
 
     def _set_failfast(self, value):
-        if safe_hasattr(self.decorated, 'failfast'):
+        if hasattr(self.decorated, 'failfast'):
             self.decorated.failfast = value
         else:
             self._failfast = value
@@ -1497,7 +1497,7 @@ class ExtendedToOriginalDecorator:
         return getattr(self.decorated, 'shouldStop', self._shouldStop)
 
     def _set_shouldStop(self, value):
-        if safe_hasattr(self.decorated, 'shouldStop'):
+        if hasattr(self.decorated, 'shouldStop'):
             self.decorated.shouldStop = value
         else:
             self._shouldStop = value
@@ -1723,7 +1723,7 @@ class ResourcedToStreamDecorator(ExtendedToStreamDecorator):
 
         # If the resource implements the TestResourceManager.id() API, let's
         # use it, otherwise fallback to the class name.
-        if safe_hasattr(resource, "id"):
+        if hasattr(resource, "id"):
             resource_id = resource.id()
         else:
             resource_id = "{}.{}".format(

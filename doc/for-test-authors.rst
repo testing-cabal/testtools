@@ -1461,14 +1461,6 @@ You can do::
   StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
 
 
-Safe attribute testing
-----------------------
-
-``hasattr`` is broken_ on many versions of Python. The helper ``safe_hasattr``
-can be used to safely test whether an object has a particular attribute. Like
-``try_import`` this used to be in testtools but is now in extras.
-
-
 Nullary callables
 -----------------
 
