@@ -27,13 +27,7 @@ from extras import (
     safe_hasattr,
     try_import,
     )
-# To let setup.py work, make this a conditional import.
-# Don't use extras.try_imports, as it interferes with PyCharm's unittest
-# detection algorithm. See: https://youtrack.jetbrains.com/issue/PY-26630
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
+import unittest
 
 from testtools import (
     content,
@@ -67,7 +61,6 @@ from testtools.testresult import (
 class TestSkipped(Exception):
     """Raised within TestCase.run() when a test is skipped."""
 TestSkipped = try_import('unittest.case.SkipTest', TestSkipped)
-TestSkipped = try_import('unittest2.case.SkipTest', TestSkipped)
 
 
 class _UnexpectedSuccess(Exception):
@@ -78,8 +71,6 @@ class _UnexpectedSuccess(Exception):
     """
 _UnexpectedSuccess = try_import(
     'unittest.case._UnexpectedSuccess', _UnexpectedSuccess)
-_UnexpectedSuccess = try_import(
-    'unittest2.case._UnexpectedSuccess', _UnexpectedSuccess)
 
 
 class _ExpectedFailure(Exception):
@@ -90,8 +81,6 @@ class _ExpectedFailure(Exception):
     """
 _ExpectedFailure = try_import(
     'unittest.case._ExpectedFailure', _ExpectedFailure)
-_ExpectedFailure = try_import(
-    'unittest2.case._ExpectedFailure', _ExpectedFailure)
 
 
 # Copied from unittest before python 3.4 release. Used to maintain
@@ -498,6 +487,7 @@ class TestCase(unittest.TestCase):
         if mismatch_error is not None:
             raise mismatch_error
 
+    assertItemsEqual = unittest.TestCase.assertCountEqual
     def addDetailUniqueName(self, name, content_object):
         """Add a detail to the test, but ensure it's name is unique.
 

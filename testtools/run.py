@@ -13,9 +13,9 @@ from functools import partial
 import os.path
 import sys
 
-from extras import safe_hasattr, try_imports
-# To let setup.py work, make this a conditional import.
-unittest = try_imports(['unittest2', 'unittest'])
+from extras import safe_hasattr
+
+import unittest
 
 from testtools import TextTestResult
 from testtools.compat import unicode_output_stream
@@ -25,9 +25,6 @@ from testtools.testsuite import filter_by_ids, iterate_tests, sorted_tests
 defaultTestLoader = unittest.defaultTestLoader
 defaultTestLoaderCls = unittest.TestLoader
 have_discover = True
-# This shouldn't really be public - its legacy.  Try to set it if we can, and
-# if we can't (during installs before unittest2 is installed) just stub it out
-# to None.
 discover_impl = getattr(unittest, 'loader', None)
 
 # Kept for API compatibility, but no longer used.
@@ -50,7 +47,6 @@ def list_test(test):
         describing things that failed to import.
     """
     unittest_import_strs = {
-        'unittest2.loader.ModuleImportFailure.',
         'unittest.loader.ModuleImportFailure.',
         'discover.ModuleImportFailure.'
         }

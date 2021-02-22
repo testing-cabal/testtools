@@ -1016,7 +1016,7 @@ class TestCaptureTwistedLogs(NeedsTwistedTestCase):
 
 
 def test_suite():
-    from unittest2 import TestLoader, TestSuite
+    from unittest import TestLoader, TestSuite
     return TestLoader().loadTestsFromName(__name__)
 
 
