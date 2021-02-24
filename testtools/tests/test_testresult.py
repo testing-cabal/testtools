@@ -20,7 +20,7 @@ import tempfile
 import threading
 from unittest import TestSuite
 
-from extras import try_import
+from testtools.helpers import try_import
 
 testresources = try_import('testresources')
 

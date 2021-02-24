@@ -1431,24 +1431,6 @@ id and can be used when filtering tests by id. (e.g. via ``--load-list``)::
 General helpers
 ===============
 
-Conditional imports
--------------------
-
-Lots of the time we would like to conditionally import modules.  testtools
-uses the small library extras to do this. This used to be part of testtools.
-
-Instead of::
-
-  try:
-      from twisted.internet import defer
-  except ImportError:
-      defer = None
-
-You can do::
-
-   defer = try_import('twisted.internet.defer')
-
-
 Nullary callables
 -----------------
 

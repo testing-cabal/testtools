@@ -24,7 +24,7 @@ import types
 import warnings
 import unittest
 
-from extras import try_import
+from testtools.helpers import try_import
 
 from testtools import (
     content,

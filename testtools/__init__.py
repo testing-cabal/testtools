@@ -47,7 +47,7 @@ __all__ = [
 
 # Compat - removal announced in 0.9.25.
 try:
-    from extras import try_import
+    from testtools.helpers import try_import
 except ImportError:
     # Support reading __init__ for __version__ without extras, because pip does
     # not support setup_requires.

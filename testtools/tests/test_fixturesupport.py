@@ -2,7 +2,7 @@
 
 import unittest
 
-from extras import try_import
+from testtools.helpers import try_import
 
 from testtools import (
     TestCase,

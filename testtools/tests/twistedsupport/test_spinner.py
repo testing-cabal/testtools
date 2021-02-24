@@ -5,7 +5,7 @@
 import os
 import signal
 
-from extras import try_import
+from testtools.helpers import try_import
 
 from testtools import skipIf
 from testtools.matchers import (

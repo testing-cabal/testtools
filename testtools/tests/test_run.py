@@ -9,7 +9,7 @@ from textwrap import dedent
 import unittest
 from unittest import TestSuite
 
-from extras import try_import
+from testtools.helpers import try_import
 fixtures = try_import('fixtures')
 testresources = try_import('testresources')
 import unittest

@@ -6,7 +6,7 @@ import doctest
 from pprint import pformat
 import unittest
 
-from extras import try_import
+from testtools.helpers import try_import
 
 from testtools import (
     ConcurrentTestSuite,

@@ -29,7 +29,7 @@ import sys
 import unittest
 import warnings
 
-from extras import try_import
+from testtools.helpers import try_import
 parse_mime_type = try_import('mimeparse.parse_mime_type')
 
 from testtools.compat import _b
