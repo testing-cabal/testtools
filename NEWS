@@ -12,6 +12,13 @@ Improvements
   decorators as well as test method decorators, just as they can in
   unittest.
 
+Changes
+-------
+
+* The dependency on the ``unittest2`` module has been removed. This has some
+  knock on effects, including the removal of the ``assertItemsEqual`` helper
+  which was removed from ``unittest`` in Python 3.x.
+
 2.4.0
 ~~~~~
 
