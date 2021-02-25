@@ -3,7 +3,6 @@
 """Tests for testtools._deferred."""
 
 from testtools.helpers import try_import
-
 from testtools.matchers import (
     Equals,
     MatchesException,

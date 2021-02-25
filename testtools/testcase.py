@@ -21,17 +21,12 @@ import functools
 import itertools
 import sys
 import types
-import warnings
 import unittest
+import warnings
 
+from testtools.compat import reraise
+from testtools import content
 from testtools.helpers import try_import
-
-from testtools import (
-    content,
-    )
-from testtools.compat import (
-    reraise,
-    )
 from testtools.matchers import (
     Annotate,
     Contains,
@@ -48,11 +43,11 @@ from testtools.monkey import patch
 from testtools.runtest import (
     MultipleExceptions,
     RunTest,
-    )
+)
 from testtools.testresult import (
     ExtendedToOriginalDecorator,
     TestResult,
-    )
+)
 
 
 class TestSkipped(Exception):

@@ -45,70 +45,58 @@ __all__ = [
     'unique_text_generator',
     ]
 
-# Compat - removal announced in 0.9.25.
-try:
-    from testtools.helpers import try_import
-except ImportError:
-    # Support reading __init__ for __version__ without extras, because pip does
-    # not support setup_requires.
-    pass
-else:
-
-    from testtools.matchers._impl import (
-        Matcher,
-        )
+from testtools.helpers import try_import
+from testtools.matchers._impl import Matcher
 # Shut up, pyflakes. We are importing for documentation, not for namespacing.
-    Matcher
+Matcher
 
-    from testtools.runtest import (
-        MultipleExceptions,
-        RunTest,
-        )
-    from testtools.testcase import (
-        DecorateTestCaseResult,
-        ErrorHolder,
-        ExpectedException,
-        PlaceHolder,
-        TestCase,
-        clone_test_with_new_id,
-        run_test_with,
-        skip,
-        skipIf,
-        skipUnless,
-        unique_text_generator,
-        )
-    from testtools.testresult import (
-        CopyStreamResult,
-        ExtendedToOriginalDecorator,
-        ExtendedToStreamDecorator,
-        MultiTestResult,
-        ResourcedToStreamDecorator,
-        StreamFailFast,
-        StreamResult,
-        StreamResultRouter,
-        StreamSummary,
-        StreamTagger,
-        StreamToDict,
-        StreamToExtendedDecorator,
-        StreamToQueue,
-        Tagger,
-        TestByTestResult,
-        TestControl,
-        TestResult,
-        TestResultDecorator,
-        TextTestResult,
-        ThreadsafeForwardingResult,
-        TimestampingStreamResult,
-        )
-    from testtools.testsuite import (
-        ConcurrentTestSuite,
-        ConcurrentStreamTestSuite,
-        FixtureSuite,
-        iterate_tests,
-        )
-    from testtools.distutilscmd import (
-        TestCommand,
-        )
+from testtools.runtest import (
+    MultipleExceptions,
+    RunTest,
+)
+from testtools.testcase import (
+    DecorateTestCaseResult,
+    ErrorHolder,
+    ExpectedException,
+    PlaceHolder,
+    TestCase,
+    clone_test_with_new_id,
+    run_test_with,
+    skip,
+    skipIf,
+    skipUnless,
+    unique_text_generator,
+)
+from testtools.testresult import (
+    CopyStreamResult,
+    ExtendedToOriginalDecorator,
+    ExtendedToStreamDecorator,
+    MultiTestResult,
+    ResourcedToStreamDecorator,
+    StreamFailFast,
+    StreamResult,
+    StreamResultRouter,
+    StreamSummary,
+    StreamTagger,
+    StreamToDict,
+    StreamToExtendedDecorator,
+    StreamToQueue,
+    Tagger,
+    TestByTestResult,
+    TestControl,
+    TestResult,
+    TestResultDecorator,
+    TextTestResult,
+    ThreadsafeForwardingResult,
+    TimestampingStreamResult,
+)
+from testtools.testsuite import (
+    ConcurrentTestSuite,
+    ConcurrentStreamTestSuite,
+    FixtureSuite,
+    iterate_tests,
+)
+from testtools.distutilscmd import TestCommand
 
 # same format as sys.version_info: "A tuple containing the five components of
 # the version number: major, minor, micro, releaselevel, and serial. All

@@ -9,19 +9,18 @@ from textwrap import dedent
 import unittest
 from unittest import TestSuite
 
-from testtools.helpers import try_import
-fixtures = try_import('fixtures')
-testresources = try_import('testresources')
-import unittest
-
 import testtools
 from testtools import TestCase, run, skipUnless
 from testtools.compat import _b
+from testtools.helpers import try_import
 from testtools.matchers import (
     Contains,
     DocTestMatches,
     MatchesRegex,
 )
+
+fixtures = try_import('fixtures')
+testresources = try_import('testresources')
 
 
 if fixtures:

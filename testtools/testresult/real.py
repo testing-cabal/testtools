@@ -29,9 +29,6 @@ import sys
 import unittest
 import warnings
 
-from testtools.helpers import try_import
-parse_mime_type = try_import('mimeparse.parse_mime_type')
-
 from testtools.compat import _b
 from testtools.content import (
     Content,
@@ -39,7 +36,11 @@ from testtools.content import (
     TracebackContent,
 )
 from testtools.content_type import ContentType
+from testtools.helpers import try_import
 from testtools.tags import TagContext
+
+parse_mime_type = try_import('mimeparse.parse_mime_type')
+
 # circular import
 # from testtools.testcase import PlaceHolder
 PlaceHolder = None

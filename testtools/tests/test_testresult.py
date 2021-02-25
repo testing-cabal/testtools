@@ -20,10 +20,6 @@ import tempfile
 import threading
 from unittest import TestSuite
 
-from testtools.helpers import try_import
-
-testresources = try_import('testresources')
-
 from testtools import (
     CopyStreamResult,
     ExtendedToOriginalDecorator,
@@ -61,6 +57,7 @@ from testtools.content import (
     TracebackContent,
     )
 from testtools.content_type import ContentType, UTF8_TEXT
+from testtools.helpers import try_import
 from testtools.matchers import (
     AllMatch,
     Contains,
@@ -90,6 +87,8 @@ from testtools.testresult.real import (
     _merge_tags,
     utc,
     )
+
+testresources = try_import('testresources')
 
 
 def make_erroring_test():
