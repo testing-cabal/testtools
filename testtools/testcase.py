@@ -21,20 +21,12 @@ import functools
 import itertools
 import sys
 import types
+import unittest
 import warnings
 
-from extras import (
-    safe_hasattr,
-    try_import,
-    )
-import unittest
-
-from testtools import (
-    content,
-    )
-from testtools.compat import (
-    reraise,
-    )
+from testtools.compat import reraise
+from testtools import content
+from testtools.helpers import try_import
 from testtools.matchers import (
     Annotate,
     Contains,
@@ -51,11 +43,11 @@ from testtools.monkey import patch
 from testtools.runtest import (
     MultipleExceptions,
     RunTest,
-    )
+)
 from testtools.testresult import (
     ExtendedToOriginalDecorator,
     TestResult,
-    )
+)
 
 
 class TestSkipped(Exception):
@@ -733,8 +725,10 @@ class TestCase(unittest.TestCase):
                 # the fixture.  Ideally this whole try/except is not
                 # really needed any more, however, we keep this code to
                 # remain compatible with the older setUp().
-                if (safe_hasattr(fixture, '_details') and
-                        fixture._details is not None):
+                if (
+                    hasattr(fixture, '_details') and
+                    fixture._details is not None
+                ):
                     gather_details(fixture.getDetails(), self.getDetails())
             except:
                 # Report the setUp exception, then raise the error during
@@ -903,7 +897,7 @@ def attr(*args):
         alter its id to enumerate the added attributes.
     """
     def decorate(fn):
-        if not safe_hasattr(fn, '__testtools_attrs'):
+        if not hasattr(fn, '__testtools_attrs'):
             fn.__testtools_attrs = set()
         fn.__testtools_attrs.update(args)
         return fn

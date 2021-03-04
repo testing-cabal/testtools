@@ -4,17 +4,14 @@
 
 from distutils.dist import Distribution
 
-from extras import try_import
-
-from testtools.compat import (
-    _b,
-    )
-fixtures = try_import('fixtures')
-
 import testtools
-from testtools import TestCase
+from testtools.compat import _b
 from testtools.distutilscmd import TestCommand
+from testtools.helpers import try_import
 from testtools.matchers import MatchesRegex
+from testtools import TestCase
+
+fixtures = try_import('fixtures')
 
 
 if fixtures:

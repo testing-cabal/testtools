@@ -7,21 +7,18 @@ __metaclass__ = type
 import codecs
 import datetime
 import doctest
-from itertools import chain, combinations
 import io
+from itertools import chain
+from itertools import combinations
 import os
 import platform
+from queue import Queue
 import re
 import shutil
 import sys
 import tempfile
 import threading
 from unittest import TestSuite
-from extras import safe_hasattr, try_imports, try_import
-
-Queue = try_imports(['Queue.Queue', 'queue.Queue'])
-
-testresources = try_import('testresources')
 
 from testtools import (
     CopyStreamResult,
@@ -60,6 +57,7 @@ from testtools.content import (
     TracebackContent,
     )
 from testtools.content_type import ContentType, UTF8_TEXT
+from testtools.helpers import try_import
 from testtools.matchers import (
     AllMatch,
     Contains,
@@ -89,6 +87,8 @@ from testtools.testresult.real import (
     _merge_tags,
     utc,
     )
+
+testresources = try_import('testresources')
 
 
 def make_erroring_test():
@@ -2191,7 +2191,7 @@ class TestExtendedToOriginalResultDecorator(
         self.make_26_result()
         self.assertEqual(False, self.converter.failfast)
         self.converter.failfast = True
-        self.assertFalse(safe_hasattr(self.converter.decorated, 'failfast'))
+        self.assertFalse(hasattr(self.converter.decorated, 'failfast'))
 
     def test_failfast_py27(self):
         self.make_27_result()

@@ -8,9 +8,27 @@ NEXT
 
 Improvements
 ------------
+
 * The skip, skipIf, and skipUnless decorators can now be used as class
   decorators as well as test method decorators, just as they can in
   unittest.
+
+Changes
+-------
+
+* The dependency on the ``unittest2`` module has been removed. This has some
+  knock on effects, including the removal of the ``assertItemsEqual`` helper
+  which was removed from ``unittest`` in Python 3.x.
+
+* The ``safe_hasattr`` utility has been removed from ``testtools.helpers``.
+  This was a compat wrapper introduced in 0.9.25 when the utility itself was
+  moved to the ``extras`` package. It is no longer useless on Python 3-only
+  projects.
+
+* The ``try_imports`` utility has been removed from ``testtools.helpers``.
+  This was a compat wrapper introduced in 0.9.25 when the utility itself was
+  moved to the ``extras`` package. It is no longer used within testtools and
+  has therefore been dropped.
 
 2.4.0
 ~~~~~

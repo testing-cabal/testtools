@@ -2,14 +2,13 @@
 
 import unittest
 
-from extras import try_import
-
 from testtools import (
     TestCase,
     content,
     content_type,
     )
 from testtools.compat import _b
+from testtools.helpers import try_import
 from testtools.matchers import (
     Contains,
     Equals,
@@ -20,6 +19,7 @@ from testtools.testresult.doubles import (
 
 fixtures = try_import('fixtures')
 LoggingFixture = try_import('fixtures.tests.helpers.LoggingFixture')
+
 
 class TestFixtureSupport(TestCase):
 

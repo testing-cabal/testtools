@@ -1431,44 +1431,6 @@ id and can be used when filtering tests by id. (e.g. via ``--load-list``)::
 General helpers
 ===============
 
-Conditional imports
--------------------
-
-Lots of the time we would like to conditionally import modules.  testtools
-uses the small library extras to do this. This used to be part of testtools.
-
-Instead of::
-
-  try:
-      from twisted.internet import defer
-  except ImportError:
-      defer = None
-
-You can do::
-
-   defer = try_import('twisted.internet.defer')
-
-
-Instead of::
-
-  try:
-      from StringIO import StringIO
-  except ImportError:
-      from io import StringIO
-
-You can do::
-
-  StringIO = try_imports(['StringIO.StringIO', 'io.StringIO'])
-
-
-Safe attribute testing
-----------------------
-
-``hasattr`` is broken_ on many versions of Python. The helper ``safe_hasattr``
-can be used to safely test whether an object has a particular attribute. Like
-``try_import`` this used to be in testtools but is now in extras.
-
-
 Nullary callables
 -----------------
 

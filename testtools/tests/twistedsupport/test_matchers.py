@@ -2,9 +2,8 @@
 
 """Tests for Deferred matchers."""
 
-from extras import try_import
-
 from testtools.content import TracebackContent
+from testtools.helpers import try_import
 from testtools.matchers import (
     AfterPreprocessing,
     Equals,

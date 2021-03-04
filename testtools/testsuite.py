@@ -12,13 +12,10 @@ __all__ = [
 
 from collections import Counter
 from pprint import pformat
+from queue import Queue
 import sys
 import threading
 import unittest
-
-from extras import safe_hasattr, try_imports
-# This is just to let setup.py work, as testtools is imported in setup.py.
-Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
 import testtools
 
@@ -235,7 +232,7 @@ def _flatten_tests(suite_or_case, unpack_outer=False):
             suite_id = test.id()
             break
         # If it has a sort_tests method, call that.
-        if safe_hasattr(suite_or_case, 'sort_tests'):
+        if hasattr(suite_or_case, 'sort_tests'):
             suite_or_case.sort_tests()
         return [(suite_id, suite_or_case)]
 
@@ -282,10 +279,10 @@ def filter_by_ids(suite_or_case, test_ids):
     than guessing how to reconstruct a new suite.
     """
     # Compatible objects
-    if safe_hasattr(suite_or_case, 'filter_by_ids'):
+    if hasattr(suite_or_case, 'filter_by_ids'):
         return suite_or_case.filter_by_ids(test_ids)
     # TestCase objects.
-    if safe_hasattr(suite_or_case, 'id'):
+    if hasattr(suite_or_case, 'id'):
         if suite_or_case.id() in test_ids:
             return suite_or_case
         else:

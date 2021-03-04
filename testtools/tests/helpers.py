@@ -8,8 +8,6 @@ __all__ = [
 
 import sys
 
-from extras import safe_hasattr
-
 from testtools import TestResult
 from testtools.content import StackLinesContent
 from testtools.matchers import (
@@ -20,9 +18,6 @@ from testtools.matchers import (
 )
 from testtools import runtest
 
-
-# Importing to preserve compatibility.
-safe_hasattr
 
 # GZ 2010-08-12: Don't do this, pointlessly creates an exc_info cycle
 try:

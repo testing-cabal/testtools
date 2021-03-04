@@ -5,13 +5,12 @@
 import os
 import signal
 
-from extras import try_import
-
 from testtools import (
     skipIf,
     TestCase,
     TestResult,
     )
+from testtools.helpers import try_import
 from testtools.matchers import (
     AfterPreprocessing,
     Contains,

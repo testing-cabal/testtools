@@ -12,9 +12,6 @@ import argparse
 from functools import partial
 import os.path
 import sys
-
-from extras import safe_hasattr
-
 import unittest
 
 from testtools import TextTestResult
@@ -183,7 +180,7 @@ class TestProgram(unittest.TestProgram):
             self.runTests()
         else:
             runner = self._get_runner()
-            if safe_hasattr(runner, 'list'):
+            if hasattr(runner, 'list'):
                 try:
                     runner.list(self.test, loader=self.testLoader)
                 except TypeError:

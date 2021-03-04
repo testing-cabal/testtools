@@ -22,6 +22,7 @@ __all__ = [
     'TimestampingStreamResult',
     ]
 
+import cgi
 import datetime
 import math
 from operator import methodcaller
@@ -29,18 +30,15 @@ import sys
 import unittest
 import warnings
 
-from extras import safe_hasattr, try_import, try_imports
-parse_mime_type = try_import('mimeparse.parse_mime_type')
-Queue = try_imports(['Queue.Queue', 'queue.Queue'])
-
 from testtools.compat import _b
 from testtools.content import (
     Content,
     text_content,
     TracebackContent,
-    )
+)
 from testtools.content_type import ContentType
 from testtools.tags import TagContext
+
 # circular import
 # from testtools.testcase import PlaceHolder
 PlaceHolder = None
@@ -751,19 +749,35 @@ def _make_content_type(mime_type=None):
     testtools was emitting a bad encoding, and this works around it.
     Unfortunately, is also loses data - probably want to drop this in a few
     releases.
+
+    Based on mimeparse.py by Joe Gregorio (MIT License).
+
+    https://github.com/conneg/mimeparse/blob/master/mimeparse.py
     """
     # XXX: Not sure what release this was added, so "in a few releases" is
     # unactionable.
     if mime_type is None:
         mime_type = 'application/octet-stream'
 
-    primary, sub, parameters = parse_mime_type(mime_type)
+    full_type, parameters = cgi.parse_header(mime_type)
+    # Ensure any wildcards are valid.
+    if full_type == '*':
+        full_type = '*/*'
+
+    type_parts = full_type.split('/') if '/' in full_type else None
+    if not type_parts or len(type_parts) > 2:
+        raise Exception("Can't parse type '%s'" % full_type)
+
+    primary_type, sub_type = type_parts
+    primary_type = primary_type.strip()
+    sub_type = sub_type.strip()
+
     if 'charset' in parameters:
         if ',' in parameters['charset']:
             parameters['charset'] = parameters['charset'][
                 :parameters['charset'].find(',')]
 
-    return ContentType(primary, sub, parameters)
+    return ContentType(primary_type, sub_type, parameters)
 
 
 _status_map = {
@@ -796,8 +810,6 @@ class _StreamToTestRecord(StreamResult):
         """
         super().__init__()
         self.on_test = on_test
-        if parse_mime_type is None:
-            raise ImportError("mimeparse module missing.")
 
     def startTestRun(self):
         super().startTestRun()
@@ -1481,7 +1493,7 @@ class ExtendedToOriginalDecorator:
         return getattr(self.decorated, 'failfast', self._failfast)
 
     def _set_failfast(self, value):
-        if safe_hasattr(self.decorated, 'failfast'):
+        if hasattr(self.decorated, 'failfast'):
             self.decorated.failfast = value
         else:
             self._failfast = value
@@ -1497,7 +1509,7 @@ class ExtendedToOriginalDecorator:
         return getattr(self.decorated, 'shouldStop', self._shouldStop)
 
     def _set_shouldStop(self, value):
-        if safe_hasattr(self.decorated, 'shouldStop'):
+        if hasattr(self.decorated, 'shouldStop'):
             self.decorated.shouldStop = value
         else:
             self._shouldStop = value
@@ -1723,7 +1735,7 @@ class ResourcedToStreamDecorator(ExtendedToStreamDecorator):
 
         # If the resource implements the TestResourceManager.id() API, let's
         # use it, otherwise fallback to the class name.
-        if safe_hasattr(resource, "id"):
+        if hasattr(resource, "id"):
             resource_id = resource.id()
         else:
             resource_id = "{}.{}".format(
