@@ -18,14 +18,11 @@ __all__ = [
     ]
 
 from testtools.compat import (
-    _isbytes,
-    istext,
-    str_is_unicode,
     text_repr
     )
 
 
-class Matcher(object):
+class Matcher:
     """A pattern matcher.
 
     A Matcher must implement match and __str__ to be used by
@@ -53,7 +50,7 @@ class Matcher(object):
         raise NotImplementedError(self.__str__)
 
 
-class Mismatch(object):
+class Mismatch:
     """An object describing a mismatch detected by a Matcher."""
 
     def __init__(self, description=None, details=None):
@@ -101,7 +98,7 @@ class Mismatch(object):
         return getattr(self, '_details', {})
 
     def __repr__(self):
-        return  "<testtools.matchers.Mismatch object at %x attributes=%r>" % (
+        return  "<testtools.matchers.Mismatch object at {:x} attributes={!r}>".format(
             id(self), self.__dict__)
 
 
@@ -114,7 +111,7 @@ class MismatchError(AssertionError):
     # characters are in the matchee, matcher or mismatch.
 
     def __init__(self, matchee, matcher, mismatch, verbose=False):
-        super(MismatchError, self).__init__()
+        super().__init__()
         self.matchee = matchee
         self.matcher = matcher
         self.mismatch = mismatch
@@ -125,7 +122,7 @@ class MismatchError(AssertionError):
         if self.verbose:
             # GZ 2011-08-24: Smelly API? Better to take any object and special
             #                case text inside?
-            if istext(self.matchee) or _isbytes(self.matchee):
+            if isinstance(self.matchee, (str, bytes)):
                 matchee = text_repr(self.matchee, multiline=False)
             else:
                 matchee = repr(self.matchee)
@@ -135,15 +132,8 @@ class MismatchError(AssertionError):
         else:
             return difference
 
-    if not str_is_unicode:
 
-        __unicode__ = __str__
-
-        def __str__(self):
-            return self.__unicode__().encode("ascii", "backslashreplace")
-
-
-class MismatchDecorator(object):
+class MismatchDecorator:
     """Decorate a ``Mismatch``.
 
     Forwards all messages to the original mismatch object.  Probably the best
@@ -159,7 +149,7 @@ class MismatchDecorator(object):
         self.original = original
 
     def __repr__(self):
-        return '<testtools.matchers.MismatchDecorator(%r)>' % (self.original,)
+        return '<testtools.matchers.MismatchDecorator({!r})>'.format(self.original)
 
     def describe(self):
         return self.original.describe()

@@ -12,14 +12,10 @@ __all__ = [
 
 from collections import Counter
 from pprint import pformat
+from queue import Queue
 import sys
 import threading
 import unittest
-
-from extras import safe_hasattr, try_imports
-# This is just to let setup.py work, as testtools is imported in setup.py.
-unittest2 = try_imports(['unittest2', 'unittest'])
-Queue = try_imports(['Queue.Queue', 'queue.Queue'])
 
 import testtools
 
@@ -32,11 +28,10 @@ def iterate_tests(test_suite_or_case):
         yield test_suite_or_case
     else:
         for test in suite:
-            for subtest in iterate_tests(test):
-                yield subtest
+            yield from iterate_tests(test)
 
 
-class ConcurrentTestSuite(unittest2.TestSuite):
+class ConcurrentTestSuite(unittest.TestSuite):
     """A TestSuite whose run() calls out to a concurrency strategy."""
 
     def __init__(self, suite, make_tests, wrap_result=None):
@@ -54,7 +49,7 @@ class ConcurrentTestSuite(unittest2.TestSuite):
             use a ``ThreadsafeForwardingResult`` wrapped around the result
             passed to ``run()``.
         """
-        super(ConcurrentTestSuite, self).__init__([suite])
+        super().__init__([suite])
         self.make_tests = make_tests
         if wrap_result:
             self._wrap_result = wrap_result
@@ -115,7 +110,7 @@ class ConcurrentTestSuite(unittest2.TestSuite):
             queue.put(test)
 
 
-class ConcurrentStreamTestSuite(object):
+class ConcurrentStreamTestSuite:
     """A TestSuite whose run() parallelises."""
 
     def __init__(self, make_tests):
@@ -128,7 +123,7 @@ class ConcurrentStreamTestSuite(object):
             case is a TestCase-like object with a run(result) method, and
             route_code is either None or a unicode string.
         """
-        super(ConcurrentStreamTestSuite, self).__init__()
+        super().__init__()
         self.make_tests = make_tests
 
     def run(self, result):
@@ -176,7 +171,7 @@ class ConcurrentStreamTestSuite(object):
                 elif event == 'startTestRun':
                     pass
                 else:
-                    raise ValueError('unknown event type %r' % (event,))
+                    raise ValueError('unknown event type {!r}'.format(event))
         except:
             for thread, process_result in threads.values():
                 # Signal to each TestControl in the ExtendedToStreamDecorator
@@ -192,23 +187,23 @@ class ConcurrentStreamTestSuite(object):
             except Exception:
                 # The run logic itself failed.
                 case = testtools.ErrorHolder(
-                    "broken-runner-'%s'" % (route_code,),
+                    "broken-runner-'{}'".format(route_code),
                     error=sys.exc_info())
                 case.run(process_result)
         finally:
             process_result.stopTestRun()
 
 
-class FixtureSuite(unittest2.TestSuite):
+class FixtureSuite(unittest.TestSuite):
 
     def __init__(self, fixture, tests):
-        super(FixtureSuite, self).__init__(tests)
+        super().__init__(tests)
         self._fixture = fixture
 
     def run(self, result):
         self._fixture.setUp()
         try:
-            super(FixtureSuite, self).run(result)
+            super().run(result)
         finally:
             self._fixture.cleanUp()
 
@@ -237,7 +232,7 @@ def _flatten_tests(suite_or_case, unpack_outer=False):
             suite_id = test.id()
             break
         # If it has a sort_tests method, call that.
-        if safe_hasattr(suite_or_case, 'sort_tests'):
+        if hasattr(suite_or_case, 'sort_tests'):
             suite_or_case.sort_tests()
         return [(suite_id, suite_or_case)]
 
@@ -284,10 +279,10 @@ def filter_by_ids(suite_or_case, test_ids):
     than guessing how to reconstruct a new suite.
     """
     # Compatible objects
-    if safe_hasattr(suite_or_case, 'filter_by_ids'):
+    if hasattr(suite_or_case, 'filter_by_ids'):
         return suite_or_case.filter_by_ids(test_ids)
     # TestCase objects.
-    if safe_hasattr(suite_or_case, 'id'):
+    if hasattr(suite_or_case, 'id'):
         if suite_or_case.id() in test_ids:
             return suite_or_case
         else:
@@ -307,11 +302,11 @@ def sorted_tests(suite_or_case, unpack_outer=False):
     # Duplicate test id can induce TypeError in Python 3.3.
     # Detect the duplicate test ids, raise exception when found.
     seen = Counter(case.id() for case in iterate_tests(suite_or_case))
-    duplicates = dict(
-        (test_id, count) for test_id, count in seen.items() if count > 1)
+    duplicates = {
+        test_id: count for test_id, count in seen.items() if count > 1}
     if duplicates:
         raise ValueError(
-            'Duplicate test ids detected: %s' % (pformat(duplicates),))
+            'Duplicate test ids detected: {}'.format(pformat(duplicates)))
 
     tests = _flatten_tests(suite_or_case, unpack_outer=unpack_outer)
     tests.sort()

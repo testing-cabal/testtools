@@ -11,8 +11,8 @@ class DeferredNotFired(Exception):
     """Raised when we extract a result from a Deferred that's not fired yet."""
 
     def __init__(self, deferred):
-        msg = "%r has not fired yet." % (deferred,)
-        super(DeferredNotFired, self).__init__(msg)
+        msg = "{!r} has not fired yet.".format(deferred)
+        super().__init__(msg)
 
 
 def extract_result(deferred):
@@ -46,7 +46,7 @@ class ImpossibleDeferredError(Exception):
     def __init__(self, deferred, successes, failures):
         msg = ('Impossible condition on %r, got both success (%r) and '
                'failure (%r)')
-        super(ImpossibleDeferredError, self).__init__(
+        super().__init__(
             msg % (deferred, successes, failures))
 
 

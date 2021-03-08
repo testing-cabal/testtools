@@ -2,8 +2,7 @@
 
 """Tests for testtools._deferred."""
 
-from extras import try_import
-
+from testtools.helpers import try_import
 from testtools.matchers import (
     Equals,
     MatchesException,
@@ -52,5 +51,5 @@ class TestExtractResult(NeedsTwistedTestCase):
 
 
 def test_suite():
-    from unittest2 import TestLoader, TestSuite
+    from unittest import TestLoader, TestSuite
     return TestLoader().loadTestsFromName(__name__)

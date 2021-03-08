@@ -6,7 +6,6 @@ from testtools import TestCase
 from testtools.compat import (
     text_repr,
     _b,
-    _u,
     )
 from testtools.matchers._basic import (
     _BinaryMismatch,
@@ -34,30 +33,30 @@ class Test_BinaryMismatch(TestCase):
 
     _long_string = "This is a longish multiline non-ascii string\n\xa7"
     _long_b = _b(_long_string)
-    _long_u = _u(_long_string)
+    _long_u = _long_string
 
-    class CustomRepr(object):
+    class CustomRepr:
         def __init__(self, repr_string):
             self._repr_string = repr_string
         def __repr__(self):
-            return _u('<object ') + _u(self._repr_string) + _u('>')
+            return '<object ' + self._repr_string + '>'
 
     def test_short_objects(self):
         o1, o2 = self.CustomRepr('a'), self.CustomRepr('b')
         mismatch = _BinaryMismatch(o1, "!~", o2)
-        self.assertEqual(mismatch.describe(), "%r !~ %r" % (o1, o2))
+        self.assertEqual(mismatch.describe(), "{!r} !~ {!r}".format(o1, o2))
 
     def test_short_mixed_strings(self):
-        b, u = _b("\xa7"), _u("\xa7")
+        b, u = _b("\xa7"), "\xa7"
         mismatch = _BinaryMismatch(b, "!~", u)
-        self.assertEqual(mismatch.describe(), "%r !~ %r" % (b, u))
+        self.assertEqual(mismatch.describe(), "{!r} !~ {!r}".format(b, u))
 
     def test_long_bytes(self):
         one_line_b = self._long_b.replace(_b("\n"), _b(" "))
         mismatch = _BinaryMismatch(one_line_b, "!~", self._long_b)
         self.assertEqual(
             mismatch.describe(),
-            "%s:\nreference = %s\nactual    = %s\n" % (
+            "{}:\nreference = {}\nactual    = {}\n".format(
                 "!~",
                 text_repr(self._long_b, multiline=True),
                 text_repr(one_line_b),
@@ -69,7 +68,7 @@ class Test_BinaryMismatch(TestCase):
         mismatch = _BinaryMismatch(one_line_u, "!~", self._long_u)
         self.assertEqual(
             mismatch.describe(),
-            "%s:\nreference = %s\nactual    = %s\n" % (
+            "{}:\nreference = {}\nactual    = {}\n".format(
                 "!~",
                 text_repr(self._long_u, multiline=True),
                 text_repr(one_line_u),
@@ -80,7 +79,7 @@ class Test_BinaryMismatch(TestCase):
         mismatch = _BinaryMismatch(self._long_b, "!~", self._long_u)
         self.assertEqual(
             mismatch.describe(),
-            "%s:\nreference = %s\nactual    = %s\n" % (
+            "{}:\nreference = {}\nactual    = {}\n".format(
                 "!~",
                 text_repr(self._long_u, multiline=True),
                 text_repr(self._long_b, multiline=True),
@@ -92,7 +91,7 @@ class Test_BinaryMismatch(TestCase):
         mismatch = _BinaryMismatch(self._long_b, "!~", obj)
         self.assertEqual(
             mismatch.describe(),
-            "%s:\nreference = %s\nactual    = %s\n" % (
+            "{}:\nreference = {}\nactual    = {}\n".format(
                 "!~",
                 repr(obj),
                 text_repr(self._long_b, multiline=True),
@@ -104,7 +103,7 @@ class Test_BinaryMismatch(TestCase):
         mismatch = _BinaryMismatch(self._long_u, "!~", obj)
         self.assertEqual(
             mismatch.describe(),
-            "%s:\nreference = %s\nactual    = %s\n" % (
+            "{}:\nreference = {}\nactual    = {}\n".format(
                 "!~",
                 repr(obj),
                 text_repr(self._long_u, multiline=True),
@@ -231,10 +230,10 @@ class DoesNotStartWithTests(TestCase):
         self.assertEqual("'fo' does not start with 'bo'.", mismatch.describe())
 
     def test_describe_non_ascii_unicode(self):
-        string = _u("A\xA7")
-        suffix = _u("B\xA7")
+        string = "A\xA7"
+        suffix = "B\xA7"
         mismatch = DoesNotStartWith(string, suffix)
-        self.assertEqual("%s does not start with %s." % (
+        self.assertEqual("{} does not start with {}.".format(
             text_repr(string), text_repr(suffix)),
             mismatch.describe())
 
@@ -242,7 +241,7 @@ class DoesNotStartWithTests(TestCase):
         string = _b("A\xA7")
         suffix = _b("B\xA7")
         mismatch = DoesNotStartWith(string, suffix)
-        self.assertEqual("%r does not start with %r." % (string, suffix),
+        self.assertEqual("{!r} does not start with {!r}.".format(string, suffix),
             mismatch.describe())
 
 
@@ -257,12 +256,12 @@ class StartsWithTests(TestCase):
     def test_str_with_bytes(self):
         b = _b("\xA7")
         matcher = StartsWith(b)
-        self.assertEqual("StartsWith(%r)" % (b,), str(matcher))
+        self.assertEqual("StartsWith({!r})".format(b), str(matcher))
 
     def test_str_with_unicode(self):
-        u = _u("\xA7")
+        u = "\xA7"
         matcher = StartsWith(u)
-        self.assertEqual("StartsWith(%r)" % (u,), str(matcher))
+        self.assertEqual("StartsWith({!r})".format(u), str(matcher))
 
     def test_match(self):
         matcher = StartsWith("bar")
@@ -292,10 +291,10 @@ class DoesNotEndWithTests(TestCase):
         self.assertEqual("'fo' does not end with 'bo'.", mismatch.describe())
 
     def test_describe_non_ascii_unicode(self):
-        string = _u("A\xA7")
-        suffix = _u("B\xA7")
+        string = "A\xA7"
+        suffix = "B\xA7"
         mismatch = DoesNotEndWith(string, suffix)
-        self.assertEqual("%s does not end with %s." % (
+        self.assertEqual("{} does not end with {}.".format(
             text_repr(string), text_repr(suffix)),
             mismatch.describe())
 
@@ -303,7 +302,7 @@ class DoesNotEndWithTests(TestCase):
         string = _b("A\xA7")
         suffix = _b("B\xA7")
         mismatch = DoesNotEndWith(string, suffix)
-        self.assertEqual("%r does not end with %r." % (string, suffix),
+        self.assertEqual("{!r} does not end with {!r}.".format(string, suffix),
             mismatch.describe())
 
 
@@ -318,12 +317,12 @@ class EndsWithTests(TestCase):
     def test_str_with_bytes(self):
         b = _b("\xA7")
         matcher = EndsWith(b)
-        self.assertEqual("EndsWith(%r)" % (b,), str(matcher))
+        self.assertEqual("EndsWith({!r})".format(b), str(matcher))
 
     def test_str_with_unicode(self):
-        u = _u("\xA7")
+        u = "\xA7"
         matcher = EndsWith(u)
-        self.assertEqual("EndsWith(%r)" % (u,), str(matcher))
+        self.assertEqual("EndsWith({!r})".format(u), str(matcher))
 
     def test_match(self):
         matcher = EndsWith("arf")
@@ -354,7 +353,7 @@ class TestSameMembers(TestCase, TestMatchersInterface):
         (2, {'foo': 'bar'}, 3, 1, 1),
         ]
     matches_mismatches = [
-        set([1, 2, 3]),
+        {1, 2, 3},
         [1, 1, 2, 3, 5],
         [1, 2, 3, {'foo': 'bar'}],
         'foo',
@@ -389,17 +388,17 @@ class TestMatchesRegex(TestCase, TestMatchersInterface):
         ("MatchesRegex('a|b')", MatchesRegex('a|b')),
         ("MatchesRegex('a|b', re.M)", MatchesRegex('a|b', re.M)),
         ("MatchesRegex('a|b', re.I|re.M)", MatchesRegex('a|b', re.I|re.M)),
-        ("MatchesRegex(%r)" % (_b("\xA7"),), MatchesRegex(_b("\xA7"))),
-        ("MatchesRegex(%r)" % (_u("\xA7"),), MatchesRegex(_u("\xA7"))),
+        ("MatchesRegex({!r})".format(_b("\xA7")), MatchesRegex(_b("\xA7"))),
+        ("MatchesRegex({!r})".format("\xA7"), MatchesRegex("\xA7")),
         ]
 
     describe_examples = [
         ("'c' does not match /a|b/", 'c', MatchesRegex('a|b')),
         ("'c' does not match /a\\d/", 'c', MatchesRegex(r'a\d')),
-        ("%r does not match /\\s+\\xa7/" % (_b('c'),),
+        ("{!r} does not match /\\s+\\xa7/".format(_b('c')),
             _b('c'), MatchesRegex(_b("\\s+\xA7"))),
-        ("%r does not match /\\s+\\xa7/" % (_u('c'),),
-            _u('c'), MatchesRegex(_u("\\s+\xA7"))),
+        ("{!r} does not match /\\s+\\xa7/".format('c'),
+            'c', MatchesRegex("\\s+\xA7")),
         ]
 
 

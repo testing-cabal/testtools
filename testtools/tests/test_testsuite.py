@@ -5,9 +5,6 @@
 import doctest
 from pprint import pformat
 import unittest
-import unittest2
-
-from extras import try_import
 
 from testtools import (
     ConcurrentTestSuite,
@@ -17,11 +14,11 @@ from testtools import (
     TestByTestResult,
     TestCase,
     )
-from testtools.compat import _u
+from testtools.helpers import try_import
 from testtools.matchers import DocTestMatches, Equals
+from testtools.testresult.doubles import StreamResult as LoggingStream
 from testtools.testsuite import FixtureSuite, sorted_tests
 from testtools.tests.helpers import LoggingResult
-from testtools.testresult.doubles import StreamResult as LoggingStream
 
 FunctionFixture = try_import('fixtures.FunctionFixture')
 
@@ -41,7 +38,7 @@ class TestConcurrentTestSuiteRun(TestCase):
         log = []
         def on_test(test, status, start_time, stop_time, tags, details):
             log.append((test.id(), status, set(details.keys())))
-        class BrokenTest(object):
+        class BrokenTest:
             # Simple break - no result parameter to run()
             def __call__(self):
                 pass
@@ -49,7 +46,7 @@ class TestConcurrentTestSuiteRun(TestCase):
         original_suite = unittest.TestSuite([BrokenTest()])
         suite = ConcurrentTestSuite(original_suite, self.split_suite)
         suite.run(TestByTestResult(on_test))
-        self.assertEqual([('broken-runner', 'error', set(['traceback']))], log)
+        self.assertEqual([('broken-runner', 'error', {'traceback'})], log)
 
     def test_trivial(self):
         log = []
@@ -110,7 +107,7 @@ class TestConcurrentStreamTestSuiteRun(TestCase):
         # Ignore event order: we're testing the code is all glued together,
         # which just means we can pump events through and they get route codes
         # added appropriately.
-        self.assertEqual(set([
+        self.assertEqual({
             ('status',
              'testtools.tests.test_testsuite.Sample.test_method1',
              'inprogress',
@@ -159,13 +156,13 @@ class TestConcurrentStreamTestSuiteRun(TestCase):
              '1',
              None,
              ),
-            ]), set(event[0:3] + (freeze(event[3]),) + event[4:10] + (None,)
-                for event in result._events))
+            }, {event[0:3] + (freeze(event[3]),) + event[4:10] + (None,)
+                for event in result._events})
 
     def test_broken_runner(self):
         # If the object called breaks, the stream is informed about it
         # regardless.
-        class BrokenTest(object):
+        class BrokenTest:
             # broken - no result parameter!
             def __call__(self):
                 pass
@@ -191,7 +188,7 @@ TypeError: run() takes ...1 ...argument...2...given...
         events[2] = events[2][:6] + (None,) + events[2][7:]
         events[3] = events[3][:6] + (None,) + events[3][7:]
         self.assertEqual([
-            ('status', "broken-runner-'0'", 'inprogress', None, True, None, None, False, None, _u('0'), None),
+            ('status', "broken-runner-'0'", 'inprogress', None, True, None, None, False, None, '0', None),
             ('status', "broken-runner-'0'", None, None, True, 'traceback', None,
              False,
              'text/x-traceback; charset="utf8"; language="python"',
@@ -207,12 +204,12 @@ TypeError: run() takes ...1 ...argument...2...given...
              'text/x-traceback; charset="utf8"; language="python"',
              '0',
              None),
-             ('status', "broken-runner-'0'", 'fail', set(), True, None, None, False, None, _u('0'), None)
+             ('status', "broken-runner-'0'", 'fail', set(), True, None, None, False, None, '0', None)
             ], events)
 
     def split_suite(self, suite):
         tests = list(enumerate(iterate_tests(suite)))
-        return [(test, _u(str(pos))) for pos, test in tests]
+        return [(test, str(pos)) for pos, test in tests]
 
     def test_setupclass_skip(self):
         # We should support setupclass skipping using cls.skipException.
@@ -223,9 +220,9 @@ TypeError: run() takes ...1 ...argument...2...given...
                 raise cls.skipException('foo')
             def test_notrun(self):
                 pass
-        # Test discovery uses the default suite from unittest2 (unless users
+        # Test discovery uses the default suite from unittest (unless users
         # deliberately change things, in which case they keep both pieces).
-        suite = unittest2.TestSuite([Skips("test_notrun")])
+        suite = unittest.TestSuite([Skips("test_notrun")])
         log = []
         result = LoggingResult(log)
         suite.run(result)
@@ -237,12 +234,12 @@ TypeError: run() takes ...1 ...argument...2...given...
         class Simples(TestCase):
             @classmethod
             def setUpClass(cls):
-                super(Simples, cls).setUpClass()
+                super().setUpClass()
             def test_simple(self):
                 pass
-        # Test discovery uses the default suite from unittest2 (unless users
+        # Test discovery uses the default suite from unittest (unless users
         # deliberately change things, in which case they keep both pieces).
-        suite = unittest2.TestSuite([Simples("test_simple")])
+        suite = unittest.TestSuite([Simples("test_simple")])
         log = []
         result = LoggingResult(log)
         suite.run(result)
@@ -254,7 +251,7 @@ TypeError: run() takes ...1 ...argument...2...given...
 class TestFixtureSuite(TestCase):
 
     def setUp(self):
-        super(TestFixtureSuite, self).setUp()
+        super().setUp()
         if FunctionFixture is None:
             self.skip("Need fixtures")
 
@@ -332,8 +329,8 @@ class TestSortedTests(TestCase):
             ValueError, sorted_tests, unittest.TestSuite([a, b, c, d]))
         self.assertThat(
             str(error),
-            Equals("Duplicate test ids detected: %s" % (
-                pformat({'a': 2, 'b': 2}),)))
+            Equals("Duplicate test ids detected: {}".format(
+                pformat({'a': 2, 'b': 2}))))
 
 
 def test_suite():

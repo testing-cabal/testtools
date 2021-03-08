@@ -21,9 +21,6 @@ import re
 import warnings
 
 from ..compat import (
-    _isbytes,
-    istext,
-    str_is_unicode,
     text_repr,
     )
 from ..helpers import list_subtract
@@ -42,19 +39,19 @@ def _format(thing):
     Blocks of text with newlines are formatted as triple-quote
     strings. Everything else is pretty-printed.
     """
-    if istext(thing) or _isbytes(thing):
+    if isinstance(thing, (str, bytes)):
         return text_repr(thing)
     return pformat(thing)
 
 
-class _BinaryComparison(object):
+class _BinaryComparison:
     """Matcher that compares an object to another object."""
 
     def __init__(self, expected):
         self.expected = expected
 
     def __str__(self):
-        return "%s(%r)" % (self.__class__.__name__, self.expected)
+        return "{}({!r})".format(self.__class__.__name__, self.expected)
 
     def match(self, other):
         if self.comparator(other, self.expected):
@@ -78,7 +75,7 @@ class _BinaryMismatch(Mismatch):
     @property
     def expected(self):
         warnings.warn(
-            '%s.expected deprecated after 1.8.1' % (self.__class__.__name__,),
+            '{}.expected deprecated after 1.8.1'.format(self.__class__.__name__),
             DeprecationWarning,
             stacklevel=2,
         )
@@ -87,7 +84,7 @@ class _BinaryMismatch(Mismatch):
     @property
     def other(self):
         warnings.warn(
-            '%s.other deprecated after 1.8.1' % (self.__class__.__name__,),
+            '{}.other deprecated after 1.8.1'.format(self.__class__.__name__),
             DeprecationWarning,
             stacklevel=2,
         )
@@ -97,7 +94,7 @@ class _BinaryMismatch(Mismatch):
         actual = repr(self._actual)
         reference = repr(self._reference)
         if len(actual) + len(reference) > 70:
-            return "%s:\nreference = %s\nactual    = %s\n" % (
+            return "{}:\nreference = {}\nactual    = {}\n".format(
                 self._mismatch_string, _format(self._reference),
                 _format(self._actual))
         else:
@@ -105,7 +102,7 @@ class _BinaryMismatch(Mismatch):
                 left, right = actual, reference
             else:
                 left, right = reference, actual
-            return "%s %s %s" % (left, self._mismatch_string, right)
+            return "{} {} {}".format(left, self._mismatch_string, right)
 
 
 class Equals(_BinaryComparison):
@@ -115,7 +112,7 @@ class Equals(_BinaryComparison):
     mismatch_string = '!='
 
 
-class _FlippedEquals(object):
+class _FlippedEquals:
     """Matches if the items are equal.
 
     Exactly like ``Equals`` except that the short mismatch message is "
@@ -175,11 +172,11 @@ class SameMembers(Matcher):
     """
 
     def __init__(self, expected):
-        super(SameMembers, self).__init__()
+        super().__init__()
         self.expected = expected
 
     def __str__(self):
-        return '%s(%r)' % (self.__class__.__name__, self.expected)
+        return '{}({!r})'.format(self.__class__.__name__, self.expected)
 
     def match(self, observed):
         expected_only = list_subtract(self.expected, observed)
@@ -187,7 +184,7 @@ class SameMembers(Matcher):
         if expected_only == observed_only == []:
             return
         return PostfixedMismatch(
-            "\nmissing:    %s\nextra:      %s" % (
+            "\nmissing:    {}\nextra:      {}".format(
                 _format(expected_only), _format(observed_only)),
             _BinaryMismatch(observed, 'elements differ', self.expected))
 
@@ -204,7 +201,7 @@ class DoesNotStartWith(Mismatch):
         self.expected = expected
 
     def describe(self):
-        return "%s does not start with %s." % (
+        return "{} does not start with {}.".format(
             text_repr(self.matchee), text_repr(self.expected))
 
 
@@ -219,7 +216,7 @@ class StartsWith(Matcher):
         self.expected = expected
 
     def __str__(self):
-        return "StartsWith(%r)" % (self.expected,)
+        return "StartsWith({!r})".format(self.expected)
 
     def match(self, matchee):
         if not matchee.startswith(self.expected):
@@ -239,7 +236,7 @@ class DoesNotEndWith(Mismatch):
         self.expected = expected
 
     def describe(self):
-        return "%s does not end with %s." % (
+        return "{} does not end with {}.".format(
             text_repr(self.matchee), text_repr(self.expected))
 
 
@@ -254,7 +251,7 @@ class EndsWith(Matcher):
         self.expected = expected
 
     def __str__(self):
-        return "EndsWith(%r)" % (self.expected,)
+        return "EndsWith({!r})".format(self.expected)
 
     def match(self, matchee):
         if not matchee.endswith(self.expected):
@@ -262,14 +259,14 @@ class EndsWith(Matcher):
         return None
 
 
-class IsInstance(object):
+class IsInstance:
     """Matcher that wraps isinstance."""
 
     def __init__(self, *types):
         self.types = tuple(types)
 
     def __str__(self):
-        return "%s(%s)" % (self.__class__.__name__,
+        return "{}({})".format(self.__class__.__name__,
                 ', '.join(type.__name__ for type in self.types))
 
     def match(self, other):
@@ -295,7 +292,7 @@ class NotAnInstance(Mismatch):
         else:
             typestr = 'any of (%s)' % ', '.join(type.__name__ for type in
                     self.types)
-        return "'%s' is not an instance of %s" % (self.matchee, typestr)
+        return "'{}' is not an instance of {}".format(self.matchee, typestr)
 
 
 class DoesNotContain(Mismatch):
@@ -310,7 +307,7 @@ class DoesNotContain(Mismatch):
         self.needle = needle
 
     def describe(self):
-        return "%r not in %r" % (self.needle, self.matchee)
+        return "{!r} not in {!r}".format(self.needle, self.matchee)
 
 
 class Contains(Matcher):
@@ -324,7 +321,7 @@ class Contains(Matcher):
         self.needle = needle
 
     def __str__(self):
-        return "Contains(%r)" % (self.needle,)
+        return "Contains({!r})".format(self.needle)
 
     def match(self, matchee):
         try:
@@ -336,7 +333,7 @@ class Contains(Matcher):
         return None
 
 
-class MatchesRegex(object):
+class MatchesRegex:
     """Matches if the matchee is matched by a regular expression."""
 
     def __init__(self, pattern, flags=0):
@@ -353,15 +350,15 @@ class MatchesRegex(object):
                     flag_arg.append('re.%s' % flag)
         if flag_arg:
             args.append('|'.join(flag_arg))
-        return '%s(%s)' % (self.__class__.__name__, ', '.join(args))
+        return '{}({})'.format(self.__class__.__name__, ', '.join(args))
 
     def match(self, value):
         if not re.match(self.pattern, value, self.flags):
             pattern = self.pattern
-            if not isinstance(pattern, str_is_unicode and str or unicode):
+            if not isinstance(pattern, str):
                 pattern = pattern.decode("latin1")
             pattern = pattern.encode("unicode_escape").decode("ascii")
-            return Mismatch("%r does not match /%s/" % (
+            return Mismatch("{!r} does not match /{}/".format(
                     value, pattern.replace("\\\\", "\\")))
 
 

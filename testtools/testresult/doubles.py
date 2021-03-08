@@ -15,7 +15,7 @@ __all__ = [
     ]
 
 
-class LoggingBase(object):
+class LoggingBase:
     """Basic support for logging of results."""
 
     def __init__(self, event_log=None):
@@ -28,7 +28,7 @@ class Python26TestResult(LoggingBase):
     """A precisely python 2.6 like test result, that logs."""
 
     def __init__(self, event_log=None):
-        super(Python26TestResult, self).__init__(event_log=event_log)
+        super().__init__(event_log=event_log)
         self.shouldStop = False
         self._was_successful = True
         self.testsRun = 0
@@ -62,16 +62,16 @@ class Python27TestResult(Python26TestResult):
     """A precisely python 2.7 like test result, that logs."""
 
     def __init__(self, event_log=None):
-        super(Python27TestResult, self).__init__(event_log)
+        super().__init__(event_log)
         self.failfast = False
 
     def addError(self, test, err):
-        super(Python27TestResult, self).addError(test, err)
+        super().addError(test, err)
         if self.failfast:
             self.stop()
 
     def addFailure(self, test, err):
-        super(Python27TestResult, self).addFailure(test, err)
+        super().addFailure(test, err)
         if self.failfast:
             self.stop()
 
@@ -97,7 +97,7 @@ class ExtendedTestResult(Python27TestResult):
     """A test result like the proposed extended unittest result API."""
 
     def __init__(self, event_log=None):
-        super(ExtendedTestResult, self).__init__(event_log)
+        super().__init__(event_log)
         self._tags = TagContext()
 
     def addError(self, test, err=None, details=None):
@@ -131,17 +131,17 @@ class ExtendedTestResult(Python27TestResult):
         self._events.append(('progress', offset, whence))
 
     def startTestRun(self):
-        super(ExtendedTestResult, self).startTestRun()
+        super().startTestRun()
         self._was_successful = True
         self._tags = TagContext()
 
     def startTest(self, test):
-        super(ExtendedTestResult, self).startTest(test)
+        super().startTest(test)
         self._tags = TagContext(self._tags)
 
     def stopTest(self, test):
         self._tags = self._tags.parent
-        super(ExtendedTestResult, self).stopTest(test)
+        super().stopTest(test)
 
     @property
     def current_tags(self):
@@ -166,7 +166,7 @@ class TwistedTestResult(LoggingBase):
     """
 
     def __init__(self, event_log=None):
-        super(TwistedTestResult, self).__init__(event_log=event_log)
+        super().__init__(event_log=event_log)
         self._was_successful = True
         self.testsRun = 0
 

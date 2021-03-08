@@ -22,6 +22,7 @@ __all__ = [
     'TimestampingStreamResult',
     ]
 
+import cgi
 import datetime
 import math
 from operator import methodcaller
@@ -29,18 +30,15 @@ import sys
 import unittest
 import warnings
 
-from extras import safe_hasattr, try_import, try_imports
-parse_mime_type = try_import('mimeparse.parse_mime_type')
-Queue = try_imports(['Queue.Queue', 'queue.Queue'])
-
-from testtools.compat import str_is_unicode, _u, _b
+from testtools.compat import _b
 from testtools.content import (
     Content,
     text_content,
     TracebackContent,
-    )
+)
 from testtools.content_type import ContentType
 from testtools.tags import TagContext
+
 # circular import
 # from testtools.testcase import PlaceHolder
 PlaceHolder = None
@@ -207,7 +205,7 @@ class TestResult(unittest.TestResult):
         # failfast and tb_locals are reset by the super __init__, so save them.
         failfast = self.failfast
         tb_locals = self.tb_locals
-        super(TestResult, self).__init__()
+        super().__init__()
         self.skip_reasons = {}
         self.__now = None
         self._tags = TagContext()
@@ -226,12 +224,12 @@ class TestResult(unittest.TestResult):
         """
 
     def startTest(self, test):
-        super(TestResult, self).startTest(test)
+        super().startTest(test)
         self._tags = TagContext(self._tags)
 
     def stopTest(self, test):
         self._tags = self._tags.parent
-        super(TestResult, self).stopTest(test)
+        super().stopTest(test)
 
     @property
     def current_tags(self):
@@ -308,7 +306,7 @@ FINAL_STATES = frozenset(
 STATES = INTERIM_STATES | FINAL_STATES
 
 
-class StreamResult(object):
+class StreamResult:
     """A test result for reporting the activity of a test run.
 
     Typical use
@@ -452,19 +450,19 @@ class CopyStreamResult(StreamResult):
     """
 
     def __init__(self, targets):
-        super(CopyStreamResult, self).__init__()
+        super().__init__()
         self.targets = targets
 
     def startTestRun(self):
-        super(CopyStreamResult, self).startTestRun()
+        super().startTestRun()
         _strict_map(methodcaller('startTestRun'), self.targets)
 
     def stopTestRun(self):
-        super(CopyStreamResult, self).stopTestRun()
+        super().stopTestRun()
         _strict_map(methodcaller('stopTestRun'), self.targets)
 
     def status(self, *args, **kwargs):
-        super(CopyStreamResult, self).status(*args, **kwargs)
+        super().status(*args, **kwargs)
         _strict_map(methodcaller('status', *args, **kwargs), self.targets)
 
 
@@ -538,13 +536,13 @@ class StreamResultRouter(StreamResult):
         self._in_run = False
 
     def startTestRun(self):
-        super(StreamResultRouter, self).startTestRun()
+        super().startTestRun()
         for sink in self._sinks:
             sink.startTestRun()
         self._in_run = True
 
     def stopTestRun(self):
-        super(StreamResultRouter, self).stopTestRun()
+        super().stopTestRun()
         for sink in self._sinks:
             sink.stopTestRun()
         self._in_run = False
@@ -591,7 +589,7 @@ class StreamResultRouter(StreamResult):
         """
         policy_method = StreamResultRouter._policies.get(policy, None)
         if not policy_method:
-            raise ValueError("bad policy %r" % (policy,))
+            raise ValueError("bad policy {!r}".format(policy))
         policy_method(self, sink, **policy_args)
         if do_start_stop_run:
             self._sinks.append(sink)
@@ -601,7 +599,7 @@ class StreamResultRouter(StreamResult):
     def _map_route_code_prefix(self, sink, route_prefix, consume_route=False):
         if '/' in route_prefix:
             raise TypeError(
-                "%r is more than one route step long" % (route_prefix,))
+                "{!r} is more than one route step long".format(route_prefix))
         self._route_code_prefixes[route_prefix] = (sink, consume_route)
     _policies['route_code_prefix'] = _map_route_code_prefix
 
@@ -621,7 +619,7 @@ class StreamTagger(CopyStreamResult):
         :param discard: Either None or an iterable of tags to discard from each
             event.
         """
-        super(StreamTagger, self).__init__(targets)
+        super().__init__(targets)
         self.add = frozenset(add or ())
         self.discard = frozenset(discard or ())
 
@@ -630,10 +628,10 @@ class StreamTagger(CopyStreamResult):
         test_tags.update(self.add)
         test_tags.difference_update(self.discard)
         kwargs['test_tags'] = test_tags or None
-        super(StreamTagger, self).status(*args, **kwargs)
+        super().status(*args, **kwargs)
 
 
-class _TestRecord(object):
+class _TestRecord:
     """Representation of a test."""
 
     def __init__(self, id, tags, details, status, timestamps):
@@ -751,19 +749,35 @@ def _make_content_type(mime_type=None):
     testtools was emitting a bad encoding, and this works around it.
     Unfortunately, is also loses data - probably want to drop this in a few
     releases.
+
+    Based on mimeparse.py by Joe Gregorio (MIT License).
+
+    https://github.com/conneg/mimeparse/blob/master/mimeparse.py
     """
     # XXX: Not sure what release this was added, so "in a few releases" is
     # unactionable.
     if mime_type is None:
         mime_type = 'application/octet-stream'
 
-    primary, sub, parameters = parse_mime_type(mime_type)
+    full_type, parameters = cgi.parse_header(mime_type)
+    # Ensure any wildcards are valid.
+    if full_type == '*':
+        full_type = '*/*'
+
+    type_parts = full_type.split('/') if '/' in full_type else None
+    if not type_parts or len(type_parts) > 2:
+        raise Exception("Can't parse type '%s'" % full_type)
+
+    primary_type, sub_type = type_parts
+    primary_type = primary_type.strip()
+    sub_type = sub_type.strip()
+
     if 'charset' in parameters:
         if ',' in parameters['charset']:
             parameters['charset'] = parameters['charset'][
                 :parameters['charset'].find(',')]
 
-    return ContentType(primary, sub, parameters)
+    return ContentType(primary_type, sub_type, parameters)
 
 
 _status_map = {
@@ -794,19 +808,17 @@ class _StreamToTestRecord(StreamResult):
         :param on_test: A callback that accepts one parameter:
             a ``_TestRecord`` object describing a test.
         """
-        super(_StreamToTestRecord, self).__init__()
+        super().__init__()
         self.on_test = on_test
-        if parse_mime_type is None:
-            raise ImportError("mimeparse module missing.")
 
     def startTestRun(self):
-        super(_StreamToTestRecord, self).startTestRun()
+        super().startTestRun()
         self._inprogress = {}
 
     def status(self, test_id=None, test_status=None, test_tags=None,
                runnable=True, file_name=None, file_bytes=None, eof=False,
                mime_type=None, route_code=None, timestamp=None):
-        super(_StreamToTestRecord, self).status(
+        super().status(
             test_id, test_status,
             test_tags=test_tags, runnable=runnable, file_name=file_name,
             file_bytes=file_bytes, eof=eof, mime_type=mime_type,
@@ -842,7 +854,7 @@ class _StreamToTestRecord(StreamResult):
         return case
 
     def stopTestRun(self):
-        super(_StreamToTestRecord, self).stopTestRun()
+        super().stopTestRun()
         while self._inprogress:
             case = self._inprogress.popitem()[1]
             self.on_test(case.got_timestamp(None))
@@ -890,7 +902,7 @@ class StreamToDict(StreamResult):
         :param on_test: A callback that accepts one parameter:
             a dictionary describing a test.
         """
-        super(StreamToDict, self).__init__()
+        super().__init__()
         self._hook = _StreamToTestRecord(self._handle_test)
         # XXX: Not clear whether its part of the supported interface for
         # self.on_test to be the passed-in on_test. If not, we could reduce
@@ -901,15 +913,15 @@ class StreamToDict(StreamResult):
         self.on_test(test_record.to_dict())
 
     def startTestRun(self):
-        super(StreamToDict, self).startTestRun()
+        super().startTestRun()
         self._hook.startTestRun()
 
     def status(self, *args, **kwargs):
-        super(StreamToDict, self).status(*args, **kwargs)
+        super().status(*args, **kwargs)
         self._hook.status(*args, **kwargs)
 
     def stopTestRun(self):
-        super(StreamToDict, self).stopTestRun()
+        super().stopTestRun()
         self._hook.stopTestRun()
 
 
@@ -937,7 +949,7 @@ class StreamSummary(StreamResult):
     """
 
     def __init__(self):
-        super(StreamSummary, self).__init__()
+        super().__init__()
         self._hook = _StreamToTestRecord(self._gather_test)
         self._handle_status = {
             'success': self._success,
@@ -951,7 +963,7 @@ class StreamSummary(StreamResult):
             }
 
     def startTestRun(self):
-        super(StreamSummary, self).startTestRun()
+        super().startTestRun()
         self.failures = []
         self.errors = []
         self.testsRun = 0
@@ -961,11 +973,11 @@ class StreamSummary(StreamResult):
         self._hook.startTestRun()
 
     def status(self, *args, **kwargs):
-        super(StreamSummary, self).status(*args, **kwargs)
+        super().status(*args, **kwargs)
         self._hook.status(*args, **kwargs)
 
     def stopTestRun(self):
-        super(StreamSummary, self).stopTestRun()
+        super().stopTestRun()
         self._hook.stopTestRun()
 
     def wasSuccessful(self):
@@ -1012,7 +1024,7 @@ class StreamSummary(StreamResult):
         self.unexpectedSuccesses.append(case)
 
 
-class TestControl(object):
+class TestControl:
     """Controls a running test run, allowing it to be interrupted.
 
     :ivar shouldStop: If True, tests should not run and should instead
@@ -1021,7 +1033,7 @@ class TestControl(object):
     """
 
     def __init__(self):
-        super(TestControl, self).__init__()
+        super().__init__()
         self.shouldStop = False
 
     def stop(self):
@@ -1035,10 +1047,10 @@ class MultiTestResult(TestResult):
     def __init__(self, *results):
         # Setup _results first, as the base class __init__ assigns to failfast.
         self._results = list(map(ExtendedToOriginalDecorator, results))
-        super(MultiTestResult, self).__init__()
+        super().__init__()
 
     def __repr__(self):
-        return '<%s (%s)>' % (
+        return '<{} ({})>'.format(
             self.__class__.__name__, ', '.join(map(repr, self._results)))
 
     def _dispatch(self, message, *args, **kwargs):
@@ -1062,14 +1074,14 @@ class MultiTestResult(TestResult):
     shouldStop = property(_get_shouldStop, _set_shouldStop)
 
     def startTest(self, test):
-        super(MultiTestResult, self).startTest(test)
+        super().startTest(test)
         return self._dispatch('startTest', test)
 
     def stop(self):
         return self._dispatch('stop')
 
     def stopTest(self, test):
-        super(MultiTestResult, self).stopTest(test)
+        super().stopTest(test)
         return self._dispatch('stopTest', test)
 
     def addError(self, test, error=None, details=None):
@@ -1092,14 +1104,14 @@ class MultiTestResult(TestResult):
         return self._dispatch('addUnexpectedSuccess', test, details=details)
 
     def startTestRun(self):
-        super(MultiTestResult, self).startTestRun()
+        super().startTestRun()
         return self._dispatch('startTestRun')
 
     def stopTestRun(self):
         return self._dispatch('stopTestRun')
 
     def tags(self, new_tags, gone_tags):
-        super(MultiTestResult, self).tags(new_tags, gone_tags)
+        super().tags(new_tags, gone_tags)
         return self._dispatch('tags', new_tags, gone_tags)
 
     def time(self, a_datetime):
@@ -1121,7 +1133,7 @@ class TextTestResult(TestResult):
 
     def __init__(self, stream, failfast=False, tb_locals=False):
         """Construct a TextTestResult writing to stream."""
-        super(TextTestResult, self).__init__(
+        super().__init__(
             failfast=failfast, tb_locals=tb_locals)
         self.stream = stream
         self.sep1 = '=' * 70 + '\n'
@@ -1140,12 +1152,12 @@ class TextTestResult(TestResult):
     def _show_list(self, label, error_list):
         for test, output in error_list:
             self.stream.write(self.sep1)
-            self.stream.write("%s: %s\n" % (label, test.id()))
+            self.stream.write("{}: {}\n".format(label, test.id()))
             self.stream.write(self.sep2)
             self.stream.write(output)
 
     def startTestRun(self):
-        super(TextTestResult, self).startTestRun()
+        super().startTestRun()
         self.__start = self._now()
         self.stream.write("Tests running...\n")
 
@@ -1159,7 +1171,7 @@ class TextTestResult(TestResult):
         self._show_list('FAIL', self.failures)
         for test in self.unexpectedSuccesses:
             self.stream.write(
-                "%sUNEXPECTED SUCCESS: %s\n%s" % (
+                "{}UNEXPECTED SUCCESS: {}\n{}".format(
                     self.sep1, test.id(), self.sep2))
         self.stream.write(
             "\nRan %d test%s in %.3fs\n" % (
@@ -1175,7 +1187,7 @@ class TextTestResult(TestResult):
                     self.failures, self.errors, self.unexpectedSuccesses)))))
             self.stream.write(", ".join(details))
             self.stream.write(")\n")
-        super(TextTestResult, self).stopTestRun()
+        super().stopTestRun()
 
 
 class ThreadsafeForwardingResult(TestResult):
@@ -1218,7 +1230,7 @@ class ThreadsafeForwardingResult(TestResult):
         self._test_tags = set(), set()
 
     def __repr__(self):
-        return '<%s %r>' % (self.__class__.__name__, self.result)
+        return '<{} {!r}>'.format(self.__class__.__name__, self.result)
 
     def _any_tags(self, tags):
         return bool(tags[0] or tags[1])
@@ -1271,7 +1283,7 @@ class ThreadsafeForwardingResult(TestResult):
         pass
 
     def startTestRun(self):
-        super(ThreadsafeForwardingResult, self).startTestRun()
+        super().startTestRun()
         self.semaphore.acquire()
         try:
             self.result.startTestRun()
@@ -1313,14 +1325,14 @@ class ThreadsafeForwardingResult(TestResult):
 
     def startTest(self, test):
         self._test_start = self._now()
-        super(ThreadsafeForwardingResult, self).startTest(test)
+        super().startTest(test)
 
     def wasSuccessful(self):
         return self.result.wasSuccessful()
 
     def tags(self, new_tags, gone_tags):
         """See `TestResult`."""
-        super(ThreadsafeForwardingResult, self).tags(new_tags, gone_tags)
+        super().tags(new_tags, gone_tags)
         if self._test_start is not None:
             self._test_tags = _merge_tags(
                 self._test_tags, (new_tags, gone_tags))
@@ -1340,7 +1352,7 @@ def _merge_tags(existing, changed):
     return result_new, result_gone
 
 
-class ExtendedToOriginalDecorator(object):
+class ExtendedToOriginalDecorator:
     """Permit new TestResult API code to degrade gracefully with old results.
 
     This decorates an existing TestResult and converts missing outcomes
@@ -1359,7 +1371,7 @@ class ExtendedToOriginalDecorator(object):
         self._shouldStop = False
 
     def __repr__(self):
-        return '<%s %r>' % (self.__class__.__name__, self.decorated)
+        return '<{} {!r}>'.format(self.__class__.__name__, self.decorated)
 
     def __getattr__(self, name):
         return getattr(self.decorated, name)
@@ -1481,7 +1493,7 @@ class ExtendedToOriginalDecorator(object):
         return getattr(self.decorated, 'failfast', self._failfast)
 
     def _set_failfast(self, value):
-        if safe_hasattr(self.decorated, 'failfast'):
+        if hasattr(self.decorated, 'failfast'):
             self.decorated.failfast = value
         else:
             self._failfast = value
@@ -1497,7 +1509,7 @@ class ExtendedToOriginalDecorator(object):
         return getattr(self.decorated, 'shouldStop', self._shouldStop)
 
     def _set_shouldStop(self, value):
-        if safe_hasattr(self.decorated, 'shouldStop'):
+        if hasattr(self.decorated, 'shouldStop'):
             self.decorated.shouldStop = value
         else:
             self._shouldStop = value
@@ -1558,7 +1570,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
     """
 
     def __init__(self, decorated):
-        super(ExtendedToStreamDecorator, self).__init__([decorated])
+        super().__init__([decorated])
         # Deal with mismatched base class constructors.
         TestControl.__init__(self)
         self._started = False
@@ -1649,7 +1661,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
                 % (err, details))
 
     def startTestRun(self):
-        super(ExtendedToStreamDecorator, self).startTestRun()
+        super().startTestRun()
         self._tags = TagContext()
         self.shouldStop = False
         self.__now = None
@@ -1686,7 +1698,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
     def wasSuccessful(self):
         if not self._started:
             self.startTestRun()
-        return super(ExtendedToStreamDecorator, self).wasSuccessful()
+        return super().wasSuccessful()
 
 
 class ResourcedToStreamDecorator(ExtendedToStreamDecorator):
@@ -1723,13 +1735,13 @@ class ResourcedToStreamDecorator(ExtendedToStreamDecorator):
 
         # If the resource implements the TestResourceManager.id() API, let's
         # use it, otherwise fallback to the class name.
-        if safe_hasattr(resource, "id"):
+        if hasattr(resource, "id"):
             resource_id = resource.id()
         else:
-            resource_id = "%s.%s" % (
+            resource_id = "{}.{}".format(
                 resource.__class__.__module__, resource.__class__.__name__)
 
-        test_id = '%s.%s' % (resource_id, method)
+        test_id = '{}.{}'.format(resource_id, method)
 
         if phase == 'start':
             test_status = 'inprogress'
@@ -1815,7 +1827,7 @@ class StreamToQueue(StreamResult):
         :param queue: A ``queue.Queue`` to receive events.
         :param routing_code: The routing code to apply to messages.
         """
-        super(StreamToQueue, self).__init__()
+        super().__init__()
         self.queue = queue
         self.routing_code = routing_code
 
@@ -1839,10 +1851,10 @@ class StreamToQueue(StreamResult):
         """Adjust route_code on the way through."""
         if route_code is None:
             return self.routing_code
-        return self.routing_code + _u("/") + route_code
+        return self.routing_code + "/" + route_code
 
 
-class TestResultDecorator(object):
+class TestResultDecorator:
     """General pass-through decorator.
 
     This provides a base that other TestResults can inherit from to
@@ -1920,12 +1932,12 @@ class Tagger(TestResultDecorator):
         :param new_tags: Tags to be added for each test.
         :param gone_tags: Tags to be removed for each test.
         """
-        super(Tagger, self).__init__(decorated)
+        super().__init__(decorated)
         self._new_tags = set(new_tags)
         self._gone_tags = set(gone_tags)
 
     def startTest(self, test):
-        super(Tagger, self).startTest(test)
+        super().startTest(test)
         self.tags(self._new_tags, self._gone_tags)
 
 
@@ -1941,11 +1953,11 @@ class TestByTestResult(TestResult):
             and a details dict. Is called at the end of each test (i.e. on
             ``stopTest``) with the accumulated values for that test.
         """
-        super(TestByTestResult, self).__init__()
+        super().__init__()
         self._on_test = on_test
 
     def startTest(self, test):
-        super(TestByTestResult, self).startTest(test)
+        super().startTest(test)
         self._start_time = self._now()
         # There's no supported (i.e. tested) behaviour that relies on these
         # being set, but it makes me more comfortable all the same. -- jml
@@ -1956,7 +1968,7 @@ class TestByTestResult(TestResult):
     def stopTest(self, test):
         self._stop_time = self._now()
         tags = set(self.current_tags)
-        super(TestByTestResult, self).stopTest(test)
+        super().stopTest(test)
         self._on_test(
             test=test,
             status=self._status,
@@ -1972,22 +1984,22 @@ class TestByTestResult(TestResult):
             err, test, capture_locals=self.tb_locals)}
 
     def addSuccess(self, test, details=None):
-        super(TestByTestResult, self).addSuccess(test)
+        super().addSuccess(test)
         self._status = 'success'
         self._details = details
 
     def addFailure(self, test, err=None, details=None):
-        super(TestByTestResult, self).addFailure(test, err, details)
+        super().addFailure(test, err, details)
         self._status = 'failure'
         self._details = self._err_to_details(test, err, details)
 
     def addError(self, test, err=None, details=None):
-        super(TestByTestResult, self).addError(test, err, details)
+        super().addError(test, err, details)
         self._status = 'error'
         self._details = self._err_to_details(test, err, details)
 
     def addSkip(self, test, reason=None, details=None):
-        super(TestByTestResult, self).addSkip(test, reason, details)
+        super().addSkip(test, reason, details)
         self._status = 'skip'
         if details is None:
             details = {'reason': text_content(reason)}
@@ -1997,12 +2009,12 @@ class TestByTestResult(TestResult):
         self._details = details
 
     def addExpectedFailure(self, test, err=None, details=None):
-        super(TestByTestResult, self).addExpectedFailure(test, err, details)
+        super().addExpectedFailure(test, err, details)
         self._status = 'xfail'
         self._details = self._err_to_details(test, err, details)
 
     def addUnexpectedSuccess(self, test, details=None):
-        super(TestByTestResult, self).addUnexpectedSuccess(test, details)
+        super().addUnexpectedSuccess(test, details)
         self._status = 'success'
         self._details = details
 
@@ -2014,32 +2026,18 @@ class TimestampingStreamResult(CopyStreamResult):
     """
 
     def __init__(self, target):
-        super(TimestampingStreamResult, self).__init__([target])
+        super().__init__([target])
 
     def status(self, *args, **kwargs):
         timestamp = kwargs.pop('timestamp', None)
         if timestamp is None:
             timestamp = datetime.datetime.now(utc)
-        super(TimestampingStreamResult, self).status(
+        super().status(
             *args, timestamp=timestamp, **kwargs)
 
 
 class _StringException(Exception):
     """An exception made from an arbitrary string."""
-
-    if not str_is_unicode:
-        def __init__(self, string):
-            if type(string) is not unicode:
-                raise TypeError(
-                    "_StringException expects unicode, got %r" % (string,))
-            Exception.__init__(self, string)
-
-        def __str__(self):
-            return self.args[0].encode("utf-8")
-
-        def __unicode__(self):
-            return self.args[0]
-    # For 3.0 and above the default __str__ is fine, so we don't define one.
 
     def __hash__(self):
         return id(self)
@@ -2053,8 +2051,8 @@ class _StringException(Exception):
 
 def _format_text_attachment(name, text):
     if '\n' in text:
-        return "%s: {{{\n%s\n}}}\n" % (name, text)
-    return "%s: {{{%s}}}" % (name, text)
+        return "{}: {{{{{{\n{}\n}}}}}}\n".format(name, text)
+    return "{}: {{{{{{{}}}}}}}".format(name, text)
 
 
 def _details_to_str(details, special=None):
@@ -2082,7 +2080,7 @@ def _details_to_str(details, special=None):
             continue
         # We want the 'special' attachment to be at the bottom.
         if key == special:
-            special_content = '%s\n' % (text,)
+            special_content = '{}\n'.format(text)
             continue
         text_attachments.append(_format_text_attachment(key, text))
     if text_attachments and not text_attachments[-1].endswith('\n'):
@@ -2093,12 +2091,12 @@ def _details_to_str(details, special=None):
     if binary_attachments:
         lines.append('Binary content:\n')
         for name, content_type in binary_attachments:
-            lines.append('  %s (%s)\n' % (name, content_type))
+            lines.append('  {} ({})\n'.format(name, content_type))
     if empty_attachments:
         lines.append('Empty attachments:\n')
         for name in empty_attachments:
-            lines.append('  %s\n' % (name,))
+            lines.append('  {}\n'.format(name))
     if (binary_attachments or empty_attachments) and text_attachments:
         lines.append('\n')
     lines.append('\n'.join(text_attachments))
-    return _u('').join(lines)
+    return ''.join(lines)

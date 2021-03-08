@@ -13,25 +13,14 @@ __all__ = [
     ]
 
 import codecs
-import inspect
+import functools
 import json
 import os
-import sys
+import traceback
 
-from extras import try_import
-# To let setup.py work, make this a conditional import.
-traceback = try_import('traceback2')
-
-from testtools.compat import (
-    _b,
-    _u,
-    istext,
-    str_is_unicode,
-)
+from testtools.compat import _b
 from testtools.content_type import ContentType, JSON, UTF8_TEXT
 
-
-functools = try_import('functools')
 
 _join_b = _b("").join
 
@@ -58,7 +47,7 @@ def _iter_chunks(stream, chunk_size, seek_offset=None, seek_whence=0):
         chunk = stream.read(chunk_size)
 
 
-class Content(object):
+class Content:
     """A MIME-like Content object.
 
     'Content' objects can be serialised to bytes using the iter_bytes method.
@@ -73,7 +62,7 @@ class Content(object):
     def __init__(self, content_type, get_bytes):
         """Create a ContentType."""
         if None in (content_type, get_bytes):
-            raise ValueError("None not permitted in %r, %r" % (
+            raise ValueError("None not permitted in {!r}, {!r}".format(
                 content_type, get_bytes))
         self.content_type = content_type
         self._get_bytes = get_bytes
@@ -89,7 +78,7 @@ class Content(object):
         content into memory.  Where this is a concern, use ``iter_text``
         instead.
         """
-        return _u('').join(self.iter_text())
+        return ''.join(self.iter_text())
 
     def iter_bytes(self):
         """Iterate over bytestrings of the serialised content."""
@@ -102,7 +91,7 @@ class Content(object):
         no charset parameter is present in the MIME type. (This is somewhat
         arbitrary, but consistent with RFC2617 3.7.1).
 
-        :raises ValueError: If the content type is not text/\\*.
+        :raises ValueError: If the content type is not "text/*".
         """
         if self.content_type.type != "text":
             raise ValueError("Not a text type %r" % self.content_type)
@@ -119,7 +108,7 @@ class Content(object):
             yield final
 
     def __repr__(self):
-        return "<Content type=%r, value=%r>" % (
+        return "<Content type={!r}, value={!r}>".format(
             self.content_type, _join_b(self.iter_bytes()))
 
 
@@ -155,14 +144,14 @@ class StackLinesContent(Content):
         value = prefix_content + \
             self._stack_lines_to_unicode(stack_lines) + \
             postfix_content
-        super(StackLinesContent, self).__init__(
+        super().__init__(
             content_type, lambda: [value.encode("utf8")])
 
     def _stack_lines_to_unicode(self, stack_lines):
         """Converts a list of pre-processed stack lines into a unicode string.
         """
         msg_lines = traceback.format_list(stack_lines)
-        return _u('').join(msg_lines)
+        return ''.join(msg_lines)
 
 
 class TracebackContent(Content):
@@ -205,7 +194,7 @@ class TracebackContent(Content):
             limit=limit, capture_locals=capture_locals).format())
         content_type = ContentType('text', 'x-traceback',
             {"language": "python", "charset": "utf8"})
-        super(TracebackContent, self).__init__(
+        super().__init__(
             content_type, lambda: [x.encode('utf8') for x in stack_lines])
 
 
@@ -240,9 +229,8 @@ def StacktraceContent(prefix_content="", postfix_content=""):
 def json_content(json_data):
     """Create a JSON Content object from JSON-encodeable data."""
     data = json.dumps(json_data)
-    if str_is_unicode:
-        # The json module perversely returns native str not bytes
-        data = data.encode('utf8')
+    # The json module perversely returns native str not bytes
+    data = data.encode('utf8')
     return Content(JSON, lambda: [data])
 
 
@@ -251,7 +239,7 @@ def text_content(text):
 
     This is useful for adding details which are short strings.
     """
-    if not istext(text):
+    if not isinstance(text, str):
         raise TypeError(
             "text_content must be given text, not '%s'." % type(text).__name__
         )
@@ -286,11 +274,10 @@ def content_from_file(path, content_type=None, chunk_size=DEFAULT_CHUNK_SIZE,
         content_type = UTF8_TEXT
     def reader():
         with open(path, 'rb') as stream:
-            for chunk in _iter_chunks(stream,
+            yield from _iter_chunks(stream,
                                       chunk_size,
                                       seek_offset,
-                                      seek_whence):
-                yield chunk
+                                      seek_whence)
     return content_from_reader(reader, content_type, buffer_now)
 
 

@@ -19,7 +19,7 @@ class MultipleExceptions(Exception):
     """
 
 
-class RunTest(object):
+class RunTest:
     """An object to run a test.
 
     RunTest objects are used to implement the internal logic involved in
@@ -124,10 +124,12 @@ class RunTest(object):
     def _run_core(self):
         """Run the user supplied test code."""
         test_method = self.case._get_test_method()
-        if getattr(test_method, '__unittest_skip__', False):
+        skip_case = getattr(self.case, '__unittest_skip__', False)
+        if skip_case or getattr(test_method, '__unittest_skip__', False):
             self.result.addSkip(
                 self.case,
-                reason=getattr(test_method, '__unittest_skip_why__', None)
+                reason=getattr(self.case if skip_case else test_method,
+                               '__unittest_skip_why__', None)
             )
             return
 

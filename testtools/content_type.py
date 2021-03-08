@@ -3,7 +3,7 @@
 """ContentType - a MIME Content Type."""
 
 
-class ContentType(object):
+class ContentType:
     """A content type from http://www.iana.org/assignments/media-types/
 
     :ivar type: The primary type, e.g. "text" or "application"
@@ -15,7 +15,7 @@ class ContentType(object):
     def __init__(self, primary_type, sub_type, parameters=None):
         """Create a ContentType."""
         if None in (primary_type, sub_type):
-            raise ValueError("None not permitted in %r, %r" % (
+            raise ValueError("None not permitted in {!r}, {!r}".format(
                 primary_type, sub_type))
         self.type = primary_type
         self.subtype = sub_type
@@ -30,10 +30,10 @@ class ContentType(object):
         if self.parameters:
             params = '; '
             params += '; '.join(
-                sorted('%s="%s"' % (k, v) for k, v in self.parameters.items()))
+                sorted('{}="{}"'.format(k, v) for k, v in self.parameters.items()))
         else:
             params = ''
-        return "%s/%s%s" % (self.type, self.subtype, params)
+        return "{}/{}{}".format(self.type, self.subtype, params)
 
 
 JSON = ContentType('application', 'json')

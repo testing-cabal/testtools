@@ -13,7 +13,7 @@ class TestStackHiding(TestCase):
     run_tests_with = FullStackRunTest
 
     def setUp(self):
-        super(TestStackHiding, self).setUp()
+        super().setUp()
         self.addCleanup(hide_testtools_stack, is_stack_hidden())
 
     def test_is_stack_hidden_consistent_true(self):

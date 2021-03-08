@@ -1,7 +1,6 @@
 # Copyright (c) 2016 testtools developers. See LICENSE for details.
 
 from testtools import TestCase
-from testtools.compat import _u
 from testtools.matchers import Always, Never
 from testtools.tests.matchers.helpers import TestMatchersInterface
 
@@ -23,7 +22,7 @@ class TestNeverInterface(TestMatchersInterface, TestCase):
     matches_mismatches = [42, object(), 'hi mom']
 
     str_examples = [('Never()', Never())]
-    describe_examples = [(_u('Inevitable mismatch on 42'), 42, Never())]
+    describe_examples = [('Inevitable mismatch on 42', 42, Never())]
 
 
 def test_suite():
