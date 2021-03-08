@@ -53,6 +53,7 @@ __all__ = [
     'PathExists',
     'Raises',
     'raises',
+    'SameMembers',
     'SamePath',
     'StartsWith',
     'TarballContains',
@@ -71,6 +72,7 @@ from ._basic import (
     LessThan,
     MatchesRegex,
     NotEquals,
+    SameMembers,
     StartsWith,
     )
 from ._const import (

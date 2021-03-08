@@ -11,6 +11,7 @@ __all__ = [
     'LessThan',
     'MatchesRegex',
     'NotEquals',
+    'SameMembers',
     'StartsWith',
     ]
 
