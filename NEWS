@@ -9,6 +9,9 @@ NEXT
 Improvements
 ------------
 
+* Add support for Python 3.9.
+  (Hugo van Kemenade)
+
 * The skip, skipIf, and skipUnless decorators can now be used as class
   decorators as well as test method decorators, just as they can in
   unittest.
