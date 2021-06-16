@@ -8,6 +8,8 @@ __all__ = [
     'advance_iterator',
     'reraise',
     'unicode_output_stream',
+    'StringIO',
+    'BytesIO',
     ]
 
 import codecs
@@ -16,6 +18,8 @@ import locale
 import os
 import sys
 import unicodedata
+# ensure retrocompatibility < 3.10
+from io import StringIO, BytesIO
 
 
 def reraise(exc_class, exc_obj, exc_tb, _marker=object()):
