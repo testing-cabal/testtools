@@ -18,7 +18,7 @@ import locale
 import os
 import sys
 import unicodedata
-# ensure retrocompatibility < 3.10
+# Ensure retro-compatibility with older testtools releases
 from io import StringIO, BytesIO
 
 
@@ -153,5 +153,4 @@ def _get_exception_encoding():
     #                no benefit in asking more than once as it's a global
     #                setting that can change after the message is formatted.
     return locale.getlocale(locale.LC_MESSAGES)[1] or "ascii"
-
 
