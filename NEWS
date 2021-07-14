@@ -3,8 +3,8 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
-NEXT
-~~~~
+2.5.0
+~~~~~
 
 Improvements
 ------------
@@ -17,6 +17,9 @@ Improvements
 * The skip, skipIf, and skipUnless decorators can now be used as class
   decorators as well as test method decorators, just as they can in
   unittest.
+
+* The ``SameMembers`` matcher class is now exposed as part of the public
+  matchers API.
 
 Changes
 -------
