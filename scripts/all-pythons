@@ -89,5 +89,5 @@ def now():
 if __name__ == '__main__':
     sys.path.append(ROOT)
     result = TestProtocolClient(sys.stdout)
-    for version in '3.5 3.6 3.7 3.8 3.9'.split():
+    for version in '3.5 3.6 3.7 3.8 3.9 3.10'.split():
         run_for_python(version, result, sys.argv[1:])

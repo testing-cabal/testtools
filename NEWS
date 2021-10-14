@@ -3,6 +3,15 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
+NEXT
+~~~~
+
+Improvements
+------------
+
+* Add support for Python 3.10.
+  (Jürgen Gmach)
+
 2.5.0
 ~~~~~
 
