@@ -3,6 +3,7 @@
 """Extensions to the standard Python unittest library."""
 
 import sys
+import warnings
 
 from distutils.core import Command
 from distutils.errors import DistutilsOptionError
@@ -19,8 +20,8 @@ class TestCommand(Command):
         ('catch', 'c', "Catch ctrl-C and display results so far"),
         ('buffer', 'b', "Buffer stdout and stderr during tests"),
         ('failfast', 'f', "Stop on first fail or error"),
-        ('test-module=','m', "Run 'test_suite' in specified module"),
-        ('test-suite=','s',
+        ('test-module=', 'm', "Run 'test_suite' in specified module"),
+        ('test-suite=', 's',
          "Test suite to run (e.g. 'some_module.test_suite')")
     ]
 
@@ -28,6 +29,13 @@ class TestCommand(Command):
         Command.__init__(self, dist)
         self.runner = TestToolsTestRunner(stdout=sys.stdout)
 
+        warnings.warn(
+            "Distutils integration is deprecated and will be removed in the "
+            "next major release. "
+            "Refer to https://github.com/pypa/setuptools/issues/1684 for more "
+            "information.",
+            DeprecationWarning,
+        )
 
     def initialize_options(self):
         self.test_suite = None
