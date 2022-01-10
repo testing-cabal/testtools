@@ -287,7 +287,7 @@ class TestStacktraceContent(TestCase):
 
     def test_top_frame_is_skipped_when_no_stack_is_specified(self):
         actual = StacktraceContent().as_text()
-        self.assertTrue('testtools/content.py' not in actual)
+        self.assertNotIn('testtools/content.py', actual)
 
 
 class TestAttachFile(TestCase):
