@@ -92,6 +92,14 @@ From now on, we'll assume that you know how to run your tests.
 Running test with Distutils
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. deprecated:: 2.6.0
+
+    Distutils integration was deprecated in 2.6.0. You should consider
+    replacing invocations of ``python setup.py test`` with a suitable
+    alternative such as ``tox``. Refer to `this issue`__ for more information.
+
+    .. __: https://github.com/pypa/setuptools/issues/1684
+
 If you are using Distutils_ to build your Python project, you can use the testtools
 Distutils_ command to integrate testtools into your Distutils_ workflow::
 

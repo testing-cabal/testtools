@@ -12,6 +12,9 @@ Improvements
 * Add support for Python 3.10.
   (Jürgen Gmach)
 
+* Distutils integration is deprecated and will be removed in the next major
+  version.
+
 2.5.0
 ~~~~~
 
