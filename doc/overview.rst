@@ -38,14 +38,6 @@ What better way to start than with a contrived code snippet?::
 Why use testtools?
 ==================
 
-Better assertion methods
-------------------------
-
-The standard assertion methods that come with unittest aren't as helpful as
-they could be, and there aren't quite enough of them.  testtools adds
-``assertIn``, ``assertIs``, ``assertIsInstance`` and their negatives.
-
-
 Matchers: better than assertion methods
 ---------------------------------------
 
