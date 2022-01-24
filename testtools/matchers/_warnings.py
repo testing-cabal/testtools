@@ -22,7 +22,7 @@ from ._impl import Mismatch
 def WarningMessage(category_type, message=None, filename=None, lineno=None,
                    line=None):
     r"""
-    Create a matcher that will match `warnings.WarningMessage`s.
+    Create a matcher that will match `warnings.WarningMessage`\s.
 
     For example, to match captured `DeprecationWarning`s with a message about
     some ``foo`` being replaced with ``bar``:
@@ -34,16 +34,15 @@ def WarningMessage(category_type, message=None, filename=None, lineno=None,
                           Contains('foo is deprecated'),
                           Contains('use bar instead')))
 
-    :param type category_type: A warning type, for example
-    `DeprecationWarning`.
+    :param type category_type: A warning type, for example `DeprecationWarning`.
     :param message_matcher: A matcher object that will be evaluated against
-    warning's message.
+        warning's message.
     :param filename_matcher: A matcher object that will be evaluated against
-    the warning's filename.
+        the warning's filename.
     :param lineno_matcher: A matcher object that will be evaluated against the
-    warning's line number.
+        warning's line number.
     :param line_matcher: A matcher object that will be evaluated against the
-    warning's line of source code.
+        warning's line of source code.
     """
     category_matcher = Is(category_type)
     message_matcher = message or Always()
