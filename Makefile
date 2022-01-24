@@ -50,7 +50,7 @@ clean-sphinx:
 
 # Build the html docs using Sphinx.
 html-sphinx:
-	cd doc && make html
+	cd doc && PYTHONPATH=.. make html
 
 .PHONY: apidocs docs-sphinx clean-sphinx html-sphinx docs
 .PHONY: check clean prerelease release

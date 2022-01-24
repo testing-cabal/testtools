@@ -16,6 +16,9 @@ If you would like to learn more about testtools, consult our documentation in
 the 'doc/' directory.  You might like to start at 'doc/overview.rst' or
 'doc/for-test-authors.rst'.
 
+To build HTML versions of the documentation, make sure you have
+sphinx installed and run ``make docs``.
+
 
 Licensing
 ---------
