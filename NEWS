@@ -92,7 +92,7 @@ Improvements
 
 * Don't add file details without content. (Thomas Herve, Github #252)
 
-* Make ``testtools.twistedsupport and tests work on Python 3. (Free Ekanayaka)
+* Make ``testtools.twistedsupport`` and tests work on Python 3. (Free Ekanayaka)
 
 2.2.0
 ~~~~~
