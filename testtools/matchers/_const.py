@@ -40,7 +40,7 @@ class _Never:
 
     def match(self, value):
         return Mismatch(
-            'Inevitable mismatch on {!r}'.format(value))
+            f'Inevitable mismatch on {value!r}')
 
 
 def Never():

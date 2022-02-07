@@ -51,7 +51,7 @@ class _BinaryComparison:
         self.expected = expected
 
     def __str__(self):
-        return "{}({!r})".format(self.__class__.__name__, self.expected)
+        return f"{self.__class__.__name__}({self.expected!r})"
 
     def match(self, other):
         if self.comparator(other, self.expected):
@@ -75,7 +75,7 @@ class _BinaryMismatch(Mismatch):
     @property
     def expected(self):
         warnings.warn(
-            '{}.expected deprecated after 1.8.1'.format(self.__class__.__name__),
+            f'{self.__class__.__name__}.expected deprecated after 1.8.1',
             DeprecationWarning,
             stacklevel=2,
         )
@@ -84,7 +84,7 @@ class _BinaryMismatch(Mismatch):
     @property
     def other(self):
         warnings.warn(
-            '{}.other deprecated after 1.8.1'.format(self.__class__.__name__),
+            f'{self.__class__.__name__}.other deprecated after 1.8.1',
             DeprecationWarning,
             stacklevel=2,
         )
@@ -102,7 +102,7 @@ class _BinaryMismatch(Mismatch):
                 left, right = actual, reference
             else:
                 left, right = reference, actual
-            return "{} {} {}".format(left, self._mismatch_string, right)
+            return f"{left} {self._mismatch_string} {right}"
 
 
 class Equals(_BinaryComparison):
@@ -176,7 +176,7 @@ class SameMembers(Matcher):
         self.expected = expected
 
     def __str__(self):
-        return '{}({!r})'.format(self.__class__.__name__, self.expected)
+        return f'{self.__class__.__name__}({self.expected!r})'
 
     def match(self, observed):
         expected_only = list_subtract(self.expected, observed)
@@ -216,7 +216,7 @@ class StartsWith(Matcher):
         self.expected = expected
 
     def __str__(self):
-        return "StartsWith({!r})".format(self.expected)
+        return f"StartsWith({self.expected!r})"
 
     def match(self, matchee):
         if not matchee.startswith(self.expected):
@@ -251,7 +251,7 @@ class EndsWith(Matcher):
         self.expected = expected
 
     def __str__(self):
-        return "EndsWith({!r})".format(self.expected)
+        return f"EndsWith({self.expected!r})"
 
     def match(self, matchee):
         if not matchee.endswith(self.expected):
@@ -292,7 +292,7 @@ class NotAnInstance(Mismatch):
         else:
             typestr = 'any of (%s)' % ', '.join(type.__name__ for type in
                     self.types)
-        return "'{}' is not an instance of {}".format(self.matchee, typestr)
+        return f"'{self.matchee}' is not an instance of {typestr}"
 
 
 class DoesNotContain(Mismatch):
@@ -307,7 +307,7 @@ class DoesNotContain(Mismatch):
         self.needle = needle
 
     def describe(self):
-        return "{!r} not in {!r}".format(self.needle, self.matchee)
+        return f"{self.needle!r} not in {self.matchee!r}"
 
 
 class Contains(Matcher):
@@ -321,7 +321,7 @@ class Contains(Matcher):
         self.needle = needle
 
     def __str__(self):
-        return "Contains({!r})".format(self.needle)
+        return f"Contains({self.needle!r})"
 
     def match(self, matchee):
         try:

@@ -106,7 +106,7 @@ class TimeoutError(Exception):
 
     def __init__(self, function, timeout):
         Exception.__init__(self,
-            "{!r} took longer than {} seconds".format(function, timeout))
+            f"{function!r} took longer than {timeout} seconds")
 
 
 class NoResultError(Exception):

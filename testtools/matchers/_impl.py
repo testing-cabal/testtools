@@ -149,7 +149,7 @@ class MismatchDecorator:
         self.original = original
 
     def __repr__(self):
-        return '<testtools.matchers.MismatchDecorator({!r})>'.format(self.original)
+        return f'<testtools.matchers.MismatchDecorator({self.original!r})>'
 
     def describe(self):
         return self.original.describe()

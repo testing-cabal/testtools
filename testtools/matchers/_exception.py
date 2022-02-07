@@ -60,7 +60,7 @@ class MatchesException(Matcher):
         if self._is_instance:
             expected_class = expected_class.__class__
         if not issubclass(other[0], expected_class):
-            return Mismatch('{!r} is not a {!r}'.format(other[0], expected_class))
+            return Mismatch(f'{other[0]!r} is not a {expected_class!r}')
         if self._is_instance:
             if other[1].args != self.expected.args:
                 return Mismatch('{} has different arguments to {}.'.format(
@@ -95,7 +95,7 @@ class Raises(Matcher):
     def match(self, matchee):
         try:
             result = matchee()
-            return Mismatch('{!r} returned {!r}'.format(matchee, result))
+            return Mismatch(f'{matchee!r} returned {result!r}')
         # Catch all exceptions: Raises() should be able to match a
         # KeyboardInterrupt or SystemExit.
         except:

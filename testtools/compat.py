@@ -2,7 +2,6 @@
 
 """Compatibility support for python 2 and 3."""
 
-__metaclass__ = type
 __all__ = [
     '_b',
     'advance_iterator',

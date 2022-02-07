@@ -80,16 +80,16 @@ def assign_fix_committed_to_next(testtools, next_milestone):
     """Find all 'Fix Committed' and make sure they are in 'next'."""
     fixed_bugs = list(testtools.searchTasks(status=FIX_COMMITTED))
     for task in fixed_bugs:
-        LOG.debug("{}".format(task.title))
+        LOG.debug(f"{task.title}")
         if task.milestone != next_milestone:
             task.milestone = next_milestone
-            LOG.info("Re-assigning {}".format(task.title))
+            LOG.info(f"Re-assigning {task.title}")
             task.lp_save()
 
 
 def rename_milestone(next_milestone, new_name):
     """Rename 'next_milestone' to 'new_name'."""
-    LOG.info("Renaming {} to {}".format(next_milestone.name, new_name))
+    LOG.info(f"Renaming {next_milestone.name} to {new_name}")
     next_milestone.name = new_name
     next_milestone.lp_save()
 
@@ -103,8 +103,8 @@ def get_release_notes_and_changelog(news_path):
     def is_heading_marker(line, marker_char):
         return line and line == marker_char * len(line)
 
-    LOG.debug("Loading NEWS from {}".format(news_path))
-    with open(news_path, 'r') as news:
+    LOG.debug(f"Loading NEWS from {news_path}")
+    with open(news_path) as news:
         for line in news:
             line = line.strip()
             if state is None:
@@ -146,7 +146,7 @@ def get_release_notes_and_changelog(news_path):
 def release_milestone(milestone, release_notes, changelog):
     date_released = datetime.now(tz=UTC)
     LOG.info(
-        "Releasing milestone: {}, date {}".format(milestone.name, date_released))
+        f"Releasing milestone: {milestone.name}, date {date_released}")
     release = milestone.createProductRelease(
         date_released=date_released,
         changelog=changelog,
@@ -159,20 +159,20 @@ def release_milestone(milestone, release_notes, changelog):
 
 def create_milestone(series, name):
     """Create a new milestone in the same series as 'release_milestone'."""
-    LOG.info("Creating milestone {} in series {}".format(name, series.name))
+    LOG.info(f"Creating milestone {name} in series {series.name}")
     return series.newMilestone(name=name)
 
 
 def close_fixed_bugs(milestone):
     tasks = list(milestone.searchTasks())
     for task in tasks:
-        LOG.debug("Found {}".format(task.title))
+        LOG.debug(f"Found {task.title}")
         if task.status == FIX_COMMITTED:
-            LOG.info("Closing {}".format(task.title))
+            LOG.info(f"Closing {task.title}")
             task.status = FIX_RELEASED
         else:
             LOG.warning(
-                "Bug not fixed, removing from milestone: {}".format(task.title))
+                f"Bug not fixed, removing from milestone: {task.title}")
             task.milestone = None
         task.lp_save()
 
@@ -184,7 +184,7 @@ def upload_tarball(release, tarball_path):
     with open(sig_path) as sig:
         sig_content = sig.read()
     tarball_name = os.path.basename(tarball_path)
-    LOG.info("Uploading tarball: {}".format(tarball_path))
+    LOG.info(f"Uploading tarball: {tarball_path}")
     release.add_file(
         file_type=CODE_RELEASE_TARBALL,
         file_content=tarball_content, filename=tarball_name,
@@ -198,17 +198,17 @@ def release_project(launchpad, project_name, next_milestone_name):
     next_milestone = testtools.getMilestone(name=next_milestone_name)
     release_name, release_notes, changelog = get_release_notes_and_changelog(
         get_path('NEWS'))
-    LOG.info("Releasing {} {}".format(project_name, release_name))
+    LOG.info(f"Releasing {project_name} {release_name}")
     # Since reversing these operations is hard, and inspecting errors from
     # Launchpad is also difficult, do some looking before leaping.
     errors = []
-    tarball_path = get_path('dist/{}-{}.tar.gz'.format(project_name, release_name))
+    tarball_path = get_path(f'dist/{project_name}-{release_name}.tar.gz')
     if not os.path.isfile(tarball_path):
-        errors.append("{} does not exist".format(tarball_path))
+        errors.append(f"{tarball_path} does not exist")
     if not os.path.isfile(tarball_path + '.asc'):
         errors.append("{} does not exist".format(tarball_path + '.asc'))
     if testtools.getMilestone(name=release_name):
-        errors.append("Milestone {} exists on {}".format(release_name, project_name))
+        errors.append(f"Milestone {release_name} exists on {project_name}")
     if errors:
         for error in errors:
             LOG.error(error)

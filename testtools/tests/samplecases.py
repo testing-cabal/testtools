@@ -133,8 +133,8 @@ def _make_behavior_scenarios(stage):
     Ordering is not consistent.
     """
     return (
-        ('{}={}'.format(stage, behavior),
-         {'{}_behavior'.format(stage): function})
+        (f'{stage}={behavior}',
+         {f'{stage}_behavior': function})
         for (behavior, function) in behaviors
     )
 

@@ -351,7 +351,7 @@ class TestAssertions(TestCase):
         self.assertEqual(1, len(raisedExceptions))
         self.assertTrue(
             exception is raisedExceptions[0],
-            "{!r} is not {!r}".format(exception, raisedExceptions[0]))
+            f"{exception!r} is not {raisedExceptions[0]!r}")
 
     def test_assertRaises_with_multiple_exceptions(self):
         # assertRaises((ExceptionOne, ExceptionTwo), function) asserts that
@@ -382,12 +382,12 @@ class TestAssertions(TestCase):
         self.assertThat(
             lambda: self.assertRaises(Exception, foo),
             Raises(
-                MatchesException(self.failureException, '.*{!r}.*'.format(foo))))
+                MatchesException(self.failureException, f'.*{foo!r}.*')))
 
     def test_assertRaisesRegexp(self):
         # assertRaisesRegexp asserts that function raises particular exception
         # with particular message.
-        self.assertRaisesRegexp(RuntimeError, r"M\w*e", self.raiseError,
+        self.assertRaisesRegex(RuntimeError, r"M\w*e", self.raiseError,
                                 RuntimeError, "Message")
 
     def test_assertRaisesRegexp_wrong_error_type(self):
@@ -734,7 +734,7 @@ class TestAssertions(TestCase):
             'a',
             repr('\xa7')[1:-1],
             "'''",
-            'actual    = {!r}'.format(b),
+            f'actual    = {b!r}',
             ': ' + message,
             ])
         self.assertFails(expected_error, self.assertEqual, a, b, message)
@@ -1097,7 +1097,7 @@ class TestExpectedFailure(TestWithDetails):
         class ReferenceTest(TestCase):
             @unittest.expectedFailure
             def test_fails_expectedly(self):
-                self.assertEquals(1, 0)
+                self.assertEqual(1, 0)
 
         test = ReferenceTest('test_fails_expectedly')
         result = test.run()
@@ -1107,7 +1107,7 @@ class TestExpectedFailure(TestWithDetails):
         class ReferenceTest(TestCase):
             @unittest.expectedFailure
             def test_passes_unexpectedly(self):
-                self.assertEquals(1, 1)
+                self.assertEqual(1, 1)
 
         test = ReferenceTest('test_passes_unexpectedly')
         result = test.run()
@@ -1672,7 +1672,7 @@ class TestSkipping(TestCase):
             setup_ran = False
 
             def setUp(self):
-                super(SkippingTestCase, self).setUp()
+                super().setUp()
                 self.setup_ran = True
 
             def test_skipped(self):

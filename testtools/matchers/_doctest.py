@@ -69,7 +69,7 @@ class DocTestMatches:
             flagstr = ", flags=%d" % self.flags
         else:
             flagstr = ""
-        return 'DocTestMatches({!r}{})'.format(self.want, flagstr)
+        return f'DocTestMatches({self.want!r}{flagstr})'
 
     def _with_nl(self, actual):
         result = self.want.__class__(actual)

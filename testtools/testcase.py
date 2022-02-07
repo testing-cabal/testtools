@@ -2,7 +2,6 @@
 
 """Test case related stuff."""
 
-__metaclass__ = type
 __all__ = [
     'attr',
     'clone_test_with_new_id',
@@ -205,7 +204,7 @@ def unique_text_generator(prefix):
     index = 0
     while True:
         unique_text = _unique_text(BASE_CP, CP_RANGE, index)
-        yield '{}-{}'.format(prefix, unique_text)
+        yield f'{prefix}-{unique_text}'
         index = index + 1
 
 
@@ -278,7 +277,7 @@ class TestCase(unittest.TestCase):
 
     def __repr__(self):
         # We add id to the repr because it makes testing testtools easier.
-        return "<{} id=0x{:0x}>".format(self.id(), id(self))
+        return f"<{self.id()} id=0x{id(self):0x}>"
 
     def addDetail(self, name, content_object):
         """Add a detail to be reported with this test's outcome.

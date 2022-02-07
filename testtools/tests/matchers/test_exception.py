@@ -43,7 +43,7 @@ class TestMatchesExceptionInstanceInterface(TestCase, TestMatchersInterface):
          MatchesException(Exception('foo')))
         ]
     describe_examples = [
-        ("{!r} is not a {!r}".format(Exception, ValueError),
+        (f"{Exception!r} is not a {ValueError!r}",
          error_base_foo,
          MatchesException(ValueError("foo"))),
         ("ValueError('bar'%s) has different arguments to ValueError('foo'%s)."
@@ -67,7 +67,7 @@ class TestMatchesExceptionTypeInterface(TestCase, TestMatchersInterface):
          MatchesException(Exception))
         ]
     describe_examples = [
-        ("{!r} is not a {!r}".format(Exception, ValueError),
+        (f"{Exception!r} is not a {ValueError!r}",
          error_base_foo,
          MatchesException(ValueError)),
         ]
@@ -107,7 +107,7 @@ class TestMatchesExceptionTypeMatcherInterface(TestCase, TestMatchersInterface):
          MatchesException(Exception, Equals('foo')))
         ]
     describe_examples = [
-        ("{!r} != 5".format(error_bar[1]),
+        (f"{error_bar[1]!r} != 5",
          error_bar, MatchesException(ValueError, Equals(5))),
         ]
 
