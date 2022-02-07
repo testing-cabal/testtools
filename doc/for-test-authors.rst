@@ -84,7 +84,6 @@ of them will happily run testtools tests.  In particular:
 * testrepository_
 * Trial_
 * nose_
-* unittest2_
 * `zope.testrunner`_ (aka zope.testing)
 
 From now on, we'll assume that you know how to run your tests.
@@ -1463,7 +1462,6 @@ Here, ``repr(nullary)`` will be the same as ``repr(f)``.
 .. _testrepository: https://launchpad.net/testrepository
 .. _Trial: http://twistedmatrix.com/documents/current/core/howto/testing.html
 .. _nose: http://somethingaboutorange.com/mrl/projects/nose/
-.. _unittest2: http://pypi.python.org/pypi/unittest2
 .. _zope.testrunner: http://pypi.python.org/pypi/zope.testrunner/
 .. _xUnit test patterns: http://xunitpatterns.com/
 .. _fixtures: http://pypi.python.org/pypi/fixtures
