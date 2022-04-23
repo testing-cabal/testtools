@@ -3,7 +3,8 @@
 Twisted support
 ===============
 
-testtools provides support for testing Twisted code.
+testtools provides support for testing Twisted code.  Install the
+``testtools[twisted]`` extra to use this.
 
 
 Matching Deferreds

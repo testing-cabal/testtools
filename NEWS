@@ -18,6 +18,9 @@ Improvements
 * Distutils integration is deprecated and will be removed in the next major
   version.
 
+* Provide a ``testtools[twisted]`` extra documenting dependencies needed for
+  ``testtools.twistedsupport``.
+
 2.5.0
 ~~~~~
 

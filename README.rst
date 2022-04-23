@@ -47,7 +47,8 @@ tested on Linux and macOS.
 Optional Dependencies
 ---------------------
 
-If you would like to use our Twisted support, then you will need Twisted.
+If you would like to use our Twisted support, then you will need the
+``testtools[twisted]`` extra.
 
 If you want to use ``fixtures`` then you can either install fixtures (e.g. from
 https://launchpad.net/python-fixtures or https://pypi.python.org/pypi/fixtures)
