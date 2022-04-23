@@ -202,9 +202,9 @@ unittest.loader._FailedTest.runexample
 Failed to import test module: runexample
 Traceback (most recent call last):
   File ".../loader.py", line ..., in _find_test_path
-    package = self._get_module_from_name(name)
+    package = self._get_module_from_name(name)...
   File ".../loader.py", line ..., in _get_module_from_name
-    __import__(name)
+    __import__(name)...
   File ".../runexample/__init__.py", line 1
     class not in
 ...^...
