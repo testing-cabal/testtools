@@ -18,6 +18,9 @@ Improvements
 * Distutils integration is deprecated and will be removed in the next major
   version.
 
+* Use ``CompoundFixture`` from ``fixtures>=2.0`` rather than rolling our
+  own.
+
 2.5.0
 ~~~~~
 
