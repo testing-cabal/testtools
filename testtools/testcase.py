@@ -275,9 +275,7 @@ class TestCase(unittest.TestCase):
             return False
         return self.__dict__ == other.__dict__
 
-    def __hash__(self):
-        hashfn = getattr(unittest.TestCase, '__hash__', id)
-        return hashfn(self)
+    __hash__ = unittest.TestCase.__hash__
 
     def __repr__(self):
         # We add id to the repr because it makes testing testtools easier.
