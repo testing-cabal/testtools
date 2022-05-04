@@ -349,9 +349,11 @@ class TestAssertions(TestCase):
 
         exception = self.assertRaises(RuntimeError, raiseError)
         self.assertEqual(1, len(raisedExceptions))
-        self.assertTrue(
-            exception is raisedExceptions[0],
-            f"{exception!r} is not {raisedExceptions[0]!r}")
+        self.assertIs(
+            exception,
+            raisedExceptions[0],
+            '{!r} is not {!r}'.format(exception, raisedExceptions[0])
+        )
 
     def test_assertRaises_with_multiple_exceptions(self):
         # assertRaises((ExceptionOne, ExceptionTwo), function) asserts that
@@ -516,7 +518,7 @@ class TestAssertions(TestCase):
 
     def test_assertIs(self):
         # assertIs asserts that an object is identical to another object.
-        self.assertIs(None, None)
+        self.assertIsNone(None)
         some_list = [42]
         self.assertIs(some_list, some_list)
         some_object = object()
@@ -645,7 +647,7 @@ class TestAssertions(TestCase):
         test = Test("test")
         result = test.run()
         details = test.getDetails()
-        self.assertTrue("Failed expectation" in details)
+        self.assertIn('Failed expectation', details)
 
     def test__force_failure_fails_test(self):
         class Test(TestCase):
@@ -1687,7 +1689,7 @@ class TestSkipping(TestCase):
     def check_test_does_not_run_setup(self, test, reason):
         result = test.run()
         self.assertTrue(result.wasSuccessful())
-        self.assertTrue(reason in result.skip_reasons, result.skip_reasons)
+        self.assertIn(reason, result.skip_reasons, result.skip_reasons)
         self.assertFalse(test.setup_ran)
 
     def test_testtools_skip_decorator_does_not_run_setUp(self):

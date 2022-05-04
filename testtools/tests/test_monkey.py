@@ -113,11 +113,13 @@ class MonkeyPatcherTest(TestCase):
         result = self.monkey_patcher.run_with_patches(f)
         self.assertEqual(
             ('haha', self.original_object.bar, self.original_object.baz),
-            result)
+            result
+        )
         result = self.monkey_patcher.run_with_patches(f)
         self.assertEqual(
             ('haha', self.original_object.bar, self.original_object.baz),
-            result)
+            result
+        )
 
     def test_run_with_patches_restores(self):
         # run_with_patches restores the original values after the function has
