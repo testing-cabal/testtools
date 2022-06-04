@@ -39,7 +39,7 @@ jobs:
 
       - name: Tests
         run: |
-          python -m testtools.run testtools.tests.test_suite
+          python -W once -m testtools.run testtools.tests.test_suite
 
       - name: Docs
         run: |
