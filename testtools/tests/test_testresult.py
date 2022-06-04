@@ -1566,7 +1566,7 @@ class TestTextTestResult(TestCase):
             DocTestMatches("...\nFAILED (failures=1)\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_shows_details(self):
-        self.skip("Disabled per bug 1188420")
+        self.skipTest("Disabled per bug 1188420")
         def run_tests():
             self.result.startTestRun()
             make_erroring_test().run(self.result)
@@ -2518,7 +2518,7 @@ class TestNonAsciiResults(TestCase):
             # the file without closing it which breaks non-refcounted pythons
             codecs.lookup(encoding)
         except LookupError:
-            self.skip("Encoding unsupported by implementation: %r" % encoding)
+            self.skipTest("Encoding unsupported by implementation: %r" % encoding)
         f = codecs.open(os.path.join(self.dir, name + ".py"), "w", encoding)
         try:
             f.write(contents)
@@ -2568,7 +2568,7 @@ class TestNonAsciiResults(TestCase):
                    return u, u
             except (LookupError, UnicodeError):
                 pass
-        self.skip("Could not find a sample text for encoding: %r" % encoding)
+        self.skipTest("Could not find a sample text for encoding: %r" % encoding)
 
     def _as_output(self, text):
         return text

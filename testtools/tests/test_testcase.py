@@ -1455,7 +1455,7 @@ class TestSkipping(TestCase):
 
     def test_skip_causes_skipException(self):
         self.assertThat(
-            lambda: self.skip("Skip this test"),
+            lambda: self.skipTest("Skip this test"),
             Raises(MatchesException(self.skipException)))
 
     def test_can_use_skipTest(self):

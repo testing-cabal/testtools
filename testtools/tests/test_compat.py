@@ -39,7 +39,7 @@ class TestUnicodeOutputStream(testtools.TestCase):
     def setUp(self):
         super().setUp()
         if sys.platform == "cli":
-            self.skip("IronPython shouldn't wrap streams to do encoding")
+            self.skipTest("IronPython shouldn't wrap streams to do encoding")
 
     def test_no_encoding_becomes_ascii(self):
         """A stream with no encoding attribute gets ascii/replace strings"""
