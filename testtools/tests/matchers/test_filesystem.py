@@ -223,7 +223,7 @@ class TestSamePath(TestCase, PathHelpers):
         try:
             os.symlink(source, target)
         except (AttributeError, NotImplementedError):
-            self.skip("No symlink support")
+            self.skipTest("No symlink support")
         self.assertThat(source, SamePath(target))
         self.assertThat(target, SamePath(source))
 

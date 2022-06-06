@@ -253,7 +253,7 @@ class TestFixtureSuite(TestCase):
     def setUp(self):
         super().setUp()
         if FunctionFixture is None:
-            self.skip("Need fixtures")
+            self.skipTest("Need fixtures")
 
     def test_fixture_suite(self):
         log = []
