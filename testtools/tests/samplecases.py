@@ -96,7 +96,7 @@ def _failure(case):
 
 
 def _skip(case):
-    case.skip('arbitrary skip message')
+    case.skipTest('arbitrary skip message')
 
 
 def _expected_failure(case):

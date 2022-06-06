@@ -386,24 +386,24 @@ class TestAssertions(TestCase):
             Raises(
                 MatchesException(self.failureException, '.*{!r}.*'.format(foo))))
 
-    def test_assertRaisesRegexp(self):
-        # assertRaisesRegexp asserts that function raises particular exception
+    def test_assertRaisesRegex(self):
+        # assertRaisesRegex asserts that function raises particular exception
         # with particular message.
-        self.assertRaisesRegexp(RuntimeError, r"M\w*e", self.raiseError,
-                                RuntimeError, "Message")
+        self.assertRaisesRegex(RuntimeError, r"M\w*e", self.raiseError,
+                               RuntimeError, "Message")
 
-    def test_assertRaisesRegexp_wrong_error_type(self):
+    def test_assertRaisesRegex_wrong_error_type(self):
         # If function raises an exception of unexpected type,
-        # assertRaisesRegexp re-raises it.
-        self.assertRaises(ValueError, self.assertRaisesRegexp, RuntimeError,
+        # assertRaisesRegex re-raises it.
+        self.assertRaises(ValueError, self.assertRaisesRegex, RuntimeError,
                           r"M\w*e", self.raiseError, ValueError, "Message")
 
-    def test_assertRaisesRegexp_wrong_message(self):
+    def test_assertRaisesRegex_wrong_message(self):
         # If function raises an exception with unexpected message
-        # assertRaisesRegexp fails.
+        # assertRaisesRegex fails.
         self.assertFails(
             '"Expected" does not match "Observed"',
-            self.assertRaisesRegexp, RuntimeError, "Expected",
+            self.assertRaisesRegex, RuntimeError, "Expected",
             self.raiseError, RuntimeError, "Observed")
 
     def assertFails(self, message, function, *args, **kwargs):
@@ -1455,7 +1455,7 @@ class TestSkipping(TestCase):
 
     def test_skip_causes_skipException(self):
         self.assertThat(
-            lambda: self.skip("Skip this test"),
+            lambda: self.skipTest("Skip this test"),
             Raises(MatchesException(self.skipException)))
 
     def test_can_use_skipTest(self):
