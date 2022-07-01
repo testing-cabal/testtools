@@ -178,7 +178,7 @@ class TestConcurrentStreamTestSuiteRun(TestCase):
             "Traceback (most recent call last):\n")
         self.assertThat(events[2][6].decode('utf8'), DocTestMatches("""\
   File "...testtools/testsuite.py", line ..., in _run_test
-    test.run(process_result)
+    test.run(process_result)...
 """, doctest.ELLIPSIS))
         self.assertThat(events[3][6].decode('utf8'), DocTestMatches("""\
 TypeError: ...run() takes ...1 ...argument...2...given...

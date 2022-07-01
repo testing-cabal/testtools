@@ -1265,11 +1265,11 @@ class TestTestResult(TestCase):
             DocTestMatches(
                 'Traceback (most recent call last):\n'
                 '  File "...testtools...runtest.py", line ..., in _run_user\n'
-                '    return fn(*args, **kwargs)\n'
+                '    return fn(*args, **kwargs)\n...'
                 '  File "...testtools...testcase.py", line ..., in _run_test_method\n'
-                '    return self._get_test_method()()\n'
+                '    return self._get_test_method()()\n...'
                 '  File "...testtools...tests...test_testresult.py", line ..., in error\n'
-                '    1/0\n'
+                '    1/0\n...'
                 'ZeroDivisionError: ...\n',
                 doctest.ELLIPSIS | doctest.REPORT_UDIFF))
 
@@ -1282,7 +1282,7 @@ class TestTestResult(TestCase):
             DocTestMatches(
                 'Traceback (most recent call last):\n'
                 '  File "...testtools...tests...test_testresult.py", line ..., in error\n'
-                '    1/0\n'
+                '    1/0\n...'
                 'ZeroDivisionError: ...\n',
                 doctest.ELLIPSIS))
 
@@ -1321,17 +1321,17 @@ class TestTestResult(TestCase):
             DocTestMatches(
                 'Traceback (most recent call last):\n'
                 '  File "...testtools...runtest.py", line ..., in _run_user\n'
-                '    return fn(*args, **kwargs)\n'
+                '    return fn(*args, **kwargs)\n...'
                 '    args = ...\n'
                 '    fn = ...\n'
                 '    kwargs = ...\n'
                 '    self = ...\n'
                 '  File "...testtools...testcase.py", line ..., in _run_test_method\n'
-                '    return self._get_test_method()()\n'
+                '    return self._get_test_method()()\n...'
                 '    result = ...\n'
                 '    self = ...\n'
                 '  File "...testtools...tests...test_testresult.py", line ..., in error\n'
-                '    1/0\n'
+                '    1/0\n...'
                 '    a = 1\n'
                 '    self = ...\n'
                 'ZeroDivisionError: ...\n',
@@ -2644,12 +2644,15 @@ class TestNonAsciiResults(TestCase):
             "        raise RuntimeError\n"
             "    def __repr__(self):\n"
             "        raise RuntimeError\n")
+        if sys.version_info >= (3, 11):
+            expected = "UnprintableError: <exception str() failed>\n"
+        else:
+            expected = (
+                "UnprintableError: <unprintable UnprintableError object>\n")
         textoutput = self._test_external_case(
             modulelevel=exception_class,
             testline="raise UnprintableError")
-        self.assertIn(self._as_output(
-            "UnprintableError: <unprintable UnprintableError object>\n"),
-            textoutput)
+        self.assertIn(self._as_output(expected), textoutput)
 
     def test_non_ascii_dirname(self):
         """Script paths in the traceback can be non-ascii"""
