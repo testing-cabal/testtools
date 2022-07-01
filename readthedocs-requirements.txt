@@ -6,5 +6,4 @@
 # that it knows exactly what to install in order to render the full
 # documentation.
 
-testtools[test]
-Twisted
+testtools[test,twisted]
