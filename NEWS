@@ -21,6 +21,9 @@ Improvements
 * Use ``CompoundFixture`` from ``fixtures>=2.0`` rather than rolling our
   own.
 
+* Provide a ``testtools[twisted]`` extra documenting dependencies needed for
+  ``testtools.twistedsupport``.
+
 2.5.0
 ~~~~~
 
