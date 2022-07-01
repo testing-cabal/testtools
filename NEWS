@@ -12,6 +12,9 @@ Improvements
 * Add support for Python 3.10.
   (Jürgen Gmach)
 
+* Drop support for Python 3.5 (EOL).
+  (Hugo van Kemenade)
+
 * Distutils integration is deprecated and will be removed in the next major
   version.
 

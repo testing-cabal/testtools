@@ -113,7 +113,7 @@ class TestMismatchDecorator(TestCase):
         x = Mismatch("description", {'foo': 'bar'})
         decorated = MismatchDecorator(x)
         self.assertEqual(
-            '<testtools.matchers.MismatchDecorator({!r})>'.format(x),
+            f'<testtools.matchers.MismatchDecorator({x!r})>',
             repr(decorated))
 
 

@@ -589,7 +589,7 @@ class StreamResultRouter(StreamResult):
         """
         policy_method = StreamResultRouter._policies.get(policy, None)
         if not policy_method:
-            raise ValueError("bad policy {!r}".format(policy))
+            raise ValueError(f"bad policy {policy!r}")
         policy_method(self, sink, **policy_args)
         if do_start_stop_run:
             self._sinks.append(sink)
@@ -599,7 +599,7 @@ class StreamResultRouter(StreamResult):
     def _map_route_code_prefix(self, sink, route_prefix, consume_route=False):
         if '/' in route_prefix:
             raise TypeError(
-                "{!r} is more than one route step long".format(route_prefix))
+                f"{route_prefix!r} is more than one route step long")
         self._route_code_prefixes[route_prefix] = (sink, consume_route)
     _policies['route_code_prefix'] = _map_route_code_prefix
 
@@ -1152,7 +1152,7 @@ class TextTestResult(TestResult):
     def _show_list(self, label, error_list):
         for test, output in error_list:
             self.stream.write(self.sep1)
-            self.stream.write("{}: {}\n".format(label, test.id()))
+            self.stream.write(f"{label}: {test.id()}\n")
             self.stream.write(self.sep2)
             self.stream.write(output)
 
@@ -1230,7 +1230,7 @@ class ThreadsafeForwardingResult(TestResult):
         self._test_tags = set(), set()
 
     def __repr__(self):
-        return '<{} {!r}>'.format(self.__class__.__name__, self.result)
+        return f'<{self.__class__.__name__} {self.result!r}>'
 
     def _any_tags(self, tags):
         return bool(tags[0] or tags[1])
@@ -1371,7 +1371,7 @@ class ExtendedToOriginalDecorator:
         self._shouldStop = False
 
     def __repr__(self):
-        return '<{} {!r}>'.format(self.__class__.__name__, self.decorated)
+        return f'<{self.__class__.__name__} {self.decorated!r}>'
 
     def __getattr__(self, name):
         return getattr(self.decorated, name)
@@ -1741,7 +1741,7 @@ class ResourcedToStreamDecorator(ExtendedToStreamDecorator):
             resource_id = "{}.{}".format(
                 resource.__class__.__module__, resource.__class__.__name__)
 
-        test_id = '{}.{}'.format(resource_id, method)
+        test_id = f'{resource_id}.{method}'
 
         if phase == 'start':
             test_status = 'inprogress'
@@ -2051,8 +2051,8 @@ class _StringException(Exception):
 
 def _format_text_attachment(name, text):
     if '\n' in text:
-        return "{}: {{{{{{\n{}\n}}}}}}\n".format(name, text)
-    return "{}: {{{{{{{}}}}}}}".format(name, text)
+        return f"{name}: {{{{{{\n{text}\n}}}}}}\n"
+    return f"{name}: {{{{{{{text}}}}}}}"
 
 
 def _details_to_str(details, special=None):
@@ -2080,7 +2080,7 @@ def _details_to_str(details, special=None):
             continue
         # We want the 'special' attachment to be at the bottom.
         if key == special:
-            special_content = '{}\n'.format(text)
+            special_content = f'{text}\n'
             continue
         text_attachments.append(_format_text_attachment(key, text))
     if text_attachments and not text_attachments[-1].endswith('\n'):
@@ -2091,11 +2091,11 @@ def _details_to_str(details, special=None):
     if binary_attachments:
         lines.append('Binary content:\n')
         for name, content_type in binary_attachments:
-            lines.append('  {} ({})\n'.format(name, content_type))
+            lines.append(f'  {name} ({content_type})\n')
     if empty_attachments:
         lines.append('Empty attachments:\n')
         for name in empty_attachments:
-            lines.append('  {}\n'.format(name))
+            lines.append(f'  {name}\n')
     if (binary_attachments or empty_attachments) and text_attachments:
         lines.append('\n')
     lines.append('\n'.join(text_attachments))

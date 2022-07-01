@@ -44,12 +44,12 @@ class Test_BinaryMismatch(TestCase):
     def test_short_objects(self):
         o1, o2 = self.CustomRepr('a'), self.CustomRepr('b')
         mismatch = _BinaryMismatch(o1, "!~", o2)
-        self.assertEqual(mismatch.describe(), "{!r} !~ {!r}".format(o1, o2))
+        self.assertEqual(mismatch.describe(), f"{o1!r} !~ {o2!r}")
 
     def test_short_mixed_strings(self):
         b, u = _b("\xa7"), "\xa7"
         mismatch = _BinaryMismatch(b, "!~", u)
-        self.assertEqual(mismatch.describe(), "{!r} !~ {!r}".format(b, u))
+        self.assertEqual(mismatch.describe(), f"{b!r} !~ {u!r}")
 
     def test_long_bytes(self):
         one_line_b = self._long_b.replace(_b("\n"), _b(" "))
@@ -241,7 +241,7 @@ class DoesNotStartWithTests(TestCase):
         string = _b("A\xA7")
         suffix = _b("B\xA7")
         mismatch = DoesNotStartWith(string, suffix)
-        self.assertEqual("{!r} does not start with {!r}.".format(string, suffix),
+        self.assertEqual(f"{string!r} does not start with {suffix!r}.",
             mismatch.describe())
 
 
@@ -256,12 +256,12 @@ class StartsWithTests(TestCase):
     def test_str_with_bytes(self):
         b = _b("\xA7")
         matcher = StartsWith(b)
-        self.assertEqual("StartsWith({!r})".format(b), str(matcher))
+        self.assertEqual(f"StartsWith({b!r})", str(matcher))
 
     def test_str_with_unicode(self):
         u = "\xA7"
         matcher = StartsWith(u)
-        self.assertEqual("StartsWith({!r})".format(u), str(matcher))
+        self.assertEqual(f"StartsWith({u!r})", str(matcher))
 
     def test_match(self):
         matcher = StartsWith("bar")
@@ -302,7 +302,7 @@ class DoesNotEndWithTests(TestCase):
         string = _b("A\xA7")
         suffix = _b("B\xA7")
         mismatch = DoesNotEndWith(string, suffix)
-        self.assertEqual("{!r} does not end with {!r}.".format(string, suffix),
+        self.assertEqual(f"{string!r} does not end with {suffix!r}.",
             mismatch.describe())
 
 
@@ -317,12 +317,12 @@ class EndsWithTests(TestCase):
     def test_str_with_bytes(self):
         b = _b("\xA7")
         matcher = EndsWith(b)
-        self.assertEqual("EndsWith({!r})".format(b), str(matcher))
+        self.assertEqual(f"EndsWith({b!r})", str(matcher))
 
     def test_str_with_unicode(self):
         u = "\xA7"
         matcher = EndsWith(u)
-        self.assertEqual("EndsWith({!r})".format(u), str(matcher))
+        self.assertEqual(f"EndsWith({u!r})", str(matcher))
 
     def test_match(self):
         matcher = EndsWith("arf")

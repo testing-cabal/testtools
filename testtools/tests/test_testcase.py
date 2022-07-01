@@ -384,7 +384,7 @@ class TestAssertions(TestCase):
         self.assertThat(
             lambda: self.assertRaises(Exception, foo),
             Raises(
-                MatchesException(self.failureException, '.*{!r}.*'.format(foo))))
+                MatchesException(self.failureException, f'.*{foo!r}.*')))
 
     def test_assertRaisesRegex(self):
         # assertRaisesRegex asserts that function raises particular exception
@@ -736,7 +736,7 @@ class TestAssertions(TestCase):
             'a',
             repr('\xa7')[1:-1],
             "'''",
-            'actual    = {!r}'.format(b),
+            f'actual    = {b!r}',
             ': ' + message,
             ])
         self.assertFails(expected_error, self.assertEqual, a, b, message)
@@ -1674,7 +1674,7 @@ class TestSkipping(TestCase):
             setup_ran = False
 
             def setUp(self):
-                super(SkippingTestCase, self).setUp()
+                super().setUp()
                 self.setup_ran = True
 
             def test_skipped(self):

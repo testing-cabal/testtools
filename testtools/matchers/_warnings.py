@@ -91,7 +91,7 @@ class Warnings:
                 return Mismatch('Expected at least one warning, got none')
 
     def __str__(self):
-        return 'Warnings({!s})'.format(self.warnings_matcher)
+        return f'Warnings({self.warnings_matcher!s})'
 
 
 def IsDeprecated(message):

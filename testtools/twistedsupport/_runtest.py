@@ -506,7 +506,7 @@ def assert_fails_with(d, *exc_types, **kwargs):
 
     def got_success(result):
         raise failureException(
-            "{} not raised ({!r} returned)".format(expected_names, result))
+            f"{expected_names} not raised ({result!r} returned)")
 
     def got_failure(failure):
         if failure.check(*exc_types):
@@ -533,4 +533,4 @@ class UncleanReactorError(Exception):
             ret = str(junk)
         else:
             ret = repr(junk)
-        return '  {}\n'.format(ret)
+        return f'  {ret}\n'

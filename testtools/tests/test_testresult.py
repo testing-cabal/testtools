@@ -2,7 +2,6 @@
 
 """Test TestResults and related things."""
 
-__metaclass__ = type
 
 import codecs
 import datetime

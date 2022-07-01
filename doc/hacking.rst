@@ -15,7 +15,7 @@ Coding style
 In general, follow `PEP 8`_ except where consistency with the standard
 library's unittest_ module would suggest otherwise.
 
-testtools supports Python 3.5 and later.
+testtools supports Python 3.6 and later.
 
 Copyright assignment
 --------------------

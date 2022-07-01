@@ -95,7 +95,7 @@ class Not:
         self.matcher = matcher
 
     def __str__(self):
-        return 'Not({})'.format(self.matcher)
+        return f'Not({self.matcher})'
 
     def match(self, other):
         mismatch = self.matcher.match(other)
@@ -113,7 +113,7 @@ class MatchedUnexpectedly(Mismatch):
         self.other = other
 
     def describe(self):
-        return "{!r} matches {}".format(self.other, self.matcher)
+        return f"{self.other!r} matches {self.matcher}"
 
 
 class Annotate:
@@ -134,7 +134,7 @@ class Annotate:
         return cls(annotation, matcher)
 
     def __str__(self):
-        return 'Annotate({!r}, {})'.format(self.annotation, self.matcher)
+        return f'Annotate({self.annotation!r}, {self.matcher})'
 
     def match(self, other):
         mismatch = self.matcher.match(other)
@@ -151,7 +151,7 @@ class PostfixedMismatch(MismatchDecorator):
         self.mismatch = mismatch
 
     def describe(self):
-        return '{}: {}'.format(self.original.describe(), self.annotation)
+        return f'{self.original.describe()}: {self.annotation}'
 
 
 AnnotatedMismatch = PostfixedMismatch
@@ -164,7 +164,7 @@ class PrefixedMismatch(MismatchDecorator):
         self.prefix = prefix
 
     def describe(self):
-        return '{}: {}'.format(self.prefix, self.original.describe())
+        return f'{self.prefix}: {self.original.describe()}'
 
 
 class AfterPreprocessing:
@@ -206,7 +206,7 @@ class AfterPreprocessing:
         after = self.preprocessor(value)
         if self.annotate:
             matcher = Annotate(
-                "after {} on {!r}".format(self._str_preprocessor(), value),
+                f"after {self._str_preprocessor()} on {value!r}",
                 self.matcher)
         else:
             matcher = self.matcher
@@ -225,7 +225,7 @@ class AllMatch:
         self.matcher = matcher
 
     def __str__(self):
-        return 'AllMatch({})'.format(self.matcher)
+        return f'AllMatch({self.matcher})'
 
     def match(self, values):
         mismatches = []
@@ -244,7 +244,7 @@ class AnyMatch:
         self.matcher = matcher
 
     def __str__(self):
-        return 'AnyMatch({})'.format(self.matcher)
+        return f'AnyMatch({self.matcher})'
 
     def match(self, values):
         mismatches = []
@@ -360,7 +360,7 @@ class _MatchesPredicateWithParams(Matcher):
                 self.predicate, self.message)
         else:
             name = self.name
-        return '{}({})'.format(name, args)
+        return f'{name}({args})'
 
     def match(self, x):
         if not self.predicate(x, *self.args, **self.kwargs):

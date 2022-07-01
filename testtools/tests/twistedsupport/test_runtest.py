@@ -804,7 +804,7 @@ class TestAssertFailsWith(NeedsTwistedTestCase):
             failure.trap(self.failureException)
             self.assertThat(
                 str(failure.value),
-                Equals("RuntimeError not raised ({!r} returned)".format(marker)))
+                Equals(f"RuntimeError not raised ({marker!r} returned)"))
         d.addCallbacks(
             lambda x: self.fail("Should not have succeeded"), check_result)
         return d
@@ -867,7 +867,7 @@ class TestAssertFailsWith(NeedsTwistedTestCase):
             failure.trap(CustomException)
             self.assertThat(
                 str(failure.value),
-                Equals("RuntimeError not raised ({!r} returned)".format(marker)))
+                Equals(f"RuntimeError not raised ({marker!r} returned)"))
         return d.addCallbacks(
             lambda x: self.fail("Should not have succeeded"), check_result)
 

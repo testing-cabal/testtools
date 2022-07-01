@@ -11,7 +11,7 @@ except:
 
 
 setuptools.setup(
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     cmdclass=cmd_class,
     setup_requires=['pbr'],
     pbr=True)

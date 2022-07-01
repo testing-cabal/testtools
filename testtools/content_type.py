@@ -30,10 +30,10 @@ class ContentType:
         if self.parameters:
             params = '; '
             params += '; '.join(
-                sorted('{}="{}"'.format(k, v) for k, v in self.parameters.items()))
+                sorted(f'{k}="{v}"' for k, v in self.parameters.items()))
         else:
             params = ''
-        return "{}/{}{}".format(self.type, self.subtype, params)
+        return f"{self.type}/{self.subtype}{params}"
 
 
 JSON = ContentType('application', 'json')

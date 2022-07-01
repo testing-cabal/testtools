@@ -137,7 +137,7 @@ class MatchesStructure:
     def __str__(self):
         kws = []
         for attr, matcher in sorted(self.kws.items()):
-            kws.append("{}={}".format(attr, matcher))
+            kws.append(f"{attr}={matcher}")
         return "{}({})".format(self.__class__.__name__, ', '.join(kws))
 
     def match(self, value):
@@ -208,18 +208,18 @@ class MatchesSetwise:
                 if common_length == 0:
                     raise AssertionError("common_length can't be 0 here")
                 if common_length > 1:
-                    msg = "There were {} mismatches".format(common_length)
+                    msg = f"There were {common_length} mismatches"
                 else:
                     msg = "There was 1 mismatch"
                 if len(remaining_matchers) > len(not_matched):
                     extra_matchers = remaining_matchers[common_length:]
-                    msg += " and {} extra matcher".format(len(extra_matchers))
+                    msg += f" and {len(extra_matchers)} extra matcher"
                     if len(extra_matchers) > 1:
                         msg += "s"
                     msg += ': ' + ', '.join(map(str, extra_matchers))
                 elif len(not_matched) > len(remaining_matchers):
                     extra_values = not_matched[common_length:]
-                    msg += " and {} extra value".format(len(extra_values))
+                    msg += f" and {len(extra_values)} extra value"
                     if len(extra_values) > 1:
                         msg += "s"
                     msg += ': ' + str(extra_values)

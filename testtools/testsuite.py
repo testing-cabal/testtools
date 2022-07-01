@@ -171,7 +171,7 @@ class ConcurrentStreamTestSuite:
                 elif event == 'startTestRun':
                     pass
                 else:
-                    raise ValueError('unknown event type {!r}'.format(event))
+                    raise ValueError(f'unknown event type {event!r}')
         except:
             for thread, process_result in threads.values():
                 # Signal to each TestControl in the ExtendedToStreamDecorator
@@ -187,7 +187,7 @@ class ConcurrentStreamTestSuite:
             except Exception:
                 # The run logic itself failed.
                 case = testtools.ErrorHolder(
-                    "broken-runner-'{}'".format(route_code),
+                    f"broken-runner-'{route_code}'",
                     error=sys.exc_info())
                 case.run(process_result)
         finally:
@@ -306,7 +306,7 @@ def sorted_tests(suite_or_case, unpack_outer=False):
         test_id: count for test_id, count in seen.items() if count > 1}
     if duplicates:
         raise ValueError(
-            'Duplicate test ids detected: {}'.format(pformat(duplicates)))
+            f'Duplicate test ids detected: {pformat(duplicates)}')
 
     tests = _flatten_tests(suite_or_case, unpack_outer=unpack_outer)
     tests.sort()
