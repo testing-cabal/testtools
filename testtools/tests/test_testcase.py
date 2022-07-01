@@ -86,6 +86,10 @@ class TestPlaceHolder(TestCase):
         test = PlaceHolder("test id", "description")
         self.assertEqual("description", test.shortDescription())
 
+    def test_testcase_is_hashable(self):
+        test = hash(self)
+        self.assertEqual(unittest.TestCase.__hash__(self), test)
+
     def test_repr_just_id(self):
         # repr(placeholder) shows you how the object was constructed.
         test = PlaceHolder("test id")
