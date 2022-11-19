@@ -5,6 +5,7 @@
 from doctest import ELLIPSIS
 from pprint import pformat
 import sys
+import _thread
 import unittest
 
 from testtools import (
@@ -89,6 +90,10 @@ class TestPlaceHolder(TestCase):
     def test_testcase_is_hashable(self):
         test = hash(self)
         self.assertEqual(unittest.TestCase.__hash__(self), test)
+
+    def test_testcase_equals_edgecase(self):
+        # Not all python objects have a __dict__ attribute
+        self.assertFalse(self == _thread.RLock())
 
     def test_repr_just_id(self):
         # repr(placeholder) shows you how the object was constructed.

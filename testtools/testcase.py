@@ -273,7 +273,7 @@ class TestCase(unittest.TestCase):
         eq = getattr(unittest.TestCase, '__eq__', None)
         if eq is not None and not unittest.TestCase.__eq__(self, other):
             return False
-        return self.__dict__ == other.__dict__
+        return self.__dict__ == getattr(other, '__dict__', None)
 
     __hash__ = unittest.TestCase.__hash__
 
