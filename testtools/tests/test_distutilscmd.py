@@ -50,7 +50,7 @@ class TestCommandTest(TestCase):
     def test_test_module(self):
         self.useFixture(SampleTestFixture())
         stdout = self.useFixture(fixtures.StringStream('stdout'))
-        dist = Distribution()
+        dist = Distribution(attrs={ 'packages': ['testtools'] })
         dist.script_name = 'setup.py'
         dist.script_args = ['test']
         dist.cmdclass = {'test': TestCommand}
@@ -70,7 +70,7 @@ OK
     def test_test_suite(self):
         self.useFixture(SampleTestFixture())
         stdout = self.useFixture(fixtures.StringStream('stdout'))
-        dist = Distribution()
+        dist = Distribution(attrs={ 'packages': ['testtools'] })
         dist.script_name = 'setup.py'
         dist.script_args = ['test']
         dist.cmdclass = {'test': TestCommand}
