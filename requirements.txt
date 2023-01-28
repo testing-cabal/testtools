@@ -1,5 +1,2 @@
 pbr>=0.11
-# TODO(stephenfin): Remove this once fixtures no longer depends on extras
-# or explicitly specifies the dependency
-extras>=1.0.0
 fixtures>=2.0
