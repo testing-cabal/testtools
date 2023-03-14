@@ -24,6 +24,13 @@ Improvements
 * Provide a ``testtools[twisted]`` extra documenting dependencies needed for
   ``testtools.twistedsupport``.
 
+* Make ``TestCase`` hashable.
+
+* Prevent ``AttributeError`` in ``TestCase.__eq__`` for objects lacking a
+  ``__dict__`` attribute.
+
+* Replace deprecated ``cgi`` module usage with ``email``.
+
 2.5.0
 ~~~~~
 
