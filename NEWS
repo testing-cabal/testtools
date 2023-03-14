@@ -31,6 +31,8 @@ Improvements
 
 * Replace deprecated ``cgi`` module usage with ``email``.
 
+* Add support for Python 3.11.
+
 2.5.0
 ~~~~~
 
