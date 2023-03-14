@@ -22,8 +22,8 @@ __all__ = [
     'TimestampingStreamResult',
     ]
 
-import cgi
 import datetime
+import email
 import math
 from operator import methodcaller
 import sys
@@ -759,7 +759,10 @@ def _make_content_type(mime_type=None):
     if mime_type is None:
         mime_type = 'application/octet-stream'
 
-    full_type, parameters = cgi.parse_header(mime_type)
+    msg = email.message.EmailMessage()
+    msg['content-type'] = mime_type
+
+    full_type, parameters = msg.get_content_type(), dict(msg['content-type'].params)
     # Ensure any wildcards are valid.
     if full_type == '*':
         full_type = '*/*'
