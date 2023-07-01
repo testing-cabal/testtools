@@ -23,7 +23,7 @@ __all__ = [
     ]
 
 import datetime
-import email
+import email.message
 import math
 from operator import methodcaller
 import sys
