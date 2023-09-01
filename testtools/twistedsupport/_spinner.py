@@ -18,6 +18,7 @@ __all__ = [
 
 from fixtures import Fixture
 import signal
+from typing import Union
 
 from ._deferreddebug import DebugTwisted
 
@@ -74,7 +75,7 @@ def trap_unhandled_errors(function, *args, **kwargs):
     # an instance doesn't work with Python 3 and viceversa overriding __del__
     # via inheritance doesn't work with Python 2. So we handle the two cases
     # differently. TODO: perhaps there's a way to have a single code path?
-    class DebugInfo(real_DebugInfo):
+    class DebugInfo(real_DebugInfo):  # type: ignore
 
         _runRealDel = True
 
@@ -86,11 +87,11 @@ def trap_unhandled_errors(function, *args, **kwargs):
             if self._runRealDel:
                 real_DebugInfo.__del__(self)
 
-    defer.DebugInfo = DebugInfo
+    defer.DebugInfo = DebugInfo  # type: ignore
     try:
         result = function(*args, **kwargs)
     finally:
-        defer.DebugInfo = real_DebugInfo
+        defer.DebugInfo = real_DebugInfo  # type: ignore
     errors = []
     for info in debug_infos:
         if info.failResult is not None:
@@ -153,6 +154,8 @@ class Spinner:
     # the ideal, and it actually works for many cases.
     _OBLIGATORY_REACTOR_ITERATIONS = 0
 
+    _failure: Union[Failure, object]
+
     def __init__(self, reactor, debug=False):
         """Construct a Spinner.
 
@@ -175,7 +178,7 @@ class Spinner:
 
     def _get_result(self):
         if self._failure is not self._UNSET:
-            self._failure.raiseException()
+            self._failure.raiseException()  # type: ignore
         if self._success is not self._UNSET:
             return self._success
         raise NoResultError()
