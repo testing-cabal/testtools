@@ -3,26 +3,39 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
-NEXT
-~~~~
+2.6.0
+~~~~~
 
 Improvements
 ------------
 
-* Add support for Python 3.10.
-  (Jürgen Gmach)
+* Add support for Python 3.10 and 3.11.
+  (Jürgen Gmach, Colin Watson)
 
 * Drop support for Python 3.5 (EOL).
   (Hugo van Kemenade)
 
 * Distutils integration is deprecated and will be removed in the next major
   version.
+  (Stephen Finucane)
 
 * Use ``CompoundFixture`` from ``fixtures>=2.0`` rather than rolling our
   own.
+  (Colin Watson)
 
 * Provide a ``testtools[twisted]`` extra documenting dependencies needed for
   ``testtools.twistedsupport``.
+  (Colin Watson)
+
+* Make ``TestCase`` hashable.
+  (Ben Beecher)
+
+* Prevent ``AttributeError`` in ``TestCase.__eq__`` for objects lacking a
+  ``__dict__`` attribute.
+  (Tim Burke)
+
+* Replace deprecated ``cgi`` module usage with ``email``.
+  (Matthew Treinish)
 
 2.5.0
 ~~~~~
