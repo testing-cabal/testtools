@@ -11,3 +11,50 @@ module = [
     "pbr.*",
 ]
 ignore_missing_imports = true
+
+[build-system]
+requires = ["setuptools>=61.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "testtools"
+description = "Extensions to the Python standard library unit testing framework"
+description-file = "doc/overview.rst"
+authors = [{name = "Jonathan M. Lange", email = "jml+testtools@mumak.net"}]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Testing",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/testing-cabal/testtools"
+
+[tool.extras]
+test = """
+testscenarios
+testresources"""
+twisted = """
+Twisted"""
+
+[tool.files]
+packages = "testtools"
+
+[tool.setuptools]
+include-package-data = false
