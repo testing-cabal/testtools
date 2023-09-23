@@ -3,6 +3,18 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
+2.6.1
+~~~~~
+
+Improvements
+------------
+
+* Fix compatibility with Python 3.12.
+  (Jake Lishman, #353)
+
+* Add typing in various modules (still lacking full coverage).
+  (Jelmer Vernooĳ)
+
 2.6.0
 ~~~~~
 
