@@ -2668,7 +2668,7 @@ class TestNonAsciiResults(TestCase):
     def test_syntax_error(self):
         """Syntax errors should still have fancy special-case formatting"""
         if platform.python_implementation() == "PyPy":
-            spaces = '           '
+            spaces = '         '
             marker = '^'
         elif sys.version_info >= (3, 10):
             spaces = '        '
