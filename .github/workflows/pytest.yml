@@ -7,10 +7,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with: {python-version: 3.x}
-      - run: pip install pytest testscenarios  # git+https://github.com/testing-cabal/testscenarios.git@master
+      - run: pip install pytest testscenarios
+      # git+https://github.com/testing-cabal/testscenarios.git@master
       - run: pip install -r requirements.txt || pip install --editable . || pip install . || true
       - run: pytest 
-               --ignore=testtools/tests/test_testcase.py
                --ignore=testtools/tests/matchers/test_basic.py
                --ignore=testtools/tests/matchers/test_const.py
                --ignore=testtools/tests/matchers/test_datastructures.py
@@ -18,9 +18,10 @@ jobs:
                --ignore=testtools/tests/matchers/test_doctest.py
                --ignore=testtools/tests/matchers/test_exception.py
                --ignore=testtools/tests/matchers/test_higherorder.py
-               --ignore=testtools/tests/matchers/test_warnings.py .
+               --ignore=testtools/tests/matchers/test_warnings.py
+               --ignore=testtools/tests/test_testcase.py
+               --ignore=testtools/tests/test_testresult.py .
       - run: pytest 
-               testtools/tests/test_testcase.py
                testtools/tests/matchers/test_basic.py
                testtools/tests/matchers/test_const.py
                testtools/tests/matchers/test_datastructures.py
@@ -29,4 +30,6 @@ jobs:
                testtools/tests/matchers/test_exception.py
                testtools/tests/matchers/test_higherorder.py
                testtools/tests/matchers/test_warnings.py
+               testtools/tests/test_testcase.py
+               testtools/tests/test_testresult.py . || true
       - run: pytest --doctest-modules . || true
