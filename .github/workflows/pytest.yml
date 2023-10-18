@@ -10,7 +10,8 @@ jobs:
       - run: pip install pytest testscenarios
       # git+https://github.com/testing-cabal/testscenarios.git@master
       - run: pip install -r requirements.txt || pip install --editable . || pip install . || true
-      - run: pytest 
+      - name: Pytests that pass
+        run: pytest 
                --ignore=testtools/tests/matchers/test_basic.py
                --ignore=testtools/tests/matchers/test_const.py
                --ignore=testtools/tests/matchers/test_datastructures.py
@@ -21,7 +22,9 @@ jobs:
                --ignore=testtools/tests/matchers/test_warnings.py
                --ignore=testtools/tests/test_testcase.py
                --ignore=testtools/tests/test_testresult.py .
-      - run: pytest 
+      # TODO: Fix the pytests that fail and move them up
+      - name: Pytests that fail
+        run: pytest 
                testtools/tests/matchers/test_basic.py
                testtools/tests/matchers/test_const.py
                testtools/tests/matchers/test_datastructures.py
@@ -31,5 +34,5 @@ jobs:
                testtools/tests/matchers/test_higherorder.py
                testtools/tests/matchers/test_warnings.py
                testtools/tests/test_testcase.py
-               testtools/tests/test_testresult.py . || true
+               testtools/tests/test_testresult.py || true
       - run: pytest --doctest-modules . || true
