@@ -2668,14 +2668,12 @@ class TestNonAsciiResults(TestCase):
     def test_syntax_error(self):
         """Syntax errors should still have fancy special-case formatting"""
         if platform.python_implementation() == "PyPy":
-            spaces = '           '
-            marker = '^'
+            spaces = '         '
         elif sys.version_info >= (3, 10):
             spaces = '        '
-            marker = '^^^'
         else:
             spaces = '          '
-            marker = '^'
+        marker = '^^^' if sys.version_info >= (3, 10) else '^'
         textoutput = self._test_external_case("exec ('f(a, b c)')")
         self.assertIn(self._as_output(
             '  File "<string>", line 1\n'
