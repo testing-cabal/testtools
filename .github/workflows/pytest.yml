@@ -1,0 +1,13 @@
+name: pytest
+on: [pull_request, push]
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with: {python-version: 3.x}
+      - run: pip install pytest
+      - run: pip install -r requirements.txt || pip install --editable . || pip install . || true
+      - run: pytest .
+      - run: pytest --doctest-modules . || true
