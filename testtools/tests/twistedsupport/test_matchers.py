@@ -3,7 +3,6 @@
 """Tests for Deferred matchers."""
 
 from testtools.content import TracebackContent
-from testtools.helpers import try_import
 from testtools.matchers import (
     AfterPreprocessing,
     Equals,
@@ -13,13 +12,10 @@ from testtools.matchers import (
 from ._helpers import NeedsTwistedTestCase
 
 
-has_no_result = try_import('testtools.twistedsupport.has_no_result')
-failed = try_import('testtools.twistedsupport.failed')
-succeeded = try_import('testtools.twistedsupport.succeeded')
+from testtools.twistedsupport import has_no_result, failed, succeeded
 
-
-defer = try_import('twisted.internet.defer')
-Failure = try_import('twisted.python.failure.Failure')
+from twisted.internet import defer
+from twisted.python.failure import Failure
 
 
 def mismatches(description, details=None):
