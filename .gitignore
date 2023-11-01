@@ -21,3 +21,6 @@ AUTHORS
 ChangeLog
 .idea
 .tox
+testtools/_version.py
+man/testtools.1
+man
