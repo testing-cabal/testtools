@@ -3,7 +3,7 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
-2.6.1
+2.7.0
 ~~~~~
 
 Improvements
@@ -14,6 +14,9 @@ Improvements
 
 * Add typing in various modules (still lacking full coverage).
   (Jelmer Vernooĳ)
+
+* Drop the 'test' command for distutils. This has been
+  deprecated since 2.6.0. (Jelmer Vernooĳ)
 
 2.6.0
 ~~~~~

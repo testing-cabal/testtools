@@ -21,7 +21,6 @@ __all__ = [
     'ResourcedToStreamDecorator',
     'Tagger',
     'TestCase',
-    'TestCommand',
     'TestByTestResult',
     'TestResult',
     'TestResultDecorator',
@@ -96,7 +95,6 @@ from testtools.testsuite import (
     FixtureSuite,
     iterate_tests,
 )
-from testtools.distutilscmd import TestCommand
 
 # same format as sys.version_info: "A tuple containing the five components of
 # the version number: major, minor, micro, releaselevel, and serial. All
