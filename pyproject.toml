@@ -78,4 +78,4 @@ __version__ = {version_tuple!r}
 
 [project.optional-dependencies]
 test = ["testscenarios", "testresources"]
-twisted = ["Twisted"]
+twisted = ["Twisted", "fixtures"]
