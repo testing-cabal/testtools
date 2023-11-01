@@ -114,7 +114,8 @@ class TestRunInReactor(NeedsTwistedTestCase):
     def test_keyword_arguments(self):
         # run_in_reactor passes keyword arguments on.
         calls = []
-        function = lambda *a, **kw: calls.extend([a, kw])
+        def function(*a, **kw):
+            return calls.extend([a, kw])
         self.make_spinner().run(self.make_timeout(), function, foo=42)
         self.assertThat(calls, Equals([(), {'foo': 42}]))
 

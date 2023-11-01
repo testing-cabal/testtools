@@ -252,7 +252,7 @@ class TestProgram(unittest.TestProgram):
 ################
 
 def main(argv, stdout):
-    program = TestProgram(argv=argv, testRunner=partial(TestToolsTestRunner, stdout=stdout),
+    TestProgram(argv=argv, testRunner=partial(TestToolsTestRunner, stdout=stdout),
         stdout=stdout)
 
 if __name__ == '__main__':
