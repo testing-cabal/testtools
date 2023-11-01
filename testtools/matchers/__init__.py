@@ -128,7 +128,7 @@ from ._warnings import (
 
 # XXX: These are not explicitly included in __all__.  It's unclear how much of
 # the public interface they really are.
-from ._impl import (
+from ._impl import (  # noqa: F401
     Matcher,
     Mismatch,
     MismatchError,

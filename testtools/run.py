@@ -8,7 +8,6 @@ For instance, to run the testtools test suite.
  $ python -m testtools.run testtools.tests.test_suite
 """
 
-import argparse
 from functools import partial
 import os.path
 import sys

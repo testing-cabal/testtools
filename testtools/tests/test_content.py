@@ -5,7 +5,7 @@ import os
 import tempfile
 import unittest
 
-from testtools import TestCase, skipUnless
+from testtools import TestCase
 from testtools.compat import (
     _b,
     )
