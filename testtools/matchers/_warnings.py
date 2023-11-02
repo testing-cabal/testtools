@@ -13,8 +13,6 @@ from ._datastructures import MatchesListwise, MatchesStructure
 from ._higherorder import (
     AfterPreprocessing,
     Annotate,
-    MatchesAll,
-    Not,
     )
 from ._impl import Mismatch
 

@@ -654,7 +654,7 @@ class TestAssertions(TestCase):
             def test(self):
                 self.expectThat("foo", Equals("bar"))
         test = Test("test")
-        result = test.run()
+        test.run()
         details = test.getDetails()
         self.assertIn('Failed expectation', details)
 

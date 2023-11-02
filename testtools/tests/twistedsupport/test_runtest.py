@@ -21,10 +21,8 @@ from testtools.matchers import (
     Is,
     KeysEqual,
     MatchesDict,
-    MatchesException,
     MatchesListwise,
     Not,
-    Raises,
     )
 from testtools.runtest import RunTest
 from testtools.testresult.doubles import ExtendedTestResult
@@ -875,7 +873,7 @@ class TestAssertFailsWith(NeedsTwistedTestCase):
 class TestRunWithLogObservers(NeedsTwistedTestCase):
 
     def test_restores_observers(self):
-        from testtools.deferredruntest import run_with_log_observers
+        from testtools.twistedsupport._runtest import run_with_log_observers
         from twisted.python import log
         # Make sure there's at least one observer.  This reproduces bug
         # #926189.
@@ -1015,7 +1013,7 @@ class TestCaptureTwistedLogs(NeedsTwistedTestCase):
 
 
 def test_suite():
-    from unittest import TestLoader, TestSuite
+    from unittest import TestLoader
     return TestLoader().loadTestsFromName(__name__)
 
 

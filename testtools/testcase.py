@@ -142,7 +142,8 @@ def _copy_content(content_object):
         ``content_object`` and a non-volatile copy of its content.
     """
     content_bytes = list(content_object.iter_bytes())
-    content_callback = lambda: content_bytes
+    def content_callback():
+        return content_bytes
     return content.Content(content_object.content_type, content_callback)
 
 

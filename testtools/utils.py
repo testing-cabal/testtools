@@ -9,5 +9,4 @@ import warnings
 warnings.warn("Please import iterate_tests from testtools.testsuite - "
     "testtools.utils is deprecated.", DeprecationWarning, stacklevel=2)
 
-from testtools.testsuite import iterate_tests
 

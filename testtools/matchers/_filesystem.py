@@ -71,7 +71,7 @@ class DirContains(Matcher):
         :param matcher: If specified, match the sorted directory listing
             against this matcher.
         """
-        if filenames == matcher == None:
+        if filenames == matcher is None:
             raise AssertionError(
                 "Must provide one of `filenames` or `matcher`.")
         if None not in (filenames, matcher):
@@ -105,7 +105,7 @@ class FileContains(Matcher):
         :param matcher: If specified, match the contents of the file against
             this matcher.
         """
-        if contents == matcher == None:
+        if contents == matcher is None:
             raise AssertionError(
                 "Must provide one of `contents` or `matcher`.")
         if None not in (contents, matcher):
@@ -163,7 +163,8 @@ class SamePath(Matcher):
         self.path = path
 
     def match(self, other_path):
-        f = lambda x: os.path.abspath(os.path.realpath(x))
+        def f(x):
+            return os.path.abspath(os.path.realpath(x))
         return Equals(f(self.path)).match(f(other_path))
 
 

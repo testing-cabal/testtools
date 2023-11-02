@@ -5,7 +5,7 @@ import os
 import tempfile
 import unittest
 
-from testtools import TestCase, skipUnless
+from testtools import TestCase
 from testtools.compat import (
     _b,
     )
@@ -55,8 +55,10 @@ class TestContent(TestCase):
 
     def test___eq__(self):
         content_type = ContentType("foo", "bar")
-        one_chunk = lambda: [_b("bytes")]
-        two_chunk = lambda: [_b("by"), _b("tes")]
+        def one_chunk():
+            return [_b("bytes")]
+        def two_chunk():
+            return [_b("by"), _b("tes")]
         content1 = Content(content_type, one_chunk)
         content2 = Content(content_type, one_chunk)
         content3 = Content(content_type, two_chunk)

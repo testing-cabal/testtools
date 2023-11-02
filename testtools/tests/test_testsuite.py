@@ -97,7 +97,8 @@ class TestConcurrentStreamTestSuiteRun(TestCase):
         result = LoggingStream()
         test1 = Sample('test_method1')
         test2 = Sample('test_method2')
-        cases = lambda:[(test1, '0'), (test2, '1')]
+        def cases():
+            return [(test1, '0'), (test2, '1')]
         suite = ConcurrentStreamTestSuite(cases)
         suite.run(result)
         def freeze(set_or_none):
@@ -169,7 +170,8 @@ class TestConcurrentStreamTestSuiteRun(TestCase):
             def run(self):
                 pass
         result = LoggingStream()
-        cases = lambda:[(BrokenTest(), '0')]
+        def cases():
+            return [(BrokenTest(), '0')]
         suite = ConcurrentStreamTestSuite(cases)
         suite.run(result)
         events = result._events
@@ -299,7 +301,8 @@ class TestSortedTests(TestCase):
     def test_custom_suite_without_sort_tests_works(self):
         a = PlaceHolder('a')
         b = PlaceHolder('b')
-        class Subclass(unittest.TestSuite):pass
+        class Subclass(unittest.TestSuite):
+            pass
         input_suite = Subclass([b, a])
         suite = sorted_tests(input_suite)
         self.assertEqual([b, a], list(iterate_tests(suite)))

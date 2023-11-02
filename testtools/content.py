@@ -302,7 +302,8 @@ def content_from_stream(stream, content_type=None,
     """
     if content_type is None:
         content_type = UTF8_TEXT
-    reader = lambda: _iter_chunks(stream, chunk_size, seek_offset, seek_whence)
+    def reader():
+        return _iter_chunks(stream, chunk_size, seek_offset, seek_whence)
     return content_from_reader(reader, content_type, buffer_now)
 
 
@@ -319,7 +320,8 @@ def content_from_reader(reader, content_type, buffer_now):
         content_type = UTF8_TEXT
     if buffer_now:
         contents = list(reader())
-        reader = lambda: contents
+        def reader():
+            return contents
     return Content(content_type, reader)
 
 

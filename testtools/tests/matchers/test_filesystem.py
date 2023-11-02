@@ -179,7 +179,8 @@ class TestTarballContains(TestCase, PathHelpers):
 
     def test_match(self):
         tempdir = self.mkdtemp()
-        in_temp_dir = lambda x: os.path.join(tempdir, x)
+        def in_temp_dir(x):
+            return os.path.join(tempdir, x)
         self.touch(in_temp_dir('a'))
         self.touch(in_temp_dir('b'))
         tarball = tarfile.open(in_temp_dir('foo.tar.gz'), 'w')
@@ -191,7 +192,8 @@ class TestTarballContains(TestCase, PathHelpers):
 
     def test_mismatch(self):
         tempdir = self.mkdtemp()
-        in_temp_dir = lambda x: os.path.join(tempdir, x)
+        def in_temp_dir(x):
+            return os.path.join(tempdir, x)
         self.touch(in_temp_dir('a'))
         self.touch(in_temp_dir('b'))
         tarball = tarfile.open(in_temp_dir('foo.tar.gz'), 'w')

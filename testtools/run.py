@@ -8,7 +8,6 @@ For instance, to run the testtools test suite.
  $ python -m testtools.run testtools.tests.test_suite
 """
 
-import argparse
 from functools import partial
 import os.path
 import sys
@@ -253,7 +252,7 @@ class TestProgram(unittest.TestProgram):
 ################
 
 def main(argv, stdout):
-    program = TestProgram(argv=argv, testRunner=partial(TestToolsTestRunner, stdout=stdout),
+    TestProgram(argv=argv, testRunner=partial(TestToolsTestRunner, stdout=stdout),
         stdout=stdout)
 
 if __name__ == '__main__':
