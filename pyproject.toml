@@ -12,8 +12,8 @@ module = [
 ignore_missing_imports = true
 
 [build-system]
-requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
+requires = ["setuptools>=61", "hatchling", "hatch_vcs"]
+build-backend = "hatchling.build"
 
 [project]
 name = "testtools"
