@@ -3,6 +3,18 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
+2.7.1
+~~~~~
+
+Improvements
+~~~~~~~~~~~~
+
+* Remove various unused imports.
+  (Jelmer Vernooĳ)
+
+* Fix build backend. This should prevent version from being set to 0.0.0
+  when building wheels.  (Jelmer Vernooĳ, #363)
+
 2.7.0
 ~~~~~
 
