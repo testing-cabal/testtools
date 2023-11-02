@@ -12,8 +12,8 @@ Improvements
 * Remove various unused imports.
   (Jelmer Vernooĳ)
 
-* Fix version data.
-  (Jelmer Vernooĳ, #363)
+* Fix build backend. This should prevent version from being set to 0.0.0
+  when building wheels.  (Jelmer Vernooĳ, #363)
 
 2.7.0
 ~~~~~
