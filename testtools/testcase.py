@@ -21,6 +21,7 @@ import itertools
 import sys
 import types
 import unittest
+from unittest.case import SkipTest
 import warnings
 
 from testtools.compat import reraise
@@ -49,9 +50,15 @@ from testtools.testresult import (
 )
 
 
-class TestSkipped(Exception):
+class TestSkipped(SkipTest):
     """Raised within TestCase.run() when a test is skipped."""
-TestSkipped = try_import('unittest.case.SkipTest', TestSkipped)
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            'Use SkipTest from unittest instead.',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
 
 
 class _UnexpectedSuccess(Exception):
@@ -218,7 +225,7 @@ class TestCase(unittest.TestCase):
         and an optional list of exception handlers.
     """
 
-    skipException = TestSkipped
+    skipException = SkipTest
 
     run_tests_with = RunTest
 
@@ -597,7 +604,8 @@ class TestCase(unittest.TestCase):
         :seealso addOnException:
         """
         if exc_info[0] not in [
-                self.skipException, _UnexpectedSuccess, _ExpectedFailure]:
+            self.skipException, _UnexpectedSuccess, _ExpectedFailure,
+        ]:
             self._report_traceback(exc_info, tb_label=tb_label)
         for handler in self.__exception_handlers:
             handler(exc_info)
