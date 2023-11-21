@@ -279,11 +279,23 @@ class TestCase(unittest.TestCase):
             return False
         return self.__dict__ == getattr(other, '__dict__', None)
 
+    # We need to explicitly set this since we're overriding __eq__
+    # https://docs.python.org/3/reference/datamodel.html#object.__hash__
     __hash__ = unittest.TestCase.__hash__
 
     def __repr__(self):
         # We add id to the repr because it makes testing testtools easier.
         return f"<{self.id()} id=0x{id(self):0x}>"
+
+    def _deprecate(original_func):
+        def deprecated_func(*args, **kwargs):
+            warnings.warn(
+                'Please use {0} instead.'.format(original_func.__name__),
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            return original_func(*args, **kwargs)
+        return deprecated_func
 
     def addDetail(self, name, content_object):
         """Add a detail to be reported with this test's outcome.
@@ -397,7 +409,7 @@ class TestCase(unittest.TestCase):
         matcher = _FlippedEquals(expected)
         self.assertThat(observed, matcher, message)
 
-    failUnlessEqual = assertEquals = assertEqual
+    failUnlessEqual = assertEquals = _deprecate(assertEqual)
 
     def assertIn(self, needle, haystack, message=''):
         """Assert that needle is in haystack."""
@@ -471,7 +483,8 @@ class TestCase(unittest.TestCase):
         our_callable = Nullary(callableObj, *args, **kwargs)
         self.assertThat(our_callable, matcher)
         return capture.matchee
-    failUnlessRaises = assertRaises
+
+    failUnlessRaises = _deprecate(assertRaises)
 
     def assertThat(self, matchee, matcher, message='', verbose=False):
         """Assert that matchee is matched by matcher.
@@ -484,7 +497,8 @@ class TestCase(unittest.TestCase):
         if mismatch_error is not None:
             raise mismatch_error
 
-    assertItemsEqual = unittest.TestCase.assertCountEqual
+    assertItemsEqual = _deprecate(unittest.TestCase.assertCountEqual)
+
     def addDetailUniqueName(self, name, content_object):
         """Add a detail to the test, but ensure it's name is unique.
 
