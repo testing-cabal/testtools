@@ -21,6 +21,7 @@ import itertools
 import sys
 import types
 import unittest
+from unittest.case import SkipTest
 import warnings
 
 from testtools.compat import reraise
@@ -49,9 +50,15 @@ from testtools.testresult import (
 )
 
 
-class TestSkipped(Exception):
+class TestSkipped(SkipTest):
     """Raised within TestCase.run() when a test is skipped."""
-TestSkipped = try_import('unittest.case.SkipTest', TestSkipped)
+    def __init__(self, *args, **kwargs):
+        warnings.warn(
+            'Use SkipTest from unittest instead.',
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(*args, **kwargs)
 
 
 class _UnexpectedSuccess(Exception):
@@ -60,8 +67,6 @@ class _UnexpectedSuccess(Exception):
     Note that this exception is private plumbing in testtools' testcase
     module.
     """
-_UnexpectedSuccess = try_import(
-    'unittest.case._UnexpectedSuccess', _UnexpectedSuccess)
 
 
 class _ExpectedFailure(Exception):
@@ -70,8 +75,6 @@ class _ExpectedFailure(Exception):
     Note that this exception is private plumbing in testtools' testcase
     module.
     """
-_ExpectedFailure = try_import(
-    'unittest.case._ExpectedFailure', _ExpectedFailure)
 
 
 # Copied from unittest before python 3.4 release. Used to maintain
@@ -222,7 +225,7 @@ class TestCase(unittest.TestCase):
         and an optional list of exception handlers.
     """
 
-    skipException = TestSkipped
+    skipException = SkipTest
 
     run_tests_with = RunTest
 
@@ -276,11 +279,23 @@ class TestCase(unittest.TestCase):
             return False
         return self.__dict__ == getattr(other, '__dict__', None)
 
+    # We need to explicitly set this since we're overriding __eq__
+    # https://docs.python.org/3/reference/datamodel.html#object.__hash__
     __hash__ = unittest.TestCase.__hash__
 
     def __repr__(self):
         # We add id to the repr because it makes testing testtools easier.
         return f"<{self.id()} id=0x{id(self):0x}>"
+
+    def _deprecate(original_func):
+        def deprecated_func(*args, **kwargs):
+            warnings.warn(
+                'Please use {0} instead.'.format(original_func.__name__),
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            return original_func(*args, **kwargs)
+        return deprecated_func
 
     def addDetail(self, name, content_object):
         """Add a detail to be reported with this test's outcome.
@@ -394,7 +409,7 @@ class TestCase(unittest.TestCase):
         matcher = _FlippedEquals(expected)
         self.assertThat(observed, matcher, message)
 
-    failUnlessEqual = assertEquals = assertEqual
+    failUnlessEqual = assertEquals = _deprecate(assertEqual)
 
     def assertIn(self, needle, haystack, message=''):
         """Assert that needle is in haystack."""
@@ -468,7 +483,8 @@ class TestCase(unittest.TestCase):
         our_callable = Nullary(callableObj, *args, **kwargs)
         self.assertThat(our_callable, matcher)
         return capture.matchee
-    failUnlessRaises = assertRaises
+
+    failUnlessRaises = _deprecate(assertRaises)
 
     def assertThat(self, matchee, matcher, message='', verbose=False):
         """Assert that matchee is matched by matcher.
@@ -481,7 +497,8 @@ class TestCase(unittest.TestCase):
         if mismatch_error is not None:
             raise mismatch_error
 
-    assertItemsEqual = unittest.TestCase.assertCountEqual
+    assertItemsEqual = _deprecate(unittest.TestCase.assertCountEqual)
+
     def addDetailUniqueName(self, name, content_object):
         """Add a detail to the test, but ensure it's name is unique.
 
@@ -601,7 +618,8 @@ class TestCase(unittest.TestCase):
         :seealso addOnException:
         """
         if exc_info[0] not in [
-                self.skipException, _UnexpectedSuccess, _ExpectedFailure]:
+            self.skipException, _UnexpectedSuccess, _ExpectedFailure,
+        ]:
             self._report_traceback(exc_info, tb_label=tb_label)
         for handler in self.__exception_handlers:
             handler(exc_info)
