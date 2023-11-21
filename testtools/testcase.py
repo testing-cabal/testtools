@@ -60,8 +60,6 @@ class _UnexpectedSuccess(Exception):
     Note that this exception is private plumbing in testtools' testcase
     module.
     """
-_UnexpectedSuccess = try_import(
-    'unittest.case._UnexpectedSuccess', _UnexpectedSuccess)
 
 
 class _ExpectedFailure(Exception):
@@ -70,8 +68,6 @@ class _ExpectedFailure(Exception):
     Note that this exception is private plumbing in testtools' testcase
     module.
     """
-_ExpectedFailure = try_import(
-    'unittest.case._ExpectedFailure', _ExpectedFailure)
 
 
 # Copied from unittest before python 3.4 release. Used to maintain
