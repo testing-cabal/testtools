@@ -33,9 +33,13 @@ jobs:
       - name: Install dependencies
         run: |
           python3 -m pip install --upgrade pip
-          python3 -m pip install --upgrade setuptools wheel setuptools_scm
+          python3 -m pip install --upgrade setuptools wheel setuptools_scm ruff
           python3 -m pip install sphinx
           python3 -m pip install ".[test,twisted]"
+
+      - name: Ruff
+        run: |
+          python -m ruff check .
 
       - name: Tests
         run: |
