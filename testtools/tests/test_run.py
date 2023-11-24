@@ -146,7 +146,7 @@ class TestRun(TestCase):
                     in testtools.testsuite.iterate_tests(test)})
         out = io.StringIO()
         try:
-            program = run.TestProgram(
+            run.TestProgram(
                 argv=['prog', '-l', 'testtools.runexample.test_suite'],
                 stdout=out, testRunner=CaptureList)
         except SystemExit:
@@ -310,7 +310,7 @@ testtools.resourceexample.TestFoo.test_foo
 
         class Failing(TestCase):
             def test_a(self):
-                a = 1
+                a = 1  # noqa: F841
                 self.fail('a')
         runner = run.TestToolsTestRunner(tb_locals=True, stdout=stdout.stream)
         runner.run(Failing('test_a'))
@@ -319,7 +319,6 @@ testtools.resourceexample.TestFoo.test_foo
 
     def test_stdout_honoured(self):
         self.useFixture(SampleTestFixture())
-        tests = []
         out = io.StringIO()
         exc = self.assertRaises(SystemExit, run.main,
             argv=['prog', 'testtools.runexample.test_suite'],

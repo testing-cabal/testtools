@@ -83,8 +83,8 @@ def text_repr(text, multiline=None):
         # making sure that quotes are not escaped.
         offset = len(prefix) + 1
         lines = []
-        for l in text.split(nl):
-            r = repr(l)
+        for line in text.split(nl):
+            r = repr(line)
             q = r[-1]
             lines.append(r[offset:-1].replace("\\" + q, q))
         # Combine the escaped lines and append two of the closing quotes,

@@ -93,7 +93,7 @@ testresources = try_import('testresources')
 def make_erroring_test():
     class Test(TestCase):
         def error(self):
-            a = 1
+            a = 1  # noqa: F841
             1/0
     return Test("error")
 
@@ -129,7 +129,7 @@ def make_test():
 def make_exception_info(exceptionFactory, *args, **kwargs):
     try:
         raise exceptionFactory(*args, **kwargs)
-    except:
+    except BaseException:
         return sys.exc_info()
 
 
@@ -2092,9 +2092,12 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
 
     def get_details_and_string(self):
         """Get a details dict and expected string."""
-        text1 = lambda: [_b("1\n2\n")]
-        text2 = lambda: [_b("3\n4\n")]
-        bin1 = lambda: [_b("5\n")]
+        def text1():
+            return [_b('1\n2\n')]
+        def text2():
+            return [_b('3\n4\n')]
+        def bin1():
+            return [_b('5\n')]
         details = {'text 1': Content(ContentType('text', 'plain'), text1),
             'text 2': Content(ContentType('text', 'strange'), text2),
             'bin 1': Content(ContentType('application', 'binary'), bin1)}
@@ -2828,8 +2831,8 @@ Empty attachments:
 """))
 
     def test_lots_of_different_attachments(self):
-        jpg = lambda x: content_from_stream(
-            io.StringIO(x), ContentType('image', 'jpeg'))
+        def jpg(x):
+            return content_from_stream(io.StringIO(x), ContentType('image', 'jpeg'))
         attachments = {
             'attachment': text_content('foo'),
             'attachment-1': text_content('traceback'),

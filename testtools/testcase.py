@@ -737,7 +737,7 @@ class TestCase(unittest.TestCase):
                     e.args[-1][0] is fixtures.fixture.SetupError):
                 gather_details(e.args[-1][1].args[0], self.getDetails())
             raise
-        except:
+        except BaseException:
             exc_info = sys.exc_info()
             try:
                 # fixture._details is not available if using the newer
@@ -750,7 +750,7 @@ class TestCase(unittest.TestCase):
                     fixture._details is not None
                 ):
                     gather_details(fixture.getDetails(), self.getDetails())
-            except:
+            except BaseException:
                 # Report the setUp exception, then raise the error during
                 # gather_details.
                 self._report_traceback(exc_info)

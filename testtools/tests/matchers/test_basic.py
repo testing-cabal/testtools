@@ -157,7 +157,8 @@ class TestIsInterface(TestCase, TestMatchersInterface):
 
 class TestIsInstanceInterface(TestCase, TestMatchersInterface):
 
-    class Foo:pass
+    class Foo:
+        pass
 
     matches_matcher = IsInstance(Foo)
     matches_matches = [Foo()]

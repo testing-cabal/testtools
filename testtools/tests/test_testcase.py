@@ -205,7 +205,7 @@ class TestErrorHolder(TestCase):
     def makeException(self):
         try:
             raise RuntimeError("danger danger")
-        except:
+        except BaseException:
             return sys.exc_info()
 
     def makePlaceHolder(self, test_id="foo", error=None,
@@ -1909,12 +1909,12 @@ class TestNullary(TestCase):
     def test_called_with_arguments(self):
         # The function is called with the arguments given to Nullary's
         # constructor.
-        l = []
+        line = []
         def foo(*args, **kwargs):
-            l.append((args, kwargs))
+            line.append((args, kwargs))
         wrapped = Nullary(foo, 1, 2, a="b")
         wrapped()
-        self.assertEqual(l, [((1, 2), {'a': 'b'})])
+        self.assertEqual(line, [((1, 2), {'a': 'b'})])
 
     def test_returns_wrapped(self):
         # Calling Nullary returns whatever the function returns.
