@@ -1,12 +1,5 @@
 # Copyright (c) 2009-2015 testtools developers. See LICENSE for details.
 
-__all__ = [
-    'ContainsAll',
-    'MatchesListwise',
-    'MatchesSetwise',
-    'MatchesStructure',
-    ]
-
 """Matchers that operate with knowledge of Python data structures."""
 
 from ..helpers import map_values
@@ -16,6 +9,15 @@ from ._higherorder import (
     MismatchesAll,
     )
 from ._impl import Mismatch
+
+__all__ = [
+    'ContainsAll',
+    'MatchesListwise',
+    'MatchesSetwise',
+    'MatchesStructure',
+    ]
+
+
 
 
 def ContainsAll(items):

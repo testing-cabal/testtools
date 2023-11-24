@@ -180,7 +180,8 @@ class MatchesDict(_CombinedMatcher):
         'Differences': _MatchCommonKeys,
         }
 
-    format_expected = lambda self, expected: _format_matcher_dict(expected)
+    def format_expected(self, expected) -> str:
+        return _format_matcher_dict(expected)
 
 
 class ContainsDict(_CombinedMatcher):
@@ -203,7 +204,8 @@ class ContainsDict(_CombinedMatcher):
         'Differences': _MatchCommonKeys,
         }
 
-    format_expected = lambda self, expected: _format_matcher_dict(expected)
+    def format_expected(self, expected):
+        return _format_matcher_dict(expected)
 
 
 class ContainedByDict(_CombinedMatcher):
@@ -226,7 +228,8 @@ class ContainedByDict(_CombinedMatcher):
         'Differences': _MatchCommonKeys,
         }
 
-    format_expected = lambda self, expected: _format_matcher_dict(expected)
+    def format_expected(self, expected):
+        return _format_matcher_dict(expected)
 
 
 class KeysEqual(Matcher):

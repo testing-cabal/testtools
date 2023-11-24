@@ -47,9 +47,7 @@ __all__ = [
     ]
 
 from testtools.helpers import try_import
-from testtools.matchers._impl import Matcher
-# Shut up, pyflakes. We are importing for documentation, not for namespacing.
-Matcher
+from testtools.matchers._impl import Matcher  # noqa: F401
 
 from testtools.runtest import (
     MultipleExceptions,
