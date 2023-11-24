@@ -4,17 +4,16 @@
 
 __all__ = [
     # Matchers
-    'succeeded',
-    'failed',
-    'has_no_result',
-
+    "succeeded",
+    "failed",
+    "has_no_result",
     # Running tests
-    'AsynchronousDeferredRunTest',
-    'AsynchronousDeferredRunTestForBrokenTwisted',
-    'SynchronousDeferredRunTest',
-    'CaptureTwistedLogs',
-    'assert_fails_with',
-    'flush_logged_errors',
+    "AsynchronousDeferredRunTest",
+    "AsynchronousDeferredRunTestForBrokenTwisted",
+    "SynchronousDeferredRunTest",
+    "CaptureTwistedLogs",
+    "assert_fails_with",
+    "flush_logged_errors",
 ]
 
 from ._matchers import (

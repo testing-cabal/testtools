@@ -5,11 +5,10 @@ from testtools.tests.helpers import (
     FullStackRunTest,
     hide_testtools_stack,
     is_stack_hidden,
-    )
+)
 
 
 class TestStackHiding(TestCase):
-
     run_tests_with = FullStackRunTest
 
     def setUp(self):
@@ -27,4 +26,5 @@ class TestStackHiding(TestCase):
 
 def test_suite():
     from unittest import TestLoader
+
     return TestLoader().loadTestsFromName(__name__)

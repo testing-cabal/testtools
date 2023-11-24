@@ -15,8 +15,9 @@ class ContentType:
     def __init__(self, primary_type, sub_type, parameters=None):
         """Create a ContentType."""
         if None in (primary_type, sub_type):
-            raise ValueError("None not permitted in {!r}, {!r}".format(
-                primary_type, sub_type))
+            raise ValueError(
+                "None not permitted in {!r}, {!r}".format(primary_type, sub_type)
+            )
         self.type = primary_type
         self.subtype = sub_type
         self.parameters = parameters or {}
@@ -28,14 +29,15 @@ class ContentType:
 
     def __repr__(self):
         if self.parameters:
-            params = '; '
-            params += '; '.join(
-                sorted(f'{k}="{v}"' for k, v in self.parameters.items()))
+            params = "; "
+            params += "; ".join(
+                sorted(f'{k}="{v}"' for k, v in self.parameters.items())
+            )
         else:
-            params = ''
+            params = ""
         return f"{self.type}/{self.subtype}{params}"
 
 
-JSON = ContentType('application', 'json')
+JSON = ContentType("application", "json")
 
-UTF8_TEXT = ContentType('text', 'plain', {'charset': 'utf8'})
+UTF8_TEXT = ContentType("text", "plain", {"charset": "utf8"})

@@ -7,17 +7,15 @@ from testtools.matchers import (
     Equals,
     MatchesException,
     Raises,
-    )
+)
 from ._helpers import NeedsTwistedTestCase
 
 
-DeferredNotFired = try_import(
-    'testtools.twistedsupport._deferred.DeferredNotFired')
-extract_result = try_import(
-    'testtools.twistedsupport._deferred.extract_result')
+DeferredNotFired = try_import("testtools.twistedsupport._deferred.DeferredNotFired")
+extract_result = try_import("testtools.twistedsupport._deferred.extract_result")
 
-defer = try_import('twisted.internet.defer')
-Failure = try_import('twisted.python.failure.Failure')
+defer = try_import("twisted.internet.defer")
+Failure = try_import("twisted.python.failure.Failure")
 
 
 class TestExtractResult(NeedsTwistedTestCase):
@@ -28,7 +26,8 @@ class TestExtractResult(NeedsTwistedTestCase):
         # given a Deferred that has not fired.
         self.assertThat(
             lambda: extract_result(defer.Deferred()),
-            Raises(MatchesException(DeferredNotFired)))
+            Raises(MatchesException(DeferredNotFired)),
+        )
 
     def test_success(self):
         # _spinner.extract_result returns the value of the Deferred if it has
@@ -41,15 +40,16 @@ class TestExtractResult(NeedsTwistedTestCase):
         # _spinner.extract_result raises the failure's exception if it's given
         # a Deferred that is failing.
         try:
-            1/0
+            1 / 0
         except ZeroDivisionError:
             f = Failure()
         d = defer.fail(f)
         self.assertThat(
-            lambda: extract_result(d),
-            Raises(MatchesException(ZeroDivisionError)))
+            lambda: extract_result(d), Raises(MatchesException(ZeroDivisionError))
+        )
 
 
 def test_suite():
     from unittest import TestLoader
+
     return TestLoader().loadTestsFromName(__name__)

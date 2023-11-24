@@ -1,9 +1,6 @@
 # Copyright (c) 2009-2016 testtools developers. See LICENSE for details.
 
-__all__ = [
-    'Warnings',
-    'WarningMessage',
-    'IsDeprecated']
+__all__ = ["Warnings", "WarningMessage", "IsDeprecated"]
 
 import warnings
 
@@ -13,12 +10,11 @@ from ._datastructures import MatchesListwise, MatchesStructure
 from ._higherorder import (
     AfterPreprocessing,
     Annotate,
-    )
+)
 from ._impl import Mismatch
 
 
-def WarningMessage(category_type, message=None, filename=None, lineno=None,
-                   line=None):
+def WarningMessage(category_type, message=None, filename=None, lineno=None, line=None):
     r"""
     Create a matcher that will match `warnings.WarningMessage`\s.
 
@@ -48,27 +44,21 @@ def WarningMessage(category_type, message=None, filename=None, lineno=None,
     lineno_matcher = lineno or Always()
     line_matcher = line or Always()
     return MatchesStructure(
-        category=Annotate(
-            "Warning's category type does not match",
-            category_matcher),
+        category=Annotate("Warning's category type does not match", category_matcher),
         message=Annotate(
-            "Warning's message does not match",
-            AfterPreprocessing(str, message_matcher)),
-        filename=Annotate(
-            "Warning's filname does not match",
-            filename_matcher),
-        lineno=Annotate(
-            "Warning's line number does not match",
-            lineno_matcher),
-        line=Annotate(
-            "Warning's source line does not match",
-            line_matcher))
+            "Warning's message does not match", AfterPreprocessing(str, message_matcher)
+        ),
+        filename=Annotate("Warning's filname does not match", filename_matcher),
+        lineno=Annotate("Warning's line number does not match", lineno_matcher),
+        line=Annotate("Warning's source line does not match", line_matcher),
+    )
 
 
 class Warnings:
     """
     Match if the matchee produces warnings.
     """
+
     def __init__(self, warnings_matcher=None):
         """
         Create a Warnings matcher.
@@ -81,15 +71,15 @@ class Warnings:
 
     def match(self, matchee):
         with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
+            warnings.simplefilter("always")
             matchee()
             if self.warnings_matcher is not None:
                 return self.warnings_matcher.match(w)
             elif not w:
-                return Mismatch('Expected at least one warning, got none')
+                return Mismatch("Expected at least one warning, got none")
 
     def __str__(self):
-        return f'Warnings({self.warnings_matcher!s})'
+        return f"Warnings({self.warnings_matcher!s})"
 
 
 def IsDeprecated(message):
@@ -100,7 +90,7 @@ def IsDeprecated(message):
     :param message: Matcher for the warning message.
     """
     return Warnings(
-        MatchesListwise([
-            WarningMessage(
-                category_type=DeprecationWarning,
-                message=message)]))
+        MatchesListwise(
+            [WarningMessage(category_type=DeprecationWarning, message=message)]
+        )
+    )

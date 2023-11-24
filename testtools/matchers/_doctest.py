@@ -1,8 +1,8 @@
 # Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
 
 __all__ = [
-    'DocTestMatches',
-    ]
+    "DocTestMatches",
+]
 
 import doctest
 import re
@@ -38,11 +38,14 @@ class _NonManglingOutputChecker(doctest.OutputChecker):
     # Only do this overriding hackery if doctest has a broken _input function
     if getattr(doctest, "_encoding", None) is not None:
         from types import FunctionType as __F
+
         __f = doctest.OutputChecker.output_difference.im_func
         __g = dict(__f.func_globals)
+
         def _indent(s, indent=4, _pattern=re.compile("^(?!$)", re.MULTILINE)):
             """Prepend non-empty lines in ``s`` with ``indent`` number of spaces"""
-            return _pattern.sub(indent*" ", s)
+            return _pattern.sub(indent * " ", s)
+
         __g["_indent"] = _indent
         output_difference = __F(__f.func_code, __g, "output_difference")
         del __F, __f, __g, _indent
@@ -58,9 +61,9 @@ class DocTestMatches:
         :param flags: doctest comparison flags to match on. e.g.
             doctest.ELLIPSIS.
         """
-        if not example.endswith('\n'):
-            example += '\n'
-        self.want = example # required variable name by doctest.
+        if not example.endswith("\n"):
+            example += "\n"
+        self.want = example  # required variable name by doctest.
         self.flags = flags
         self._checker = _NonManglingOutputChecker()
 
@@ -69,12 +72,12 @@ class DocTestMatches:
             flagstr = ", flags=%d" % self.flags
         else:
             flagstr = ""
-        return f'DocTestMatches({self.want!r}{flagstr})'
+        return f"DocTestMatches({self.want!r}{flagstr})"
 
     def _with_nl(self, actual):
         result = self.want.__class__(actual)
-        if not result.endswith('\n'):
-            result += '\n'
+        if not result.endswith("\n"):
+            result += "\n"
         return result
 
     def match(self, actual):

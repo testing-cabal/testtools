@@ -1,27 +1,27 @@
 # Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
 
 __all__ = [
-    'KeysEqual',
-    ]
+    "KeysEqual",
+]
 
 from ..helpers import (
     dict_subtract,
     filter_values,
     map_values,
-    )
+)
 from ._higherorder import (
     AnnotatedMismatch,
     PrefixedMismatch,
     MismatchesAll,
-    )
+)
 from ._impl import Matcher, Mismatch
 
 
 def LabelledMismatches(mismatches, details=None):
     """A collection of mismatches, each labelled."""
     return MismatchesAll(
-        (PrefixedMismatch(k, v) for (k, v) in sorted(mismatches.items())),
-        wrap=False)
+        (PrefixedMismatch(k, v) for (k, v) in sorted(mismatches.items())), wrap=False
+    )
 
 
 class MatchesAllDict(Matcher):
@@ -36,14 +36,13 @@ class MatchesAllDict(Matcher):
         self.matchers = matchers
 
     def __str__(self):
-        return f'MatchesAllDict({_format_matcher_dict(self.matchers)})'
+        return f"MatchesAllDict({_format_matcher_dict(self.matchers)})"
 
     def match(self, observed):
         mismatches = {}
         for label in self.matchers:
             mismatches[label] = self.matchers[label].match(observed)
-        return _dict_to_mismatch(
-            mismatches, result_mismatch=LabelledMismatches)
+        return _dict_to_mismatch(mismatches, result_mismatch=LabelledMismatches)
 
 
 class DictMismatches(Mismatch):
@@ -54,16 +53,18 @@ class DictMismatches(Mismatch):
         self.mismatches = mismatches
 
     def describe(self):
-        lines = ['{']
+        lines = ["{"]
         lines.extend(
-            [f'  {key!r}: {mismatch.describe()},'
-             for (key, mismatch) in sorted(self.mismatches.items())])
-        lines.append('}')
-        return '\n'.join(lines)
+            [
+                f"  {key!r}: {mismatch.describe()},"
+                for (key, mismatch) in sorted(self.mismatches.items())
+            ]
+        )
+        lines.append("}")
+        return "\n".join(lines)
 
 
-def _dict_to_mismatch(data, to_mismatch=None,
-                      result_mismatch=DictMismatches):
+def _dict_to_mismatch(data, to_mismatch=None, result_mismatch=DictMismatches):
     if to_mismatch:
         data = map_values(to_mismatch, data)
     mismatches = filter_values(bool, data)
@@ -114,13 +115,11 @@ class _SubDictOf(Matcher):
 
     def match(self, observed):
         excess = dict_subtract(observed, self.super_dict)
-        return _dict_to_mismatch(
-            excess, lambda v: Mismatch(self.format_value(v)))
+        return _dict_to_mismatch(excess, lambda v: Mismatch(self.format_value(v)))
 
 
 class _SuperDictOf(Matcher):
-    """Matches if all of the keys in the given dict are in the matched dict.
-    """
+    """Matches if all of the keys in the given dict are in the matched dict."""
 
     def __init__(self, sub_dict, format_value=repr):
         super().__init__()
@@ -132,8 +131,7 @@ class _SuperDictOf(Matcher):
 
 
 def _format_matcher_dict(matchers):
-    return '{%s}' % (
-        ', '.join(sorted(f'{k!r}: {v}' for k, v in matchers.items())))
+    return "{%s}" % (", ".join(sorted(f"{k!r}: {v}" for k, v in matchers.items())))
 
 
 class _CombinedMatcher(Matcher):
@@ -156,12 +154,12 @@ class _CombinedMatcher(Matcher):
         return repr(expected)
 
     def __str__(self):
-        return '{}({})'.format(
-            self.__class__.__name__, self.format_expected(self._expected))
+        return "{}({})".format(
+            self.__class__.__name__, self.format_expected(self._expected)
+        )
 
     def match(self, observed):
-        matchers = {
-            k: v(self._expected) for k, v in self.matcher_factories.items()}
+        matchers = {k: v(self._expected) for k, v in self.matcher_factories.items()}
         return MatchesAllDict(matchers).match(observed)
 
 
@@ -175,10 +173,10 @@ class MatchesDict(_CombinedMatcher):
     """
 
     matcher_factories = {
-        'Extra': _SubDictOf,
-        'Missing': lambda m: _SuperDictOf(m, format_value=str),
-        'Differences': _MatchCommonKeys,
-        }
+        "Extra": _SubDictOf,
+        "Missing": lambda m: _SuperDictOf(m, format_value=str),
+        "Differences": _MatchCommonKeys,
+    }
 
     def format_expected(self, expected) -> str:
         return _format_matcher_dict(expected)
@@ -200,9 +198,9 @@ class ContainsDict(_CombinedMatcher):
     """
 
     matcher_factories = {
-        'Missing': lambda m: _SuperDictOf(m, format_value=str),
-        'Differences': _MatchCommonKeys,
-        }
+        "Missing": lambda m: _SuperDictOf(m, format_value=str),
+        "Differences": _MatchCommonKeys,
+    }
 
     def format_expected(self, expected):
         return _format_matcher_dict(expected)
@@ -224,9 +222,9 @@ class ContainedByDict(_CombinedMatcher):
     """
 
     matcher_factories = {
-        'Extra': _SubDictOf,
-        'Differences': _MatchCommonKeys,
-        }
+        "Extra": _SubDictOf,
+        "Differences": _MatchCommonKeys,
+    }
 
     def format_expected(self, expected):
         return _format_matcher_dict(expected)
@@ -251,14 +249,15 @@ class KeysEqual(Matcher):
         self.expected = list(expected)
 
     def __str__(self):
-        return "KeysEqual(%s)" % ', '.join(map(repr, self.expected))
+        return "KeysEqual(%s)" % ", ".join(map(repr, self.expected))
 
     def match(self, matchee):
         from ._basic import _BinaryMismatch, Equals
+
         expected = sorted(self.expected)
         matched = Equals(expected).match(sorted(matchee.keys()))
         if matched:
             return AnnotatedMismatch(
-                'Keys not equal',
-                _BinaryMismatch(expected, 'does not match', matchee))
+                "Keys not equal", _BinaryMismatch(expected, "does not match", matchee)
+            )
         return None

@@ -44,17 +44,17 @@ from testtools import (
     ThreadsafeForwardingResult,
     TimestampingStreamResult,
     testresult,
-    )
+)
 from testtools.compat import (
     _b,
     _get_exception_encoding,
-    )
+)
 from testtools.content import (
     Content,
     content_from_stream,
     text_content,
     TracebackContent,
-    )
+)
 from testtools.content_type import ContentType, UTF8_TEXT
 from testtools.helpers import try_import
 from testtools.matchers import (
@@ -67,34 +67,35 @@ from testtools.matchers import (
     MatchesException,
     MatchesRegex,
     Raises,
-    )
+)
 from testtools.tests.helpers import (
     an_exc_info,
     FullStackRunTest,
     LoggingResult,
     run_with_stack_hidden,
-    )
+)
 from testtools.testresult.doubles import (
     Python26TestResult,
     Python27TestResult,
     ExtendedTestResult,
     StreamResult as LoggingStreamResult,
     TwistedTestResult,
-    )
+)
 from testtools.testresult.real import (
     _details_to_str,
     _merge_tags,
     utc,
-    )
+)
 
-testresources = try_import('testresources')
+testresources = try_import("testresources")
 
 
 def make_erroring_test():
     class Test(TestCase):
         def error(self):
             a = 1  # noqa: F841
-            1/0
+            1 / 0
+
     return Test("error")
 
 
@@ -102,6 +103,7 @@ def make_failing_test():
     class Test(TestCase):
         def failed(self):
             self.fail("yo!")
+
     return Test("failed")
 
 
@@ -109,6 +111,7 @@ def make_mismatching_test():
     class Test(TestCase):
         def mismatch(self):
             self.assertEqual(1, 2)
+
     return Test("mismatch")
 
 
@@ -116,6 +119,7 @@ def make_unexpectedly_successful_test():
     class Test(TestCase):
         def succeeded(self):
             self.expectFailure("yo!", lambda: None)
+
     return Test("succeeded")
 
 
@@ -123,6 +127,7 @@ def make_test():
     class Test(TestCase):
         def test(self):
             pass
+
     return Test("test")
 
 
@@ -149,7 +154,6 @@ class TestControlContract:
 
 
 class Python26Contract(TestControlContract):
-
     def test_fresh_result_is_successful(self):
         # A result is considered successful before any tests are run.
         result = self.makeResult()
@@ -181,7 +185,6 @@ class Python26Contract(TestControlContract):
 
 
 class Python27Contract(Python26Contract):
-
     def test_addExpectedFailure(self):
         # Calling addExpectedFailure(test, exc_info) completes ok.
         result = self.makeResult()
@@ -233,12 +236,15 @@ class Python27Contract(Python26Contract):
     def test_failfast(self):
         result = self.makeResult()
         result.failfast = True
+
         class Failing(TestCase):
             def test_a(self):
-                self.fail('a')
+                self.fail("a")
+
             def test_b(self):
-                self.fail('b')
-        TestSuite([Failing('test_a'), Failing('test_b')]).run(result)
+                self.fail("b")
+
+        TestSuite([Failing("test_a"), Failing("test_b")]).run(result)
         self.assertEqual(1, result.testsRun)
 
 
@@ -259,22 +265,22 @@ class TagsContract(Python27Contract):
         # 'current_tags'.
         result = self.makeResult()
         result.startTestRun()
-        result.tags({'foo'}, set())
-        self.assertEqual({'foo'}, result.current_tags)
+        result.tags({"foo"}, set())
+        self.assertEqual({"foo"}, result.current_tags)
 
     def test_removing_tags(self):
         # Tags are removed using 'tags'.
         result = self.makeResult()
         result.startTestRun()
-        result.tags({'foo'}, set())
-        result.tags(set(), {'foo'})
+        result.tags({"foo"}, set())
+        result.tags(set(), {"foo"})
         self.assertEqual(set(), result.current_tags)
 
     def test_startTestRun_resets_tags(self):
         # startTestRun makes a new test run, and thus clears all the tags.
         result = self.makeResult()
         result.startTestRun()
-        result.tags({'foo'}, set())
+        result.tags({"foo"}, set())
         result.startTestRun()
         self.assertEqual(set(), result.current_tags)
 
@@ -282,42 +288,42 @@ class TagsContract(Python27Contract):
         # Tags can be added after a test has run.
         result = self.makeResult()
         result.startTestRun()
-        result.tags({'foo'}, set())
+        result.tags({"foo"}, set())
         result.startTest(self)
-        result.tags({'bar'}, set())
-        self.assertEqual({'foo', 'bar'}, result.current_tags)
+        result.tags({"bar"}, set())
+        self.assertEqual({"foo", "bar"}, result.current_tags)
 
     def test_tags_added_in_test_are_reverted(self):
         # Tags added during a test run are then reverted once that test has
         # finished.
         result = self.makeResult()
         result.startTestRun()
-        result.tags({'foo'}, set())
+        result.tags({"foo"}, set())
         result.startTest(self)
-        result.tags({'bar'}, set())
+        result.tags({"bar"}, set())
         result.addSuccess(self)
         result.stopTest(self)
-        self.assertEqual({'foo'}, result.current_tags)
+        self.assertEqual({"foo"}, result.current_tags)
 
     def test_tags_removed_in_test(self):
         # Tags can be removed during tests.
         result = self.makeResult()
         result.startTestRun()
-        result.tags({'foo'}, set())
+        result.tags({"foo"}, set())
         result.startTest(self)
-        result.tags(set(), {'foo'})
+        result.tags(set(), {"foo"})
         self.assertEqual(set(), result.current_tags)
 
     def test_tags_removed_in_test_are_restored(self):
         # Tags removed during tests are restored once that test has finished.
         result = self.makeResult()
         result.startTestRun()
-        result.tags({'foo'}, set())
+        result.tags({"foo"}, set())
         result.startTest(self)
-        result.tags(set(), {'foo'})
+        result.tags(set(), {"foo"})
         result.addSuccess(self)
         result.stopTest(self)
-        self.assertEqual({'foo'}, result.current_tags)
+        self.assertEqual({"foo"}, result.current_tags)
 
 
 class DetailsContract(TagsContract):
@@ -408,7 +414,6 @@ class StartTestRunContract(FallbackContract):
 
 
 class TestTestResultContract(TestCase, StartTestRunContract):
-
     run_test_with = FullStackRunTest
 
     def makeResult(self):
@@ -416,7 +421,6 @@ class TestTestResultContract(TestCase, StartTestRunContract):
 
 
 class TestMultiTestResultContract(TestCase, StartTestRunContract):
-
     run_test_with = FullStackRunTest
 
     def makeResult(self):
@@ -424,7 +428,6 @@ class TestMultiTestResultContract(TestCase, StartTestRunContract):
 
 
 class TestTextTestResultContract(TestCase, StartTestRunContract):
-
     run_test_with = FullStackRunTest
 
     def makeResult(self):
@@ -432,7 +435,6 @@ class TestTextTestResultContract(TestCase, StartTestRunContract):
 
 
 class TestThreadSafeForwardingResultContract(TestCase, StartTestRunContract):
-
     run_test_with = FullStackRunTest
 
     def makeResult(self):
@@ -442,49 +444,41 @@ class TestThreadSafeForwardingResultContract(TestCase, StartTestRunContract):
 
 
 class TestExtendedTestResultContract(TestCase, StartTestRunContract):
-
     def makeResult(self):
         return ExtendedTestResult()
 
 
 class TestPython26TestResultContract(TestCase, Python26Contract):
-
     def makeResult(self):
         return Python26TestResult()
 
 
 class TestAdaptedPython26TestResultContract(TestCase, FallbackContract):
-
     def makeResult(self):
         return ExtendedToOriginalDecorator(Python26TestResult())
 
 
 class TestPython27TestResultContract(TestCase, Python27Contract):
-
     def makeResult(self):
         return Python27TestResult()
 
 
 class TestAdaptedPython27TestResultContract(TestCase, DetailsContract):
-
     def makeResult(self):
         return ExtendedToOriginalDecorator(Python27TestResult())
 
 
 class TestAdaptedTwistedTestResultContract(TestCase, DetailsContract):
-
     def makeResult(self):
         return ExtendedToOriginalDecorator(TwistedTestResult())
 
 
 class TestAdaptedStreamResult(TestCase, DetailsContract):
-
     def makeResult(self):
         return ExtendedToStreamDecorator(StreamResult())
 
 
 class TestTestResultDecoratorContract(TestCase, StartTestRunContract):
-
     run_test_with = FullStackRunTest
 
     def makeResult(self):
@@ -494,14 +488,13 @@ class TestTestResultDecoratorContract(TestCase, StartTestRunContract):
 # DetailsContract because ExtendedToStreamDecorator follows Python for
 # uxsuccess handling.
 class TestStreamToExtendedContract(TestCase, DetailsContract):
-
     def makeResult(self):
         return ExtendedToStreamDecorator(
-            StreamToExtendedDecorator(ExtendedTestResult()))
+            StreamToExtendedDecorator(ExtendedTestResult())
+        )
 
 
 class TestStreamResultContract:
-
     def _make_result(self):
         raise NotImplementedError(self._make_result)
 
@@ -516,13 +509,15 @@ class TestStreamResultContract:
         result.startTestRun()
         self.addCleanup(result.stopTestRun)
         now = datetime.datetime.now(utc)
-        inputs = list(dict(
-            eof=True,
-            mime_type="text/plain",
-            route_code="1234",
-            test_id="foo",
-            timestamp=now,
-            ).items())
+        inputs = list(
+            dict(
+                eof=True,
+                mime_type="text/plain",
+                route_code="1234",
+                test_id="foo",
+                timestamp=now,
+            ).items()
+        )
         param_dicts = self._power_set(inputs)
         for kwargs in param_dicts:
             result.status(file_name="foo", file_bytes=_b(""), **kwargs)
@@ -534,21 +529,26 @@ class TestStreamResultContract:
         result.startTestRun()
         self.addCleanup(result.stopTestRun)
         now = datetime.datetime.now(utc)
-        args = [["foo", s] for s in [
-            'exists',
-            'inprogress',
-            'xfail',
-            'uxsuccess',
-            'success',
-            'fail',
-            'skip',
-        ]]
-        inputs = list(dict(
-            runnable=False,
-            test_tags={'quux'},
-            route_code="1234",
-            timestamp=now,
-            ).items())
+        args = [
+            ["foo", s]
+            for s in [
+                "exists",
+                "inprogress",
+                "xfail",
+                "uxsuccess",
+                "success",
+                "fail",
+                "skip",
+            ]
+        ]
+        inputs = list(
+            dict(
+                runnable=False,
+                test_tags={"quux"},
+                route_code="1234",
+                timestamp=now,
+            ).items()
+        )
         param_dicts = self._power_set(inputs)
         for kwargs in param_dicts:
             for arg in args:
@@ -565,116 +565,145 @@ class TestStreamResultContract:
 
 
 class TestBaseStreamResultContract(TestCase, TestStreamResultContract):
-
     def _make_result(self):
         return StreamResult()
 
 
 class TestCopyStreamResultContract(TestCase, TestStreamResultContract):
-
     def _make_result(self):
         return CopyStreamResult([StreamResult(), StreamResult()])
 
 
 class TestDoubleStreamResultContract(TestCase, TestStreamResultContract):
-
     def _make_result(self):
         return LoggingStreamResult()
 
 
 class TestExtendedToStreamDecoratorContract(TestCase, TestStreamResultContract):
-
     def _make_result(self):
         return ExtendedToStreamDecorator(StreamResult())
 
 
 class TestResourcedToStreamDecoratorContract(TestCase, TestStreamResultContract):
-
     def _make_result(self):
         return ResourcedToStreamDecorator(StreamResult())
 
 
 class TestStreamSummaryResultContract(TestCase, TestStreamResultContract):
-
     def _make_result(self):
         return StreamSummary()
 
 
 class TestStreamTaggerContract(TestCase, TestStreamResultContract):
-
     def _make_result(self):
         return StreamTagger([StreamResult()], add=set(), discard=set())
 
 
 class TestStreamToDictContract(TestCase, TestStreamResultContract):
-
     def _make_result(self):
-        return StreamToDict(lambda x:None)
+        return StreamToDict(lambda x: None)
 
 
 class TestStreamToExtendedDecoratorContract(TestCase, TestStreamResultContract):
-
     def _make_result(self):
         return StreamToExtendedDecorator(ExtendedTestResult())
 
 
 class TestStreamToQueueContract(TestCase, TestStreamResultContract):
-
     def _make_result(self):
         queue = Queue()
         return StreamToQueue(queue, "foo")
 
 
 class TestStreamFailFastContract(TestCase, TestStreamResultContract):
-
     def _make_result(self):
-        return StreamFailFast(lambda:None)
+        return StreamFailFast(lambda: None)
 
 
 class TestStreamResultRouterContract(TestCase, TestStreamResultContract):
-
     def _make_result(self):
         return StreamResultRouter(StreamResult())
 
 
 class TestDoubleStreamResultEvents(TestCase):
-
     def test_startTestRun(self):
         result = LoggingStreamResult()
         result.startTestRun()
-        self.assertEqual([('startTestRun',)], result._events)
+        self.assertEqual([("startTestRun",)], result._events)
 
     def test_stopTestRun(self):
         result = LoggingStreamResult()
         result.startTestRun()
         result.stopTestRun()
-        self.assertEqual([('startTestRun',), ('stopTestRun',)], result._events)
+        self.assertEqual([("startTestRun",), ("stopTestRun",)], result._events)
 
     def test_file(self):
         result = LoggingStreamResult()
         result.startTestRun()
         now = datetime.datetime.now(utc)
-        result.status(file_name="foo", file_bytes="bar", eof=True, mime_type="text/json",
-            test_id="id", route_code='abc', timestamp=now)
+        result.status(
+            file_name="foo",
+            file_bytes="bar",
+            eof=True,
+            mime_type="text/json",
+            test_id="id",
+            route_code="abc",
+            timestamp=now,
+        )
         self.assertEqual(
-            [('startTestRun',),
-             ('status', 'id', None, None, True, 'foo', 'bar', True, 'text/json', 'abc', now)],
-            result._events)
+            [
+                ("startTestRun",),
+                (
+                    "status",
+                    "id",
+                    None,
+                    None,
+                    True,
+                    "foo",
+                    "bar",
+                    True,
+                    "text/json",
+                    "abc",
+                    now,
+                ),
+            ],
+            result._events,
+        )
 
     def test_status(self):
         result = LoggingStreamResult()
         result.startTestRun()
         now = datetime.datetime.now(utc)
-        result.status("foo", "success", test_tags={'tag'},
-            runnable=False, route_code='abc', timestamp=now)
+        result.status(
+            "foo",
+            "success",
+            test_tags={"tag"},
+            runnable=False,
+            route_code="abc",
+            timestamp=now,
+        )
         self.assertEqual(
-            [('startTestRun',),
-             ('status', 'foo', 'success', {'tag'}, False, None, None, False, None, 'abc', now)],
-            result._events)
+            [
+                ("startTestRun",),
+                (
+                    "status",
+                    "foo",
+                    "success",
+                    {"tag"},
+                    False,
+                    None,
+                    None,
+                    False,
+                    None,
+                    "abc",
+                    now,
+                ),
+            ],
+            result._events,
+        )
 
 
 class TestCopyStreamResultCopies(TestCase):
-
     def setUp(self):
         super().setUp()
         self.target1 = LoggingStreamResult()
@@ -684,94 +713,195 @@ class TestCopyStreamResultCopies(TestCase):
 
     def test_startTestRun(self):
         self.result.startTestRun()
-        self.assertThat(self.targets, AllMatch(Equals([('startTestRun',)])))
+        self.assertThat(self.targets, AllMatch(Equals([("startTestRun",)])))
 
     def test_stopTestRun(self):
         self.result.startTestRun()
         self.result.stopTestRun()
-        self.assertThat(self.targets,
-            AllMatch(Equals([('startTestRun',), ('stopTestRun',)])))
+        self.assertThat(
+            self.targets, AllMatch(Equals([("startTestRun",), ("stopTestRun",)]))
+        )
 
     def test_status(self):
         self.result.startTestRun()
         now = datetime.datetime.now(utc)
-        self.result.status("foo", "success", test_tags={'tag'},
-            runnable=False, file_name="foo", file_bytes=b'bar', eof=True,
-            mime_type="text/json", route_code='abc', timestamp=now)
-        self.assertThat(self.targets,
-            AllMatch(Equals([('startTestRun',),
-                ('status', 'foo', 'success', {'tag'}, False, "foo",
-                 b'bar', True, "text/json", 'abc', now)
-                ])))
+        self.result.status(
+            "foo",
+            "success",
+            test_tags={"tag"},
+            runnable=False,
+            file_name="foo",
+            file_bytes=b"bar",
+            eof=True,
+            mime_type="text/json",
+            route_code="abc",
+            timestamp=now,
+        )
+        self.assertThat(
+            self.targets,
+            AllMatch(
+                Equals(
+                    [
+                        ("startTestRun",),
+                        (
+                            "status",
+                            "foo",
+                            "success",
+                            {"tag"},
+                            False,
+                            "foo",
+                            b"bar",
+                            True,
+                            "text/json",
+                            "abc",
+                            now,
+                        ),
+                    ]
+                )
+            ),
+        )
 
 
 class TestStreamTagger(TestCase):
-
     def test_adding(self):
         log = LoggingStreamResult()
-        result = StreamTagger([log], add=['foo'])
+        result = StreamTagger([log], add=["foo"])
         result.startTestRun()
         result.status()
-        result.status(test_tags={'bar'})
+        result.status(test_tags={"bar"})
         result.status(test_tags=None)
         result.stopTestRun()
-        self.assertEqual([
-            ('startTestRun',),
-            ('status', None, None, {'foo'}, True, None, None, False, None, None, None),
-            ('status', None, None, {'foo', 'bar'}, True, None, None, False, None, None, None),
-            ('status', None, None, {'foo'}, True, None, None, False, None, None, None),
-            ('stopTestRun',),
-            ], log._events)
+        self.assertEqual(
+            [
+                ("startTestRun",),
+                (
+                    "status",
+                    None,
+                    None,
+                    {"foo"},
+                    True,
+                    None,
+                    None,
+                    False,
+                    None,
+                    None,
+                    None,
+                ),
+                (
+                    "status",
+                    None,
+                    None,
+                    {"foo", "bar"},
+                    True,
+                    None,
+                    None,
+                    False,
+                    None,
+                    None,
+                    None,
+                ),
+                (
+                    "status",
+                    None,
+                    None,
+                    {"foo"},
+                    True,
+                    None,
+                    None,
+                    False,
+                    None,
+                    None,
+                    None,
+                ),
+                ("stopTestRun",),
+            ],
+            log._events,
+        )
 
     def test_discarding(self):
         log = LoggingStreamResult()
-        result = StreamTagger([log], discard=['foo'])
+        result = StreamTagger([log], discard=["foo"])
         result.startTestRun()
         result.status()
         result.status(test_tags=None)
-        result.status(test_tags={'foo'})
-        result.status(test_tags={'bar'})
-        result.status(test_tags={'foo', 'bar'})
+        result.status(test_tags={"foo"})
+        result.status(test_tags={"bar"})
+        result.status(test_tags={"foo", "bar"})
         result.stopTestRun()
-        self.assertEqual([
-            ('startTestRun',),
-            ('status', None, None, None, True, None, None, False, None, None, None),
-            ('status', None, None, None, True, None, None, False, None, None, None),
-            ('status', None, None, None, True, None, None, False, None, None, None),
-            ('status', None, None, {'bar'}, True, None, None, False, None, None, None),
-            ('status', None, None, {'bar'}, True, None, None, False, None, None, None),
-            ('stopTestRun',),
-            ], log._events)
+        self.assertEqual(
+            [
+                ("startTestRun",),
+                ("status", None, None, None, True, None, None, False, None, None, None),
+                ("status", None, None, None, True, None, None, False, None, None, None),
+                ("status", None, None, None, True, None, None, False, None, None, None),
+                (
+                    "status",
+                    None,
+                    None,
+                    {"bar"},
+                    True,
+                    None,
+                    None,
+                    False,
+                    None,
+                    None,
+                    None,
+                ),
+                (
+                    "status",
+                    None,
+                    None,
+                    {"bar"},
+                    True,
+                    None,
+                    None,
+                    False,
+                    None,
+                    None,
+                    None,
+                ),
+                ("stopTestRun",),
+            ],
+            log._events,
+        )
 
 
 class TestStreamToDict(TestCase):
-
     def test_hung_test(self):
         tests = []
         result = StreamToDict(tests.append)
         result.startTestRun()
-        result.status('foo', 'inprogress')
+        result.status("foo", "inprogress")
         self.assertEqual([], tests)
         result.stopTestRun()
-        self.assertEqual([
-            {'id': 'foo', 'tags': set(), 'details': {}, 'status': 'inprogress',
-             'timestamps': [None, None]}
-            ], tests)
+        self.assertEqual(
+            [
+                {
+                    "id": "foo",
+                    "tags": set(),
+                    "details": {},
+                    "status": "inprogress",
+                    "timestamps": [None, None],
+                }
+            ],
+            tests,
+        )
 
     def test_all_terminal_states_reported(self):
         tests = []
         result = StreamToDict(tests.append)
         result.startTestRun()
-        result.status('success', 'success')
-        result.status('skip', 'skip')
-        result.status('exists', 'exists')
-        result.status('fail', 'fail')
-        result.status('xfail', 'xfail')
-        result.status('uxsuccess', 'uxsuccess')
+        result.status("success", "success")
+        result.status("skip", "skip")
+        result.status("exists", "exists")
+        result.status("fail", "fail")
+        result.status("xfail", "xfail")
+        result.status("uxsuccess", "uxsuccess")
         self.assertThat(tests, HasLength(6))
         self.assertEqual(
-            ['success', 'skip', 'exists', 'fail', 'xfail', 'uxsuccess'],
-            [test['id'] for test in tests])
+            ["success", "skip", "exists", "fail", "xfail", "uxsuccess"],
+            [test["id"] for test in tests],
+        )
         result.stopTestRun()
         self.assertThat(tests, HasLength(6))
 
@@ -779,24 +909,31 @@ class TestStreamToDict(TestCase):
         tests = []
         result = StreamToDict(tests.append)
         result.startTestRun()
-        result.status(file_name="some log.txt",
-            file_bytes=_b("1234 log message"), eof=True,
-            mime_type="text/plain; charset=utf8", test_id="foo.bar")
-        result.status(file_name="another file",
-            file_bytes=_b("""Traceback..."""), test_id="foo.bar")
+        result.status(
+            file_name="some log.txt",
+            file_bytes=_b("1234 log message"),
+            eof=True,
+            mime_type="text/plain; charset=utf8",
+            test_id="foo.bar",
+        )
+        result.status(
+            file_name="another file",
+            file_bytes=_b("""Traceback..."""),
+            test_id="foo.bar",
+        )
         result.stopTestRun()
         self.assertThat(tests, HasLength(1))
         test = tests[0]
-        self.assertEqual("foo.bar", test['id'])
-        self.assertEqual("unknown", test['status'])
-        details = test['details']
+        self.assertEqual("foo.bar", test["id"])
+        self.assertEqual("unknown", test["status"])
+        details = test["details"]
+        self.assertEqual("1234 log message", details["some log.txt"].as_text())
         self.assertEqual(
-            "1234 log message", details['some log.txt'].as_text())
+            _b("Traceback..."), _b("").join(details["another file"].iter_bytes())
+        )
         self.assertEqual(
-            _b("Traceback..."),
-            _b('').join(details['another file'].iter_bytes()))
-        self.assertEqual(
-            "application/octet-stream", repr(details['another file'].content_type))
+            "application/octet-stream", repr(details["another file"].content_type)
+        )
 
     def test_bad_mime(self):
         # Testtools was making bad mime types, this tests that the specific
@@ -804,46 +941,52 @@ class TestStreamToDict(TestCase):
         tests = []
         result = StreamToDict(tests.append)
         result.startTestRun()
-        result.status(file_name="file", file_bytes=b'a',
-            mime_type='text/plain; charset=utf8, language=python',
-            test_id='id')
+        result.status(
+            file_name="file",
+            file_bytes=b"a",
+            mime_type="text/plain; charset=utf8, language=python",
+            test_id="id",
+        )
         result.stopTestRun()
         self.assertThat(tests, HasLength(1))
         test = tests[0]
-        self.assertEqual("id", test['id'])
-        details = test['details']
-        self.assertEqual("a", details['file'].as_text())
+        self.assertEqual("id", test["id"])
+        details = test["details"]
+        self.assertEqual("a", details["file"].as_text())
         self.assertEqual(
-            "text/plain; charset=\"utf8\"",
-            repr(details['file'].content_type))
+            'text/plain; charset="utf8"', repr(details["file"].content_type)
+        )
 
     def test_timestamps(self):
         tests = []
         result = StreamToDict(tests.append)
         result.startTestRun()
-        result.status(test_id='foo', test_status='inprogress', timestamp="A")
-        result.status(test_id='foo', test_status='success', timestamp="B")
-        result.status(test_id='bar', test_status='inprogress', timestamp="C")
+        result.status(test_id="foo", test_status="inprogress", timestamp="A")
+        result.status(test_id="foo", test_status="success", timestamp="B")
+        result.status(test_id="bar", test_status="inprogress", timestamp="C")
         result.stopTestRun()
         self.assertThat(tests, HasLength(2))
-        self.assertEqual(["A", "B"], tests[0]['timestamps'])
-        self.assertEqual(["C", None], tests[1]['timestamps'])
+        self.assertEqual(["A", "B"], tests[0]["timestamps"])
+        self.assertEqual(["C", None], tests[1]["timestamps"])
 
     def test_files_skipped(self):
         tests = []
         result = StreamToDict(tests.append)
         result.startTestRun()
-        result.status(file_name="some log.txt",
-            file_bytes="", eof=True,
-            mime_type="text/plain; charset=utf8", test_id="foo.bar")
+        result.status(
+            file_name="some log.txt",
+            file_bytes="",
+            eof=True,
+            mime_type="text/plain; charset=utf8",
+            test_id="foo.bar",
+        )
         result.stopTestRun()
         self.assertThat(tests, HasLength(1))
-        details = tests[0]['details']
+        details = tests[0]["details"]
         self.assertNotIn("some log.txt", details)
 
 
 class TestExtendedToStreamDecorator(TestCase):
-
     def test_explicit_time(self):
         log = LoggingStreamResult()
         result = ExtendedToStreamDecorator(log)
@@ -854,37 +997,45 @@ class TestExtendedToStreamDecorator(TestCase):
         result.addSuccess(self)
         result.stopTest(self)
         result.stopTestRun()
-        self.assertEqual([
-            ('startTestRun',),
-            ('status',
-             'testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_explicit_time',
-             'inprogress',
-             None,
-             True,
-             None,
-             None,
-             False,
-             None,
-             None,
-             now),
-            ('status',
-             'testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_explicit_time',
-             'success',
-              set(),
-              True,
-              None,
-              None,
-              False,
-              None,
-              None,
-              now),
-             ('stopTestRun',)], log._events)
+        self.assertEqual(
+            [
+                ("startTestRun",),
+                (
+                    "status",
+                    "testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_explicit_time",
+                    "inprogress",
+                    None,
+                    True,
+                    None,
+                    None,
+                    False,
+                    None,
+                    None,
+                    now,
+                ),
+                (
+                    "status",
+                    "testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_explicit_time",
+                    "success",
+                    set(),
+                    True,
+                    None,
+                    None,
+                    False,
+                    None,
+                    None,
+                    now,
+                ),
+                ("stopTestRun",),
+            ],
+            log._events,
+        )
 
     def test_wasSuccessful_after_stopTestRun(self):
         log = LoggingStreamResult()
         result = ExtendedToStreamDecorator(log)
         result.startTestRun()
-        result.status(test_id='foo', test_status='fail')
+        result.status(test_id="foo", test_status="fail")
         result.stopTestRun()
         self.assertEqual(False, result.wasSuccessful())
 
@@ -895,53 +1046,62 @@ class TestExtendedToStreamDecorator(TestCase):
         now = datetime.datetime.now(utc)
         result.time(now)
         result.startTest(self)
-        result.addError(self, details={'foo': text_content("")})
+        result.addError(self, details={"foo": text_content("")})
         result.stopTest(self)
         result.stopTestRun()
-        self.assertEqual([
-            ('startTestRun',),
-            ('status',
-             'testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_empty_detail_status_correct',
-             'inprogress',
-             None,
-             True,
-             None,
-             None,
-             False,
-             None,
-             None,
-             now),
-            ('status',
-             'testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_empty_detail_status_correct',
-              None,
-              None,
-              True,
-              'foo',
-              _b(''),
-              True,
-              'text/plain; charset="utf8"',
-              None,
-              now),
-            ('status',
-             'testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_empty_detail_status_correct',
-             'fail',
-              set(),
-              True,
-              None,
-              None,
-              False,
-              None,
-              None,
-              now),
-             ('stopTestRun',)], log._events)
+        self.assertEqual(
+            [
+                ("startTestRun",),
+                (
+                    "status",
+                    "testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_empty_detail_status_correct",
+                    "inprogress",
+                    None,
+                    True,
+                    None,
+                    None,
+                    False,
+                    None,
+                    None,
+                    now,
+                ),
+                (
+                    "status",
+                    "testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_empty_detail_status_correct",
+                    None,
+                    None,
+                    True,
+                    "foo",
+                    _b(""),
+                    True,
+                    'text/plain; charset="utf8"',
+                    None,
+                    now,
+                ),
+                (
+                    "status",
+                    "testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_empty_detail_status_correct",
+                    "fail",
+                    set(),
+                    True,
+                    None,
+                    None,
+                    False,
+                    None,
+                    None,
+                    now,
+                ),
+                ("stopTestRun",),
+            ],
+            log._events,
+        )
 
 
 class TestResourcedToStreamDecorator(TestCase):
-
     def setUp(self):
         super().setUp()
         if testresources is None:
-            self.skipTest('Need testresources')
+            self.skipTest("Need testresources")
 
     def test_startMakeResource(self):
         log = LoggingStreamResult()
@@ -952,9 +1112,8 @@ class TestResourcedToStreamDecorator(TestCase):
         resource = testresources.TestResourceManager()
         result.startMakeResource(resource)
         [_, event] = log._events
-        self.assertEqual(
-            'testresources.TestResourceManager.make', event.test_id)
-        self.assertEqual('inprogress', event.test_status)
+        self.assertEqual("testresources.TestResourceManager.make", event.test_id)
+        self.assertEqual("inprogress", event.test_status)
         self.assertFalse(event.runnable)
         self.assertEqual(timestamp, event.timestamp)
 
@@ -962,10 +1121,10 @@ class TestResourcedToStreamDecorator(TestCase):
         log = LoggingStreamResult()
         result = ResourcedToStreamDecorator(log)
         resource = testresources.TestResourceManager()
-        resource.id = lambda: 'nice.resource'
+        resource.id = lambda: "nice.resource"
         result.startTestRun()
         result.startMakeResource(resource)
-        self.assertEqual('nice.resource.make', log._events[1].test_id)
+        self.assertEqual("nice.resource.make", log._events[1].test_id)
 
     def test_stopMakeResource(self):
         log = LoggingStreamResult()
@@ -974,9 +1133,8 @@ class TestResourcedToStreamDecorator(TestCase):
         result.startTestRun()
         result.stopMakeResource(resource)
         [_, event] = log._events
-        self.assertEqual(
-            'testresources.TestResourceManager.make', event.test_id)
-        self.assertEqual('success', event.test_status)
+        self.assertEqual("testresources.TestResourceManager.make", event.test_id)
+        self.assertEqual("success", event.test_status)
 
     def test_startCleanResource(self):
         log = LoggingStreamResult()
@@ -985,9 +1143,8 @@ class TestResourcedToStreamDecorator(TestCase):
         result.startTestRun()
         result.startCleanResource(resource)
         [_, event] = log._events
-        self.assertEqual(
-            'testresources.TestResourceManager.clean', event.test_id)
-        self.assertEqual('inprogress', event.test_status)
+        self.assertEqual("testresources.TestResourceManager.clean", event.test_id)
+        self.assertEqual("inprogress", event.test_status)
 
     def test_stopCleanResource(self):
         log = LoggingStreamResult()
@@ -996,54 +1153,55 @@ class TestResourcedToStreamDecorator(TestCase):
         result.startTestRun()
         result.stopCleanResource(resource)
         [_, event] = log._events
-        self.assertEqual(
-            'testresources.TestResourceManager.clean', event.test_id)
-        self.assertEqual('success', event.test_status)
+        self.assertEqual("testresources.TestResourceManager.clean", event.test_id)
+        self.assertEqual("success", event.test_status)
 
 
 class TestStreamFailFast(TestCase):
-
     def test_inprogress(self):
         result = StreamFailFast(self.fail)
-        result.status('foo', 'inprogress')
+        result.status("foo", "inprogress")
 
     def test_exists(self):
         result = StreamFailFast(self.fail)
-        result.status('foo', 'exists')
+        result.status("foo", "exists")
 
     def test_xfail(self):
         result = StreamFailFast(self.fail)
-        result.status('foo', 'xfail')
+        result.status("foo", "xfail")
 
     def test_uxsuccess(self):
         calls = []
+
         def hook():
             calls.append("called")
+
         result = StreamFailFast(hook)
-        result.status('foo', 'uxsuccess')
-        result.status('foo', 'uxsuccess')
-        self.assertEqual(['called', 'called'], calls)
+        result.status("foo", "uxsuccess")
+        result.status("foo", "uxsuccess")
+        self.assertEqual(["called", "called"], calls)
 
     def test_success(self):
         result = StreamFailFast(self.fail)
-        result.status('foo', 'success')
+        result.status("foo", "success")
 
     def test_fail(self):
         calls = []
+
         def hook():
             calls.append("called")
+
         result = StreamFailFast(hook)
-        result.status('foo', 'fail')
-        result.status('foo', 'fail')
-        self.assertEqual(['called', 'called'], calls)
+        result.status("foo", "fail")
+        result.status("foo", "fail")
+        self.assertEqual(["called", "called"], calls)
 
     def test_skip(self):
         result = StreamFailFast(self.fail)
-        result.status('foo', 'skip')
+        result.status("foo", "skip")
 
 
 class TestStreamSummary(TestCase):
-
     def test_attributes(self):
         result = StreamSummary()
         result.startTestRun()
@@ -1057,11 +1215,11 @@ class TestStreamSummary(TestCase):
     def test_startTestRun(self):
         result = StreamSummary()
         result.startTestRun()
-        result.failures.append('x')
-        result.errors.append('x')
-        result.skipped.append('x')
-        result.expectedFailures.append('x')
-        result.unexpectedSuccesses.append('x')
+        result.failures.append("x")
+        result.errors.append("x")
+        result.skipped.append("x")
+        result.expectedFailures.append("x")
+        result.unexpectedSuccesses.append("x")
         result.testsRun = 1
         result.startTestRun()
         self.assertEqual([], result.failures)
@@ -1077,19 +1235,19 @@ class TestStreamSummary(TestCase):
         result = StreamSummary()
         result.startTestRun()
         self.assertEqual(True, result.wasSuccessful())
-        result.failures.append('x')
+        result.failures.append("x")
         self.assertEqual(False, result.wasSuccessful())
         result.startTestRun()
-        result.errors.append('x')
+        result.errors.append("x")
         self.assertEqual(False, result.wasSuccessful())
         result.startTestRun()
-        result.skipped.append('x')
+        result.skipped.append("x")
         self.assertEqual(True, result.wasSuccessful())
         result.startTestRun()
-        result.expectedFailures.append('x')
+        result.expectedFailures.append("x")
         self.assertEqual(True, result.wasSuccessful())
         result.startTestRun()
-        result.unexpectedSuccesses.append('x')
+        result.unexpectedSuccesses.append("x")
         self.assertEqual(True, result.wasSuccessful())
 
     def test_stopTestRun(self):
@@ -1129,29 +1287,45 @@ class TestStreamSummary(TestCase):
         # from the 'reason' file attachment if any.
         result = StreamSummary()
         result.startTestRun()
-        result.status(file_name="reason",
-            file_bytes=_b("Missing dependency"), eof=True,
-            mime_type="text/plain; charset=utf8", test_id="foo.bar")
+        result.status(
+            file_name="reason",
+            file_bytes=_b("Missing dependency"),
+            eof=True,
+            mime_type="text/plain; charset=utf8",
+            test_id="foo.bar",
+        )
         result.status("foo.bar", "skip")
         self.assertThat(result.skipped, HasLength(1))
         self.assertEqual("foo.bar", result.skipped[0][0].id())
         self.assertEqual("Missing dependency", result.skipped[0][1])
 
     def _report_files(self, result):
-        result.status(file_name="some log.txt",
-            file_bytes=_b("1234 log message"), eof=True,
-            mime_type="text/plain; charset=utf8", test_id="foo.bar")
-        result.status(file_name="traceback",
-            file_bytes=_b("""Traceback (most recent call last):
+        result.status(
+            file_name="some log.txt",
+            file_bytes=_b("1234 log message"),
+            eof=True,
+            mime_type="text/plain; charset=utf8",
+            test_id="foo.bar",
+        )
+        result.status(
+            file_name="traceback",
+            file_bytes=_b(
+                """Traceback (most recent call last):
   File "testtools/tests/test_testresult.py", line 607, in test_stopTestRun
       AllMatch(Equals([('startTestRun',), ('stopTestRun',)])))
 testtools.matchers._impl.MismatchError: Differences: [
 [('startTestRun',), ('stopTestRun',)] != []
 [('startTestRun',), ('stopTestRun',)] != []
 ]
-"""), eof=True, mime_type="text/plain; charset=utf8", test_id="foo.bar")
+"""
+            ),
+            eof=True,
+            mime_type="text/plain; charset=utf8",
+            test_id="foo.bar",
+        )
 
-    files_message = Equals("""some log.txt: {{{1234 log message}}}
+    files_message = Equals(
+        """some log.txt: {{{1234 log message}}}
 
 Traceback (most recent call last):
   File "testtools/tests/test_testresult.py", line 607, in test_stopTestRun
@@ -1160,7 +1334,8 @@ testtools.matchers._impl.MismatchError: Differences: [
 [('startTestRun',), ('stopTestRun',)] != []
 [('startTestRun',), ('stopTestRun',)] != []
 ]
-""")
+"""
+    )
 
     def test_status_fail(self):
         # when fail is seen, a synthetic test is reported with all files
@@ -1194,7 +1369,6 @@ testtools.matchers._impl.MismatchError: Differences: [
 
 
 class TestTestControl(TestCase, TestControlContract):
-
     def makeResult(self):
         return TestControl()
 
@@ -1213,24 +1387,30 @@ class TestTestResult(TestCase):
         # its skip_reasons dict.
         result = self.makeResult()
         result.addSkip(self, "Skipped for some reason")
-        self.assertEqual({"Skipped for some reason":[self]},
-            result.skip_reasons)
+        self.assertEqual({"Skipped for some reason": [self]}, result.skip_reasons)
         result.addSkip(self, "Skipped for some reason")
-        self.assertEqual({"Skipped for some reason":[self, self]},
-            result.skip_reasons)
+        self.assertEqual({"Skipped for some reason": [self, self]}, result.skip_reasons)
         result.addSkip(self, "Skipped for another reason")
-        self.assertEqual({"Skipped for some reason":[self, self],
-            "Skipped for another reason":[self]},
-            result.skip_reasons)
+        self.assertEqual(
+            {
+                "Skipped for some reason": [self, self],
+                "Skipped for another reason": [self],
+            },
+            result.skip_reasons,
+        )
 
     def test_now_datetime_now(self):
         result = self.makeResult()
         olddatetime = testresult.real.datetime
+
         def restore():
             testresult.real.datetime = olddatetime
+
         self.addCleanup(restore)
+
         class Module:
             pass
+
         now = datetime.datetime.now(utc)
         stubdatetime = Module()
         stubdatetime.datetime = Module()
@@ -1263,15 +1443,17 @@ class TestTestResult(TestCase):
         self.assertThat(
             result.errors[0][1],
             DocTestMatches(
-                'Traceback (most recent call last):\n'
+                "Traceback (most recent call last):\n"
                 '  File "...testtools...runtest.py", line ..., in _run_user\n'
-                '    return fn(*args, **kwargs)\n...'
+                "    return fn(*args, **kwargs)\n..."
                 '  File "...testtools...testcase.py", line ..., in _run_test_method\n'
-                '    return self._get_test_method()()\n...'
+                "    return self._get_test_method()()\n..."
                 '  File "...testtools...tests...test_testresult.py", line ..., in error\n'
-                '    1/0\n...'
-                'ZeroDivisionError: ...\n',
-                doctest.ELLIPSIS | doctest.REPORT_UDIFF))
+                "    1 / 0\n..."
+                "ZeroDivisionError: ...\n",
+                doctest.ELLIPSIS | doctest.REPORT_UDIFF,
+            ),
+        )
 
     def test_traceback_formatting_with_stack_hidden(self):
         result = self.makeResult()
@@ -1280,11 +1462,13 @@ class TestTestResult(TestCase):
         self.assertThat(
             result.errors[0][1],
             DocTestMatches(
-                'Traceback (most recent call last):\n'
+                "Traceback (most recent call last):\n"
                 '  File "...testtools...tests...test_testresult.py", line ..., in error\n'
-                '    1/0\n...'
-                'ZeroDivisionError: ...\n',
-                doctest.ELLIPSIS))
+                "    1 / 0\n..."
+                "ZeroDivisionError: ...\n",
+                doctest.ELLIPSIS,
+            ),
+        )
 
     def test_traceback_formatting_with_stack_hidden_mismatch(self):
         result = self.makeResult()
@@ -1293,11 +1477,13 @@ class TestTestResult(TestCase):
         self.assertThat(
             result.failures[0][1],
             DocTestMatches(
-                'Traceback (most recent call last):\n'
+                "Traceback (most recent call last):\n"
                 '  File "...testtools...tests...test_testresult.py", line ..., in mismatch\n'
-                '    self.assertEqual(1, 2)\n'
-                '...MismatchError: 1 != 2\n',
-                doctest.ELLIPSIS))
+                "    self.assertEqual(1, 2)\n"
+                "...MismatchError: 1 != 2\n",
+                doctest.ELLIPSIS,
+            ),
+        )
 
     def test_exc_info_to_unicode(self):
         # subunit upcalls to TestResult._exc_info_to_unicode, so we need to
@@ -1308,8 +1494,7 @@ class TestTestResult(TestCase):
         exc_info = make_exception_info(RuntimeError, "foo")
         result = self.makeResult()
         text_traceback = result._exc_info_to_unicode(exc_info, test)
-        self.assertEqual(
-            TracebackContent(exc_info, test).as_text(), text_traceback)
+        self.assertEqual(TracebackContent(exc_info, test).as_text(), text_traceback)
 
     def test_traceback_with_locals(self):
         result = self.makeResult()
@@ -1319,23 +1504,25 @@ class TestTestResult(TestCase):
         self.assertThat(
             result.errors[0][1],
             DocTestMatches(
-                'Traceback (most recent call last):\n'
+                "Traceback (most recent call last):\n"
                 '  File "...testtools...runtest.py", line ..., in _run_user\n'
-                '    return fn(*args, **kwargs)\n...'
-                '    args = ...\n'
-                '    fn = ...\n'
-                '    kwargs = ...\n'
-                '    self = ...\n'
+                "    return fn(*args, **kwargs)\n..."
+                "    args = ...\n"
+                "    fn = ...\n"
+                "    kwargs = ...\n"
+                "    self = ...\n"
                 '  File "...testtools...testcase.py", line ..., in _run_test_method\n'
-                '    return self._get_test_method()()\n...'
-                '    result = ...\n'
-                '    self = ...\n'
+                "    return self._get_test_method()()\n..."
+                "    result = ...\n"
+                "    self = ...\n"
                 '  File "...testtools...tests...test_testresult.py", line ..., in error\n'
-                '    1/0\n...'
-                '    a = 1\n'
-                '    self = ...\n'
-                'ZeroDivisionError: ...\n',
-                doctest.ELLIPSIS | doctest.REPORT_UDIFF))
+                "    1 / 0\n..."
+                "    a = 1\n"
+                "    self = ...\n"
+                "ZeroDivisionError: ...\n",
+                doctest.ELLIPSIS | doctest.REPORT_UDIFF,
+            ),
+        )
 
 
 class TestMultiTestResult(TestCase):
@@ -1354,10 +1541,12 @@ class TestMultiTestResult(TestCase):
 
     def test_repr(self):
         self.assertEqual(
-            '<MultiTestResult ({!r}, {!r})>'.format(
+            "<MultiTestResult ({!r}, {!r})>".format(
                 ExtendedToOriginalDecorator(self.result1),
-                ExtendedToOriginalDecorator(self.result2)),
-            repr(self.multiResult))
+                ExtendedToOriginalDecorator(self.result2),
+            ),
+            repr(self.multiResult),
+        )
 
     def test_empty(self):
         # Initializing a `MultiTestResult` doesn't do anything to its
@@ -1387,63 +1576,63 @@ class TestMultiTestResult(TestCase):
         # Calling `startTest` on a `MultiTestResult` calls `startTest` on all
         # its `TestResult`s.
         self.multiResult.startTest(self)
-        self.assertResultLogsEqual([('startTest', self)])
+        self.assertResultLogsEqual([("startTest", self)])
 
     def test_stop(self):
         self.assertFalse(self.multiResult.shouldStop)
         self.multiResult.stop()
-        self.assertResultLogsEqual(['stop'])
+        self.assertResultLogsEqual(["stop"])
 
     def test_stopTest(self):
         # Calling `stopTest` on a `MultiTestResult` calls `stopTest` on all
         # its `TestResult`s.
         self.multiResult.stopTest(self)
-        self.assertResultLogsEqual([('stopTest', self)])
+        self.assertResultLogsEqual([("stopTest", self)])
 
     def test_addSkipped(self):
         # Calling `addSkip` on a `MultiTestResult` calls addSkip on its
         # results.
         reason = "Skipped for some reason"
         self.multiResult.addSkip(self, reason)
-        self.assertResultLogsEqual([('addSkip', self, reason)])
+        self.assertResultLogsEqual([("addSkip", self, reason)])
 
     def test_addSuccess(self):
         # Calling `addSuccess` on a `MultiTestResult` calls `addSuccess` on
         # all its `TestResult`s.
         self.multiResult.addSuccess(self)
-        self.assertResultLogsEqual([('addSuccess', self)])
+        self.assertResultLogsEqual([("addSuccess", self)])
 
     def test_done(self):
         # Calling `done` on a `MultiTestResult` calls `done` on all its
         # `TestResult`s.
         self.multiResult.done()
-        self.assertResultLogsEqual([('done')])
+        self.assertResultLogsEqual([("done")])
 
     def test_addFailure(self):
         # Calling `addFailure` on a `MultiTestResult` calls `addFailure` on
         # all its `TestResult`s.
-        exc_info = make_exception_info(AssertionError, 'failure')
+        exc_info = make_exception_info(AssertionError, "failure")
         self.multiResult.addFailure(self, exc_info)
-        self.assertResultLogsEqual([('addFailure', self, exc_info)])
+        self.assertResultLogsEqual([("addFailure", self, exc_info)])
 
     def test_addError(self):
         # Calling `addError` on a `MultiTestResult` calls `addError` on all
         # its `TestResult`s.
-        exc_info = make_exception_info(RuntimeError, 'error')
+        exc_info = make_exception_info(RuntimeError, "error")
         self.multiResult.addError(self, exc_info)
-        self.assertResultLogsEqual([('addError', self, exc_info)])
+        self.assertResultLogsEqual([("addError", self, exc_info)])
 
     def test_startTestRun(self):
         # Calling `startTestRun` on a `MultiTestResult` forwards to all its
         # `TestResult`s.
         self.multiResult.startTestRun()
-        self.assertResultLogsEqual([('startTestRun')])
+        self.assertResultLogsEqual([("startTestRun")])
 
     def test_stopTestRun(self):
         # Calling `stopTestRun` on a `MultiTestResult` forwards to all its
         # `TestResult`s.
         self.multiResult.stopTestRun()
-        self.assertResultLogsEqual([('stopTestRun')])
+        self.assertResultLogsEqual([("stopTestRun")])
 
     def test_stopTestRun_returns_results(self):
         # `MultiTestResult.stopTestRun` returns a tuple of all of the return
@@ -1451,23 +1640,24 @@ class TestMultiTestResult(TestCase):
         class Result(LoggingResult):
             def stopTestRun(self):
                 super().stopTestRun()
-                return 'foo'
+                return "foo"
+
         multi_result = MultiTestResult(Result([]), Result([]))
         result = multi_result.stopTestRun()
-        self.assertEqual(('foo', 'foo'), result)
+        self.assertEqual(("foo", "foo"), result)
 
     def test_tags(self):
         # Calling `tags` on a `MultiTestResult` calls `tags` on all its
         # `TestResult`s.
-        added_tags = {'foo', 'bar'}
-        removed_tags = {'eggs'}
+        added_tags = {"foo", "bar"}
+        removed_tags = {"eggs"}
         self.multiResult.tags(added_tags, removed_tags)
-        self.assertResultLogsEqual([('tags', added_tags, removed_tags)])
+        self.assertResultLogsEqual([("tags", added_tags, removed_tags)])
 
     def test_time(self):
         # the time call is dispatched, not eaten by the base class
-        self.multiResult.time('foo')
-        self.assertResultLogsEqual([('time', 'foo')])
+        self.multiResult.time("foo")
+        self.assertResultLogsEqual([("time", "foo")])
 
 
 class TestTextTestResult(TestCase):
@@ -1500,8 +1690,10 @@ class TestTextTestResult(TestCase):
         self.result.stopTest(test)
         self.result.stream = io.StringIO()
         self.result.stopTestRun()
-        self.assertThat(self.getvalue(),
-            DocTestMatches("\nRan 2 tests in ...s\n...", doctest.ELLIPSIS))
+        self.assertThat(
+            self.getvalue(),
+            DocTestMatches("\nRan 2 tests in ...s\n...", doctest.ELLIPSIS),
+        )
 
     def test_stopTestRun_count_single(self):
         test = make_test()
@@ -1510,15 +1702,19 @@ class TestTextTestResult(TestCase):
         self.result.stopTest(test)
         self.reset_output()
         self.result.stopTestRun()
-        self.assertThat(self.getvalue(),
-            DocTestMatches("\nRan 1 test in ...s\nOK\n", doctest.ELLIPSIS))
+        self.assertThat(
+            self.getvalue(),
+            DocTestMatches("\nRan 1 test in ...s\nOK\n", doctest.ELLIPSIS),
+        )
 
     def test_stopTestRun_count_zero(self):
         self.result.startTestRun()
         self.reset_output()
         self.result.stopTestRun()
-        self.assertThat(self.getvalue(),
-            DocTestMatches("\nRan 0 tests in ...s\nOK\n", doctest.ELLIPSIS))
+        self.assertThat(
+            self.getvalue(),
+            DocTestMatches("\nRan 0 tests in ...s\nOK\n", doctest.ELLIPSIS),
+        )
 
     def test_stopTestRun_current_time(self):
         test = make_test()
@@ -1531,41 +1727,48 @@ class TestTextTestResult(TestCase):
         self.result.stopTest(test)
         self.reset_output()
         self.result.stopTestRun()
-        self.assertThat(self.getvalue(),
-            DocTestMatches("... in 0.001s\n...", doctest.ELLIPSIS))
+        self.assertThat(
+            self.getvalue(), DocTestMatches("... in 0.001s\n...", doctest.ELLIPSIS)
+        )
 
     def test_stopTestRun_successful(self):
         self.result.startTestRun()
         self.result.stopTestRun()
-        self.assertThat(self.getvalue(),
-            DocTestMatches("...\nOK\n", doctest.ELLIPSIS))
+        self.assertThat(self.getvalue(), DocTestMatches("...\nOK\n", doctest.ELLIPSIS))
 
     def test_stopTestRun_not_successful_failure(self):
         test = make_failing_test()
         self.result.startTestRun()
         test.run(self.result)
         self.result.stopTestRun()
-        self.assertThat(self.getvalue(),
-            DocTestMatches("...\nFAILED (failures=1)\n", doctest.ELLIPSIS))
+        self.assertThat(
+            self.getvalue(),
+            DocTestMatches("...\nFAILED (failures=1)\n", doctest.ELLIPSIS),
+        )
 
     def test_stopTestRun_not_successful_error(self):
         test = make_erroring_test()
         self.result.startTestRun()
         test.run(self.result)
         self.result.stopTestRun()
-        self.assertThat(self.getvalue(),
-            DocTestMatches("...\nFAILED (failures=1)\n", doctest.ELLIPSIS))
+        self.assertThat(
+            self.getvalue(),
+            DocTestMatches("...\nFAILED (failures=1)\n", doctest.ELLIPSIS),
+        )
 
     def test_stopTestRun_not_successful_unexpected_success(self):
         test = make_unexpectedly_successful_test()
         self.result.startTestRun()
         test.run(self.result)
         self.result.stopTestRun()
-        self.assertThat(self.getvalue(),
-            DocTestMatches("...\nFAILED (failures=1)\n", doctest.ELLIPSIS))
+        self.assertThat(
+            self.getvalue(),
+            DocTestMatches("...\nFAILED (failures=1)\n", doctest.ELLIPSIS),
+        )
 
     def test_stopTestRun_shows_details(self):
         self.skipTest("Disabled per bug 1188420")
+
         def run_tests():
             self.result.startTestRun()
             make_erroring_test().run(self.result)
@@ -1573,14 +1776,17 @@ class TestTextTestResult(TestCase):
             make_failing_test().run(self.result)
             self.reset_output()
             self.result.stopTestRun()
+
         run_with_stack_hidden(True, run_tests)
-        self.assertThat(self.getvalue(),
-            DocTestMatches("""...======================================================================
+        self.assertThat(
+            self.getvalue(),
+            DocTestMatches(
+                """...======================================================================
 ERROR: testtools.tests.test_testresult.Test.error
 ----------------------------------------------------------------------
 Traceback (most recent call last):
   File "...testtools...tests...test_testresult.py", line ..., in error
-    1/0
+    1 / 0
 ZeroDivisionError:... divi... by zero...
 ======================================================================
 FAIL: testtools.tests.test_testresult.Test.failed
@@ -1592,7 +1798,10 @@ AssertionError: yo!
 ======================================================================
 UNEXPECTED SUCCESS: testtools.tests.test_testresult.Test.succeeded
 ----------------------------------------------------------------------
-...""", doctest.ELLIPSIS | doctest.REPORT_NDIFF))
+...""",
+                doctest.ELLIPSIS | doctest.REPORT_NDIFF,
+            ),
+        )
 
 
 class TestThreadSafeForwardingResult(TestCase):
@@ -1602,9 +1811,7 @@ class TestThreadSafeForwardingResult(TestCase):
         events = []
         target = LoggingResult(events)
         semaphore = threading.Semaphore(1)
-        return [
-            ThreadsafeForwardingResult(target, semaphore)
-            for i in range(n)], events
+        return [ThreadsafeForwardingResult(target, semaphore) for i in range(n)], events
 
     def test_nonforwarding_methods(self):
         # startTest and stopTest are not forwarded because they need to be
@@ -1618,7 +1825,7 @@ class TestThreadSafeForwardingResult(TestCase):
         # Tags need to be batched for each test, so they aren't forwarded
         # until a test runs.
         [result], events = self.make_results(1)
-        result.tags({'foo'}, {'bar'})
+        result.tags({"foo"}, {"bar"})
         self.assertEqual([], events)
 
     def test_global_tags_simple(self):
@@ -1628,19 +1835,22 @@ class TestThreadSafeForwardingResult(TestCase):
         # way for a global tag on an input stream to affect tests from other
         # streams - we can just always issue test local tags.
         [result], events = self.make_results(1)
-        result.tags({'foo'}, set())
+        result.tags({"foo"}, set())
         result.time(1)
         result.startTest(self)
         result.time(2)
         result.addSuccess(self)
         self.assertEqual(
-            [('time', 1),
-             ('startTest', self),
-             ('time', 2),
-             ('tags', {'foo'}, set()),
-             ('addSuccess', self),
-             ('stopTest', self),
-             ], events)
+            [
+                ("time", 1),
+                ("startTest", self),
+                ("time", 2),
+                ("tags", {"foo"}, set()),
+                ("addSuccess", self),
+                ("stopTest", self),
+            ],
+            events,
+        )
 
     def test_global_tags_complex(self):
         # Multiple calls to tags() in a global context are buffered until the
@@ -1650,20 +1860,23 @@ class TestThreadSafeForwardingResult(TestCase):
         # speaking incidental - they could be issued separately (in-order) and
         # still be legitimate.
         [result], events = self.make_results(1)
-        result.tags({'foo', 'bar'}, {'baz', 'qux'})
-        result.tags({'cat', 'qux'}, {'bar', 'dog'})
+        result.tags({"foo", "bar"}, {"baz", "qux"})
+        result.tags({"cat", "qux"}, {"bar", "dog"})
         result.time(1)
         result.startTest(self)
         result.time(2)
         result.addSuccess(self)
         self.assertEqual(
-            [('time', 1),
-             ('startTest', self),
-             ('time', 2),
-             ('tags', {'cat', 'foo', 'qux'}, {'dog', 'bar', 'baz'}),
-             ('addSuccess', self),
-             ('stopTest', self),
-             ], events)
+            [
+                ("time", 1),
+                ("startTest", self),
+                ("time", 2),
+                ("tags", {"cat", "foo", "qux"}, {"dog", "bar", "baz"}),
+                ("addSuccess", self),
+                ("stopTest", self),
+            ],
+            events,
+        )
 
     def test_local_tags(self):
         # Any tags set within a test context are forwarded in that test
@@ -1673,27 +1886,30 @@ class TestThreadSafeForwardingResult(TestCase):
         [result], events = self.make_results(1)
         result.time(1)
         result.startTest(self)
-        result.tags({'foo'}, set())
-        result.tags(set(), {'bar'})
+        result.tags({"foo"}, set())
+        result.tags(set(), {"bar"})
         result.time(2)
         result.addSuccess(self)
         self.assertEqual(
-            [('time', 1),
-             ('startTest', self),
-             ('time', 2),
-             ('tags', {'foo'}, {'bar'}),
-             ('addSuccess', self),
-             ('stopTest', self),
-             ], events)
+            [
+                ("time", 1),
+                ("startTest", self),
+                ("time", 2),
+                ("tags", {"foo"}, {"bar"}),
+                ("addSuccess", self),
+                ("stopTest", self),
+            ],
+            events,
+        )
 
     def test_local_tags_dont_leak(self):
         # A tag set during a test is local to that test and is not set during
         # the tests that follow.
         [result], events = self.make_results(1)
-        a, b = PlaceHolder('a'), PlaceHolder('b')
+        a, b = PlaceHolder("a"), PlaceHolder("b")
         result.time(1)
         result.startTest(a)
-        result.tags({'foo'}, set())
+        result.tags({"foo"}, set())
         result.time(2)
         result.addSuccess(a)
         result.stopTest(a)
@@ -1703,18 +1919,21 @@ class TestThreadSafeForwardingResult(TestCase):
         result.addSuccess(b)
         result.stopTest(b)
         self.assertEqual(
-            [('time', 1),
-             ('startTest', a),
-             ('time', 2),
-             ('tags', {'foo'}, set()),
-             ('addSuccess', a),
-             ('stopTest', a),
-             ('time', 3),
-             ('startTest', b),
-             ('time', 4),
-             ('addSuccess', b),
-             ('stopTest', b),
-             ], events)
+            [
+                ("time", 1),
+                ("startTest", a),
+                ("time", 2),
+                ("tags", {"foo"}, set()),
+                ("addSuccess", a),
+                ("stopTest", a),
+                ("time", 3),
+                ("startTest", b),
+                ("time", 4),
+                ("addSuccess", b),
+                ("stopTest", b),
+            ],
+            events,
+        )
 
     def test_startTestRun(self):
         # Calls to startTestRun are not batched, because we are only
@@ -1736,39 +1955,45 @@ class TestThreadSafeForwardingResult(TestCase):
         # Once we receive an addError event, we forward all of the events for
         # that test, as we now know that test is complete.
         [result], events = self.make_results(1)
-        exc_info = make_exception_info(RuntimeError, 'error')
+        exc_info = make_exception_info(RuntimeError, "error")
         start_time = datetime.datetime.utcfromtimestamp(1.489)
         end_time = datetime.datetime.utcfromtimestamp(51.476)
         result.time(start_time)
         result.startTest(self)
         result.time(end_time)
         result.addError(self, exc_info)
-        self.assertEqual([
-            ('time', start_time),
-            ('startTest', self),
-            ('time', end_time),
-            ('addError', self, exc_info),
-            ('stopTest', self),
-            ], events)
+        self.assertEqual(
+            [
+                ("time", start_time),
+                ("startTest", self),
+                ("time", end_time),
+                ("addError", self, exc_info),
+                ("stopTest", self),
+            ],
+            events,
+        )
 
     def test_forward_addFailure(self):
         # Once we receive an addFailure event, we forward all of the events
         # for that test, as we now know that test is complete.
         [result], events = self.make_results(1)
-        exc_info = make_exception_info(AssertionError, 'failure')
+        exc_info = make_exception_info(AssertionError, "failure")
         start_time = datetime.datetime.utcfromtimestamp(2.489)
         end_time = datetime.datetime.utcfromtimestamp(3.476)
         result.time(start_time)
         result.startTest(self)
         result.time(end_time)
         result.addFailure(self, exc_info)
-        self.assertEqual([
-            ('time', start_time),
-            ('startTest', self),
-            ('time', end_time),
-            ('addFailure', self, exc_info),
-            ('stopTest', self),
-            ], events)
+        self.assertEqual(
+            [
+                ("time", start_time),
+                ("startTest", self),
+                ("time", end_time),
+                ("addFailure", self, exc_info),
+                ("stopTest", self),
+            ],
+            events,
+        )
 
     def test_forward_addSkip(self):
         # Once we receive an addSkip event, we forward all of the events for
@@ -1781,13 +2006,16 @@ class TestThreadSafeForwardingResult(TestCase):
         result.startTest(self)
         result.time(end_time)
         result.addSkip(self, reason)
-        self.assertEqual([
-            ('time', start_time),
-            ('startTest', self),
-            ('time', end_time),
-            ('addSkip', self, reason),
-            ('stopTest', self),
-            ], events)
+        self.assertEqual(
+            [
+                ("time", start_time),
+                ("startTest", self),
+                ("time", end_time),
+                ("addSkip", self, reason),
+                ("stopTest", self),
+            ],
+            events,
+        )
 
     def test_forward_addSuccess(self):
         # Once we receive an addSuccess event, we forward all of the events
@@ -1799,13 +2027,16 @@ class TestThreadSafeForwardingResult(TestCase):
         result.startTest(self)
         result.time(end_time)
         result.addSuccess(self)
-        self.assertEqual([
-            ('time', start_time),
-            ('startTest', self),
-            ('time', end_time),
-            ('addSuccess', self),
-            ('stopTest', self),
-            ], events)
+        self.assertEqual(
+            [
+                ("time", start_time),
+                ("startTest", self),
+                ("time", end_time),
+                ("addSuccess", self),
+                ("stopTest", self),
+            ],
+            events,
+        )
 
     def test_only_one_test_at_a_time(self):
         # Even if there are multiple ThreadsafeForwardingResults forwarding to
@@ -1825,227 +2056,325 @@ class TestThreadSafeForwardingResult(TestCase):
         result2.time(end_time2)
         result2.addSuccess(test2)
         result1.addSuccess(test1)
-        self.assertEqual([
-            # test2 finishes first, and so is flushed first.
-            ('time', start_time2),
-            ('startTest', test2),
-            ('time', end_time2),
-            ('addSuccess', test2),
-            ('stopTest', test2),
-            # test1 finishes next, and thus follows.
-            ('time', start_time1),
-            ('startTest', test1),
-            ('time', end_time1),
-            ('addSuccess', test1),
-            ('stopTest', test1),
-            ], events)
+        self.assertEqual(
+            [
+                # test2 finishes first, and so is flushed first.
+                ("time", start_time2),
+                ("startTest", test2),
+                ("time", end_time2),
+                ("addSuccess", test2),
+                ("stopTest", test2),
+                # test1 finishes next, and thus follows.
+                ("time", start_time1),
+                ("startTest", test1),
+                ("time", end_time1),
+                ("addSuccess", test1),
+                ("stopTest", test1),
+            ],
+            events,
+        )
 
 
 class TestMergeTags(TestCase):
-
     def test_merge_unseen_gone_tag(self):
         # If an incoming "gone" tag isn't currently tagged one way or the
         # other, add it to the "gone" tags.
-        current_tags = {'present'}, {'missing'}
-        changing_tags = set(), {'going'}
-        expected = {'present'}, {'missing', 'going'}
-        self.assertEqual(
-            expected, _merge_tags(current_tags, changing_tags))
+        current_tags = {"present"}, {"missing"}
+        changing_tags = set(), {"going"}
+        expected = {"present"}, {"missing", "going"}
+        self.assertEqual(expected, _merge_tags(current_tags, changing_tags))
 
     def test_merge_incoming_gone_tag_with_current_new_tag(self):
         # If one of the incoming "gone" tags is one of the existing "new"
         # tags, then it overrides the "new" tag, leaving it marked as "gone".
-        current_tags = {'present', 'going'}, {'missing'}
-        changing_tags = set(), {'going'}
-        expected = {'present'}, {'missing', 'going'}
-        self.assertEqual(
-            expected, _merge_tags(current_tags, changing_tags))
+        current_tags = {"present", "going"}, {"missing"}
+        changing_tags = set(), {"going"}
+        expected = {"present"}, {"missing", "going"}
+        self.assertEqual(expected, _merge_tags(current_tags, changing_tags))
 
     def test_merge_unseen_new_tag(self):
-        current_tags = {'present'}, {'missing'}
-        changing_tags = {'coming'}, set()
-        expected = {'coming', 'present'}, {'missing'}
-        self.assertEqual(
-            expected, _merge_tags(current_tags, changing_tags))
+        current_tags = {"present"}, {"missing"}
+        changing_tags = {"coming"}, set()
+        expected = {"coming", "present"}, {"missing"}
+        self.assertEqual(expected, _merge_tags(current_tags, changing_tags))
 
     def test_merge_incoming_new_tag_with_current_gone_tag(self):
         # If one of the incoming "new" tags is currently marked as "gone",
         # then it overrides the "gone" tag, leaving it marked as "new".
-        current_tags = {'present'}, {'coming', 'missing'}
-        changing_tags = {'coming'}, set()
-        expected = {'coming', 'present'}, {'missing'}
-        self.assertEqual(
-            expected, _merge_tags(current_tags, changing_tags))
+        current_tags = {"present"}, {"coming", "missing"}
+        changing_tags = {"coming"}, set()
+        expected = {"coming", "present"}, {"missing"}
+        self.assertEqual(expected, _merge_tags(current_tags, changing_tags))
 
 
 class TestStreamResultRouter(TestCase):
-
     def test_start_stop_test_run_no_fallback(self):
         result = StreamResultRouter()
         result.startTestRun()
         result.stopTestRun()
 
     def test_no_fallback_errors(self):
-        self.assertRaises(Exception, StreamResultRouter().status, test_id='f')
+        self.assertRaises(Exception, StreamResultRouter().status, test_id="f")
 
     def test_fallback_calls(self):
         fallback = LoggingStreamResult()
         result = StreamResultRouter(fallback)
         result.startTestRun()
-        result.status(test_id='foo')
+        result.status(test_id="foo")
         result.stopTestRun()
-        self.assertEqual([
-            ('startTestRun',),
-            ('status', 'foo', None, None, True, None, None, False, None, None,
-             None),
-            ('stopTestRun',),
+        self.assertEqual(
+            [
+                ("startTestRun",),
+                (
+                    "status",
+                    "foo",
+                    None,
+                    None,
+                    True,
+                    None,
+                    None,
+                    False,
+                    None,
+                    None,
+                    None,
+                ),
+                ("stopTestRun",),
             ],
-            fallback._events)
+            fallback._events,
+        )
 
     def test_fallback_no_do_start_stop_run(self):
         fallback = LoggingStreamResult()
         result = StreamResultRouter(fallback, do_start_stop_run=False)
         result.startTestRun()
-        result.status(test_id='foo')
+        result.status(test_id="foo")
         result.stopTestRun()
-        self.assertEqual([
-            ('status', 'foo', None, None, True, None, None, False, None, None,
-             None)
-            ],
-            fallback._events)
+        self.assertEqual(
+            [("status", "foo", None, None, True, None, None, False, None, None, None)],
+            fallback._events,
+        )
 
     def test_add_rule_bad_policy(self):
         router = StreamResultRouter()
         target = LoggingStreamResult()
-        self.assertRaises(ValueError, router.add_rule, target, 'route_code_prefixa',
-            route_prefix='0')
+        self.assertRaises(
+            ValueError, router.add_rule, target, "route_code_prefixa", route_prefix="0"
+        )
 
     def test_add_rule_extra_policy_arg(self):
         router = StreamResultRouter()
         target = LoggingStreamResult()
-        self.assertRaises(TypeError, router.add_rule, target, 'route_code_prefix',
-            route_prefix='0', foo=1)
+        self.assertRaises(
+            TypeError,
+            router.add_rule,
+            target,
+            "route_code_prefix",
+            route_prefix="0",
+            foo=1,
+        )
 
     def test_add_rule_missing_prefix(self):
         router = StreamResultRouter()
         target = LoggingStreamResult()
-        self.assertRaises(TypeError, router.add_rule, target, 'route_code_prefix')
+        self.assertRaises(TypeError, router.add_rule, target, "route_code_prefix")
 
     def test_add_rule_slash_in_prefix(self):
         router = StreamResultRouter()
         target = LoggingStreamResult()
-        self.assertRaises(TypeError, router.add_rule, target, 'route_code_prefix',
-            route_prefix='0/')
+        self.assertRaises(
+            TypeError, router.add_rule, target, "route_code_prefix", route_prefix="0/"
+        )
 
     def test_add_rule_route_code_consume_False(self):
         fallback = LoggingStreamResult()
         target = LoggingStreamResult()
         router = StreamResultRouter(fallback)
-        router.add_rule(target, 'route_code_prefix', route_prefix='0')
-        router.status(test_id='foo', route_code='0')
-        router.status(test_id='foo', route_code='0/1')
-        router.status(test_id='foo')
-        self.assertEqual([
-            ('status', 'foo', None, None, True, None, None, False, None, '0',
-             None),
-            ('status', 'foo', None, None, True, None, None, False, None, '0/1',
-             None),
+        router.add_rule(target, "route_code_prefix", route_prefix="0")
+        router.status(test_id="foo", route_code="0")
+        router.status(test_id="foo", route_code="0/1")
+        router.status(test_id="foo")
+        self.assertEqual(
+            [
+                ("status", "foo", None, None, True, None, None, False, None, "0", None),
+                (
+                    "status",
+                    "foo",
+                    None,
+                    None,
+                    True,
+                    None,
+                    None,
+                    False,
+                    None,
+                    "0/1",
+                    None,
+                ),
             ],
-            target._events)
-        self.assertEqual([
-            ('status', 'foo', None, None, True, None, None, False, None, None,
-             None),
+            target._events,
+        )
+        self.assertEqual(
+            [
+                (
+                    "status",
+                    "foo",
+                    None,
+                    None,
+                    True,
+                    None,
+                    None,
+                    False,
+                    None,
+                    None,
+                    None,
+                ),
             ],
-            fallback._events)
+            fallback._events,
+        )
 
     def test_add_rule_route_code_consume_True(self):
         fallback = LoggingStreamResult()
         target = LoggingStreamResult()
         router = StreamResultRouter(fallback)
         router.add_rule(
-            target, 'route_code_prefix', route_prefix='0', consume_route=True)
-        router.status(test_id='foo', route_code='0') # -> None
-        router.status(test_id='foo', route_code='0/1') # -> 1
-        router.status(test_id='foo', route_code='1') # -> fallback as-is.
-        self.assertEqual([
-            ('status', 'foo', None, None, True, None, None, False, None, None,
-             None),
-            ('status', 'foo', None, None, True, None, None, False, None, '1',
-             None),
+            target, "route_code_prefix", route_prefix="0", consume_route=True
+        )
+        router.status(test_id="foo", route_code="0")  # -> None
+        router.status(test_id="foo", route_code="0/1")  # -> 1
+        router.status(test_id="foo", route_code="1")  # -> fallback as-is.
+        self.assertEqual(
+            [
+                (
+                    "status",
+                    "foo",
+                    None,
+                    None,
+                    True,
+                    None,
+                    None,
+                    False,
+                    None,
+                    None,
+                    None,
+                ),
+                ("status", "foo", None, None, True, None, None, False, None, "1", None),
             ],
-            target._events)
-        self.assertEqual([
-            ('status', 'foo', None, None, True, None, None, False, None, '1',
-             None),
+            target._events,
+        )
+        self.assertEqual(
+            [
+                ("status", "foo", None, None, True, None, None, False, None, "1", None),
             ],
-            fallback._events)
+            fallback._events,
+        )
 
     def test_add_rule_test_id(self):
         nontest = LoggingStreamResult()
         test = LoggingStreamResult()
         router = StreamResultRouter(test)
-        router.add_rule(nontest, 'test_id', test_id=None)
-        router.status(test_id='foo', file_name="bar", file_bytes=b'')
-        router.status(file_name="bar", file_bytes=b'')
-        self.assertEqual([
-            ('status', 'foo', None, None, True, 'bar', b'', False, None, None,
-             None),], test._events)
-        self.assertEqual([
-            ('status', None, None, None, True, 'bar', b'', False, None, None,
-             None),], nontest._events)
+        router.add_rule(nontest, "test_id", test_id=None)
+        router.status(test_id="foo", file_name="bar", file_bytes=b"")
+        router.status(file_name="bar", file_bytes=b"")
+        self.assertEqual(
+            [
+                (
+                    "status",
+                    "foo",
+                    None,
+                    None,
+                    True,
+                    "bar",
+                    b"",
+                    False,
+                    None,
+                    None,
+                    None,
+                ),
+            ],
+            test._events,
+        )
+        self.assertEqual(
+            [
+                ("status", None, None, None, True, "bar", b"", False, None, None, None),
+            ],
+            nontest._events,
+        )
 
     def test_add_rule_do_start_stop_run(self):
         nontest = LoggingStreamResult()
         router = StreamResultRouter()
-        router.add_rule(nontest, 'test_id', test_id=None, do_start_stop_run=True)
+        router.add_rule(nontest, "test_id", test_id=None, do_start_stop_run=True)
         router.startTestRun()
         router.stopTestRun()
-        self.assertEqual([
-            ('startTestRun',),
-            ('stopTestRun',),
-            ], nontest._events)
+        self.assertEqual(
+            [
+                ("startTestRun",),
+                ("stopTestRun",),
+            ],
+            nontest._events,
+        )
 
     def test_add_rule_do_start_stop_run_after_startTestRun(self):
         nontest = LoggingStreamResult()
         router = StreamResultRouter()
         router.startTestRun()
-        router.add_rule(nontest, 'test_id', test_id=None, do_start_stop_run=True)
+        router.add_rule(nontest, "test_id", test_id=None, do_start_stop_run=True)
         router.stopTestRun()
-        self.assertEqual([
-            ('startTestRun',),
-            ('stopTestRun',),
-            ], nontest._events)
+        self.assertEqual(
+            [
+                ("startTestRun",),
+                ("stopTestRun",),
+            ],
+            nontest._events,
+        )
 
 
 class TestStreamToQueue(TestCase):
-
     def make_result(self):
         queue = Queue()
         return queue, StreamToQueue(queue, "foo")
 
     def test_status(self):
         def check_event(event_dict, route=None, time=None):
-            self.assertEqual("status", event_dict['event'])
-            self.assertEqual("test", event_dict['test_id'])
-            self.assertEqual("fail", event_dict['test_status'])
-            self.assertEqual({"quux"}, event_dict['test_tags'])
-            self.assertEqual(False, event_dict['runnable'])
-            self.assertEqual("file", event_dict['file_name'])
-            self.assertEqual(_b("content"), event_dict['file_bytes'])
-            self.assertEqual(True, event_dict['eof'])
-            self.assertEqual("quux", event_dict['mime_type'])
-            self.assertEqual("test", event_dict['test_id'])
-            self.assertEqual(route, event_dict['route_code'])
-            self.assertEqual(time, event_dict['timestamp'])
+            self.assertEqual("status", event_dict["event"])
+            self.assertEqual("test", event_dict["test_id"])
+            self.assertEqual("fail", event_dict["test_status"])
+            self.assertEqual({"quux"}, event_dict["test_tags"])
+            self.assertEqual(False, event_dict["runnable"])
+            self.assertEqual("file", event_dict["file_name"])
+            self.assertEqual(_b("content"), event_dict["file_bytes"])
+            self.assertEqual(True, event_dict["eof"])
+            self.assertEqual("quux", event_dict["mime_type"])
+            self.assertEqual("test", event_dict["test_id"])
+            self.assertEqual(route, event_dict["route_code"])
+            self.assertEqual(time, event_dict["timestamp"])
+
         queue, result = self.make_result()
-        result.status("test", "fail", test_tags={"quux"}, runnable=False,
-            file_name="file", file_bytes=_b("content"), eof=True,
-            mime_type="quux", route_code=None, timestamp=None)
+        result.status(
+            "test",
+            "fail",
+            test_tags={"quux"},
+            runnable=False,
+            file_name="file",
+            file_bytes=_b("content"),
+            eof=True,
+            mime_type="quux",
+            route_code=None,
+            timestamp=None,
+        )
         self.assertEqual(1, queue.qsize())
         a_time = datetime.datetime.now(utc)
-        result.status("test", "fail", test_tags={"quux"}, runnable=False,
-            file_name="file", file_bytes=_b("content"), eof=True,
-            mime_type="quux", route_code="bar", timestamp=a_time)
+        result.status(
+            "test",
+            "fail",
+            test_tags={"quux"},
+            runnable=False,
+            file_name="file",
+            file_bytes=_b("content"),
+            eof=True,
+            mime_type="quux",
+            route_code="bar",
+            timestamp=a_time,
+        )
         self.assertEqual(2, queue.qsize())
         check_event(queue.get(False), route="foo", time=None)
         check_event(queue.get(False), route="foo/bar", time=a_time)
@@ -2053,20 +2382,17 @@ class TestStreamToQueue(TestCase):
     def testStartTestRun(self):
         queue, result = self.make_result()
         result.startTestRun()
-        self.assertEqual(
-            {'event':'startTestRun', 'result':result}, queue.get(False))
+        self.assertEqual({"event": "startTestRun", "result": result}, queue.get(False))
         self.assertTrue(queue.empty())
 
     def testStopTestRun(self):
         queue, result = self.make_result()
         result.stopTestRun()
-        self.assertEqual(
-            {'event':'stopTestRun', 'result':result}, queue.get(False))
+        self.assertEqual({"event": "stopTestRun", "result": result}, queue.get(False))
         self.assertTrue(queue.empty())
 
 
 class TestExtendedToOriginalResultDecoratorBase(TestCase):
-
     def make_26_result(self):
         self.result = Python26TestResult()
         self.make_converter()
@@ -2086,34 +2412,44 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
         """Call an outcome with a details dict to be passed through."""
         # This dict is /not/ convertible - thats deliberate, as it should
         # not hit the conversion code path.
-        details = {'foo': 'bar'}
+        details = {"foo": "bar"}
         getattr(self.converter, outcome)(self, details=details)
         self.assertEqual([(outcome, self, details)], self.result._events)
 
     def get_details_and_string(self):
         """Get a details dict and expected string."""
+
         def text1():
-            return [_b('1\n2\n')]
+            return [_b("1\n2\n")]
+
         def text2():
-            return [_b('3\n4\n')]
+            return [_b("3\n4\n")]
+
         def bin1():
-            return [_b('5\n')]
-        details = {'text 1': Content(ContentType('text', 'plain'), text1),
-            'text 2': Content(ContentType('text', 'strange'), text2),
-            'bin 1': Content(ContentType('application', 'binary'), bin1)}
-        return (details,
-                ("Binary content:\n"
-                 "  bin 1 (application/binary)\n"
-                 "\n"
-                 "text 1: {{{\n"
-                 "1\n"
-                 "2\n"
-                 "}}}\n"
-                 "\n"
-                 "text 2: {{{\n"
-                 "3\n"
-                 "4\n"
-                 "}}}\n"))
+            return [_b("5\n")]
+
+        details = {
+            "text 1": Content(ContentType("text", "plain"), text1),
+            "text 2": Content(ContentType("text", "strange"), text2),
+            "bin 1": Content(ContentType("application", "binary"), bin1),
+        }
+        return (
+            details,
+            (
+                "Binary content:\n"
+                "  bin 1 (application/binary)\n"
+                "\n"
+                "text 1: {{{\n"
+                "1\n"
+                "2\n"
+                "}}}\n"
+                "\n"
+                "text 2: {{{\n"
+                "3\n"
+                "4\n"
+                "}}}\n"
+            ),
+        )
 
     def check_outcome_details_to_exec_info(self, outcome, expected=None):
         """Call an outcome with a details dict to be made into exc_info."""
@@ -2130,7 +2466,7 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
         """Call an outcome with a details dict to be swallowed."""
         if not expected:
             expected = outcome
-        details = {'foo': 'bar'}
+        details = {"foo": "bar"}
         getattr(self.converter, outcome)(self, details=details)
         self.assertEqual([(expected, self)], self.result._events)
 
@@ -2186,14 +2522,12 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
         self.assertEqual([(outcome, self, "foo")], self.result._events)
 
 
-class TestExtendedToOriginalResultDecorator(
-    TestExtendedToOriginalResultDecoratorBase):
-
+class TestExtendedToOriginalResultDecorator(TestExtendedToOriginalResultDecoratorBase):
     def test_failfast_py26(self):
         self.make_26_result()
         self.assertEqual(False, self.converter.failfast)
         self.converter.failfast = True
-        self.assertFalse(hasattr(self.converter.decorated, 'failfast'))
+        self.assertFalse(hasattr(self.converter.decorated, "failfast"))
 
     def test_failfast_py27(self):
         self.make_27_result()
@@ -2213,7 +2547,7 @@ class TestExtendedToOriginalResultDecorator(
     def test_progress_pyextended(self):
         self.make_extended_result()
         self.converter.progress(1, 2)
-        self.assertEqual([('progress', 1, 2)], self.result._events)
+        self.assertEqual([("progress", 1, 2)], self.result._events)
 
     def test_shouldStop(self):
         self.make_26_result()
@@ -2224,17 +2558,17 @@ class TestExtendedToOriginalResultDecorator(
     def test_startTest_py26(self):
         self.make_26_result()
         self.converter.startTest(self)
-        self.assertEqual([('startTest', self)], self.result._events)
+        self.assertEqual([("startTest", self)], self.result._events)
 
     def test_startTest_py27(self):
         self.make_27_result()
         self.converter.startTest(self)
-        self.assertEqual([('startTest', self)], self.result._events)
+        self.assertEqual([("startTest", self)], self.result._events)
 
     def test_startTest_pyextended(self):
         self.make_extended_result()
         self.converter.startTest(self)
-        self.assertEqual([('startTest', self)], self.result._events)
+        self.assertEqual([("startTest", self)], self.result._events)
 
     def test_startTestRun_py26(self):
         self.make_26_result()
@@ -2244,27 +2578,27 @@ class TestExtendedToOriginalResultDecorator(
     def test_startTestRun_py27(self):
         self.make_27_result()
         self.converter.startTestRun()
-        self.assertEqual([('startTestRun',)], self.result._events)
+        self.assertEqual([("startTestRun",)], self.result._events)
 
     def test_startTestRun_pyextended(self):
         self.make_extended_result()
         self.converter.startTestRun()
-        self.assertEqual([('startTestRun',)], self.result._events)
+        self.assertEqual([("startTestRun",)], self.result._events)
 
     def test_stopTest_py26(self):
         self.make_26_result()
         self.converter.stopTest(self)
-        self.assertEqual([('stopTest', self)], self.result._events)
+        self.assertEqual([("stopTest", self)], self.result._events)
 
     def test_stopTest_py27(self):
         self.make_27_result()
         self.converter.stopTest(self)
-        self.assertEqual([('stopTest', self)], self.result._events)
+        self.assertEqual([("stopTest", self)], self.result._events)
 
     def test_stopTest_pyextended(self):
         self.make_extended_result()
         self.converter.stopTest(self)
-        self.assertEqual([('stopTest', self)], self.result._events)
+        self.assertEqual([("stopTest", self)], self.result._events)
 
     def test_stopTestRun_py26(self):
         self.make_26_result()
@@ -2274,12 +2608,12 @@ class TestExtendedToOriginalResultDecorator(
     def test_stopTestRun_py27(self):
         self.make_27_result()
         self.converter.stopTestRun()
-        self.assertEqual([('stopTestRun',)], self.result._events)
+        self.assertEqual([("stopTestRun",)], self.result._events)
 
     def test_stopTestRun_pyextended(self):
         self.make_extended_result()
         self.converter.stopTestRun()
-        self.assertEqual([('stopTestRun',)], self.result._events)
+        self.assertEqual([("stopTestRun",)], self.result._events)
 
     def test_tags_py26(self):
         self.make_26_result()
@@ -2292,7 +2626,7 @@ class TestExtendedToOriginalResultDecorator(
     def test_tags_pyextended(self):
         self.make_extended_result()
         self.converter.tags({1}, {2})
-        self.assertEqual([('tags', {1}, {2})], self.result._events)
+        self.assertEqual([("tags", {1}, {2})], self.result._events)
 
     def test_time_py26(self):
         self.make_26_result()
@@ -2305,12 +2639,11 @@ class TestExtendedToOriginalResultDecorator(
     def test_time_pyextended(self):
         self.make_extended_result()
         self.converter.time(1)
-        self.assertEqual([('time', 1)], self.result._events)
+        self.assertEqual([("time", 1)], self.result._events)
 
 
 class TestExtendedToOriginalAddError(TestExtendedToOriginalResultDecoratorBase):
-
-    outcome = 'addError'
+    outcome = "addError"
 
     def test_outcome_Original_py26(self):
         self.make_26_result()
@@ -2340,38 +2673,32 @@ class TestExtendedToOriginalAddError(TestExtendedToOriginalResultDecoratorBase):
         self.make_extended_result()
         self.assertThat(
             lambda: getattr(self.converter, self.outcome)(self),
-            Raises(MatchesException(ValueError)))
+            Raises(MatchesException(ValueError)),
+        )
 
 
-class TestExtendedToOriginalAddFailure(
-    TestExtendedToOriginalAddError):
-
-    outcome = 'addFailure'
+class TestExtendedToOriginalAddFailure(TestExtendedToOriginalAddError):
+    outcome = "addFailure"
 
 
-class TestExtendedToOriginalAddExpectedFailure(
-    TestExtendedToOriginalAddError):
-
-    outcome = 'addExpectedFailure'
+class TestExtendedToOriginalAddExpectedFailure(TestExtendedToOriginalAddError):
+    outcome = "addExpectedFailure"
 
     def test_outcome_Original_py26(self):
         self.make_26_result()
-        self.check_outcome_exc_info_to_nothing(self.outcome, 'addSuccess')
+        self.check_outcome_exc_info_to_nothing(self.outcome, "addSuccess")
 
     def test_outcome_Extended_py26(self):
         self.make_26_result()
-        self.check_outcome_details_to_nothing(self.outcome, 'addSuccess')
+        self.check_outcome_details_to_nothing(self.outcome, "addSuccess")
 
 
-
-class TestExtendedToOriginalAddSkip(
-    TestExtendedToOriginalResultDecoratorBase):
-
-    outcome = 'addSkip'
+class TestExtendedToOriginalAddSkip(TestExtendedToOriginalResultDecoratorBase):
+    outcome = "addSkip"
 
     def test_outcome_Original_py26(self):
         self.make_26_result()
-        self.check_outcome_string_nothing(self.outcome, 'addSuccess')
+        self.check_outcome_string_nothing(self.outcome, "addSuccess")
 
     def test_outcome_Original_py27(self):
         self.make_27_result()
@@ -2383,7 +2710,7 @@ class TestExtendedToOriginalAddSkip(
 
     def test_outcome_Extended_py26(self):
         self.make_26_result()
-        self.check_outcome_string_nothing(self.outcome, 'addSuccess')
+        self.check_outcome_string_nothing(self.outcome, "addSuccess")
 
     def test_outcome_Extended_py27_no_reason(self):
         self.make_27_result()
@@ -2391,8 +2718,9 @@ class TestExtendedToOriginalAddSkip(
 
     def test_outcome_Extended_py27_reason(self):
         self.make_27_result()
-        self.check_outcome_details_to_arg(self.outcome, 'foo',
-            {'reason': Content(UTF8_TEXT, lambda:[_b('foo')])})
+        self.check_outcome_details_to_arg(
+            self.outcome, "foo", {"reason": Content(UTF8_TEXT, lambda: [_b("foo")])}
+        )
 
     def test_outcome_Extended_pyextended(self):
         self.make_extended_result()
@@ -2402,14 +2730,13 @@ class TestExtendedToOriginalAddSkip(
         self.make_extended_result()
         self.assertThat(
             lambda: getattr(self.converter, self.outcome)(self),
-            Raises(MatchesException(ValueError)))
+            Raises(MatchesException(ValueError)),
+        )
 
 
-class TestExtendedToOriginalAddSuccess(
-    TestExtendedToOriginalResultDecoratorBase):
-
-    outcome = 'addSuccess'
-    expected = 'addSuccess'
+class TestExtendedToOriginalAddSuccess(TestExtendedToOriginalResultDecoratorBase):
+    outcome = "addSuccess"
+    expected = "addSuccess"
 
     def test_outcome_Original_py26(self):
         self.make_26_result()
@@ -2437,10 +2764,10 @@ class TestExtendedToOriginalAddSuccess(
 
 
 class TestExtendedToOriginalAddUnexpectedSuccess(
-    TestExtendedToOriginalResultDecoratorBase):
-
-    outcome = 'addUnexpectedSuccess'
-    expected = 'addFailure'
+    TestExtendedToOriginalResultDecoratorBase
+):
+    outcome = "addUnexpectedSuccess"
+    expected = "addFailure"
 
     def test_outcome_Original_py26(self):
         self.make_26_result()
@@ -2472,13 +2799,15 @@ class TestExtendedToOriginalAddUnexpectedSuccess(
 
 
 class TestExtendedToOriginalResultOtherAttributes(
-    TestExtendedToOriginalResultDecoratorBase):
-
+    TestExtendedToOriginalResultDecoratorBase
+):
     def test_other_attribute(self):
         class OtherExtendedResult:
             def foo(self):
                 return 2
+
             bar = 1
+
         self.result = OtherExtendedResult()
         self.make_converter()
         self.assertEqual(1, self.converter.bar)
@@ -2495,10 +2824,10 @@ class TestNonAsciiResults(TestCase):
     """
 
     _sample_texts = (
-        "pa\u026a\u03b8\u0259n", # Unicode encodings only
-        "\u5357\u7121", # In ISO 2022 encodings
-        "\xa7\xa7\xa7", # In ISO 8859 encodings
-        )
+        "pa\u026a\u03b8\u0259n",  # Unicode encodings only
+        "\u5357\u7121",  # In ISO 2022 encodings
+        "\xa7\xa7\xa7",  # In ISO 8859 encodings
+    )
 
     _is_pypy = "__pypy__" in sys.builtin_module_names
     # Everything but Jython shows syntax errors on the current character
@@ -2527,19 +2856,19 @@ class TestNonAsciiResults(TestCase):
         finally:
             f.close()
 
-    def _test_external_case(self, testline, coding="ascii", modulelevel="",
-            suffix=""):
+    def _test_external_case(self, testline, coding="ascii", modulelevel="", suffix=""):
         """Create and run a test case in a separate module"""
         self._setup_external_case(testline, coding, modulelevel, suffix)
         return self._run_external_case()
 
-    def _setup_external_case(self, testline, coding="ascii", modulelevel="",
-            suffix=""):
+    def _setup_external_case(self, testline, coding="ascii", modulelevel="", suffix=""):
         """Create a test case in a separate module"""
         _, prefix, self.modname = self.id().rsplit(".", 2)
         self.dir = tempfile.mkdtemp(prefix=prefix, suffix=suffix)
         self.addCleanup(shutil.rmtree, self.dir)
-        self._write_module(self.modname, coding,
+        self._write_module(
+            self.modname,
+            coding,
             # Older Python 2 versions don't see a coding declaration in a
             # docstring so it has to be in a comment, but then we can't
             # workaround bug: <http://ironpython.codeplex.com/workitem/26940>
@@ -2548,7 +2877,8 @@ class TestNonAsciiResults(TestCase):
             "%s\n"
             "class Test(testtools.TestCase):\n"
             "    def runTest(self):\n"
-            "        %s\n" % (coding, modulelevel, testline))
+            "        %s\n" % (coding, modulelevel, testline),
+        )
 
     def _run_external_case(self):
         """Run the prepared test case in a separate module"""
@@ -2562,12 +2892,12 @@ class TestNonAsciiResults(TestCase):
 
     def _get_sample_text(self, encoding="unicode_internal"):
         if encoding is None:
-           encoding = "unicode_internal"
+            encoding = "unicode_internal"
         for u in self._sample_texts:
             try:
                 b = u.encode(encoding)
                 if u == b.decode(encoding):
-                   return u, u
+                    return u, u
             except (LookupError, UnicodeError):
                 pass
         self.skipTest("Could not find a sample text for encoding: %r" % encoding)
@@ -2585,43 +2915,46 @@ class TestNonAsciiResults(TestCase):
         """Assertion via exec can be non-ascii and still gets decoded"""
         text, raw = self._get_sample_text(_get_exception_encoding())
         textoutput = self._test_external_case(
-            testline='exec ("self.fail(%s)")' % ascii(raw))
+            testline='exec ("self.fail(%s)")' % ascii(raw)
+        )
         self.assertIn(self._as_output(text), textoutput)
 
     def test_control_characters_in_failure_string(self):
         """Control characters in assertions should be escaped"""
         textoutput = self._test_external_case("self.fail('\\a\\a\\a')")
-        self.expectFailure("Defense against the beeping horror unimplemented",
-            self.assertNotIn, self._as_output("\a\a\a"), textoutput)
+        self.expectFailure(
+            "Defense against the beeping horror unimplemented",
+            self.assertNotIn,
+            self._as_output("\a\a\a"),
+            textoutput,
+        )
         self.assertIn(self._as_output("\uFFFD\uFFFD\uFFFD"), textoutput)
 
     def _local_os_error_matcher(self):
-        return MatchesAny(Contains("FileExistsError: "),
-                          Contains("PermissionError: "))
+        return MatchesAny(Contains("FileExistsError: "), Contains("PermissionError: "))
 
     def test_os_error(self):
         """Locale error messages from the OS shouldn't break anything"""
         textoutput = self._test_external_case(
-            modulelevel="import os",
-            testline="os.mkdir('/')")
+            modulelevel="import os", testline="os.mkdir('/')"
+        )
         self.assertThat(textoutput, self._local_os_error_matcher())
 
     def test_assertion_text_shift_jis(self):
         """A terminal raw backslash in an encoded string is weird but fine"""
         example_text = "\u5341"
         textoutput = self._test_external_case(
-            coding="shift_jis",
-            testline="self.fail('%s')" % example_text)
+            coding="shift_jis", testline="self.fail('%s')" % example_text
+        )
         output_text = example_text
-        self.assertIn(self._as_output("AssertionError: %s" % output_text),
-            textoutput)
+        self.assertIn(self._as_output("AssertionError: %s" % output_text), textoutput)
 
     def test_file_comment_iso2022_jp(self):
         """Control character escapes must be preserved if valid encoding"""
         example_text, _ = self._get_sample_text("iso2022_jp")
         textoutput = self._test_external_case(
-            coding="iso2022_jp",
-            testline="self.fail('Simple') # %s" % example_text)
+            coding="iso2022_jp", testline="self.fail('Simple') # %s" % example_text
+        )
         self.assertIn(self._as_output(example_text), textoutput)
 
     def test_unicode_exception(self):
@@ -2631,10 +2964,12 @@ class TestNonAsciiResults(TestCase):
             "class FancyError(Exception):\n"
             # A __unicode__ method does nothing on py3k but the default works
             "    def __unicode__(self):\n"
-            "        return self.args[0]\n")
+            "        return self.args[0]\n"
+        )
         textoutput = self._test_external_case(
             modulelevel=exception_class,
-            testline="raise FancyError(%s)" % ascii(example_text))
+            testline="raise FancyError(%s)" % ascii(example_text),
+        )
         self.assertIn(self._as_output(example_text), textoutput)
 
     def test_unprintable_exception(self):
@@ -2646,15 +2981,15 @@ class TestNonAsciiResults(TestCase):
             "    def __unicode__(self):\n"
             "        raise RuntimeError\n"
             "    def __repr__(self):\n"
-            "        raise RuntimeError\n")
+            "        raise RuntimeError\n"
+        )
         if sys.version_info >= (3, 11):
             expected = "UnprintableError: <exception str() failed>\n"
         else:
-            expected = (
-                "UnprintableError: <unprintable UnprintableError object>\n")
+            expected = "UnprintableError: <unprintable UnprintableError object>\n"
         textoutput = self._test_external_case(
-            modulelevel=exception_class,
-            testline="raise UnprintableError")
+            modulelevel=exception_class, testline="raise UnprintableError"
+        )
         self.assertIn(self._as_output(expected), textoutput)
 
     def test_non_ascii_dirname(self):
@@ -2665,26 +3000,32 @@ class TestNonAsciiResults(TestCase):
             # than just ascii which raises a SyntaxError with no other details
             coding="utf-8",
             testline="self.fail('Simple')",
-            suffix=raw)
+            suffix=raw,
+        )
         self.assertIn(self._as_output(text), textoutput)
 
     def test_syntax_error(self):
         """Syntax errors should still have fancy special-case formatting"""
         if platform.python_implementation() == "PyPy":
-            spaces = '         '
+            spaces = "         "
         elif sys.version_info >= (3, 10):
-            spaces = '        '
+            spaces = "        "
         else:
-            spaces = '          '
-        marker = '^^^' if sys.version_info >= (3, 10) else '^'
+            spaces = "          "
+        marker = "^^^" if sys.version_info >= (3, 10) else "^"
         textoutput = self._test_external_case("exec ('f(a, b c)')")
-        self.assertIn(self._as_output(
-            '  File "<string>", line 1\n'
-            '    f(a, b c)\n'
-            + ' ' * self._error_on_character +
-            spaces + marker + '\n'
-            'SyntaxError: '
-            ), textoutput)
+        self.assertIn(
+            self._as_output(
+                '  File "<string>", line 1\n'
+                "    f(a, b c)\n"
+                + " " * self._error_on_character
+                + spaces
+                + marker
+                + "\n"
+                "SyntaxError: "
+            ),
+            textoutput,
+        )
 
     def test_syntax_error_malformed(self):
         """Syntax errors with bogus parameters should break anything"""
@@ -2695,53 +3036,61 @@ class TestNonAsciiResults(TestCase):
         """Syntax error on a latin-1 line shows the line decoded"""
         text, raw = self._get_sample_text("iso-8859-1")
         textoutput = self._setup_external_case("import bad")
-        self._write_module("bad", "iso-8859-1",
-            "# coding: iso-8859-1\n! = 0 # %s\n" % text)
+        self._write_module(
+            "bad", "iso-8859-1", "# coding: iso-8859-1\n! = 0 # %s\n" % text
+        )
         textoutput = self._run_external_case()
-        self.assertIn(self._as_output(
-            #'bad.py", line 2\n'
-            '    ! = 0 # %s\n'
-            '    ^\n'
-            'SyntaxError: ' %
-            (text,)), textoutput)
+        self.assertIn(
+            self._as_output(
+                #'bad.py", line 2\n'
+                "    ! = 0 # %s\n" "    ^\n" "SyntaxError: " % (text,)
+            ),
+            textoutput,
+        )
 
     def test_syntax_error_line_iso_8859_5(self):
         """Syntax error on a iso-8859-5 line shows the line decoded"""
         text, raw = self._get_sample_text("iso-8859-5")
         textoutput = self._setup_external_case("import bad")
-        self._write_module("bad", "iso-8859-5",
-            "# coding: iso-8859-5\n%% = 0 # %s\n" % text)
+        self._write_module(
+            "bad", "iso-8859-5", "# coding: iso-8859-5\n%% = 0 # %s\n" % text
+        )
         textoutput = self._run_external_case()
         self.assertThat(
             textoutput,
             MatchesRegex(
-                self._as_output((
-                #'bad.py", line 2\n'
-                '.*%% = 0 # %s\n'
-                + ' ' * self._error_on_character +
-                '\\s*\\^\n'
-                'SyntaxError:.*') %
-                (text,)),
-            re.MULTILINE | re.DOTALL)
+                self._as_output(
+                    (
+                        #'bad.py", line 2\n'
+                        ".*%% = 0 # %s\n" + " " * self._error_on_character + "\\s*\\^\n"
+                        "SyntaxError:.*"
+                    )
+                    % (text,)
+                ),
+                re.MULTILINE | re.DOTALL,
+            ),
         )
 
     def test_syntax_error_line_euc_jp(self):
         """Syntax error on a euc_jp line shows the line decoded"""
         text, raw = self._get_sample_text("euc_jp")
         textoutput = self._setup_external_case("import bad")
-        self._write_module("bad", "euc_jp",
-            "# coding: euc_jp\n$ = 0 # %s\n" % text)
+        self._write_module("bad", "euc_jp", "# coding: euc_jp\n$ = 0 # %s\n" % text)
         textoutput = self._run_external_case()
         # pypy uses cpython's multibyte codecs so has their behavior here
         if self._is_pypy:
             self._error_on_character = True
-        self.assertIn(self._as_output((
-            #'bad.py", line 2\n'
-            '    $ = 0 # %s\n'
-            + ' ' * self._error_on_character +
-            '   ^\n'
-            'SyntaxError: ') %
-            (text,)), textoutput)
+        self.assertIn(
+            self._as_output(
+                (
+                    #'bad.py", line 2\n'
+                    "    $ = 0 # %s\n" + " " * self._error_on_character + "   ^\n"
+                    "SyntaxError: "
+                )
+                % (text,)
+            ),
+            textoutput,
+        )
 
     def test_syntax_error_line_utf_8(self):
         """Syntax error on a utf-8 line shows the line decoded"""
@@ -2750,18 +3099,24 @@ class TestNonAsciiResults(TestCase):
         self._write_module("bad", "utf-8", "\ufeff^ = 0 # %s\n" % text)
         textoutput = self._run_external_case()
         # Python 3.9 no longer prints the '\ufeff'
-        if sys.version_info >= (3,9):
-            textoutput = textoutput.replace('\ufeff', '')
+        if sys.version_info >= (3, 9):
+            textoutput = textoutput.replace("\ufeff", "")
         self.assertThat(
             textoutput,
             MatchesRegex(
-                self._as_output((
-                    '.*bad.py", line 1\n'
-                    '\\s*\\^ = 0 # %s\n'
-                    + ' ' * self._error_on_character +
-                    '\\s*\\^\n'
-                    'SyntaxError:.*') % text),
-                re.M | re.S)
+                self._as_output(
+                    (
+                        '.*bad.py", line 1\n'
+                        "\\s*\\^ = 0 # %s\n"
+                        + " "
+                        * self._error_on_character
+                        + "\\s*\\^\n"
+                        "SyntaxError:.*"
+                    )
+                    % text
+                ),
+                re.M | re.S,
+            ),
         )
 
 
@@ -2770,6 +3125,7 @@ class TestNonAsciiResultsWithUnittest(TestNonAsciiResults):
 
     def _run(self, stream, test):
         from unittest import TextTestRunner as _Runner
+
         return _Runner(stream).run(test)
 
     def _as_output(self, text):
@@ -2777,73 +3133,91 @@ class TestNonAsciiResultsWithUnittest(TestNonAsciiResults):
 
 
 class TestDetailsToStr(TestCase):
-
     def test_no_details(self):
         string = _details_to_str({})
-        self.assertThat(string, Equals(''))
+        self.assertThat(string, Equals(""))
 
     def test_binary_content(self):
         content = content_from_stream(
-            io.StringIO('foo'), content_type=ContentType('image', 'jpeg'))
-        string = _details_to_str({'attachment': content})
+            io.StringIO("foo"), content_type=ContentType("image", "jpeg")
+        )
+        string = _details_to_str({"attachment": content})
         self.assertThat(
-            string, Equals("""\
+            string,
+            Equals(
+                """\
 Binary content:
   attachment (image/jpeg)
-"""))
+"""
+            ),
+        )
 
     def test_single_line_content(self):
-        content = text_content('foo')
-        string = _details_to_str({'attachment': content})
-        self.assertThat(string, Equals('attachment: {{{foo}}}\n'))
+        content = text_content("foo")
+        string = _details_to_str({"attachment": content})
+        self.assertThat(string, Equals("attachment: {{{foo}}}\n"))
 
     def test_multi_line_text_content(self):
-        content = text_content('foo\nbar\nbaz')
-        string = _details_to_str({'attachment': content})
-        self.assertThat(string, Equals('attachment: {{{\nfoo\nbar\nbaz\n}}}\n'))
+        content = text_content("foo\nbar\nbaz")
+        string = _details_to_str({"attachment": content})
+        self.assertThat(string, Equals("attachment: {{{\nfoo\nbar\nbaz\n}}}\n"))
 
     def test_special_text_content(self):
-        content = text_content('foo')
-        string = _details_to_str({'attachment': content}, special='attachment')
-        self.assertThat(string, Equals('foo\n'))
+        content = text_content("foo")
+        string = _details_to_str({"attachment": content}, special="attachment")
+        self.assertThat(string, Equals("foo\n"))
 
     def test_multiple_text_content(self):
         string = _details_to_str(
-            {'attachment': text_content('foo\nfoo'),
-             'attachment-1': text_content('bar\nbar')})
+            {
+                "attachment": text_content("foo\nfoo"),
+                "attachment-1": text_content("bar\nbar"),
+            }
+        )
         self.assertThat(
-            string, Equals('attachment: {{{\n'
-                           'foo\n'
-                           'foo\n'
-                           '}}}\n'
-                           '\n'
-                           'attachment-1: {{{\n'
-                           'bar\n'
-                           'bar\n'
-                           '}}}\n'))
+            string,
+            Equals(
+                "attachment: {{{\n"
+                "foo\n"
+                "foo\n"
+                "}}}\n"
+                "\n"
+                "attachment-1: {{{\n"
+                "bar\n"
+                "bar\n"
+                "}}}\n"
+            ),
+        )
 
     def test_empty_attachment(self):
-        string = _details_to_str({'attachment': text_content('')})
+        string = _details_to_str({"attachment": text_content("")})
         self.assertThat(
-            string, Equals("""\
+            string,
+            Equals(
+                """\
 Empty attachments:
   attachment
-"""))
+"""
+            ),
+        )
 
     def test_lots_of_different_attachments(self):
         def jpg(x):
-            return content_from_stream(io.StringIO(x), ContentType('image', 'jpeg'))
+            return content_from_stream(io.StringIO(x), ContentType("image", "jpeg"))
+
         attachments = {
-            'attachment': text_content('foo'),
-            'attachment-1': text_content('traceback'),
-            'attachment-2': jpg('pic1'),
-            'attachment-3': text_content('bar'),
-            'attachment-4': text_content(''),
-            'attachment-5': jpg('pic2'),
-            }
-        string = _details_to_str(attachments, special='attachment-1')
+            "attachment": text_content("foo"),
+            "attachment-1": text_content("traceback"),
+            "attachment-2": jpg("pic1"),
+            "attachment-3": text_content("bar"),
+            "attachment-4": text_content(""),
+            "attachment-5": jpg("pic2"),
+        }
+        string = _details_to_str(attachments, special="attachment-1")
         self.assertThat(
-            string, Equals("""\
+            string,
+            Equals(
+                """\
 Binary content:
   attachment-2 (image/jpeg)
   attachment-5 (image/jpeg)
@@ -2854,11 +3228,12 @@ attachment: {{{foo}}}
 attachment-3: {{{bar}}}
 
 traceback
-"""))
+"""
+            ),
+        )
 
 
 class TestByTestResultTests(TestCase):
-
     def setUp(self):
         super().setUp()
         self.log = []
@@ -2868,12 +3243,12 @@ class TestByTestResultTests(TestCase):
 
     def assertCalled(self, **kwargs):
         defaults = {
-            'test': self,
-            'tags': set(),
-            'details': None,
-            'start_time': 0,
-            'stop_time': 1,
-            }
+            "test": self,
+            "tags": set(),
+            "details": None,
+            "start_time": 0,
+            "stop_time": 1,
+        }
         defaults.update(kwargs)
         self.assertEqual([defaults], self.log)
 
@@ -2889,48 +3264,48 @@ class TestByTestResultTests(TestCase):
         self.result.startTest(self)
         self.result.addSuccess(self)
         self.result.stopTest(self)
-        self.assertCalled(status='success')
+        self.assertCalled(status="success")
 
     def test_add_success_details(self):
         self.result.startTest(self)
-        details = {'foo': 'bar'}
+        details = {"foo": "bar"}
         self.result.addSuccess(self, details=details)
         self.result.stopTest(self)
-        self.assertCalled(status='success', details=details)
+        self.assertCalled(status="success", details=details)
 
     def test_global_tags(self):
-        self.result.tags(['foo'], [])
+        self.result.tags(["foo"], [])
         self.result.startTest(self)
         self.result.addSuccess(self)
         self.result.stopTest(self)
-        self.assertCalled(status='success', tags={'foo'})
+        self.assertCalled(status="success", tags={"foo"})
 
     def test_local_tags(self):
-        self.result.tags(['foo'], [])
+        self.result.tags(["foo"], [])
         self.result.startTest(self)
-        self.result.tags(['bar'], [])
+        self.result.tags(["bar"], [])
         self.result.addSuccess(self)
         self.result.stopTest(self)
-        self.assertCalled(status='success', tags={'foo', 'bar'})
+        self.assertCalled(status="success", tags={"foo", "bar"})
 
     def test_add_error(self):
         self.result.startTest(self)
         try:
-            1/0
+            1 / 0
         except ZeroDivisionError:
             error = sys.exc_info()
         self.result.addError(self, error)
         self.result.stopTest(self)
         self.assertCalled(
-            status='error',
-            details={'traceback': TracebackContent(error, self)})
+            status="error", details={"traceback": TracebackContent(error, self)}
+        )
 
     def test_add_error_details(self):
         self.result.startTest(self)
         details = {"foo": text_content("bar")}
         self.result.addError(self, details=details)
         self.result.stopTest(self)
-        self.assertCalled(status='error', details=details)
+        self.assertCalled(status="error", details=details)
 
     def test_add_failure(self):
         self.result.startTest(self)
@@ -2941,86 +3316,90 @@ class TestByTestResultTests(TestCase):
         self.result.addFailure(self, failure)
         self.result.stopTest(self)
         self.assertCalled(
-            status='failure',
-            details={'traceback': TracebackContent(failure, self)})
+            status="failure", details={"traceback": TracebackContent(failure, self)}
+        )
 
     def test_add_failure_details(self):
         self.result.startTest(self)
         details = {"foo": text_content("bar")}
         self.result.addFailure(self, details=details)
         self.result.stopTest(self)
-        self.assertCalled(status='failure', details=details)
+        self.assertCalled(status="failure", details=details)
 
     def test_add_xfail(self):
         self.result.startTest(self)
         try:
-            1/0
+            1 / 0
         except ZeroDivisionError:
             error = sys.exc_info()
         self.result.addExpectedFailure(self, error)
         self.result.stopTest(self)
         self.assertCalled(
-            status='xfail',
-            details={'traceback': TracebackContent(error, self)})
+            status="xfail", details={"traceback": TracebackContent(error, self)}
+        )
 
     def test_add_xfail_details(self):
         self.result.startTest(self)
         details = {"foo": text_content("bar")}
         self.result.addExpectedFailure(self, details=details)
         self.result.stopTest(self)
-        self.assertCalled(status='xfail', details=details)
+        self.assertCalled(status="xfail", details=details)
 
     def test_add_unexpected_success(self):
         self.result.startTest(self)
-        details = {'foo': 'bar'}
+        details = {"foo": "bar"}
         self.result.addUnexpectedSuccess(self, details=details)
         self.result.stopTest(self)
-        self.assertCalled(status='success', details=details)
+        self.assertCalled(status="success", details=details)
 
     def test_add_skip_reason(self):
         self.result.startTest(self)
         reason = self.getUniqueString()
         self.result.addSkip(self, reason)
         self.result.stopTest(self)
-        self.assertCalled(
-            status='skip', details={'reason': text_content(reason)})
+        self.assertCalled(status="skip", details={"reason": text_content(reason)})
 
     def test_add_skip_details(self):
         self.result.startTest(self)
-        details = {'foo': 'bar'}
+        details = {"foo": "bar"}
         self.result.addSkip(self, details=details)
         self.result.stopTest(self)
-        self.assertCalled(status='skip', details=details)
+        self.assertCalled(status="skip", details=details)
 
     def test_twice(self):
         self.result.startTest(self)
-        self.result.addSuccess(self, details={'foo': 'bar'})
+        self.result.addSuccess(self, details={"foo": "bar"})
         self.result.stopTest(self)
         self.result.startTest(self)
         self.result.addSuccess(self)
         self.result.stopTest(self)
         self.assertEqual(
-            [{'test': self,
-              'status': 'success',
-              'start_time': 0,
-              'stop_time': 1,
-              'tags': set(),
-              'details': {'foo': 'bar'}},
-             {'test': self,
-              'status': 'success',
-              'start_time': 2,
-              'stop_time': 3,
-              'tags': set(),
-              'details': None},
-             ],
-            self.log)
+            [
+                {
+                    "test": self,
+                    "status": "success",
+                    "start_time": 0,
+                    "stop_time": 1,
+                    "tags": set(),
+                    "details": {"foo": "bar"},
+                },
+                {
+                    "test": self,
+                    "status": "success",
+                    "start_time": 2,
+                    "stop_time": 3,
+                    "tags": set(),
+                    "details": None,
+                },
+            ],
+            self.log,
+        )
 
 
 class TestTagger(TestCase):
-
     def test_tags_tests(self):
         result = ExtendedTestResult()
-        tagger = Tagger(result, {'foo'}, {'bar'})
+        tagger = Tagger(result, {"foo"}, {"bar"})
         test1, test2 = self, make_test()
         tagger.startTest(test1)
         tagger.addSuccess(test1)
@@ -3029,40 +3408,50 @@ class TestTagger(TestCase):
         tagger.addSuccess(test2)
         tagger.stopTest(test2)
         self.assertEqual(
-            [('startTest', test1),
-             ('tags', {'foo'}, {'bar'}),
-             ('addSuccess', test1),
-             ('stopTest', test1),
-             ('startTest', test2),
-             ('tags', {'foo'}, {'bar'}),
-             ('addSuccess', test2),
-             ('stopTest', test2),
-             ], result._events)
+            [
+                ("startTest", test1),
+                ("tags", {"foo"}, {"bar"}),
+                ("addSuccess", test1),
+                ("stopTest", test1),
+                ("startTest", test2),
+                ("tags", {"foo"}, {"bar"}),
+                ("addSuccess", test2),
+                ("stopTest", test2),
+            ],
+            result._events,
+        )
 
 
 class TestTimestampingStreamResult(TestCase):
-
     def test_startTestRun(self):
         result = TimestampingStreamResult(LoggingStreamResult())
         result.startTestRun()
-        self.assertEqual([('startTestRun',)], result.targets[0]._events)
+        self.assertEqual([("startTestRun",)], result.targets[0]._events)
 
     def test_stopTestRun(self):
         result = TimestampingStreamResult(LoggingStreamResult())
         result.stopTestRun()
-        self.assertEqual([('stopTestRun',)], result.targets[0]._events)
+        self.assertEqual([("stopTestRun",)], result.targets[0]._events)
 
     def test_status_no_timestamp(self):
         result = TimestampingStreamResult(LoggingStreamResult())
-        result.status(test_id="A", test_status="B", test_tags="C",
-            runnable="D", file_name="E", file_bytes=b"F", eof=True,
-            mime_type="G", route_code="H")
+        result.status(
+            test_id="A",
+            test_status="B",
+            test_tags="C",
+            runnable="D",
+            file_name="E",
+            file_bytes=b"F",
+            eof=True,
+            mime_type="G",
+            route_code="H",
+        )
         events = result.targets[0]._events
         self.assertThat(events, HasLength(1))
         self.assertThat(events[0], HasLength(11))
         self.assertEqual(
-            ("status", "A", "B", "C", "D", "E", b"F", True, "G", "H"),
-            events[0][:10])
+            ("status", "A", "B", "C", "D", "E", b"F", True, "G", "H"), events[0][:10]
+        )
         self.assertNotEqual(None, events[0][10])
         self.assertIsInstance(events[0][10], datetime.datetime)
 
@@ -3074,4 +3463,5 @@ class TestTimestampingStreamResult(TestCase):
 
 def test_suite():
     from unittest import TestLoader
+
     return TestLoader().loadTestsFromName(__name__)

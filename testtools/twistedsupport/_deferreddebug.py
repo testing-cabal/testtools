@@ -14,8 +14,8 @@ class DebugTwisted(Fixture):
 
     def _setUp(self):
         self.useFixture(
-            MonkeyPatch('twisted.internet.defer.Deferred.debug',
-                        self._debug_setting))
+            MonkeyPatch("twisted.internet.defer.Deferred.debug", self._debug_setting)
+        )
         self.useFixture(
-            MonkeyPatch('twisted.internet.base.DelayedCall.debug',
-                        self._debug_setting))
+            MonkeyPatch("twisted.internet.base.DelayedCall.debug", self._debug_setting)
+        )

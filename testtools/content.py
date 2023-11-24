@@ -3,14 +3,14 @@
 """Content - a MIME-like Content object."""
 
 __all__ = [
-    'attach_file',
-    'Content',
-    'content_from_file',
-    'content_from_stream',
-    'json_content',
-    'text_content',
-    'TracebackContent',
-    ]
+    "attach_file",
+    "Content",
+    "content_from_file",
+    "content_from_stream",
+    "json_content",
+    "text_content",
+    "TracebackContent",
+]
 
 import codecs
 import functools
@@ -27,8 +27,8 @@ _join_b = _b("").join
 
 DEFAULT_CHUNK_SIZE = 4096
 
-STDOUT_LINE = '\nStdout:\n%s'
-STDERR_LINE = '\nStderr:\n%s'
+STDOUT_LINE = "\nStdout:\n%s"
+STDERR_LINE = "\nStderr:\n%s"
 
 
 def _iter_chunks(stream, chunk_size, seek_offset=None, seek_whence=0):
@@ -62,14 +62,16 @@ class Content:
     def __init__(self, content_type, get_bytes):
         """Create a ContentType."""
         if None in (content_type, get_bytes):
-            raise ValueError("None not permitted in {!r}, {!r}".format(
-                content_type, get_bytes))
+            raise ValueError(
+                "None not permitted in {!r}, {!r}".format(content_type, get_bytes)
+            )
         self.content_type = content_type
         self._get_bytes = get_bytes
 
     def __eq__(self, other):
-        return (self.content_type == other.content_type and
-            _join_b(self.iter_bytes()) == _join_b(other.iter_bytes()))
+        return self.content_type == other.content_type and _join_b(
+            self.iter_bytes()
+        ) == _join_b(other.iter_bytes())
 
     def as_text(self):
         """Return all of the content as text.
@@ -78,7 +80,7 @@ class Content:
         content into memory.  Where this is a concern, use ``iter_text``
         instead.
         """
-        return ''.join(self.iter_text())
+        return "".join(self.iter_text())
 
     def iter_bytes(self):
         """Iterate over bytestrings of the serialised content."""
@@ -99,17 +101,18 @@ class Content:
 
     def _iter_text(self):
         """Worker for iter_text - does the decoding."""
-        encoding = self.content_type.parameters.get('charset', 'ISO-8859-1')
+        encoding = self.content_type.parameters.get("charset", "ISO-8859-1")
         decoder = codecs.getincrementaldecoder(encoding)()
         for bytes in self.iter_bytes():
             yield decoder.decode(bytes)
-        final = decoder.decode(_b(''), True)
+        final = decoder.decode(_b(""), True)
         if final:
             yield final
 
     def __repr__(self):
         return "<Content type={!r}, value={!r}>".format(
-            self.content_type, _join_b(self.iter_bytes()))
+            self.content_type, _join_b(self.iter_bytes())
+        )
 
 
 class StackLinesContent(Content):
@@ -139,19 +142,18 @@ class StackLinesContent(Content):
         :param postfix_content: If specified, a unicode string to append to the
             text content.
         """
-        content_type = ContentType('text', 'x-traceback',
-            {"language": "python", "charset": "utf8"})
-        value = prefix_content + \
-            self._stack_lines_to_unicode(stack_lines) + \
-            postfix_content
-        super().__init__(
-            content_type, lambda: [value.encode("utf8")])
+        content_type = ContentType(
+            "text", "x-traceback", {"language": "python", "charset": "utf8"}
+        )
+        value = (
+            prefix_content + self._stack_lines_to_unicode(stack_lines) + postfix_content
+        )
+        super().__init__(content_type, lambda: [value.encode("utf8")])
 
     def _stack_lines_to_unicode(self, stack_lines):
-        """Converts a list of pre-processed stack lines into a unicode string.
-        """
+        """Converts a list of pre-processed stack lines into a unicode string."""
         msg_lines = traceback.format_list(stack_lines)
-        return ''.join(msg_lines)
+        return "".join(msg_lines)
 
 
 class TracebackContent(Content):
@@ -175,27 +177,32 @@ class TracebackContent(Content):
         exctype, value, tb = err
         # Skip test runner traceback levels
         if StackLinesContent.HIDE_INTERNAL_STACK:
-            while tb and '__unittest' in tb.tb_frame.f_globals:
+            while tb and "__unittest" in tb.tb_frame.f_globals:
                 tb = tb.tb_next
 
         limit = None
         # Disabled due to https://bugs.launchpad.net/testtools/+bug/1188420
-        if (False
+        if (
+            False
             and StackLinesContent.HIDE_INTERNAL_STACK
             and test.failureException
-            and isinstance(value, test.failureException)):
+            and isinstance(value, test.failureException)
+        ):
             # Skip assert*() traceback levels
             limit = 0
             while tb and not self._is_relevant_tb_level(tb):
                 limit += 1
                 tb = tb.tb_next
 
-        stack_lines = list(traceback.TracebackException(exctype, value, tb,
-            limit=limit, capture_locals=capture_locals).format())
-        content_type = ContentType('text', 'x-traceback',
-            {"language": "python", "charset": "utf8"})
-        super().__init__(
-            content_type, lambda: [x.encode('utf8') for x in stack_lines])
+        stack_lines = list(
+            traceback.TracebackException(
+                exctype, value, tb, limit=limit, capture_locals=capture_locals
+            ).format()
+        )
+        content_type = ContentType(
+            "text", "x-traceback", {"language": "python", "charset": "utf8"}
+        )
+        super().__init__(content_type, lambda: [x.encode("utf8") for x in stack_lines])
 
 
 def StacktraceContent(prefix_content="", postfix_content=""):
@@ -211,6 +218,7 @@ def StacktraceContent(prefix_content="", postfix_content=""):
     :param postfix_content: A unicode string to add after the stack lines.
     """
     stack = traceback.walk_stack(None)
+
     def filter_stack(stack):
         # Discard the filter_stack frame.
         next(stack)
@@ -218,9 +226,10 @@ def StacktraceContent(prefix_content="", postfix_content=""):
         next(stack)
         for f, f_lineno in stack:
             if StackLinesContent.HIDE_INTERNAL_STACK:
-                if '__unittest' in f.f_globals:
+                if "__unittest" in f.f_globals:
                     return
                 yield f, f_lineno
+
     extract = traceback.StackSummary.extract(filter_stack(stack))
     extract.reverse()
     return StackLinesContent(extract, prefix_content, postfix_content)
@@ -230,7 +239,7 @@ def json_content(json_data):
     """Create a JSON Content object from JSON-encodeable data."""
     data = json.dumps(json_data)
     # The json module perversely returns native str not bytes
-    data = data.encode('utf8')
+    data = data.encode("utf8")
     return Content(JSON, lambda: [data])
 
 
@@ -243,7 +252,7 @@ def text_content(text):
         raise TypeError(
             "text_content must be given text, not '%s'." % type(text).__name__
         )
-    return Content(UTF8_TEXT, lambda: [text.encode('utf8')])
+    return Content(UTF8_TEXT, lambda: [text.encode("utf8")])
 
 
 def maybe_wrap(wrapper, func):
@@ -253,8 +262,14 @@ def maybe_wrap(wrapper, func):
     return wrapper
 
 
-def content_from_file(path, content_type=None, chunk_size=DEFAULT_CHUNK_SIZE,
-                      buffer_now=False, seek_offset=None, seek_whence=0):
+def content_from_file(
+    path,
+    content_type=None,
+    chunk_size=DEFAULT_CHUNK_SIZE,
+    buffer_now=False,
+    seek_offset=None,
+    seek_whence=0,
+):
     """Create a Content object from a file on disk.
 
     Note that unless ``buffer_now`` is explicitly passed in as True, the file
@@ -272,18 +287,22 @@ def content_from_file(path, content_type=None, chunk_size=DEFAULT_CHUNK_SIZE,
     """
     if content_type is None:
         content_type = UTF8_TEXT
+
     def reader():
-        with open(path, 'rb') as stream:
-            yield from _iter_chunks(stream,
-                                      chunk_size,
-                                      seek_offset,
-                                      seek_whence)
+        with open(path, "rb") as stream:
+            yield from _iter_chunks(stream, chunk_size, seek_offset, seek_whence)
+
     return content_from_reader(reader, content_type, buffer_now)
 
 
-def content_from_stream(stream, content_type=None,
-                        chunk_size=DEFAULT_CHUNK_SIZE, buffer_now=False,
-                        seek_offset=None, seek_whence=0):
+def content_from_stream(
+    stream,
+    content_type=None,
+    chunk_size=DEFAULT_CHUNK_SIZE,
+    buffer_now=False,
+    seek_offset=None,
+    seek_whence=0,
+):
     """Create a Content object from a file-like stream.
 
     Note that unless ``buffer_now`` is explicitly passed in as True, the stream
@@ -302,8 +321,10 @@ def content_from_stream(stream, content_type=None,
     """
     if content_type is None:
         content_type = UTF8_TEXT
+
     def reader():
         return _iter_chunks(stream, chunk_size, seek_offset, seek_whence)
+
     return content_from_reader(reader, content_type, buffer_now)
 
 
@@ -320,13 +341,21 @@ def content_from_reader(reader, content_type, buffer_now):
         content_type = UTF8_TEXT
     if buffer_now:
         contents = list(reader())
+
         def reader():
             return contents
+
     return Content(content_type, reader)
 
 
-def attach_file(detailed, path, name=None, content_type=None,
-                chunk_size=DEFAULT_CHUNK_SIZE, buffer_now=True):
+def attach_file(
+    detailed,
+    path,
+    name=None,
+    content_type=None,
+    chunk_size=DEFAULT_CHUNK_SIZE,
+    buffer_now=True,
+):
     """Attach a file to this test as a detail.
 
     This is a convenience method wrapping around ``addDetail``.
@@ -354,6 +383,5 @@ def attach_file(detailed, path, name=None, content_type=None,
     """
     if name is None:
         name = os.path.basename(path)
-    content_object = content_from_file(
-        path, content_type, chunk_size, buffer_now)
+    content_object = content_from_file(path, content_type, chunk_size, buffer_now)
     detailed.addDetail(name, content_object)

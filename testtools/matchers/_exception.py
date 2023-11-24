@@ -1,10 +1,10 @@
 # Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
 
 __all__ = [
-    'MatchesException',
-    'Raises',
-    'raises',
-    ]
+    "MatchesException",
+    "Raises",
+    "raises",
+]
 
 import sys
 
@@ -13,7 +13,7 @@ from ._higherorder import AfterPreproccessing
 from ._impl import (
     Matcher,
     Mismatch,
-    )
+)
 
 
 _error_repr = BaseException.__repr__
@@ -50,21 +50,25 @@ class MatchesException(Matcher):
             value_re = AfterPreproccessing(str, MatchesRegex(value_re), False)
         self.value_re = value_re
         expected_type = type(self.expected)
-        self._is_instance = not any(issubclass(expected_type, class_type)
-                for class_type in (type, tuple))
+        self._is_instance = not any(
+            issubclass(expected_type, class_type) for class_type in (type, tuple)
+        )
 
     def match(self, other):
         if type(other) != tuple:
-            return Mismatch('%r is not an exc_info tuple' % other)
+            return Mismatch("%r is not an exc_info tuple" % other)
         expected_class = self.expected
         if self._is_instance:
             expected_class = expected_class.__class__
         if not issubclass(other[0], expected_class):
-            return Mismatch(f'{other[0]!r} is not a {expected_class!r}')
+            return Mismatch(f"{other[0]!r} is not a {expected_class!r}")
         if self._is_instance:
             if other[1].args != self.expected.args:
-                return Mismatch('{} has different arguments to {}.'.format(
-                        _error_repr(other[1]), _error_repr(self.expected)))
+                return Mismatch(
+                    "{} has different arguments to {}.".format(
+                        _error_repr(other[1]), _error_repr(self.expected)
+                    )
+                )
         elif self.value_re is not None:
             return self.value_re.match(other[1])
 
@@ -95,7 +99,7 @@ class Raises(Matcher):
     def match(self, matchee):
         try:
             result = matchee()
-            return Mismatch(f'{matchee!r} returned {result!r}')
+            return Mismatch(f"{matchee!r} returned {result!r}")
         # Catch all exceptions: Raises() should be able to match a
         # KeyboardInterrupt or SystemExit.
         except BaseException:
@@ -117,7 +121,7 @@ class Raises(Matcher):
             return mismatch
 
     def __str__(self):
-        return 'Raises()'
+        return "Raises()"
 
 
 def raises(exception):

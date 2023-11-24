@@ -11,15 +11,13 @@ $ python -c 'import testtools.matchers; print testtools.matchers.__all__'
 """
 
 __all__ = [
-    'Matcher',
-    'Mismatch',
-    'MismatchDecorator',
-    'MismatchError',
-    ]
+    "Matcher",
+    "Mismatch",
+    "MismatchDecorator",
+    "MismatchError",
+]
 
-from testtools.compat import (
-    text_repr
-    )
+from testtools.compat import text_repr
 
 
 class Matcher:
@@ -37,8 +35,7 @@ class Matcher:
     """
 
     def match(self, something):
-        """Return None if this matcher matches something, a Mismatch otherwise.
-        """
+        """Return None if this matcher matches something, a Mismatch otherwise."""
         raise NotImplementedError(self.match)
 
     def __str__(self):
@@ -95,11 +92,12 @@ class Mismatch:
             to the result. For more information see the API to which items from
             this dict are passed testtools.TestCase.addDetail.
         """
-        return getattr(self, '_details', {})
+        return getattr(self, "_details", {})
 
     def __repr__(self):
-        return  "<testtools.matchers.Mismatch object at {:x} attributes={!r}>".format(
-            id(self), self.__dict__)
+        return "<testtools.matchers.Mismatch object at {:x} attributes={!r}>".format(
+            id(self), self.__dict__
+        )
 
 
 class MismatchError(AssertionError):
@@ -126,9 +124,11 @@ class MismatchError(AssertionError):
                 matchee = text_repr(self.matchee, multiline=False)
             else:
                 matchee = repr(self.matchee)
-            return (
-                'Match failed. Matchee: %s\nMatcher: %s\nDifference: %s\n'
-                % (matchee, self.matcher, difference))
+            return "Match failed. Matchee: %s\nMatcher: %s\nDifference: %s\n" % (
+                matchee,
+                self.matcher,
+                difference,
+            )
         else:
             return difference
 
@@ -149,7 +149,7 @@ class MismatchDecorator:
         self.original = original
 
     def __repr__(self):
-        return f'<testtools.matchers.MismatchDecorator({self.original!r})>'
+        return f"<testtools.matchers.MismatchDecorator({self.original!r})>"
 
     def describe(self):
         return self.original.describe()

@@ -17,7 +17,7 @@ def try_import(name, alternative=None, error_callback=None):
     :param error_callback: If non-None, a callable that is passed the
         ImportError when the module cannot be loaded.
     """
-    module_segments = name.split('.')
+    module_segments = name.split(".")
     last_error = None
     remainder = []
 
@@ -25,7 +25,7 @@ def try_import(name, alternative=None, error_callback=None):
     # __import__ result because in import loops (A imports A.B, which imports
     # C, which calls try_import("A.B")) A.B will not yet be set.
     while module_segments:
-        module_name = '.'.join(module_segments)
+        module_name = ".".join(module_segments)
         try:
             __import__(module_name)
         except ImportError:

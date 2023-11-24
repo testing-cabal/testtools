@@ -27,18 +27,18 @@ from launchpadlib.launchpad import Launchpad
 from launchpadlib import uris
 
 
-APP_NAME = 'testtools-lp-release'
-CACHE_DIR = os.path.expanduser('~/.launchpadlib/cache')
+APP_NAME = "testtools-lp-release"
+CACHE_DIR = os.path.expanduser("~/.launchpadlib/cache")
 SERVICE_ROOT = uris.LPNET_SERVICE_ROOT
 
 FIX_COMMITTED = "Fix Committed"
 FIX_RELEASED = "Fix Released"
 
 # Launchpad file type for a tarball upload.
-CODE_RELEASE_TARBALL = 'Code Release Tarball'
+CODE_RELEASE_TARBALL = "Code Release Tarball"
 
-PROJECT_NAME = 'testtools'
-NEXT_MILESTONE_NAME = 'next'
+PROJECT_NAME = "testtools"
+NEXT_MILESTONE_NAME = "next"
 
 
 class _UTC(tzinfo):
@@ -53,6 +53,7 @@ class _UTC(tzinfo):
     def dst(self, dt):
         return timedelta(0)
 
+
 UTC = _UTC()
 
 
@@ -66,14 +67,16 @@ def configure_logging():
     handler.setFormatter(formatter)
     log.addHandler(handler)
     return log
+
+
 LOG = configure_logging()
 
 
 def get_path(relpath):
     """Get the absolute path for something relative to this file."""
     return os.path.abspath(
-        os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), relpath))
+        os.path.join(os.path.dirname(os.path.dirname(__file__)), relpath)
+    )
 
 
 def assign_fix_committed_to_next(testtools, next_milestone):
@@ -108,27 +111,26 @@ def get_release_notes_and_changelog(news_path):
         for line in news:
             line = line.strip()
             if state is None:
-                if (is_heading_marker(line, '~') and
-                    not last_line.startswith('NEXT')):
+                if is_heading_marker(line, "~") and not last_line.startswith("NEXT"):
                     milestone_name = last_line
-                    state = 'release-notes'
+                    state = "release-notes"
                 else:
                     last_line = line
-            elif state == 'title':
+            elif state == "title":
                 # The line after the title is a heading marker line, so we
                 # ignore it and change state. That which follows are the
                 # release notes.
-                state = 'release-notes'
-            elif state == 'release-notes':
-                if is_heading_marker(line, '-'):
-                    state = 'changelog'
+                state = "release-notes"
+            elif state == "release-notes":
+                if is_heading_marker(line, "-"):
+                    state = "changelog"
                     # Last line in the release notes is actually the first
                     # line of the changelog.
                     changelog = [release_notes.pop(), line]
                 else:
                     release_notes.append(line)
-            elif state == 'changelog':
-                if is_heading_marker(line, '~'):
+            elif state == "changelog":
+                if is_heading_marker(line, "~"):
                     # Last line in changelog is actually the first line of the
                     # next section.
                     changelog.pop()
@@ -138,20 +140,19 @@ def get_release_notes_and_changelog(news_path):
             else:
                 raise ValueError("Couldn't parse NEWS")
 
-    release_notes = '\n'.join(release_notes).strip() + '\n'
-    changelog = '\n'.join(changelog).strip() + '\n'
+    release_notes = "\n".join(release_notes).strip() + "\n"
+    changelog = "\n".join(changelog).strip() + "\n"
     return milestone_name, release_notes, changelog
 
 
 def release_milestone(milestone, release_notes, changelog):
     date_released = datetime.now(tz=UTC)
-    LOG.info(
-        f"Releasing milestone: {milestone.name}, date {date_released}")
+    LOG.info(f"Releasing milestone: {milestone.name}, date {date_released}")
     release = milestone.createProductRelease(
         date_released=date_released,
         changelog=changelog,
         release_notes=release_notes,
-        )
+    )
     milestone.is_active = False
     milestone.lp_save()
     return release
@@ -171,8 +172,7 @@ def close_fixed_bugs(milestone):
             LOG.info(f"Closing {task.title}")
             task.status = FIX_RELEASED
         else:
-            LOG.warning(
-                f"Bug not fixed, removing from milestone: {task.title}")
+            LOG.warning(f"Bug not fixed, removing from milestone: {task.title}")
             task.milestone = None
         task.lp_save()
 
@@ -180,33 +180,36 @@ def close_fixed_bugs(milestone):
 def upload_tarball(release, tarball_path):
     with open(tarball_path) as tarball:
         tarball_content = tarball.read()
-    sig_path = tarball_path + '.asc'
+    sig_path = tarball_path + ".asc"
     with open(sig_path) as sig:
         sig_content = sig.read()
     tarball_name = os.path.basename(tarball_path)
     LOG.info(f"Uploading tarball: {tarball_path}")
     release.add_file(
         file_type=CODE_RELEASE_TARBALL,
-        file_content=tarball_content, filename=tarball_name,
+        file_content=tarball_content,
+        filename=tarball_name,
         signature_content=sig_content,
         signature_filename=sig_path,
-        content_type="application/x-gzip; charset=binary")
+        content_type="application/x-gzip; charset=binary",
+    )
 
 
 def release_project(launchpad, project_name, next_milestone_name):
     testtools = launchpad.projects[project_name]
     next_milestone = testtools.getMilestone(name=next_milestone_name)
     release_name, release_notes, changelog = get_release_notes_and_changelog(
-        get_path('NEWS'))
+        get_path("NEWS")
+    )
     LOG.info(f"Releasing {project_name} {release_name}")
     # Since reversing these operations is hard, and inspecting errors from
     # Launchpad is also difficult, do some looking before leaping.
     errors = []
-    tarball_path = get_path(f'dist/{project_name}-{release_name}.tar.gz')
+    tarball_path = get_path(f"dist/{project_name}-{release_name}.tar.gz")
     if not os.path.isfile(tarball_path):
         errors.append(f"{tarball_path} does not exist")
-    if not os.path.isfile(tarball_path + '.asc'):
-        errors.append("{} does not exist".format(tarball_path + '.asc'))
+    if not os.path.isfile(tarball_path + ".asc"):
+        errors.append("{} does not exist".format(tarball_path + ".asc"))
     if testtools.getMilestone(name=release_name):
         errors.append(f"Milestone {release_name} exists on {project_name}")
     if errors:
@@ -224,9 +227,10 @@ def release_project(launchpad, project_name, next_milestone_name):
 
 def main(args):
     launchpad = Launchpad.login_with(
-        APP_NAME, SERVICE_ROOT, CACHE_DIR, credentials_file='.lp_creds')
+        APP_NAME, SERVICE_ROOT, CACHE_DIR, credentials_file=".lp_creds"
+    )
     return release_project(launchpad, PROJECT_NAME, NEXT_MILESTONE_NAME)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main(sys.argv))

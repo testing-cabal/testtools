@@ -6,7 +6,10 @@ Legacy - deprecated - use testtools.testsuite.iterate_tests
 """
 
 import warnings
-warnings.warn("Please import iterate_tests from testtools.testsuite - "
-    "testtools.utils is deprecated.", DeprecationWarning, stacklevel=2)
 
-
+warnings.warn(
+    "Please import iterate_tests from testtools.testsuite - "
+    "testtools.utils is deprecated.",
+    DeprecationWarning,
+    stacklevel=2,
+)

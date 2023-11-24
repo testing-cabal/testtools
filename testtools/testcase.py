@@ -3,17 +3,17 @@
 """Test case related stuff."""
 
 __all__ = [
-    'attr',
-    'clone_test_with_new_id',
-    'ExpectedException',
-    'gather_details',
-    'run_test_with',
-    'skip',
-    'skipIf',
-    'skipUnless',
-    'TestCase',
-    'unique_text_generator',
-    ]
+    "attr",
+    "clone_test_with_new_id",
+    "ExpectedException",
+    "gather_details",
+    "run_test_with",
+    "skip",
+    "skipIf",
+    "skipUnless",
+    "TestCase",
+    "unique_text_generator",
+]
 
 import copy
 import functools
@@ -37,7 +37,7 @@ from testtools.matchers import (
     IsInstance,
     Not,
     Raises,
-    )
+)
 from testtools.matchers._basic import _FlippedEquals
 from testtools.monkey import patch
 from testtools.runtest import (
@@ -52,9 +52,10 @@ from testtools.testresult import (
 
 class TestSkipped(SkipTest):
     """Raised within TestCase.run() when a test is skipped."""
+
     def __init__(self, *args, **kwargs):
         warnings.warn(
-            'Use SkipTest from unittest instead.',
+            "Use SkipTest from unittest instead.",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -88,6 +89,7 @@ def _expectedFailure(func):
         except Exception:
             raise _ExpectedFailure(sys.exc_info())
         raise _UnexpectedSuccess
+
     return wrapper
 
 
@@ -116,20 +118,23 @@ def run_test_with(test_runner, **kwargs):
     :return: A decorator to be used for marking a test as needing a special
         runner.
     """
+
     def decorator(function):
         # Set an attribute on 'function' which will inform TestCase how to
         # make the runner.
         def _run_test_with(case, handlers=None, last_resort=None):
             try:
                 return test_runner(
-                    case, handlers=handlers, last_resort=last_resort,
-                    **kwargs)
+                    case, handlers=handlers, last_resort=last_resort, **kwargs
+                )
             except TypeError:
                 # Backwards compat: if we can't call the constructor
                 # with last_resort, try without that.
                 return test_runner(case, handlers=handlers, **kwargs)
+
         function._run_test_with = _run_test_with
         return function
+
     return decorator
 
 
@@ -145,8 +150,10 @@ def _copy_content(content_object):
         ``content_object`` and a non-volatile copy of its content.
     """
     content_bytes = list(content_object.iter_bytes())
+
     def content_callback():
         return content_bytes
+
     return content.Content(content_object.content_type, content_callback)
 
 
@@ -163,7 +170,7 @@ def gather_details(source_dict, target_dict):
         new_name = name
         disambiguator = itertools.count(1)
         while new_name in target_dict:
-            new_name = '%s-%d' % (name, next(disambiguator))
+            new_name = "%s-%d" % (name, next(disambiguator))
         name = new_name
         target_dict[name] = _copy_content(content_object)
 
@@ -171,7 +178,7 @@ def gather_details(source_dict, target_dict):
 # Circular import: fixtures imports gather_details from here, we import
 # fixtures, leading to gather_details not being available and fixtures being
 # unable to import it.
-fixtures = try_import('fixtures')
+fixtures = try_import("fixtures")
 
 
 def _mods(i, mod):
@@ -184,7 +191,7 @@ def _mods(i, mod):
 
 
 def _unique_text(base_cp, cp_range, index):
-    s = ''
+    s = ""
     for m in _mods(index, cp_range):
         s += chr(base_cp + m)
     return s
@@ -203,12 +210,12 @@ def unique_text_generator(prefix):
     # 0x1e00 is the start of a range of glyphs that are easy to see are
     # unicode since they've got circles and dots and other diacriticals.
     # 0x1eff is the end of the range of these diacritical chars.
-    BASE_CP = 0x1e00
-    CP_RANGE = 0x1f00 - BASE_CP
+    BASE_CP = 0x1E00
+    CP_RANGE = 0x1F00 - BASE_CP
     index = 0
     while True:
         unique_text = _unique_text(BASE_CP, CP_RANGE, index)
-        yield f'{prefix}-{unique_text}'
+        yield f"{prefix}-{unique_text}"
         index = index + 1
 
 
@@ -238,15 +245,14 @@ class TestCase(unittest.TestCase):
             when run() is invoked, so will be fresh each time. Overrides
             ``TestCase.run_tests_with`` if given.
         """
-        runTest = kwargs.pop('runTest', None)
+        runTest = kwargs.pop("runTest", None)
         super().__init__(*args, **kwargs)
         self._reset()
         test_method = self._get_test_method()
         if runTest is None:
-            runTest = getattr(
-                test_method, '_run_test_with', self.run_tests_with)
+            runTest = getattr(test_method, "_run_test_with", self.run_tests_with)
         self.__RunTest = runTest
-        if getattr(test_method, '__unittest_expecting_failure__', False):
+        if getattr(test_method, "__unittest_expecting_failure__", False):
             setattr(self, self._testMethodName, _expectedFailure(test_method))
         # Used internally for onException processing - used to gather extra
         # data from exceptions.
@@ -258,7 +264,7 @@ class TestCase(unittest.TestCase):
             (_ExpectedFailure, self._report_expected_failure),
             (_UnexpectedSuccess, self._report_unexpected_success),
             (Exception, self._report_error),
-            ]
+        ]
 
     def _reset(self):
         """Reset the test case as if it had never been run."""
@@ -274,10 +280,10 @@ class TestCase(unittest.TestCase):
         self.__details = None
 
     def __eq__(self, other):
-        eq = getattr(unittest.TestCase, '__eq__', None)
+        eq = getattr(unittest.TestCase, "__eq__", None)
         if eq is not None and not unittest.TestCase.__eq__(self, other):
             return False
-        return self.__dict__ == getattr(other, '__dict__', None)
+        return self.__dict__ == getattr(other, "__dict__", None)
 
     # We need to explicitly set this since we're overriding __eq__
     # https://docs.python.org/3/reference/datamodel.html#object.__hash__
@@ -290,11 +296,12 @@ class TestCase(unittest.TestCase):
     def _deprecate(original_func):
         def deprecated_func(*args, **kwargs):
             warnings.warn(
-                'Please use {0} instead.'.format(original_func.__name__),
+                "Please use {0} instead.".format(original_func.__name__),
                 DeprecationWarning,
                 stacklevel=2,
             )
             return original_func(*args, **kwargs)
+
         return deprecated_func
 
     def addDetail(self, name, content_object):
@@ -351,15 +358,17 @@ class TestCase(unittest.TestCase):
     def skip(self, reason):
         """DEPRECATED: Use skipTest instead."""
         warnings.warn(
-            'Only valid in 1.8.1 and earlier. Use skipTest instead.',
-            DeprecationWarning, stacklevel=2)
+            "Only valid in 1.8.1 and earlier. Use skipTest instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self.skipTest(reason)
 
     def _formatTypes(self, classOrIterable):
         """Format a class or a bunch of classes for display in an error."""
-        className = getattr(classOrIterable, '__name__', None)
+        className = getattr(classOrIterable, "__name__", None)
         if className is None:
-            className = ', '.join(klass.__name__ for klass in classOrIterable)
+            className = ", ".join(klass.__name__ for klass in classOrIterable)
         return className
 
     def addCleanup(self, function, *arguments, **keywordArguments):
@@ -397,9 +406,9 @@ class TestCase(unittest.TestCase):
         self.__exception_handlers.append(handler)
 
     def _add_reason(self, reason):
-        self.addDetail('reason', content.text_content(reason))
+        self.addDetail("reason", content.text_content(reason))
 
-    def assertEqual(self, expected, observed, message=''):
+    def assertEqual(self, expected, observed, message=""):
         """Assert that 'expected' is equal to 'observed'.
 
         :param expected: The expected value.
@@ -411,11 +420,11 @@ class TestCase(unittest.TestCase):
 
     failUnlessEqual = assertEquals = _deprecate(assertEqual)
 
-    def assertIn(self, needle, haystack, message=''):
+    def assertIn(self, needle, haystack, message=""):
         """Assert that needle is in haystack."""
         self.assertThat(haystack, Contains(needle), message)
 
-    def assertIsNone(self, observed, message=''):
+    def assertIsNone(self, observed, message=""):
         """Assert that 'observed' is equal to None.
 
         :param observed: The observed value.
@@ -424,7 +433,7 @@ class TestCase(unittest.TestCase):
         matcher = Is(None)
         self.assertThat(observed, matcher, message)
 
-    def assertIsNotNone(self, observed, message=''):
+    def assertIsNotNone(self, observed, message=""):
         """Assert that 'observed' is not equal to None.
 
         :param observed: The observed value.
@@ -433,7 +442,7 @@ class TestCase(unittest.TestCase):
         matcher = Not(Is(None))
         self.assertThat(observed, matcher, message)
 
-    def assertIs(self, expected, observed, message=''):
+    def assertIs(self, expected, observed, message=""):
         """Assert that 'expected' is 'observed'.
 
         :param expected: The expected value.
@@ -443,12 +452,12 @@ class TestCase(unittest.TestCase):
         matcher = Is(expected)
         self.assertThat(observed, matcher, message)
 
-    def assertIsNot(self, expected, observed, message=''):
+    def assertIsNot(self, expected, observed, message=""):
         """Assert that 'expected' is not 'observed'."""
         matcher = Not(Is(expected))
         self.assertThat(observed, matcher, message)
 
-    def assertNotIn(self, needle, haystack, message=''):
+    def assertNotIn(self, needle, haystack, message=""):
         """Assert that needle is not in haystack."""
         matcher = Not(Contains(needle))
         self.assertThat(haystack, matcher, message)
@@ -462,12 +471,13 @@ class TestCase(unittest.TestCase):
 
     def assertRaises(self, excClass, callableObj, *args, **kwargs):
         """Fail unless an exception of class excClass is thrown
-           by callableObj when invoked with arguments args and keyword
-           arguments kwargs. If a different type of exception is
-           thrown, it will not be caught, and the test case will be
-           deemed to have suffered an error, exactly as for an
-           unexpected exception.
+        by callableObj when invoked with arguments args and keyword
+        arguments kwargs. If a different type of exception is
+        thrown, it will not be caught, and the test case will be
+        deemed to have suffered an error, exactly as for an
+        unexpected exception.
         """
+
         class ReRaiseOtherTypes:
             def match(self, matchee):
                 if not issubclass(matchee[0], excClass):
@@ -476,17 +486,18 @@ class TestCase(unittest.TestCase):
         class CaptureMatchee:
             def match(self, matchee):
                 self.matchee = matchee[1]
+
         capture = CaptureMatchee()
         matcher = Raises(
-            MatchesAll(ReRaiseOtherTypes(),
-                       MatchesException(excClass), capture))
+            MatchesAll(ReRaiseOtherTypes(), MatchesException(excClass), capture)
+        )
         our_callable = Nullary(callableObj, *args, **kwargs)
         self.assertThat(our_callable, matcher)
         return capture.matchee
 
     failUnlessRaises = _deprecate(assertRaises)
 
-    def assertThat(self, matchee, matcher, message='', verbose=False):
+    def assertThat(self, matchee, matcher, message="", verbose=False):
         """Assert that matchee is matched by matcher.
 
         :param matchee: An object to match with matcher.
@@ -520,7 +531,7 @@ class TestCase(unittest.TestCase):
             suffix += 1
         self.addDetail(full_name, content_object)
 
-    def expectThat(self, matchee, matcher, message='', verbose=False):
+    def expectThat(self, matchee, matcher, message="", verbose=False):
         """Check that matchee is matched by matcher, but delay the assertion failure.
 
         This method behaves similarly to ``assertThat``, except that a failed
@@ -540,7 +551,7 @@ class TestCase(unittest.TestCase):
                 "Failed expectation",
                 content.StacktraceContent(
                     postfix_content="MismatchError: " + str(mismatch_error)
-                )
+                ),
             )
             self.force_failure = True
 
@@ -549,7 +560,7 @@ class TestCase(unittest.TestCase):
         mismatch = matcher.match(matchee)
         if not mismatch:
             return
-        for (name, value) in mismatch.get_details().items():
+        for name, value in mismatch.get_details().items():
             self.addDetailUniqueName(name, value)
         return MismatchError(matchee, matcher, mismatch, verbose)
 
@@ -610,15 +621,17 @@ class TestCase(unittest.TestCase):
         """
         if prefix is None:
             prefix = self.id()
-        return '%s-%d' % (prefix, self.getUniqueInteger())
+        return "%s-%d" % (prefix, self.getUniqueInteger())
 
-    def onException(self, exc_info, tb_label='traceback'):
+    def onException(self, exc_info, tb_label="traceback"):
         """Called when an exception propagates from test code.
 
         :seealso addOnException:
         """
         if exc_info[0] not in [
-            self.skipException, _UnexpectedSuccess, _ExpectedFailure,
+            self.skipException,
+            _UnexpectedSuccess,
+            _ExpectedFailure,
         ]:
             self._report_traceback(exc_info, tb_label=tb_label)
         for handler in self.__exception_handlers:
@@ -645,18 +658,22 @@ class TestCase(unittest.TestCase):
         self._add_reason(reason)
         result.addSkip(self, details=self.getDetails())
 
-    def _report_traceback(self, exc_info, tb_label='traceback'):
-        id_gen = self._traceback_id_gens.setdefault(
-            tb_label, itertools.count(0))
+    def _report_traceback(self, exc_info, tb_label="traceback"):
+        id_gen = self._traceback_id_gens.setdefault(tb_label, itertools.count(0))
         while True:
             tb_id = next(id_gen)
             if tb_id:
-                tb_label = '%s-%d' % (tb_label, tb_id)
+                tb_label = "%s-%d" % (tb_label, tb_id)
             if tb_label not in self.getDetails():
                 break
-        self.addDetail(tb_label, content.TracebackContent(
-            exc_info, self, capture_locals=getattr(
-                self, '__testtools_tb_locals__', False)))
+        self.addDetail(
+            tb_label,
+            content.TracebackContent(
+                exc_info,
+                self,
+                capture_locals=getattr(self, "__testtools_tb_locals__", False),
+            ),
+        )
 
     @staticmethod
     def _report_unexpected_success(self, result, err):
@@ -666,7 +683,8 @@ class TestCase(unittest.TestCase):
         self._reset()
         try:
             run_test = self.__RunTest(
-                self, self.exception_handlers, last_resort=self._report_error)
+                self, self.exception_handlers, last_resort=self._report_error
+            )
         except TypeError:
             # Backwards compat: if we can't call the constructor
             # with last_resort, try without that.
@@ -687,8 +705,11 @@ class TestCase(unittest.TestCase):
                 "TestCase.setUp was not called. Have you upcalled all the "
                 "way up the hierarchy from your setUp? e.g. Call "
                 "super(%s, self).setUp() from your setUp()."
-                % (sys.modules[self.__class__.__module__].__file__,
-                   self.__class__.__name__))
+                % (
+                    sys.modules[self.__class__.__module__].__file__,
+                    self.__class__.__name__,
+                )
+            )
         return ret
 
     def _run_teardown(self, result):
@@ -705,12 +726,15 @@ class TestCase(unittest.TestCase):
                 "TestCase.tearDown was not called. Have you upcalled all the "
                 "way up the hierarchy from your tearDown? e.g. Call "
                 "super(%s, self).tearDown() from your tearDown()."
-                % (sys.modules[self.__class__.__module__].__file__,
-                   self.__class__.__name__))
+                % (
+                    sys.modules[self.__class__.__module__].__file__,
+                    self.__class__.__name__,
+                )
+            )
         return ret
 
     def _get_test_method(self):
-        method_name = getattr(self, '_testMethodName')
+        method_name = getattr(self, "_testMethodName")
         return getattr(self, method_name)
 
     def _run_test_method(self, result):
@@ -733,8 +757,7 @@ class TestCase(unittest.TestCase):
         try:
             fixture.setUp()
         except MultipleExceptions as e:
-            if (fixtures is not None and
-                    e.args[-1][0] is fixtures.fixture.SetupError):
+            if fixtures is not None and e.args[-1][0] is fixtures.fixture.SetupError:
                 gather_details(e.args[-1][1].args[0], self.getDetails())
             raise
         except BaseException:
@@ -745,10 +768,7 @@ class TestCase(unittest.TestCase):
                 # the fixture.  Ideally this whole try/except is not
                 # really needed any more, however, we keep this code to
                 # remain compatible with the older setUp().
-                if (
-                    hasattr(fixture, '_details') and
-                    fixture._details is not None
-                ):
+                if hasattr(fixture, "_details") and fixture._details is not None:
                     gather_details(fixture.getDetails(), self.getDetails())
             except BaseException:
                 # Report the setUp exception, then raise the error during
@@ -761,8 +781,7 @@ class TestCase(unittest.TestCase):
                 reraise(*exc_info)
         else:
             self.addCleanup(fixture.cleanUp)
-            self.addCleanup(
-                gather_details, fixture.getDetails(), self.getDetails())
+            self.addCleanup(gather_details, fixture.getDetails(), self.getDetails())
             return fixture
 
     def setUp(self):
@@ -772,8 +791,8 @@ class TestCase(unittest.TestCase):
                 "In File: %s\n"
                 "TestCase.setUp was already called. Do not explicitly call "
                 "setUp from your tests. In your own setUp, use super to call "
-                "the base setUp."
-                % (sys.modules[self.__class__.__module__].__file__,))
+                "the base setUp." % (sys.modules[self.__class__.__module__].__file__,)
+            )
         self.__setup_called = True
 
     def tearDown(self):
@@ -784,7 +803,8 @@ class TestCase(unittest.TestCase):
                 "TestCase.tearDown was already called. Do not explicitly call "
                 "tearDown from your tests. In your own tearDown, use super to "
                 "call the base tearDown."
-                % (sys.modules[self.__class__.__module__].__file__,))
+                % (sys.modules[self.__class__.__module__].__file__,)
+            )
         self.__teardown_called = True
 
 
@@ -797,8 +817,16 @@ class PlaceHolder:
 
     failureException = None
 
-    def __init__(self, test_id, short_description=None, details=None,
-        outcome='addSuccess', error=None, tags=None, timestamps=(None, None)):
+    def __init__(
+        self,
+        test_id,
+        short_description=None,
+        details=None,
+        outcome="addSuccess",
+        error=None,
+        tags=None,
+        timestamps=(None, None),
+    ):
         """Construct a `PlaceHolder`.
 
         :param test_id: The id of the placeholder test.
@@ -815,7 +843,7 @@ class PlaceHolder:
         self._details = details or {}
         self._outcome = outcome
         if error is not None:
-            self._details['traceback'] = content.TracebackContent(error, self)
+            self._details["traceback"] = content.TracebackContent(error, self)
         tags = tags or frozenset()
         self._tags = frozenset(tags)
         self._timestamps = timestamps
@@ -830,7 +858,8 @@ class PlaceHolder:
         return "<{}.{}({})>".format(
             self.__class__.__module__,
             self.__class__.__name__,
-            ", ".join(map(repr, internal)))
+            ", ".join(map(repr, internal)),
+        )
 
     def __str__(self):
         return self.id()
@@ -881,8 +910,12 @@ def ErrorHolder(test_id, error, short_description=None, details=None):
     :param details: Outcome details as accepted by addSuccess etc.
     """
     return PlaceHolder(
-        test_id, short_description=short_description,
-        details=details, outcome='addError', error=error)
+        test_id,
+        short_description=short_description,
+        details=details,
+        outcome="addError",
+        error=error,
+    )
 
 
 def _clone_test_id_callback(test, callback):
@@ -916,11 +949,13 @@ def attr(*args):
     :return: A callable that when applied to a WithAttributes will
         alter its id to enumerate the added attributes.
     """
+
     def decorate(fn):
-        if not hasattr(fn, '__testtools_attrs'):
+        if not hasattr(fn, "__testtools_attrs"):
             fn.__testtools_attrs = set()
         fn.__testtools_attrs.update(args)
         return fn
+
     return decorate
 
 
@@ -941,14 +976,14 @@ class WithAttributes:
         # Depends on testtools.TestCase._get_test_method, be nice to support
         # plain unittest.
         fn = self._get_test_method()
-        attributes = getattr(fn, '__testtools_attrs', None)
+        attributes = getattr(fn, "__testtools_attrs", None)
         if not attributes:
             return orig
-        return orig + '[' + ','.join(sorted(attributes)) + ']'
+        return orig + "[" + ",".join(sorted(attributes)) + "]"
 
 
 class_types = [type]
-if getattr(types, 'ClassType', None) is not None:
+if getattr(types, "ClassType", None) is not None:
     class_types.append(types.ClassType)
 class_types = tuple(class_types)
 
@@ -960,11 +995,14 @@ def skip(reason):
     unit tests in order to migrate to python 2.7, which provides the
     @unittest.skip decorator.
     """
+
     def decorator(test_item):
         if not isinstance(test_item, class_types):
+
             @functools.wraps(test_item)
             def skip_wrapper(*args, **kwargs):
                 raise TestCase.skipException(reason)
+
             test_item = skip_wrapper
 
         # This attribute signals to RunTest._run_core that the entire test
@@ -974,6 +1012,7 @@ def skip(reason):
         test_item.__unittest_skip__ = True
         test_item.__unittest_skip_why__ = reason
         return test_item
+
     return decorator
 
 
@@ -984,6 +1023,7 @@ def skipIf(condition, reason):
 
     def _id(obj):
         return obj
+
     return _id
 
 
@@ -994,6 +1034,7 @@ def skipUnless(condition, reason):
 
     def _id(obj):
         return obj
+
     return _id
 
 
@@ -1027,9 +1068,9 @@ class ExpectedException:
 
     def __exit__(self, exc_type, exc_value, traceback):
         if exc_type is None:
-            error_msg = '%s not raised.' % self.exc_type.__name__
+            error_msg = "%s not raised." % self.exc_type.__name__
             if self.msg:
-                error_msg = error_msg + ' : ' + self.msg
+                error_msg = error_msg + " : " + self.msg
             raise AssertionError(error_msg)
         if exc_type != self.exc_type:
             return False
@@ -1105,7 +1146,7 @@ class DecorateTestCaseResult:
         delattr(self.decorated, name)
 
     def __setattr__(self, name, value):
-        if name in ('decorated', 'callout', 'before_run', 'after_run'):
+        if name in ("decorated", "callout", "before_run", "after_run"):
             self.__dict__[name] = value
             return
         setattr(self.decorated, name, value)

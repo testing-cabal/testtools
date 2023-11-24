@@ -1,19 +1,19 @@
 # Copyright (c) 2009-2012 testtools developers. See LICENSE for details.
 
 __all__ = [
-    'Contains',
-    'EndsWith',
-    'Equals',
-    'GreaterThan',
-    'HasLength',
-    'Is',
-    'IsInstance',
-    'LessThan',
-    'MatchesRegex',
-    'NotEquals',
-    'SameMembers',
-    'StartsWith',
-    ]
+    "Contains",
+    "EndsWith",
+    "Equals",
+    "GreaterThan",
+    "HasLength",
+    "Is",
+    "IsInstance",
+    "LessThan",
+    "MatchesRegex",
+    "NotEquals",
+    "SameMembers",
+    "StartsWith",
+]
 
 import operator
 from pprint import pformat
@@ -22,16 +22,16 @@ import warnings
 
 from ..compat import (
     text_repr,
-    )
+)
 from ..helpers import list_subtract
 from ._higherorder import (
     MatchesPredicateWithParams,
     PostfixedMismatch,
-    )
+)
 from ._impl import (
     Matcher,
     Mismatch,
-    )
+)
 
 
 def _format(thing):
@@ -65,8 +65,7 @@ class _BinaryComparison:
 class _BinaryMismatch(Mismatch):
     """Two things did not match."""
 
-    def __init__(self, actual, mismatch_string, reference,
-                 reference_on_right=True):
+    def __init__(self, actual, mismatch_string, reference, reference_on_right=True):
         self._actual = actual
         self._mismatch_string = mismatch_string
         self._reference = reference
@@ -75,7 +74,7 @@ class _BinaryMismatch(Mismatch):
     @property
     def expected(self):
         warnings.warn(
-            f'{self.__class__.__name__}.expected deprecated after 1.8.1',
+            f"{self.__class__.__name__}.expected deprecated after 1.8.1",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -84,7 +83,7 @@ class _BinaryMismatch(Mismatch):
     @property
     def other(self):
         warnings.warn(
-            f'{self.__class__.__name__}.other deprecated after 1.8.1',
+            f"{self.__class__.__name__}.other deprecated after 1.8.1",
             DeprecationWarning,
             stacklevel=2,
         )
@@ -95,8 +94,8 @@ class _BinaryMismatch(Mismatch):
         reference = repr(self._reference)
         if len(actual) + len(reference) > 70:
             return "{}:\nreference = {}\nactual    = {}\n".format(
-                self._mismatch_string, _format(self._reference),
-                _format(self._actual))
+                self._mismatch_string, _format(self._reference), _format(self._actual)
+            )
         else:
             if self._reference_on_right:
                 left, right = actual, reference
@@ -109,7 +108,7 @@ class Equals(_BinaryComparison):
     """Matches if the items are equal."""
 
     comparator = operator.eq
-    mismatch_string = '!='
+    mismatch_string = "!="
 
 
 class _FlippedEquals:
@@ -129,7 +128,7 @@ class _FlippedEquals:
         mismatch = Equals(self._expected).match(other)
         if not mismatch:
             return None
-        return _BinaryMismatch(other, '!=', self._expected, False)
+        return _BinaryMismatch(other, "!=", self._expected, False)
 
 
 class NotEquals(_BinaryComparison):
@@ -140,28 +139,28 @@ class NotEquals(_BinaryComparison):
     """
 
     comparator = operator.ne
-    mismatch_string = '=='
+    mismatch_string = "=="
 
 
 class Is(_BinaryComparison):
     """Matches if the items are identical."""
 
     comparator = operator.is_
-    mismatch_string = 'is not'
+    mismatch_string = "is not"
 
 
 class LessThan(_BinaryComparison):
     """Matches if the item is less than the matchers reference object."""
 
     comparator = operator.__lt__
-    mismatch_string = '>='
+    mismatch_string = ">="
 
 
 class GreaterThan(_BinaryComparison):
     """Matches if the item is greater than the matchers reference object."""
 
     comparator = operator.__gt__
-    mismatch_string = '<='
+    mismatch_string = "<="
 
 
 class SameMembers(Matcher):
@@ -176,7 +175,7 @@ class SameMembers(Matcher):
         self.expected = expected
 
     def __str__(self):
-        return f'{self.__class__.__name__}({self.expected!r})'
+        return f"{self.__class__.__name__}({self.expected!r})"
 
     def match(self, observed):
         expected_only = list_subtract(self.expected, observed)
@@ -185,12 +184,13 @@ class SameMembers(Matcher):
             return
         return PostfixedMismatch(
             "\nmissing:    {}\nextra:      {}".format(
-                _format(expected_only), _format(observed_only)),
-            _BinaryMismatch(observed, 'elements differ', self.expected))
+                _format(expected_only), _format(observed_only)
+            ),
+            _BinaryMismatch(observed, "elements differ", self.expected),
+        )
 
 
 class DoesNotStartWith(Mismatch):
-
     def __init__(self, matchee, expected):
         """Create a DoesNotStartWith Mismatch.
 
@@ -202,7 +202,8 @@ class DoesNotStartWith(Mismatch):
 
     def describe(self):
         return "{} does not start with {}.".format(
-            text_repr(self.matchee), text_repr(self.expected))
+            text_repr(self.matchee), text_repr(self.expected)
+        )
 
 
 class StartsWith(Matcher):
@@ -225,7 +226,6 @@ class StartsWith(Matcher):
 
 
 class DoesNotEndWith(Mismatch):
-
     def __init__(self, matchee, expected):
         """Create a DoesNotEndWith Mismatch.
 
@@ -237,7 +237,8 @@ class DoesNotEndWith(Mismatch):
 
     def describe(self):
         return "{} does not end with {}.".format(
-            text_repr(self.matchee), text_repr(self.expected))
+            text_repr(self.matchee), text_repr(self.expected)
+        )
 
 
 class EndsWith(Matcher):
@@ -266,8 +267,9 @@ class IsInstance:
         self.types = tuple(types)
 
     def __str__(self):
-        return "{}({})".format(self.__class__.__name__,
-                ', '.join(type.__name__ for type in self.types))
+        return "{}({})".format(
+            self.__class__.__name__, ", ".join(type.__name__ for type in self.types)
+        )
 
     def match(self, other):
         if isinstance(other, self.types):
@@ -276,7 +278,6 @@ class IsInstance:
 
 
 class NotAnInstance(Mismatch):
-
     def __init__(self, matchee, types):
         """Create a NotAnInstance Mismatch.
 
@@ -290,13 +291,11 @@ class NotAnInstance(Mismatch):
         if len(self.types) == 1:
             typestr = self.types[0].__name__
         else:
-            typestr = 'any of (%s)' % ', '.join(type.__name__ for type in
-                    self.types)
+            typestr = "any of (%s)" % ", ".join(type.__name__ for type in self.types)
         return f"'{self.matchee}' is not an instance of {typestr}"
 
 
 class DoesNotContain(Mismatch):
-
     def __init__(self, matchee, needle):
         """Create a DoesNotContain Mismatch.
 
@@ -341,16 +340,16 @@ class MatchesRegex:
         self.flags = flags
 
     def __str__(self):
-        args = ['%r' % self.pattern]
+        args = ["%r" % self.pattern]
         flag_arg = []
         # dir() sorts the attributes for us, so we don't need to do it again.
         for flag in dir(re):
             if len(flag) == 1:
                 if self.flags & getattr(re, flag):
-                    flag_arg.append('re.%s' % flag)
+                    flag_arg.append("re.%s" % flag)
         if flag_arg:
-            args.append('|'.join(flag_arg))
-        return '{}({})'.format(self.__class__.__name__, ', '.join(args))
+            args.append("|".join(flag_arg))
+        return "{}({})".format(self.__class__.__name__, ", ".join(args))
 
     def match(self, value):
         if not re.match(self.pattern, value, self.flags):
@@ -358,8 +357,9 @@ class MatchesRegex:
             if not isinstance(pattern, str):
                 pattern = pattern.decode("latin1")
             pattern = pattern.encode("unicode_escape").decode("ascii")
-            return Mismatch("{!r} does not match /{}/".format(
-                    value, pattern.replace("\\\\", "\\")))
+            return Mismatch(
+                "{!r} does not match /{}/".format(value, pattern.replace("\\\\", "\\"))
+            )
 
 
 def has_len(x, y):

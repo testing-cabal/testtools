@@ -10,6 +10,7 @@ def test_suite():
         test_runtest,
         test_spinner,
     )
+
     modules = [
         test_deferred,
         test_matchers,
