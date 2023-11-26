@@ -22,6 +22,7 @@ from ._higherorder import (
     )
 from ._impl import (
     Matcher,
+    OverrideDescription,
     )
 
 
@@ -32,23 +33,29 @@ def PathExists():
 
       assertThat('/some/path', PathExists())
     """
-    return MatchesPredicate(os.path.exists, "%s does not exist.")
+    return OverrideDescription(
+        'PathExists()',
+        MatchesPredicate(os.path.exists, "%s does not exist."))
 
 
 def DirExists():
     """Matches if the path exists and is a directory."""
-    return MatchesAll(
-        PathExists(),
-        MatchesPredicate(os.path.isdir, "%s is not a directory."),
-        first_only=True)
+    return OverrideDescription(
+        'DirExists()',
+        MatchesAll(
+            PathExists(),
+            MatchesPredicate(os.path.isdir, "%s is not a directory."),
+            first_only=True))
 
 
 def FileExists():
     """Matches if the given path exists and is a file."""
-    return MatchesAll(
-        PathExists(),
-        MatchesPredicate(os.path.isfile, "%s is not a file."),
-        first_only=True)
+    return OverrideDescription(
+        "FileExists()",
+        MatchesAll(
+            PathExists(),
+            MatchesPredicate(os.path.isfile, "%s is not a file."),
+            first_only=True))
 
 
 class DirContains(Matcher):
