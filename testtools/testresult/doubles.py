@@ -7,12 +7,12 @@ from collections import namedtuple
 from testtools.tags import TagContext
 
 __all__ = [
-    'Python26TestResult',
-    'Python27TestResult',
-    'ExtendedTestResult',
-    'TwistedTestResult',
-    'StreamResult',
-    ]
+    "Python26TestResult",
+    "Python27TestResult",
+    "ExtendedTestResult",
+    "TwistedTestResult",
+    "StreamResult",
+]
 
 
 class LoggingBase:
@@ -35,24 +35,24 @@ class Python26TestResult(LoggingBase):
 
     def addError(self, test, err):
         self._was_successful = False
-        self._events.append(('addError', test, err))
+        self._events.append(("addError", test, err))
 
     def addFailure(self, test, err):
         self._was_successful = False
-        self._events.append(('addFailure', test, err))
+        self._events.append(("addFailure", test, err))
 
     def addSuccess(self, test):
-        self._events.append(('addSuccess', test))
+        self._events.append(("addSuccess", test))
 
     def startTest(self, test):
-        self._events.append(('startTest', test))
+        self._events.append(("startTest", test))
         self.testsRun += 1
 
     def stop(self):
         self.shouldStop = True
 
     def stopTest(self, test):
-        self._events.append(('stopTest', test))
+        self._events.append(("stopTest", test))
 
     def wasSuccessful(self):
         return self._was_successful
@@ -76,21 +76,21 @@ class Python27TestResult(Python26TestResult):
             self.stop()
 
     def addExpectedFailure(self, test, err):
-        self._events.append(('addExpectedFailure', test, err))
+        self._events.append(("addExpectedFailure", test, err))
 
     def addSkip(self, test, reason):
-        self._events.append(('addSkip', test, reason))
+        self._events.append(("addSkip", test, reason))
 
     def addUnexpectedSuccess(self, test):
-        self._events.append(('addUnexpectedSuccess', test))
+        self._events.append(("addUnexpectedSuccess", test))
         if self.failfast:
             self.stop()
 
     def startTestRun(self):
-        self._events.append(('startTestRun',))
+        self._events.append(("startTestRun",))
 
     def stopTestRun(self):
-        self._events.append(('stopTestRun',))
+        self._events.append(("stopTestRun",))
 
 
 class ExtendedTestResult(Python27TestResult):
@@ -102,33 +102,33 @@ class ExtendedTestResult(Python27TestResult):
 
     def addError(self, test, err=None, details=None):
         self._was_successful = False
-        self._events.append(('addError', test, err or details))
+        self._events.append(("addError", test, err or details))
 
     def addFailure(self, test, err=None, details=None):
         self._was_successful = False
-        self._events.append(('addFailure', test, err or details))
+        self._events.append(("addFailure", test, err or details))
 
     def addExpectedFailure(self, test, err=None, details=None):
-        self._events.append(('addExpectedFailure', test, err or details))
+        self._events.append(("addExpectedFailure", test, err or details))
 
     def addSkip(self, test, reason=None, details=None):
-        self._events.append(('addSkip', test, reason or details))
+        self._events.append(("addSkip", test, reason or details))
 
     def addSuccess(self, test, details=None):
         if details:
-            self._events.append(('addSuccess', test, details))
+            self._events.append(("addSuccess", test, details))
         else:
-            self._events.append(('addSuccess', test))
+            self._events.append(("addSuccess", test))
 
     def addUnexpectedSuccess(self, test, details=None):
         self._was_successful = False
         if details is not None:
-            self._events.append(('addUnexpectedSuccess', test, details))
+            self._events.append(("addUnexpectedSuccess", test, details))
         else:
-            self._events.append(('addUnexpectedSuccess', test))
+            self._events.append(("addUnexpectedSuccess", test))
 
     def progress(self, offset, whence):
-        self._events.append(('progress', offset, whence))
+        self._events.append(("progress", offset, whence))
 
     def startTestRun(self):
         super().startTestRun()
@@ -149,10 +149,10 @@ class ExtendedTestResult(Python27TestResult):
 
     def tags(self, new_tags, gone_tags):
         self._tags.change_tags(new_tags, gone_tags)
-        self._events.append(('tags', new_tags, gone_tags))
+        self._events.append(("tags", new_tags, gone_tags))
 
     def time(self, time):
-        self._events.append(('time', time))
+        self._events.append(("time", time))
 
     def wasSuccessful(self):
         return self._was_successful
@@ -172,30 +172,30 @@ class TwistedTestResult(LoggingBase):
 
     def startTest(self, test):
         self.testsRun += 1
-        self._events.append(('startTest', test))
+        self._events.append(("startTest", test))
 
     def stopTest(self, test):
-        self._events.append(('stopTest', test))
+        self._events.append(("stopTest", test))
 
     def addSuccess(self, test):
-        self._events.append(('addSuccess', test))
+        self._events.append(("addSuccess", test))
 
     def addError(self, test, error):
         self._was_successful = False
-        self._events.append(('addError', test, error))
+        self._events.append(("addError", test, error))
 
     def addFailure(self, test, error):
         self._was_successful = False
-        self._events.append(('addFailure', test, error))
+        self._events.append(("addFailure", test, error))
 
     def addExpectedFailure(self, test, failure, todo=None):
-        self._events.append(('addExpectedFailure', test, failure))
+        self._events.append(("addExpectedFailure", test, failure))
 
     def addUnexpectedSuccess(self, test, todo=None):
-        self._events.append(('addUnexpectedSuccess', test))
+        self._events.append(("addUnexpectedSuccess", test))
 
     def addSkip(self, test, reason):
-        self._events.append(('addSkip', test, reason))
+        self._events.append(("addSkip", test, reason))
 
     def wasSuccessful(self):
         return self._was_successful
@@ -211,23 +211,55 @@ class StreamResult(LoggingBase):
     """
 
     def startTestRun(self):
-        self._events.append(('startTestRun',))
+        self._events.append(("startTestRun",))
 
     def stopTestRun(self):
-        self._events.append(('stopTestRun',))
+        self._events.append(("stopTestRun",))
 
-    def status(self, test_id=None, test_status=None, test_tags=None,
-               runnable=True, file_name=None, file_bytes=None, eof=False,
-               mime_type=None, route_code=None, timestamp=None):
+    def status(
+        self,
+        test_id=None,
+        test_status=None,
+        test_tags=None,
+        runnable=True,
+        file_name=None,
+        file_bytes=None,
+        eof=False,
+        mime_type=None,
+        route_code=None,
+        timestamp=None,
+    ):
         self._events.append(
             _StatusEvent(
-                'status', test_id, test_status, test_tags, runnable,
-                file_name, file_bytes, eof, mime_type, route_code,
-                timestamp))
+                "status",
+                test_id,
+                test_status,
+                test_tags,
+                runnable,
+                file_name,
+                file_bytes,
+                eof,
+                mime_type,
+                route_code,
+                timestamp,
+            )
+        )
 
 
 # Convenience for easier access to status fields
 _StatusEvent = namedtuple(
-    "_Event", [
-        "name", "test_id", "test_status", "test_tags", "runnable", "file_name",
-        "file_bytes", "eof", "mime_type", "route_code", "timestamp"])
+    "_Event",
+    [
+        "name",
+        "test_id",
+        "test_status",
+        "test_tags",
+        "runnable",
+        "file_name",
+        "file_bytes",
+        "eof",
+        "mime_type",
+        "route_code",
+        "timestamp",
+    ],
+)

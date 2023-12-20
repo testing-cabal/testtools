@@ -15,8 +15,9 @@ def test_suite():
         test_filesystem,
         test_higherorder,
         test_impl,
-        test_warnings
-        )
+        test_warnings,
+    )
+
     modules = [
         test_basic,
         test_const,
@@ -27,7 +28,7 @@ def test_suite():
         test_filesystem,
         test_higherorder,
         test_impl,
-        test_warnings
-        ]
+        test_warnings,
+    ]
     suites = map(lambda x: x.test_suite(), modules)
     return TestSuite(suites)

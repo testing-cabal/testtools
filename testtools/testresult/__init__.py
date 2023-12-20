@@ -3,28 +3,28 @@
 """Test result objects."""
 
 __all__ = [
-    'CopyStreamResult',
-    'ExtendedToOriginalDecorator',
-    'ExtendedToStreamDecorator',
-    'MultiTestResult',
-    'ResourcedToStreamDecorator',
-    'StreamFailFast',
-    'StreamResult',
-    'StreamResultRouter',
-    'StreamSummary',
-    'StreamTagger',
-    'StreamToDict',
-    'StreamToExtendedDecorator',
-    'StreamToQueue',
-    'Tagger',
-    'TestByTestResult',
-    'TestControl',
-    'TestResult',
-    'TestResultDecorator',
-    'TextTestResult',
-    'ThreadsafeForwardingResult',
-    'TimestampingStreamResult',
-    ]
+    "CopyStreamResult",
+    "ExtendedToOriginalDecorator",
+    "ExtendedToStreamDecorator",
+    "MultiTestResult",
+    "ResourcedToStreamDecorator",
+    "StreamFailFast",
+    "StreamResult",
+    "StreamResultRouter",
+    "StreamSummary",
+    "StreamTagger",
+    "StreamToDict",
+    "StreamToExtendedDecorator",
+    "StreamToQueue",
+    "Tagger",
+    "TestByTestResult",
+    "TestControl",
+    "TestResult",
+    "TestResultDecorator",
+    "TextTestResult",
+    "ThreadsafeForwardingResult",
+    "TimestampingStreamResult",
+]
 
 from testtools.testresult.real import (
     CopyStreamResult,
@@ -48,4 +48,4 @@ from testtools.testresult.real import (
     TextTestResult,
     ThreadsafeForwardingResult,
     TimestampingStreamResult,
-    )
+)

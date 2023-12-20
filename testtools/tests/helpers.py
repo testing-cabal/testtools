@@ -3,8 +3,8 @@
 """Helpers for tests."""
 
 __all__ = [
-    'LoggingResult',
-    ]
+    "LoggingResult",
+]
 
 import sys
 
@@ -36,51 +36,51 @@ class LoggingResult(TestResult):
         super().__init__()
 
     def startTest(self, test):
-        self._events.append(('startTest', test))
+        self._events.append(("startTest", test))
         super().startTest(test)
 
     def stop(self):
-        self._events.append('stop')
+        self._events.append("stop")
         super().stop()
 
     def stopTest(self, test):
-        self._events.append(('stopTest', test))
+        self._events.append(("stopTest", test))
         super().stopTest(test)
 
     def addFailure(self, test, error):
-        self._events.append(('addFailure', test, error))
+        self._events.append(("addFailure", test, error))
         super().addFailure(test, error)
 
     def addError(self, test, error):
-        self._events.append(('addError', test, error))
+        self._events.append(("addError", test, error))
         super().addError(test, error)
 
     def addSkip(self, test, reason):
-        self._events.append(('addSkip', test, reason))
+        self._events.append(("addSkip", test, reason))
         super().addSkip(test, reason)
 
     def addSuccess(self, test):
-        self._events.append(('addSuccess', test))
+        self._events.append(("addSuccess", test))
         super().addSuccess(test)
 
     def startTestRun(self):
-        self._events.append('startTestRun')
+        self._events.append("startTestRun")
         super().startTestRun()
 
     def stopTestRun(self):
-        self._events.append('stopTestRun')
+        self._events.append("stopTestRun")
         super().stopTestRun()
 
     def done(self):
-        self._events.append('done')
+        self._events.append("done")
         super().done()
 
     def tags(self, new_tags, gone_tags):
-        self._events.append(('tags', new_tags, gone_tags))
+        self._events.append(("tags", new_tags, gone_tags))
         super().tags(new_tags, gone_tags)
 
     def time(self, a_datetime):
-        self._events.append(('time', a_datetime))
+        self._events.append(("time", a_datetime))
         super().time(a_datetime)
 
 
@@ -103,11 +103,8 @@ def run_with_stack_hidden(should_hide, f, *args, **kwargs):
 
 
 class FullStackRunTest(runtest.RunTest):
-
     def _run_user(self, fn, *args, **kwargs):
-        return run_with_stack_hidden(
-            False,
-            super()._run_user, fn, *args, **kwargs)
+        return run_with_stack_hidden(False, super()._run_user, fn, *args, **kwargs)
 
 
 class MatchesEvents:
@@ -124,15 +121,14 @@ class MatchesEvents:
     def _make_matcher(self, obj):
         # This isn't very safe for general use, but is good enough to make
         # some tests in this module more readable.
-        if hasattr(obj, 'match'):
+        if hasattr(obj, "match"):
             return obj
         elif isinstance(obj, tuple) or isinstance(obj, list):
-            return MatchesListwise(
-                [self._make_matcher(item) for item in obj])
+            return MatchesListwise([self._make_matcher(item) for item in obj])
         elif isinstance(obj, dict):
-            return MatchesDict({
-                key: self._make_matcher(value)
-                for key, value in obj.items()})
+            return MatchesDict(
+                {key: self._make_matcher(value) for key, value in obj.items()}
+            )
         else:
             return Equals(obj)
 
@@ -145,8 +141,7 @@ class AsText(AfterPreprocessing):
     """Match the text of a Content instance."""
 
     def __init__(self, matcher, annotate=True):
-        super().__init__(
-            lambda log: log.as_text(), matcher, annotate=annotate)
+        super().__init__(lambda log: log.as_text(), matcher, annotate=annotate)
 
 
 def raise_(exception):

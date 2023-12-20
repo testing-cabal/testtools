@@ -3,24 +3,24 @@
 """Test results and related things."""
 
 __all__ = [
-    'ExtendedToOriginalDecorator',
-    'ExtendedToStreamDecorator',
-    'MultiTestResult',
-    'ResourcedToStreamDecorator',
-    'StreamFailFast',
-    'StreamResult',
-    'StreamSummary',
-    'StreamTagger',
-    'StreamToDict',
-    'StreamToExtendedDecorator',
-    'StreamToQueue',
-    'Tagger',
-    'TestControl',
-    'TestResult',
-    'TestResultDecorator',
-    'ThreadsafeForwardingResult',
-    'TimestampingStreamResult',
-    ]
+    "ExtendedToOriginalDecorator",
+    "ExtendedToStreamDecorator",
+    "MultiTestResult",
+    "ResourcedToStreamDecorator",
+    "StreamFailFast",
+    "StreamResult",
+    "StreamSummary",
+    "StreamTagger",
+    "StreamToDict",
+    "StreamToExtendedDecorator",
+    "StreamToQueue",
+    "Tagger",
+    "TestControl",
+    "TestResult",
+    "TestResultDecorator",
+    "ThreadsafeForwardingResult",
+    "TimestampingStreamResult",
+]
 
 import datetime
 import email.message
@@ -58,6 +58,7 @@ class UTC(datetime.tzinfo):
 
     def dst(self, dt):
         return _ZERO
+
 
 utc = UTC()
 
@@ -99,7 +100,8 @@ class TestResult(unittest.TestResult):
         """
         # This is the python 2.7 implementation
         self.expectedFailures.append(
-            (test, self._err_details_to_string(test, err, details)))
+            (test, self._err_details_to_string(test, err, details))
+        )
 
     def addError(self, test, err=None, details=None):
         """Called when an error has occurred. 'err' is a tuple of values as
@@ -108,8 +110,7 @@ class TestResult(unittest.TestResult):
         :param details: Alternative way to supply details about the outcome.
             see the class docstring for more information.
         """
-        self.errors.append(
-            (test, self._err_details_to_string(test, err, details)))
+        self.errors.append((test, self._err_details_to_string(test, err, details)))
         if self.failfast:
             self.stop()
 
@@ -120,8 +121,7 @@ class TestResult(unittest.TestResult):
         :param details: Alternative way to supply details about the outcome.
             see the class docstring for more information.
         """
-        self.failures.append(
-            (test, self._err_details_to_string(test, err, details)))
+        self.failures.append((test, self._err_details_to_string(test, err, details)))
         if self.failfast:
             self.stop()
 
@@ -142,9 +142,9 @@ class TestResult(unittest.TestResult):
         :return: None
         """
         if reason is None:
-            reason = details.get('reason')
+            reason = details.get("reason")
             if reason is None:
-                reason = 'No reason given'
+                reason = "No reason given"
             else:
                 reason = reason.as_text()
         skip_list = self.skip_reasons.setdefault(reason, [])
@@ -174,9 +174,8 @@ class TestResult(unittest.TestResult):
     def _err_details_to_string(self, test, err=None, details=None):
         """Convert an error in exc_info form or a contents dict to a string."""
         if err is not None:
-            return TracebackContent(
-                err, test, capture_locals=self.tb_locals).as_text()
-        return _details_to_str(details, special='traceback')
+            return TracebackContent(err, test, capture_locals=self.tb_locals).as_text()
+        return _details_to_str(details, special="traceback")
 
     def _exc_info_to_unicode(self, err, test):
         # Deprecated.  Only present because subunit upcalls to it.  See
@@ -275,7 +274,7 @@ class TestResult(unittest.TestResult):
   running and at any intermediary point they might choose to indicate their
   continual operation.
 """
-INTERIM_STATES = frozenset([None, 'inprogress'])
+INTERIM_STATES = frozenset([None, "inprogress"])
 
 """Final states:
 
@@ -300,7 +299,8 @@ INTERIM_STATES = frozenset([None, 'inprogress'])
 * unknown - we don't know what state the test is in
 """
 FINAL_STATES = frozenset(
-    ['exists', 'xfail', 'uxsuccess', 'success', 'fail', 'skip', 'unknown'])
+    ["exists", "xfail", "uxsuccess", "success", "fail", "skip", "unknown"]
+)
 
 
 STATES = INTERIM_STATES | FINAL_STATES
@@ -362,9 +362,19 @@ class StreamResult:
         considered failed-or-hung.
         """
 
-    def status(self, test_id=None, test_status=None, test_tags=None,
-               runnable=True, file_name=None, file_bytes=None, eof=False,
-               mime_type=None, route_code=None, timestamp=None):
+    def status(
+        self,
+        test_id=None,
+        test_status=None,
+        test_tags=None,
+        runnable=True,
+        file_name=None,
+        file_bytes=None,
+        eof=False,
+        mime_type=None,
+        route_code=None,
+        timestamp=None,
+    ):
         """Inform the result about a test status.
 
         :param test_id: The test whose status is being reported. None to
@@ -433,7 +443,9 @@ def domap(function, *sequences):
     """
     warnings.warn(
         "domap deprecated since 1.8.1. Please implement your own strict map.",
-        DeprecationWarning, stacklevel=2)
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return _strict_map(function, *sequences)
 
 
@@ -455,15 +467,15 @@ class CopyStreamResult(StreamResult):
 
     def startTestRun(self):
         super().startTestRun()
-        _strict_map(methodcaller('startTestRun'), self.targets)
+        _strict_map(methodcaller("startTestRun"), self.targets)
 
     def stopTestRun(self):
         super().stopTestRun()
-        _strict_map(methodcaller('stopTestRun'), self.targets)
+        _strict_map(methodcaller("stopTestRun"), self.targets)
 
     def status(self, *args, **kwargs):
         super().status(*args, **kwargs)
-        _strict_map(methodcaller('status', *args, **kwargs), self.targets)
+        _strict_map(methodcaller("status", *args, **kwargs), self.targets)
 
 
 class StreamFailFast(StreamResult):
@@ -478,10 +490,20 @@ class StreamFailFast(StreamResult):
     def __init__(self, on_error):
         self.on_error = on_error
 
-    def status(self, test_id=None, test_status=None, test_tags=None,
-               runnable=True, file_name=None, file_bytes=None, eof=False,
-               mime_type=None, route_code=None, timestamp=None):
-        if test_status in ('uxsuccess', 'fail'):
+    def status(
+        self,
+        test_id=None,
+        test_status=None,
+        test_tags=None,
+        runnable=True,
+        file_name=None,
+        file_bytes=None,
+        eof=False,
+        mime_type=None,
+        route_code=None,
+        timestamp=None,
+    ):
+        if test_status in ("uxsuccess", "fail"):
             self.on_error()
 
 
@@ -548,19 +570,19 @@ class StreamResultRouter(StreamResult):
         self._in_run = False
 
     def status(self, **kwargs):
-        route_code = kwargs.get('route_code', None)
-        test_id = kwargs.get('test_id', None)
+        route_code = kwargs.get("route_code", None)
+        test_id = kwargs.get("test_id", None)
         if route_code is not None:
-            prefix = route_code.split('/')[0]
+            prefix = route_code.split("/")[0]
         else:
             prefix = route_code
         if prefix in self._route_code_prefixes:
             target, consume_route = self._route_code_prefixes[prefix]
             if route_code is not None and consume_route:
-                route_code = route_code[len(prefix) + 1:]
+                route_code = route_code[len(prefix) + 1 :]
                 if not route_code:
                     route_code = None
-                kwargs['route_code'] = route_code
+                kwargs["route_code"] = route_code
         elif test_id in self._test_ids:
             target = self._test_ids[test_id]
         else:
@@ -597,15 +619,16 @@ class StreamResultRouter(StreamResult):
             sink.startTestRun()
 
     def _map_route_code_prefix(self, sink, route_prefix, consume_route=False):
-        if '/' in route_prefix:
-            raise TypeError(
-                f"{route_prefix!r} is more than one route step long")
+        if "/" in route_prefix:
+            raise TypeError(f"{route_prefix!r} is more than one route step long")
         self._route_code_prefixes[route_prefix] = (sink, consume_route)
-    _policies['route_code_prefix'] = _map_route_code_prefix
+
+    _policies["route_code_prefix"] = _map_route_code_prefix
 
     def _map_test_id(self, sink, test_id):
         self._test_ids[test_id] = sink
-    _policies['test_id'] = _map_test_id
+
+    _policies["test_id"] = _map_test_id
 
 
 class StreamTagger(CopyStreamResult):
@@ -624,10 +647,10 @@ class StreamTagger(CopyStreamResult):
         self.discard = frozenset(discard or ())
 
     def status(self, *args, **kwargs):
-        test_tags = kwargs.get('test_tags') or set()
+        test_tags = kwargs.get("test_tags") or set()
         test_tags.update(self.add)
         test_tags.difference_update(self.discard)
-        kwargs['test_tags'] = test_tags or None
+        kwargs["test_tags"] = test_tags or None
         super().status(*args, **kwargs)
 
 
@@ -658,7 +681,7 @@ class _TestRecord:
             id=test_id,
             tags=set(),
             details={},
-            status='unknown',
+            status="unknown",
             timestamps=(timestamp, None),
         )
 
@@ -691,11 +714,11 @@ class _TestRecord:
           compared - their ordering is purely order received in the stream.
         """
         return {
-            'id': self.id,
-            'tags': self.tags,
-            'details': self.details,
-            'status': self.status,
-            'timestamps': list(self.timestamps),
+            "id": self.id,
+            "tags": self.tags,
+            "details": self.details,
+            "status": self.status,
+            "timestamps": list(self.timestamps),
         }
 
     def got_timestamp(self, timestamp):
@@ -718,8 +741,8 @@ class _TestRecord:
             content_type = _make_content_type(mime_type)
             content_bytes = []
             case = self.transform(
-                ['details', file_name],
-                Content(content_type, lambda: content_bytes))
+                ["details", file_name], Content(content_type, lambda: content_bytes)
+            )
 
         case.details[file_name].iter_bytes().append(file_bytes)
         return case
@@ -757,17 +780,17 @@ def _make_content_type(mime_type=None):
     # XXX: Not sure what release this was added, so "in a few releases" is
     # unactionable.
     if mime_type is None:
-        mime_type = 'application/octet-stream'
+        mime_type = "application/octet-stream"
 
     msg = email.message.EmailMessage()
-    msg['content-type'] = mime_type
+    msg["content-type"] = mime_type
 
-    full_type, parameters = msg.get_content_type(), dict(msg['content-type'].params)
+    full_type, parameters = msg.get_content_type(), dict(msg["content-type"].params)
     # Ensure any wildcards are valid.
-    if full_type == '*':
-        full_type = '*/*'
+    if full_type == "*":
+        full_type = "*/*"
 
-    type_parts = full_type.split('/') if '/' in full_type else None
+    type_parts = full_type.split("/") if "/" in full_type else None
     if not type_parts or len(type_parts) > 2:
         raise Exception("Can't parse type '%s'" % full_type)
 
@@ -775,22 +798,23 @@ def _make_content_type(mime_type=None):
     primary_type = primary_type.strip()
     sub_type = sub_type.strip()
 
-    if 'charset' in parameters:
-        if ',' in parameters['charset']:
-            parameters['charset'] = parameters['charset'][
-                :parameters['charset'].find(',')]
+    if "charset" in parameters:
+        if "," in parameters["charset"]:
+            parameters["charset"] = parameters["charset"][
+                : parameters["charset"].find(",")
+            ]
 
     return ContentType(primary_type, sub_type, parameters)
 
 
 _status_map = {
-    'inprogress': 'addFailure',
-    'unknown': 'addFailure',
-    'success': 'addSuccess',
-    'skip': 'addSkip',
-    'fail': 'addFailure',
-    'xfail': 'addExpectedFailure',
-    'uxsuccess': 'addUnexpectedSuccess',
+    "inprogress": "addFailure",
+    "unknown": "addFailure",
+    "success": "addSuccess",
+    "skip": "addSkip",
+    "fail": "addFailure",
+    "xfail": "addExpectedFailure",
+    "uxsuccess": "addUnexpectedSuccess",
 }
 
 
@@ -818,14 +842,31 @@ class _StreamToTestRecord(StreamResult):
         super().startTestRun()
         self._inprogress = {}
 
-    def status(self, test_id=None, test_status=None, test_tags=None,
-               runnable=True, file_name=None, file_bytes=None, eof=False,
-               mime_type=None, route_code=None, timestamp=None):
+    def status(
+        self,
+        test_id=None,
+        test_status=None,
+        test_tags=None,
+        runnable=True,
+        file_name=None,
+        file_bytes=None,
+        eof=False,
+        mime_type=None,
+        route_code=None,
+        timestamp=None,
+    ):
         super().status(
-            test_id, test_status,
-            test_tags=test_tags, runnable=runnable, file_name=file_name,
-            file_bytes=file_bytes, eof=eof, mime_type=mime_type,
-            route_code=route_code, timestamp=timestamp)
+            test_id,
+            test_status,
+            test_tags=test_tags,
+            runnable=runnable,
+            file_name=file_name,
+            file_bytes=file_bytes,
+            eof=eof,
+            mime_type=mime_type,
+            route_code=route_code,
+            timestamp=timestamp,
+        )
 
         key = self._ensure_key(test_id, route_code, timestamp)
         if not key:
@@ -833,16 +874,29 @@ class _StreamToTestRecord(StreamResult):
 
         # update fields
         self._inprogress[key] = self._update_case(
-            self._inprogress[key], test_status, test_tags, file_name,
-            file_bytes, mime_type, timestamp)
+            self._inprogress[key],
+            test_status,
+            test_tags,
+            file_name,
+            file_bytes,
+            mime_type,
+            timestamp,
+        )
 
         # notify completed tests.
         if test_status not in INTERIM_STATES:
             self.on_test(self._inprogress.pop(key))
 
-    def _update_case(self, case, test_status=None, test_tags=None,
-                     file_name=None, file_bytes=None, mime_type=None,
-                     timestamp=None):
+    def _update_case(
+        self,
+        case,
+        test_status=None,
+        test_tags=None,
+        file_name=None,
+        file_bytes=None,
+        mime_type=None,
+        timestamp=None,
+    ):
         if test_status is not None:
             case = case.set(status=test_status)
 
@@ -852,7 +906,7 @@ class _StreamToTestRecord(StreamResult):
             case = case.got_file(file_name, file_bytes, mime_type)
 
         if test_tags is not None:
-            case = case.set('tags', test_tags)
+            case = case.set("tags", test_tags)
 
         return case
 
@@ -935,11 +989,11 @@ def test_dict_to_case(test_dict):
     :return: A PlaceHolder test object.
     """
     return _TestRecord(
-        id=test_dict['id'],
-        tags=test_dict['tags'],
-        details=test_dict['details'],
-        status=test_dict['status'],
-        timestamps=tuple(test_dict['timestamps']),
+        id=test_dict["id"],
+        tags=test_dict["tags"],
+        details=test_dict["details"],
+        status=test_dict["status"],
+        timestamps=tuple(test_dict["timestamps"]),
     ).to_test_case()
 
 
@@ -955,15 +1009,15 @@ class StreamSummary(StreamResult):
         super().__init__()
         self._hook = _StreamToTestRecord(self._gather_test)
         self._handle_status = {
-            'success': self._success,
-            'skip': self._skip,
-            'exists': self._exists,
-            'fail': self._fail,
-            'xfail': self._xfail,
-            'uxsuccess': self._uxsuccess,
-            'unknown': self._incomplete,
-            'inprogress': self._incomplete,
-            }
+            "success": self._success,
+            "skip": self._skip,
+            "exists": self._exists,
+            "fail": self._fail,
+            "xfail": self._xfail,
+            "uxsuccess": self._uxsuccess,
+            "unknown": self._incomplete,
+            "inprogress": self._incomplete,
+        }
 
     def startTestRun(self):
         super().startTestRun()
@@ -989,10 +1043,10 @@ class StreamSummary(StreamResult):
         Note that incomplete tests can only be detected when stopTestRun is
         called, so that should be called before checking wasSuccessful.
         """
-        return (not self.failures and not self.errors)
+        return not self.failures and not self.errors
 
     def _gather_test(self, test_record):
-        if test_record.status == 'exists':
+        if test_record.status == "exists":
             return
         self.testsRun += 1
         case = test_record.to_test_case()
@@ -1005,10 +1059,10 @@ class StreamSummary(StreamResult):
         pass
 
     def _skip(self, case):
-        if 'reason' not in case._details:
+        if "reason" not in case._details:
             reason = "Unknown"
         else:
-            reason = case._details['reason'].as_text()
+            reason = case._details["reason"].as_text()
         self.skipped.append((case, reason))
 
     def _exists(self, case):
@@ -1023,7 +1077,7 @@ class StreamSummary(StreamResult):
         self.expectedFailures.append((case, message))
 
     def _uxsuccess(self, case):
-        case._outcome = 'addUnexpectedSuccess'
+        case._outcome = "addUnexpectedSuccess"
         self.unexpectedSuccesses.append(case)
 
 
@@ -1053,82 +1107,84 @@ class MultiTestResult(TestResult):
         super().__init__()
 
     def __repr__(self):
-        return '<{} ({})>'.format(
-            self.__class__.__name__, ', '.join(map(repr, self._results)))
+        return "<{} ({})>".format(
+            self.__class__.__name__, ", ".join(map(repr, self._results))
+        )
 
     def _dispatch(self, message, *args, **kwargs):
         return tuple(
-            getattr(result, message)(*args, **kwargs)
-            for result in self._results)
+            getattr(result, message)(*args, **kwargs) for result in self._results
+        )
 
     def _get_failfast(self):
-        return getattr(self._results[0], 'failfast', False)
+        return getattr(self._results[0], "failfast", False)
 
     def _set_failfast(self, value):
-        self._dispatch('__setattr__', 'failfast', value)
+        self._dispatch("__setattr__", "failfast", value)
+
     failfast = property(_get_failfast, _set_failfast)
 
     def _get_shouldStop(self):
-        return any(self._dispatch('__getattr__', 'shouldStop'))
+        return any(self._dispatch("__getattr__", "shouldStop"))
 
     def _set_shouldStop(self, value):
         # Called because we subclass TestResult. Probably should not do that.
         pass
+
     shouldStop = property(_get_shouldStop, _set_shouldStop)
 
     def startTest(self, test):
         super().startTest(test)
-        return self._dispatch('startTest', test)
+        return self._dispatch("startTest", test)
 
     def stop(self):
-        return self._dispatch('stop')
+        return self._dispatch("stop")
 
     def stopTest(self, test):
         super().stopTest(test)
-        return self._dispatch('stopTest', test)
+        return self._dispatch("stopTest", test)
 
     def addError(self, test, error=None, details=None):
-        return self._dispatch('addError', test, error, details=details)
+        return self._dispatch("addError", test, error, details=details)
 
     def addExpectedFailure(self, test, err=None, details=None):
-        return self._dispatch(
-            'addExpectedFailure', test, err, details=details)
+        return self._dispatch("addExpectedFailure", test, err, details=details)
 
     def addFailure(self, test, err=None, details=None):
-        return self._dispatch('addFailure', test, err, details=details)
+        return self._dispatch("addFailure", test, err, details=details)
 
     def addSkip(self, test, reason=None, details=None):
-        return self._dispatch('addSkip', test, reason, details=details)
+        return self._dispatch("addSkip", test, reason, details=details)
 
     def addSuccess(self, test, details=None):
-        return self._dispatch('addSuccess', test, details=details)
+        return self._dispatch("addSuccess", test, details=details)
 
     def addUnexpectedSuccess(self, test, details=None):
-        return self._dispatch('addUnexpectedSuccess', test, details=details)
+        return self._dispatch("addUnexpectedSuccess", test, details=details)
 
     def startTestRun(self):
         super().startTestRun()
-        return self._dispatch('startTestRun')
+        return self._dispatch("startTestRun")
 
     def stopTestRun(self):
-        return self._dispatch('stopTestRun')
+        return self._dispatch("stopTestRun")
 
     def tags(self, new_tags, gone_tags):
         super().tags(new_tags, gone_tags)
-        return self._dispatch('tags', new_tags, gone_tags)
+        return self._dispatch("tags", new_tags, gone_tags)
 
     def time(self, a_datetime):
-        return self._dispatch('time', a_datetime)
+        return self._dispatch("time", a_datetime)
 
     def done(self):
-        return self._dispatch('done')
+        return self._dispatch("done")
 
     def wasSuccessful(self):
         """Was this result successful?
 
         Only returns True if every constituent result was successful.
         """
-        return all(self._dispatch('wasSuccessful'))
+        return all(self._dispatch("wasSuccessful"))
 
 
 class TextTestResult(TestResult):
@@ -1136,21 +1192,28 @@ class TextTestResult(TestResult):
 
     def __init__(self, stream, failfast=False, tb_locals=False):
         """Construct a TextTestResult writing to stream."""
-        super().__init__(
-            failfast=failfast, tb_locals=tb_locals)
+        super().__init__(failfast=failfast, tb_locals=tb_locals)
         self.stream = stream
-        self.sep1 = '=' * 70 + '\n'
-        self.sep2 = '-' * 70 + '\n'
+        self.sep1 = "=" * 70 + "\n"
+        self.sep2 = "-" * 70 + "\n"
 
     def _delta_to_float(self, a_timedelta, precision):
         # This calls ceiling to ensure that the most pessimistic view of time
         # taken is shown (rather than leaving it to the Python %f operator
         # to decide whether to round/floor/ceiling. This was added when we
         # had pyp3 test failures that suggest a floor was happening.
-        shift = 10 ** precision
-        return math.ceil(
-            (a_timedelta.days * 86400.0 + a_timedelta.seconds +
-             a_timedelta.microseconds / 1000000.0) * shift) / shift
+        shift = 10**precision
+        return (
+            math.ceil(
+                (
+                    a_timedelta.days * 86400.0
+                    + a_timedelta.seconds
+                    + a_timedelta.microseconds / 1000000.0
+                )
+                * shift
+            )
+            / shift
+        )
 
     def _show_list(self, label, error_list):
         for test, output in error_list:
@@ -1166,28 +1229,33 @@ class TextTestResult(TestResult):
 
     def stopTestRun(self):
         if self.testsRun != 1:
-            plural = 's'
+            plural = "s"
         else:
-            plural = ''
+            plural = ""
         stop = self._now()
-        self._show_list('ERROR', self.errors)
-        self._show_list('FAIL', self.failures)
+        self._show_list("ERROR", self.errors)
+        self._show_list("FAIL", self.failures)
         for test in self.unexpectedSuccesses:
             self.stream.write(
-                "{}UNEXPECTED SUCCESS: {}\n{}".format(
-                    self.sep1, test.id(), self.sep2))
+                "{}UNEXPECTED SUCCESS: {}\n{}".format(self.sep1, test.id(), self.sep2)
+            )
         self.stream.write(
-            "\nRan %d test%s in %.3fs\n" % (
-                self.testsRun, plural,
-                self._delta_to_float(stop - self.__start, 3)))
+            "\nRan %d test%s in %.3fs\n"
+            % (self.testsRun, plural, self._delta_to_float(stop - self.__start, 3))
+        )
         if self.wasSuccessful():
             self.stream.write("OK\n")
         else:
             self.stream.write("FAILED (")
             details = []
-            details.append("failures=%d" % (
-                sum(map(len, (
-                    self.failures, self.errors, self.unexpectedSuccesses)))))
+            details.append(
+                "failures=%d"
+                % (
+                    sum(
+                        map(len, (self.failures, self.errors, self.unexpectedSuccesses))
+                    )
+                )
+            )
             self.stream.write(", ".join(details))
             self.stream.write(")\n")
         super().stopTestRun()
@@ -1233,7 +1301,7 @@ class ThreadsafeForwardingResult(TestResult):
         self._test_tags = set(), set()
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} {self.result!r}>'
+        return f"<{self.__class__.__name__} {self.result!r}>"
 
     def _any_tags(self, tags):
         return bool(tags[0] or tags[1])
@@ -1260,27 +1328,31 @@ class ThreadsafeForwardingResult(TestResult):
 
     def addError(self, test, err=None, details=None):
         self._add_result_with_semaphore(
-            self.result.addError, test, err, details=details)
+            self.result.addError, test, err, details=details
+        )
 
     def addExpectedFailure(self, test, err=None, details=None):
         self._add_result_with_semaphore(
-            self.result.addExpectedFailure, test, err, details=details)
+            self.result.addExpectedFailure, test, err, details=details
+        )
 
     def addFailure(self, test, err=None, details=None):
         self._add_result_with_semaphore(
-            self.result.addFailure, test, err, details=details)
+            self.result.addFailure, test, err, details=details
+        )
 
     def addSkip(self, test, reason=None, details=None):
         self._add_result_with_semaphore(
-            self.result.addSkip, test, reason, details=details)
+            self.result.addSkip, test, reason, details=details
+        )
 
     def addSuccess(self, test, details=None):
-        self._add_result_with_semaphore(
-            self.result.addSuccess, test, details=details)
+        self._add_result_with_semaphore(self.result.addSuccess, test, details=details)
 
     def addUnexpectedSuccess(self, test, details=None):
         self._add_result_with_semaphore(
-            self.result.addUnexpectedSuccess, test, details=details)
+            self.result.addUnexpectedSuccess, test, details=details
+        )
 
     def progress(self, offset, whence):
         pass
@@ -1303,6 +1375,7 @@ class ThreadsafeForwardingResult(TestResult):
     def _set_shouldStop(self, value):
         # Another case where we should not subclass TestResult
         pass
+
     shouldStop = property(_get_shouldStop, _set_shouldStop)
 
     def stop(self):
@@ -1337,11 +1410,9 @@ class ThreadsafeForwardingResult(TestResult):
         """See `TestResult`."""
         super().tags(new_tags, gone_tags)
         if self._test_start is not None:
-            self._test_tags = _merge_tags(
-                self._test_tags, (new_tags, gone_tags))
+            self._test_tags = _merge_tags(self._test_tags, (new_tags, gone_tags))
         else:
-            self._global_tags = _merge_tags(
-                self._global_tags, (new_tags, gone_tags))
+            self._global_tags = _merge_tags(self._global_tags, (new_tags, gone_tags))
 
 
 def _merge_tags(existing, changed):
@@ -1374,7 +1445,7 @@ class ExtendedToOriginalDecorator:
         self._shouldStop = False
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} {self.decorated!r}>'
+        return f"<{self.__class__.__name__} {self.decorated!r}>"
 
     def __getattr__(self, name):
         return getattr(self.decorated, name)
@@ -1395,8 +1466,7 @@ class ExtendedToOriginalDecorator:
 
     def addExpectedFailure(self, test, err=None, details=None):
         self._check_args(err, details)
-        addExpectedFailure = getattr(
-            self.decorated, 'addExpectedFailure', None)
+        addExpectedFailure = getattr(self.decorated, "addExpectedFailure", None)
         if addExpectedFailure is None:
             return self.addSuccess(test)
         if details is not None:
@@ -1423,7 +1493,7 @@ class ExtendedToOriginalDecorator:
 
     def addSkip(self, test, reason=None, details=None):
         self._check_args(reason, details)
-        addSkip = getattr(self.decorated, 'addSkip', None)
+        addSkip = getattr(self.decorated, "addSkip", None)
         if addSkip is None:
             return self.decorated.addSuccess(test)
         if details is not None:
@@ -1432,14 +1502,14 @@ class ExtendedToOriginalDecorator:
             except TypeError:
                 # extract the reason if it's available
                 try:
-                    reason = details['reason'].as_text()
+                    reason = details["reason"].as_text()
                 except KeyError:
                     reason = _details_to_str(details)
         return addSkip(test, reason)
 
     def addUnexpectedSuccess(self, test, details=None):
         try:
-            outcome = getattr(self.decorated, 'addUnexpectedSuccess', None)
+            outcome = getattr(self.decorated, "addUnexpectedSuccess", None)
             if outcome is None:
                 try:
                     test.fail("")
@@ -1471,20 +1541,20 @@ class ExtendedToOriginalDecorator:
             param_count += 1
         if param_count != 1:
             raise ValueError(
-                "Must pass only one of err '%s' and details '%s"
-                % (err, details))
+                "Must pass only one of err '%s' and details '%s" % (err, details)
+            )
 
     def _details_to_exc_info(self, details):
         """Convert a details dict to an exc_info tuple."""
         return (
             _StringException,
-            _StringException(_details_to_str(details, special='traceback')),
-            None)
+            _StringException(_details_to_str(details, special="traceback")),
+            None,
+        )
 
     @property
     def current_tags(self):
-        return getattr(
-            self.decorated, 'current_tags', self._tags.get_current_tags())
+        return getattr(self.decorated, "current_tags", self._tags.get_current_tags())
 
     def done(self):
         try:
@@ -1493,29 +1563,31 @@ class ExtendedToOriginalDecorator:
             return
 
     def _get_failfast(self):
-        return getattr(self.decorated, 'failfast', self._failfast)
+        return getattr(self.decorated, "failfast", self._failfast)
 
     def _set_failfast(self, value):
-        if hasattr(self.decorated, 'failfast'):
+        if hasattr(self.decorated, "failfast"):
             self.decorated.failfast = value
         else:
             self._failfast = value
+
     failfast = property(_get_failfast, _set_failfast)
 
     def progress(self, offset, whence):
-        method = getattr(self.decorated, 'progress', None)
+        method = getattr(self.decorated, "progress", None)
         if method is None:
             return
         return method(offset, whence)
 
     def _get_shouldStop(self):
-        return getattr(self.decorated, 'shouldStop', self._shouldStop)
+        return getattr(self.decorated, "shouldStop", self._shouldStop)
 
     def _set_shouldStop(self, value):
-        if hasattr(self.decorated, 'shouldStop'):
+        if hasattr(self.decorated, "shouldStop"):
             self.decorated.shouldStop = value
         else:
             self._shouldStop = value
+
     shouldStop = property(_get_shouldStop, _set_shouldStop)
 
     def startTest(self, test):
@@ -1530,7 +1602,7 @@ class ExtendedToOriginalDecorator:
             return
 
     def stop(self):
-        method = getattr(self.decorated, 'stop', None)
+        method = getattr(self.decorated, "stop", None)
         if method:
             return method()
         self.shouldStop = True
@@ -1546,14 +1618,14 @@ class ExtendedToOriginalDecorator:
             return
 
     def tags(self, new_tags, gone_tags):
-        method = getattr(self.decorated, 'tags', None)
+        method = getattr(self.decorated, "tags", None)
         if method is not None:
             return method(new_tags, gone_tags)
         else:
             self._tags.change_tags(new_tags, gone_tags)
 
     def time(self, a_datetime):
-        method = getattr(self.decorated, 'time', None)
+        method = getattr(self.decorated, "time", None)
         if method is None:
             return
         return method(a_datetime)
@@ -1588,13 +1660,13 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
             self.targets.append(StreamFailFast(self.stop))
         else:
             del self.targets[1:]
+
     failfast = property(_get_failfast, _set_failfast)
 
     def startTest(self, test):
         if not self._started:
             self.startTestRun()
-        self.status(
-            test_id=test.id(), test_status='inprogress', timestamp=self._now())
+        self.status(test_id=test.id(), test_status="inprogress", timestamp=self._now())
         self._tags = TagContext(self._tags)
 
     def stopTest(self, test):
@@ -1602,7 +1674,8 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
 
     def addError(self, test, err=None, details=None):
         self._check_args(err, details)
-        self._convert(test, err, details, 'fail')
+        self._convert(test, err, details, "fail")
+
     addFailure = addError
 
     def _convert(self, test, err, details, status, reason=None):
@@ -1613,7 +1686,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
         if err is not None:
             if details is None:
                 details = {}
-            details['traceback'] = TracebackContent(err, test)
+            details["traceback"] = TracebackContent(err, test)
         if details is not None:
             for name, content in details.items():
                 mime_type = repr(content.content_type)
@@ -1621,36 +1694,51 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
                 for next_bytes in content.iter_bytes():
                     if file_bytes is not None:
                         self.status(
-                            file_name=name, file_bytes=file_bytes,
-                            mime_type=mime_type, test_id=test_id,
-                            timestamp=now)
+                            file_name=name,
+                            file_bytes=file_bytes,
+                            mime_type=mime_type,
+                            test_id=test_id,
+                            timestamp=now,
+                        )
                     file_bytes = next_bytes
                 if file_bytes is None:
                     file_bytes = _b("")
                 self.status(
-                    file_name=name, file_bytes=file_bytes, eof=True,
-                    mime_type=mime_type, test_id=test_id, timestamp=now)
+                    file_name=name,
+                    file_bytes=file_bytes,
+                    eof=True,
+                    mime_type=mime_type,
+                    test_id=test_id,
+                    timestamp=now,
+                )
         if reason is not None:
             self.status(
-                file_name='reason', file_bytes=reason.encode('utf8'),
-                eof=True, mime_type="text/plain; charset=utf8",
-                test_id=test_id, timestamp=now)
+                file_name="reason",
+                file_bytes=reason.encode("utf8"),
+                eof=True,
+                mime_type="text/plain; charset=utf8",
+                test_id=test_id,
+                timestamp=now,
+            )
         self.status(
-            test_id=test_id, test_status=status,
-            test_tags=self.current_tags, timestamp=now)
+            test_id=test_id,
+            test_status=status,
+            test_tags=self.current_tags,
+            timestamp=now,
+        )
 
     def addExpectedFailure(self, test, err=None, details=None):
         self._check_args(err, details)
-        self._convert(test, err, details, 'xfail')
+        self._convert(test, err, details, "xfail")
 
     def addSkip(self, test, reason=None, details=None):
-        self._convert(test, None, details, 'skip', reason)
+        self._convert(test, None, details, "skip", reason)
 
     def addUnexpectedSuccess(self, test, details=None):
-        self._convert(test, None, details, 'uxsuccess')
+        self._convert(test, None, details, "uxsuccess")
 
     def addSuccess(self, test, details=None):
-        self._convert(test, None, details, 'success')
+        self._convert(test, None, details, "success")
 
     def _check_args(self, err, details):
         param_count = 0
@@ -1660,8 +1748,8 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
             param_count += 1
         if param_count != 1:
             raise ValueError(
-                "Must pass only one of err '%s' and details '%s"
-                % (err, details))
+                "Must pass only one of err '%s' and details '%s" % (err, details)
+            )
 
     def startTestRun(self):
         super().startTestRun()
@@ -1722,16 +1810,16 @@ class ResourcedToStreamDecorator(ExtendedToStreamDecorator):
     """
 
     def startMakeResource(self, resource):
-        self._convertResourceLifecycle(resource, 'make', 'start')
+        self._convertResourceLifecycle(resource, "make", "start")
 
     def stopMakeResource(self, resource):
-        self._convertResourceLifecycle(resource, 'make', 'stop')
+        self._convertResourceLifecycle(resource, "make", "stop")
 
     def startCleanResource(self, resource):
-        self._convertResourceLifecycle(resource, 'clean', 'start')
+        self._convertResourceLifecycle(resource, "clean", "start")
 
     def stopCleanResource(self, resource):
-        self._convertResourceLifecycle(resource, 'clean', 'stop')
+        self._convertResourceLifecycle(resource, "clean", "stop")
 
     def _convertResourceLifecycle(self, resource, method, phase):
         """Convert a resource lifecycle report to a stream event."""
@@ -1742,18 +1830,22 @@ class ResourcedToStreamDecorator(ExtendedToStreamDecorator):
             resource_id = resource.id()
         else:
             resource_id = "{}.{}".format(
-                resource.__class__.__module__, resource.__class__.__name__)
+                resource.__class__.__module__, resource.__class__.__name__
+            )
 
-        test_id = f'{resource_id}.{method}'
+        test_id = f"{resource_id}.{method}"
 
-        if phase == 'start':
-            test_status = 'inprogress'
+        if phase == "start":
+            test_status = "inprogress"
         else:
-            test_status = 'success'
+            test_status = "success"
 
         self.status(
-            test_id=test_id, test_status=test_status, runnable=False,
-            timestamp=self._now())
+            test_id=test_id,
+            test_status=test_status,
+            runnable=False,
+            timestamp=self._now(),
+        )
 
 
 class StreamToExtendedDecorator(StreamResult):
@@ -1776,10 +1868,9 @@ class StreamToExtendedDecorator(StreamResult):
         self.hook = _StreamToTestRecord(self._handle_tests)
 
     def status(self, test_id=None, test_status=None, *args, **kwargs):
-        if test_status == 'exists':
+        if test_status == "exists":
             return
-        self.hook.status(
-            test_id=test_id, test_status=test_status, *args, **kwargs)
+        self.hook.status(test_id=test_id, test_status=test_status, *args, **kwargs)
 
     def startTestRun(self):
         self.decorated.startTestRun()
@@ -1835,20 +1926,39 @@ class StreamToQueue(StreamResult):
         self.routing_code = routing_code
 
     def startTestRun(self):
-        self.queue.put(dict(event='startTestRun', result=self))
+        self.queue.put(dict(event="startTestRun", result=self))
 
-    def status(self, test_id=None, test_status=None, test_tags=None,
-               runnable=True, file_name=None, file_bytes=None, eof=False,
-               mime_type=None, route_code=None, timestamp=None):
-        self.queue.put(dict(
-            event='status', test_id=test_id,
-            test_status=test_status, test_tags=test_tags, runnable=runnable,
-            file_name=file_name, file_bytes=file_bytes, eof=eof,
-            mime_type=mime_type, route_code=self.route_code(route_code),
-            timestamp=timestamp))
+    def status(
+        self,
+        test_id=None,
+        test_status=None,
+        test_tags=None,
+        runnable=True,
+        file_name=None,
+        file_bytes=None,
+        eof=False,
+        mime_type=None,
+        route_code=None,
+        timestamp=None,
+    ):
+        self.queue.put(
+            dict(
+                event="status",
+                test_id=test_id,
+                test_status=test_status,
+                test_tags=test_tags,
+                runnable=runnable,
+                file_name=file_name,
+                file_bytes=file_bytes,
+                eof=eof,
+                mime_type=mime_type,
+                route_code=self.route_code(route_code),
+                timestamp=timestamp,
+            )
+        )
 
     def stopTestRun(self):
-        self.queue.put(dict(event='stopTestRun', result=self))
+        self.queue.put(dict(event="stopTestRun", result=self))
 
     def route_code(self, route_code):
         """Adjust route_code on the way through."""
@@ -1978,47 +2088,47 @@ class TestByTestResult(TestResult):
             start_time=self._start_time,
             stop_time=self._stop_time,
             tags=tags,
-            details=self._details)
+            details=self._details,
+        )
 
     def _err_to_details(self, test, err, details):
         if details:
             return details
-        return {'traceback': TracebackContent(
-            err, test, capture_locals=self.tb_locals)}
+        return {"traceback": TracebackContent(err, test, capture_locals=self.tb_locals)}
 
     def addSuccess(self, test, details=None):
         super().addSuccess(test)
-        self._status = 'success'
+        self._status = "success"
         self._details = details
 
     def addFailure(self, test, err=None, details=None):
         super().addFailure(test, err, details)
-        self._status = 'failure'
+        self._status = "failure"
         self._details = self._err_to_details(test, err, details)
 
     def addError(self, test, err=None, details=None):
         super().addError(test, err, details)
-        self._status = 'error'
+        self._status = "error"
         self._details = self._err_to_details(test, err, details)
 
     def addSkip(self, test, reason=None, details=None):
         super().addSkip(test, reason, details)
-        self._status = 'skip'
+        self._status = "skip"
         if details is None:
-            details = {'reason': text_content(reason)}
+            details = {"reason": text_content(reason)}
         elif reason:
             # XXX: What if details already has 'reason' key?
-            details['reason'] = text_content(reason)
+            details["reason"] = text_content(reason)
         self._details = details
 
     def addExpectedFailure(self, test, err=None, details=None):
         super().addExpectedFailure(test, err, details)
-        self._status = 'xfail'
+        self._status = "xfail"
         self._details = self._err_to_details(test, err, details)
 
     def addUnexpectedSuccess(self, test, details=None):
         super().addUnexpectedSuccess(test, details)
-        self._status = 'success'
+        self._status = "success"
         self._details = details
 
 
@@ -2032,11 +2142,10 @@ class TimestampingStreamResult(CopyStreamResult):
         super().__init__([target])
 
     def status(self, *args, **kwargs):
-        timestamp = kwargs.pop('timestamp', None)
+        timestamp = kwargs.pop("timestamp", None)
         if timestamp is None:
             timestamp = datetime.datetime.now(utc)
-        super().status(
-            *args, timestamp=timestamp, **kwargs)
+        super().status(*args, timestamp=timestamp, **kwargs)
 
 
 class _StringException(Exception):
@@ -2053,7 +2162,7 @@ class _StringException(Exception):
 
 
 def _format_text_attachment(name, text):
-    if '\n' in text:
+    if "\n" in text:
         return f"{name}: {{{{{{\n{text}\n}}}}}}\n"
     return f"{name}: {{{{{{{text}}}}}}}"
 
@@ -2074,7 +2183,7 @@ def _details_to_str(details, special=None):
     # sorted is for testing, may want to remove that and use a dict
     # subclass with defined order for items instead.
     for key, content in sorted(details.items()):
-        if content.content_type.type != 'text':
+        if content.content_type.type != "text":
             binary_attachments.append((key, content.content_type))
             continue
         text = content.as_text().strip()
@@ -2083,23 +2192,23 @@ def _details_to_str(details, special=None):
             continue
         # We want the 'special' attachment to be at the bottom.
         if key == special:
-            special_content = f'{text}\n'
+            special_content = f"{text}\n"
             continue
         text_attachments.append(_format_text_attachment(key, text))
-    if text_attachments and not text_attachments[-1].endswith('\n'):
-        text_attachments.append('')
+    if text_attachments and not text_attachments[-1].endswith("\n"):
+        text_attachments.append("")
     if special_content:
         text_attachments.append(special_content)
     lines = []
     if binary_attachments:
-        lines.append('Binary content:\n')
+        lines.append("Binary content:\n")
         for name, content_type in binary_attachments:
-            lines.append(f'  {name} ({content_type})\n')
+            lines.append(f"  {name} ({content_type})\n")
     if empty_attachments:
-        lines.append('Empty attachments:\n')
+        lines.append("Empty attachments:\n")
         for name in empty_attachments:
-            lines.append(f'  {name}\n')
+            lines.append(f"  {name}\n")
     if (binary_attachments or empty_attachments) and text_attachments:
-        lines.append('\n')
-    lines.append('\n'.join(text_attachments))
-    return ''.join(lines)
+        lines.append("\n")
+    lines.append("\n".join(text_attachments))
+    return "".join(lines)

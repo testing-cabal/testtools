@@ -3,13 +3,13 @@
 """Compatibility support for python 2 and 3."""
 
 __all__ = [
-    '_b',
-    'advance_iterator',
-    'reraise',
-    'unicode_output_stream',
-    'StringIO',
-    'BytesIO',
-    ]
+    "_b",
+    "advance_iterator",
+    "reraise",
+    "unicode_output_stream",
+    "StringIO",
+    "BytesIO",
+]
 
 import codecs
 import io
@@ -17,6 +17,7 @@ import locale
 import os
 import sys
 import unicodedata
+
 # Ensure retro-compatibility with older testtools releases
 from io import StringIO, BytesIO
 
@@ -69,8 +70,7 @@ def _slow_escape(text):
 
 
 def text_repr(text, multiline=None):
-    """Rich repr for ``text`` returning unicode, triple quoted if ``multiline``.
-    """
+    """Rich repr for ``text`` returning unicode, triple quoted if ``multiline``."""
     nl = isinstance(text, bytes) and bytes((0xA,)) or "\n"
     if multiline is None:
         multiline = nl in text
@@ -120,8 +120,7 @@ def unicode_output_stream(stream):
     The wrapper only allows unicode to be written, not non-ascii bytestrings,
     which is a good thing to ensure sanity and sanitation.
     """
-    if (sys.platform == "cli" or
-        isinstance(stream, (io.TextIOWrapper, io.StringIO))):
+    if sys.platform == "cli" or isinstance(stream, (io.TextIOWrapper, io.StringIO)):
         # Best to never encode before writing in IronPython, or if it is
         # already a TextIO [which in the io library has no encoding
         # attribute).
@@ -135,8 +134,13 @@ def unicode_output_stream(stream):
         return stream
     # Python 3 doesn't seem to make this easy, handle a common case
     try:
-        return stream.__class__(stream.buffer, stream.encoding, "replace",
-            stream.newlines, stream.line_buffering)
+        return stream.__class__(
+            stream.buffer,
+            stream.encoding,
+            "replace",
+            stream.newlines,
+            stream.line_buffering,
+        )
     except AttributeError:
         pass
     return writer(stream, "replace")
@@ -152,4 +156,3 @@ def _get_exception_encoding():
     #                no benefit in asking more than once as it's a global
     #                setting that can change after the message is formatted.
     return locale.getlocale(locale.LC_MESSAGES)[1] or "ascii"
-

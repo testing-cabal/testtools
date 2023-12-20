@@ -21,13 +21,14 @@ from testtools.testsuite import filter_by_ids, iterate_tests, sorted_tests
 defaultTestLoader = unittest.defaultTestLoader
 defaultTestLoaderCls = unittest.TestLoader
 have_discover = True
-discover_impl = getattr(unittest, 'loader', None)
+discover_impl = getattr(unittest, "loader", None)
 
 # Kept for API compatibility, but no longer used.
 BUFFEROUTPUT = ""
 CATCHBREAK = ""
 FAILFAST = ""
 USAGE_AS_MAIN = ""
+
 
 def list_test(test):
     """Return the test ids that would be run if test() was run.
@@ -43,16 +44,16 @@ def list_test(test):
         describing things that failed to import.
     """
     unittest_import_strs = {
-        'unittest.loader.ModuleImportFailure.',
-        'discover.ModuleImportFailure.'
-        }
+        "unittest.loader.ModuleImportFailure.",
+        "discover.ModuleImportFailure.",
+    }
     test_ids = []
     errors = []
     for test in iterate_tests(test):
         # Much ugly.
         for prefix in unittest_import_strs:
             if test.id().startswith(prefix):
-                errors.append(test.id()[len(prefix):])
+                errors.append(test.id()[len(prefix) :])
                 break
         else:
             test_ids.append(test.id())
@@ -60,10 +61,17 @@ def list_test(test):
 
 
 class TestToolsTestRunner:
-    """ A thunk object to support unittest.TestProgram."""
+    """A thunk object to support unittest.TestProgram."""
 
-    def __init__(self, verbosity=None, failfast=None, buffer=None,
-        stdout=None, tb_locals=False, **kwargs):
+    def __init__(
+        self,
+        verbosity=None,
+        failfast=None,
+        buffer=None,
+        stdout=None,
+        tb_locals=False,
+        **kwargs,
+    ):
         """Create a TestToolsTestRunner.
 
         :param verbosity: Ignored.
@@ -82,18 +90,20 @@ class TestToolsTestRunner:
         """List the tests that would be run if test() was run."""
         test_ids, _ = list_test(test)
         for test_id in test_ids:
-            self.stdout.write('%s\n' % test_id)
+            self.stdout.write("%s\n" % test_id)
         errors = loader.errors
         if errors:
             for test_id in errors:
-                self.stdout.write('%s\n' % test_id)
+                self.stdout.write("%s\n" % test_id)
             sys.exit(2)
 
     def run(self, test):
         "Run the given test case or test suite."
         result = TextTestResult(
-            unicode_output_stream(self.stdout), failfast=self.failfast,
-            tb_locals=self.tb_locals)
+            unicode_output_stream(self.stdout),
+            failfast=self.failfast,
+            tb_locals=self.tb_locals,
+        )
         result.startTestRun()
         try:
             return test.run(result)
@@ -114,24 +124,35 @@ class TestToolsTestRunner:
 
 class TestProgram(unittest.TestProgram):
     """A command-line program that runs a set of tests; this is primarily
-       for making test modules conveniently executable.
+    for making test modules conveniently executable.
     """
 
     # defaults for testing
-    module=None
+    module = None
     verbosity = 1
     failfast = catchbreak = buffer = progName = None
     _discovery_parser = None
 
-    def __init__(self, module=__name__, defaultTest=None, argv=None,
-                    testRunner=None, testLoader=defaultTestLoader,
-                    exit=True, verbosity=1, failfast=None, catchbreak=None,
-                    buffer=None, stdout=None, tb_locals=False):
+    def __init__(
+        self,
+        module=__name__,
+        defaultTest=None,
+        argv=None,
+        testRunner=None,
+        testLoader=defaultTestLoader,
+        exit=True,
+        verbosity=1,
+        failfast=None,
+        catchbreak=None,
+        buffer=None,
+        stdout=None,
+        tb_locals=False,
+    ):
         if module == __name__:
             self.module = None
         elif isinstance(module, str):
             self.module = __import__(module)
-            for part in module.split('.')[1:]:
+            for part in module.split(".")[1:]:
                 self.module = getattr(self.module, part)
         else:
             self.module = module
@@ -154,9 +175,9 @@ class TestProgram(unittest.TestProgram):
         self.testRunner = testRunner
         self.testLoader = testLoader
         progName = argv[0]
-        if progName.endswith('%srun.py' % os.path.sep):
+        if progName.endswith("%srun.py" % os.path.sep):
             elements = progName.split(os.path.sep)
-            progName = '%s.run' % elements[-2]
+            progName = "%s.run" % elements[-2]
         else:
             progName = os.path.basename(argv[0])
         self.progName = progName
@@ -167,36 +188,46 @@ class TestProgram(unittest.TestProgram):
             # OptimisingTestSuite.add, but with a standard protocol).
             # This is needed because the load_tests hook allows arbitrary
             # suites, even if that is rarely used.
-            source = open(self.load_list, 'rb')
+            source = open(self.load_list, "rb")
             try:
                 lines = source.readlines()
             finally:
                 source.close()
-            test_ids = {line.strip().decode('utf-8') for line in lines}
+            test_ids = {line.strip().decode("utf-8") for line in lines}
             self.test = filter_by_ids(self.test, test_ids)
         # XXX: Local edit (see http://bugs.python.org/issue22860)
         if not self.listtests:
             self.runTests()
         else:
             runner = self._get_runner()
-            if hasattr(runner, 'list'):
+            if hasattr(runner, "list"):
                 try:
                     runner.list(self.test, loader=self.testLoader)
                 except TypeError:
                     runner.list(self.test)
             else:
                 for test in iterate_tests(self.test):
-                    self.stdout.write('%s\n' % test.id())
+                    self.stdout.write("%s\n" % test.id())
         del self.testLoader.errors[:]
 
     def _getParentArgParser(self):
         parser = super()._getParentArgParser()
         # XXX: Local edit (see http://bugs.python.org/issue22860)
-        parser.add_argument('-l', '--list', dest='listtests', default=False,
-            action='store_true', help='List tests rather than executing them')
-        parser.add_argument('--load-list', dest='load_list', default=None,
-            help='Specifies a file containing test ids, only tests matching '
-                'those ids are executed')
+        parser.add_argument(
+            "-l",
+            "--list",
+            dest="listtests",
+            default=False,
+            action="store_true",
+            help="List tests rather than executing them",
+        )
+        parser.add_argument(
+            "--load-list",
+            dest="load_list",
+            default=None,
+            help="Specifies a file containing test ids, only tests matching "
+            "those ids are executed",
+        )
         return parser
 
     def _do_discovery(self, argv, Loader=None):
@@ -206,8 +237,7 @@ class TestProgram(unittest.TestProgram):
 
     def runTests(self):
         # XXX: Local edit (see http://bugs.python.org/issue22860)
-        if (self.catchbreak
-            and getattr(unittest, 'installHandler', None) is not None):
+        if self.catchbreak and getattr(unittest, "installHandler", None) is not None:
             unittest.installHandler()
         testRunner = self._get_runner()
         self.result = testRunner.run(self.test)
@@ -220,24 +250,28 @@ class TestProgram(unittest.TestProgram):
             self.testRunner = TestToolsTestRunner
         try:
             try:
-                testRunner = self.testRunner(verbosity=self.verbosity,
-                                             failfast=self.failfast,
-                                             buffer=self.buffer,
-                                             stdout=self.stdout,
-                                             tb_locals=self.tb_locals)
+                testRunner = self.testRunner(
+                    verbosity=self.verbosity,
+                    failfast=self.failfast,
+                    buffer=self.buffer,
+                    stdout=self.stdout,
+                    tb_locals=self.tb_locals,
+                )
             except TypeError:
                 # didn't accept the tb_locals parameter
-                testRunner = self.testRunner(verbosity=self.verbosity,
-                                             failfast=self.failfast,
-                                             buffer=self.buffer,
-                                             stdout=self.stdout)
+                testRunner = self.testRunner(
+                    verbosity=self.verbosity,
+                    failfast=self.failfast,
+                    buffer=self.buffer,
+                    stdout=self.stdout,
+                )
         except TypeError:
             # didn't accept the verbosity, buffer, failfast or stdout arguments
             # Try with the prior contract
             try:
-                testRunner = self.testRunner(verbosity=self.verbosity,
-                                             failfast=self.failfast,
-                                             buffer=self.buffer)
+                testRunner = self.testRunner(
+                    verbosity=self.verbosity, failfast=self.failfast, buffer=self.buffer
+                )
             except TypeError:
                 # Now try calling it with defaults
                 try:
@@ -248,12 +282,14 @@ class TestProgram(unittest.TestProgram):
         return testRunner
 
 
-
 ################
 
-def main(argv, stdout):
-    TestProgram(argv=argv, testRunner=partial(TestToolsTestRunner, stdout=stdout),
-        stdout=stdout)
 
-if __name__ == '__main__':
+def main(argv, stdout):
+    TestProgram(
+        argv=argv, testRunner=partial(TestToolsTestRunner, stdout=stdout), stdout=stdout
+    )
+
+
+if __name__ == "__main__":
     main(sys.argv, sys.stdout)

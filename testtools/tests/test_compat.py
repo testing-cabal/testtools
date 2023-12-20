@@ -14,11 +14,11 @@ from testtools.compat import (
     reraise,
     text_repr,
     unicode_output_stream,
-    )
+)
 from testtools.matchers import (
     Is,
     Not,
-    )
+)
 
 
 class _FakeOutputStream:
@@ -85,14 +85,14 @@ class TestUnicodeOutputStream(testtools.TestCase):
         bytes_io = io.BytesIO()
         self.assertThat(bytes_io, Not(Is(unicode_output_stream(bytes_io))))
         # Will error if s was not wrapped properly.
-        unicode_output_stream(bytes_io).write('foo')
+        unicode_output_stream(bytes_io).write("foo")
 
     def test_io_textwrapper(self):
         # textwrapper is unicode, should be returned as itself.
         text_io = io.TextIOWrapper(io.BytesIO())
         self.assertThat(unicode_output_stream(text_io), Is(text_io))
         # To be sure...
-        unicode_output_stream(text_io).write('foo')
+        unicode_output_stream(text_io).write("foo")
 
 
 class TestTextRepr(testtools.TestCase):
@@ -108,22 +108,21 @@ class TestTextRepr(testtools.TestCase):
         ("\r", "'\\r'", "'''\\\n\\r'''"),
         #  Quotes and backslash should match normal repr behaviour
         ('"', "'\"'", "'''\\\n\"'''"),
-        ("'", "\"'\"", "'''\\\n\\''''"),
+        ("'", '"\'"', "'''\\\n\\''''"),
         ("\\", "'\\\\'", "'''\\\n\\\\'''"),
         #  DEL is also unprintable and should be escaped
         ("\x7F", "'\\x7f'", "'''\\\n\\x7f'''"),
-
         # Character combinations that need double checking
         ("\r\n", "'\\r\\n'", "'''\\\n\\r\n'''"),
         ("\"'", "'\"\\''", "'''\\\n\"\\''''"),
         ("'\"", "'\\'\"'", "'''\\\n'\"'''"),
         ("\\n", "'\\\\n'", "'''\\\n\\\\n'''"),
         ("\\\n", "'\\\\\\n'", "'''\\\n\\\\\n'''"),
-        ("\\' ", "\"\\\\' \"", "'''\\\n\\\\' '''"),
-        ("\\'\n", "\"\\\\'\\n\"", "'''\\\n\\\\'\n'''"),
+        ("\\' ", '"\\\\\' "', "'''\\\n\\\\' '''"),
+        ("\\'\n", '"\\\\\'\\n"', "'''\\\n\\\\'\n'''"),
         ("\\'\"", "'\\\\\\'\"'", "'''\\\n\\\\'\"'''"),
         ("\\'''", "\"\\\\'''\"", "'''\\\n\\\\\\'\\'\\''''"),
-        )
+    )
 
     # Bytes with the high bit set should always be escaped
     bytes_examples = (
@@ -132,7 +131,7 @@ class TestTextRepr(testtools.TestCase):
         (_b("\xC0"), "'\\xc0'", "'''\\\n\\xc0'''"),
         (_b("\xFF"), "'\\xff'", "'''\\\n\\xff'''"),
         (_b("\xC2\xA7"), "'\\xc2\\xa7'", "'''\\\n\\xc2\\xa7'''"),
-        )
+    )
 
     # Unicode doesn't escape printable characters as per the Python 3 model
     unicode_examples = (
@@ -152,7 +151,7 @@ class TestTextRepr(testtools.TestCase):
         ("\uD800", "'\\ud800'", "'''\\\n\\ud800'''"),
         ("\uDFFF", "'\\udfff'", "'''\\\n\\udfff'''"),
         # Unprintable general categories not fully tested: Cc, Cf, Co, Cn, Zs
-        )
+    )
 
     b_prefix = repr(_b(""))[:-2]
     u_prefix = repr("")[:-2]
@@ -220,7 +219,6 @@ class TestTextRepr(testtools.TestCase):
             self.assertEqual(ast.literal_eval(actual), u)
 
 
-
 class TestReraise(testtools.TestCase):
     """Tests for trivial reraise wrapper needed for Python 2/3 changes"""
 
@@ -237,8 +235,9 @@ class TestReraise(testtools.TestCase):
         self.assertIs(_exc_info[0], _new_exc_info[0])
         self.assertIs(_exc_info[1], _new_exc_info[1])
         expected_tb = traceback.extract_tb(_exc_info[2])
-        self.assertEqual(expected_tb,
-            traceback.extract_tb(_new_exc_info[2])[-len(expected_tb):])
+        self.assertEqual(
+            expected_tb, traceback.extract_tb(_new_exc_info[2])[-len(expected_tb) :]
+        )
 
     def test_custom_exception_no_args(self):
         """Reraising does not require args attribute to contain params"""
@@ -259,4 +258,5 @@ class TestReraise(testtools.TestCase):
 
 def test_suite():
     from unittest import TestLoader
+
     return TestLoader().loadTestsFromName(__name__)

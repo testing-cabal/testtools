@@ -12,49 +12,51 @@ from testtools.matchers import (
     Is,
     MatchesException,
     Raises,
-    )
+)
 from ._helpers import NeedsTwistedTestCase
 
 
-_spinner = try_import('testtools.twistedsupport._spinner')
+_spinner = try_import("testtools.twistedsupport._spinner")
 
-defer = try_import('twisted.internet.defer')
-Failure = try_import('twisted.python.failure.Failure')
+defer = try_import("twisted.internet.defer")
+Failure = try_import("twisted.python.failure.Failure")
 
 
 class TestNotReentrant(NeedsTwistedTestCase):
-
     def test_not_reentrant(self):
         # A function decorated as not being re-entrant will raise a
         # _spinner.ReentryError if it is called while it is running.
         calls = []
+
         @_spinner.not_reentrant
         def log_something():
             calls.append(None)
             if len(calls) < 5:
                 log_something()
-        self.assertThat(
-            log_something, Raises(MatchesException(_spinner.ReentryError)))
+
+        self.assertThat(log_something, Raises(MatchesException(_spinner.ReentryError)))
         self.assertEqual(1, len(calls))
 
     def test_deeper_stack(self):
         calls = []
+
         @_spinner.not_reentrant
         def g():
             calls.append(None)
             if len(calls) < 5:
                 f()
+
         @_spinner.not_reentrant
         def f():
             calls.append(None)
             if len(calls) < 5:
                 g()
+
         self.assertThat(f, Raises(MatchesException(_spinner.ReentryError)))
         self.assertEqual(2, len(calls))
 
 
 class TestTrapUnhandledErrors(NeedsTwistedTestCase):
-
     def test_no_deferreds(self):
         marker = object()
         result, errors = _spinner.trap_unhandled_errors(lambda: marker)
@@ -63,23 +65,24 @@ class TestTrapUnhandledErrors(NeedsTwistedTestCase):
 
     def test_unhandled_error(self):
         failures = []
+
         def make_deferred_but_dont_handle():
             try:
-                1/0
+                1 / 0
             except ZeroDivisionError:
                 f = Failure()
                 failures.append(f)
                 defer.fail(f)
-        result, errors = _spinner.trap_unhandled_errors(
-            make_deferred_but_dont_handle)
+
+        result, errors = _spinner.trap_unhandled_errors(make_deferred_but_dont_handle)
         self.assertIs(None, result)
         self.assertEqual(failures, [error.failResult for error in errors])
 
 
 class TestRunInReactor(NeedsTwistedTestCase):
-
     def make_reactor(self):
         from twisted.internet import reactor
+
         return reactor
 
     def make_spinner(self, reactor=None):
@@ -108,37 +111,43 @@ class TestRunInReactor(NeedsTwistedTestCase):
         # If the given function raises an error, run_in_reactor re-raises that
         # error.
         self.assertThat(
-            lambda: self.make_spinner().run(self.make_timeout(), lambda: 1/0),
-            Raises(MatchesException(ZeroDivisionError)))
+            lambda: self.make_spinner().run(self.make_timeout(), lambda: 1 / 0),
+            Raises(MatchesException(ZeroDivisionError)),
+        )
 
     def test_keyword_arguments(self):
         # run_in_reactor passes keyword arguments on.
         calls = []
+
         def function(*a, **kw):
             return calls.extend([a, kw])
+
         self.make_spinner().run(self.make_timeout(), function, foo=42)
-        self.assertThat(calls, Equals([(), {'foo': 42}]))
+        self.assertThat(calls, Equals([(), {"foo": 42}]))
 
     def test_not_reentrant(self):
         # run_in_reactor raises an error if it is called inside another call
         # to run_in_reactor.
         spinner = self.make_spinner()
-        self.assertThat(lambda: spinner.run(
-            self.make_timeout(), spinner.run, self.make_timeout(),
-            lambda: None), Raises(MatchesException(_spinner.ReentryError)))
+        self.assertThat(
+            lambda: spinner.run(
+                self.make_timeout(), spinner.run, self.make_timeout(), lambda: None
+            ),
+            Raises(MatchesException(_spinner.ReentryError)),
+        )
 
     def test_deferred_value_returned(self):
         # If the given function returns a Deferred, run_in_reactor returns the
         # value in the Deferred at the end of the callback chain.
         marker = object()
         result = self.make_spinner().run(
-            self.make_timeout(), lambda: defer.succeed(marker))
+            self.make_timeout(), lambda: defer.succeed(marker)
+        )
         self.assertThat(result, Is(marker))
 
     def test_preserve_signal_handler(self):
-        signals = ['SIGINT', 'SIGTERM', 'SIGCHLD']
-        signals = list(filter(
-            None, (getattr(signal, name, None) for name in signals)))
+        signals = ["SIGINT", "SIGTERM", "SIGCHLD"]
+        signals = list(filter(None, (getattr(signal, name, None) for name in signals)))
         for sig in signals:
             self.addCleanup(signal.signal, sig, signal.getsignal(sig))
         new_hdlrs = list(lambda *a: None for _ in signals)
@@ -154,7 +163,8 @@ class TestRunInReactor(NeedsTwistedTestCase):
         timeout = self.make_timeout()
         self.assertThat(
             lambda: self.make_spinner().run(timeout, lambda: defer.Deferred()),
-            Raises(MatchesException(_spinner.TimeoutError)))
+            Raises(MatchesException(_spinner.TimeoutError)),
+        )
 
     def test_no_junk_by_default(self):
         # If the reactor hasn't spun yet, then there cannot be any junk.
@@ -194,9 +204,10 @@ class TestRunInReactor(NeedsTwistedTestCase):
         #
         # Note that the socket is left open. This emulates a bug in trial.
         from twisted.internet.protocol import ServerFactory
+
         reactor = self.make_reactor()
         spinner = self.make_spinner(reactor)
-        port = reactor.listenTCP(0, ServerFactory(), interface='127.0.0.1')
+        port = reactor.listenTCP(0, ServerFactory(), interface="127.0.0.1")
         spinner.run(self.make_timeout(), lambda: None)
         results = spinner.get_junk()
         self.assertThat(results, Equals([port]))
@@ -204,6 +215,7 @@ class TestRunInReactor(NeedsTwistedTestCase):
     def test_clean_running_threads(self):
         import threading
         import time
+
         current_threads = list(threading.enumerate())
         reactor = self.make_reactor()
         timeout = self.make_timeout()
@@ -216,33 +228,45 @@ class TestRunInReactor(NeedsTwistedTestCase):
         # way, 'run' will clean up the reactor and then store information
         # about the junk. This information can be got using get_junk.
         from twisted.internet.protocol import ServerFactory
+
         reactor = self.make_reactor()
         spinner = self.make_spinner(reactor)
         port = spinner.run(
-            self.make_timeout(), reactor.listenTCP, 0, ServerFactory(),
-            interface='127.0.0.1')
+            self.make_timeout(),
+            reactor.listenTCP,
+            0,
+            ServerFactory(),
+            interface="127.0.0.1",
+        )
         self.assertThat(spinner.get_junk(), Equals([port]))
 
     def test_will_not_run_with_previous_junk(self):
         # If 'run' is called and there's still junk in the spinner's junk
         # list, then the spinner will refuse to run.
         from twisted.internet.protocol import ServerFactory
+
         reactor = self.make_reactor()
         spinner = self.make_spinner(reactor)
         timeout = self.make_timeout()
-        spinner.run(timeout, reactor.listenTCP, 0, ServerFactory(), interface='127.0.0.1')
-        self.assertThat(lambda: spinner.run(timeout, lambda: None),
-            Raises(MatchesException(_spinner.StaleJunkError)))
+        spinner.run(
+            timeout, reactor.listenTCP, 0, ServerFactory(), interface="127.0.0.1"
+        )
+        self.assertThat(
+            lambda: spinner.run(timeout, lambda: None),
+            Raises(MatchesException(_spinner.StaleJunkError)),
+        )
 
     def test_clear_junk_clears_previous_junk(self):
         # If 'run' is called and there's still junk in the spinner's junk
         # list, then the spinner will refuse to run.
         from twisted.internet.protocol import ServerFactory
+
         reactor = self.make_reactor()
         spinner = self.make_spinner(reactor)
         timeout = self.make_timeout()
-        port = spinner.run(timeout, reactor.listenTCP, 0, ServerFactory(),
-                           interface='127.0.0.1')
+        port = spinner.run(
+            timeout, reactor.listenTCP, 0, ServerFactory(), interface="127.0.0.1"
+        )
         junk = spinner.clear_junk()
         self.assertThat(junk, Equals([port]))
         self.assertThat(spinner.get_junk(), Equals([]))
@@ -250,7 +274,7 @@ class TestRunInReactor(NeedsTwistedTestCase):
     @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
     def test_sigint_raises_no_result_error(self):
         # If we get a SIGINT during a run, we raise _spinner.NoResultError.
-        SIGINT = getattr(signal, 'SIGINT', None)
+        SIGINT = getattr(signal, "SIGINT", None)
         if not SIGINT:
             self.skipTest("SIGINT not available")
         reactor = self.make_reactor()
@@ -259,7 +283,8 @@ class TestRunInReactor(NeedsTwistedTestCase):
         reactor.callLater(timeout, os.kill, os.getpid(), SIGINT)
         self.assertThat(
             lambda: spinner.run(timeout * 5, defer.Deferred),
-            Raises(MatchesException(_spinner.NoResultError)))
+            Raises(MatchesException(_spinner.NoResultError)),
+        )
         self.assertEqual([], spinner._clean())
 
     @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
@@ -272,7 +297,7 @@ class TestRunInReactor(NeedsTwistedTestCase):
     @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
     def test_fast_sigint_raises_no_result_error(self):
         # If we get a SIGINT during a run, we raise _spinner.NoResultError.
-        SIGINT = getattr(signal, 'SIGINT', None)
+        SIGINT = getattr(signal, "SIGINT", None)
         if not SIGINT:
             self.skipTest("SIGINT not available")
         reactor = self.make_reactor()
@@ -281,7 +306,8 @@ class TestRunInReactor(NeedsTwistedTestCase):
         reactor.callWhenRunning(os.kill, os.getpid(), SIGINT)
         self.assertThat(
             lambda: spinner.run(timeout * 5, defer.Deferred),
-            Raises(MatchesException(_spinner.NoResultError)))
+            Raises(MatchesException(_spinner.NoResultError)),
+        )
         self.assertEqual([], spinner._clean())
 
     @skipIf(os.name != "posix", "Sending SIGINT with os.kill is posix only")
@@ -303,7 +329,8 @@ class TestRunInReactor(NeedsTwistedTestCase):
         deferred1 = defer.Deferred()
         self.expectThat(
             lambda: spinner1.run(timeout, lambda: deferred1),
-            Raises(MatchesException(_spinner.TimeoutError)))
+            Raises(MatchesException(_spinner.TimeoutError)),
+        )
 
         # Make a Deferred that will fire *after* deferred1 as long as the
         # reactor keeps spinning. We don't care that it's a callback of
@@ -311,7 +338,8 @@ class TestRunInReactor(NeedsTwistedTestCase):
         marker = object()
         deferred2 = defer.Deferred()
         deferred1.addCallback(
-            lambda ignored: reactor.callLater(0, deferred2.callback, marker))
+            lambda ignored: reactor.callLater(0, deferred2.callback, marker)
+        )
 
         def fire_other():
             """Fire Deferred from the last spin while waiting for this one."""
@@ -324,4 +352,5 @@ class TestRunInReactor(NeedsTwistedTestCase):
 
 def test_suite():
     from unittest import TestLoader
+
     return TestLoader().loadTestsFromName(__name__)

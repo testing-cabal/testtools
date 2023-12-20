@@ -5,10 +5,10 @@
 from testtools.matchers import (
     Annotate,
     MismatchError,
-    )
+)
 
 
-def assert_that(matchee, matcher, message='', verbose=False):
+def assert_that(matchee, matcher, message="", verbose=False):
     """Assert that matchee is matched by matcher.
 
     This should only be used when you need to use a function based

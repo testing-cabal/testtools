@@ -1,9 +1,9 @@
 # Copyright (c) 2016 testtools developers. See LICENSE for details.
 
 __all__ = [
-    'Always',
-    'Never',
-    ]
+    "Always",
+    "Never",
+]
 
 from ._impl import Mismatch
 
@@ -12,7 +12,7 @@ class _Always:
     """Always matches."""
 
     def __str__(self):
-        return 'Always()'
+        return "Always()"
 
     def match(self, value):
         return None
@@ -36,11 +36,10 @@ class _Never:
     """Never matches."""
 
     def __str__(self):
-        return 'Never()'
+        return "Never()"
 
     def match(self, value):
-        return Mismatch(
-            f'Inevitable mismatch on {value!r}')
+        return Mismatch(f"Inevitable mismatch on {value!r}")
 
 
 def Never():

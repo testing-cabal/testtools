@@ -3,11 +3,11 @@
 """Test suites and related things."""
 
 __all__ = [
-    'ConcurrentTestSuite',
-    'ConcurrentStreamTestSuite',
-    'filter_by_ids',
-    'iterate_tests',
-    'sorted_tests',
+    "ConcurrentTestSuite",
+    "ConcurrentStreamTestSuite",
+    "filter_by_ids",
+    "iterate_tests",
+    "sorted_tests",
 ]
 
 from collections import Counter
@@ -82,9 +82,11 @@ class ConcurrentTestSuite(unittest.TestSuite):
             semaphore = threading.Semaphore(1)
             for i, test in enumerate(tests):
                 process_result = self._wrap_result(
-                    testtools.ThreadsafeForwardingResult(result, semaphore), i)
+                    testtools.ThreadsafeForwardingResult(result, semaphore), i
+                )
                 reader_thread = threading.Thread(
-                    target=self._run_test, args=(test, process_result, queue))
+                    target=self._run_test, args=(test, process_result, queue)
+                )
                 threads[test] = reader_thread, process_result
                 reader_thread.start()
             while threads:
@@ -102,9 +104,7 @@ class ConcurrentTestSuite(unittest.TestSuite):
                 test.run(process_result)
             except Exception:
                 # The run logic itself failed.
-                case = testtools.ErrorHolder(
-                    "broken-runner",
-                    error=sys.exc_info())
+                case = testtools.ErrorHolder("broken-runner", error=sys.exc_info())
                 case.run(process_result)
         finally:
             queue.put(test)
@@ -154,24 +154,25 @@ class ConcurrentStreamTestSuite:
             for test, route_code in tests:
                 to_queue = testtools.StreamToQueue(queue, route_code)
                 process_result = testtools.ExtendedToStreamDecorator(
-                    testtools.TimestampingStreamResult(to_queue))
+                    testtools.TimestampingStreamResult(to_queue)
+                )
                 runner_thread = threading.Thread(
-                    target=self._run_test,
-                    args=(test, process_result, route_code))
+                    target=self._run_test, args=(test, process_result, route_code)
+                )
                 threads[to_queue] = runner_thread, process_result
                 runner_thread.start()
             while threads:
                 event_dict = queue.get()
-                event = event_dict.pop('event')
-                if event == 'status':
+                event = event_dict.pop("event")
+                if event == "status":
                     result.status(**event_dict)
-                elif event == 'stopTestRun':
-                    thread = threads.pop(event_dict['result'])[0]
+                elif event == "stopTestRun":
+                    thread = threads.pop(event_dict["result"])[0]
                     thread.join()
-                elif event == 'startTestRun':
+                elif event == "startTestRun":
                     pass
                 else:
-                    raise ValueError(f'unknown event type {event!r}')
+                    raise ValueError(f"unknown event type {event!r}")
         except:
             for thread, process_result in threads.values():
                 # Signal to each TestControl in the ExtendedToStreamDecorator
@@ -187,15 +188,14 @@ class ConcurrentStreamTestSuite:
             except Exception:
                 # The run logic itself failed.
                 case = testtools.ErrorHolder(
-                    f"broken-runner-'{route_code}'",
-                    error=sys.exc_info())
+                    f"broken-runner-'{route_code}'", error=sys.exc_info()
+                )
                 case.run(process_result)
         finally:
             process_result.stopTestRun()
 
 
 class FixtureSuite(unittest.TestSuite):
-
     def __init__(self, fixture, tests):
         super().__init__(tests)
         self._fixture = fixture
@@ -217,7 +217,7 @@ def _flatten_tests(suite_or_case, unpack_outer=False):
     except TypeError:
         # Not iterable, assume it's a test case.
         return [(suite_or_case.id(), suite_or_case)]
-    if (type(suite_or_case) in (unittest.TestSuite,) or unpack_outer):
+    if type(suite_or_case) in (unittest.TestSuite,) or unpack_outer:
         # Plain old test suite (or any others we may add).
         result = []
         for test in tests:
@@ -232,7 +232,7 @@ def _flatten_tests(suite_or_case, unpack_outer=False):
             suite_id = test.id()
             break
         # If it has a sort_tests method, call that.
-        if hasattr(suite_or_case, 'sort_tests'):
+        if hasattr(suite_or_case, "sort_tests"):
             suite_or_case.sort_tests()
         return [(suite_id, suite_or_case)]
 
@@ -279,10 +279,10 @@ def filter_by_ids(suite_or_case, test_ids):
     than guessing how to reconstruct a new suite.
     """
     # Compatible objects
-    if hasattr(suite_or_case, 'filter_by_ids'):
+    if hasattr(suite_or_case, "filter_by_ids"):
         return suite_or_case.filter_by_ids(test_ids)
     # TestCase objects.
-    if hasattr(suite_or_case, 'id'):
+    if hasattr(suite_or_case, "id"):
         if suite_or_case.id() in test_ids:
             return suite_or_case
         else:
@@ -302,11 +302,9 @@ def sorted_tests(suite_or_case, unpack_outer=False):
     # Duplicate test id can induce TypeError in Python 3.3.
     # Detect the duplicate test ids, raise exception when found.
     seen = Counter(case.id() for case in iterate_tests(suite_or_case))
-    duplicates = {
-        test_id: count for test_id, count in seen.items() if count > 1}
+    duplicates = {test_id: count for test_id, count in seen.items() if count > 1}
     if duplicates:
-        raise ValueError(
-            f'Duplicate test ids detected: {pformat(duplicates)}')
+        raise ValueError(f"Duplicate test ids detected: {pformat(duplicates)}")
 
     tests = _flatten_tests(suite_or_case, unpack_outer=unpack_outer)
     tests.sort()

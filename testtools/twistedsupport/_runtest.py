@@ -20,11 +20,11 @@ reactor until ``d`` fires, and wait for all of its callbacks to be processed.
 """
 
 __all__ = [
-    'AsynchronousDeferredRunTest',
-    'AsynchronousDeferredRunTestForBrokenTwisted',
-    'SynchronousDeferredRunTest',
-    'assert_fails_with',
-    ]
+    "AsynchronousDeferredRunTest",
+    "AsynchronousDeferredRunTestForBrokenTwisted",
+    "SynchronousDeferredRunTest",
+    "assert_fails_with",
+]
 
 import io
 import warnings
@@ -41,14 +41,16 @@ from ._spinner import (
     Spinner,
     TimeoutError,
     trap_unhandled_errors,
-    )
+)
 
 from twisted.internet import defer
+
 try:
     from twisted.logger import globalLogPublisher
 except ImportError:
     globalLogPublisher = None
 from twisted.python import log
+
 try:
     from twisted.trial.unittest import _LogObserver
 except ImportError:
@@ -58,11 +60,12 @@ except ImportError:
 class _DeferredRunTest(RunTest):
     """Base for tests that return Deferreds."""
 
-    def _got_user_failure(self, failure, tb_label='traceback'):
+    def _got_user_failure(self, failure, tb_label="traceback"):
         """We got a failure from user code."""
         return self._got_user_exception(
             (failure.type, failure.value, failure.getTracebackObject()),
-            tb_label=tb_label)
+            tb_label=tb_label,
+        )
 
 
 class SynchronousDeferredRunTest(_DeferredRunTest):
@@ -167,21 +170,25 @@ class CaptureTwistedLogs(Fixture):
                 # ... do something with twisted_logs ...
     """
 
-    LOG_DETAIL_NAME = 'twisted-log'
+    LOG_DETAIL_NAME = "twisted-log"
 
     def _setUp(self):
         logs = io.StringIO()
         full_observer = log.FileLogObserver(logs)
         self.useFixture(_TwistedLogObservers([full_observer.emit]))
-        self.addDetail(self.LOG_DETAIL_NAME, Content(
-            UTF8_TEXT, lambda: [logs.getvalue().encode("utf-8")]))
+        self.addDetail(
+            self.LOG_DETAIL_NAME,
+            Content(UTF8_TEXT, lambda: [logs.getvalue().encode("utf-8")]),
+        )
 
 
 def run_with_log_observers(observers, function, *args, **kwargs):
     """Run 'function' with the given Twisted log observers."""
     warnings.warn(
-        'run_with_log_observers is deprecated since 1.8.2.',
-        DeprecationWarning, stacklevel=2)
+        "run_with_log_observers is deprecated since 1.8.2.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     with _NoTwistedLogObservers():
         with _TwistedLogObservers(observers):
             return function(*args, **kwargs)
@@ -227,9 +234,17 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
     only fire if the reactor is left to spin for a while.
     """
 
-    def __init__(self, case, handlers=None, last_resort=None, reactor=None,
-                 timeout=0.005, debug=False, suppress_twisted_logging=True,
-                 store_twisted_logs=True):
+    def __init__(
+        self,
+        case,
+        handlers=None,
+        last_resort=None,
+        reactor=None,
+        timeout=0.005,
+        debug=False,
+        suppress_twisted_logging=True,
+        store_twisted_logs=True,
+    ):
         """Construct an ``AsynchronousDeferredRunTest``.
 
         Please be sure to always use keyword syntax, not positional, as the
@@ -256,8 +271,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
             that took place during the run as the 'twisted-log' detail.
             Defaults to True.
         """
-        super().__init__(
-            case, handlers, last_resort)
+        super().__init__(case, handlers, last_resort)
         if reactor is None:
             from twisted.internet import reactor
         self._reactor = reactor
@@ -267,8 +281,14 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         self._store_twisted_logs = store_twisted_logs
 
     @classmethod
-    def make_factory(cls, reactor=None, timeout=0.005, debug=False,
-                     suppress_twisted_logging=True, store_twisted_logs=True):
+    def make_factory(
+        cls,
+        reactor=None,
+        timeout=0.005,
+        debug=False,
+        suppress_twisted_logging=True,
+        store_twisted_logs=True,
+    ):
         """Make a factory that conforms to the RunTest factory interface.
 
         Example::
@@ -278,15 +298,23 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
                 run_tests_with = AsynchronousDeferredRunTest.make_factory(
                     timeout=120)
         """
+
         # This is horrible, but it means that the return value of the method
         # will be able to be assigned to a class variable *and* also be
         # invoked directly.
         class AsynchronousDeferredRunTestFactory:
             def __call__(self, case, handlers=None, last_resort=None):
                 return cls(
-                    case, handlers, last_resort, reactor, timeout, debug,
-                    suppress_twisted_logging, store_twisted_logs,
+                    case,
+                    handlers,
+                    last_resort,
+                    reactor,
+                    timeout,
+                    debug,
+                    suppress_twisted_logging,
+                    store_twisted_logs,
                 )
+
         return AsynchronousDeferredRunTestFactory()
 
     @defer.inlineCallbacks
@@ -335,6 +363,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
                 if result is not None:
                     self._exceptions.append(result)
                     fails.append(None)
+
             return d.addCallback(clean_up_done)
 
         def set_up_done(exception_caught):
@@ -355,7 +384,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
             return d
 
         def force_failure(ignored):
-            if getattr(self.case, 'force_failure', None):
+            if getattr(self.case, "force_failure", None):
                 d = self._run_user(_raise_force_fail_error)
                 d.addCallback(fails.append)
                 return d
@@ -375,8 +404,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
 
     def _blocking_run_deferred(self, spinner):
         try:
-            return trap_unhandled_errors(
-                spinner.run, self._timeout, self._run_deferred)
+            return trap_unhandled_errors(spinner.run, self._timeout, self._run_deferred)
         except NoResultError:
             # We didn't get a result at all!  This could be for any number of
             # reasons, but most likely someone hit Ctrl-C during the test.
@@ -414,12 +442,10 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
             for name, detail in capture_logs.getDetails().items():
                 self.case.addDetail(name, detail)
             with _ErrorObserver(_log_observer) as error_fixture:
-                successful, unhandled = self._blocking_run_deferred(
-                    spinner)
+                successful, unhandled = self._blocking_run_deferred(spinner)
             for logged_error in error_fixture.flush_logged_errors():
                 successful = False
-                self._got_user_failure(
-                    logged_error, tb_label='logged-error')
+                self._got_user_failure(logged_error, tb_label="logged-error")
 
         if unhandled:
             successful = False
@@ -428,9 +454,9 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
                 info = debug_info._getDebugTracebacks()
                 if info:
                     self.case.addDetail(
-                        'unhandled-error-in-deferred-debug',
-                        text_content(info))
-                self._got_user_failure(f, 'unhandled-error-in-deferred')
+                        "unhandled-error-in-deferred-debug", text_content(info)
+                    )
+                self._got_user_failure(f, "unhandled-error-in-deferred")
 
         junk = spinner.clear_junk()
         if junk:
@@ -483,22 +509,26 @@ def assert_fails_with(d, *exc_types, **kwargs):
     :return: A ``Deferred`` that will fail with an ``AssertionError`` if ``d``
         does not fail with one of the exception types.
     """
-    failureException = kwargs.pop('failureException', None)
+    failureException = kwargs.pop("failureException", None)
     if failureException is None:
         # Avoid circular imports.
         from testtools import TestCase
+
         failureException = TestCase.failureException
     expected_names = ", ".join(exc_type.__name__ for exc_type in exc_types)
 
     def got_success(result):
-        raise failureException(
-            f"{expected_names} not raised ({result!r} returned)")
+        raise failureException(f"{expected_names} not raised ({result!r} returned)")
 
     def got_failure(failure):
         if failure.check(*exc_types):
             return failure.value
-        raise failureException("{} raised instead of {}:\n {}".format(
-            failure.type.__name__, expected_names, failure.getTraceback()))
+        raise failureException(
+            "{} raised instead of {}:\n {}".format(
+                failure.type.__name__, expected_names, failure.getTraceback()
+            )
+        )
+
     return d.addCallbacks(got_success, got_failure)
 
 
@@ -511,12 +541,14 @@ class UncleanReactorError(Exception):
             "The reactor still thinks it needs to do things. Close all "
             "connections, kill all processes and make sure all delayed "
             "calls have either fired or been cancelled:\n%s"
-            % ''.join(map(self._get_junk_info, junk)))
+            % "".join(map(self._get_junk_info, junk)),
+        )
 
     def _get_junk_info(self, junk):
         from twisted.internet.base import DelayedCall
+
         if isinstance(junk, DelayedCall):
             ret = str(junk)
         else:
             ret = repr(junk)
-        return f'  {ret}\n'
+        return f"  {ret}\n"

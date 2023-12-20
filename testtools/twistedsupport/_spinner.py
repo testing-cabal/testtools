@@ -7,14 +7,14 @@ you couldn't write this yourself, you should not be using it.
 """
 
 __all__ = [
-    'NoResultError',
-    'not_reentrant',
-    'ReentryError',
-    'Spinner',
-    'StaleJunkError',
-    'TimeoutError',
-    'trap_unhandled_errors',
-    ]
+    "NoResultError",
+    "not_reentrant",
+    "ReentryError",
+    "Spinner",
+    "StaleJunkError",
+    "TimeoutError",
+    "trap_unhandled_errors",
+]
 
 from fixtures import Fixture
 import signal
@@ -32,9 +32,11 @@ class ReentryError(Exception):
     """Raised when we try to re-enter a function that forbids it."""
 
     def __init__(self, function):
-        Exception.__init__(self,
+        Exception.__init__(
+            self,
             "%r in not re-entrant but was called within a call to itself."
-            % (function,))
+            % (function,),
+        )
 
 
 def not_reentrant(function, _calls={}):
@@ -42,6 +44,7 @@ def not_reentrant(function, _calls={}):
 
     The decorated function will raise an error if called from within itself.
     """
+
     def decorated(*args, **kwargs):
         if _calls.get(function, False):
             raise ReentryError(function)
@@ -50,6 +53,7 @@ def not_reentrant(function, _calls={}):
             return function(*args, **kwargs)
         finally:
             _calls[function] = False
+
     return mergeFunctionMetadata(function, decorated)
 
 
@@ -76,7 +80,6 @@ def trap_unhandled_errors(function, *args, **kwargs):
     # via inheritance doesn't work with Python 2. So we handle the two cases
     # differently. TODO: perhaps there's a way to have a single code path?
     class DebugInfo(real_DebugInfo):  # type: ignore
-
         _runRealDel = True
 
         def __init__(self):
@@ -106,26 +109,29 @@ class TimeoutError(Exception):
     """Raised when run_in_reactor takes too long to run a function."""
 
     def __init__(self, function, timeout):
-        Exception.__init__(self,
-            f"{function!r} took longer than {timeout} seconds")
+        Exception.__init__(self, f"{function!r} took longer than {timeout} seconds")
 
 
 class NoResultError(Exception):
     """Raised when the reactor has stopped but we don't have any result."""
 
     def __init__(self):
-        Exception.__init__(self,
+        Exception.__init__(
+            self,
             "Tried to get test's result from Deferred when no result is "
-            "available.  Probably means we received SIGINT or similar.")
+            "available.  Probably means we received SIGINT or similar.",
+        )
 
 
 class StaleJunkError(Exception):
     """Raised when there's junk in the spinner from a previous run."""
 
     def __init__(self, junk):
-        Exception.__init__(self,
+        Exception.__init__(
+            self,
             "There was junk in the spinner from a previous run. "
-            "Use clear_junk() to clear it out: %r" % (junk,))
+            "Use clear_junk() to clear it out: %r" % (junk,),
+        )
 
 
 class Spinner:
@@ -141,10 +147,10 @@ class Spinner:
 
     # Signals that we save and restore for each spin.
     _PRESERVED_SIGNALS = [
-        'SIGINT',
-        'SIGTERM',
-        'SIGCHLD',
-        ]
+        "SIGINT",
+        "SIGTERM",
+        "SIGCHLD",
+    ]
 
     # There are many APIs within Twisted itself where a Deferred fires but
     # leaves cleanup work scheduled for the reactor to do.  Arguably, many of
@@ -255,9 +261,11 @@ class Spinner:
 
     def _save_signals(self):
         available_signals = [
-            getattr(signal, name, None) for name in self._PRESERVED_SIGNALS]
+            getattr(signal, name, None) for name in self._PRESERVED_SIGNALS
+        ]
         self._saved_signals = [
-            (sig, signal.getsignal(sig)) for sig in available_signals if sig]
+            (sig, signal.getsignal(sig)) for sig in available_signals if sig
+        ]
 
     def _restore_signals(self):
         for sig, hdlr in self._saved_signals:
@@ -293,7 +301,8 @@ class Spinner:
                 raise StaleJunkError(junk)
             self._save_signals()
             self._timeout_call = self._reactor.callLater(
-                timeout, self._timed_out, function, timeout)
+                timeout, self._timed_out, function, timeout
+            )
             # Calling 'stop' on the reactor will make it impossible to
             # re-start the reactor.  Since the default signal handlers for
             # TERM, BREAK and INT all call reactor.stop(), we'll patch it over
@@ -306,6 +315,7 @@ class Spinner:
                 d = defer.maybeDeferred(function, *args, **kwargs)
                 d.addCallbacks(self._got_success, self._got_failure)
                 d.addBoth(self._stop_reactor)
+
             try:
                 self._reactor.callWhenRunning(run_function)
                 self._spinning = True

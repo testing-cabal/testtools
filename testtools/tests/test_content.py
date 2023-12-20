@@ -8,7 +8,7 @@ import unittest
 from testtools import TestCase
 from testtools.compat import (
     _b,
-    )
+)
 from testtools.content import (
     attach_file,
     Content,
@@ -20,17 +20,17 @@ from testtools.content import (
     StacktraceContent,
     TracebackContent,
     text_content,
-    )
+)
 from testtools.content_type import (
     ContentType,
     UTF8_TEXT,
-    )
+)
 from testtools.matchers import (
     Equals,
     MatchesException,
     Raises,
     raises,
-    )
+)
 from testtools.tests.helpers import an_exc_info
 
 
@@ -38,14 +38,14 @@ raises_value_error = Raises(MatchesException(ValueError))
 
 
 class TestContent(TestCase):
-
     def test___init___None_errors(self):
         self.assertThat(lambda: Content(None, None), raises_value_error)
         self.assertThat(
-            lambda: Content(None, lambda: ["traceback"]), raises_value_error)
+            lambda: Content(None, lambda: ["traceback"]), raises_value_error
+        )
         self.assertThat(
-            lambda: Content(ContentType("text", "traceback"), None),
-            raises_value_error)
+            lambda: Content(ContentType("text", "traceback"), None), raises_value_error
+        )
 
     def test___init___sets_ivars(self):
         content_type = ContentType("foo", "bar")
@@ -55,10 +55,13 @@ class TestContent(TestCase):
 
     def test___eq__(self):
         content_type = ContentType("foo", "bar")
+
         def one_chunk():
             return [_b("bytes")]
+
         def two_chunk():
             return [_b("by"), _b("tes")]
+
         content1 = Content(content_type, one_chunk)
         content2 = Content(content_type, one_chunk)
         content3 = Content(content_type, two_chunk)
@@ -70,8 +73,10 @@ class TestContent(TestCase):
         self.assertNotEqual(content1, content5)
 
     def test___repr__(self):
-        content = Content(ContentType("application", "octet-stream"),
-            lambda: [_b("\x00bin"), _b("ary\xff")])
+        content = Content(
+            ContentType("application", "octet-stream"),
+            lambda: [_b("\x00bin"), _b("ary\xff")],
+        )
         self.assertIn("\\x00binary\\xff", repr(content))
 
     def test_iter_text_not_text_errors(self):
@@ -81,8 +86,7 @@ class TestContent(TestCase):
 
     def test_iter_text_decodes(self):
         content_type = ContentType("text", "strange", {"charset": "utf8"})
-        content = Content(
-            content_type, lambda: ["bytes\xea".encode()])
+        content = Content(content_type, lambda: ["bytes\xea".encode()])
         self.assertEqual(["bytes\xea"], list(content.iter_text()))
 
     def test_iter_text_default_charset_iso_8859_1(self):
@@ -94,67 +98,65 @@ class TestContent(TestCase):
 
     def test_as_text(self):
         content_type = ContentType("text", "strange", {"charset": "utf8"})
-        content = Content(
-            content_type, lambda: ["bytes\xea".encode()])
+        content = Content(content_type, lambda: ["bytes\xea".encode()])
         self.assertEqual("bytes\xea", content.as_text())
 
     def test_from_file(self):
         fd, path = tempfile.mkstemp()
         self.addCleanup(os.remove, path)
-        os.write(fd, _b('some data'))
+        os.write(fd, _b("some data"))
         os.close(fd)
         content = content_from_file(path, UTF8_TEXT, chunk_size=2)
         self.assertThat(
             list(content.iter_bytes()),
-            Equals([_b('so'), _b('me'), _b(' d'), _b('at'), _b('a')]))
+            Equals([_b("so"), _b("me"), _b(" d"), _b("at"), _b("a")]),
+        )
 
     def test_from_nonexistent_file(self):
         directory = tempfile.mkdtemp()
-        nonexistent = os.path.join(directory, 'nonexistent-file')
+        nonexistent = os.path.join(directory, "nonexistent-file")
         content = content_from_file(nonexistent)
         self.assertThat(content.iter_bytes, raises(IOError))
 
     def test_from_file_default_type(self):
-        content = content_from_file('/nonexistent/path')
+        content = content_from_file("/nonexistent/path")
         self.assertThat(content.content_type, Equals(UTF8_TEXT))
 
     def test_from_file_eager_loading(self):
         fd, path = tempfile.mkstemp()
-        os.write(fd, _b('some data'))
+        os.write(fd, _b("some data"))
         os.close(fd)
         content = content_from_file(path, UTF8_TEXT, buffer_now=True)
         os.remove(path)
-        self.assertThat(
-            ''.join(content.iter_text()), Equals('some data'))
+        self.assertThat("".join(content.iter_text()), Equals("some data"))
 
     def test_from_file_with_simple_seek(self):
         f = tempfile.NamedTemporaryFile()
-        f.write(_b('some data'))
+        f.write(_b("some data"))
         f.flush()
         self.addCleanup(f.close)
-        content = content_from_file(
-            f.name, UTF8_TEXT, chunk_size=50, seek_offset=5)
-        self.assertThat(
-            list(content.iter_bytes()), Equals([_b('data')]))
+        content = content_from_file(f.name, UTF8_TEXT, chunk_size=50, seek_offset=5)
+        self.assertThat(list(content.iter_bytes()), Equals([_b("data")]))
 
     def test_from_file_with_whence_seek(self):
         f = tempfile.NamedTemporaryFile()
-        f.write(_b('some data'))
+        f.write(_b("some data"))
         f.flush()
         self.addCleanup(f.close)
         content = content_from_file(
-            f.name, UTF8_TEXT, chunk_size=50, seek_offset=-4, seek_whence=2)
-        self.assertThat(
-            list(content.iter_bytes()), Equals([_b('data')]))
+            f.name, UTF8_TEXT, chunk_size=50, seek_offset=-4, seek_whence=2
+        )
+        self.assertThat(list(content.iter_bytes()), Equals([_b("data")]))
 
     def test_from_stream(self):
-        data = io.StringIO('some data')
+        data = io.StringIO("some data")
         content = content_from_stream(data, UTF8_TEXT, chunk_size=2)
         self.assertThat(
-            list(content.iter_bytes()), Equals(['so', 'me', ' d', 'at', 'a']))
+            list(content.iter_bytes()), Equals(["so", "me", " d", "at", "a"])
+        )
 
     def test_from_stream_default_type(self):
-        data = io.StringIO('some data')
+        data = io.StringIO("some data")
         content = content_from_stream(data)
         self.assertThat(content.content_type, Equals(UTF8_TEXT))
 
@@ -162,31 +164,28 @@ class TestContent(TestCase):
         fd, path = tempfile.mkstemp()
         self.addCleanup(os.remove, path)
         self.addCleanup(os.close, fd)
-        os.write(fd, _b('some data'))
-        stream = open(path, 'rb')
+        os.write(fd, _b("some data"))
+        stream = open(path, "rb")
         self.addCleanup(stream.close)
         content = content_from_stream(stream, UTF8_TEXT, buffer_now=True)
-        os.write(fd, _b('more data'))
-        self.assertThat(
-            ''.join(content.iter_text()), Equals('some data'))
+        os.write(fd, _b("more data"))
+        self.assertThat("".join(content.iter_text()), Equals("some data"))
 
     def test_from_stream_with_simple_seek(self):
-        data = io.BytesIO(_b('some data'))
-        content = content_from_stream(
-            data, UTF8_TEXT, chunk_size=50, seek_offset=5)
-        self.assertThat(
-            list(content.iter_bytes()), Equals([_b('data')]))
+        data = io.BytesIO(_b("some data"))
+        content = content_from_stream(data, UTF8_TEXT, chunk_size=50, seek_offset=5)
+        self.assertThat(list(content.iter_bytes()), Equals([_b("data")]))
 
     def test_from_stream_with_whence_seek(self):
-        data = io.BytesIO(_b('some data'))
+        data = io.BytesIO(_b("some data"))
         content = content_from_stream(
-            data, UTF8_TEXT, chunk_size=50, seek_offset=-4, seek_whence=2)
-        self.assertThat(
-            list(content.iter_bytes()), Equals([_b('data')]))
+            data, UTF8_TEXT, chunk_size=50, seek_offset=-4, seek_whence=2
+        )
+        self.assertThat(list(content.iter_bytes()), Equals([_b("data")]))
 
     def test_from_text(self):
         data = "some data"
-        expected = Content(UTF8_TEXT, lambda: [data.encode('utf8')])
+        expected = Content(UTF8_TEXT, lambda: [data.encode("utf8")])
         self.assertEqual(expected, text_content(data))
 
     def test_text_content_raises_TypeError_when_passed_bytes(self):
@@ -199,25 +198,28 @@ class TestContent(TestCase):
             self.assertThat(
                 lambda: text_content(value),
                 raises(
-                    TypeError("text_content must be given text, not '%s'." %
-                        type(value).__name__)
+                    TypeError(
+                        "text_content must be given text, not '%s'."
+                        % type(value).__name__
+                    )
                 ),
             )
 
     def test_json_content(self):
-        data = {'foo': 'bar'}
+        data = {"foo": "bar"}
         expected = Content(JSON, lambda: [_b('{"foo": "bar"}')])
         self.assertEqual(expected, json_content(data))
 
 
 class TestStackLinesContent(TestCase):
-
     def _get_stack_line_and_expected_output(self):
         stack_lines = [
-            ('/path/to/file', 42, 'some_function', 'print("Hello World")'),
+            ("/path/to/file", 42, "some_function", 'print("Hello World")'),
         ]
-        expected = '  File "/path/to/file", line 42, in some_function\n' \
-                   '    print("Hello World")\n'
+        expected = (
+            '  File "/path/to/file", line 42, in some_function\n'
+            '    print("Hello World")\n'
+        )
         return stack_lines, expected
 
     def test_single_stack_line(self):
@@ -228,16 +230,16 @@ class TestStackLinesContent(TestCase):
 
     def test_prefix_content(self):
         stack_lines, expected = self._get_stack_line_and_expected_output()
-        prefix = self.getUniqueString() + '\n'
+        prefix = self.getUniqueString() + "\n"
         content = StackLinesContent(stack_lines, prefix_content=prefix)
         actual = content.as_text()
-        expected = prefix  + expected
+        expected = prefix + expected
 
         self.assertEqual(expected, actual)
 
     def test_postfix_content(self):
         stack_lines, expected = self._get_stack_line_and_expected_output()
-        postfix = '\n' + self.getUniqueString()
+        postfix = "\n" + self.getUniqueString()
         content = StackLinesContent(stack_lines, postfix_content=postfix)
         actual = content.as_text()
         expected = expected + postfix
@@ -247,34 +249,34 @@ class TestStackLinesContent(TestCase):
     def test___init___sets_content_type(self):
         stack_lines, expected = self._get_stack_line_and_expected_output()
         content = StackLinesContent(stack_lines)
-        expected_content_type = ContentType("text", "x-traceback",
-            {"language": "python", "charset": "utf8"})
+        expected_content_type = ContentType(
+            "text", "x-traceback", {"language": "python", "charset": "utf8"}
+        )
 
         self.assertEqual(expected_content_type, content.content_type)
 
 
 class TestTracebackContent(TestCase):
-
     def test___init___None_errors(self):
-        self.assertThat(
-            lambda: TracebackContent(None, None), raises_value_error)
+        self.assertThat(lambda: TracebackContent(None, None), raises_value_error)
 
     def test___init___sets_ivars(self):
         content = TracebackContent(an_exc_info, self)
-        content_type = ContentType("text", "x-traceback",
-            {"language": "python", "charset": "utf8"})
+        content_type = ContentType(
+            "text", "x-traceback", {"language": "python", "charset": "utf8"}
+        )
         self.assertEqual(content_type, content.content_type)
         result = unittest.TestResult()
         expected = result._exc_info_to_string(an_exc_info, self)
-        self.assertEqual(expected, ''.join(list(content.iter_text())))
+        self.assertEqual(expected, "".join(list(content.iter_text())))
 
 
 class TestStacktraceContent(TestCase):
-
     def test___init___sets_ivars(self):
         content = StacktraceContent()
-        content_type = ContentType("text", "x-traceback",
-            {"language": "python", "charset": "utf8"})
+        content_type = ContentType(
+            "text", "x-traceback", {"language": "python", "charset": "utf8"}
+        )
         self.assertEqual(content_type, content.content_type)
 
     def test_prefix_is_used(self):
@@ -289,11 +291,10 @@ class TestStacktraceContent(TestCase):
 
     def test_top_frame_is_skipped_when_no_stack_is_specified(self):
         actual = StacktraceContent().as_text()
-        self.assertNotIn('testtools/content.py', actual)
+        self.assertNotIn("testtools/content.py", actual)
 
 
 class TestAttachFile(TestCase):
-
     def make_file(self, data):
         # GZ 2011-04-21: This helper could be useful for methods above trying
         #                to use mkstemp, but should handle write failures and
@@ -308,12 +309,13 @@ class TestAttachFile(TestCase):
         class SomeTest(TestCase):
             def test_foo(self):
                 pass
-        test = SomeTest('test_foo')
-        data = 'some data'
+
+        test = SomeTest("test_foo")
+        data = "some data"
         path = self.make_file(data)
         my_content = text_content(data)
-        attach_file(test, path, name='foo')
-        self.assertEqual({'foo': my_content}, test.getDetails())
+        attach_file(test, path, name="foo")
+        self.assertEqual({"foo": my_content}, test.getDetails())
 
     def test_optional_name(self):
         # If no name is provided, attach_file just uses the base name of the
@@ -321,8 +323,9 @@ class TestAttachFile(TestCase):
         class SomeTest(TestCase):
             def test_foo(self):
                 pass
-        test = SomeTest('test_foo')
-        path = self.make_file('some data')
+
+        test = SomeTest("test_foo")
+        path = self.make_file("some data")
         base_path = os.path.basename(path)
         attach_file(test, path)
         self.assertEqual([base_path], list(test.getDetails()))
@@ -331,29 +334,32 @@ class TestAttachFile(TestCase):
         class SomeTest(TestCase):
             def test_foo(self):
                 pass
-        test = SomeTest('test_foo')
-        path = self.make_file('some data')
-        attach_file(test, path, name='foo', buffer_now=False)
-        content = test.getDetails()['foo']
-        content_file = open(path, 'w')
-        content_file.write('new data')
+
+        test = SomeTest("test_foo")
+        path = self.make_file("some data")
+        attach_file(test, path, name="foo", buffer_now=False)
+        content = test.getDetails()["foo"]
+        content_file = open(path, "w")
+        content_file.write("new data")
         content_file.close()
-        self.assertEqual(''.join(content.iter_text()), 'new data')
+        self.assertEqual("".join(content.iter_text()), "new data")
 
     def test_eager_read_by_default(self):
         class SomeTest(TestCase):
             def test_foo(self):
                 pass
-        test = SomeTest('test_foo')
-        path = self.make_file('some data')
-        attach_file(test, path, name='foo')
-        content = test.getDetails()['foo']
-        content_file = open(path, 'w')
-        content_file.write('new data')
+
+        test = SomeTest("test_foo")
+        path = self.make_file("some data")
+        attach_file(test, path, name="foo")
+        content = test.getDetails()["foo"]
+        content_file = open(path, "w")
+        content_file.write("new data")
         content_file.close()
-        self.assertEqual(''.join(content.iter_text()), 'some data')
+        self.assertEqual("".join(content.iter_text()), "some data")
 
 
 def test_suite():
     from unittest import TestLoader
+
     return TestLoader().loadTestsFromName(__name__)

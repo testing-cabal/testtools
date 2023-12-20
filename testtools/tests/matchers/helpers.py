@@ -4,7 +4,6 @@ from testtools.tests.helpers import FullStackRunTest
 
 
 class TestMatchersInterface:
-
     run_tests_with = FullStackRunTest
 
     def test_matches_match(self):
@@ -16,11 +15,12 @@ class TestMatchersInterface:
         for candidate in mismatches:
             mismatch = matcher.match(candidate)
             self.assertNotEqual(None, mismatch)
-            self.assertNotEqual(None, getattr(mismatch, 'describe', None))
+            self.assertNotEqual(None, getattr(mismatch, "describe", None))
 
     def test__str__(self):
         # [(expected, object to __str__)].
         from testtools.matchers._doctest import DocTestMatches
+
         examples = self.str_examples
         for expected, matcher in examples:
             self.assertThat(matcher, DocTestMatches(expected))

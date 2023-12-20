@@ -8,21 +8,21 @@ from testtools import (
     RunTest,
     TestCase,
     TestResult,
-    )
+)
 from testtools.matchers import HasLength, MatchesException, Is, Raises
 from testtools.testresult.doubles import ExtendedTestResult
 from testtools.tests.helpers import FullStackRunTest
 
 
 class TestRunTest(TestCase):
-
     run_tests_with = FullStackRunTest
 
     def make_case(self):
         class Case(TestCase):
             def test(self):
                 pass
-        return Case('test')
+
+        return Case("test")
 
     def test___init___short(self):
         run = RunTest("bar")
@@ -43,10 +43,12 @@ class TestRunTest(TestCase):
     def test_run_with_result(self):
         # test.run passes result down to _run_test_method.
         log = []
+
         class Case(TestCase):
             def _run_test_method(self, result):
                 log.append(result)
-        case = Case('_run_test_method')
+
+        case = Case("_run_test_method")
         run = RunTest(case, lambda x: log.append(x))
         result = TestResult()
         run.run(result)
@@ -63,40 +65,48 @@ class TestRunTest(TestCase):
         case = self.make_case()
         log = []
         run = RunTest(case, lambda x: x)
-        run._run_core = lambda: log.append('foo')
+        run._run_core = lambda: log.append("foo")
         run.run()
-        self.assertEqual(['foo'], log)
+        self.assertEqual(["foo"], log)
 
     def test__run_prepared_result_does_not_mask_keyboard(self):
         tearDownRuns = []
+
         class Case(TestCase):
             def test(self):
                 raise KeyboardInterrupt("go")
+
             def _run_teardown(self, result):
                 tearDownRuns.append(self)
                 return super()._run_teardown(result)
-        case = Case('test')
+
+        case = Case("test")
         run = RunTest(case)
         run.result = ExtendedTestResult()
-        self.assertThat(lambda: run._run_prepared_result(run.result),
-            Raises(MatchesException(KeyboardInterrupt)))
-        self.assertEqual(
-            [('startTest', case), ('stopTest', case)], run.result._events)
+        self.assertThat(
+            lambda: run._run_prepared_result(run.result),
+            Raises(MatchesException(KeyboardInterrupt)),
+        )
+        self.assertEqual([("startTest", case), ("stopTest", case)], run.result._events)
         # tearDown is still run though!
         self.assertThat(tearDownRuns, HasLength(1))
 
     def test__run_user_calls_onException(self):
         case = self.make_case()
         log = []
+
         def handler(exc_info):
             log.append("got it")
             self.assertEqual(3, len(exc_info))
             self.assertIsInstance(exc_info[1], KeyError)
             self.assertIs(KeyError, exc_info[0])
+
         case.addOnException(handler)
-        e = KeyError('Yo')
+        e = KeyError("Yo")
+
         def raises():
             raise e
+
         run = RunTest(case, [(KeyError, None)])
         run.result = ExtendedTestResult()
         status = run._run_user(raises)
@@ -106,9 +116,11 @@ class TestRunTest(TestCase):
 
     def test__run_user_can_catch_Exception(self):
         case = self.make_case()
-        e = Exception('Yo')
+        e = Exception("Yo")
+
         def raises():
             raise e
+
         log = []
         run = RunTest(case, [(Exception, None)])
         run.result = ExtendedTestResult()
@@ -118,20 +130,25 @@ class TestRunTest(TestCase):
         self.assertEqual([], log)
 
     def test__run_prepared_result_uncaught_Exception_raised(self):
-        e = KeyError('Yo')
+        e = KeyError("Yo")
+
         class Case(TestCase):
             def test(self):
                 raise e
-        case = Case('test')
+
+        case = Case("test")
         log = []
+
         def log_exc(self, result, err):
             log.append((result, err))
+
         run = RunTest(case, [(ValueError, log_exc)])
         run.result = ExtendedTestResult()
-        self.assertThat(lambda: run._run_prepared_result(run.result),
-            Raises(MatchesException(KeyError)))
-        self.assertEqual(
-            [('startTest', case), ('stopTest', case)], run.result._events)
+        self.assertThat(
+            lambda: run._run_prepared_result(run.result),
+            Raises(MatchesException(KeyError)),
+        )
+        self.assertEqual([("startTest", case), ("stopTest", case)], run.result._events)
         self.assertEqual([], log)
 
     def test__run_prepared_result_uncaught_Exception_triggers_error(self):
@@ -139,45 +156,59 @@ class TestRunTest(TestCase):
         # When something isn't handled, the test that was
         # executing has errored, one way or another.
         e = SystemExit(0)
+
         class Case(TestCase):
             def test(self):
                 raise e
-        case = Case('test')
+
+        case = Case("test")
         log = []
+
         def log_exc(self, result, err):
             log.append((result, err))
+
         run = RunTest(case, [], log_exc)
         run.result = ExtendedTestResult()
-        self.assertThat(lambda: run._run_prepared_result(run.result),
-            Raises(MatchesException(SystemExit)))
-        self.assertEqual(
-            [('startTest', case), ('stopTest', case)], run.result._events)
+        self.assertThat(
+            lambda: run._run_prepared_result(run.result),
+            Raises(MatchesException(SystemExit)),
+        )
+        self.assertEqual([("startTest", case), ("stopTest", case)], run.result._events)
         self.assertEqual([(run.result, e)], log)
 
     def test__run_user_uncaught_Exception_from_exception_handler_raised(self):
         case = self.make_case()
+
         def broken_handler(exc_info):
             # ValueError because thats what we know how to catch - and must
             # not.
-            raise ValueError('boo')
+            raise ValueError("boo")
+
         case.addOnException(broken_handler)
-        e = KeyError('Yo')
+        e = KeyError("Yo")
+
         def raises():
             raise e
+
         log = []
+
         def log_exc(self, result, err):
             log.append((result, err))
+
         run = RunTest(case, [(ValueError, log_exc)])
         run.result = ExtendedTestResult()
-        self.assertThat(lambda: run._run_user(raises),
-            Raises(MatchesException(ValueError)))
+        self.assertThat(
+            lambda: run._run_user(raises), Raises(MatchesException(ValueError))
+        )
         self.assertEqual([], run.result._events)
         self.assertEqual([], log)
 
     def test__run_user_returns_result(self):
         case = self.make_case()
+
         def returns():
             return 1
+
         run = RunTest(case)
         run.result = ExtendedTestResult()
         self.assertEqual(1, run._run_user(returns))
@@ -185,44 +216,54 @@ class TestRunTest(TestCase):
 
     def test__run_one_decorates_result(self):
         log = []
+
         class Run(RunTest):
             def _run_prepared_result(self, result):
                 log.append(result)
                 return result
+
         run = Run(self.make_case(), lambda x: x)
-        result = run._run_one('foo')
+        result = run._run_one("foo")
         self.assertEqual([result], log)
         self.assertIsInstance(log[0], ExtendedToOriginalDecorator)
-        self.assertEqual('foo', result.decorated)
+        self.assertEqual("foo", result.decorated)
 
     def test__run_prepared_result_calls_start_and_stop_test(self):
         result = ExtendedTestResult()
         case = self.make_case()
         run = RunTest(case, lambda x: x)
         run.run(result)
-        self.assertEqual([
-            ('startTest', case),
-            ('addSuccess', case),
-            ('stopTest', case),
-            ], result._events)
+        self.assertEqual(
+            [
+                ("startTest", case),
+                ("addSuccess", case),
+                ("stopTest", case),
+            ],
+            result._events,
+        )
 
     def test__run_prepared_result_calls_stop_test_always(self):
         result = ExtendedTestResult()
         case = self.make_case()
+
         def inner():
             raise Exception("foo")
+
         run = RunTest(case, lambda x: x)
         run._run_core = inner
-        self.assertThat(lambda: run.run(result),
-            Raises(MatchesException(Exception("foo"))))
-        self.assertEqual([
-            ('startTest', case),
-            ('stopTest', case),
-            ], result._events)
+        self.assertThat(
+            lambda: run.run(result), Raises(MatchesException(Exception("foo")))
+        )
+        self.assertEqual(
+            [
+                ("startTest", case),
+                ("stopTest", case),
+            ],
+            result._events,
+        )
 
 
 class CustomRunTest(RunTest):
-
     marker = object()
 
     def run(self, result=None):
@@ -230,23 +271,25 @@ class CustomRunTest(RunTest):
 
 
 class TestTestCaseSupportForRunTest(TestCase):
-
     def test_pass_custom_run_test(self):
         class SomeCase(TestCase):
             def test_foo(self):
                 pass
+
         result = TestResult()
-        case = SomeCase('test_foo', runTest=CustomRunTest)
+        case = SomeCase("test_foo", runTest=CustomRunTest)
         from_run_test = case.run(result)
         self.assertThat(from_run_test, Is(CustomRunTest.marker))
 
     def test_default_is_runTest_class_variable(self):
         class SomeCase(TestCase):
             run_tests_with = CustomRunTest
+
             def test_foo(self):
                 pass
+
         result = TestResult()
-        case = SomeCase('test_foo')
+        case = SomeCase("test_foo")
         from_run_test = case.run(result)
         self.assertThat(from_run_test, Is(CustomRunTest.marker))
 
@@ -254,15 +297,19 @@ class TestTestCaseSupportForRunTest(TestCase):
         # If a 'runTest' argument is passed to the test's constructor, that
         # overrides the class variable.
         marker = object()
+
         class DifferentRunTest(RunTest):
             def run(self, result=None):
                 return marker
+
         class SomeCase(TestCase):
             run_tests_with = CustomRunTest
+
             def test_foo(self):
                 pass
+
         result = TestResult()
-        case = SomeCase('test_foo', runTest=DifferentRunTest)
+        case = SomeCase("test_foo", runTest=DifferentRunTest)
         from_run_test = case.run(result)
         self.assertThat(from_run_test, Is(marker))
 
@@ -272,8 +319,9 @@ class TestTestCaseSupportForRunTest(TestCase):
             @run_test_with(CustomRunTest)
             def test_foo(self):
                 pass
+
         result = TestResult()
-        case = SomeCase('test_foo')
+        case = SomeCase("test_foo")
         from_run_test = case.run(result)
         self.assertThat(from_run_test, Is(CustomRunTest.marker))
 
@@ -282,18 +330,22 @@ class TestTestCaseSupportForRunTest(TestCase):
         # Extra arguments can be passed to the decorator which will then be
         # passed on to the RunTest object.
         marker = object()
+
         class FooRunTest(RunTest):
             def __init__(self, case, handlers=None, bar=None):
                 super().__init__(case, handlers)
                 self.bar = bar
+
             def run(self, result=None):
                 return self.bar
+
         class SomeCase(TestCase):
             @run_test_with(FooRunTest, bar=marker)
             def test_foo(self):
                 pass
+
         result = TestResult()
-        case = SomeCase('test_foo')
+        case = SomeCase("test_foo")
         from_run_test = case.run(result)
         self.assertThat(from_run_test, Is(marker))
 
@@ -302,18 +354,22 @@ class TestTestCaseSupportForRunTest(TestCase):
         # respected.
         def wrapped(function):
             """Silly, trivial decorator."""
+
             def decorated(*args, **kwargs):
                 return function(*args, **kwargs)
+
             decorated.__name__ = function.__name__
             decorated.__dict__.update(function.__dict__)
             return decorated
+
         class SomeCase(TestCase):
             @wrapped
             @run_test_with(CustomRunTest)
             def test_foo(self):
                 pass
+
         result = TestResult()
-        case = SomeCase('test_foo')
+        case = SomeCase("test_foo")
         from_run_test = case.run(result)
         self.assertThat(from_run_test, Is(CustomRunTest.marker))
 
@@ -321,19 +377,23 @@ class TestTestCaseSupportForRunTest(TestCase):
         # If a 'runTest' argument is passed to the test's constructor, that
         # overrides the decorator.
         marker = object()
+
         class DifferentRunTest(RunTest):
             def run(self, result=None):
                 return marker
+
         class SomeCase(TestCase):
             @run_test_with(CustomRunTest)
             def test_foo(self):
                 pass
+
         result = TestResult()
-        case = SomeCase('test_foo', runTest=DifferentRunTest)
+        case = SomeCase("test_foo", runTest=DifferentRunTest)
         from_run_test = case.run(result)
         self.assertThat(from_run_test, Is(marker))
 
 
 def test_suite():
     from unittest import TestLoader
+
     return TestLoader().loadTestsFromName(__name__)

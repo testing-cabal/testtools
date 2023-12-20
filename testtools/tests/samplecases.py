@@ -17,9 +17,15 @@ from testtools.matchers import (
 )
 
 
-def make_test_case(test_method_name, set_up=None, test_body=None,
-                   tear_down=None, cleanups=(), pre_set_up=None,
-                   post_tear_down=None):
+def make_test_case(
+    test_method_name,
+    set_up=None,
+    test_body=None,
+    tear_down=None,
+    cleanups=(),
+    pre_set_up=None,
+    post_tear_down=None,
+):
     """Make a test case with the given behaviors.
 
     All callables are unary callables that receive this test as their argument.
@@ -41,16 +47,29 @@ def make_test_case(test_method_name, set_up=None, test_body=None,
     pre_set_up = pre_set_up if pre_set_up else _do_nothing
     post_tear_down = post_tear_down if post_tear_down else _do_nothing
     return _ConstructedTest(
-        test_method_name, set_up, test_body, tear_down, cleanups,
-        pre_set_up, post_tear_down,
+        test_method_name,
+        set_up,
+        test_body,
+        tear_down,
+        cleanups,
+        pre_set_up,
+        post_tear_down,
     )
 
 
 class _ConstructedTest(TestCase):
     """A test case defined by arguments, rather than overrides."""
 
-    def __init__(self, test_method_name, set_up, test_body, tear_down,
-                 cleanups, pre_set_up, post_tear_down):
+    def __init__(
+        self,
+        test_method_name,
+        set_up,
+        test_body,
+        tear_down,
+        cleanups,
+        pre_set_up,
+        post_tear_down,
+    ):
         """Construct a test case.
 
         See ``make_test_case`` for full documentation.
@@ -88,32 +107,32 @@ _success = _do_nothing
 
 
 def _error(case):
-    1/0  # arbitrary non-failure exception
+    1 / 0  # arbitrary non-failure exception
 
 
 def _failure(case):
-    case.fail('arbitrary failure')
+    case.fail("arbitrary failure")
 
 
 def _skip(case):
-    case.skipTest('arbitrary skip message')
+    case.skipTest("arbitrary skip message")
 
 
 def _expected_failure(case):
-    case.expectFailure('arbitrary expected failure', _failure, case)
+    case.expectFailure("arbitrary expected failure", _failure, case)
 
 
 def _unexpected_success(case):
-    case.expectFailure('arbitrary unexpected success', _success, case)
+    case.expectFailure("arbitrary unexpected success", _success, case)
 
 
 behaviors = [
-    ('success', _success),
-    ('fail', _failure),
-    ('error',  _error),
-    ('skip', _skip),
-    ('xfail', _expected_failure),
-    ('uxsuccess', _unexpected_success),
+    ("success", _success),
+    ("fail", _failure),
+    ("error", _error),
+    ("skip", _skip),
+    ("xfail", _expected_failure),
+    ("uxsuccess", _unexpected_success),
 ]
 
 
@@ -133,24 +152,23 @@ def _make_behavior_scenarios(stage):
     Ordering is not consistent.
     """
     return (
-        (f'{stage}={behavior}',
-         {f'{stage}_behavior': function})
+        (f"{stage}={behavior}", {f"{stage}_behavior": function})
         for (behavior, function) in behaviors
     )
 
 
 def make_case_for_behavior_scenario(case):
     """Given a test with a behavior scenario installed, make a TestCase."""
-    cleanup_behavior = getattr(case, 'cleanup_behavior', None)
+    cleanup_behavior = getattr(case, "cleanup_behavior", None)
     cleanups = [cleanup_behavior] if cleanup_behavior else []
     return make_test_case(
         case.getUniqueString(),
-        set_up=getattr(case, 'set_up_behavior', _do_nothing),
-        test_body=getattr(case, 'body_behavior', _do_nothing),
-        tear_down=getattr(case, 'tear_down_behavior', _do_nothing),
+        set_up=getattr(case, "set_up_behavior", _do_nothing),
+        test_body=getattr(case, "body_behavior", _do_nothing),
+        tear_down=getattr(case, "tear_down_behavior", _do_nothing),
         cleanups=cleanups,
-        pre_set_up=getattr(case, 'pre_set_up_behavior', _do_nothing),
-        post_tear_down=getattr(case, 'post_tear_down_behavior', _do_nothing),
+        pre_set_up=getattr(case, "pre_set_up_behavior", _do_nothing),
+        post_tear_down=getattr(case, "post_tear_down_behavior", _do_nothing),
     )
 
 
@@ -179,13 +197,15 @@ class _SetUpFailsOnGlobalState(TestCase):
 
     @classmethod
     def make_scenario(cls):
-        case = cls('test_success')
+        case = cls("test_success")
         return {
-            'case': case,
-            'expected_first_result': _test_error_traceback(
-                case, Contains('TestCase.tearDown was not called')),
-            'expected_second_result': _test_error_traceback(
-                case, Contains('TestCase.setUp was not called')),
+            "case": case,
+            "expected_first_result": _test_error_traceback(
+                case, Contains("TestCase.tearDown was not called")
+            ),
+            "expected_second_result": _test_error_traceback(
+                case, Contains("TestCase.setUp was not called")
+            ),
         }
 
 
@@ -194,20 +214,26 @@ def _test_error_traceback(case, traceback_matcher):
 
     ``traceback_matcher`` is applied to the text of the traceback.
     """
-    return MatchesListwise([
-        Equals(('startTest', case)),
-        MatchesListwise([
-            Equals('addError'),
-            Equals(case),
-            MatchesDict({
-                'traceback': AfterPreprocessing(
-                    lambda x: x.as_text(),
-                    traceback_matcher,
-                )
-            })
-        ]),
-        Equals(('stopTest', case)),
-    ])
+    return MatchesListwise(
+        [
+            Equals(("startTest", case)),
+            MatchesListwise(
+                [
+                    Equals("addError"),
+                    Equals(case),
+                    MatchesDict(
+                        {
+                            "traceback": AfterPreprocessing(
+                                lambda x: x.as_text(),
+                                traceback_matcher,
+                            )
+                        }
+                    ),
+                ]
+            ),
+            Equals(("stopTest", case)),
+        ]
+    )
 
 
 """
@@ -215,14 +241,17 @@ A list that can be used with testscenarios to test every deterministic sample
 case that we have.
 """
 deterministic_sample_cases_scenarios = multiply_scenarios(
-    _make_behavior_scenarios('set_up'),
-    _make_behavior_scenarios('body'),
-    _make_behavior_scenarios('tear_down'),
-    _make_behavior_scenarios('cleanup'),
+    _make_behavior_scenarios("set_up"),
+    _make_behavior_scenarios("body"),
+    _make_behavior_scenarios("tear_down"),
+    _make_behavior_scenarios("cleanup"),
 ) + [
-    ('tear_down_fails_after_upcall', {
-        'post_tear_down_behavior': _error,
-    }),
+    (
+        "tear_down_fails_after_upcall",
+        {
+            "post_tear_down_behavior": _error,
+        },
+    ),
 ]
 
 
@@ -231,5 +260,5 @@ A list that can be used with testscenarios to test every non-deterministic
 sample case that we have.
 """
 nondeterministic_sample_cases_scenarios = [
-    ('setup-fails-global-state', _SetUpFailsOnGlobalState.make_scenario()),
+    ("setup-fails-global-state", _SetUpFailsOnGlobalState.make_scenario()),
 ]

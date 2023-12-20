@@ -3,9 +3,9 @@
 """Helpers for monkey-patching Python code."""
 
 __all__ = [
-    'MonkeyPatcher',
-    'patch',
-    ]
+    "MonkeyPatcher",
+    "patch",
+]
 
 
 class MonkeyPatcher:

@@ -3,14 +3,14 @@
 """Matchers for things related to the filesystem."""
 
 __all__ = [
-    'FileContains',
-    'DirExists',
-    'FileExists',
-    'HasPermissions',
-    'PathExists',
-    'SamePath',
-    'TarballContains',
-    ]
+    "FileContains",
+    "DirExists",
+    "FileExists",
+    "HasPermissions",
+    "PathExists",
+    "SamePath",
+    "TarballContains",
+]
 
 import os
 import tarfile
@@ -19,10 +19,10 @@ from ._basic import Equals
 from ._higherorder import (
     MatchesAll,
     MatchesPredicate,
-    )
+)
 from ._impl import (
     Matcher,
-    )
+)
 
 
 def PathExists():
@@ -40,7 +40,8 @@ def DirExists():
     return MatchesAll(
         PathExists(),
         MatchesPredicate(os.path.isdir, "%s is not a directory."),
-        first_only=True)
+        first_only=True,
+    )
 
 
 def FileExists():
@@ -48,7 +49,8 @@ def FileExists():
     return MatchesAll(
         PathExists(),
         MatchesPredicate(os.path.isfile, "%s is not a file."),
-        first_only=True)
+        first_only=True,
+    )
 
 
 class DirContains(Matcher):
@@ -72,11 +74,11 @@ class DirContains(Matcher):
             against this matcher.
         """
         if filenames == matcher is None:
-            raise AssertionError(
-                "Must provide one of `filenames` or `matcher`.")
+            raise AssertionError("Must provide one of `filenames` or `matcher`.")
         if None not in (filenames, matcher):
             raise AssertionError(
-                "Must provide either `filenames` or `matcher`, not both.")
+                "Must provide either `filenames` or `matcher`, not both."
+            )
         if filenames is None:
             self.matcher = matcher
         else:
@@ -106,11 +108,11 @@ class FileContains(Matcher):
             this matcher.
         """
         if contents == matcher is None:
-            raise AssertionError(
-                "Must provide one of `contents` or `matcher`.")
+            raise AssertionError("Must provide one of `contents` or `matcher`.")
         if None not in (contents, matcher):
             raise AssertionError(
-                "Must provide either `contents` or `matcher`, not both.")
+                "Must provide either `contents` or `matcher`, not both."
+            )
         if matcher is None:
             self.matcher = Equals(contents)
         else:
@@ -165,6 +167,7 @@ class SamePath(Matcher):
     def match(self, other_path):
         def f(x):
             return os.path.abspath(os.path.realpath(x))
+
         return Equals(f(self.path)).match(f(other_path))
 
 
