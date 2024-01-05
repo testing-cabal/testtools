@@ -227,7 +227,9 @@ class TestResult(unittest.TestResult):
         self._tags = TagContext(self._tags)
 
     def stopTest(self, test):
-        self._tags = self._tags.parent
+        # NOTE: In Python 3.12.1 skipped tests may not call startTest()
+        if self._tags is not None:
+            self._tags = self._tags.parent
         super().stopTest(test)
 
     @property
@@ -1608,7 +1610,9 @@ class ExtendedToOriginalDecorator:
         self.shouldStop = True
 
     def stopTest(self, test):
-        self._tags = self._tags.parent
+        # NOTE: In Python 3.12.1 skipped tests may not call startTest()
+        if self._tags is not None:
+            self._tags = self._tags.parent
         return self.decorated.stopTest(test)
 
     def stopTestRun(self):
@@ -1670,7 +1674,9 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
         self._tags = TagContext(self._tags)
 
     def stopTest(self, test):
-        self._tags = self._tags.parent
+        # NOTE: In Python 3.12.1 skipped tests may not call startTest()
+        if self._tags is not None:
+            self._tags = self._tags.parent
 
     def addError(self, test, err=None, details=None):
         self._check_args(err, details)
