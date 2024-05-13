@@ -2,7 +2,6 @@
 
 """Test TestResults and related things."""
 
-
 import codecs
 import datetime
 import doctest
@@ -2928,7 +2927,7 @@ class TestNonAsciiResults(TestCase):
             self._as_output("\a\a\a"),
             textoutput,
         )
-        self.assertIn(self._as_output("\uFFFD\uFFFD\uFFFD"), textoutput)
+        self.assertIn(self._as_output("\ufffd\ufffd\ufffd"), textoutput)
 
     def _local_os_error_matcher(self):
         return MatchesAny(Contains("FileExistsError: "), Contains("PermissionError: "))

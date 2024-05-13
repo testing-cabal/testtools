@@ -54,13 +54,6 @@ include-package-data = false
 include = ["testtools"]
 exclude = ["man*"]
 
-[tool.extras]
-test = """
-testscenarios
-testresources"""
-twisted = """
-Twisted"""
-
 [tool.files]
 packages = "testtools"
 
@@ -79,3 +72,4 @@ __version__ = {version_tuple!r}
 [project.optional-dependencies]
 test = ["testscenarios", "testresources"]
 twisted = ["Twisted", "fixtures"]
+dev = ["ruff==0.4.4"]
