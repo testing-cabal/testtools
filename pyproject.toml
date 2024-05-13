@@ -60,6 +60,9 @@ testscenarios
 testresources"""
 twisted = """
 Twisted"""
+dev = """
+ruff==0.4.4
+"""
 
 [tool.files]
 packages = "testtools"
