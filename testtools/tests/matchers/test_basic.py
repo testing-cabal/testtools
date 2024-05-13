@@ -230,8 +230,8 @@ class DoesNotStartWithTests(TestCase):
         self.assertEqual("'fo' does not start with 'bo'.", mismatch.describe())
 
     def test_describe_non_ascii_unicode(self):
-        string = "A\xA7"
-        suffix = "B\xA7"
+        string = "A\xa7"
+        suffix = "B\xa7"
         mismatch = DoesNotStartWith(string, suffix)
         self.assertEqual(
             "{} does not start with {}.".format(text_repr(string), text_repr(suffix)),
@@ -239,8 +239,8 @@ class DoesNotStartWithTests(TestCase):
         )
 
     def test_describe_non_ascii_bytes(self):
-        string = _b("A\xA7")
-        suffix = _b("B\xA7")
+        string = _b("A\xa7")
+        suffix = _b("B\xa7")
         mismatch = DoesNotStartWith(string, suffix)
         self.assertEqual(
             f"{string!r} does not start with {suffix!r}.", mismatch.describe()
@@ -255,12 +255,12 @@ class StartsWithTests(TestCase):
         self.assertEqual("StartsWith('bar')", str(matcher))
 
     def test_str_with_bytes(self):
-        b = _b("\xA7")
+        b = _b("\xa7")
         matcher = StartsWith(b)
         self.assertEqual(f"StartsWith({b!r})", str(matcher))
 
     def test_str_with_unicode(self):
-        u = "\xA7"
+        u = "\xa7"
         matcher = StartsWith(u)
         self.assertEqual(f"StartsWith({u!r})", str(matcher))
 
@@ -291,8 +291,8 @@ class DoesNotEndWithTests(TestCase):
         self.assertEqual("'fo' does not end with 'bo'.", mismatch.describe())
 
     def test_describe_non_ascii_unicode(self):
-        string = "A\xA7"
-        suffix = "B\xA7"
+        string = "A\xa7"
+        suffix = "B\xa7"
         mismatch = DoesNotEndWith(string, suffix)
         self.assertEqual(
             "{} does not end with {}.".format(text_repr(string), text_repr(suffix)),
@@ -300,8 +300,8 @@ class DoesNotEndWithTests(TestCase):
         )
 
     def test_describe_non_ascii_bytes(self):
-        string = _b("A\xA7")
-        suffix = _b("B\xA7")
+        string = _b("A\xa7")
+        suffix = _b("B\xa7")
         mismatch = DoesNotEndWith(string, suffix)
         self.assertEqual(
             f"{string!r} does not end with {suffix!r}.", mismatch.describe()
@@ -316,12 +316,12 @@ class EndsWithTests(TestCase):
         self.assertEqual("EndsWith('bar')", str(matcher))
 
     def test_str_with_bytes(self):
-        b = _b("\xA7")
+        b = _b("\xa7")
         matcher = EndsWith(b)
         self.assertEqual(f"EndsWith({b!r})", str(matcher))
 
     def test_str_with_unicode(self):
-        u = "\xA7"
+        u = "\xa7"
         matcher = EndsWith(u)
         self.assertEqual(f"EndsWith({u!r})", str(matcher))
 
@@ -404,8 +404,8 @@ class TestMatchesRegex(TestCase, TestMatchersInterface):
         ("MatchesRegex('a|b')", MatchesRegex("a|b")),
         ("MatchesRegex('a|b', re.M)", MatchesRegex("a|b", re.M)),
         ("MatchesRegex('a|b', re.I|re.M)", MatchesRegex("a|b", re.I | re.M)),
-        ("MatchesRegex({!r})".format(_b("\xA7")), MatchesRegex(_b("\xA7"))),
-        ("MatchesRegex({!r})".format("\xA7"), MatchesRegex("\xA7")),
+        ("MatchesRegex({!r})".format(_b("\xa7")), MatchesRegex(_b("\xa7"))),
+        ("MatchesRegex({!r})".format("\xa7"), MatchesRegex("\xa7")),
     ]
 
     describe_examples = [
@@ -414,9 +414,9 @@ class TestMatchesRegex(TestCase, TestMatchersInterface):
         (
             "{!r} does not match /\\s+\\xa7/".format(_b("c")),
             _b("c"),
-            MatchesRegex(_b("\\s+\xA7")),
+            MatchesRegex(_b("\\s+\xa7")),
         ),
-        ("{!r} does not match /\\s+\\xa7/".format("c"), "c", MatchesRegex("\\s+\xA7")),
+        ("{!r} does not match /\\s+\\xa7/".format("c"), "c", MatchesRegex("\\s+\xa7")),
     ]
 
 
