@@ -111,7 +111,7 @@ class TestTextRepr(testtools.TestCase):
         ("'", '"\'"', "'''\\\n\\''''"),
         ("\\", "'\\\\'", "'''\\\n\\\\'''"),
         #  DEL is also unprintable and should be escaped
-        ("\x7F", "'\\x7f'", "'''\\\n\\x7f'''"),
+        ("\x7f", "'\\x7f'", "'''\\\n\\x7f'''"),
         # Character combinations that need double checking
         ("\r\n", "'\\r\\n'", "'''\\\n\\r\n'''"),
         ("\"'", "'\"\\''", "'''\\\n\"\\''''"),
@@ -127,29 +127,29 @@ class TestTextRepr(testtools.TestCase):
     # Bytes with the high bit set should always be escaped
     bytes_examples = (
         (_b("\x80"), "'\\x80'", "'''\\\n\\x80'''"),
-        (_b("\xA0"), "'\\xa0'", "'''\\\n\\xa0'''"),
-        (_b("\xC0"), "'\\xc0'", "'''\\\n\\xc0'''"),
-        (_b("\xFF"), "'\\xff'", "'''\\\n\\xff'''"),
-        (_b("\xC2\xA7"), "'\\xc2\\xa7'", "'''\\\n\\xc2\\xa7'''"),
+        (_b("\xa0"), "'\\xa0'", "'''\\\n\\xa0'''"),
+        (_b("\xc0"), "'\\xc0'", "'''\\\n\\xc0'''"),
+        (_b("\xff"), "'\\xff'", "'''\\\n\\xff'''"),
+        (_b("\xc2\xa7"), "'\\xc2\\xa7'", "'''\\\n\\xc2\\xa7'''"),
     )
 
     # Unicode doesn't escape printable characters as per the Python 3 model
     unicode_examples = (
         # C1 codes are unprintable
         ("\x80", "'\\x80'", "'''\\\n\\x80'''"),
-        ("\x9F", "'\\x9f'", "'''\\\n\\x9f'''"),
+        ("\x9f", "'\\x9f'", "'''\\\n\\x9f'''"),
         # No-break space is unprintable
-        ("\xA0", "'\\xa0'", "'''\\\n\\xa0'''"),
+        ("\xa0", "'\\xa0'", "'''\\\n\\xa0'''"),
         # Letters latin alphabets are printable
-        ("\xA1", "'\xa1'", "'''\\\n\xa1'''"),
-        ("\xFF", "'\xff'", "'''\\\n\xff'''"),
+        ("\xa1", "'\xa1'", "'''\\\n\xa1'''"),
+        ("\xff", "'\xff'", "'''\\\n\xff'''"),
         ("\u0100", "'\u0100'", "'''\\\n\u0100'''"),
         # Line and paragraph seperators are unprintable
         ("\u2028", "'\\u2028'", "'''\\\n\\u2028'''"),
         ("\u2029", "'\\u2029'", "'''\\\n\\u2029'''"),
         # Unpaired surrogates are unprintable
-        ("\uD800", "'\\ud800'", "'''\\\n\\ud800'''"),
-        ("\uDFFF", "'\\udfff'", "'''\\\n\\udfff'''"),
+        ("\ud800", "'\\ud800'", "'''\\\n\\ud800'''"),
+        ("\udfff", "'\\udfff'", "'''\\\n\\udfff'''"),
         # Unprintable general categories not fully tested: Cc, Cf, Co, Cn, Zs
     )
 

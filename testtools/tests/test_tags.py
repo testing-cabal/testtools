@@ -2,7 +2,6 @@
 
 """Test tag support."""
 
-
 from testtools import TestCase
 from testtools.tags import TagContext
 
