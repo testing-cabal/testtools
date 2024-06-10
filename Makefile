@@ -1,6 +1,6 @@
 # Copyright (c) 2008-2013 testtools developers. See LICENSE for details.
 
-PYTHON=python
+PYTHON=python3
 SOURCES=$(shell find testtools -name "*.py")
 
 check:
@@ -21,11 +21,13 @@ prerelease:
 	-rm MANIFEST
 
 release:
-	./setup.py sdist bdist_wheel upload --sign
+	hatchling build
+	twine upload dist/testtools-$(shell hatchling version)-*
+	gpg -a --detach-sign dist/testtools-$(shell hatchling version).tar.gz
 	$(PYTHON) scripts/_lp_release.py
 
 snapshot: prerelease
-	./setup.py sdist bdist_wheel
+	hatchling build
 
 ### Documentation ###
 
