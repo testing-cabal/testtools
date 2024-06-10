@@ -50,7 +50,7 @@ Homepage = "https://github.com/testing-cabal/testtools"
 include-package-data = false
 
 [tool.setuptools.packages.find]
-include = ["testtools"]
+include = ["testtools*"]
 exclude = ["man*"]
 
 [tool.files]
