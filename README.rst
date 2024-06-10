@@ -34,11 +34,11 @@ under the same license as Python, see LICENSE for details.
 Supported platforms
 -------------------
 
- * Python 3.7+ or PyPy3
+* Python 3.7+ or PyPy3
 
 If you would like to use testtools for earlier Pythons, consult the compatibility docs:
 
- * https://testtools.readthedocs.io/en/latest/overview.html#cross-python-compatibility
+* https://testtools.readthedocs.io/en/latest/overview.html#cross-python-compatibility
 
 testtools probably works on all OSes that Python works on, but is most heavily
 tested on Linux and macOS.
@@ -65,8 +65,8 @@ See ``doc/hacking.rst`` for more details.
 There's no mailing list for this project yet, however the testing-in-python
 mailing list may be a useful resource:
 
- * Address: testing-in-python@lists.idyll.org
- * Subscription link: http://lists.idyll.org/listinfo/testing-in-python
+* Address: testing-in-python@lists.idyll.org
+* Subscription link: http://lists.idyll.org/listinfo/testing-in-python
 
 
 History
@@ -80,24 +80,24 @@ conflating the library with the Python 3.0 release (commonly referred to as
 Thanks
 ------
 
- * Canonical Ltd
- * Bazaar
- * Twisted Matrix Labs
- * Robert Collins
- * Andrew Bennetts
- * Benjamin Peterson
- * Jamu Kakar
- * James Westby
- * Martin [gz]
- * Michael Hudson-Doyle
- * Aaron Bentley
- * Christian Kampka
- * Gavin Panella
- * Martin Pool
- * Julia Varlamova
- * ClusterHQ Ltd
- * Tristan Seligmann
- * Jonathan Jacobs
- * Jelmer Vernooĳ
- * Hugo van Kemenade
- * Zane Bitter
+* Canonical Ltd
+* Bazaar
+* Twisted Matrix Labs
+* Robert Collins
+* Andrew Bennetts
+* Benjamin Peterson
+* Jamu Kakar
+* James Westby
+* Martin [gz]
+* Michael Hudson-Doyle
+* Aaron Bentley
+* Christian Kampka
+* Gavin Panella
+* Martin Pool
+* Julia Varlamova
+* ClusterHQ Ltd
+* Tristan Seligmann
+* Jonathan Jacobs
+* Jelmer Vernooĳ
+* Hugo van Kemenade
+* Zane Bitter
