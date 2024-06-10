@@ -72,4 +72,4 @@ __version__ = {version_tuple!r}
 [project.optional-dependencies]
 test = ["testscenarios", "testresources"]
 twisted = ["Twisted", "fixtures"]
-dev = ["ruff==0.4.7"]
+dev = ["ruff==0.4.8"]
