@@ -3,11 +3,28 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
+2.7.2
+~~~~~
+
+Improvements
+------------
+
+* Treat methodName="runTest" similar to unittest.TestCase,
+  fixes compatibility with pytest 8.3. (Natanael Copa, #372)
+
+* Format with ``ruff format``. (Jelmer Vernooĳ)
+
+* Use ruff for linting. (Jelmer Vernooĳ)
+
+* Fix compatibility with Python 3.12.1. (Matthew Treinish)
+
+* Deprecate SkippedTest exception. (Stephen Finucane)
+
 2.7.1
 ~~~~~
 
 Improvements
-~~~~~~~~~~~~
+------------
 
 * Remove various unused imports.
   (Jelmer Vernooĳ)
