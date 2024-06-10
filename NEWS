@@ -20,6 +20,8 @@ Improvements
 
 * Deprecate SkippedTest exception. (Stephen Finucane)
 
+* Drop support for Python 3.7. (Jelmer Vernooĳ)
+
 2.7.1
 ~~~~~
 
