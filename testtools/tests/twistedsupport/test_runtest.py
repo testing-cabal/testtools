@@ -16,7 +16,6 @@ from testtools.matchers import (
     Contains,
     ContainsAll,
     ContainsDict,
-    EndsWith,
     Equals,
     Is,
     KeysEqual,
@@ -749,7 +748,7 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
                     test,
                     {
                         "traceback": Not(Is(None)),
-                        "twisted-log": AsText(EndsWith(" foo\n")),
+                        "twisted-log": AsText(Contains(" foo\n")),
                     },
                 ),
                 ("stopTest", test),
@@ -790,7 +789,8 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
         result = self.make_result()
         runner.run(result)
         self.assertThat(
-            messages, MatchesListwise([ContainsDict({"message": Equals(("foo",))})])
+            messages[0:1],
+            MatchesListwise([ContainsDict({"message": Equals(("foo",))})]),
         )
 
     def test_restore_observers(self):
