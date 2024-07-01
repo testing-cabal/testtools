@@ -55,7 +55,7 @@ class MatchesException(Matcher):
         )
 
     def match(self, other):
-        if type(other) != tuple:
+        if not isinstance(other, tuple):
             return Mismatch("%r is not an exc_info tuple" % other)
         expected_class = self.expected
         if self._is_instance:
