@@ -23,7 +23,7 @@ class ContentType:
         self.parameters = parameters or {}
 
     def __eq__(self, other):
-        if type(other) != ContentType:
+        if type(other) is not ContentType:
             return False
         return self.__dict__ == other.__dict__
 
