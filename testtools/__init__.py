@@ -116,7 +116,7 @@ try:
     # This will fail with LookupError if the package is not installed in
     # editable mode or if Git is not installed.
     version = get_version(root="..", relative_to=__file__)
-    __version__ = tuple(version.split("."))
+    __version__ = tuple([int(v) if v.isdigit() else v for v in version.split(".")])
 except (ImportError, LookupError):
     # As a fallback, use the version that is hard-coded in the file.
     try:
