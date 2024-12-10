@@ -335,7 +335,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
                 exc_info = sys.exc_info()
                 self.case._report_traceback(exc_info)
                 last_exception = exc_info[1]
-        defer.returnValue(last_exception)
+        return last_exception
 
     def _make_spinner(self):
         """Make the `Spinner` to be used to run the tests."""
