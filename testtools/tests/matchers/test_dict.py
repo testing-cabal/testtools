@@ -127,15 +127,12 @@ class TestMatchesDict(TestCase, TestMatchersInterface):
 
     describe_examples = [
         (
-            "Missing: {\n"
-            "  'baz': Not(Equals('qux')),\n"
-            "  'foo': Equals('bar'),\n"
-            "}",
+            "Missing: {\n  'baz': Not(Equals('qux')),\n  'foo': Equals('bar'),\n}",
             {},
             matches_matcher,
         ),
         (
-            "Differences: {\n" "  'baz': 'qux' matches Equals('qux'),\n" "}",
+            "Differences: {\n  'baz': 'qux' matches Equals('qux'),\n}",
             {"foo": "bar", "baz": "qux"},
             matches_matcher,
         ),
@@ -148,17 +145,12 @@ class TestMatchesDict(TestCase, TestMatchersInterface):
             matches_matcher,
         ),
         (
-            "Extra: {\n" "  'cat': 'dog',\n" "}",
+            "Extra: {\n  'cat': 'dog',\n}",
             {"foo": "bar", "baz": "quux", "cat": "dog"},
             matches_matcher,
         ),
         (
-            "Extra: {\n"
-            "  'cat': 'dog',\n"
-            "}\n"
-            "Missing: {\n"
-            "  'baz': Not(Equals('qux')),\n"
-            "}",
+            "Extra: {\n  'cat': 'dog',\n}\nMissing: {\n  'baz': Not(Equals('qux')),\n}",
             {"foo": "bar", "cat": "dog"},
             matches_matcher,
         ),
@@ -192,15 +184,12 @@ class TestContainsDict(TestCase, TestMatchersInterface):
 
     describe_examples = [
         (
-            "Missing: {\n"
-            "  'baz': Not(Equals('qux')),\n"
-            "  'foo': Equals('bar'),\n"
-            "}",
+            "Missing: {\n  'baz': Not(Equals('qux')),\n  'foo': Equals('bar'),\n}",
             {},
             matches_matcher,
         ),
         (
-            "Differences: {\n" "  'baz': 'qux' matches Equals('qux'),\n" "}",
+            "Differences: {\n  'baz': 'qux' matches Equals('qux'),\n}",
             {"foo": "bar", "baz": "qux"},
             matches_matcher,
         ),
@@ -213,7 +202,7 @@ class TestContainsDict(TestCase, TestMatchersInterface):
             matches_matcher,
         ),
         (
-            "Missing: {\n" "  'baz': Not(Equals('qux')),\n" "}",
+            "Missing: {\n  'baz': Not(Equals('qux')),\n}",
             {"foo": "bar", "cat": "dog"},
             matches_matcher,
         ),
@@ -247,7 +236,7 @@ class TestContainedByDict(TestCase, TestMatchersInterface):
 
     describe_examples = [
         (
-            "Differences: {\n" "  'baz': 'qux' matches Equals('qux'),\n" "}",
+            "Differences: {\n  'baz': 'qux' matches Equals('qux'),\n}",
             {"foo": "bar", "baz": "qux"},
             matches_matcher,
         ),
@@ -260,7 +249,7 @@ class TestContainedByDict(TestCase, TestMatchersInterface):
             matches_matcher,
         ),
         (
-            "Extra: {\n" "  'cat': 'dog',\n" "}",
+            "Extra: {\n  'cat': 'dog',\n}",
             {"foo": "bar", "cat": "dog"},
             matches_matcher,
         ),

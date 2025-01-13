@@ -88,7 +88,7 @@ class _Succeeded:
     @staticmethod
     def _got_no_result(deferred):
         return Mismatch(
-            "Success result expected on %r, found no result " "instead" % (deferred,)
+            "Success result expected on %r, found no result instead" % (deferred,)
         )
 
     def match(self, deferred):

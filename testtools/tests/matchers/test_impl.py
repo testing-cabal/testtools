@@ -67,7 +67,7 @@ class TestMismatchError(TestCase):
         matcher = Equals(3)
         mismatch = matcher.match(2)
         e = MismatchError(matchee, matcher, mismatch, True)
-        expected = "Match failed. Matchee: %r\n" "Matcher: %s\n" "Difference: %s\n" % (
+        expected = "Match failed. Matchee: %r\nMatcher: %s\nDifference: %s\n" % (
             matchee,
             matcher,
             matcher.match(matchee).describe(),
@@ -80,7 +80,7 @@ class TestMismatchError(TestCase):
         matchee = "\xa7"
         matcher = Equals("a")
         mismatch = matcher.match(matchee)
-        expected = "Match failed. Matchee: %s\n" "Matcher: %s\n" "Difference: %s\n" % (
+        expected = "Match failed. Matchee: %s\nMatcher: %s\nDifference: %s\n" % (
             text_repr(matchee),
             matcher,
             mismatch.describe(),

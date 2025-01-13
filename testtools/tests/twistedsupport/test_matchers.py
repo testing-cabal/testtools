@@ -139,7 +139,7 @@ class SuccessResultTests(NeedsTwistedTestCase):
             self.match(arbitrary_matcher, deferred),
             mismatches(
                 Equals(
-                    ("Success result expected on %r, found no result " "instead")
+                    ("Success result expected on %r, found no result instead")
                     % (deferred,)
                 )
             ),
