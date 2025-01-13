@@ -50,7 +50,7 @@ class ImpossibleDeferredError(Exception):
     """Raised if a Deferred somehow triggers both a success and a failure."""
 
     def __init__(self, deferred, successes, failures):
-        msg = "Impossible condition on %r, got both success (%r) and " "failure (%r)"
+        msg = "Impossible condition on %r, got both success (%r) and failure (%r)"
         super().__init__(msg % (deferred, successes, failures))
 
 

@@ -43,7 +43,7 @@ class TestAllMatch(TestCase, TestMatchersInterface):
 
     describe_examples = [
         (
-            "Differences: [\n" "11 >= 10\n" "10 >= 10\n" "]",
+            "Differences: [\n11 >= 10\n10 >= 10\n]",
             [11, 9, 10],
             AllMatch(LessThan(10)),
         ),
@@ -72,7 +72,7 @@ class TestAnyMatch(TestCase, TestMatchersInterface):
 
     describe_examples = [
         (
-            "Differences: [\n" "11 != 7\n" "9 != 7\n" "10 != 7\n" "]",
+            "Differences: [\n11 != 7\n9 != 7\n10 != 7\n]",
             [11, 9, 10],
             AnyMatch(Equals(7)),
         ),

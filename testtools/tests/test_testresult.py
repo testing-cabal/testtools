@@ -3042,7 +3042,7 @@ class TestNonAsciiResults(TestCase):
         self.assertIn(
             self._as_output(
                 #'bad.py", line 2\n'
-                "    ! = 0 # %s\n" "    ^\n" "SyntaxError: " % (text,)
+                "    ! = 0 # %s\n    ^\nSyntaxError: " % (text,)
             ),
             textoutput,
         )
@@ -3176,15 +3176,7 @@ Binary content:
         self.assertThat(
             string,
             Equals(
-                "attachment: {{{\n"
-                "foo\n"
-                "foo\n"
-                "}}}\n"
-                "\n"
-                "attachment-1: {{{\n"
-                "bar\n"
-                "bar\n"
-                "}}}\n"
+                "attachment: {{{\nfoo\nfoo\n}}}\n\nattachment-1: {{{\nbar\nbar\n}}}\n"
             ),
         )
 

@@ -26,7 +26,7 @@ class TestDocTestMatchesInterface(TestCase, TestMatchersInterface):
 
     describe_examples = [
         (
-            "Expected:\n    Ran 1 tests in ...s\nGot:\n" "    Ran 1 test in 0.123s\n",
+            "Expected:\n    Ran 1 tests in ...s\nGot:\n    Ran 1 test in 0.123s\n",
             "Ran 1 test in 0.123s",
             DocTestMatches("Ran 1 tests in ...s", doctest.ELLIPSIS),
         )
