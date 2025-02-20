@@ -21,9 +21,6 @@ from testtools import TextTestResult
 from testtools.compat import unicode_output_stream
 from testtools.testsuite import filter_by_ids, iterate_tests, sorted_tests
 
-# unittest.TestProgram has these methods but mypy's stubs don't include them
-# We'll just use unittest.TestProgram directly and ignore the type errors
-
 defaultTestLoader = unittest.defaultTestLoader
 defaultTestLoaderCls = unittest.TestLoader
 have_discover = True
@@ -135,20 +132,17 @@ class TestToolsTestRunner:
             result.stopTestRun()
 
 
-####################
-# Taken from python 2.7 and slightly modified for compatibility with
-# older versions. Delete when 2.7 is the oldest supported version.
-# Modifications:
-#  - If --catch is given, check that installHandler is available, as
-#    it won't be on old python versions or python builds without signals.
-#  - --list has been added which can list tests (should be upstreamed).
-#  - --load-list has been added which can reduce the tests used (should be
-#    upstreamed).
-
-
+# Note that we need to duplicate a lot of the upstream implementation here.
+# This has been reported as https://github.com/python/cpython/issues/67049
 class TestProgram(unittest.TestProgram):
     """A command-line program that runs a set of tests; this is primarily
     for making test modules conveniently executable.
+
+    Extends unittest.TestProgram with:
+    - ``-l``/``--list``: list tests rather than running them
+    - ``--load-list``: filter tests to those listed in a file
+    - ``stdout`` parameter: control where output goes
+    - Sorted test ordering after discovery
     """
 
     # defaults for testing
@@ -208,7 +202,6 @@ class TestProgram(unittest.TestProgram):
         self.buffer = buffer
         self.tb_locals = tb_locals
         self.defaultTest = defaultTest
-        # XXX: Local edit (see http://bugs.python.org/issue22860)
         self.listtests = False
         self.load_list = None
         self.testRunner = testRunner
@@ -221,7 +214,6 @@ class TestProgram(unittest.TestProgram):
             progName = os.path.basename(argv[0])
         self.progName = progName
         self.parseArgs(argv)
-        # XXX: Local edit (see http://bugs.python.org/issue22860)
         if self.load_list:
             # TODO: preserve existing suites (like testresources does in
             # OptimisingTestSuite.add, but with a standard protocol).
@@ -234,7 +226,6 @@ class TestProgram(unittest.TestProgram):
                 source.close()
             test_ids = {line.strip().decode("utf-8") for line in lines}
             self.test = filter_by_ids(self.test, test_ids)
-        # XXX: Local edit (see http://bugs.python.org/issue22860)
         if not self.listtests:
             self.runTests()
         else:
@@ -247,8 +238,8 @@ class TestProgram(unittest.TestProgram):
         del self.testLoader.errors[:]
 
     def _getParentArgParser(self) -> ArgumentParser:
+        # this method is not part of the type stubs
         parser: ArgumentParser = super()._getParentArgParser()  # type: ignore[misc]
-        # XXX: Local edit (see http://bugs.python.org/issue22860)
         parser.add_argument(
             "-l",
             "--list",
@@ -269,13 +260,12 @@ class TestProgram(unittest.TestProgram):
     def _do_discovery(
         self, argv: list[str], Loader: type[unittest.TestLoader] | None = None
     ) -> None:
+        # this method is not part of the type stubs
         super()._do_discovery(argv, Loader=Loader)  # type: ignore[misc]
-        # XXX: Local edit (see http://bugs.python.org/issue22860)
         self.test = sorted_tests(self.test)
 
     def runTests(self) -> None:
-        # XXX: Local edit (see http://bugs.python.org/issue22860)
-        if self.catchbreak and getattr(unittest, "installHandler", None) is not None:
+        if self.catchbreak:
             unittest.installHandler()
         testRunner = self._get_runner()
         result = testRunner.run(self.test)
@@ -285,16 +275,13 @@ class TestProgram(unittest.TestProgram):
             sys.exit(not self.result.wasSuccessful())
 
     def _get_runner(self) -> TestToolsTestRunner:
-        # XXX: Local edit (see http://bugs.python.org/issue22860)
         runner_or_factory = self.testRunner
         if runner_or_factory is None:
             runner_or_factory = TestToolsTestRunner
 
-        # If it's already an instance, return it directly
         if isinstance(runner_or_factory, TestToolsTestRunner):
             return runner_or_factory
 
-        # It's a callable (class or factory function)
         runner_factory: Callable[..., TestToolsTestRunner] = runner_or_factory
         try:
             try:
@@ -315,18 +302,13 @@ class TestProgram(unittest.TestProgram):
                 )
         except TypeError:
             # didn't accept the verbosity, buffer, failfast or stdout arguments
-            # Try with the prior contract
             try:
                 testRunner = runner_factory(
                     verbosity=self.verbosity, failfast=self.failfast, buffer=self.buffer
                 )
             except TypeError:
-                # Now try calling it with defaults
                 testRunner = runner_factory()
         return testRunner
-
-
-################
 
 
 def main(argv: list[str], stdout: IO[str]) -> None:
