@@ -3,6 +3,14 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
+2.8.0
+~~~~~
+
+Changes
+-------
+
+* Drop support for Python 3.8. (Stephen Finucane)
+
 2.7.2
 ~~~~~
 
