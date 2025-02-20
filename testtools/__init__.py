@@ -96,6 +96,32 @@ from testtools.testsuite import (
     iterate_tests,
 )
 
+
+def __get_git_version():
+    import os
+    import subprocess
+
+    cwd = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir)
+
+    try:
+        out = subprocess.check_output(
+            ["git", "describe"], stderr=subprocess.STDOUT, cwd=cwd
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return None
+
+    try:
+        version = out.strip().decode("utf-8")
+    except UnicodeDecodeError:
+        return None
+
+    if "-" in version:  # after tag
+        # convert version-N-githash to version.postN+githash
+        return version.replace("-", ".post", 1).replace("-g", "+git", 1)
+    else:
+        return version
+
+
 # same format as sys.version_info: "A tuple containing the five components of
 # the version number: major, minor, micro, releaselevel, and serial. All
 # values except releaselevel are integers; the release level is 'alpha',
@@ -109,21 +135,13 @@ from testtools.testsuite import (
 # Otherwise it is major.minor.micro~$(revno).
 
 try:
-    # If setuptools_scm is installed (e.g. in a development environment with
-    # an editable install), then use it to determine the version dynamically.
-    from setuptools_scm import get_version
-
-    # This will fail with LookupError if the package is not installed in
-    # editable mode or if Git is not installed.
-    version = get_version(root="..", relative_to=__file__)
-    __version__ = tuple([int(v) if v.isdigit() else v for v in version.split(".")])
-except (ImportError, LookupError):
-    # As a fallback, use the version that is hard-coded in the file.
-    try:
-        from ._version import __version__, version
-    except ModuleNotFoundError:
-        # The user is probably trying to run this without having installed
-        # the package, so complain.
-        raise RuntimeError(
-            "Testtools is not correctly installed. Please install it with pip."
-        )
+    from ._version import __version__, version
+except ModuleNotFoundError:
+    # package is not installed
+    if version := __get_git_version():
+        # we're in a git repo
+        __version__ = tuple([int(v) if v.isdigit() else v for v in version.split(".")])
+    else:
+        # we're working with a tarball or similar
+        version = "0.0.0"
+        __version__ = (0, 0, 0)
