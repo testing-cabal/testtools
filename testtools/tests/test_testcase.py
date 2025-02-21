@@ -41,7 +41,6 @@ from testtools.testcase import (
     attr,
     Nullary,
     WithAttributes,
-    TestSkipped,
 )
 from testtools.testresult.doubles import (
     Python26TestResult,
@@ -304,7 +303,7 @@ class TestEquality(TestCase):
 
     def test_nonIdenticalInUnequal(self):
         # TestCase's are not equal if they are not identical.
-        self.assertNotEqual(TestCase(methodName="run"), TestCase(methodName="skip"))
+        self.assertNotEqual(TestCase(methodName="run"), TestCase(methodName="skipTest"))
 
 
 class TestAssertions(TestCase):
@@ -804,16 +803,12 @@ class TestAssertions(TestCase):
             ]
         )
         self.assertFails(expected_error, self.assertEqual, a, b, message)
-        self.assertFails(expected_error, self.assertEquals, a, b, message)
-        self.assertFails(expected_error, self.failUnlessEqual, a, b, message)
 
     def test_assertEqual_formatting_no_message(self):
         a = "cat"
         b = "dog"
         expected_error = "'cat' != 'dog'"
         self.assertFails(expected_error, self.assertEqual, a, b)
-        self.assertFails(expected_error, self.assertEquals, a, b)
-        self.assertFails(expected_error, self.failUnlessEqual, a, b)
 
     def test_assertEqual_non_ascii_str_with_newlines(self):
         message = "Be careful mixing unicode and bytes"
@@ -1817,8 +1812,8 @@ class TestSkipping(TestCase):
         result = Python26TestResult(events)
         try:
             test = SkippingTest("test_that_is_decorated_with_skip")
-        except TestSkipped:
-            self.fail("TestSkipped raised")
+        except unittest.SkipTest:
+            self.fail("SkipTest raised")
         test.run(result)
         self.assertEqual("addSuccess", events[1][0])
 
@@ -1832,8 +1827,8 @@ class TestSkipping(TestCase):
         result = Python26TestResult(events)
         try:
             test = SkippingTest("test_that_is_decorated_with_skipIf")
-        except TestSkipped:
-            self.fail("TestSkipped raised")
+        except unittest.SkipTest:
+            self.fail("SkipTest raised")
         test.run(result)
         self.assertEqual("addSuccess", events[1][0])
 
@@ -1847,8 +1842,8 @@ class TestSkipping(TestCase):
         result = Python26TestResult(events)
         try:
             test = SkippingTest("test_that_is_decorated_with_skipUnless")
-        except TestSkipped:
-            self.fail("TestSkipped raised")
+        except unittest.SkipTest:
+            self.fail("SkipTest raised")
         test.run(result)
         self.assertEqual("addSuccess", events[1][0])
 
@@ -1882,8 +1877,8 @@ class TestSkipping(TestCase):
 
         try:
             test = SkippingTestCase("test_skipped")
-        except TestSkipped:
-            self.fail("TestSkipped raised")
+        except unittest.SkipTest:
+            self.fail("SkipTest raised")
         self.check_test_does_not_run_setup(test, reason)
 
     def check_test_does_not_run_setup(self, test, reason):

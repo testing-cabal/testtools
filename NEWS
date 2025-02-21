@@ -11,6 +11,29 @@ Changes
 
 * Drop support for Python 3.8. (Stephen Finucane)
 
+* Remove a number of deprecated classes and methods. (Stephen Finucane)
+
+  * ``testtools.matchers``
+
+    * ``AfterPreproccessing`` (use ``AfterPreprocessing``)
+
+  * ``testtools.testcase``
+
+    * ``TestSkipped`` (use ``unittest.SkipTest``)
+    * ``TestCase.skip`` (use ``TestCase.skipTest``)
+    * ``TestCase.failUnlessEqual`` (use ``TestCase.assertEqual``)
+    * ``TestCase.assertEquals`` (use ``TestCase.assertEqual``)
+    * ``TestCase.failUnlessRaises`` (use ``TestCase.assertRaises``)
+    * ``TestCase.assertItemsEqual`` (use ``TestCase.assertCountEqual``)
+
+  * ``testtools.testresult.real``
+
+    * ``domap`` (no replacement)
+
+  * ``testtools.twistedsupport._runtest``
+
+    * ``run_with_log_observers`` (no replacement)
+
 2.7.2
 ~~~~~
 

@@ -27,7 +27,6 @@ __all__ = [
 ]
 
 import io
-import warnings
 import sys
 
 from fixtures import CompoundFixture, Fixture
@@ -180,18 +179,6 @@ class CaptureTwistedLogs(Fixture):
             self.LOG_DETAIL_NAME,
             Content(UTF8_TEXT, lambda: [logs.getvalue().encode("utf-8")]),
         )
-
-
-def run_with_log_observers(observers, function, *args, **kwargs):
-    """Run 'function' with the given Twisted log observers."""
-    warnings.warn(
-        "run_with_log_observers is deprecated since 1.8.2.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    with _NoTwistedLogObservers():
-        with _TwistedLogObservers(observers):
-            return function(*args, **kwargs)
 
 
 # Observer of the Twisted log that we install during tests.

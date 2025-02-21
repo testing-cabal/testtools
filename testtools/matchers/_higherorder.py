@@ -212,11 +212,6 @@ class AfterPreprocessing:
         return matcher.match(after)
 
 
-# This is the old, deprecated. spelling of the name, kept for backwards
-# compatibility.
-AfterPreproccessing = AfterPreprocessing
-
-
 class AllMatch:
     """Matches if all provided values match the given matcher."""
 
