@@ -268,8 +268,10 @@ class TestCase(unittest.TestCase):
 
     def __eq__(self, other):
         eq = getattr(unittest.TestCase, "__eq__", None)
-        if eq is not None and not unittest.TestCase.__eq__(self, other):
-            return False
+        if eq is not None:
+            eq_ = unittest.TestCase.__eq__(self, other)
+            if eq_ is NotImplemented or not eq_:
+                return False
         return self.__dict__ == getattr(other, "__dict__", None)
 
     # We need to explicitly set this since we're overriding __eq__
