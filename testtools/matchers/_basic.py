@@ -18,7 +18,6 @@ __all__ = [
 import operator
 from pprint import pformat
 import re
-import warnings
 
 from ..compat import (
     text_repr,
@@ -70,24 +69,6 @@ class _BinaryMismatch(Mismatch):
         self._mismatch_string = mismatch_string
         self._reference = reference
         self._reference_on_right = reference_on_right
-
-    @property
-    def expected(self):
-        warnings.warn(
-            f"{self.__class__.__name__}.expected deprecated after 1.8.1",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self._reference
-
-    @property
-    def other(self):
-        warnings.warn(
-            f"{self.__class__.__name__}.other deprecated after 1.8.1",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self._actual
 
     def describe(self):
         actual = repr(self._actual)

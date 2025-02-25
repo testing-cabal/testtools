@@ -28,7 +28,6 @@ import math
 from operator import methodcaller
 import sys
 import unittest
-import warnings
 
 from testtools.compat import _b
 from testtools.content import (
@@ -434,21 +433,6 @@ class StreamResult:
             defaults to application/octet-stream. Ignored unless file_name
             has been supplied.
         """
-
-
-def domap(function, *sequences):
-    """A strict version of 'map' that's guaranteed to run on all inputs.
-
-    DEPRECATED since testtools 1.8.1: Internal code should use _strict_map.
-    External code should look for other solutions for their strict mapping
-    needs.
-    """
-    warnings.warn(
-        "domap deprecated since 1.8.1. Please implement your own strict map.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return _strict_map(function, *sequences)
 
 
 def _strict_map(function, *sequences):
