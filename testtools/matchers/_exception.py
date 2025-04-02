@@ -9,7 +9,7 @@ __all__ = [
 import sys
 
 from ._basic import MatchesRegex
-from ._higherorder import AfterPreproccessing
+from ._higherorder import AfterPreprocessing
 from ._impl import (
     Matcher,
     Mismatch,
@@ -47,7 +47,7 @@ class MatchesException(Matcher):
         Matcher.__init__(self)
         self.expected = exception
         if isinstance(value_re, str):
-            value_re = AfterPreproccessing(str, MatchesRegex(value_re), False)
+            value_re = AfterPreprocessing(str, MatchesRegex(value_re), False)
         self.value_re = value_re
         expected_type = type(self.expected)
         self._is_instance = not any(

@@ -155,7 +155,7 @@ class TestRunInReactor(NeedsTwistedTestCase):
             signal.signal(sig, hdlr)
         spinner = self.make_spinner()
         spinner.run(self.make_timeout(), lambda: None)
-        self.assertItemsEqual(new_hdlrs, list(map(signal.getsignal, signals)))
+        self.assertCountEqual(new_hdlrs, list(map(signal.getsignal, signals)))
 
     def test_timeout(self):
         # If the function takes too long to run, we raise a

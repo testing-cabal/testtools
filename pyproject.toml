@@ -1,18 +1,5 @@
-[tool.mypy]
-warn_redundant_casts = true
-warn_unused_configs = true
-check_untyped_defs = true
-
-[[tool.mypy.overrides]]
-module = [
-    "fixtures.*",
-    "testresources.*",
-    "testscenarios.*",
-]
-ignore_missing_imports = true
-
 [build-system]
-requires = ["setuptools>=61", "hatchling", "hatch_vcs"]
+requires = ["hatchling", "hatch_vcs"]
 build-backend = "hatchling.build"
 
 [project]
@@ -27,7 +14,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -39,22 +25,16 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Software Development :: Testing",
 ]
-dependencies = ["setuptools; python_version>='3.12'"]
 dynamic = ["version"]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 
 [project.urls]
 Homepage = "https://github.com/testing-cabal/testtools"
 
-[tool.setuptools]
-include-package-data = false
-
-[tool.setuptools.packages.find]
-include = ["testtools*"]
-exclude = ["man*"]
-
-[tool.files]
-packages = "testtools"
+[project.optional-dependencies]
+test = ["testscenarios", "testresources"]
+twisted = ["Twisted", "fixtures"]
+dev = ["ruff==0.11.2"]
 
 [tool.hatch.version]
 source = "vcs"
@@ -68,7 +48,15 @@ version = {version!r}
 __version__ = {version_tuple!r}
 """
 
-[project.optional-dependencies]
-test = ["testscenarios", "testresources"]
-twisted = ["Twisted", "fixtures"]
-dev = ["ruff==0.11.2"]
+[tool.mypy]
+warn_redundant_casts = true
+warn_unused_configs = true
+check_untyped_defs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "fixtures.*",
+    "testresources.*",
+    "testscenarios.*",
+]
+ignore_missing_imports = true

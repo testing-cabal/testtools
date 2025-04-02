@@ -22,7 +22,6 @@ import sys
 import types
 import unittest
 from unittest.case import SkipTest
-import warnings
 
 from testtools.compat import reraise
 from testtools import content
@@ -48,18 +47,6 @@ from testtools.testresult import (
     ExtendedToOriginalDecorator,
     TestResult,
 )
-
-
-class TestSkipped(SkipTest):
-    """Raised within TestCase.run() when a test is skipped."""
-
-    def __init__(self, *args, **kwargs):
-        warnings.warn(
-            "Use SkipTest from unittest instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(*args, **kwargs)
 
 
 class _UnexpectedSuccess(Exception):
@@ -281,8 +268,10 @@ class TestCase(unittest.TestCase):
 
     def __eq__(self, other):
         eq = getattr(unittest.TestCase, "__eq__", None)
-        if eq is not None and not unittest.TestCase.__eq__(self, other):
-            return False
+        if eq is not None:
+            eq_ = unittest.TestCase.__eq__(self, other)
+            if eq_ is NotImplemented or not eq_:
+                return False
         return self.__dict__ == getattr(other, "__dict__", None)
 
     # We need to explicitly set this since we're overriding __eq__
@@ -292,17 +281,6 @@ class TestCase(unittest.TestCase):
     def __repr__(self):
         # We add id to the repr because it makes testing testtools easier.
         return f"<{self.id()} id=0x{id(self):0x}>"
-
-    def _deprecate(original_func):
-        def deprecated_func(*args, **kwargs):
-            warnings.warn(
-                "Please use {0} instead.".format(original_func.__name__),
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            return original_func(*args, **kwargs)
-
-        return deprecated_func
 
     def addDetail(self, name, content_object):
         """Add a detail to be reported with this test's outcome.
@@ -354,15 +332,6 @@ class TestCase(unittest.TestCase):
             support being cast into a unicode string for reporting.
         """
         raise self.skipException(reason)
-
-    def skip(self, reason):
-        """DEPRECATED: Use skipTest instead."""
-        warnings.warn(
-            "Only valid in 1.8.1 and earlier. Use skipTest instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self.skipTest(reason)
 
     def _formatTypes(self, classOrIterable):
         """Format a class or a bunch of classes for display in an error."""
@@ -417,8 +386,6 @@ class TestCase(unittest.TestCase):
         """
         matcher = _FlippedEquals(expected)
         self.assertThat(observed, matcher, message)
-
-    failUnlessEqual = assertEquals = _deprecate(assertEqual)
 
     def assertIn(self, needle, haystack, message=""):
         """Assert that needle is in haystack."""
@@ -495,8 +462,6 @@ class TestCase(unittest.TestCase):
         self.assertThat(our_callable, matcher)
         return capture.matchee
 
-    failUnlessRaises = _deprecate(assertRaises)
-
     def assertThat(self, matchee, matcher, message="", verbose=False):
         """Assert that matchee is matched by matcher.
 
@@ -507,8 +472,6 @@ class TestCase(unittest.TestCase):
         mismatch_error = self._matchHelper(matchee, matcher, message, verbose)
         if mismatch_error is not None:
             raise mismatch_error
-
-    assertItemsEqual = _deprecate(unittest.TestCase.assertCountEqual)
 
     def addDetailUniqueName(self, name, content_object):
         """Add a detail to the test, but ensure it's name is unique.
