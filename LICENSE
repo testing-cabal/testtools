@@ -21,6 +21,7 @@ The testtools authors are:
  * Tristan Seligmann
  * Julian Edwards
  * Jonathan Jacobs
+ * Jelmer Vernooĳ
 
 and are collectively referred to as "testtools developers".
 
@@ -42,7 +43,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-Some code in testtools/run.py taken from Python's unittest module:
+Some code in testtools/run.py and testtools/testcase.py taken from Python's unittest module:
 Copyright (c) 1999-2003 Steve Purcell
 Copyright (c) 2003-2010 Python Software Foundation
 

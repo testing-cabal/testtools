@@ -436,14 +436,32 @@ class TestCase(unittest.TestCase):
             matcher = IsInstance(klass)
         self.assertThat(obj, matcher, msg)
 
-    def assertRaises(self, excClass, callableObj, *args, **kwargs):
+    def assertRaises(self, excClass, callableObj=None, *args, **kwargs):
         """Fail unless an exception of class excClass is thrown
         by callableObj when invoked with arguments args and keyword
         arguments kwargs. If a different type of exception is
         thrown, it will not be caught, and the test case will be
         deemed to have suffered an error, exactly as for an
         unexpected exception.
+
+        If called with the callable omitted, will return a
+        context object used like this::
+
+            with self.assertRaises(SomeException):
+                do_something()
+
+        The context manager keeps a reference to the exception as
+        the 'exception' attribute. This allows you to inspect the
+        exception after the assertion::
+
+            with self.assertRaises(SomeException) as cm:
+                do_something()
+            the_exception = cm.exception
+            self.assertEqual(the_exception.error_code, 3)
         """
+        # If callableObj is None, we're being used as a context manager
+        if callableObj is None:
+            return _AssertRaisesContext(excClass, self, msg=kwargs.get("msg"))
 
         class ReRaiseOtherTypes:
             def match(self, matchee):
@@ -1009,6 +1027,51 @@ def skipUnless(condition, reason):
         return obj
 
     return _id
+
+
+class _AssertRaisesContext:
+    """A context manager to handle expected exceptions for assertRaises.
+
+    This provides compatibility with unittest's assertRaises context manager.
+    """
+
+    def __init__(self, expected, test_case, msg=None):
+        """Construct an `_AssertRaisesContext`.
+
+        :param expected: The type of exception to expect.
+        :param test_case: The TestCase instance using this context.
+        :param msg: An optional message explaining the failure.
+        """
+        self.expected = expected
+        self.test_case = test_case
+        self.msg = msg
+        self.exception = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type is None:
+            try:
+                if isinstance(self.expected, tuple):
+                    exc_name = "({})".format(
+                        ", ".join(e.__name__ for e in self.expected)
+                    )
+                else:
+                    exc_name = self.expected.__name__
+            except AttributeError:
+                exc_name = str(self.expected)
+            if self.msg:
+                error_msg = "{} not raised : {}".format(exc_name, self.msg)
+            else:
+                error_msg = "{} not raised".format(exc_name)
+            raise self.test_case.failureException(error_msg)
+        if not issubclass(exc_type, self.expected):
+            # let unexpected exceptions pass through
+            return False
+        # store exception for later retrieval
+        self.exception = exc_value
+        return True
 
 
 class ExpectedException:
