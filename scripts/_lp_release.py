@@ -18,14 +18,13 @@ already had a tarball built and uploaded with 'python setup.py sdist upload
 --sign'.
 """
 
-from datetime import datetime, timedelta, tzinfo
 import logging
 import os
 import sys
+from datetime import datetime, timedelta, tzinfo
 
-from launchpadlib.launchpad import Launchpad
 from launchpadlib import uris
-
+from launchpadlib.launchpad import Launchpad
 
 APP_NAME = "testtools-lp-release"
 CACHE_DIR = os.path.expanduser("~/.launchpadlib/cache")

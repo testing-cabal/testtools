@@ -15,9 +15,7 @@ class ContentType:
     def __init__(self, primary_type, sub_type, parameters=None):
         """Create a ContentType."""
         if None in (primary_type, sub_type):
-            raise ValueError(
-                "None not permitted in {!r}, {!r}".format(primary_type, sub_type)
-            )
+            raise ValueError(f"None not permitted in {primary_type!r}, {sub_type!r}")
         self.type = primary_type
         self.subtype = sub_type
         self.parameters = parameters or {}

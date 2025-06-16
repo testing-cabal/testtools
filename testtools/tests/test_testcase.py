@@ -2,11 +2,11 @@
 
 """Tests for extensions to the base test library."""
 
+import _thread
+import sys
+import unittest
 from doctest import ELLIPSIS
 from pprint import pformat
-import sys
-import _thread
-import unittest
 
 from testtools import (
     DecorateTestCaseResult,
@@ -25,8 +25,8 @@ from testtools.compat import (
     _b,
 )
 from testtools.content import (
-    text_content,
     TracebackContent,
+    text_content,
 )
 from testtools.matchers import (
     Annotate,
@@ -38,21 +38,21 @@ from testtools.matchers import (
     Raises,
 )
 from testtools.testcase import (
-    attr,
     Nullary,
     WithAttributes,
+    attr,
 )
 from testtools.testresult.doubles import (
+    ExtendedTestResult,
     Python26TestResult,
     Python27TestResult,
-    ExtendedTestResult,
 )
 from testtools.tests.helpers import (
-    an_exc_info,
     AsText,
     FullStackRunTest,
     LoggingResult,
     MatchesEvents,
+    an_exc_info,
     raise_,
 )
 from testtools.tests.samplecases import (
@@ -97,7 +97,7 @@ class TestPlaceHolder(TestCase):
         # repr(placeholder) shows you how the object was constructed.
         test = PlaceHolder("test id")
         self.assertEqual(
-            "<testtools.testcase.PlaceHolder('addSuccess', %s, {})>" % repr(test.id()),
+            f"<testtools.testcase.PlaceHolder('addSuccess', {test.id()!r}, {{}})>",
             repr(test),
         )
 
@@ -105,16 +105,15 @@ class TestPlaceHolder(TestCase):
         # repr(placeholder) shows you how the object was constructed.
         test = PlaceHolder("test id", "description")
         self.assertEqual(
-            "<testtools.testcase.PlaceHolder('addSuccess', {!r}, {{}}, {!r})>".format(
-                test.id(), test.shortDescription()
-            ),
+            f"<testtools.testcase.PlaceHolder('addSuccess', {test.id()!r}, "
+            f"{{}}, {test.shortDescription()!r})>",
             repr(test),
         )
 
     def test_repr_custom_outcome(self):
         test = PlaceHolder("test id", outcome="addSkip")
         self.assertEqual(
-            "<testtools.testcase.PlaceHolder('addSkip', %r, {})>" % (test.id()),
+            f"<testtools.testcase.PlaceHolder('addSkip', {test.id()!r}, {{}})>",
             repr(test),
         )
 
@@ -387,7 +386,7 @@ class TestAssertions(TestCase):
         self.assertIs(
             exception,
             raisedExceptions[0],
-            "{!r} is not {!r}".format(exception, raisedExceptions[0]),
+            f"{exception!r} is not {raisedExceptions[0]!r}",
         )
 
     def test_assertRaises_with_multiple_exceptions(self):
@@ -417,7 +416,6 @@ class TestAssertions(TestCase):
         # function in the error message, so it's easy to locate the problem.
         def foo():
             """An arbitrary function."""
-            pass
 
         self.assertThat(
             lambda: self.assertRaises(Exception, foo),
@@ -600,7 +598,7 @@ class TestAssertions(TestCase):
             """Simple class for testing assertIsInstance."""
 
         self.assertFails(
-            "'42' is not an instance of %s" % self._formatTypes(Foo),
+            f"'42' is not an instance of {self._formatTypes(Foo)}",
             self.assertIsInstance,
             42,
             Foo,
@@ -617,7 +615,7 @@ class TestAssertions(TestCase):
             """Another simple class for testing assertIsInstance."""
 
         self.assertFails(
-            "'42' is not an instance of any of (%s)" % self._formatTypes([Foo, Bar]),
+            f"'42' is not an instance of any of ({self._formatTypes([Foo, Bar])})",
             self.assertIsInstance,
             42,
             (Foo, Bar),
@@ -730,10 +728,9 @@ class TestAssertions(TestCase):
     def test_assertThat_verbose_output(self):
         matchee = "foo"
         matcher = Equals("bar")
-        expected = "Match failed. Matchee: %r\nMatcher: %s\nDifference: %s\n" % (
-            matchee,
-            matcher,
-            matcher.match(matchee).describe(),
+        expected = (
+            f"Match failed. Matchee: {matchee!r}\nMatcher: {matcher}\n"
+            f"Difference: {matcher.match(matchee).describe()}\n"
         )
         self.assertFails(expected, self.assertThat, matchee, matcher, verbose=True)
 
@@ -814,7 +811,7 @@ class TestAssertions(TestCase):
         # unicode strings, we can still provide a meaningful error.
         matchee = "\xa7"
         matcher = Equals("a")
-        expected = "Match failed. Matchee: %s\nMatcher: %s\nDifference: %s\n\n" % (
+        expected = "Match failed. Matchee: {}\nMatcher: {}\nDifference: {}\n\n".format(
             repr(matchee).replace("\\xa7", matchee),
             matcher,
             matcher.match(matchee).describe(),
@@ -836,8 +833,8 @@ class TestAssertions(TestCase):
         expected_error = "\n".join(
             [
                 "!=:",
-                "reference = %s" % pformat(a),
-                "actual    = %s" % pformat(b),
+                f"reference = {pformat(a)}",
+                f"actual    = {pformat(b)}",
                 ": " + message,
             ]
         )
@@ -1318,9 +1315,9 @@ class TestUniqueFactories(TestCase):
         # getUniqueString returns the current test id followed by a unique
         # integer.
         name_one = self.getUniqueString()
-        self.assertEqual("%s-%d" % (self.id(), 1), name_one)
+        self.assertEqual(f"{self.id()}-1", name_one)
         name_two = self.getUniqueString()
-        self.assertEqual("%s-%d" % (self.id(), 2), name_two)
+        self.assertEqual(f"{self.id()}-2", name_two)
 
     def test_getUniqueString_prefix(self):
         # If getUniqueString is given an argument, it uses that argument as
@@ -1464,7 +1461,7 @@ class TestDetailsProvided(TestWithDetails):
         class Case(TestCase):
             def test(this):
                 this.addDetail("foo", self.get_content())
-                raise testcase._UnexpectedSuccess()
+                raise testcase._UnexpectedSuccess
 
         self.assertDetailsProvided(Case("test"), "addUnexpectedSuccess", ["foo"])
 

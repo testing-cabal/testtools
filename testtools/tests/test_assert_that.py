@@ -86,10 +86,9 @@ class AssertThatTests:
     def test_assertThat_verbose_output(self):
         matchee = "foo"
         matcher = Equals("bar")
-        expected = "Match failed. Matchee: %r\nMatcher: %s\nDifference: %s\n" % (
-            matchee,
-            matcher,
-            matcher.match(matchee).describe(),
+        expected = (
+            f"Match failed. Matchee: {matchee!r}\nMatcher: {matcher}\n"
+            f"Difference: {matcher.match(matchee).describe()}\n"
         )
         self.assertFails(
             expected, self.assert_that_callable, matchee, matcher, verbose=True
@@ -124,7 +123,7 @@ class AssertThatTests:
         # unicode strings, we can still provide a meaningful error.
         matchee = "\xa7"
         matcher = Equals("a")
-        expected = "Match failed. Matchee: %s\nMatcher: %s\nDifference: %s\n\n" % (
+        expected = "Match failed. Matchee: {}\nMatcher: {}\nDifference: {}\n\n".format(
             repr(matchee).replace("\\xa7", matchee),
             matcher,
             matcher.match(matchee).describe(),

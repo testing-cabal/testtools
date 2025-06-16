@@ -3,12 +3,12 @@
 """Compatibility support for python 2 and 3."""
 
 __all__ = [
+    "BytesIO",
+    "StringIO",
     "_b",
     "advance_iterator",
     "reraise",
     "unicode_output_stream",
-    "StringIO",
-    "BytesIO",
 ]
 
 import codecs
@@ -19,7 +19,7 @@ import sys
 import unicodedata
 
 # Ensure retro-compatibility with older testtools releases
-from io import StringIO, BytesIO
+from io import BytesIO, StringIO
 
 
 def reraise(exc_class, exc_obj, exc_tb, _marker=object()):
@@ -71,7 +71,7 @@ def _slow_escape(text):
 
 def text_repr(text, multiline=None):
     """Rich repr for ``text`` returning unicode, triple quoted if ``multiline``."""
-    nl = isinstance(text, bytes) and bytes((0xA,)) or "\n"
+    nl = (isinstance(text, bytes) and bytes((0xA,))) or "\n"
     if multiline is None:
         multiline = nl in text
     if not multiline:

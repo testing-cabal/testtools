@@ -8,15 +8,14 @@ For instance, to run the testtools test suite.
  $ python -m testtools.run testtools.tests.test_suite
 """
 
-from functools import partial
 import os.path
 import sys
 import unittest
+from functools import partial
 
 from testtools import TextTestResult
 from testtools.compat import unicode_output_stream
 from testtools.testsuite import filter_by_ids, iterate_tests, sorted_tests
-
 
 defaultTestLoader = unittest.defaultTestLoader
 defaultTestLoaderCls = unittest.TestLoader
@@ -90,15 +89,15 @@ class TestToolsTestRunner:
         """List the tests that would be run if test() was run."""
         test_ids, _ = list_test(test)
         for test_id in test_ids:
-            self.stdout.write("%s\n" % test_id)
+            self.stdout.write(f"{test_id}\n")
         errors = loader.errors
         if errors:
             for test_id in errors:
-                self.stdout.write("%s\n" % test_id)
+                self.stdout.write(f"{test_id}\n")
             sys.exit(2)
 
     def run(self, test):
-        "Run the given test case or test suite."
+        """Run the given test case or test suite."""
         result = TextTestResult(
             unicode_output_stream(self.stdout),
             failfast=self.failfast,
@@ -175,9 +174,9 @@ class TestProgram(unittest.TestProgram):
         self.testRunner = testRunner
         self.testLoader = testLoader
         progName = argv[0]
-        if progName.endswith("%srun.py" % os.path.sep):
+        if progName.endswith(f"{os.path.sep}run.py"):
             elements = progName.split(os.path.sep)
-            progName = "%s.run" % elements[-2]
+            progName = f"{elements[-2]}.run"
         else:
             progName = os.path.basename(argv[0])
         self.progName = progName
@@ -207,7 +206,7 @@ class TestProgram(unittest.TestProgram):
                     runner.list(self.test)
             else:
                 for test in iterate_tests(self.test):
-                    self.stdout.write("%s\n" % test.id())
+                    self.stdout.write(f"{test.id()}\n")
         del self.testLoader.errors[:]
 
     def _getParentArgParser(self):

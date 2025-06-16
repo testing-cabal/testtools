@@ -10,20 +10,20 @@ from testtools.compat import (
     _b,
 )
 from testtools.content import (
-    attach_file,
-    Content,
-    content_from_file,
-    content_from_stream,
     JSON,
-    json_content,
+    Content,
     StackLinesContent,
     StacktraceContent,
     TracebackContent,
+    attach_file,
+    content_from_file,
+    content_from_stream,
+    json_content,
     text_content,
 )
 from testtools.content_type import (
-    ContentType,
     UTF8_TEXT,
+    ContentType,
 )
 from testtools.matchers import (
     Equals,
@@ -32,7 +32,6 @@ from testtools.matchers import (
     raises,
 )
 from testtools.tests.helpers import an_exc_info
-
 
 raises_value_error = Raises(MatchesException(ValueError))
 
@@ -199,8 +198,8 @@ class TestContent(TestCase):
                 lambda: text_content(value),
                 raises(
                     TypeError(
-                        "text_content must be given text, not '%s'."
-                        % type(value).__name__
+                        f"text_content must be given text, "
+                        f"not '{type(value).__name__}'."
                     )
                 ),
             )

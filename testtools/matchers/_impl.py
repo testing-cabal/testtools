@@ -95,8 +95,9 @@ class Mismatch:
         return getattr(self, "_details", {})
 
     def __repr__(self):
-        return "<testtools.matchers.Mismatch object at {:x} attributes={!r}>".format(
-            id(self), self.__dict__
+        return (
+            f"<testtools.matchers.Mismatch object at {id(self):x} "
+            f"attributes={self.__dict__!r}>"
         )
 
 
@@ -124,10 +125,9 @@ class MismatchError(AssertionError):
                 matchee = text_repr(self.matchee, multiline=False)
             else:
                 matchee = repr(self.matchee)
-            return "Match failed. Matchee: %s\nMatcher: %s\nDifference: %s\n" % (
-                matchee,
-                self.matcher,
-                difference,
+            return (
+                f"Match failed. Matchee: {matchee}\n"
+                f"Matcher: {self.matcher}\nDifference: {difference}\n"
             )
         else:
             return difference

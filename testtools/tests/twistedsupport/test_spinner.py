@@ -5,16 +5,16 @@
 import os
 import signal
 
-from testtools.helpers import try_import
 from testtools import skipIf
+from testtools.helpers import try_import
 from testtools.matchers import (
     Equals,
     Is,
     MatchesException,
     Raises,
 )
-from ._helpers import NeedsTwistedTestCase
 
+from ._helpers import NeedsTwistedTestCase
 
 _spinner = try_import("testtools.twistedsupport._spinner")
 

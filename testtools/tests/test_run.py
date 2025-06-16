@@ -5,8 +5,8 @@
 import doctest
 import io
 import sys
-from textwrap import dedent
 import unittest
+from textwrap import dedent
 from unittest import TestSuite
 
 import testtools
@@ -179,7 +179,7 @@ class TestRun(TestCase):
             )
         except SystemExit:
             exc_info = sys.exc_info()
-            raise AssertionError("-l tried to exit. %r" % exc_info[1])
+            raise AssertionError(f"-l tried to exit. {exc_info[1]!r}")
         self.assertEqual(
             [
                 {
@@ -211,7 +211,7 @@ class TestRun(TestCase):
             )
         except SystemExit:
             exc_info = sys.exc_info()
-            raise AssertionError("-l tried to exit. %r" % exc_info[1])
+            raise AssertionError(f"-l tried to exit. {exc_info[1]!r}")
         self.assertEqual(
             [
                 {
@@ -230,7 +230,7 @@ class TestRun(TestCase):
             run.main(["prog", "-l", "testtools.runexample.test_suite"], out)
         except SystemExit:
             exc_info = sys.exc_info()
-            raise AssertionError("-l tried to exit. %r" % exc_info[1])
+            raise AssertionError(f"-l tried to exit. {exc_info[1]!r}")
         self.assertEqual(
             """testtools.runexample.TestFoo.test_bar
 testtools.runexample.TestFoo.test_quux
@@ -304,7 +304,7 @@ testtools.runexample.missingtest
             )
         except SystemExit:
             exc_info = sys.exc_info()
-            raise AssertionError("-l --load-list tried to exit. %r" % exc_info[1])
+            raise AssertionError(f"-l --load-list tried to exit. {exc_info[1]!r}")
         self.assertEqual(
             """testtools.runexample.TestFoo.test_bar
 """,
@@ -344,7 +344,7 @@ testtools.runexample.missingtest
             )
         except SystemExit:
             exc_info = sys.exc_info()
-            raise AssertionError("-l --load-list tried to exit. %r" % exc_info[1])
+            raise AssertionError(f"-l --load-list tried to exit. {exc_info[1]!r}")
         self.assertEqual(
             """testtools.runexample.TestFoo.test_bar
 """,
@@ -387,7 +387,7 @@ testtools.resourceexample.TestFoo.test_foo
                 # Evil resides in TestProgram.
                 pass
         out = stdout.getDetails()["stdout"].as_text()
-        self.assertEqual(1, out.count("Setting up Printer"), "%r" % out)
+        self.assertEqual(1, out.count("Setting up Printer"), f"{out!r}")
 
     def test_run_failfast(self):
         stdout = self.useFixture(fixtures.StringStream("stdout"))

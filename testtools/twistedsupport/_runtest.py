@@ -30,10 +30,12 @@ import io
 import sys
 
 from fixtures import CompoundFixture, Fixture
+from twisted.internet import defer
 
 from testtools.content import Content, text_content
 from testtools.content_type import UTF8_TEXT
 from testtools.runtest import RunTest, _raise_force_fail_error
+
 from ._deferred import extract_result
 from ._spinner import (
     NoResultError,
@@ -41,8 +43,6 @@ from ._spinner import (
     TimeoutError,
     trap_unhandled_errors,
 )
-
-from twisted.internet import defer
 
 try:
     from twisted.logger import globalLogPublisher
@@ -511,9 +511,8 @@ def assert_fails_with(d, *exc_types, **kwargs):
         if failure.check(*exc_types):
             return failure.value
         raise failureException(
-            "{} raised instead of {}:\n {}".format(
-                failure.type.__name__, expected_names, failure.getTraceback()
-            )
+            f"{failure.type.__name__} raised instead of {expected_names}:\n"
+            f" {failure.getTraceback()}"
         )
 
     return d.addCallbacks(got_success, got_failure)
@@ -527,8 +526,9 @@ class UncleanReactorError(Exception):
             self,
             "The reactor still thinks it needs to do things. Close all "
             "connections, kill all processes and make sure all delayed "
-            "calls have either fired or been cancelled:\n%s"
-            % "".join(map(self._get_junk_info, junk)),
+            "calls have either fired or been cancelled:\n{}".format(
+                "".join(map(self._get_junk_info, junk))
+            ),
         )
 
     def _get_junk_info(self, junk):

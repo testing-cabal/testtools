@@ -8,7 +8,6 @@ import sys
 import traceback
 
 import testtools
-
 from testtools.compat import (
     _b,
     reraise,
@@ -186,12 +185,12 @@ class TestTextRepr(testtools.TestCase):
 
     def test_ascii_examples_defaultline_bytes(self):
         for s, one, multi in self.ascii_examples:
-            expected = "\n" in s and multi or one
+            expected = ("\n" in s and multi) or one
             self.assertEqual(text_repr(_b(s)), self.b_prefix + expected)
 
     def test_ascii_examples_defaultline_unicode(self):
         for s, one, multi in self.ascii_examples:
-            expected = "\n" in s and multi or one
+            expected = ("\n" in s and multi) or one
             self.assertEqual(text_repr(s), self.u_prefix + expected)
 
     def test_bytes_examples_oneline(self):

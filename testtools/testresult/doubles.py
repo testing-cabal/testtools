@@ -7,11 +7,11 @@ from collections import namedtuple
 from testtools.tags import TagContext
 
 __all__ = [
+    "ExtendedTestResult",
     "Python26TestResult",
     "Python27TestResult",
-    "ExtendedTestResult",
-    "TwistedTestResult",
     "StreamResult",
+    "TwistedTestResult",
 ]
 
 
@@ -159,8 +159,7 @@ class ExtendedTestResult(Python27TestResult):
 
 
 class TwistedTestResult(LoggingBase):
-    """
-    Emulate the relevant bits of :py:class:`twisted.trial.itrial.IReporter`.
+    """Emulate the relevant bits of :py:class:`twisted.trial.itrial.IReporter`.
 
     Used to ensure that we can use ``trial`` as a test runner.
     """

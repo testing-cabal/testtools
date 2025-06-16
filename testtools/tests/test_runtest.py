@@ -4,12 +4,12 @@
 
 from testtools import (
     ExtendedToOriginalDecorator,
-    run_test_with,
     RunTest,
     TestCase,
     TestResult,
+    run_test_with,
 )
-from testtools.matchers import HasLength, MatchesException, Is, Raises
+from testtools.matchers import HasLength, Is, MatchesException, Raises
 from testtools.testresult.doubles import ExtendedTestResult
 from testtools.tests.helpers import FullStackRunTest
 

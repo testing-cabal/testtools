@@ -3,15 +3,15 @@
 """Test case related stuff."""
 
 __all__ = [
+    "ExpectedException",
+    "TestCase",
     "attr",
     "clone_test_with_new_id",
-    "ExpectedException",
     "gather_details",
     "run_test_with",
     "skip",
     "skipIf",
     "skipUnless",
-    "TestCase",
     "unique_text_generator",
 ]
 
@@ -23,17 +23,17 @@ import types
 import unittest
 from unittest.case import SkipTest
 
-from testtools.compat import reraise
 from testtools import content
+from testtools.compat import reraise
 from testtools.helpers import try_import
 from testtools.matchers import (
     Annotate,
     Contains,
+    Is,
+    IsInstance,
     MatchesAll,
     MatchesException,
     MismatchError,
-    Is,
-    IsInstance,
     Not,
     Raises,
 )
@@ -157,7 +157,7 @@ def gather_details(source_dict, target_dict):
         new_name = name
         disambiguator = itertools.count(1)
         while new_name in target_dict:
-            new_name = "%s-%d" % (name, next(disambiguator))
+            new_name = f"{name}-{next(disambiguator)}"
         name = new_name
         target_dict[name] = _copy_content(content_object)
 
@@ -508,7 +508,7 @@ class TestCase(unittest.TestCase):
         full_name = name
         suffix = 1
         while full_name in existing_details:
-            full_name = "%s-%d" % (name, suffix)
+            full_name = f"{name}-{suffix}"
             suffix += 1
         self.addDetail(full_name, content_object)
 
@@ -602,7 +602,7 @@ class TestCase(unittest.TestCase):
         """
         if prefix is None:
             prefix = self.id()
-        return "%s-%d" % (prefix, self.getUniqueInteger())
+        return f"{prefix}-{self.getUniqueInteger()}"
 
     def onException(self, exc_info, tb_label="traceback"):
         """Called when an exception propagates from test code.
@@ -644,7 +644,7 @@ class TestCase(unittest.TestCase):
         while True:
             tb_id = next(id_gen)
             if tb_id:
-                tb_label = "%s-%d" % (tb_label, tb_id)
+                tb_label = f"{tb_label}-{tb_id}"
             if tb_label not in self.getDetails():
                 break
         self.addDetail(
@@ -682,14 +682,10 @@ class TestCase(unittest.TestCase):
         ret = self.setUp()
         if not self.__setup_called:
             raise ValueError(
-                "In File: %s\n"
+                f"In File: {sys.modules[self.__class__.__module__].__file__}\n"
                 "TestCase.setUp was not called. Have you upcalled all the "
                 "way up the hierarchy from your setUp? e.g. Call "
-                "super(%s, self).setUp() from your setUp()."
-                % (
-                    sys.modules[self.__class__.__module__].__file__,
-                    self.__class__.__name__,
-                )
+                f"super({self.__class__.__name__}, self).setUp() from your setUp()."
             )
         return ret
 
@@ -703,14 +699,11 @@ class TestCase(unittest.TestCase):
         ret = self.tearDown()
         if not self.__teardown_called:
             raise ValueError(
-                "In File: %s\n"
+                f"In File: {sys.modules[self.__class__.__module__].__file__}\n"
                 "TestCase.tearDown was not called. Have you upcalled all the "
                 "way up the hierarchy from your tearDown? e.g. Call "
-                "super(%s, self).tearDown() from your tearDown()."
-                % (
-                    sys.modules[self.__class__.__module__].__file__,
-                    self.__class__.__name__,
-                )
+                f"super({self.__class__.__name__}, self).tearDown() "
+                "from your tearDown()."
             )
         return ret
 
@@ -723,7 +716,7 @@ class TestCase(unittest.TestCase):
                 # We allow instantiation with no explicit method name
                 # but not an *incorrect* or missing method name.
                 raise ValueError(
-                    "no such test method in %s: %s" % (self.__class__, method_name)
+                    f"no such test method in {self.__class__}: {method_name}"
                 )
         else:
             return m
@@ -779,10 +772,10 @@ class TestCase(unittest.TestCase):
         super().setUp()
         if self.__setup_called:
             raise ValueError(
-                "In File: %s\n"
+                f"In File: {sys.modules[self.__class__.__module__].__file__}\n"
                 "TestCase.setUp was already called. Do not explicitly call "
                 "setUp from your tests. In your own setUp, use super to call "
-                "the base setUp." % (sys.modules[self.__class__.__module__].__file__,)
+                "the base setUp."
             )
         self.__setup_called = True
 
@@ -790,11 +783,10 @@ class TestCase(unittest.TestCase):
         super().tearDown()
         if self.__teardown_called:
             raise ValueError(
-                "In File: %s\n"
+                f"In File: {sys.modules[self.__class__.__module__].__file__}\n"
                 "TestCase.tearDown was already called. Do not explicitly call "
                 "tearDown from your tests. In your own tearDown, use super to "
                 "call the base tearDown."
-                % (sys.modules[self.__class__.__module__].__file__,)
             )
         self.__teardown_called = True
 
@@ -1062,9 +1054,9 @@ class _AssertRaisesContext:
             except AttributeError:
                 exc_name = str(self.expected)
             if self.msg:
-                error_msg = "{} not raised : {}".format(exc_name, self.msg)
+                error_msg = f"{exc_name} not raised : {self.msg}"
             else:
-                error_msg = "{} not raised".format(exc_name)
+                error_msg = f"{exc_name} not raised"
             raise self.test_case.failureException(error_msg)
         if not issubclass(exc_type, self.expected):
             # let unexpected exceptions pass through
@@ -1104,7 +1096,7 @@ class ExpectedException:
 
     def __exit__(self, exc_type, exc_value, traceback):
         if exc_type is None:
-            error_msg = "%s not raised." % self.exc_type.__name__
+            error_msg = f"{self.exc_type.__name__} not raised."
             if self.msg:
                 error_msg = error_msg + " : " + self.msg
             raise AssertionError(error_msg)

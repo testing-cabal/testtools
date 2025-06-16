@@ -2,6 +2,9 @@
 
 """Tests for Deferred matchers."""
 
+from twisted.internet import defer
+from twisted.python.failure import Failure
+
 from testtools.content import TracebackContent
 from testtools.matchers import (
     AfterPreprocessing,
@@ -9,13 +12,9 @@ from testtools.matchers import (
     Is,
     MatchesDict,
 )
+from testtools.twistedsupport import failed, has_no_result, succeeded
+
 from ._helpers import NeedsTwistedTestCase
-
-
-from testtools.twistedsupport import has_no_result, failed, succeeded
-
-from twisted.internet import defer
-from twisted.python.failure import Failure
 
 
 def mismatches(description, details=None):
@@ -65,9 +64,7 @@ class NoResultTests(NeedsTwistedTestCase):
         self.assertThat(
             mismatch,
             mismatches(
-                Equals(
-                    "No result expected on %r, found %r instead" % (deferred, result)
-                )
+                Equals(f"No result expected on {deferred!r}, found {result!r} instead")
             ),
         )
 
@@ -81,7 +78,7 @@ class NoResultTests(NeedsTwistedTestCase):
         self.assertThat(
             mismatch,
             mismatches(
-                Equals("No result expected on %r, found %r instead" % (deferred, fail))
+                Equals(f"No result expected on {deferred!r}, found {fail!r} instead")
             ),
         )
 
@@ -139,8 +136,7 @@ class SuccessResultTests(NeedsTwistedTestCase):
             self.match(arbitrary_matcher, deferred),
             mismatches(
                 Equals(
-                    ("Success result expected on %r, found no result instead")
-                    % (deferred,)
+                    f"Success result expected on {deferred!r}, found no result instead"
                 )
             ),
         )
@@ -155,8 +151,8 @@ class SuccessResultTests(NeedsTwistedTestCase):
             self.match(arbitrary_matcher, deferred),
             mismatches(
                 Equals(
-                    "Success result expected on %r, found failure result "
-                    "instead: %r" % (deferred, fail)
+                    f"Success result expected on {deferred!r}, found failure result "
+                    f"instead: {fail!r}"
                 ),
                 Equals(
                     {
@@ -202,8 +198,8 @@ class FailureResultTests(NeedsTwistedTestCase):
             self.match(matcher, deferred),
             mismatches(
                 Equals(
-                    "Failure result expected on %r, found success "
-                    "result (%r) instead" % (deferred, result)
+                    f"Failure result expected on {deferred!r}, found success "
+                    f"result ({result!r}) instead"
                 )
             ),
         )
@@ -216,8 +212,7 @@ class FailureResultTests(NeedsTwistedTestCase):
             self.match(matcher, deferred),
             mismatches(
                 Equals(
-                    "Failure result expected on %r, found no result instead"
-                    % (deferred,)
+                    f"Failure result expected on {deferred!r}, found no result instead"
                 )
             ),
         )

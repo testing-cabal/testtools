@@ -15,7 +15,6 @@ from ._impl import (
     Mismatch,
 )
 
-
 _error_repr = BaseException.__repr__
 
 
@@ -56,7 +55,7 @@ class MatchesException(Matcher):
 
     def match(self, other):
         if not isinstance(other, tuple):
-            return Mismatch("%r is not an exc_info tuple" % other)
+            return Mismatch(f"{other!r} is not an exc_info tuple")
         expected_class = self.expected
         if self._is_instance:
             expected_class = expected_class.__class__
@@ -65,17 +64,16 @@ class MatchesException(Matcher):
         if self._is_instance:
             if other[1].args != self.expected.args:
                 return Mismatch(
-                    "{} has different arguments to {}.".format(
-                        _error_repr(other[1]), _error_repr(self.expected)
-                    )
+                    f"{_error_repr(other[1])} has different arguments to "
+                    f"{_error_repr(self.expected)}."
                 )
         elif self.value_re is not None:
             return self.value_re.match(other[1])
 
     def __str__(self):
         if self._is_instance:
-            return "MatchesException(%s)" % _error_repr(self.expected)
-        return "MatchesException(%s)" % repr(self.expected)
+            return f"MatchesException({_error_repr(self.expected)})"
+        return f"MatchesException({self.expected!r})"
 
 
 class Raises(Matcher):

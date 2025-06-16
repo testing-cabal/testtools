@@ -1,6 +1,6 @@
 # Copyright (c) 2009-2016 testtools developers. See LICENSE for details.
 
-__all__ = ["Warnings", "WarningMessage", "IsDeprecated"]
+__all__ = ["IsDeprecated", "WarningMessage", "Warnings"]
 
 import warnings
 
@@ -15,8 +15,7 @@ from ._impl import Mismatch
 
 
 def WarningMessage(category_type, message=None, filename=None, lineno=None, line=None):
-    r"""
-    Create a matcher that will match `warnings.WarningMessage`\s.
+    r"""Create a matcher that will match `warnings.WarningMessage`\s.
 
     For example, to match captured `DeprecationWarning`s with a message about
     some ``foo`` being replaced with ``bar``:
@@ -55,13 +54,10 @@ def WarningMessage(category_type, message=None, filename=None, lineno=None, line
 
 
 class Warnings:
-    """
-    Match if the matchee produces warnings.
-    """
+    """Match if the matchee produces warnings."""
 
     def __init__(self, warnings_matcher=None):
-        """
-        Create a Warnings matcher.
+        """Create a Warnings matcher.
 
         :param warnings_matcher: Optional validator for the warnings emitted by
         matchee. If no warnings_matcher is supplied then the simple fact that
@@ -83,8 +79,7 @@ class Warnings:
 
 
 def IsDeprecated(message):
-    """
-    Make a matcher that checks that a callable produces exactly one
+    """Make a matcher that checks that a callable produces exactly one
     `DeprecationWarning`.
 
     :param message: Matcher for the warning message.

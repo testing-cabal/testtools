@@ -1,12 +1,12 @@
 # Copyright (c) 2008, 2012 testtools developers. See LICENSE for details.
 
 from testtools import TestCase
-from testtools.matchers import Equals, MatchesException, Raises
 from testtools.content_type import (
-    ContentType,
     JSON,
     UTF8_TEXT,
+    ContentType,
 )
+from testtools.matchers import Equals, MatchesException, Raises
 
 
 class TestContentType(TestCase):

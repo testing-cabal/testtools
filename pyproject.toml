@@ -60,3 +60,19 @@ module = [
     "testscenarios.*",
 ]
 ignore_missing_imports = true
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "PIE",
+    "UP",
+    "RSE",
+    "RUF",
+]
+ignore = [
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

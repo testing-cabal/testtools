@@ -8,7 +8,7 @@ __all__ = [
 
 import sys
 
-from testtools import TestResult
+from testtools import TestResult, runtest
 from testtools.content import StackLinesContent
 from testtools.matchers import (
     AfterPreprocessing,
@@ -16,8 +16,6 @@ from testtools.matchers import (
     MatchesDict,
     MatchesListwise,
 )
-from testtools import runtest
-
 
 # GZ 2010-08-12: Don't do this, pointlessly creates an exc_info cycle
 try:
