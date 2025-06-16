@@ -361,9 +361,9 @@ meet the testtools ``TestResult`` API.
 Test Doubles
 ------------
 
-In testtools.testresult.doubles there are three test doubles that testtools
-uses for its own testing: ``Python26TestResult``, ``Python27TestResult``,
-``ExtendedTestResult``. These TestResult objects implement a single variation of
+In testtools.testresult.doubles there are several test doubles that testtools
+uses for its own testing: ``Python3TestResult``, and ``ExtendedTestResult``.
+These TestResult objects implement a single variation of
 the TestResult API each, and log activity to a list ``self._events``. These are
 made available for the convenience of people writing their own extensions.
 

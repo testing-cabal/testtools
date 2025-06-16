@@ -44,8 +44,7 @@ from testtools.testcase import (
 )
 from testtools.testresult.doubles import (
     ExtendedTestResult,
-    Python26TestResult,
-    Python27TestResult,
+    Python3TestResult,
 )
 from testtools.tests.helpers import (
     AsText,
@@ -1217,9 +1216,9 @@ class TestExpectedFailure(TestWithDetails):
         case = Case("test")
         return case
 
-    def test_raising__UnexpectedSuccess_py27(self):
+    def test_raising__UnexpectedSuccess_py3(self):
         case = self.make_unexpected_case()
-        result = Python27TestResult()
+        result = Python3TestResult()
         case.run(result)
         case = result._events[0][1]
         self.assertEqual(
@@ -1720,7 +1719,7 @@ class TestSkipping(TestCase):
                 self.skipTest("skipping this test")
 
         events = []
-        result = Python27TestResult(events)
+        result = Python3TestResult(events)
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
         case = result._events[0][1]
@@ -1741,7 +1740,7 @@ class TestSkipping(TestCase):
                 self.skipTest("skipping this test")
 
         events = []
-        result = Python27TestResult(events)
+        result = Python3TestResult(events)
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
         case = result._events[0][1]
@@ -1764,10 +1763,10 @@ class TestSkipping(TestCase):
                 pass
 
         events = []
-        result = Python26TestResult(events)
+        result = Python3TestResult(events)
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
-        self.assertEqual("addSuccess", events[1][0])
+        self.assertEqual("addSkip", events[1][0])
 
     def test_skip_with_old_result_object_calls_addError(self):
         class SkippingTest(TestCase):
@@ -1775,10 +1774,10 @@ class TestSkipping(TestCase):
                 raise self.skipException("skipping this test")
 
         events = []
-        result = Python26TestResult(events)
+        result = Python3TestResult(events)
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
-        self.assertEqual("addSuccess", events[1][0])
+        self.assertEqual("addSkip", events[1][0])
 
     def test_skip_decorator(self):
         class SkippingTest(TestCase):
@@ -1787,10 +1786,10 @@ class TestSkipping(TestCase):
                 self.fail()
 
         events = []
-        result = Python26TestResult(events)
+        result = Python3TestResult(events)
         test = SkippingTest("test_that_is_decorated_with_skip")
         test.run(result)
-        self.assertEqual("addSuccess", events[1][0])
+        self.assertEqual("addSkip", events[1][0])
 
     def test_skipIf_decorator(self):
         class SkippingTest(TestCase):
@@ -1799,10 +1798,10 @@ class TestSkipping(TestCase):
                 self.fail()
 
         events = []
-        result = Python26TestResult(events)
+        result = Python3TestResult(events)
         test = SkippingTest("test_that_is_decorated_with_skipIf")
         test.run(result)
-        self.assertEqual("addSuccess", events[1][0])
+        self.assertEqual("addSkip", events[1][0])
 
     def test_skipUnless_decorator(self):
         class SkippingTest(TestCase):
@@ -1811,10 +1810,10 @@ class TestSkipping(TestCase):
                 self.fail()
 
         events = []
-        result = Python26TestResult(events)
+        result = Python3TestResult(events)
         test = SkippingTest("test_that_is_decorated_with_skipUnless")
         test.run(result)
-        self.assertEqual("addSuccess", events[1][0])
+        self.assertEqual("addSkip", events[1][0])
 
     def test_skip_decorator_shared(self):
         def shared(testcase):
@@ -1827,13 +1826,13 @@ class TestSkipping(TestCase):
             test_no_skip = skipIf(False, "skipping this test")(shared)
 
         events = []
-        result = Python26TestResult(events)
+        result = Python3TestResult(events)
         test = SkippingTest("test_skip")
         test.run(result)
-        self.assertEqual("addSuccess", events[1][0])
+        self.assertEqual("addSkip", events[1][0])
 
         events2 = []
-        result2 = Python26TestResult(events2)
+        result2 = Python3TestResult(events2)
         test2 = NotSkippingTest("test_no_skip")
         test2.run(result2)
         self.assertEqual("addFailure", events2[1][0])
@@ -1845,13 +1844,13 @@ class TestSkipping(TestCase):
                 self.fail()
 
         events = []
-        result = Python26TestResult(events)
+        result = Python3TestResult(events)
         try:
             test = SkippingTest("test_that_is_decorated_with_skip")
         except unittest.SkipTest:
             self.fail("SkipTest raised")
         test.run(result)
-        self.assertEqual("addSuccess", events[1][0])
+        self.assertEqual("addSkip", events[1][0])
 
     def test_skipIf_class_decorator(self):
         @skipIf(True, "skipping this testcase")
@@ -1860,13 +1859,13 @@ class TestSkipping(TestCase):
                 self.fail()
 
         events = []
-        result = Python26TestResult(events)
+        result = Python3TestResult(events)
         try:
             test = SkippingTest("test_that_is_decorated_with_skipIf")
         except unittest.SkipTest:
             self.fail("SkipTest raised")
         test.run(result)
-        self.assertEqual("addSuccess", events[1][0])
+        self.assertEqual("addSkip", events[1][0])
 
     def test_skipUnless_class_decorator(self):
         @skipUnless(False, "skipping this testcase")
@@ -1875,13 +1874,13 @@ class TestSkipping(TestCase):
                 self.fail()
 
         events = []
-        result = Python26TestResult(events)
+        result = Python3TestResult(events)
         try:
             test = SkippingTest("test_that_is_decorated_with_skipUnless")
         except unittest.SkipTest:
             self.fail("SkipTest raised")
         test.run(result)
-        self.assertEqual("addSuccess", events[1][0])
+        self.assertEqual("addSkip", events[1][0])
 
     def check_skip_decorator_does_not_run_setup(self, decorator, reason):
         class SkippingTest(TestCase):
