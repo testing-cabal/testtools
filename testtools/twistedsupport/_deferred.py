@@ -2,13 +2,12 @@
 
 """Utilities for Deferreds."""
 
-from typing import List, TYPE_CHECKING
-
 from functools import partial
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from twisted.python.failure import Failure
     from twisted.internet.defer import Deferred
+    from twisted.python.failure import Failure
 
 from testtools.content import TracebackContent
 
@@ -35,8 +34,8 @@ def extract_result(deferred):
     code). In those cases, it is better to add callbacks and errbacks as
     needed.
     """
-    failures: List["Failure"] = []
-    successes: List["Deferred"] = []
+    failures: list[Failure] = []
+    successes: list[Deferred] = []
     deferred.addCallbacks(successes.append, failures.append)
     if len(failures) == 1:
         failures[0].raiseException()
@@ -80,8 +79,8 @@ def on_deferred_result(deferred, on_success, on_failure, on_no_result):
     :return: Whatever is returned by the triggered callback.
     :rtype: ``T``
     """
-    successes: List["Deferred"] = []
-    failures: List["Failure"] = []
+    successes: list[Deferred] = []
+    failures: list[Failure] = []
 
     def capture(value, values):
         values.append(value)

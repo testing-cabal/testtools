@@ -48,7 +48,7 @@ class TestPathExists(TestCase, PathHelpers):
     def test_not_exists(self):
         doesntexist = os.path.join(self.mkdtemp(), "doesntexist")
         mismatch = PathExists().match(doesntexist)
-        self.assertThat("%s does not exist." % doesntexist, Equals(mismatch.describe()))
+        self.assertThat(f"{doesntexist} does not exist.", Equals(mismatch.describe()))
 
 
 class TestDirExists(TestCase, PathHelpers):
@@ -67,9 +67,7 @@ class TestDirExists(TestCase, PathHelpers):
         filename = os.path.join(self.mkdtemp(), "foo")
         self.touch(filename)
         mismatch = DirExists().match(filename)
-        self.assertThat(
-            "%s is not a directory." % filename, Equals(mismatch.describe())
-        )
+        self.assertThat(f"{filename} is not a directory.", Equals(mismatch.describe()))
 
 
 class TestFileExists(TestCase, PathHelpers):
@@ -89,7 +87,7 @@ class TestFileExists(TestCase, PathHelpers):
     def test_not_a_file(self):
         tempdir = self.mkdtemp()
         mismatch = FileExists().match(tempdir)
-        self.assertThat("%s is not a file." % tempdir, Equals(mismatch.describe()))
+        self.assertThat(f"{tempdir} is not a file.", Equals(mismatch.describe()))
 
 
 class TestDirContains(TestCase, PathHelpers):

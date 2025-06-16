@@ -193,9 +193,7 @@ class MatchesSetwise:
 
             if len(not_matched) == 0:
                 if len(remaining_matchers) > 1:
-                    msg = "There were {} matchers left over: ".format(
-                        len(remaining_matchers)
-                    )
+                    msg = f"There were {len(remaining_matchers)} matchers left over: "
                 else:
                     msg = "There was 1 matcher left over: "
                 msg += ", ".join(map(str, remaining_matchers))
@@ -203,14 +201,10 @@ class MatchesSetwise:
             elif len(remaining_matchers) == 0:
                 if len(not_matched) > 1:
                     return Mismatch(
-                        "There were {} values left over: {}".format(
-                            len(not_matched), not_matched
-                        )
+                        f"There were {len(not_matched)} values left over: {not_matched}"
                     )
                 else:
-                    return Mismatch(
-                        "There was 1 value left over: {}".format(not_matched)
-                    )
+                    return Mismatch(f"There was 1 value left over: {not_matched}")
             else:
                 common_length = min(len(remaining_matchers), len(not_matched))
                 if common_length == 0:

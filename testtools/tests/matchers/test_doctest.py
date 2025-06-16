@@ -1,6 +1,7 @@
 # Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
 
 import doctest
+from typing import ClassVar
 
 from testtools import TestCase
 from testtools.compat import (
@@ -13,10 +14,13 @@ from testtools.tests.matchers.helpers import TestMatchersInterface
 
 class TestDocTestMatchesInterface(TestCase, TestMatchersInterface):
     matches_matcher = DocTestMatches("Ran 1 test in ...s", doctest.ELLIPSIS)
-    matches_matches = ["Ran 1 test in 0.000s", "Ran 1 test in 1.234s"]
-    matches_mismatches = ["Ran 1 tests in 0.000s", "Ran 2 test in 0.000s"]
+    matches_matches: ClassVar[list] = ["Ran 1 test in 0.000s", "Ran 1 test in 1.234s"]
+    matches_mismatches: ClassVar[list] = [
+        "Ran 1 tests in 0.000s",
+        "Ran 2 test in 0.000s",
+    ]
 
-    str_examples = [
+    str_examples: ClassVar[list] = [
         (
             "DocTestMatches('Ran 1 test in ...s\\n')",
             DocTestMatches("Ran 1 test in ...s"),
@@ -24,7 +28,7 @@ class TestDocTestMatchesInterface(TestCase, TestMatchersInterface):
         ("DocTestMatches('foo\\n', flags=8)", DocTestMatches("foo", flags=8)),
     ]
 
-    describe_examples = [
+    describe_examples: ClassVar[list] = [
         (
             "Expected:\n    Ran 1 tests in ...s\nGot:\n    Ran 1 test in 0.123s\n",
             "Ran 1 test in 0.123s",
@@ -35,14 +39,14 @@ class TestDocTestMatchesInterface(TestCase, TestMatchersInterface):
 
 class TestDocTestMatchesInterfaceUnicode(TestCase, TestMatchersInterface):
     matches_matcher = DocTestMatches("\xa7...", doctest.ELLIPSIS)
-    matches_matches = ["\xa7", "\xa7 more\n"]
-    matches_mismatches = ["\\xa7", "more \xa7", "\n\xa7"]
+    matches_matches: ClassVar[list] = ["\xa7", "\xa7 more\n"]
+    matches_mismatches: ClassVar[list] = ["\\xa7", "more \xa7", "\n\xa7"]
 
-    str_examples = [
+    str_examples: ClassVar[list] = [
         ("DocTestMatches({!r})".format("\xa7\n"), DocTestMatches("\xa7")),
     ]
 
-    describe_examples = [
+    describe_examples: ClassVar[list] = [
         (
             "Expected:\n    \xa7\nGot:\n    a\n",
             "a",

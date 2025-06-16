@@ -10,7 +10,6 @@ import testscenarios
 def test_suite():
     from testtools.tests import (
         matchers,
-        twistedsupport,
         test_assert_that,
         test_compat,
         test_content,
@@ -25,6 +24,7 @@ def test_suite():
         test_testresult,
         test_testsuite,
         test_with_with,
+        twistedsupport,
     )
 
     modules = [

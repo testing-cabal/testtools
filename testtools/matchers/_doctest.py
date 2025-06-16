@@ -69,7 +69,7 @@ class DocTestMatches:
 
     def __str__(self):
         if self.flags:
-            flagstr = ", flags=%d" % self.flags
+            flagstr = f", flags={self.flags}"
         else:
             flagstr = ""
         return f"DocTestMatches({self.want!r}{flagstr})"

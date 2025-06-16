@@ -1,17 +1,18 @@
 # Copyright (c) 2008-2016 testtools developers. See LICENSE for details.
 
 import warnings
+from typing import ClassVar
 
 from testtools import TestCase
 from testtools.matchers import (
     AfterPreprocessing,
-    Equals,
-    MatchesStructure,
-    MatchesListwise,
     Contains,
+    Equals,
     HasLength,
+    MatchesListwise,
+    MatchesStructure,
 )
-from testtools.matchers._warnings import Warnings, IsDeprecated, WarningMessage
+from testtools.matchers._warnings import IsDeprecated, WarningMessage, Warnings
 from testtools.tests.helpers import FullStackRunTest
 from testtools.tests.matchers.helpers import TestMatchersInterface
 
@@ -27,8 +28,7 @@ def make_warning_message(message, category, filename=None, lineno=None, line=Non
 
 
 class TestWarningMessageCategoryTypeInterface(TestCase, TestMatchersInterface):
-    """
-    Tests for `testtools.matchers._warnings.WarningMessage`.
+    """Tests for `testtools.matchers._warnings.WarningMessage`.
 
     In particular matching the ``category_type``.
     """
@@ -37,16 +37,15 @@ class TestWarningMessageCategoryTypeInterface(TestCase, TestMatchersInterface):
     warning_foo = make_warning_message("foo", DeprecationWarning)
     warning_bar = make_warning_message("bar", SyntaxWarning)
     warning_base = make_warning_message("base", Warning)
-    matches_matches = [warning_foo]
-    matches_mismatches = [warning_bar, warning_base]
+    matches_matches: ClassVar[list] = [warning_foo]
+    matches_mismatches: ClassVar[list] = [warning_bar, warning_base]
 
-    str_examples = []
-    describe_examples = []
+    str_examples: ClassVar[list] = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestWarningMessageMessageInterface(TestCase, TestMatchersInterface):
-    """
-    Tests for `testtools.matchers._warnings.WarningMessage`.
+    """Tests for `testtools.matchers._warnings.WarningMessage`.
 
     In particular matching the ``message``.
     """
@@ -56,16 +55,15 @@ class TestWarningMessageMessageInterface(TestCase, TestMatchersInterface):
     )
     warning_foo = make_warning_message("foo", DeprecationWarning)
     warning_bar = make_warning_message("bar", DeprecationWarning)
-    matches_matches = [warning_foo]
-    matches_mismatches = [warning_bar]
+    matches_matches: ClassVar[list] = [warning_foo]
+    matches_mismatches: ClassVar[list] = [warning_bar]
 
-    str_examples = []
-    describe_examples = []
+    str_examples: ClassVar[list] = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestWarningMessageFilenameInterface(TestCase, TestMatchersInterface):
-    """
-    Tests for `testtools.matchers._warnings.WarningMessage`.
+    """Tests for `testtools.matchers._warnings.WarningMessage`.
 
     In particular matching the ``filename``.
     """
@@ -75,16 +73,15 @@ class TestWarningMessageFilenameInterface(TestCase, TestMatchersInterface):
     )
     warning_foo = make_warning_message("foo", DeprecationWarning, filename="a")
     warning_bar = make_warning_message("bar", DeprecationWarning, filename="b")
-    matches_matches = [warning_foo]
-    matches_mismatches = [warning_bar]
+    matches_matches: ClassVar[list] = [warning_foo]
+    matches_mismatches: ClassVar[list] = [warning_bar]
 
-    str_examples = []
-    describe_examples = []
+    str_examples: ClassVar[list] = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestWarningMessageLineNumberInterface(TestCase, TestMatchersInterface):
-    """
-    Tests for `testtools.matchers._warnings.WarningMessage`.
+    """Tests for `testtools.matchers._warnings.WarningMessage`.
 
     In particular matching the ``lineno``.
     """
@@ -94,16 +91,15 @@ class TestWarningMessageLineNumberInterface(TestCase, TestMatchersInterface):
     )
     warning_foo = make_warning_message("foo", DeprecationWarning, lineno=42)
     warning_bar = make_warning_message("bar", DeprecationWarning, lineno=21)
-    matches_matches = [warning_foo]
-    matches_mismatches = [warning_bar]
+    matches_matches: ClassVar[list] = [warning_foo]
+    matches_mismatches: ClassVar[list] = [warning_bar]
 
-    str_examples = []
-    describe_examples = []
+    str_examples: ClassVar[list] = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestWarningMessageLineInterface(TestCase, TestMatchersInterface):
-    """
-    Tests for `testtools.matchers._warnings.WarningMessage`.
+    """Tests for `testtools.matchers._warnings.WarningMessage`.
 
     In particular matching the ``line``.
     """
@@ -111,16 +107,15 @@ class TestWarningMessageLineInterface(TestCase, TestMatchersInterface):
     matches_matcher = WarningMessage(category_type=DeprecationWarning, line=Equals("x"))
     warning_foo = make_warning_message("foo", DeprecationWarning, line="x")
     warning_bar = make_warning_message("bar", DeprecationWarning, line="y")
-    matches_matches = [warning_foo]
-    matches_mismatches = [warning_bar]
+    matches_matches: ClassVar[list] = [warning_foo]
+    matches_mismatches: ClassVar[list] = [warning_bar]
 
-    str_examples = []
-    describe_examples = []
+    str_examples: ClassVar[list] = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestWarningsInterface(TestCase, TestMatchersInterface):
-    """
-    Tests for `testtools.matchers._warnings.Warnings`.
+    """Tests for `testtools.matchers._warnings.Warnings`.
 
     Specifically without the optional argument.
     """
@@ -130,19 +125,18 @@ class TestWarningsInterface(TestCase, TestMatchersInterface):
     def old_func():
         warnings.warn("old_func is deprecated", DeprecationWarning, 2)
 
-    matches_matches = [old_func]
-    matches_mismatches = [lambda: None]
+    matches_matches: ClassVar[list] = [old_func]
+    matches_mismatches: ClassVar[list] = [lambda: None]
 
     # Tricky to get function objects to render constantly, and the interfaces
     # helper uses assertEqual rather than (for instance) DocTestMatches.
-    str_examples = []
+    str_examples: ClassVar[list] = []
 
-    describe_examples = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestWarningsMatcherInterface(TestCase, TestMatchersInterface):
-    """
-    Tests for `testtools.matchers._warnings.Warnings`.
+    """Tests for `testtools.matchers._warnings.Warnings`.
 
     Specifically with the optional matcher argument.
     """
@@ -159,16 +153,15 @@ class TestWarningsMatcherInterface(TestCase, TestMatchersInterface):
     def older_func():
         warnings.warn("older_func is deprecated", DeprecationWarning, 2)
 
-    matches_matches = [old_func]
-    matches_mismatches = [lambda: None, older_func]
+    matches_matches: ClassVar[list] = [old_func]
+    matches_mismatches: ClassVar[list] = [lambda: None, older_func]
 
-    str_examples = []
-    describe_examples = []
+    str_examples: ClassVar[list] = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestWarningsMatcherNoWarningsInterface(TestCase, TestMatchersInterface):
-    """
-    Tests for `testtools.matchers._warnings.Warnings`.
+    """Tests for `testtools.matchers._warnings.Warnings`.
 
     Specifically with the optional matcher argument matching that there were no
     warnings.
@@ -182,17 +175,15 @@ class TestWarningsMatcherNoWarningsInterface(TestCase, TestMatchersInterface):
     def warning_func():
         warnings.warn("warning_func is deprecated", DeprecationWarning, 2)
 
-    matches_matches = [nowarning_func]
-    matches_mismatches = [warning_func]
+    matches_matches: ClassVar[list] = [nowarning_func]
+    matches_mismatches: ClassVar[list] = [warning_func]
 
-    str_examples = []
-    describe_examples = []
+    str_examples: ClassVar[list] = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestWarningMessage(TestCase):
-    """
-    Tests for `testtools.matchers._warnings.WarningMessage`.
-    """
+    """Tests for `testtools.matchers._warnings.WarningMessage`."""
 
     run_tests_with = FullStackRunTest
 
@@ -204,9 +195,7 @@ class TestWarningMessage(TestCase):
 
 
 class TestIsDeprecated(TestCase):
-    """
-    Tests for `testtools.matchers._warnings.IsDeprecated`.
-    """
+    """Tests for `testtools.matchers._warnings.IsDeprecated`."""
 
     run_tests_with = FullStackRunTest
 

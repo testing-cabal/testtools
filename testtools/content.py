@@ -3,13 +3,13 @@
 """Content - a MIME-like Content object."""
 
 __all__ = [
-    "attach_file",
     "Content",
+    "TracebackContent",
+    "attach_file",
     "content_from_file",
     "content_from_stream",
     "json_content",
     "text_content",
-    "TracebackContent",
 ]
 
 import codecs
@@ -19,8 +19,7 @@ import os
 import traceback
 
 from testtools.compat import _b
-from testtools.content_type import ContentType, JSON, UTF8_TEXT
-
+from testtools.content_type import JSON, UTF8_TEXT, ContentType
 
 _join_b = _b("").join
 
@@ -62,9 +61,7 @@ class Content:
     def __init__(self, content_type, get_bytes):
         """Create a ContentType."""
         if None in (content_type, get_bytes):
-            raise ValueError(
-                "None not permitted in {!r}, {!r}".format(content_type, get_bytes)
-            )
+            raise ValueError(f"None not permitted in {content_type!r}, {get_bytes!r}")
         self.content_type = content_type
         self._get_bytes = get_bytes
 
@@ -96,7 +93,7 @@ class Content:
         :raises ValueError: If the content type is not "text/*".
         """
         if self.content_type.type != "text":
-            raise ValueError("Not a text type %r" % self.content_type)
+            raise ValueError(f"Not a text type {self.content_type!r}")
         return self._iter_text()
 
     def _iter_text(self):
@@ -110,8 +107,9 @@ class Content:
             yield final
 
     def __repr__(self):
-        return "<Content type={!r}, value={!r}>".format(
-            self.content_type, _join_b(self.iter_bytes())
+        return (
+            f"<Content type={self.content_type!r}, "
+            f"value={_join_b(self.iter_bytes())!r}>"
         )
 
 
@@ -250,7 +248,7 @@ def text_content(text):
     """
     if not isinstance(text, str):
         raise TypeError(
-            "text_content must be given text, not '%s'." % type(text).__name__
+            f"text_content must be given text, not '{type(text).__name__}'."
         )
     return Content(UTF8_TEXT, lambda: [text.encode("utf8")])
 

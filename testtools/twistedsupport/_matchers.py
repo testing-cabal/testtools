@@ -24,9 +24,7 @@ class _NoResult:
 
     @staticmethod
     def _got_result(deferred, result):
-        return Mismatch(
-            "No result expected on %r, found %r instead" % (deferred, result)
-        )
+        return Mismatch(f"No result expected on {deferred!r}, found {result!r} instead")
 
     def match(self, deferred):
         """Match ``deferred`` if it hasn't fired."""
@@ -55,7 +53,8 @@ def has_no_result():
       ...
       File "testtools/assertions.py", line 22, in assert_that
         raise MismatchError(matchee, matcher, mismatch, verbose)
-    testtools.matchers._impl.MismatchError: No result expected on <Deferred at ... current result: None>, found None instead
+    testtools.matchers._impl.MismatchError: No result expected on <Deferred at ...
+        current result: None>, found None instead
 
     As will this:
 
@@ -64,7 +63,10 @@ def has_no_result():
       ...
       File "testtools/assertions.py", line 22, in assert_that
         raise MismatchError(matchee, matcher, mismatch, verbose)
-    testtools.matchers._impl.MismatchError: No result expected on <Deferred at ... current result: <twisted.python.failure.Failure <type 'exceptions.RuntimeError'>>>, found <twisted.python.failure.Failure <type 'exceptions.RuntimeError'>> instead
+    testtools.matchers._impl.MismatchError: No result expected on <Deferred at ...
+        current result: <twisted.python.failure.Failure
+        <type 'exceptions.RuntimeError'>>>, found
+        <twisted.python.failure.Failure <type 'exceptions.RuntimeError'>> instead
     """
     return _NO_RESULT
 
@@ -80,15 +82,15 @@ class _Succeeded:
     def _got_failure(deferred, failure):
         deferred.addErrback(lambda _: None)
         return Mismatch(
-            "Success result expected on %r, found failure result "
-            "instead: %r" % (deferred, failure),
+            f"Success result expected on {deferred!r}, found failure result "
+            f"instead: {failure!r}",
             {"traceback": failure_content(failure)},
         )
 
     @staticmethod
     def _got_no_result(deferred):
         return Mismatch(
-            "Success result expected on %r, found no result instead" % (deferred,)
+            f"Success result expected on {deferred!r}, found no result instead"
         )
 
     def match(self, deferred):
@@ -139,14 +141,14 @@ class _Failed:
     @staticmethod
     def _got_success(deferred, success):
         return Mismatch(
-            "Failure result expected on %r, found success "
-            "result (%r) instead" % (deferred, success)
+            f"Failure result expected on {deferred!r}, found success "
+            f"result ({success!r}) instead"
         )
 
     @staticmethod
     def _got_no_result(deferred):
         return Mismatch(
-            "Failure result expected on %r, found no result instead" % (deferred,)
+            f"Failure result expected on {deferred!r}, found no result instead"
         )
 
     def match(self, deferred):

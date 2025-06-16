@@ -3,19 +3,19 @@
 """Test suites and related things."""
 
 __all__ = [
-    "ConcurrentTestSuite",
     "ConcurrentStreamTestSuite",
+    "ConcurrentTestSuite",
     "filter_by_ids",
     "iterate_tests",
     "sorted_tests",
 ]
 
-from collections import Counter
-from pprint import pformat
-from queue import Queue
 import sys
 import threading
 import unittest
+from collections import Counter
+from pprint import pformat
+from queue import Queue
 
 import testtools
 

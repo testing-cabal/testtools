@@ -16,9 +16,7 @@ class TestObj:
 
 
 class MonkeyPatcherTest(TestCase):
-    """
-    Tests for 'MonkeyPatcher' monkey-patching class.
-    """
+    """Tests for 'MonkeyPatcher' monkey-patching class."""
 
     def setUp(self):
         super().setUp()

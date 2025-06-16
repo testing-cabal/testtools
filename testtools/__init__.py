@@ -3,32 +3,20 @@
 """Extensions to the standard Python unittest library."""
 
 __all__ = [
-    "clone_test_with_new_id",
-    "CopyStreamResult",
-    "ConcurrentTestSuite",
     "ConcurrentStreamTestSuite",
+    "ConcurrentTestSuite",
+    "CopyStreamResult",
     "DecorateTestCaseResult",
     "ErrorHolder",
     "ExpectedException",
     "ExtendedToOriginalDecorator",
     "ExtendedToStreamDecorator",
     "FixtureSuite",
-    "iterate_tests",
-    "MultipleExceptions",
     "MultiTestResult",
+    "MultipleExceptions",
     "PlaceHolder",
-    "run_test_with",
     "ResourcedToStreamDecorator",
-    "Tagger",
-    "TestCase",
-    "TestByTestResult",
-    "TestResult",
-    "TestResultDecorator",
-    "TextTestResult",
     "RunTest",
-    "skip",
-    "skipIf",
-    "skipUnless",
     "StreamFailFast",
     "StreamResult",
     "StreamResultRouter",
@@ -37,18 +25,29 @@ __all__ = [
     "StreamToDict",
     "StreamToExtendedDecorator",
     "StreamToQueue",
+    "Tagger",
+    "TestByTestResult",
+    "TestCase",
     "TestControl",
+    "TestResult",
+    "TestResultDecorator",
+    "TextTestResult",
     "ThreadsafeForwardingResult",
     "TimestampingStreamResult",
+    "__version__",
+    "clone_test_with_new_id",
+    "iterate_tests",
+    "run_test_with",
+    "skip",
+    "skipIf",
+    "skipUnless",
     "try_import",
     "unique_text_generator",
     "version",
-    "__version__",
 ]
 
 from testtools.helpers import try_import
 from testtools.matchers._impl import Matcher  # noqa: F401
-
 from testtools.runtest import (
     MultipleExceptions,
     RunTest,
@@ -90,8 +89,8 @@ from testtools.testresult import (
     TimestampingStreamResult,
 )
 from testtools.testsuite import (
-    ConcurrentTestSuite,
     ConcurrentStreamTestSuite,
+    ConcurrentTestSuite,
     FixtureSuite,
     iterate_tests,
 )

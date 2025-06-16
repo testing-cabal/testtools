@@ -25,15 +25,16 @@ __all__ = [
 import datetime
 import email.message
 import math
-from operator import methodcaller
 import sys
 import unittest
+from operator import methodcaller
+from typing import ClassVar
 
 from testtools.compat import _b
 from testtools.content import (
     Content,
-    text_content,
     TracebackContent,
+    text_content,
 )
 from testtools.content_type import ContentType
 from testtools.tags import TagContext
@@ -524,7 +525,7 @@ class StreamResultRouter(StreamResult):
     the behaviour is undefined. Only a single route is chosen for any event.
     """
 
-    _policies = {}
+    _policies: ClassVar[dict] = {}
 
     def __init__(self, fallback=None, do_start_stop_run=True):
         """Construct a StreamResultRouter with optional fallback.
@@ -778,7 +779,7 @@ def _make_content_type(mime_type=None):
 
     type_parts = full_type.split("/") if "/" in full_type else None
     if not type_parts or len(type_parts) > 2:
-        raise Exception("Can't parse type '%s'" % full_type)
+        raise Exception(f"Can't parse type '{full_type}'")
 
     primary_type, sub_type = type_parts
     primary_type = primary_type.strip()
@@ -1223,25 +1224,21 @@ class TextTestResult(TestResult):
         self._show_list("FAIL", self.failures)
         for test in self.unexpectedSuccesses:
             self.stream.write(
-                "{}UNEXPECTED SUCCESS: {}\n{}".format(self.sep1, test.id(), self.sep2)
+                f"{self.sep1}UNEXPECTED SUCCESS: {test.id()}\n{self.sep2}"
             )
         self.stream.write(
-            "\nRan %d test%s in %.3fs\n"
-            % (self.testsRun, plural, self._delta_to_float(stop - self.__start, 3))
+            f"\nRan {self.testsRun} test{plural} in "
+            f"{self._delta_to_float(stop - self.__start, 3):.3f}s\n"
         )
         if self.wasSuccessful():
             self.stream.write("OK\n")
         else:
             self.stream.write("FAILED (")
             details = []
-            details.append(
-                "failures=%d"
-                % (
-                    sum(
-                        map(len, (self.failures, self.errors, self.unexpectedSuccesses))
-                    )
-                )
+            failure_count = sum(
+                map(len, (self.failures, self.errors, self.unexpectedSuccesses))
             )
+            details.append(f"failures={failure_count}")
             self.stream.write(", ".join(details))
             self.stream.write(")\n")
         super().stopTestRun()
@@ -1527,7 +1524,7 @@ class ExtendedToOriginalDecorator:
             param_count += 1
         if param_count != 1:
             raise ValueError(
-                "Must pass only one of err '%s' and details '%s" % (err, details)
+                f"Must pass only one of err '{err}' and details '{details}"
             )
 
     def _details_to_exc_info(self, details):
@@ -1738,7 +1735,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
             param_count += 1
         if param_count != 1:
             raise ValueError(
-                "Must pass only one of err '%s' and details '%s" % (err, details)
+                f"Must pass only one of err '{err}' and details '{details}"
             )
 
     def startTestRun(self):
@@ -1813,14 +1810,13 @@ class ResourcedToStreamDecorator(ExtendedToStreamDecorator):
 
     def _convertResourceLifecycle(self, resource, method, phase):
         """Convert a resource lifecycle report to a stream event."""
-
         # If the resource implements the TestResourceManager.id() API, let's
         # use it, otherwise fallback to the class name.
         if hasattr(resource, "id"):
             resource_id = resource.id()
         else:
-            resource_id = "{}.{}".format(
-                resource.__class__.__module__, resource.__class__.__name__
+            resource_id = (
+                f"{resource.__class__.__module__}.{resource.__class__.__name__}"
             )
 
         test_id = f"{resource_id}.{method}"

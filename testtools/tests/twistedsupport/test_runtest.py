@@ -4,11 +4,12 @@
 
 import os
 import signal
+from typing import ClassVar
 
 from testtools import (
-    skipIf,
     TestCase,
     TestResult,
+    skipIf,
 )
 from testtools.helpers import try_import
 from testtools.matchers import (
@@ -29,6 +30,7 @@ from testtools.tests.helpers import (
     AsText,
     MatchesEvents,
 )
+
 from ._helpers import NeedsTwistedTestCase
 
 DebugTwisted = try_import("testtools.twistedsupport._deferreddebug.DebugTwisted")
@@ -71,44 +73,44 @@ class X:
             super(X.Base, self).tearDown()
 
     class BaseExceptionRaised(Base):
-        expected_calls = ["setUp", "tearDown", "clean-up"]
-        expected_results = [("addError", SystemExit)]
+        expected_calls: ClassVar[list] = ["setUp", "tearDown", "clean-up"]
+        expected_results: ClassVar[list] = [("addError", SystemExit)]
 
         def test_something(self):
             raise SystemExit(0)
 
     class ErrorInSetup(Base):
-        expected_calls = ["setUp", "clean-up"]
-        expected_results = [("addError", RuntimeError)]
+        expected_calls: ClassVar[list] = ["setUp", "clean-up"]
+        expected_results: ClassVar[list] = [("addError", RuntimeError)]
 
         def setUp(self):
             super(X.ErrorInSetup, self).setUp()
             raise RuntimeError("Error in setUp")
 
     class ErrorInTest(Base):
-        expected_calls = ["setUp", "tearDown", "clean-up"]
-        expected_results = [("addError", RuntimeError)]
+        expected_calls: ClassVar[list] = ["setUp", "tearDown", "clean-up"]
+        expected_results: ClassVar[list] = [("addError", RuntimeError)]
 
         def test_something(self):
             raise RuntimeError("Error in test")
 
     class FailureInTest(Base):
-        expected_calls = ["setUp", "tearDown", "clean-up"]
-        expected_results = [("addFailure", AssertionError)]
+        expected_calls: ClassVar[list] = ["setUp", "tearDown", "clean-up"]
+        expected_results: ClassVar[list] = [("addFailure", AssertionError)]
 
         def test_something(self):
             self.fail("test failed")
 
     class ErrorInTearDown(Base):
-        expected_calls = ["setUp", "test", "clean-up"]
-        expected_results = [("addError", RuntimeError)]
+        expected_calls: ClassVar[list] = ["setUp", "test", "clean-up"]
+        expected_results: ClassVar[list] = [("addError", RuntimeError)]
 
         def tearDown(self):
             raise RuntimeError("Error in tearDown")
 
     class ErrorInCleanup(Base):
-        expected_calls = ["setUp", "test", "tearDown", "clean-up"]
-        expected_results = [("addError", ZeroDivisionError)]
+        expected_calls: ClassVar[list] = ["setUp", "test", "tearDown", "clean-up"]
+        expected_results: ClassVar[list] = [("addError", ZeroDivisionError)]
 
         def test_something(self):
             self.calls.append("test")
@@ -117,8 +119,8 @@ class X:
     class ExpectThatFailure(Base):
         """Calling expectThat with a failing match fails the test."""
 
-        expected_calls = ["setUp", "test", "tearDown", "clean-up"]
-        expected_results = [("addFailure", AssertionError)]
+        expected_calls: ClassVar[list] = ["setUp", "test", "tearDown", "clean-up"]
+        expected_results: ClassVar[list] = [("addFailure", AssertionError)]
 
         def test_something(self):
             self.calls.append("test")
@@ -151,6 +153,7 @@ class X:
 
 def make_integration_tests():
     from unittest import TestSuite
+
     from testtools import clone_test_with_new_id
 
     runners = [
@@ -174,7 +177,7 @@ def make_integration_tests():
         for test in tests:
             new_test = clone_test_with_new_id(
                 base_test,
-                "{}({}, {})".format(base_test.id(), runner_name, test.__name__),
+                f"{base_test.id()}({runner_name}, {test.__name__})",
             )
             new_test.test_factory = test
             new_test.runner = runner
@@ -894,8 +897,7 @@ class TestAssertFailsWith(NeedsTwistedTestCase):
             self.assertThat(
                 str(failure.value),
                 Equals(
-                    "RuntimeError, ZeroDivisionError not raised "
-                    "(%r returned)" % (marker,)
+                    f"RuntimeError, ZeroDivisionError not raised ({marker!r} returned)"
                 ),
             )
 

@@ -5,8 +5,8 @@ __all__ = [
     "AllMatch",
     "Annotate",
     "AnyMatch",
-    "MatchesAny",
     "MatchesAll",
+    "MatchesAny",
     "Not",
 ]
 
@@ -35,7 +35,9 @@ class MatchesAny:
         return MismatchesAll(results)
 
     def __str__(self):
-        return "MatchesAny(%s)" % ", ".join([str(matcher) for matcher in self.matchers])
+        return "MatchesAny({})".format(
+            ", ".join([str(matcher) for matcher in self.matchers])
+        )
 
 
 class MatchesAll:
@@ -53,7 +55,7 @@ class MatchesAll:
         self.first_only = options.get("first_only", False)
 
     def __str__(self):
-        return "MatchesAll(%s)" % ", ".join(map(str, self.matchers))
+        return "MatchesAll({})".format(", ".join(map(str, self.matchers)))
 
     def match(self, matchee):
         results = []
@@ -193,13 +195,11 @@ class AfterPreprocessing:
 
     def _str_preprocessor(self):
         if isinstance(self.preprocessor, types.FunctionType):
-            return "<function %s>" % self.preprocessor.__name__
+            return f"<function {self.preprocessor.__name__}>"
         return str(self.preprocessor)
 
     def __str__(self):
-        return "AfterPreprocessing({}, {})".format(
-            self._str_preprocessor(), self.matcher
-        )
+        return f"AfterPreprocessing({self._str_preprocessor()}, {self.matcher})"
 
     def match(self, value):
         after = self.preprocessor(value)
@@ -276,9 +276,7 @@ class MatchesPredicate(Matcher):
         self.message = message
 
     def __str__(self):
-        return "{}({!r}, {!r})".format(
-            self.__class__.__name__, self.predicate, self.message
-        )
+        return f"{self.__class__.__name__}({self.predicate!r}, {self.message!r})"
 
     def match(self, x):
         if not self.predicate(x):
@@ -348,16 +346,14 @@ class _MatchesPredicateWithParams(Matcher):
 
     def __str__(self):
         args = [str(arg) for arg in self.args]
-        kwargs = ["%s=%s" % item for item in self.kwargs.items()]
+        kwargs = ["{}={}".format(*item) for item in self.kwargs.items()]
         args = ", ".join(args + kwargs)
         if self.name is None:
-            name = "MatchesPredicateWithParams({!r}, {!r})".format(
-                self.predicate, self.message
-            )
+            name = f"MatchesPredicateWithParams({self.predicate!r}, {self.message!r})"
         else:
             name = self.name
         return f"{name}({args})"
 
     def match(self, x):
         if not self.predicate(x, *self.args, **self.kwargs):
-            return Mismatch(self.message.format(*((x,) + self.args), **self.kwargs))
+            return Mismatch(self.message.format(*((x, *self.args)), **self.kwargs))

@@ -3,8 +3,8 @@
 """Matchers for things related to the filesystem."""
 
 __all__ = [
-    "FileContains",
     "DirExists",
+    "FileContains",
     "FileExists",
     "HasPermissions",
     "PathExists",
@@ -130,7 +130,7 @@ class FileContains(Matcher):
             f.close()
 
     def __str__(self):
-        return "File at path exists and contains %s" % self.contents
+        return f"File at path exists and contains {self.contents}"
 
 
 class HasPermissions(Matcher):

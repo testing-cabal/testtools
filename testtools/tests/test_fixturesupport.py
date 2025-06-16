@@ -119,7 +119,7 @@ class TestFixtureSupport(TestCase):
             def setUp(self):
                 fixtures.Fixture.setUp(self)
                 self.addDetail("content", content.text_content("foobar"))
-                raise Exception()
+                raise Exception
 
         fixture = BrokenFixture()
 

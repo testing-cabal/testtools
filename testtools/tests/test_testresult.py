@@ -6,16 +6,15 @@ import codecs
 import datetime
 import doctest
 import io
-from itertools import chain
-from itertools import combinations
 import os
 import platform
-from queue import Queue
 import re
 import shutil
 import sys
 import tempfile
 import threading
+from itertools import chain, combinations
+from queue import Queue
 from unittest import TestSuite
 
 from testtools import (
@@ -34,11 +33,11 @@ from testtools import (
     StreamToExtendedDecorator,
     StreamToQueue,
     Tagger,
+    TestByTestResult,
     TestCase,
     TestControl,
     TestResult,
     TestResultDecorator,
-    TestByTestResult,
     TextTestResult,
     ThreadsafeForwardingResult,
     TimestampingStreamResult,
@@ -50,11 +49,11 @@ from testtools.compat import (
 )
 from testtools.content import (
     Content,
+    TracebackContent,
     content_from_stream,
     text_content,
-    TracebackContent,
 )
-from testtools.content_type import ContentType, UTF8_TEXT
+from testtools.content_type import UTF8_TEXT, ContentType
 from testtools.helpers import try_import
 from testtools.matchers import (
     AllMatch,
@@ -67,23 +66,25 @@ from testtools.matchers import (
     MatchesRegex,
     Raises,
 )
-from testtools.tests.helpers import (
-    an_exc_info,
-    FullStackRunTest,
-    LoggingResult,
-    run_with_stack_hidden,
-)
 from testtools.testresult.doubles import (
+    ExtendedTestResult,
     Python26TestResult,
     Python27TestResult,
-    ExtendedTestResult,
-    StreamResult as LoggingStreamResult,
     TwistedTestResult,
+)
+from testtools.testresult.doubles import (
+    StreamResult as LoggingStreamResult,
 )
 from testtools.testresult.real import (
     _details_to_str,
     _merge_tags,
     utc,
+)
+from testtools.tests.helpers import (
+    FullStackRunTest,
+    LoggingResult,
+    an_exc_info,
+    run_with_stack_hidden,
 )
 
 testresources = try_import("testresources")
@@ -554,7 +555,7 @@ class TestStreamResultContract:
                 result.status(test_id=arg[0], test_status=arg[1], **kwargs)
 
     def _power_set(self, iterable):
-        "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
+        """powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"""
         s = list(iterable)
         param_dicts = []
         combos = (combinations(s, r) for r in range(len(s) + 1))
@@ -1447,7 +1448,8 @@ class TestTestResult(TestCase):
                 "    return fn(*args, **kwargs)\n..."
                 '  File "...testtools...testcase.py", line ..., in _run_test_method\n'
                 "    return self._get_test_method()()\n..."
-                '  File "...testtools...tests...test_testresult.py", line ..., in error\n'
+                '  File "...testtools...tests...test_testresult.py", '
+                "line ..., in error\n"
                 "    1 / 0\n..."
                 "ZeroDivisionError: ...\n",
                 doctest.ELLIPSIS | doctest.REPORT_UDIFF,
@@ -1462,7 +1464,8 @@ class TestTestResult(TestCase):
             result.errors[0][1],
             DocTestMatches(
                 "Traceback (most recent call last):\n"
-                '  File "...testtools...tests...test_testresult.py", line ..., in error\n'
+                '  File "...testtools...tests...test_testresult.py", '
+                "line ..., in error\n"
                 "    1 / 0\n..."
                 "ZeroDivisionError: ...\n",
                 doctest.ELLIPSIS,
@@ -1477,7 +1480,8 @@ class TestTestResult(TestCase):
             result.failures[0][1],
             DocTestMatches(
                 "Traceback (most recent call last):\n"
-                '  File "...testtools...tests...test_testresult.py", line ..., in mismatch\n'
+                '  File "...testtools...tests...test_testresult.py", '
+                "line ..., in mismatch\n"
                 "    self.assertEqual(1, 2)\n"
                 "...MismatchError: 1 != 2\n",
                 doctest.ELLIPSIS,
@@ -1514,7 +1518,8 @@ class TestTestResult(TestCase):
                 "    return self._get_test_method()()\n..."
                 "    result = ...\n"
                 "    self = ...\n"
-                '  File "...testtools...tests...test_testresult.py", line ..., in error\n'
+                '  File "...testtools...tests...test_testresult.py", '
+                "line ..., in error\n"
                 "    1 / 0\n..."
                 "    a = 1\n"
                 "    self = ...\n"
@@ -1540,10 +1545,8 @@ class TestMultiTestResult(TestCase):
 
     def test_repr(self):
         self.assertEqual(
-            "<MultiTestResult ({!r}, {!r})>".format(
-                ExtendedToOriginalDecorator(self.result1),
-                ExtendedToOriginalDecorator(self.result2),
-            ),
+            f"<MultiTestResult ({ExtendedToOriginalDecorator(self.result1)!r}, "
+            f"{ExtendedToOriginalDecorator(self.result2)!r})>",
             repr(self.multiResult),
         )
 
@@ -2848,7 +2851,7 @@ class TestNonAsciiResults(TestCase):
             # the file without closing it which breaks non-refcounted pythons
             codecs.lookup(encoding)
         except LookupError:
-            self.skipTest("Encoding unsupported by implementation: %r" % encoding)
+            self.skipTest(f"Encoding unsupported by implementation: {encoding!r}")
         f = codecs.open(os.path.join(self.dir, name + ".py"), "w", encoding)
         try:
             f.write(contents)
@@ -2871,12 +2874,12 @@ class TestNonAsciiResults(TestCase):
             # Older Python 2 versions don't see a coding declaration in a
             # docstring so it has to be in a comment, but then we can't
             # workaround bug: <http://ironpython.codeplex.com/workitem/26940>
-            "# coding: %s\n"
+            f"# coding: {coding}\n"
             "import testtools\n"
-            "%s\n"
+            f"{modulelevel}\n"
             "class Test(testtools.TestCase):\n"
             "    def runTest(self):\n"
-            "        %s\n" % (coding, modulelevel, testline),
+            f"        {testline}\n",
         )
 
     def _run_external_case(self):
@@ -2899,7 +2902,7 @@ class TestNonAsciiResults(TestCase):
                     return u, u
             except (LookupError, UnicodeError):
                 pass
-        self.skipTest("Could not find a sample text for encoding: %r" % encoding)
+        self.skipTest(f"Could not find a sample text for encoding: {encoding!r}")
 
     def _as_output(self, text):
         return text
@@ -2907,15 +2910,13 @@ class TestNonAsciiResults(TestCase):
     def test_non_ascii_failure_string(self):
         """Assertion contents can be non-ascii and should get decoded"""
         text, raw = self._get_sample_text(_get_exception_encoding())
-        textoutput = self._test_external_case("self.fail(%s)" % ascii(raw))
+        textoutput = self._test_external_case(f"self.fail({raw!a})")
         self.assertIn(self._as_output(text), textoutput)
 
     def test_non_ascii_failure_string_via_exec(self):
         """Assertion via exec can be non-ascii and still gets decoded"""
         text, raw = self._get_sample_text(_get_exception_encoding())
-        textoutput = self._test_external_case(
-            testline='exec ("self.fail(%s)")' % ascii(raw)
-        )
+        textoutput = self._test_external_case(testline=f'exec ("self.fail({raw!a})")')
         self.assertIn(self._as_output(text), textoutput)
 
     def test_control_characters_in_failure_string(self):
@@ -2943,16 +2944,16 @@ class TestNonAsciiResults(TestCase):
         """A terminal raw backslash in an encoded string is weird but fine"""
         example_text = "\u5341"
         textoutput = self._test_external_case(
-            coding="shift_jis", testline="self.fail('%s')" % example_text
+            coding="shift_jis", testline=f"self.fail('{example_text}')"
         )
         output_text = example_text
-        self.assertIn(self._as_output("AssertionError: %s" % output_text), textoutput)
+        self.assertIn(self._as_output(f"AssertionError: {output_text}"), textoutput)
 
     def test_file_comment_iso2022_jp(self):
         """Control character escapes must be preserved if valid encoding"""
         example_text, _ = self._get_sample_text("iso2022_jp")
         textoutput = self._test_external_case(
-            coding="iso2022_jp", testline="self.fail('Simple') # %s" % example_text
+            coding="iso2022_jp", testline=f"self.fail('Simple') # {example_text}"
         )
         self.assertIn(self._as_output(example_text), textoutput)
 
@@ -2967,7 +2968,7 @@ class TestNonAsciiResults(TestCase):
         )
         textoutput = self._test_external_case(
             modulelevel=exception_class,
-            testline="raise FancyError(%s)" % ascii(example_text),
+            testline=f"raise FancyError({example_text!a})",
         )
         self.assertIn(self._as_output(example_text), textoutput)
 
@@ -3036,13 +3037,13 @@ class TestNonAsciiResults(TestCase):
         text, raw = self._get_sample_text("iso-8859-1")
         textoutput = self._setup_external_case("import bad")
         self._write_module(
-            "bad", "iso-8859-1", "# coding: iso-8859-1\n! = 0 # %s\n" % text
+            "bad", "iso-8859-1", f"# coding: iso-8859-1\n! = 0 # {text}\n"
         )
         textoutput = self._run_external_case()
         self.assertIn(
             self._as_output(
                 #'bad.py", line 2\n'
-                "    ! = 0 # %s\n    ^\nSyntaxError: " % (text,)
+                f"    ! = 0 # {text}\n    ^\nSyntaxError: "
             ),
             textoutput,
         )
@@ -3052,7 +3053,7 @@ class TestNonAsciiResults(TestCase):
         text, raw = self._get_sample_text("iso-8859-5")
         textoutput = self._setup_external_case("import bad")
         self._write_module(
-            "bad", "iso-8859-5", "# coding: iso-8859-5\n%% = 0 # %s\n" % text
+            "bad", "iso-8859-5", f"# coding: iso-8859-5\n% = 0 # {text}\n"
         )
         textoutput = self._run_external_case()
         self.assertThat(
@@ -3074,7 +3075,7 @@ class TestNonAsciiResults(TestCase):
         """Syntax error on a euc_jp line shows the line decoded"""
         text, raw = self._get_sample_text("euc_jp")
         textoutput = self._setup_external_case("import bad")
-        self._write_module("bad", "euc_jp", "# coding: euc_jp\n$ = 0 # %s\n" % text)
+        self._write_module("bad", "euc_jp", f"# coding: euc_jp\n$ = 0 # {text}\n")
         textoutput = self._run_external_case()
         # pypy uses cpython's multibyte codecs so has their behavior here
         if self._is_pypy:
@@ -3095,11 +3096,10 @@ class TestNonAsciiResults(TestCase):
         """Syntax error on a utf-8 line shows the line decoded"""
         text, raw = self._get_sample_text("utf-8")
         textoutput = self._setup_external_case("import bad")
-        self._write_module("bad", "utf-8", "\ufeff^ = 0 # %s\n" % text)
+        self._write_module("bad", "utf-8", f"\ufeff^ = 0 # {text}\n")
         textoutput = self._run_external_case()
         # Python 3.9 no longer prints the '\ufeff'
-        if sys.version_info >= (3, 9):
-            textoutput = textoutput.replace("\ufeff", "")
+        textoutput = textoutput.replace("\ufeff", "")
         self.assertThat(
             textoutput,
             MatchesRegex(

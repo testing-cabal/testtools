@@ -1,28 +1,29 @@
 # Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
 
 import re
+from typing import ClassVar
 
 from testtools import TestCase
 from testtools.compat import (
-    text_repr,
     _b,
+    text_repr,
 )
 from testtools.matchers._basic import (
-    _BinaryMismatch,
     Contains,
     DoesNotEndWith,
     DoesNotStartWith,
     EndsWith,
     Equals,
+    GreaterThan,
+    HasLength,
     Is,
     IsInstance,
     LessThan,
-    GreaterThan,
-    HasLength,
     MatchesRegex,
     NotEquals,
     SameMembers,
     StartsWith,
+    _BinaryMismatch,
 )
 from testtools.tests.helpers import FullStackRunTest
 from testtools.tests.matchers.helpers import TestMatchersInterface
@@ -114,12 +115,15 @@ class Test_BinaryMismatch(TestCase):
 
 class TestEqualsInterface(TestCase, TestMatchersInterface):
     matches_matcher = Equals(1)
-    matches_matches = [1]
-    matches_mismatches = [2]
+    matches_matches: ClassVar[list] = [1]
+    matches_mismatches: ClassVar[list] = [2]
 
-    str_examples = [("Equals(1)", Equals(1)), ("Equals('1')", Equals("1"))]
+    str_examples: ClassVar[list] = [
+        ("Equals(1)", Equals(1)),
+        ("Equals('1')", Equals("1")),
+    ]
 
-    describe_examples = [
+    describe_examples: ClassVar[list] = [
         ("2 != 1", 2, Equals(1)),
         (
             (
@@ -135,12 +139,15 @@ class TestEqualsInterface(TestCase, TestMatchersInterface):
 
 class TestNotEqualsInterface(TestCase, TestMatchersInterface):
     matches_matcher = NotEquals(1)
-    matches_matches = [2]
-    matches_mismatches = [1]
+    matches_matches: ClassVar[list] = [2]
+    matches_mismatches: ClassVar[list] = [1]
 
-    str_examples = [("NotEquals(1)", NotEquals(1)), ("NotEquals('1')", NotEquals("1"))]
+    str_examples: ClassVar[list] = [
+        ("NotEquals(1)", NotEquals(1)),
+        ("NotEquals('1')", NotEquals("1")),
+    ]
 
-    describe_examples = [("1 == 1", 1, NotEquals(1))]
+    describe_examples: ClassVar[list] = [("1 == 1", 1, NotEquals(1))]
 
 
 class TestIsInterface(TestCase, TestMatchersInterface):
@@ -148,12 +155,12 @@ class TestIsInterface(TestCase, TestMatchersInterface):
     bar = object()
 
     matches_matcher = Is(foo)
-    matches_matches = [foo]
-    matches_mismatches = [bar, 1]
+    matches_matches: ClassVar[list] = [foo]
+    matches_mismatches: ClassVar[list] = [bar, 1]
 
-    str_examples = [("Is(2)", Is(2))]
+    str_examples: ClassVar[list] = [("Is(2)", Is(2))]
 
-    describe_examples = [("2 is not 1", 2, Is(1))]
+    describe_examples: ClassVar[list] = [("2 is not 1", 2, Is(1))]
 
 
 class TestIsInstanceInterface(TestCase, TestMatchersInterface):
@@ -161,15 +168,15 @@ class TestIsInstanceInterface(TestCase, TestMatchersInterface):
         pass
 
     matches_matcher = IsInstance(Foo)
-    matches_matches = [Foo()]
-    matches_mismatches = [object(), 1, Foo]
+    matches_matches: ClassVar[list] = [Foo()]
+    matches_mismatches: ClassVar[list] = [object(), 1, Foo]
 
-    str_examples = [
+    str_examples: ClassVar[list] = [
         ("IsInstance(str)", IsInstance(str)),
         ("IsInstance(str, int)", IsInstance(str, int)),
     ]
 
-    describe_examples = [
+    describe_examples: ClassVar[list] = [
         ("'foo' is not an instance of int", "foo", IsInstance(int)),
         (
             "'foo' is not an instance of any of (int, type)",
@@ -181,14 +188,14 @@ class TestIsInstanceInterface(TestCase, TestMatchersInterface):
 
 class TestLessThanInterface(TestCase, TestMatchersInterface):
     matches_matcher = LessThan(4)
-    matches_matches = [-5, 3]
-    matches_mismatches = [4, 5, 5000]
+    matches_matches: ClassVar[list] = [-5, 3]
+    matches_mismatches: ClassVar[list] = [4, 5, 5000]
 
-    str_examples = [
+    str_examples: ClassVar[list] = [
         ("LessThan(12)", LessThan(12)),
     ]
 
-    describe_examples = [
+    describe_examples: ClassVar[list] = [
         ("5 >= 4", 5, LessThan(4)),
         ("4 >= 4", 4, LessThan(4)),
     ]
@@ -196,14 +203,14 @@ class TestLessThanInterface(TestCase, TestMatchersInterface):
 
 class TestGreaterThanInterface(TestCase, TestMatchersInterface):
     matches_matcher = GreaterThan(4)
-    matches_matches = [5, 8]
-    matches_mismatches = [-2, 0, 4]
+    matches_matches: ClassVar[list] = [5, 8]
+    matches_mismatches: ClassVar[list] = [-2, 0, 4]
 
-    str_examples = [
+    str_examples: ClassVar[list] = [
         ("GreaterThan(12)", GreaterThan(12)),
     ]
 
-    describe_examples = [
+    describe_examples: ClassVar[list] = [
         ("4 <= 5", 4, GreaterThan(5)),
         ("4 <= 4", 4, GreaterThan(4)),
     ]
@@ -211,15 +218,15 @@ class TestGreaterThanInterface(TestCase, TestMatchersInterface):
 
 class TestContainsInterface(TestCase, TestMatchersInterface):
     matches_matcher = Contains("foo")
-    matches_matches = ["foo", "afoo", "fooa"]
-    matches_mismatches = ["f", "fo", "oo", "faoo", "foao"]
+    matches_matches: ClassVar[list] = ["foo", "afoo", "fooa"]
+    matches_mismatches: ClassVar[list] = ["f", "fo", "oo", "faoo", "foao"]
 
-    str_examples = [
+    str_examples: ClassVar[list] = [
         ("Contains(1)", Contains(1)),
         ("Contains('foo')", Contains("foo")),
     ]
 
-    describe_examples = [("1 not in 2", 2, Contains(1))]
+    describe_examples: ClassVar[list] = [("1 not in 2", 2, Contains(1))]
 
 
 class DoesNotStartWithTests(TestCase):
@@ -234,7 +241,7 @@ class DoesNotStartWithTests(TestCase):
         suffix = "B\xa7"
         mismatch = DoesNotStartWith(string, suffix)
         self.assertEqual(
-            "{} does not start with {}.".format(text_repr(string), text_repr(suffix)),
+            f"{text_repr(string)} does not start with {text_repr(suffix)}.",
             mismatch.describe(),
         )
 
@@ -295,7 +302,7 @@ class DoesNotEndWithTests(TestCase):
         suffix = "B\xa7"
         mismatch = DoesNotEndWith(string, suffix)
         self.assertEqual(
-            "{} does not end with {}.".format(text_repr(string), text_repr(suffix)),
+            f"{text_repr(string)} does not end with {text_repr(suffix)}.",
             mismatch.describe(),
         )
 
@@ -346,25 +353,27 @@ class EndsWithTests(TestCase):
 
 class TestSameMembers(TestCase, TestMatchersInterface):
     matches_matcher = SameMembers([1, 1, 2, 3, {"foo": "bar"}])
-    matches_matches = [
+    matches_matches: ClassVar[list] = [
         [1, 1, 2, 3, {"foo": "bar"}],
         [3, {"foo": "bar"}, 1, 2, 1],
         [3, 2, 1, {"foo": "bar"}, 1],
         (2, {"foo": "bar"}, 3, 1, 1),
     ]
-    matches_mismatches = [
+    matches_mismatches: ClassVar[list] = [
         {1, 2, 3},
         [1, 1, 2, 3, 5],
         [1, 2, 3, {"foo": "bar"}],
         "foo",
     ]
 
-    describe_examples = [
+    describe_examples: ClassVar[list] = [
         (
             (
                 "elements differ:\n"
-                "reference = ['apple', 'orange', 'canteloupe', 'watermelon', 'lemon', 'banana']\n"
-                "actual    = ['orange', 'apple', 'banana', 'sparrow', 'lemon', 'canteloupe']\n"
+                "reference = ['apple', 'orange', 'canteloupe', 'watermelon', "
+                "'lemon', 'banana']\n"
+                "actual    = ['orange', 'apple', 'banana', 'sparrow', "
+                "'lemon', 'canteloupe']\n"
                 ": \n"
                 "missing:    ['watermelon']\n"
                 "extra:      ['sparrow']"
@@ -390,17 +399,17 @@ class TestSameMembers(TestCase, TestMatchersInterface):
         ),
     ]
 
-    str_examples = [
+    str_examples: ClassVar[list] = [
         ("SameMembers([1, 2, 3])", SameMembers([1, 2, 3])),
     ]
 
 
 class TestMatchesRegex(TestCase, TestMatchersInterface):
     matches_matcher = MatchesRegex("a|b")
-    matches_matches = ["a", "b"]
-    matches_mismatches = ["c"]
+    matches_matches: ClassVar[list] = ["a", "b"]
+    matches_mismatches: ClassVar[list] = ["c"]
 
-    str_examples = [
+    str_examples: ClassVar[list] = [
         ("MatchesRegex('a|b')", MatchesRegex("a|b")),
         ("MatchesRegex('a|b', re.M)", MatchesRegex("a|b", re.M)),
         ("MatchesRegex('a|b', re.I|re.M)", MatchesRegex("a|b", re.I | re.M)),
@@ -408,7 +417,7 @@ class TestMatchesRegex(TestCase, TestMatchersInterface):
         ("MatchesRegex({!r})".format("\xa7"), MatchesRegex("\xa7")),
     ]
 
-    describe_examples = [
+    describe_examples: ClassVar[list] = [
         ("'c' does not match /a|b/", "c", MatchesRegex("a|b")),
         ("'c' does not match /a\\d/", "c", MatchesRegex(r"a\d")),
         (
@@ -422,14 +431,14 @@ class TestMatchesRegex(TestCase, TestMatchersInterface):
 
 class TestHasLength(TestCase, TestMatchersInterface):
     matches_matcher = HasLength(2)
-    matches_matches = [[1, 2]]
-    matches_mismatches = [[], [1], [3, 2, 1]]
+    matches_matches: ClassVar[list] = [[1, 2]]
+    matches_mismatches: ClassVar[list] = [[], [1], [3, 2, 1]]
 
-    str_examples = [
+    str_examples: ClassVar[list] = [
         ("HasLength(2)", HasLength(2)),
     ]
 
-    describe_examples = [
+    describe_examples: ClassVar[list] = [
         ("len([]) != 1", [], HasLength(1)),
     ]
 

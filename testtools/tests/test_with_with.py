@@ -9,8 +9,8 @@ from testtools import (
 )
 from testtools.matchers import (
     AfterPreprocessing,
-    Equals,
     EndsWith,
+    Equals,
 )
 
 

@@ -3,22 +3,22 @@
 """Test ConcurrentTestSuite and related things."""
 
 import doctest
-from pprint import pformat
 import unittest
+from pprint import pformat
 
 from testtools import (
-    ConcurrentTestSuite,
     ConcurrentStreamTestSuite,
-    iterate_tests,
+    ConcurrentTestSuite,
     PlaceHolder,
     TestByTestResult,
     TestCase,
+    iterate_tests,
 )
 from testtools.helpers import try_import
 from testtools.matchers import DocTestMatches, Equals
 from testtools.testresult.doubles import StreamResult as LoggingStream
-from testtools.testsuite import FixtureSuite, sorted_tests
 from testtools.tests.helpers import LoggingResult
+from testtools.testsuite import FixtureSuite, sorted_tests
 
 FunctionFixture = try_import("fixtures.FunctionFixture")
 

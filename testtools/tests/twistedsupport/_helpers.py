@@ -4,8 +4,8 @@ __all__ = [
     "NeedsTwistedTestCase",
 ]
 
-from testtools.helpers import try_import
 from testtools import TestCase
+from testtools.helpers import try_import
 
 defer = try_import("twisted.internet.defer")
 

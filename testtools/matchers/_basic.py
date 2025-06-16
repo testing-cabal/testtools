@@ -16,8 +16,8 @@ __all__ = [
 ]
 
 import operator
-from pprint import pformat
 import re
+from pprint import pformat
 
 from ..compat import (
     text_repr,
@@ -34,8 +34,7 @@ from ._impl import (
 
 
 def _format(thing):
-    """
-    Blocks of text with newlines are formatted as triple-quote
+    """Blocks of text with newlines are formatted as triple-quote
     strings. Everything else is pretty-printed.
     """
     if isinstance(thing, (str, bytes)):
@@ -74,8 +73,10 @@ class _BinaryMismatch(Mismatch):
         actual = repr(self._actual)
         reference = repr(self._reference)
         if len(actual) + len(reference) > 70:
-            return "{}:\nreference = {}\nactual    = {}\n".format(
-                self._mismatch_string, _format(self._reference), _format(self._actual)
+            return (
+                f"{self._mismatch_string}:\n"
+                f"reference = {_format(self._reference)}\n"
+                f"actual    = {_format(self._actual)}\n"
             )
         else:
             if self._reference_on_right:
@@ -164,8 +165,9 @@ class SameMembers(Matcher):
         if expected_only == observed_only == []:
             return
         return PostfixedMismatch(
-            "\nmissing:    {}\nextra:      {}".format(
-                _format(expected_only), _format(observed_only)
+            (
+                f"\nmissing:    {_format(expected_only)}\n"
+                f"extra:      {_format(observed_only)}"
             ),
             _BinaryMismatch(observed, "elements differ", self.expected),
         )
@@ -182,8 +184,8 @@ class DoesNotStartWith(Mismatch):
         self.expected = expected
 
     def describe(self):
-        return "{} does not start with {}.".format(
-            text_repr(self.matchee), text_repr(self.expected)
+        return (
+            f"{text_repr(self.matchee)} does not start with {text_repr(self.expected)}."
         )
 
 
@@ -217,8 +219,8 @@ class DoesNotEndWith(Mismatch):
         self.expected = expected
 
     def describe(self):
-        return "{} does not end with {}.".format(
-            text_repr(self.matchee), text_repr(self.expected)
+        return (
+            f"{text_repr(self.matchee)} does not end with {text_repr(self.expected)}."
         )
 
 
@@ -272,7 +274,9 @@ class NotAnInstance(Mismatch):
         if len(self.types) == 1:
             typestr = self.types[0].__name__
         else:
-            typestr = "any of (%s)" % ", ".join(type.__name__ for type in self.types)
+            typestr = "any of ({})".format(
+                ", ".join(type.__name__ for type in self.types)
+            )
         return f"'{self.matchee}' is not an instance of {typestr}"
 
 
@@ -321,13 +325,13 @@ class MatchesRegex:
         self.flags = flags
 
     def __str__(self):
-        args = ["%r" % self.pattern]
+        args = [f"{self.pattern!r}"]
         flag_arg = []
         # dir() sorts the attributes for us, so we don't need to do it again.
         for flag in dir(re):
             if len(flag) == 1:
                 if self.flags & getattr(re, flag):
-                    flag_arg.append("re.%s" % flag)
+                    flag_arg.append(f"re.{flag}")
         if flag_arg:
             args.append("|".join(flag_arg))
         return "{}({})".format(self.__class__.__name__, ", ".join(args))

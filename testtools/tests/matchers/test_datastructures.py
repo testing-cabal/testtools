@@ -4,6 +4,7 @@ import doctest
 import io
 import re
 import sys
+from typing import ClassVar
 
 from testtools import TestCase
 from testtools.matchers import (
@@ -16,8 +17,8 @@ from testtools.matchers import (
 from testtools.matchers._datastructures import (
     ContainsAll,
     MatchesListwise,
-    MatchesStructure,
     MatchesSetwise,
+    MatchesStructure,
 )
 from testtools.tests.helpers import FullStackRunTest
 from testtools.tests.matchers.helpers import TestMatchersInterface
@@ -40,7 +41,7 @@ class TestMatchesListwise(TestCase):
     def test_docstring(self):
         failure_count, output = run_doctest(MatchesListwise, "MatchesListwise")
         if failure_count:
-            self.fail("Doctest failed with %s" % output)
+            self.fail(f"Doctest failed with {output}")
 
 
 class TestMatchesStructure(TestCase, TestMatchersInterface):
@@ -50,14 +51,14 @@ class TestMatchesStructure(TestCase, TestMatchersInterface):
             self.y = y
 
     matches_matcher = MatchesStructure(x=Equals(1), y=Equals(2))
-    matches_matches = [SimpleClass(1, 2)]
-    matches_mismatches = [
+    matches_matches: ClassVar[list] = [SimpleClass(1, 2)]
+    matches_mismatches: ClassVar[list] = [
         SimpleClass(2, 2),
         SimpleClass(1, 1),
         SimpleClass(3, 3),
     ]
 
-    str_examples = [
+    str_examples: ClassVar[list] = [
         ("MatchesStructure(x=Equals(1))", MatchesStructure(x=Equals(1))),
         ("MatchesStructure(y=Equals(2))", MatchesStructure(y=Equals(2))),
         (
@@ -66,7 +67,7 @@ class TestMatchesStructure(TestCase, TestMatchersInterface):
         ),
     ]
 
-    describe_examples = [
+    describe_examples: ClassVar[list] = [
         (
             """\
 Differences: [
@@ -214,14 +215,18 @@ class TestMatchesSetwise(TestCase):
 
 class TestContainsAllInterface(TestCase, TestMatchersInterface):
     matches_matcher = ContainsAll(["foo", "bar"])
-    matches_matches = [["foo", "bar"], ["foo", "z", "bar"], ["bar", "foo"]]
-    matches_mismatches = [["f", "g"], ["foo", "baz"], []]
+    matches_matches: ClassVar[list] = [
+        ["foo", "bar"],
+        ["foo", "z", "bar"],
+        ["bar", "foo"],
+    ]
+    matches_mismatches: ClassVar[list] = [["f", "g"], ["foo", "baz"], []]
 
-    str_examples = [
+    str_examples: ClassVar[list] = [
         ("MatchesAll(Contains('foo'), Contains('bar'))", ContainsAll(["foo", "bar"])),
     ]
 
-    describe_examples = [
+    describe_examples: ClassVar[list] = [
         (
             """Differences: [
 'baz' not in 'foo'

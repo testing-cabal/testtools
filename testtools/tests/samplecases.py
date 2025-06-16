@@ -240,18 +240,14 @@ def _test_error_traceback(case, traceback_matcher):
 A list that can be used with testscenarios to test every deterministic sample
 case that we have.
 """
-deterministic_sample_cases_scenarios = multiply_scenarios(
-    _make_behavior_scenarios("set_up"),
-    _make_behavior_scenarios("body"),
-    _make_behavior_scenarios("tear_down"),
-    _make_behavior_scenarios("cleanup"),
-) + [
-    (
-        "tear_down_fails_after_upcall",
-        {
-            "post_tear_down_behavior": _error,
-        },
+deterministic_sample_cases_scenarios = [
+    *multiply_scenarios(
+        _make_behavior_scenarios("set_up"),
+        _make_behavior_scenarios("body"),
+        _make_behavior_scenarios("tear_down"),
+        _make_behavior_scenarios("cleanup"),
     ),
+    ("tear_down_fails_after_upcall", {"post_tear_down_behavior": _error}),
 ]
 
 

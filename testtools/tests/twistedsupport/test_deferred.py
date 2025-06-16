@@ -8,8 +8,8 @@ from testtools.matchers import (
     MatchesException,
     Raises,
 )
-from ._helpers import NeedsTwistedTestCase
 
+from ._helpers import NeedsTwistedTestCase
 
 DeferredNotFired = try_import("testtools.twistedsupport._deferred.DeferredNotFired")
 extract_result = try_import("testtools.twistedsupport._deferred.extract_result")

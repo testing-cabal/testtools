@@ -1,6 +1,7 @@
 # Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
 
 import sys
+from typing import ClassVar
 
 from testtools import TestCase
 from testtools.matchers import (
@@ -28,30 +29,25 @@ class TestMatchesExceptionInstanceInterface(TestCase, TestMatchersInterface):
     error_foo = make_error(ValueError, "foo")
     error_bar = make_error(ValueError, "bar")
     error_base_foo = make_error(Exception, "foo")
-    matches_matches = [error_foo]
-    matches_mismatches = [error_bar, error_base_foo]
+    matches_matches: ClassVar[list] = [error_foo]
+    matches_mismatches: ClassVar[list] = [error_bar, error_base_foo]
 
-    if sys.version_info >= (3, 7):
-        # exception's repr has changed
-        _e = ""
-    else:
-        _e = ","
+    _e = ""
 
-    str_examples = [
+    str_examples: ClassVar[list] = [
         (
-            "MatchesException(Exception('foo'%s))" % _e,
+            f"MatchesException(Exception('foo'{_e}))",
             MatchesException(Exception("foo")),
         )
     ]
-    describe_examples = [
+    describe_examples: ClassVar[list] = [
         (
             f"{Exception!r} is not a {ValueError!r}",
             error_base_foo,
             MatchesException(ValueError("foo")),
         ),
         (
-            "ValueError('bar'%s) has different arguments to ValueError('foo'%s)."
-            % (_e, _e),
+            f"ValueError('bar'{_e}) has different arguments to ValueError('foo'{_e}).",
             error_bar,
             MatchesException(ValueError("foo")),
         ),
@@ -63,11 +59,13 @@ class TestMatchesExceptionTypeInterface(TestCase, TestMatchersInterface):
     error_foo = make_error(ValueError, "foo")
     error_sub = make_error(UnicodeError, "bar")
     error_base_foo = make_error(Exception, "foo")
-    matches_matches = [error_foo, error_sub]
-    matches_mismatches = [error_base_foo]
+    matches_matches: ClassVar[list] = [error_foo, error_sub]
+    matches_mismatches: ClassVar[list] = [error_base_foo]
 
-    str_examples = [("MatchesException(%r)" % Exception, MatchesException(Exception))]
-    describe_examples = [
+    str_examples: ClassVar[list] = [
+        (f"MatchesException({Exception!r})", MatchesException(Exception))
+    ]
+    describe_examples: ClassVar[list] = [
         (
             f"{Exception!r} is not a {ValueError!r}",
             error_base_foo,
@@ -81,13 +79,13 @@ class TestMatchesExceptionTypeReInterface(TestCase, TestMatchersInterface):
     error_foo = make_error(ValueError, "foo")
     error_sub = make_error(UnicodeError, "foo")
     error_bar = make_error(ValueError, "bar")
-    matches_matches = [error_foo, error_sub]
-    matches_mismatches = [error_bar]
+    matches_matches: ClassVar[list] = [error_foo, error_sub]
+    matches_mismatches: ClassVar[list] = [error_bar]
 
-    str_examples = [
-        ("MatchesException(%r)" % Exception, MatchesException(Exception, "fo."))
+    str_examples: ClassVar[list] = [
+        (f"MatchesException({Exception!r})", MatchesException(Exception, "fo."))
     ]
-    describe_examples = [
+    describe_examples: ClassVar[list] = [
         ("'bar' does not match /fo./", error_bar, MatchesException(ValueError, "fo.")),
     ]
 
@@ -99,13 +97,13 @@ class TestMatchesExceptionTypeMatcherInterface(TestCase, TestMatchersInterface):
     error_foo = make_error(ValueError, "foo")
     error_sub = make_error(UnicodeError, "foo")
     error_bar = make_error(ValueError, "bar")
-    matches_matches = [error_foo, error_sub]
-    matches_mismatches = [error_bar]
+    matches_matches: ClassVar[list] = [error_foo, error_sub]
+    matches_mismatches: ClassVar[list] = [error_bar]
 
-    str_examples = [
-        ("MatchesException(%r)" % Exception, MatchesException(Exception, Equals("foo")))
+    str_examples: ClassVar[list] = [
+        (f"MatchesException({Exception!r})", MatchesException(Exception, Equals("foo")))
     ]
-    describe_examples = [
+    describe_examples: ClassVar[list] = [
         (f"{error_bar[1]!r} != 5", error_bar, MatchesException(ValueError, Equals(5))),
     ]
 
@@ -116,14 +114,14 @@ class TestRaisesInterface(TestCase, TestMatchersInterface):
     def boom():
         raise Exception("foo")
 
-    matches_matches = [boom]
-    matches_mismatches = [lambda: None]
+    matches_matches: ClassVar[list] = [boom]
+    matches_mismatches: ClassVar[list] = [lambda: None]
 
     # Tricky to get function objects to render constantly, and the interfaces
     # helper uses assertEqual rather than (for instance) DocTestMatches.
-    str_examples = []
+    str_examples: ClassVar[list] = []
 
-    describe_examples = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestRaisesExceptionMatcherInterface(TestCase, TestMatchersInterface):
@@ -135,14 +133,14 @@ class TestRaisesExceptionMatcherInterface(TestCase, TestMatchersInterface):
     def boom_foo():
         raise Exception("foo")
 
-    matches_matches = [boom_foo]
-    matches_mismatches = [lambda: None, boom_bar]
+    matches_matches: ClassVar[list] = [boom_foo]
+    matches_mismatches: ClassVar[list] = [lambda: None, boom_bar]
 
     # Tricky to get function objects to render constantly, and the interfaces
     # helper uses assertEqual rather than (for instance) DocTestMatches.
-    str_examples = []
+    str_examples: ClassVar[list] = []
 
-    describe_examples = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestRaisesBaseTypes(TestCase):

@@ -4,6 +4,8 @@ __all__ = [
     "KeysEqual",
 ]
 
+from typing import ClassVar
+
 from ..helpers import (
     dict_subtract,
     filter_values,
@@ -11,8 +13,8 @@ from ..helpers import (
 )
 from ._higherorder import (
     AnnotatedMismatch,
-    PrefixedMismatch,
     MismatchesAll,
+    PrefixedMismatch,
 )
 from ._impl import Matcher, Mismatch
 
@@ -131,7 +133,9 @@ class _SuperDictOf(Matcher):
 
 
 def _format_matcher_dict(matchers):
-    return "{%s}" % (", ".join(sorted(f"{k!r}: {v}" for k, v in matchers.items())))
+    return "{{{}}}".format(
+        ", ".join(sorted(f"{k!r}: {v}" for k, v in matchers.items()))
+    )
 
 
 class _CombinedMatcher(Matcher):
@@ -144,7 +148,7 @@ class _CombinedMatcher(Matcher):
     Not **entirely** dissimilar from ``MatchesAll``.
     """
 
-    matcher_factories = {}
+    matcher_factories: ClassVar[dict] = {}
 
     def __init__(self, expected):
         super().__init__()
@@ -154,9 +158,7 @@ class _CombinedMatcher(Matcher):
         return repr(expected)
 
     def __str__(self):
-        return "{}({})".format(
-            self.__class__.__name__, self.format_expected(self._expected)
-        )
+        return f"{self.__class__.__name__}({self.format_expected(self._expected)})"
 
     def match(self, observed):
         matchers = {k: v(self._expected) for k, v in self.matcher_factories.items()}
@@ -172,7 +174,7 @@ class MatchesDict(_CombinedMatcher):
     expected dict.
     """
 
-    matcher_factories = {
+    matcher_factories: ClassVar[dict] = {
         "Extra": _SubDictOf,
         "Missing": lambda m: _SuperDictOf(m, format_value=str),
         "Differences": _MatchCommonKeys,
@@ -197,7 +199,7 @@ class ContainsDict(_CombinedMatcher):
     match.
     """
 
-    matcher_factories = {
+    matcher_factories: ClassVar[dict] = {
         "Missing": lambda m: _SuperDictOf(m, format_value=str),
         "Differences": _MatchCommonKeys,
     }
@@ -221,7 +223,7 @@ class ContainedByDict(_CombinedMatcher):
     match.
     """
 
-    matcher_factories = {
+    matcher_factories: ClassVar[dict] = {
         "Extra": _SubDictOf,
         "Differences": _MatchCommonKeys,
     }
@@ -249,10 +251,10 @@ class KeysEqual(Matcher):
         self.expected = list(expected)
 
     def __str__(self):
-        return "KeysEqual(%s)" % ", ".join(map(repr, self.expected))
+        return "KeysEqual({})".format(", ".join(map(repr, self.expected)))
 
     def match(self, matchee):
-        from ._basic import _BinaryMismatch, Equals
+        from ._basic import Equals, _BinaryMismatch
 
         expected = sorted(self.expected)
         matched = Equals(expected).match(sorted(matchee.keys()))

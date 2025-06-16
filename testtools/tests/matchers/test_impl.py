@@ -67,10 +67,9 @@ class TestMismatchError(TestCase):
         matcher = Equals(3)
         mismatch = matcher.match(2)
         e = MismatchError(matchee, matcher, mismatch, True)
-        expected = "Match failed. Matchee: %r\nMatcher: %s\nDifference: %s\n" % (
-            matchee,
-            matcher,
-            matcher.match(matchee).describe(),
+        expected = (
+            f"Match failed. Matchee: {matchee!r}\nMatcher: {matcher}\n"
+            f"Difference: {matcher.match(matchee).describe()}\n"
         )
         self.assertEqual(expected, str(e))
 
@@ -80,10 +79,9 @@ class TestMismatchError(TestCase):
         matchee = "\xa7"
         matcher = Equals("a")
         mismatch = matcher.match(matchee)
-        expected = "Match failed. Matchee: %s\nMatcher: %s\nDifference: %s\n" % (
-            text_repr(matchee),
-            matcher,
-            mismatch.describe(),
+        expected = (
+            f"Match failed. Matchee: {text_repr(matchee)}\nMatcher: {matcher}\n"
+            f"Difference: {mismatch.describe()}\n"
         )
         e = MismatchError(matchee, matcher, mismatch, True)
         self.assertEqual(expected, str(e))
