@@ -457,6 +457,45 @@ class TestAssertions(TestCase):
             "Observed",
         )
 
+    def test_assertRaises_as_context_manager(self):
+        # assertRaises can be used as a context manager
+        with self.assertRaises(RuntimeError):
+            raise RuntimeError("Error message")
+
+    def test_assertRaises_as_context_manager_no_exception(self):
+        # assertRaises used as context manager fails when no exception is raised
+        with self.assertRaises(self.failureException) as cm:
+            with self.assertRaises(RuntimeError):
+                pass
+        self.assertIn("RuntimeError not raised", str(cm.exception))
+
+    def test_assertRaises_as_context_manager_wrong_exception(self):
+        # assertRaises used as context manager re-raises unexpected exceptions
+        with self.assertRaises(ZeroDivisionError):
+            with self.assertRaises(RuntimeError):
+                raise ZeroDivisionError("Wrong exception")
+
+    def test_assertRaises_as_context_manager_with_msg(self):
+        # assertRaises context manager can accept a msg parameter
+        with self.assertRaises(self.failureException) as cm:
+            with self.assertRaises(RuntimeError, msg="Custom message"):
+                pass
+        self.assertIn("Custom message", str(cm.exception))
+
+    def test_assertRaises_as_context_manager_stores_exception(self):
+        # assertRaises context manager stores the caught exception
+        with self.assertRaises(RuntimeError) as cm:
+            raise RuntimeError("Test error")
+        self.assertIsInstance(cm.exception, RuntimeError)
+        self.assertEqual("Test error", str(cm.exception))
+
+    def test_assertRaises_as_context_manager_with_multiple_exceptions(self):
+        # assertRaises context manager works with multiple exception types
+        exceptions = (RuntimeError, ValueError)
+        with self.assertRaises(exceptions) as cm:
+            raise ValueError("One of the expected exceptions")
+        self.assertIsInstance(cm.exception, ValueError)
+
     def assertFails(self, message, function, *args, **kwargs):
         """Assert that function raises a failure with the given message."""
         failure = self.assertRaises(self.failureException, function, *args, **kwargs)
