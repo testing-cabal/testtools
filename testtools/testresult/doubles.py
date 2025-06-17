@@ -8,8 +8,7 @@ from testtools.tags import TagContext
 
 __all__ = [
     "ExtendedTestResult",
-    "Python26TestResult",
-    "Python27TestResult",
+    "Python3TestResult",
     "StreamResult",
     "TwistedTestResult",
 ]
@@ -24,56 +23,30 @@ class LoggingBase:
         self._events = event_log
 
 
-class Python26TestResult(LoggingBase):
-    """A precisely python 2.6 like test result, that logs."""
+class Python3TestResult(LoggingBase):
+    """A precisely python 3 like test result, that logs."""
 
     def __init__(self, event_log=None):
         super().__init__(event_log=event_log)
         self.shouldStop = False
         self._was_successful = True
         self.testsRun = 0
+        self.failfast = False
 
     def addError(self, test, err):
         self._was_successful = False
         self._events.append(("addError", test, err))
+        if self.failfast:
+            self.stop()
 
     def addFailure(self, test, err):
         self._was_successful = False
         self._events.append(("addFailure", test, err))
+        if self.failfast:
+            self.stop()
 
     def addSuccess(self, test):
         self._events.append(("addSuccess", test))
-
-    def startTest(self, test):
-        self._events.append(("startTest", test))
-        self.testsRun += 1
-
-    def stop(self):
-        self.shouldStop = True
-
-    def stopTest(self, test):
-        self._events.append(("stopTest", test))
-
-    def wasSuccessful(self):
-        return self._was_successful
-
-
-class Python27TestResult(Python26TestResult):
-    """A precisely python 2.7 like test result, that logs."""
-
-    def __init__(self, event_log=None):
-        super().__init__(event_log)
-        self.failfast = False
-
-    def addError(self, test, err):
-        super().addError(test, err)
-        if self.failfast:
-            self.stop()
-
-    def addFailure(self, test, err):
-        super().addFailure(test, err)
-        if self.failfast:
-            self.stop()
 
     def addExpectedFailure(self, test, err):
         self._events.append(("addExpectedFailure", test, err))
@@ -86,14 +59,27 @@ class Python27TestResult(Python26TestResult):
         if self.failfast:
             self.stop()
 
+    def startTest(self, test):
+        self._events.append(("startTest", test))
+        self.testsRun += 1
+
     def startTestRun(self):
         self._events.append(("startTestRun",))
+
+    def stop(self):
+        self.shouldStop = True
+
+    def stopTest(self, test):
+        self._events.append(("stopTest", test))
 
     def stopTestRun(self):
         self._events.append(("stopTestRun",))
 
+    def wasSuccessful(self):
+        return self._was_successful
 
-class ExtendedTestResult(Python27TestResult):
+
+class ExtendedTestResult(Python3TestResult):
     """A test result like the proposed extended unittest result API."""
 
     def __init__(self, event_log=None):

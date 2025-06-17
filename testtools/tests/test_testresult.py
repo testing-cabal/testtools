@@ -68,8 +68,7 @@ from testtools.matchers import (
 )
 from testtools.testresult.doubles import (
     ExtendedTestResult,
-    Python26TestResult,
-    Python27TestResult,
+    Python3TestResult,
     TwistedTestResult,
 )
 from testtools.testresult.doubles import (
@@ -153,7 +152,7 @@ class TestControlContract:
         self.assertTrue(result.shouldStop)
 
 
-class Python26Contract(TestControlContract):
+class Python3Contract(TestControlContract):
     def test_fresh_result_is_successful(self):
         # A result is considered successful before any tests are run.
         result = self.makeResult()
@@ -183,8 +182,6 @@ class Python26Contract(TestControlContract):
         result.stopTest(self)
         self.assertTrue(result.wasSuccessful())
 
-
-class Python27Contract(Python26Contract):
     def test_addExpectedFailure(self):
         # Calling addExpectedFailure(test, exc_info) completes ok.
         result = self.makeResult()
@@ -248,7 +245,7 @@ class Python27Contract(Python26Contract):
         self.assertEqual(1, result.testsRun)
 
 
-class TagsContract(Python27Contract):
+class TagsContract(Python3Contract):
     """Tests to ensure correct tagging behaviour.
 
     See the subunit docs for guidelines on how this is supposed to work.
@@ -448,24 +445,14 @@ class TestExtendedTestResultContract(TestCase, StartTestRunContract):
         return ExtendedTestResult()
 
 
-class TestPython26TestResultContract(TestCase, Python26Contract):
+class TestPython3TestResultContract(TestCase, Python3Contract):
     def makeResult(self):
-        return Python26TestResult()
+        return Python3TestResult()
 
 
-class TestAdaptedPython26TestResultContract(TestCase, FallbackContract):
+class TestAdaptedPython3TestResultContract(TestCase, DetailsContract):
     def makeResult(self):
-        return ExtendedToOriginalDecorator(Python26TestResult())
-
-
-class TestPython27TestResultContract(TestCase, Python27Contract):
-    def makeResult(self):
-        return Python27TestResult()
-
-
-class TestAdaptedPython27TestResultContract(TestCase, DetailsContract):
-    def makeResult(self):
-        return ExtendedToOriginalDecorator(Python27TestResult())
+        return ExtendedToOriginalDecorator(Python3TestResult())
 
 
 class TestAdaptedTwistedTestResultContract(TestCase, DetailsContract):
@@ -2395,12 +2382,8 @@ class TestStreamToQueue(TestCase):
 
 
 class TestExtendedToOriginalResultDecoratorBase(TestCase):
-    def make_26_result(self):
-        self.result = Python26TestResult()
-        self.make_converter()
-
-    def make_27_result(self):
-        self.result = Python27TestResult()
+    def make_result(self):
+        self.result = Python3TestResult()
         self.make_converter()
 
     def make_converter(self):
@@ -2525,25 +2508,15 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
 
 
 class TestExtendedToOriginalResultDecorator(TestExtendedToOriginalResultDecoratorBase):
-    def test_failfast_py26(self):
-        self.make_26_result()
-        self.assertEqual(False, self.converter.failfast)
-        self.converter.failfast = True
-        self.assertFalse(hasattr(self.converter.decorated, "failfast"))
-
-    def test_failfast_py27(self):
-        self.make_27_result()
+    def test_failfast_py3(self):
+        self.make_result()
         self.assertEqual(False, self.converter.failfast)
         # setting it should write it to the backing result
         self.converter.failfast = True
         self.assertEqual(True, self.converter.decorated.failfast)
 
-    def test_progress_py26(self):
-        self.make_26_result()
-        self.converter.progress(1, 2)
-
-    def test_progress_py27(self):
-        self.make_27_result()
+    def test_progress_py3(self):
+        self.make_result()
         self.converter.progress(1, 2)
 
     def test_progress_pyextended(self):
@@ -2552,18 +2525,13 @@ class TestExtendedToOriginalResultDecorator(TestExtendedToOriginalResultDecorato
         self.assertEqual([("progress", 1, 2)], self.result._events)
 
     def test_shouldStop(self):
-        self.make_26_result()
+        self.make_result()
         self.assertEqual(False, self.converter.shouldStop)
         self.converter.decorated.stop()
         self.assertEqual(True, self.converter.shouldStop)
 
-    def test_startTest_py26(self):
-        self.make_26_result()
-        self.converter.startTest(self)
-        self.assertEqual([("startTest", self)], self.result._events)
-
-    def test_startTest_py27(self):
-        self.make_27_result()
+    def test_startTest_py3(self):
+        self.make_result()
         self.converter.startTest(self)
         self.assertEqual([("startTest", self)], self.result._events)
 
@@ -2572,13 +2540,8 @@ class TestExtendedToOriginalResultDecorator(TestExtendedToOriginalResultDecorato
         self.converter.startTest(self)
         self.assertEqual([("startTest", self)], self.result._events)
 
-    def test_startTestRun_py26(self):
-        self.make_26_result()
-        self.converter.startTestRun()
-        self.assertEqual([], self.result._events)
-
-    def test_startTestRun_py27(self):
-        self.make_27_result()
+    def test_startTestRun_py3(self):
+        self.make_result()
         self.converter.startTestRun()
         self.assertEqual([("startTestRun",)], self.result._events)
 
@@ -2587,13 +2550,8 @@ class TestExtendedToOriginalResultDecorator(TestExtendedToOriginalResultDecorato
         self.converter.startTestRun()
         self.assertEqual([("startTestRun",)], self.result._events)
 
-    def test_stopTest_py26(self):
-        self.make_26_result()
-        self.converter.stopTest(self)
-        self.assertEqual([("stopTest", self)], self.result._events)
-
-    def test_stopTest_py27(self):
-        self.make_27_result()
+    def test_stopTest_py3(self):
+        self.make_result()
         self.converter.stopTest(self)
         self.assertEqual([("stopTest", self)], self.result._events)
 
@@ -2602,13 +2560,8 @@ class TestExtendedToOriginalResultDecorator(TestExtendedToOriginalResultDecorato
         self.converter.stopTest(self)
         self.assertEqual([("stopTest", self)], self.result._events)
 
-    def test_stopTestRun_py26(self):
-        self.make_26_result()
-        self.converter.stopTestRun()
-        self.assertEqual([], self.result._events)
-
-    def test_stopTestRun_py27(self):
-        self.make_27_result()
+    def test_stopTestRun_py3(self):
+        self.make_result()
         self.converter.stopTestRun()
         self.assertEqual([("stopTestRun",)], self.result._events)
 
@@ -2617,12 +2570,8 @@ class TestExtendedToOriginalResultDecorator(TestExtendedToOriginalResultDecorato
         self.converter.stopTestRun()
         self.assertEqual([("stopTestRun",)], self.result._events)
 
-    def test_tags_py26(self):
-        self.make_26_result()
-        self.converter.tags({1}, {2})
-
-    def test_tags_py27(self):
-        self.make_27_result()
+    def test_tags_py3(self):
+        self.make_result()
         self.converter.tags({1}, {2})
 
     def test_tags_pyextended(self):
@@ -2630,12 +2579,8 @@ class TestExtendedToOriginalResultDecorator(TestExtendedToOriginalResultDecorato
         self.converter.tags({1}, {2})
         self.assertEqual([("tags", {1}, {2})], self.result._events)
 
-    def test_time_py26(self):
-        self.make_26_result()
-        self.converter.time(1)
-
-    def test_time_py27(self):
-        self.make_27_result()
+    def test_time_py3(self):
+        self.make_result()
         self.converter.time(1)
 
     def test_time_pyextended(self):
@@ -2647,24 +2592,16 @@ class TestExtendedToOriginalResultDecorator(TestExtendedToOriginalResultDecorato
 class TestExtendedToOriginalAddError(TestExtendedToOriginalResultDecoratorBase):
     outcome = "addError"
 
-    def test_outcome_Original_py26(self):
-        self.make_26_result()
-        self.check_outcome_exc_info(self.outcome)
-
-    def test_outcome_Original_py27(self):
-        self.make_27_result()
+    def test_outcome_Original_py3(self):
+        self.make_result()
         self.check_outcome_exc_info(self.outcome)
 
     def test_outcome_Original_pyextended(self):
         self.make_extended_result()
         self.check_outcome_exc_info(self.outcome)
 
-    def test_outcome_Extended_py26(self):
-        self.make_26_result()
-        self.check_outcome_details_to_exec_info(self.outcome)
-
-    def test_outcome_Extended_py27(self):
-        self.make_27_result()
+    def test_outcome_Extended_py3(self):
+        self.make_result()
         self.check_outcome_details_to_exec_info(self.outcome)
 
     def test_outcome_Extended_pyextended(self):
@@ -2686,40 +2623,36 @@ class TestExtendedToOriginalAddFailure(TestExtendedToOriginalAddError):
 class TestExtendedToOriginalAddExpectedFailure(TestExtendedToOriginalAddError):
     outcome = "addExpectedFailure"
 
-    def test_outcome_Original_py26(self):
-        self.make_26_result()
-        self.check_outcome_exc_info_to_nothing(self.outcome, "addSuccess")
+    def test_outcome_Original_py3(self):
+        self.make_result()
+        self.check_outcome_exc_info(self.outcome)
 
-    def test_outcome_Extended_py26(self):
-        self.make_26_result()
-        self.check_outcome_details_to_nothing(self.outcome, "addSuccess")
+    def test_outcome_Extended_py3(self):
+        self.make_result()
+        self.check_outcome_details_to_exec_info(self.outcome)
 
 
 class TestExtendedToOriginalAddSkip(TestExtendedToOriginalResultDecoratorBase):
     outcome = "addSkip"
 
-    def test_outcome_Original_py26(self):
-        self.make_26_result()
-        self.check_outcome_string_nothing(self.outcome, "addSuccess")
-
-    def test_outcome_Original_py27(self):
-        self.make_27_result()
+    def test_outcome_Original_py3(self):
+        self.make_result()
         self.check_outcome_string(self.outcome)
 
     def test_outcome_Original_pyextended(self):
         self.make_extended_result()
         self.check_outcome_string(self.outcome)
 
-    def test_outcome_Extended_py26(self):
-        self.make_26_result()
-        self.check_outcome_string_nothing(self.outcome, "addSuccess")
+    def test_outcome_Extended_py3(self):
+        self.make_result()
+        self.check_outcome_string(self.outcome)
 
-    def test_outcome_Extended_py27_no_reason(self):
-        self.make_27_result()
+    def test_outcome_Extended_py3_no_reason(self):
+        self.make_result()
         self.check_outcome_details_to_string(self.outcome)
 
-    def test_outcome_Extended_py27_reason(self):
-        self.make_27_result()
+    def test_outcome_Extended_py3_reason(self):
+        self.make_result()
         self.check_outcome_details_to_arg(
             self.outcome, "foo", {"reason": Content(UTF8_TEXT, lambda: [_b("foo")])}
         )
@@ -2740,24 +2673,16 @@ class TestExtendedToOriginalAddSuccess(TestExtendedToOriginalResultDecoratorBase
     outcome = "addSuccess"
     expected = "addSuccess"
 
-    def test_outcome_Original_py26(self):
-        self.make_26_result()
-        self.check_outcome_nothing(self.outcome, self.expected)
-
-    def test_outcome_Original_py27(self):
-        self.make_27_result()
+    def test_outcome_Original_py3(self):
+        self.make_result()
         self.check_outcome_nothing(self.outcome)
 
     def test_outcome_Original_pyextended(self):
         self.make_extended_result()
         self.check_outcome_nothing(self.outcome)
 
-    def test_outcome_Extended_py26(self):
-        self.make_26_result()
-        self.check_outcome_details_to_nothing(self.outcome, self.expected)
-
-    def test_outcome_Extended_py27(self):
-        self.make_27_result()
+    def test_outcome_Extended_py3(self):
+        self.make_result()
         self.check_outcome_details_to_nothing(self.outcome)
 
     def test_outcome_Extended_pyextended(self):
@@ -2769,30 +2694,18 @@ class TestExtendedToOriginalAddUnexpectedSuccess(
     TestExtendedToOriginalResultDecoratorBase
 ):
     outcome = "addUnexpectedSuccess"
-    expected = "addFailure"
+    expected = "addUnexpectedSuccess"
 
-    def test_outcome_Original_py26(self):
-        self.make_26_result()
-        getattr(self.converter, self.outcome)(self)
-        [event] = self.result._events
-        self.assertEqual((self.expected, self), event[:2])
-
-    def test_outcome_Original_py27(self):
-        self.make_27_result()
+    def test_outcome_Original_py3(self):
+        self.make_result()
         self.check_outcome_nothing(self.outcome)
 
     def test_outcome_Original_pyextended(self):
         self.make_extended_result()
         self.check_outcome_nothing(self.outcome)
 
-    def test_outcome_Extended_py26(self):
-        self.make_26_result()
-        getattr(self.converter, self.outcome)(self)
-        [event] = self.result._events
-        self.assertEqual((self.expected, self), event[:2])
-
-    def test_outcome_Extended_py27(self):
-        self.make_27_result()
+    def test_outcome_Extended_py3(self):
+        self.make_result()
         self.check_outcome_details_to_nothing(self.outcome)
 
     def test_outcome_Extended_pyextended(self):
