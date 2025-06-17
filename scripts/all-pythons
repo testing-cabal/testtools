@@ -82,7 +82,7 @@ def run_for_python(version, result, tests):
 
 
 def now():
-    return datetime.utcnow().replace(tzinfo=iso8601.Utc())
+    return datetime.now(tz=iso8601.Utc())
 
 
 

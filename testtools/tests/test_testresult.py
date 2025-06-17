@@ -89,6 +89,12 @@ from testtools.tests.helpers import (
 testresources = try_import("testresources")
 
 
+def _utcfromtimestamp(t):
+    return datetime.datetime.fromtimestamp(t, tz=datetime.timezone.utc).replace(
+        tzinfo=None
+    )
+
+
 def make_erroring_test():
     class Test(TestCase):
         def error(self):
@@ -1093,7 +1099,7 @@ class TestResourcedToStreamDecorator(TestCase):
     def test_startMakeResource(self):
         log = LoggingStreamResult()
         result = ResourcedToStreamDecorator(log)
-        timestamp = datetime.datetime.utcfromtimestamp(3.476)
+        timestamp = _utcfromtimestamp(3.476)
         result.startTestRun()
         result.time(timestamp)
         resource = testresources.TestResourceManager()
@@ -1945,8 +1951,8 @@ class TestThreadSafeForwardingResult(TestCase):
         # that test, as we now know that test is complete.
         [result], events = self.make_results(1)
         exc_info = make_exception_info(RuntimeError, "error")
-        start_time = datetime.datetime.utcfromtimestamp(1.489)
-        end_time = datetime.datetime.utcfromtimestamp(51.476)
+        start_time = _utcfromtimestamp(1.489)
+        end_time = _utcfromtimestamp(51.476)
         result.time(start_time)
         result.startTest(self)
         result.time(end_time)
@@ -1967,8 +1973,8 @@ class TestThreadSafeForwardingResult(TestCase):
         # for that test, as we now know that test is complete.
         [result], events = self.make_results(1)
         exc_info = make_exception_info(AssertionError, "failure")
-        start_time = datetime.datetime.utcfromtimestamp(2.489)
-        end_time = datetime.datetime.utcfromtimestamp(3.476)
+        start_time = _utcfromtimestamp(2.489)
+        end_time = _utcfromtimestamp(3.476)
         result.time(start_time)
         result.startTest(self)
         result.time(end_time)
@@ -1989,8 +1995,8 @@ class TestThreadSafeForwardingResult(TestCase):
         # that test, as we now know that test is complete.
         [result], events = self.make_results(1)
         reason = "Skipped for some reason"
-        start_time = datetime.datetime.utcfromtimestamp(4.489)
-        end_time = datetime.datetime.utcfromtimestamp(5.476)
+        start_time = _utcfromtimestamp(4.489)
+        end_time = _utcfromtimestamp(5.476)
         result.time(start_time)
         result.startTest(self)
         result.time(end_time)
@@ -2010,8 +2016,8 @@ class TestThreadSafeForwardingResult(TestCase):
         # Once we receive an addSuccess event, we forward all of the events
         # for that test, as we now know that test is complete.
         [result], events = self.make_results(1)
-        start_time = datetime.datetime.utcfromtimestamp(6.489)
-        end_time = datetime.datetime.utcfromtimestamp(7.476)
+        start_time = _utcfromtimestamp(6.489)
+        end_time = _utcfromtimestamp(7.476)
         result.time(start_time)
         result.startTest(self)
         result.time(end_time)
@@ -2033,10 +2039,10 @@ class TestThreadSafeForwardingResult(TestCase):
         # events for one test at a time.
         [result1, result2], events = self.make_results(2)
         test1, test2 = self, make_test()
-        start_time1 = datetime.datetime.utcfromtimestamp(1.489)
-        end_time1 = datetime.datetime.utcfromtimestamp(2.476)
-        start_time2 = datetime.datetime.utcfromtimestamp(3.489)
-        end_time2 = datetime.datetime.utcfromtimestamp(4.489)
+        start_time1 = _utcfromtimestamp(1.489)
+        end_time1 = _utcfromtimestamp(2.476)
+        start_time2 = _utcfromtimestamp(3.489)
+        end_time2 = _utcfromtimestamp(4.489)
         result1.time(start_time1)
         result2.time(start_time2)
         result1.startTest(test1)
