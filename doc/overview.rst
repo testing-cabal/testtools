@@ -84,7 +84,7 @@ Cross-Python compatibility
 --------------------------
 
 testtools gives you the very latest in unit testing technology in a way that
-will work with Python 3.7+ and PyPy3.
+will work with Python 3.9+ and PyPy3.
 
 If you wish to use testtools with Python 2.4 or 2.5, then please use testtools
 0.9.15.
