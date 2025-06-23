@@ -175,7 +175,7 @@ class TestConcurrentStreamTestSuiteRun(TestCase):
                 ),
             },
             {
-                event[0:3] + (freeze(event[3]),) + event[4:10] + (None,)
+                (*event[0:3], freeze(event[3]), *event[4:10], None)
                 for event in result._events
             },
         )
@@ -222,10 +222,10 @@ TypeError: ...run() takes ...1 ...argument...2...given...
                 doctest.ELLIPSIS,
             ),
         )
-        events = [event[0:10] + (None,) for event in events]
-        events[1] = events[1][:6] + (None,) + events[1][7:]
-        events[2] = events[2][:6] + (None,) + events[2][7:]
-        events[3] = events[3][:6] + (None,) + events[3][7:]
+        events = [(*event[0:10], None) for event in events]
+        events[1] = (*events[1][:6], None, *events[1][7:])
+        events[2] = (*events[2][:6], None, *events[2][7:])
+        events[3] = (*events[3][:6], None, *events[3][7:])
         self.assertEqual(
             [
                 (
