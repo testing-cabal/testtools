@@ -478,6 +478,75 @@ class TestTestResultDecoratorContract(TestCase, StartTestRunContract):
         return TestResultDecorator(TestResult())
 
 
+class TestPython3TestResultDuration(TestCase):
+    """Tests for addDuration functionality in Python3TestResult."""
+
+    def test_addDuration_logging(self):
+        # Python3TestResult should log addDuration calls
+        result = Python3TestResult()
+        test = make_erroring_test()
+
+        result.addDuration(test, 1.5)
+        expected_call = ("addDuration", test, 1.5)
+        self.assertIn(expected_call, result._events)
+
+    def test_addDuration_stores_in_collectedDurations(self):
+        # Python3TestResult should store durations in collectedDurations
+        result = Python3TestResult()
+        test = make_erroring_test()
+
+        result.addDuration(test, 2.3)
+        self.assertEqual([(test, 2.3)], result.collectedDurations)
+
+        # Multiple durations should accumulate
+        result.addDuration(test, 1.7)
+        self.assertEqual([(test, 2.3), (test, 1.7)], result.collectedDurations)
+
+
+class TestExtendedTestResultDuration(TestCase):
+    """Tests for addDuration functionality in ExtendedTestResult."""
+
+    def test_addDuration_logging(self):
+        # ExtendedTestResult should log addDuration calls
+        result = ExtendedTestResult()
+        test = make_erroring_test()
+
+        result.addDuration(test, 3.1)
+        expected_call = ("addDuration", test, 3.1)
+        self.assertIn(expected_call, result._events)
+
+
+class TestTestResultDecoratorDuration(TestCase):
+    """Tests for addDuration functionality in TestResultDecorator."""
+
+    def test_addDuration_forwards_to_decorated_result(self):
+        # TestResultDecorator should forward addDuration calls to decorated result
+        base_result = TestResult()
+        base_result.startTestRun()  # Initialize collectedDurations
+        decorator = TestResultDecorator(base_result)
+        test = make_erroring_test()
+
+        decorator.addDuration(test, 4.2)
+
+        # Check that the duration was stored in the base result
+        self.assertEqual([(test, 4.2)], base_result.collectedDurations)
+
+    def test_addDuration_multiple_forwards(self):
+        # Multiple addDuration calls should all be forwarded
+        base_result = TestResult()
+        base_result.startTestRun()
+        decorator = TestResultDecorator(base_result)
+        test1 = make_erroring_test()
+        test2 = make_erroring_test()
+
+        decorator.addDuration(test1, 1.1)
+        decorator.addDuration(test2, 2.2)
+        decorator.addDuration(test1, 3.3)
+
+        expected = [(test1, 1.1), (test2, 2.2), (test1, 3.3)]
+        self.assertEqual(expected, base_result.collectedDurations)
+
+
 # DetailsContract because ExtendedToStreamDecorator follows Python for
 # uxsuccess handling.
 class TestStreamToExtendedContract(TestCase, DetailsContract):
@@ -1520,6 +1589,61 @@ class TestTestResult(TestCase):
                 doctest.ELLIPSIS | doctest.REPORT_UDIFF,
             ),
         )
+
+    def test_addDuration(self):
+        # addDuration stores test-duration pairs in collectedDurations
+        result = self.makeResult()
+        test1 = make_erroring_test()
+        test2 = make_erroring_test()
+
+        # Initially collectedDurations should be empty after startTestRun
+        result.startTestRun()
+        self.assertEqual([], result.collectedDurations)
+
+        # Adding durations should store them as (test, duration) tuples
+        result.addDuration(test1, 1.5)
+        self.assertEqual([(test1, 1.5)], result.collectedDurations)
+
+        result.addDuration(test2, 2.3)
+        self.assertEqual([(test1, 1.5), (test2, 2.3)], result.collectedDurations)
+
+        # Adding duration for same test should create separate entries
+        result.addDuration(test1, 3.7)
+        expected = [(test1, 1.5), (test2, 2.3), (test1, 3.7)]
+        self.assertEqual(expected, result.collectedDurations)
+
+    def test_addDuration_with_zero_duration(self):
+        # addDuration should work with zero duration
+        result = self.makeResult()
+        test = make_erroring_test()
+        result.startTestRun()
+
+        result.addDuration(test, 0.0)
+        self.assertEqual([(test, 0.0)], result.collectedDurations)
+
+    def test_addDuration_with_negative_duration(self):
+        # addDuration should work with negative duration (edge case)
+        result = self.makeResult()
+        test = make_erroring_test()
+        result.startTestRun()
+
+        result.addDuration(test, -1.0)
+        self.assertEqual([(test, -1.0)], result.collectedDurations)
+
+    def test_collectedDurations_resets_on_startTestRun(self):
+        # collectedDurations should be reset when startTestRun is called
+        result = self.makeResult()
+        test = make_erroring_test()
+
+        # Add some durations
+        result.startTestRun()
+        result.addDuration(test, 1.0)
+        result.addDuration(test, 2.0)
+        self.assertEqual([(test, 1.0), (test, 2.0)], result.collectedDurations)
+
+        # Starting a new test run should reset
+        result.startTestRun()
+        self.assertEqual([], result.collectedDurations)
 
 
 class TestMultiTestResult(TestCase):
