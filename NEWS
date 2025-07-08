@@ -11,6 +11,12 @@ Changes
 
 * Drop support for Python 3.8. (Stephen Finucane)
 
+Improvements
+------------
+
+* Add support for Python 3.12's ``addDuration`` method and ``collectedDurations``
+  attribute in ``TestResult`` classes. (Jelmer Vernooĳ, #2045171)
+
 * Remove a number of deprecated classes and methods. (Stephen Finucane)
 
   * ``testtools.matchers``

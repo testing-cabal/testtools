@@ -32,6 +32,7 @@ class Python3TestResult(LoggingBase):
         self._was_successful = True
         self.testsRun = 0
         self.failfast = False
+        self.collectedDurations = []
 
     def addError(self, test, err):
         self._was_successful = False
@@ -58,6 +59,10 @@ class Python3TestResult(LoggingBase):
         self._events.append(("addUnexpectedSuccess", test))
         if self.failfast:
             self.stop()
+
+    def addDuration(self, test, duration):
+        self._events.append(("addDuration", test, duration))
+        self.collectedDurations.append((test, duration))
 
     def startTest(self, test):
         self._events.append(("startTest", test))
@@ -112,6 +117,9 @@ class ExtendedTestResult(Python3TestResult):
             self._events.append(("addUnexpectedSuccess", test, details))
         else:
             self._events.append(("addUnexpectedSuccess", test))
+
+    def addDuration(self, test, duration):
+        self._events.append(("addDuration", test, duration))
 
     def progress(self, offset, whence):
         self._events.append(("progress", offset, whence))

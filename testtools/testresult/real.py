@@ -159,6 +159,14 @@ class TestResult(unittest.TestResult):
         if self.failfast:
             self.stop()
 
+    def addDuration(self, test, duration):
+        """Called to add a test duration.
+
+        :param test: The test that completed.
+        :param duration: The duration of the test as a float in seconds.
+        """
+        self.collectedDurations.append((test, duration))
+
     def wasSuccessful(self):
         """Has this result been successful so far?
 
@@ -215,6 +223,8 @@ class TestResult(unittest.TestResult):
         # -- End:   As per python 2.7 --
         # -- Python 3.5
         self.tb_locals = tb_locals
+        # -- Python 3.12
+        self.collectedDurations = []
 
     def stopTestRun(self):
         """Called after a test run completes
@@ -1993,6 +2003,9 @@ class TestResultDecorator:
 
     def addUnexpectedSuccess(self, test, details=None):
         return self.decorated.addUnexpectedSuccess(test, details=details)
+
+    def addDuration(self, test, duration):
+        return self.decorated.addDuration(test, duration)
 
     def progress(self, offset, whence):
         return self.decorated.progress(offset, whence)
