@@ -21,6 +21,7 @@ import itertools
 import sys
 import types
 import unittest
+from typing import Any, Protocol, TypeVar
 from unittest.case import SkipTest
 
 from testtools import content
@@ -166,6 +167,15 @@ def gather_details(source_dict, target_dict):
 # fixtures, leading to gather_details not being available and fixtures being
 # unable to import it.
 fixtures = try_import("fixtures")
+
+
+class UseFixtureProtocol(Protocol):
+    def setUp(self) -> Any: ...
+    def cleanUp(self) -> Any: ...
+    def getDetails(self) -> dict[str, content.Content]: ...
+
+
+UseFixtureT = TypeVar("UseFixtureT", bound=UseFixtureProtocol)
 
 
 def _mods(i, mod):
@@ -729,7 +739,7 @@ class TestCase(unittest.TestCase):
         """
         return self._get_test_method()()
 
-    def useFixture(self, fixture):
+    def useFixture(self, fixture: UseFixtureT) -> UseFixtureT:
         """Use fixture in a test case.
 
         The fixture will be setUp, and self.addCleanup(fixture.cleanUp) called.
