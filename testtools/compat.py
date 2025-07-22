@@ -16,13 +16,14 @@ import io
 import locale
 import os
 import sys
+import typing
 import unicodedata
 
 # Ensure retro-compatibility with older testtools releases
 from io import BytesIO, StringIO
 
 
-def reraise(exc_class, exc_obj, exc_tb, _marker=object()):
+def reraise(exc_class, exc_obj, exc_tb, _marker=object()) -> typing.NoReturn:
     """Re-raise an exception received from sys.exc_info() or similar."""
     raise exc_obj.with_traceback(exc_tb)
 
