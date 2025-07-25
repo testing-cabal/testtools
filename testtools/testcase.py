@@ -19,9 +19,8 @@ import copy
 import functools
 import itertools
 import sys
-import types
 import unittest
-from typing import Any, Protocol, TypeVar
+from typing import Any, Protocol, TypeVar, Union
 from unittest.case import SkipTest
 
 from testtools import content
@@ -31,6 +30,7 @@ from testtools.matchers import (
     Contains,
     Is,
     IsInstance,
+    Matcher,
     MatchesAll,
     MatchesException,
     MismatchError,
@@ -352,7 +352,7 @@ class TestCase(unittest.TestCase):
             className = ", ".join(klass.__name__ for klass in classOrIterable)
         return className
 
-    def addCleanup(self, function, *arguments, **keywordArguments):
+    def addCleanup(self, function, /, *arguments, **keywordArguments):
         """Add a cleanup function to be called after tearDown.
 
         Functions added with addCleanup will be called in reverse order of
@@ -448,9 +448,9 @@ class TestCase(unittest.TestCase):
             matcher = IsInstance(klass)
         self.assertThat(obj, matcher, msg)
 
-    def assertRaises(self, excClass, callableObj=None, *args, **kwargs):
-        """Fail unless an exception of class excClass is thrown
-        by callableObj when invoked with arguments args and keyword
+    def assertRaises(self, expected_exception, callable=None, *args, **kwargs):
+        """Fail unless an exception of class expected_exception is thrown
+        by callable when invoked with arguments args and keyword
         arguments kwargs. If a different type of exception is
         thrown, it will not be caught, and the test case will be
         deemed to have suffered an error, exactly as for an
@@ -471,13 +471,13 @@ class TestCase(unittest.TestCase):
             the_exception = cm.exception
             self.assertEqual(the_exception.error_code, 3)
         """
-        # If callableObj is None, we're being used as a context manager
-        if callableObj is None:
-            return _AssertRaisesContext(excClass, self, msg=kwargs.get("msg"))
+        # If callable is None, we're being used as a context manager
+        if callable is None:
+            return _AssertRaisesContext(expected_exception, self, msg=kwargs.get("msg"))
 
         class ReRaiseOtherTypes:
             def match(self, matchee):
-                if not issubclass(matchee[0], excClass):
+                if not issubclass(matchee[0], expected_exception):
                     reraise(*matchee)
 
         class CaptureMatchee:
@@ -486,9 +486,11 @@ class TestCase(unittest.TestCase):
 
         capture = CaptureMatchee()
         matcher = Raises(
-            MatchesAll(ReRaiseOtherTypes(), MatchesException(excClass), capture)
+            MatchesAll(
+                ReRaiseOtherTypes(), MatchesException(expected_exception), capture
+            )
         )
-        our_callable = Nullary(callableObj, *args, **kwargs)
+        our_callable = Nullary(callable, *args, **kwargs)
         self.assertThat(our_callable, matcher)
         return capture.matchee
 
@@ -966,8 +968,10 @@ class WithAttributes:
     testtools.testcase.MyTest/test_bar[foo]
     """
 
-    def id(self):
-        orig = super().id()
+    _get_test_method: Any  # Provided by the class we're mixed with
+
+    def id(self) -> str:
+        orig = super().id()  # type: ignore[misc]
         # Depends on testtools.TestCase._get_test_method, be nice to support
         # plain unittest.
         fn = self._get_test_method()
@@ -977,10 +981,7 @@ class WithAttributes:
         return orig + "[" + ",".join(sorted(attributes)) + "]"
 
 
-class_types = [type]
-if getattr(types, "ClassType", None) is not None:
-    class_types.append(types.ClassType)
-class_types = tuple(class_types)
+class_types = (type,)
 
 
 def skip(reason):
@@ -1115,9 +1116,12 @@ class ExpectedException:
         if exc_type != self.exc_type:
             return False
         if self.value_re:
-            matcher = MatchesException(self.exc_type, self.value_re)
+            exception_matcher = MatchesException(self.exc_type, self.value_re)
+            matcher: Union[Matcher, Annotate]
             if self.msg:
-                matcher = Annotate(self.msg, matcher)
+                matcher = Annotate(self.msg, exception_matcher)
+            else:
+                matcher = exception_matcher
             mismatch = matcher.match((exc_type, exc_value, traceback))
             if mismatch:
                 raise AssertionError(mismatch.describe())

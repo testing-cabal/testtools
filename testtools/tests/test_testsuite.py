@@ -50,13 +50,13 @@ class TestConcurrentTestSuiteRun(TestCase):
 
             run = __call__
 
-        original_suite = unittest.TestSuite([BrokenTest()])
+        original_suite = unittest.TestSuite([BrokenTest()])  # type: ignore[list-item]
         suite = ConcurrentTestSuite(original_suite, self.split_suite)
         suite.run(TestByTestResult(on_test))
         self.assertEqual([("broken-runner", "error", {"traceback"})], log)
 
     def test_trivial(self):
-        log = []
+        log: list[tuple[str, ...]] = []
         result = LoggingResult(log)
         test1 = Sample("test_method1")
         test2 = Sample("test_method2")
@@ -64,11 +64,13 @@ class TestConcurrentTestSuiteRun(TestCase):
         suite = ConcurrentTestSuite(original_suite, self.split_suite)
         suite.run(result)
         # log[0] is the timestamp for the first test starting.
-        test1 = log[1][1]
-        test2 = log[-1][1]
-        self.assertIsInstance(test1, Sample)
-        self.assertIsInstance(test2, Sample)
-        self.assertNotEqual(test1.id(), test2.id())
+        test1_from_log = log[1][1]
+        test2_from_log = log[-1][1]
+        self.assertIsInstance(test1_from_log, Sample)
+        self.assertIsInstance(test2_from_log, Sample)
+        assert isinstance(test1_from_log, Sample)  # For mypy
+        assert isinstance(test2_from_log, Sample)  # For mypy
+        self.assertNotEqual(test1_from_log.id(), test2_from_log.id())
 
     def test_wrap_result(self):
         # ConcurrentTestSuite has a hook for wrapping the per-thread result.
@@ -78,7 +80,7 @@ class TestConcurrentTestSuiteRun(TestCase):
             wrap_log.append((thread_safe_result.result.decorated, thread_number))
             return thread_safe_result
 
-        result_log = []
+        result_log: list[tuple[str, ...]] = []
         result = LoggingResult(result_log)
         test1 = Sample("test_method1")
         test2 = Sample("test_method2")
@@ -317,7 +319,7 @@ TypeError: ...run() takes ...1 ...argument...2...given...
         # Test discovery uses the default suite from unittest (unless users
         # deliberately change things, in which case they keep both pieces).
         suite = unittest.TestSuite([Skips("test_notrun")])
-        log = []
+        log: list[tuple[str, ...]] = []
         result = LoggingResult(log)
         suite.run(result)
         self.assertEqual(["addSkip"], [item[0] for item in log])
@@ -336,7 +338,7 @@ TypeError: ...run() takes ...1 ...argument...2...given...
         # Test discovery uses the default suite from unittest (unless users
         # deliberately change things, in which case they keep both pieces).
         suite = unittest.TestSuite([Simples("test_simple")])
-        log = []
+        log: list[tuple[str, ...]] = []
         result = LoggingResult(log)
         suite.run(result)
         self.assertEqual(
@@ -351,7 +353,7 @@ class TestFixtureSuite(TestCase):
             self.skipTest("Need fixtures")
 
     def test_fixture_suite(self):
-        log = []
+        log: list[int | str] = []
 
         class Sample(TestCase):
             def test_one(self):
@@ -368,7 +370,7 @@ class TestFixtureSuite(TestCase):
         self.assertEqual(["setUp", 1, 2, "tearDown"], log)
 
     def test_fixture_suite_sort(self):
-        log = []
+        log: list[int | str] = []
 
         class Sample(TestCase):
             def test_one(self):
@@ -393,7 +395,7 @@ class TestSortedTests(TestCase):
             def sort_tests(self):
                 self._tests = sorted_tests(self, True)
 
-        input_suite = Subclass([b, a])
+        input_suite = Subclass([b, a])  # type: ignore[list-item]
         suite = sorted_tests(input_suite)
         self.assertEqual([a, b], list(iterate_tests(suite)))
         self.assertEqual([input_suite], list(iter(suite)))
@@ -405,7 +407,7 @@ class TestSortedTests(TestCase):
         class Subclass(unittest.TestSuite):
             pass
 
-        input_suite = Subclass([b, a])
+        input_suite = Subclass([b, a])  # type: ignore[list-item]
         suite = sorted_tests(input_suite)
         self.assertEqual([b, a], list(iterate_tests(suite)))
         self.assertEqual([input_suite], list(iter(suite)))
@@ -413,14 +415,14 @@ class TestSortedTests(TestCase):
     def test_sorts_simple_suites(self):
         a = PlaceHolder("a")
         b = PlaceHolder("b")
-        suite = sorted_tests(unittest.TestSuite([b, a]))
+        suite = sorted_tests(unittest.TestSuite([b, a]))  # type: ignore[list-item]
         self.assertEqual([a, b], list(iterate_tests(suite)))
 
     def test_duplicate_simple_suites(self):
         a = PlaceHolder("a")
         b = PlaceHolder("b")
         c = PlaceHolder("a")
-        self.assertRaises(ValueError, sorted_tests, unittest.TestSuite([a, b, c]))
+        self.assertRaises(ValueError, sorted_tests, unittest.TestSuite([a, b, c]))  # type: ignore[list-item]
 
     def test_multiple_duplicates(self):
         # If there are multiple duplicates on a test suite, we report on them
@@ -430,7 +432,9 @@ class TestSortedTests(TestCase):
         c = PlaceHolder("a")
         d = PlaceHolder("b")
         error = self.assertRaises(
-            ValueError, sorted_tests, unittest.TestSuite([a, b, c, d])
+            ValueError,
+            sorted_tests,
+            unittest.TestSuite([a, b, c, d]),  # type: ignore[list-item]
         )
         self.assertThat(
             str(error),

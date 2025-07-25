@@ -241,7 +241,7 @@ class StreamResult(LoggingBase):
 
 # Convenience for easier access to status fields
 _StatusEvent = namedtuple(
-    "_Event",
+    "_StatusEvent",
     [
         "name",
         "test_id",

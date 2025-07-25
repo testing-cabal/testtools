@@ -1,4 +1,5 @@
 from doctest import ELLIPSIS
+from typing import Any, Callable
 
 from testtools import (
     TestCase,
@@ -18,6 +19,12 @@ from testtools.matchers import (
 
 class AssertThatTests:
     """A mixin containing shared tests for assertThat and assert_that."""
+
+    # These are provided by TestCase when mixed in
+    assertRaises: Callable[..., Any]
+    assertEqual: Callable[..., Any]
+    assertFalse: Callable[..., Any]
+    failureException: Any  # Inherited from TestCase
 
     def assert_that_callable(self, *args, **kwargs):
         raise NotImplementedError
@@ -54,12 +61,15 @@ class AssertThatTests:
                 return Mismatch(thing)
 
             def __str__(self):
-                calls.append(("__str__",))
+                calls.append(("__str__", None))
                 return "a description"
 
-        class Test(type(self)):
+        # Create a test class that inherits from the actual test class
+        test_self = self
+
+        class Test(test_self.__class__):  # type: ignore[misc,name-defined]
             def test(self):
-                self.assert_that_callable("foo", Matcher())
+                test_self.assert_that_callable("foo", Matcher())
 
         result = Test("test").run()
         self.assertEqual(

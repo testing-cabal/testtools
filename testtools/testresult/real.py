@@ -565,9 +565,20 @@ class StreamResultRouter(StreamResult):
             sink.stopTestRun()
         self._in_run = False
 
-    def status(self, **kwargs):
-        route_code = kwargs.get("route_code", None)
-        test_id = kwargs.get("test_id", None)
+    def status(
+        self,
+        test_id=None,
+        test_status=None,
+        test_tags=None,
+        runnable=True,
+        file_name=None,
+        file_bytes=None,
+        eof=False,
+        mime_type=None,
+        route_code=None,
+        timestamp=None,
+    ):
+        # route_code and test_id are already available as parameters
         if route_code is not None:
             prefix = route_code.split("/")[0]
         else:
@@ -578,12 +589,23 @@ class StreamResultRouter(StreamResult):
                 route_code = route_code[len(prefix) + 1 :]
                 if not route_code:
                     route_code = None
-                kwargs["route_code"] = route_code
+                # Update route_code for forwarding
         elif test_id in self._test_ids:
             target = self._test_ids[test_id]
         else:
             target = self.fallback
-        target.status(**kwargs)
+        target.status(
+            test_id=test_id,
+            test_status=test_status,
+            test_tags=test_tags,
+            runnable=runnable,
+            file_name=file_name,
+            file_bytes=file_bytes,
+            eof=eof,
+            mime_type=mime_type,
+            route_code=route_code,
+            timestamp=timestamp,
+        )
 
     def add_rule(self, sink, policy, do_start_stop_run=False, **policy_args):
         """Add a rule to route events to sink when they match a given policy.
@@ -735,7 +757,7 @@ class _TestRecord:
             case = self
         else:
             content_type = _make_content_type(mime_type)
-            content_bytes = []
+            content_bytes: list[bytes] = []
             case = self.transform(
                 ["details", file_name], Content(content_type, lambda: content_bytes)
             )
@@ -753,6 +775,7 @@ class _TestRecord:
         if PlaceHolder is None:
             from testtools.testcase import PlaceHolder
         outcome = _status_map[self.status]
+        assert PlaceHolder is not None
         return PlaceHolder(
             self.id,
             outcome=outcome,
@@ -1321,7 +1344,7 @@ class TextTestResult(TestResult):
             self.stream.write("FAILED (")
             details = []
             failure_count = sum(
-                map(len, (self.failures, self.errors, self.unexpectedSuccesses))
+                len(x) for x in (self.failures, self.errors, self.unexpectedSuccesses)
             )
             details.append(f"failures={failure_count}")
             self.stream.write(", ".join(details))
@@ -1365,8 +1388,8 @@ class ThreadsafeForwardingResult(TestResult):
         self.result = ExtendedToOriginalDecorator(target)
         self.semaphore = semaphore
         self._test_start = None
-        self._global_tags = set(), set()
-        self._test_tags = set(), set()
+        self._global_tags: tuple[set, set] = set(), set()
+        self._test_tags: tuple[set, set] = set(), set()
 
     def __repr__(self):
         return f"<{self.__class__.__name__} {self.result!r}>"
@@ -1583,12 +1606,13 @@ class ExtendedToOriginalDecorator:
                     test.fail("")
                 except test.failureException:
                     return self.addFailure(test, sys.exc_info())
-            if details is not None:
-                try:
-                    return outcome(test, details=details)
-                except TypeError:
-                    pass
-            return outcome(test)
+            else:
+                if details is not None:
+                    try:
+                        return outcome(test, details=details)
+                    except TypeError:
+                        pass
+                return outcome(test)
         finally:
             if self.failfast:
                 self.stop()
@@ -1719,6 +1743,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
         # Deal with mismatched base class constructors.
         TestControl.__init__(self)
         self._started = False
+        self._tags: TagContext | None = None
 
     def _get_failfast(self):
         return len(self.targets) == 2
@@ -1833,6 +1858,8 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
     @property
     def current_tags(self):
         """The currently set tags."""
+        if self._tags is None:
+            return set()
         return self._tags.get_current_tags()
 
     def tags(self, new_tags, gone_tags):
@@ -1841,7 +1868,8 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
         :param new_tags: A set of tags to be added to the stream.
         :param gone_tags: A set of tags to be removed from the stream.
         """
-        self._tags.change_tags(new_tags, gone_tags)
+        if self._tags is not None:
+            self._tags.change_tags(new_tags, gone_tags)
 
     def _now(self):
         """Return the current 'test time'.
@@ -1938,10 +1966,33 @@ class StreamToExtendedDecorator(StreamResult):
         # _StreamToTestRecord buffers and gives us individual tests.
         self.hook = _StreamToTestRecord(self._handle_tests)
 
-    def status(self, test_id=None, test_status=None, *args, **kwargs):
+    def status(
+        self,
+        test_id=None,
+        test_status=None,
+        test_tags=None,
+        runnable=True,
+        file_name=None,
+        file_bytes=None,
+        eof=False,
+        mime_type=None,
+        route_code=None,
+        timestamp=None,
+    ):
         if test_status == "exists":
             return
-        self.hook.status(test_id=test_id, test_status=test_status, *args, **kwargs)
+        self.hook.status(
+            test_id=test_id,
+            test_status=test_status,
+            test_tags=test_tags,
+            runnable=runnable,
+            file_name=file_name,
+            file_bytes=file_bytes,
+            eof=eof,
+            mime_type=mime_type,
+            route_code=route_code,
+            timestamp=timestamp,
+        )
 
     def startTestRun(self):
         self.decorated.startTestRun()

@@ -64,6 +64,8 @@ class TestFixtureSupport(TestCase):
         self.assertEqual(["called"], calls)
 
     def test_useFixture_details_captured(self):
+        assert fixtures is not None  # Checked in setUp
+
         class DetailsFixture(fixtures.Fixture):
             def setUp(self):
                 fixtures.Fixture.setUp(self)
@@ -98,6 +100,8 @@ class TestFixtureSupport(TestCase):
         )
 
     def test_useFixture_multiple_details_captured(self):
+        assert fixtures is not None  # Checked in setUp
+
         class DetailsFixture(fixtures.Fixture):
             def setUp(self):
                 fixtures.Fixture.setUp(self)
@@ -121,6 +125,9 @@ class TestFixtureSupport(TestCase):
     def test_useFixture_details_captured_from_setUp(self):
         # Details added during fixture set-up are gathered even if setUp()
         # fails with an exception.
+        assert fixtures is not None  # Checked in setUp
+        assert fixtures is not None  # Checked in setUp
+
         class BrokenFixture(fixtures.Fixture):
             def setUp(self):
                 fixtures.Fixture.setUp(self)
@@ -144,6 +151,8 @@ class TestFixtureSupport(TestCase):
         # Newer Fixtures deprecates setUp() in favour of _setUp().
         # https://bugs.launchpad.net/testtools/+bug/1469759 reports that
         # this is broken when gathering details from a broken _setUp().
+        assert fixtures is not None  # Checked in setUp
+
         class BrokenFixture(fixtures.Fixture):
             def _setUp(self):
                 fixtures.Fixture._setUp(self)
@@ -175,6 +184,8 @@ class TestFixtureSupport(TestCase):
         # In bug #1368440 it was reported that when a fixture fails setUp
         # and gather_details errors on it, then the original exception that
         # failed is not reported.
+        assert fixtures is not None  # Checked in setUp
+
         class BrokenFixture(fixtures.Fixture):
             def getDetails(self):
                 raise AttributeError("getDetails broke")
