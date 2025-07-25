@@ -4,6 +4,8 @@ import os
 import shutil
 import tarfile
 import tempfile
+from collections.abc import Callable
+from typing import Any
 
 from testtools import TestCase
 from testtools.matchers import (
@@ -24,6 +26,9 @@ from testtools.matchers._filesystem import (
 
 
 class PathHelpers:
+    # This is provided by TestCase when mixed in
+    addCleanup: Callable[..., Any]
+
     def mkdtemp(self):
         directory = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, directory)

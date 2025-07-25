@@ -130,7 +130,7 @@ class FileContains(Matcher):
             f.close()
 
     def __str__(self):
-        return f"File at path exists and contains {self.contents}"
+        return f"File at path exists and contains {self.matcher}"
 
 
 class HasPermissions(Matcher):

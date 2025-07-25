@@ -96,6 +96,9 @@ class Raises(Matcher):
 
     def match(self, matchee):
         try:
+            # Handle staticmethod objects by extracting the underlying function
+            if isinstance(matchee, staticmethod):
+                matchee = matchee.__func__
             result = matchee()
             return Mismatch(f"{matchee!r} returned {result!r}")
         # Catch all exceptions: Raises() should be able to match a

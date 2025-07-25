@@ -4,6 +4,7 @@
 
 import os
 import signal
+from typing import Any
 
 from testtools import skipIf
 from testtools.matchers import (
@@ -18,24 +19,24 @@ from ._helpers import NeedsTwistedTestCase
 try:
     from testtools.twistedsupport import _spinner
 except ImportError:
-    _spinner = None
+    _spinner = None  # type: ignore[assignment]
 
 try:
     from twisted.internet import defer
 except ImportError:
-    defer = None
+    defer = None  # type: ignore[assignment]
 
 try:
     from twisted.python.failure import Failure
 except ImportError:
-    Failure = None
+    Failure = None  # type: ignore[assignment,misc]
 
 
 class TestNotReentrant(NeedsTwistedTestCase):
     def test_not_reentrant(self):
         # A function decorated as not being re-entrant will raise a
         # _spinner.ReentryError if it is called while it is running.
-        calls = []
+        calls: list[Any] = []
 
         @_spinner.not_reentrant
         def log_something():
@@ -47,7 +48,7 @@ class TestNotReentrant(NeedsTwistedTestCase):
         self.assertEqual(1, len(calls))
 
     def test_deeper_stack(self):
-        calls = []
+        calls: list[Any] = []
 
         @_spinner.not_reentrant
         def g():
@@ -104,7 +105,7 @@ class TestRunInReactor(NeedsTwistedTestCase):
 
     def test_function_called(self):
         # run_in_reactor actually calls the function given to it.
-        calls = []
+        calls: list[Any] = []
         marker = object()
         self.make_spinner().run(self.make_timeout(), calls.append, marker)
         self.assertThat(calls, Equals([marker]))
@@ -126,7 +127,7 @@ class TestRunInReactor(NeedsTwistedTestCase):
 
     def test_keyword_arguments(self):
         # run_in_reactor passes keyword arguments on.
-        calls = []
+        calls: list[Any] = []
 
         def function(*a, **kw):
             return calls.extend([a, kw])
@@ -155,8 +156,10 @@ class TestRunInReactor(NeedsTwistedTestCase):
         self.assertThat(result, Is(marker))
 
     def test_preserve_signal_handler(self):
-        signals = ["SIGINT", "SIGTERM", "SIGCHLD"]
-        signals = list(filter(None, (getattr(signal, name, None) for name in signals)))
+        signal_names = ["SIGINT", "SIGTERM", "SIGCHLD"]
+        signals: list[int] = list(
+            filter(None, (getattr(signal, name, None) for name in signal_names))
+        )
         for sig in signals:
             self.addCleanup(signal.signal, sig, signal.getsignal(sig))
         new_hdlrs = list(lambda *a: None for _ in signals)
@@ -335,7 +338,7 @@ class TestRunInReactor(NeedsTwistedTestCase):
         reactor = self.make_reactor()
         spinner1 = self.make_spinner(reactor)
         timeout = self.make_timeout()
-        deferred1 = defer.Deferred()
+        deferred1: defer.Deferred[Any] = defer.Deferred()
         self.expectThat(
             lambda: spinner1.run(timeout, lambda: deferred1),
             Raises(MatchesException(_spinner.TimeoutError)),
@@ -345,7 +348,7 @@ class TestRunInReactor(NeedsTwistedTestCase):
         # reactor keeps spinning. We don't care that it's a callback of
         # deferred1 per se, only that it strictly fires afterwards.
         marker = object()
-        deferred2 = defer.Deferred()
+        deferred2: defer.Deferred[Any] = defer.Deferred()
         deferred1.addCallback(
             lambda ignored: reactor.callLater(0, deferred2.callback, marker)
         )

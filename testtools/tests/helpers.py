@@ -45,21 +45,24 @@ class LoggingResult(TestResult):
         self._events.append(("stopTest", test))
         super().stopTest(test)
 
-    def addFailure(self, test, error):
-        self._events.append(("addFailure", test, error))
-        super().addFailure(test, error)
+    def addFailure(self, test, err=None, details=None):
+        self._events.append(("addFailure", test, err))
+        super().addFailure(test, err, details)
 
-    def addError(self, test, error):
-        self._events.append(("addError", test, error))
-        super().addError(test, error)
+    def addError(self, test, err=None, details=None):
+        self._events.append(("addError", test, err))
+        super().addError(test, err, details)
 
-    def addSkip(self, test, reason):
+    def addSkip(self, test, reason=None, details=None):
+        # Extract reason from details if not provided directly
+        if reason is None and details and "reason" in details:
+            reason = details["reason"].as_text()
         self._events.append(("addSkip", test, reason))
-        super().addSkip(test, reason)
+        super().addSkip(test, reason, details)
 
-    def addSuccess(self, test):
+    def addSuccess(self, test, details=None):
         self._events.append(("addSuccess", test))
-        super().addSuccess(test)
+        super().addSuccess(test, details)
 
     def startTestRun(self):
         self._events.append("startTestRun")

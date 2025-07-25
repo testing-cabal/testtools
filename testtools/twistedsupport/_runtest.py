@@ -28,6 +28,7 @@ __all__ = [
 
 import io
 import sys
+from typing import Any
 
 from fixtures import CompoundFixture, Fixture
 from twisted.internet import defer
@@ -47,11 +48,11 @@ from ._spinner import (
 try:
     from twisted.logger import globalLogPublisher
 except ImportError:
-    globalLogPublisher = None
+    globalLogPublisher = None  # type: ignore[assignment]
 from twisted.python import log
 
 try:
-    from twisted.trial.unittest import _LogObserver
+    from twisted.trial.unittest import _LogObserver  # type: ignore[attr-defined]
 except ImportError:
     from twisted.trial._synctest import _LogObserver
 
@@ -305,7 +306,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         return AsynchronousDeferredRunTestFactory()
 
     @defer.inlineCallbacks
-    def _run_cleanups(self):
+    def _run_cleanups(self, result=None):
         """Run the cleanups on the test case.
 
         We expect that the cleanups on the test case can also return
@@ -336,7 +337,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         call addSuccess on the result, because there's reactor clean up that
         we needs to be done afterwards.
         """
-        fails = []
+        fails: list[Any] = []
 
         def fail_if_exception_caught(exception_caught):
             if self.exception_caught == exception_caught:
@@ -405,7 +406,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
 
     def _get_log_fixture(self):
         """Return the log fixture we're configured to use."""
-        fixtures = []
+        fixtures: list[Fixture] = []
         # TODO: Expose these fixtures and deprecate both of these options in
         # favour of them.
         if self._suppress_twisted_logging:
@@ -430,7 +431,10 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
                 self.case.addDetail(name, detail)
             with _ErrorObserver(_log_observer) as error_fixture:
                 successful, unhandled = self._blocking_run_deferred(spinner)
-            for logged_error in error_fixture.flush_logged_errors():
+            # FIXME(stephenfin): Something is off with the __enter__ method on
+            # Fixture: mypy is incorrectly identifying the type as Fixture
+            # instead of _ErrorObserver
+            for logged_error in error_fixture.flush_logged_errors():  # type: ignore
                 successful = False
                 self._got_user_failure(logged_error, tb_label="logged-error")
 

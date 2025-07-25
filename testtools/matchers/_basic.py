@@ -17,7 +17,9 @@ __all__ = [
 
 import operator
 import re
+from collections.abc import Callable
 from pprint import pformat
+from typing import Any
 
 from ..compat import (
     text_repr,
@@ -45,6 +47,10 @@ def _format(thing):
 class _BinaryComparison:
     """Matcher that compares an object to another object."""
 
+    mismatch_string: str
+    # comparator is defined by subclasses - using Any to allow different signatures
+    comparator: Callable[..., Any]
+
     def __init__(self, expected):
         self.expected = expected
 
@@ -55,9 +61,6 @@ class _BinaryComparison:
         if self.comparator(other, self.expected):
             return None
         return _BinaryMismatch(other, self.mismatch_string, self.expected)
-
-    def comparator(self, expected, other):
-        raise NotImplementedError(self.comparator)
 
 
 class _BinaryMismatch(Mismatch):
@@ -134,14 +137,14 @@ class Is(_BinaryComparison):
 class LessThan(_BinaryComparison):
     """Matches if the item is less than the matchers reference object."""
 
-    comparator = operator.__lt__
+    comparator = operator.lt
     mismatch_string = ">="
 
 
 class GreaterThan(_BinaryComparison):
     """Matches if the item is greater than the matchers reference object."""
 
-    comparator = operator.__gt__
+    comparator = operator.gt
     mismatch_string = "<="
 
 
