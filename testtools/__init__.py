@@ -41,12 +41,10 @@ __all__ = [
     "skip",
     "skipIf",
     "skipUnless",
-    "try_import",
     "unique_text_generator",
     "version",
 ]
 
-from testtools.helpers import try_import
 from testtools.matchers._impl import Matcher  # noqa: F401
 from testtools.runtest import (
     MultipleExceptions,
