@@ -81,11 +81,11 @@ class TestAnyMatch(TestCase, TestMatchersInterface):
     ]
 
 
-class TestAfterPreprocessing(TestCase, TestMatchersInterface):
-    @staticmethod
-    def parity(x):
-        return x % 2
+def parity(x):
+    return x % 2
 
+
+class TestAfterPreprocessing(TestCase, TestMatchersInterface):
     matches_matcher: ClassVar = AfterPreprocessing(parity, Equals(1))
     matches_matches: ClassVar = [3, 5]
     matches_mismatches: ClassVar = [2]

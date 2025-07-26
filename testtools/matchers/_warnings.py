@@ -68,6 +68,9 @@ class Warnings:
     def match(self, matchee):
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
+            # Handle staticmethod objects by extracting the underlying function
+            if isinstance(matchee, staticmethod):
+                matchee = matchee.__func__
             matchee()
             if self.warnings_matcher is not None:
                 return self.warnings_matcher.match(w)

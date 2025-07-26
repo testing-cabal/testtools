@@ -54,6 +54,9 @@ class LoggingResult(TestResult):
         super().addError(test, err, details)
 
     def addSkip(self, test, reason=None, details=None):
+        # Extract reason from details if not provided directly
+        if reason is None and details and "reason" in details:
+            reason = details["reason"].as_text()
         self._events.append(("addSkip", test, reason))
         super().addSkip(test, reason, details)
 
