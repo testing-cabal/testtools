@@ -44,6 +44,10 @@ jobs:
         run: |
           python -m ruff format --check .
 
+      - name: Type Check
+        run: |
+          python -m mypy testtools
+
       - name: Tests
         run: |
           python -W once -m testtools.run testtools.tests.test_suite
