@@ -10,6 +10,7 @@ from testtools import TestCase
 
 if TYPE_CHECKING:
     from types import ModuleType
+
     defer: Optional[ModuleType]
 else:
     try:
