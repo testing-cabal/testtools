@@ -345,9 +345,9 @@ class _MatchesPredicateWithParams(Matcher):
         self.kwargs = kwargs
 
     def __str__(self):
-        args = [str(arg) for arg in self.args]
+        args_list = [str(arg) for arg in self.args]
         kwargs = ["{}={}".format(*item) for item in self.kwargs.items()]
-        args = ", ".join(args + kwargs)
+        args = ", ".join(args_list + kwargs)
         if self.name is None:
             name = f"MatchesPredicateWithParams({self.predicate!r}, {self.message!r})"
         else:

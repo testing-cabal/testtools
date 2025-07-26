@@ -12,15 +12,21 @@ from unittest import TestSuite
 import testtools
 from testtools import TestCase, run, skipUnless
 from testtools.compat import _b
-from testtools.helpers import try_import
 from testtools.matchers import (
     Contains,
     DocTestMatches,
     MatchesRegex,
 )
 
-fixtures = try_import("fixtures")
-testresources = try_import("testresources")
+try:
+    import fixtures
+except ImportError:
+    fixtures = None
+
+try:
+    import testresources
+except ImportError:
+    testresources = None
 
 
 if fixtures:
@@ -165,7 +171,7 @@ class TestRun(TestCase):
         tests = []
 
         class CaptureList(run.TestToolsTestRunner):
-            def list(self, test):
+            def list(self, test, loader=None):
                 tests.append(
                     {case.id() for case in testtools.testsuite.iterate_tests(test)}
                 )
@@ -242,7 +248,7 @@ testtools.runexample.TestFoo.test_quux
         broken = self.useFixture(SampleTestFixture(broken=True))
         out = io.StringIO()
         # XXX: http://bugs.python.org/issue22811
-        unittest.defaultTestLoader._top_level_dir = None
+        unittest.defaultTestLoader._top_level_dir = None  # type: ignore[attr-defined]
         exc = self.assertRaises(
             SystemExit,
             run.main,
@@ -446,7 +452,7 @@ OK
         pkg = self.useFixture(SampleLoadTestsPackage())
         out = io.StringIO()
         # XXX: http://bugs.python.org/issue22811
-        unittest.defaultTestLoader._top_level_dir = None
+        unittest.defaultTestLoader._top_level_dir = None  # type: ignore[attr-defined]
         self.assertEqual(
             None, run.main(["prog", "discover", "-l", pkg.package.base], out)
         )

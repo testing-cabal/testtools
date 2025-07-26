@@ -2,6 +2,8 @@
 
 """Tests for Deferred matchers."""
 
+from typing import Any
+
 from twisted.internet import defer
 from twisted.python.failure import Failure
 
@@ -85,9 +87,9 @@ class NoResultTests(NeedsTwistedTestCase):
     def test_success_after_assertion(self):
         # We can create a Deferred, assert that it hasn't fired, then fire it
         # and collect the result.
-        deferred = defer.Deferred()
+        deferred: defer.Deferred[Any] = defer.Deferred()
         self.assertThat(deferred, has_no_result())
-        results = []
+        results: list[Any] = []
         deferred.addCallback(results.append)
         marker = object()
         deferred.callback(marker)
@@ -96,9 +98,9 @@ class NoResultTests(NeedsTwistedTestCase):
     def test_failure_after_assertion(self):
         # We can create a Deferred, assert that it hasn't fired, then fire it
         # with a failure and collect the result.
-        deferred = defer.Deferred()
+        deferred: defer.Deferred[Any] = defer.Deferred()
         self.assertThat(deferred, has_no_result())
-        results = []
+        results: list[Any] = []
         deferred.addErrback(results.append)
         fail = make_failure(RuntimeError("arbitrary failure"))
         deferred.errback(fail)
@@ -130,7 +132,7 @@ class SuccessResultTests(NeedsTwistedTestCase):
 
     def test_not_fired_fails(self):
         # A Deferred that has not yet fired fails to match.
-        deferred = defer.Deferred()
+        deferred: defer.Deferred[Any] = defer.Deferred()
         arbitrary_matcher = Is(None)
         self.assertThat(
             self.match(arbitrary_matcher, deferred),
@@ -143,7 +145,7 @@ class SuccessResultTests(NeedsTwistedTestCase):
 
     def test_failing_fails(self):
         # A Deferred that has fired with a failure fails to match.
-        deferred = defer.Deferred()
+        deferred: defer.Deferred[Any] = defer.Deferred()
         fail = make_failure(RuntimeError("arbitrary failure"))
         deferred.errback(fail)
         arbitrary_matcher = Is(None)
@@ -206,7 +208,7 @@ class FailureResultTests(NeedsTwistedTestCase):
 
     def test_no_result_fails(self):
         # A Deferred that has not fired fails to match.
-        deferred = defer.Deferred()
+        deferred: defer.Deferred[Any] = defer.Deferred()
         matcher = Is(None)  # Can be any matcher
         self.assertThat(
             self.match(matcher, deferred),

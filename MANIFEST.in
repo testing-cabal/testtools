@@ -4,4 +4,5 @@ include MANIFEST.in
 include NEWS
 include README.rst
 include .gitignore
+include testtools/py.typed
 prune doc/_build

@@ -4,14 +4,13 @@
 
 import os
 import signal
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from testtools import (
     TestCase,
     TestResult,
     skipIf,
 )
-from testtools.helpers import try_import
 from testtools.matchers import (
     AfterPreprocessing,
     Contains,
@@ -33,24 +32,55 @@ from testtools.tests.helpers import (
 
 from ._helpers import NeedsTwistedTestCase
 
-DebugTwisted = try_import("testtools.twistedsupport._deferreddebug.DebugTwisted")
+try:
+    from testtools.twistedsupport._deferreddebug import DebugTwisted
+except ImportError:
+    DebugTwisted = None  # type: ignore[assignment,misc]
 
-assert_fails_with = try_import("testtools.twistedsupport.assert_fails_with")
-AsynchronousDeferredRunTest = try_import(
-    "testtools.twistedsupport.AsynchronousDeferredRunTest"
-)
-flush_logged_errors = try_import("testtools.twistedsupport.flush_logged_errors")
-SynchronousDeferredRunTest = try_import(
-    "testtools.twistedsupport.SynchronousDeferredRunTest"
-)
+try:
+    from testtools.twistedsupport import assert_fails_with
+except ImportError:
+    assert_fails_with = None  # type: ignore[assignment]
 
-defer = try_import("twisted.internet.defer")
-failure = try_import("twisted.python.failure")
-log = try_import("twisted.python.log")
-DelayedCall = try_import("twisted.internet.base.DelayedCall")
-_get_global_publisher_and_observers = try_import(
-    "testtools.twistedsupport._runtest._get_global_publisher_and_observers"
-)
+try:
+    from testtools.twistedsupport import AsynchronousDeferredRunTest
+except ImportError:
+    AsynchronousDeferredRunTest = None  # type: ignore[assignment,misc]
+
+try:
+    from testtools.twistedsupport import flush_logged_errors
+except ImportError:
+    flush_logged_errors = None  # type: ignore[assignment]
+
+try:
+    from testtools.twistedsupport import SynchronousDeferredRunTest
+except ImportError:
+    SynchronousDeferredRunTest = None  # type: ignore[assignment,misc]
+
+try:
+    from twisted.internet import defer
+except ImportError:
+    defer = None  # type: ignore[assignment]
+
+try:
+    from twisted.python import failure
+except ImportError:
+    failure = None  # type: ignore[assignment]
+
+try:
+    from twisted.python import log
+except ImportError:
+    log = None  # type: ignore[assignment]
+
+try:
+    from twisted.internet.base import DelayedCall
+except ImportError:
+    DelayedCall = None  # type: ignore[assignment,misc]
+
+try:
+    from testtools.twistedsupport._runtest import _get_global_publisher_and_observers
+except ImportError:
+    _get_global_publisher_and_observers = None  # type: ignore[assignment]
 
 
 class X:
@@ -127,6 +157,10 @@ class X:
             self.expectThat(object(), Is(object()))
 
     class TestIntegration(NeedsTwistedTestCase):
+        # These attributes are set dynamically in test generation
+        test_factory: Any = None
+        runner: Any = None
+
         def assertResultsMatch(self, test, result):
             events = list(result._events)
             self.assertEqual(("startTest", test), events.pop(0))
@@ -268,9 +302,10 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
         # setUp can return a Deferred that might fire at any time.
         # AsynchronousDeferredRunTest will not go on to running the test until
         # the Deferred returned by setUp actually fires.
-        call_log = []
+        call_log: list[Any] = []
         marker = object()
-        d = defer.Deferred().addCallback(call_log.append)
+        d: defer.Deferred[Any] = defer.Deferred()
+        d.addCallback(call_log.append)
 
         class SomeCase(TestCase):
             def setUp(self):
@@ -299,12 +334,12 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
         # Deferreds. AsynchronousDeferredRunTest will make sure that each of
         # these are run in turn, only going on to the next stage once the
         # Deferred from the previous stage has fired.
-        call_log = []
-        a = defer.Deferred()
+        call_log: list[Any] = []
+        a: defer.Deferred[Any] = defer.Deferred()
         a.addCallback(lambda x: call_log.append("a"))
-        b = defer.Deferred()
+        b: defer.Deferred[Any] = defer.Deferred()
         b.addCallback(lambda x: call_log.append("b"))
-        c = defer.Deferred()
+        c: defer.Deferred[Any] = defer.Deferred()
         c.addCallback(lambda x: call_log.append("c"))
 
         class SomeCase(TestCase):
@@ -355,7 +390,7 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
                 pass
 
         test = SomeCase("test_whatever")
-        call_log = []
+        call_log: list[Any] = []
         a = defer.Deferred().addCallback(lambda x: call_log.append("a"))
         b = defer.Deferred().addCallback(lambda x: call_log.append("b"))
         c = defer.Deferred().addCallback(lambda x: call_log.append("c"))
@@ -411,6 +446,8 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
         timeout = self.make_timeout()
 
         class SomeCase(TestCase):
+            reactor: Any  # Set dynamically by runner
+
             def test_cruft(self):
                 self.assertIs(reactor, self.reactor)
 
@@ -761,7 +798,7 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
     def test_do_not_log_to_twisted(self):
         # If suppress_twisted_logging is True, we don't log anything to the
         # default Twisted loggers.
-        messages = []
+        messages: list[Any] = []
         publisher, _ = _get_global_publisher_and_observers()
         publisher.addObserver(messages.append)
         self.addCleanup(publisher.removeObserver, messages.append)
@@ -779,7 +816,7 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
     def test_log_to_twisted(self):
         # If suppress_twisted_logging is False, we log to the default Twisted
         # loggers.
-        messages = []
+        messages: list[Any] = []
         publisher, _ = _get_global_publisher_and_observers()
         publisher.addObserver(messages.append)
 
@@ -968,7 +1005,7 @@ class TestNoTwistedLogObservers(NeedsTwistedTestCase):
 
     def _get_logged_messages(self, function, *args, **kwargs):
         """Run ``function`` and return ``(ret, logged_messages)``."""
-        messages = []
+        messages: list[Any] = []
         publisher, _ = _get_global_publisher_and_observers()
         publisher.addObserver(messages.append)
         try:
@@ -1029,7 +1066,7 @@ class TestTwistedLogObservers(NeedsTwistedTestCase):
         # that observer while the fixture is active.
         from testtools.twistedsupport._runtest import _TwistedLogObservers
 
-        messages = []
+        messages: list[Any] = []
 
         class SomeTest(TestCase):
             def test_something(self):

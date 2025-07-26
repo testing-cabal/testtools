@@ -28,22 +28,22 @@ from testtools.tests.matchers.helpers import TestMatchersInterface
 
 
 class TestAllMatch(TestCase, TestMatchersInterface):
-    matches_matcher = AllMatch(LessThan(10))
-    matches_matches: ClassVar[list] = [
+    matches_matcher: ClassVar = AllMatch(LessThan(10))
+    matches_matches: ClassVar = [
         [9, 9, 9],
         (9, 9),
         iter([9, 9, 9, 9, 9]),
     ]
-    matches_mismatches: ClassVar[list] = [
+    matches_mismatches: ClassVar = [
         [11, 9, 9],
         iter([9, 12, 9, 11]),
     ]
 
-    str_examples: ClassVar[list] = [
+    str_examples: ClassVar = [
         ("AllMatch(LessThan(12))", AllMatch(LessThan(12))),
     ]
 
-    describe_examples: ClassVar[list] = [
+    describe_examples: ClassVar = [
         (
             "Differences: [\n11 >= 10\n10 >= 10\n]",
             [11, 9, 10],
@@ -53,14 +53,14 @@ class TestAllMatch(TestCase, TestMatchersInterface):
 
 
 class TestAnyMatch(TestCase, TestMatchersInterface):
-    matches_matcher = AnyMatch(Equals("elephant"))
-    matches_matches: ClassVar[list] = [
+    matches_matcher: ClassVar = AnyMatch(Equals("elephant"))
+    matches_matches: ClassVar = [
         ["grass", "cow", "steak", "milk", "elephant"],
         (13, "elephant"),
         ["elephant", "elephant", "elephant"],
         {"hippo", "rhino", "elephant"},
     ]
-    matches_mismatches: ClassVar[list] = [
+    matches_mismatches: ClassVar = [
         [],
         ["grass", "cow", "steak", "milk"],
         (13, 12, 10),
@@ -68,11 +68,11 @@ class TestAnyMatch(TestCase, TestMatchersInterface):
         {"hippo", "rhino", "diplodocus"},
     ]
 
-    str_examples: ClassVar[list] = [
+    str_examples: ClassVar = [
         ("AnyMatch(Equals('elephant'))", AnyMatch(Equals("elephant"))),
     ]
 
-    describe_examples: ClassVar[list] = [
+    describe_examples: ClassVar = [
         (
             "Differences: [\n11 != 7\n9 != 7\n10 != 7\n]",
             [11, 9, 10],
@@ -81,22 +81,23 @@ class TestAnyMatch(TestCase, TestMatchersInterface):
     ]
 
 
+def parity(x):
+    return x % 2
+
+
 class TestAfterPreprocessing(TestCase, TestMatchersInterface):
-    def parity(x):
-        return x % 2
+    matches_matcher: ClassVar = AfterPreprocessing(parity, Equals(1))
+    matches_matches: ClassVar = [3, 5]
+    matches_mismatches: ClassVar = [2]
 
-    matches_matcher = AfterPreprocessing(parity, Equals(1))
-    matches_matches: ClassVar[list] = [3, 5]
-    matches_mismatches: ClassVar[list] = [2]
-
-    str_examples: ClassVar[list] = [
+    str_examples: ClassVar = [
         (
             "AfterPreprocessing(<function parity>, Equals(1))",
             AfterPreprocessing(parity, Equals(1)),
         ),
     ]
 
-    describe_examples: ClassVar[list] = [
+    describe_examples: ClassVar = [
         (
             "0 != 1: after <function parity> on 2",
             2,
@@ -107,18 +108,18 @@ class TestAfterPreprocessing(TestCase, TestMatchersInterface):
 
 
 class TestMatchersAnyInterface(TestCase, TestMatchersInterface):
-    matches_matcher = MatchesAny(DocTestMatches("1"), DocTestMatches("2"))
-    matches_matches: ClassVar[list] = ["1", "2"]
-    matches_mismatches: ClassVar[list] = ["3"]
+    matches_matcher: ClassVar = MatchesAny(DocTestMatches("1"), DocTestMatches("2"))
+    matches_matches: ClassVar = ["1", "2"]
+    matches_mismatches: ClassVar = ["3"]
 
-    str_examples: ClassVar[list] = [
+    str_examples: ClassVar = [
         (
             "MatchesAny(DocTestMatches('1\\n'), DocTestMatches('2\\n'))",
             MatchesAny(DocTestMatches("1"), DocTestMatches("2")),
         ),
     ]
 
-    describe_examples: ClassVar[list] = [
+    describe_examples: ClassVar = [
         (
             """Differences: [
 Expected:
@@ -139,18 +140,18 @@ Got:
 
 
 class TestMatchesAllInterface(TestCase, TestMatchersInterface):
-    matches_matcher = MatchesAll(NotEquals(1), NotEquals(2))
-    matches_matches: ClassVar[list] = [3, 4]
-    matches_mismatches: ClassVar[list] = [1, 2]
+    matches_matcher: ClassVar = MatchesAll(NotEquals(1), NotEquals(2))
+    matches_matches: ClassVar = [3, 4]
+    matches_mismatches: ClassVar = [1, 2]
 
-    str_examples: ClassVar[list] = [
+    str_examples: ClassVar = [
         (
             "MatchesAll(NotEquals(1), NotEquals(2))",
             MatchesAll(NotEquals(1), NotEquals(2)),
         )
     ]
 
-    describe_examples: ClassVar[list] = [
+    describe_examples: ClassVar = [
         (
             """Differences: [
 1 == 1
@@ -167,15 +168,15 @@ class TestMatchesAllInterface(TestCase, TestMatchersInterface):
 
 
 class TestAnnotate(TestCase, TestMatchersInterface):
-    matches_matcher = Annotate("foo", Equals(1))
-    matches_matches: ClassVar[list] = [1]
-    matches_mismatches: ClassVar[list] = [2]
+    matches_matcher: ClassVar = Annotate("foo", Equals(1))
+    matches_matches: ClassVar = [1]
+    matches_mismatches: ClassVar = [2]
 
-    str_examples: ClassVar[list] = [
+    str_examples: ClassVar = [
         ("Annotate('foo', Equals(1))", Annotate("foo", Equals(1)))
     ]
 
-    describe_examples: ClassVar[list] = [("2 != 1: foo", 2, Annotate("foo", Equals(1)))]
+    describe_examples: ClassVar = [("2 != 1: foo", 2, Annotate("foo", Equals(1)))]
 
     def test_if_message_no_message(self):
         # Annotate.if_message returns the given matcher if there is no
@@ -205,16 +206,16 @@ class TestAnnotatedMismatch(TestCase):
 
 
 class TestNotInterface(TestCase, TestMatchersInterface):
-    matches_matcher = Not(Equals(1))
-    matches_matches: ClassVar[list] = [2]
-    matches_mismatches: ClassVar[list] = [1]
+    matches_matcher: ClassVar = Not(Equals(1))
+    matches_matches: ClassVar = [2]
+    matches_mismatches: ClassVar = [1]
 
-    str_examples: ClassVar[list] = [
+    str_examples: ClassVar = [
         ("Not(Equals(1))", Not(Equals(1))),
         ("Not(Equals('1'))", Not(Equals("1"))),
     ]
 
-    describe_examples: ClassVar[list] = [("1 matches Equals(1)", 1, Not(Equals(1)))]
+    describe_examples: ClassVar = [("1 matches Equals(1)", 1, Not(Equals(1)))]
 
 
 def is_even(x):
@@ -222,18 +223,18 @@ def is_even(x):
 
 
 class TestMatchesPredicate(TestCase, TestMatchersInterface):
-    matches_matcher = MatchesPredicate(is_even, "%s is not even")
-    matches_matches: ClassVar[list] = [2, 4, 6, 8]
-    matches_mismatches: ClassVar[list] = [3, 5, 7, 9]
+    matches_matcher: ClassVar = MatchesPredicate(is_even, "%s is not even")
+    matches_matches: ClassVar = [2, 4, 6, 8]
+    matches_mismatches: ClassVar = [3, 5, 7, 9]
 
-    str_examples: ClassVar[list] = [
+    str_examples: ClassVar = [
         (
             "MatchesPredicate({!r}, {!r})".format(is_even, "%s is not even"),
             MatchesPredicate(is_even, "%s is not even"),
         ),
     ]
 
-    describe_examples: ClassVar[list] = [
+    describe_examples: ClassVar = [
         ("7 is not even", 7, MatchesPredicate(is_even, "%s is not even")),
     ]
 
@@ -243,13 +244,13 @@ def between(x, low, high):
 
 
 class TestMatchesPredicateWithParams(TestCase, TestMatchersInterface):
-    matches_matcher = MatchesPredicateWithParams(
+    matches_matcher: ClassVar = MatchesPredicateWithParams(
         between, "{0} is not between {1} and {2}"
     )(1, 9)
-    matches_matches: ClassVar[list] = [2, 4, 6, 8]
-    matches_mismatches: ClassVar[list] = [0, 1, 9, 10]
+    matches_matches: ClassVar = [2, 4, 6, 8]
+    matches_mismatches: ClassVar = [0, 1, 9, 10]
 
-    str_examples: ClassVar[list] = [
+    str_examples: ClassVar = [
         (
             "MatchesPredicateWithParams({!r}, {!r})({})".format(
                 between, "{0} is not between {1} and {2}", "1, 2"
@@ -264,7 +265,7 @@ class TestMatchesPredicateWithParams(TestCase, TestMatchersInterface):
         ),
     ]
 
-    describe_examples: ClassVar[list] = [
+    describe_examples: ClassVar = [
         (
             "1 is not between 2 and 3",
             1,

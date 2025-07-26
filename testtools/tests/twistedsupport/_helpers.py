@@ -4,10 +4,19 @@ __all__ = [
     "NeedsTwistedTestCase",
 ]
 
-from testtools import TestCase
-from testtools.helpers import try_import
+from typing import TYPE_CHECKING, Optional
 
-defer = try_import("twisted.internet.defer")
+from testtools import TestCase
+
+if TYPE_CHECKING:
+    from types import ModuleType
+
+    defer: Optional[ModuleType]
+else:
+    try:
+        from twisted.internet import defer
+    except ImportError:
+        defer = None
 
 
 class NeedsTwistedTestCase(TestCase):

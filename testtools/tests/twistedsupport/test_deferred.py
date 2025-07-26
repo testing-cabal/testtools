@@ -2,7 +2,6 @@
 
 """Tests for testtools._deferred."""
 
-from testtools.helpers import try_import
 from testtools.matchers import (
     Equals,
     MatchesException,
@@ -11,11 +10,25 @@ from testtools.matchers import (
 
 from ._helpers import NeedsTwistedTestCase
 
-DeferredNotFired = try_import("testtools.twistedsupport._deferred.DeferredNotFired")
-extract_result = try_import("testtools.twistedsupport._deferred.extract_result")
+try:
+    from testtools.twistedsupport._deferred import DeferredNotFired
+except ImportError:
+    DeferredNotFired = None  # type: ignore[misc,assignment]
 
-defer = try_import("twisted.internet.defer")
-Failure = try_import("twisted.python.failure.Failure")
+try:
+    from testtools.twistedsupport._deferred import extract_result
+except ImportError:
+    extract_result = None  # type: ignore[assignment]
+
+try:
+    from twisted.internet import defer
+except ImportError:
+    defer = None  # type: ignore[assignment]
+
+try:
+    from twisted.python.failure import Failure
+except ImportError:
+    Failure = None  # type: ignore[misc,assignment]
 
 
 class TestExtractResult(NeedsTwistedTestCase):

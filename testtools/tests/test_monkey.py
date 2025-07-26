@@ -57,7 +57,7 @@ class MonkeyPatcherTest(TestCase):
         # the patch.
         self.monkey_patcher.add_patch(self.test_object, "doesntexist", "value")
         self.monkey_patcher.patch()
-        self.assertEqual(self.test_object.doesntexist, "value")
+        self.assertEqual(self.test_object.doesntexist, "value")  # type: ignore[attr-defined]
 
     def test_restore_non_existing(self):
         # Restoring a value that didn't exist before the patch deletes the

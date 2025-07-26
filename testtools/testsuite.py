@@ -16,6 +16,7 @@ import unittest
 from collections import Counter
 from pprint import pformat
 from queue import Queue
+from typing import Any
 
 import testtools
 
@@ -51,8 +52,7 @@ class ConcurrentTestSuite(unittest.TestSuite):
         """
         super().__init__([suite])
         self.make_tests = make_tests
-        if wrap_result:
-            self._wrap_result = wrap_result
+        self._custom_wrap_result = wrap_result
 
     def _wrap_result(self, thread_safe_result, thread_number):
         """Wrap a thread-safe result before sending it test results.
@@ -60,9 +60,11 @@ class ConcurrentTestSuite(unittest.TestSuite):
         You can either override this in a subclass or pass your own
         ``wrap_result`` in to the constructor.  The latter is preferred.
         """
+        if self._custom_wrap_result:
+            return self._custom_wrap_result(thread_safe_result, thread_number)
         return thread_safe_result
 
-    def run(self, result):
+    def run(self, result, debug=False):
         """Run the tests concurrently.
 
         This calls out to the provided make_tests helper, and then serialises
@@ -78,7 +80,7 @@ class ConcurrentTestSuite(unittest.TestSuite):
         tests = self.make_tests(self)
         try:
             threads = {}
-            queue = Queue()
+            queue: Queue[Any] = Queue()
             semaphore = threading.Semaphore(1)
             for i, test in enumerate(tests):
                 process_result = self._wrap_result(
@@ -126,7 +128,7 @@ class ConcurrentStreamTestSuite:
         super().__init__()
         self.make_tests = make_tests
 
-    def run(self, result):
+    def run(self, result, debug=False):
         """Run the tests concurrently.
 
         This calls out to the provided make_tests helper to determine the
@@ -150,7 +152,7 @@ class ConcurrentStreamTestSuite:
         tests = self.make_tests()
         try:
             threads = {}
-            queue = Queue()
+            queue: Queue[Any] = Queue()
             for test, route_code in tests:
                 to_queue = testtools.StreamToQueue(queue, route_code)
                 process_result = testtools.ExtendedToStreamDecorator(
@@ -200,10 +202,10 @@ class FixtureSuite(unittest.TestSuite):
         super().__init__(tests)
         self._fixture = fixture
 
-    def run(self, result):
+    def run(self, result, debug=False):
         self._fixture.setUp()
         try:
-            super().run(result)
+            super().run(result, debug)
         finally:
             self._fixture.cleanUp()
 
