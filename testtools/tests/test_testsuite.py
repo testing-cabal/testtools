@@ -5,6 +5,7 @@
 import doctest
 import unittest
 from pprint import pformat
+from typing import Union
 
 from testtools import (
     ConcurrentStreamTestSuite,
@@ -353,7 +354,7 @@ class TestFixtureSuite(TestCase):
             self.skipTest("Need fixtures")
 
     def test_fixture_suite(self):
-        log: list[int | str] = []
+        log: list[Union[int, str]] = []
 
         class Sample(TestCase):
             def test_one(self):
@@ -370,7 +371,7 @@ class TestFixtureSuite(TestCase):
         self.assertEqual(["setUp", 1, 2, "tearDown"], log)
 
     def test_fixture_suite_sort(self):
-        log: list[int | str] = []
+        log: list[Union[int, str]] = []
 
         class Sample(TestCase):
             def test_one(self):
