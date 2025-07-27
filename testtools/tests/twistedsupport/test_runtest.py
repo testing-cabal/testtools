@@ -6,6 +6,8 @@ import os
 import signal
 from typing import Any, ClassVar
 
+from testscenarios import multiply_scenarios
+
 from testtools import (
     TestCase,
     TestResult,
@@ -83,140 +85,161 @@ except ImportError:
     _get_global_publisher_and_observers = None  # type: ignore[assignment]
 
 
-class X:
-    """Tests that we run as part of our tests, nested to avoid discovery."""
+# Flattened test classes to avoid PyPy compilation crash with nested classes
+# Prefixed with _ to avoid pytest discovery
 
-    # XXX: After testing-cabal/testtools#165 lands, fix up all of these to be
-    # scenario tests for RunTest.
 
-    class Base(TestCase):
-        def setUp(self):
-            super(X.Base, self).setUp()
-            self.calls = ["setUp"]
-            self.addCleanup(self.calls.append, "clean-up")
+class _XBase(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.calls = ["setUp"]
+        self.addCleanup(self.calls.append, "clean-up")
 
-        def test_something(self):
-            self.calls.append("test")
+    def test_something(self):
+        self.calls.append("test")
 
-        def tearDown(self):
-            self.calls.append("tearDown")
-            super(X.Base, self).tearDown()
+    def tearDown(self):
+        self.calls.append("tearDown")
+        super().tearDown()
 
-    class BaseExceptionRaised(Base):
-        expected_calls: ClassVar[list] = ["setUp", "tearDown", "clean-up"]
-        expected_results: ClassVar[list] = [("addError", SystemExit)]
 
-        def test_something(self):
-            raise SystemExit(0)
+class _XBaseExceptionRaised(_XBase):
+    expected_calls: ClassVar[list] = ["setUp", "tearDown", "clean-up"]
+    expected_results: ClassVar[list] = [("addError", SystemExit)]
 
-    class ErrorInSetup(Base):
-        expected_calls: ClassVar[list] = ["setUp", "clean-up"]
-        expected_results: ClassVar[list] = [("addError", RuntimeError)]
+    def test_something(self):
+        raise SystemExit(0)
 
-        def setUp(self):
-            super(X.ErrorInSetup, self).setUp()
-            raise RuntimeError("Error in setUp")
 
-    class ErrorInTest(Base):
-        expected_calls: ClassVar[list] = ["setUp", "tearDown", "clean-up"]
-        expected_results: ClassVar[list] = [("addError", RuntimeError)]
+class _XErrorInSetup(_XBase):
+    expected_calls: ClassVar[list] = ["setUp", "clean-up"]
+    expected_results: ClassVar[list] = [("addError", RuntimeError)]
 
-        def test_something(self):
-            raise RuntimeError("Error in test")
+    def setUp(self):
+        super().setUp()
+        raise RuntimeError("Error in setUp")
 
-    class FailureInTest(Base):
-        expected_calls: ClassVar[list] = ["setUp", "tearDown", "clean-up"]
-        expected_results: ClassVar[list] = [("addFailure", AssertionError)]
 
-        def test_something(self):
-            self.fail("test failed")
+class _XErrorInTest(_XBase):
+    expected_calls: ClassVar[list] = ["setUp", "tearDown", "clean-up"]
+    expected_results: ClassVar[list] = [("addError", RuntimeError)]
 
-    class ErrorInTearDown(Base):
-        expected_calls: ClassVar[list] = ["setUp", "test", "clean-up"]
-        expected_results: ClassVar[list] = [("addError", RuntimeError)]
+    def test_something(self):
+        raise RuntimeError("Error in test")
 
-        def tearDown(self):
-            raise RuntimeError("Error in tearDown")
 
-    class ErrorInCleanup(Base):
-        expected_calls: ClassVar[list] = ["setUp", "test", "tearDown", "clean-up"]
-        expected_results: ClassVar[list] = [("addError", ZeroDivisionError)]
+class _XFailureInTest(_XBase):
+    expected_calls: ClassVar[list] = ["setUp", "tearDown", "clean-up"]
+    expected_results: ClassVar[list] = [("addFailure", AssertionError)]
 
-        def test_something(self):
-            self.calls.append("test")
-            self.addCleanup(lambda: 1 / 0)
+    def test_something(self):
+        self.fail("test failed")
 
-    class ExpectThatFailure(Base):
-        """Calling expectThat with a failing match fails the test."""
 
-        expected_calls: ClassVar[list] = ["setUp", "test", "tearDown", "clean-up"]
-        expected_results: ClassVar[list] = [("addFailure", AssertionError)]
+class _XErrorInTearDown(_XBase):
+    expected_calls: ClassVar[list] = ["setUp", "test", "clean-up"]
+    expected_results: ClassVar[list] = [("addError", RuntimeError)]
 
-        def test_something(self):
-            self.calls.append("test")
-            self.expectThat(object(), Is(object()))
+    def tearDown(self):
+        raise RuntimeError("Error in tearDown")
 
-    class TestIntegration(NeedsTwistedTestCase):
-        # These attributes are set dynamically in test generation
-        test_factory: Any = None
-        runner: Any = None
 
-        def assertResultsMatch(self, test, result):
-            events = list(result._events)
-            self.assertEqual(("startTest", test), events.pop(0))
-            for expected_result in test.expected_results:
-                result = events.pop(0)
-                if len(expected_result) == 1:
-                    self.assertEqual((expected_result[0], test), result)
-                else:
-                    self.assertEqual((expected_result[0], test), result[:2])
-                    error_type = expected_result[1]
-                    self.assertIn(error_type.__name__, str(result[2]))
-            self.assertEqual([("stopTest", test)], events)
+class _XErrorInCleanup(_XBase):
+    expected_calls: ClassVar[list] = ["setUp", "test", "tearDown", "clean-up"]
+    expected_results: ClassVar[list] = [("addError", ZeroDivisionError)]
 
-        def test_runner(self):
-            result = ExtendedTestResult()
-            test = self.test_factory("test_something", runTest=self.runner)
-            if self.test_factory is X.BaseExceptionRaised:
-                self.assertRaises(SystemExit, test.run, result)
+    def test_something(self):
+        self.calls.append("test")
+        self.addCleanup(lambda: 1 / 0)
+
+
+class _XExpectThatFailure(_XBase):
+    """Calling expectThat with a failing match fails the test."""
+
+    expected_calls: ClassVar[list] = ["setUp", "test", "tearDown", "clean-up"]
+    expected_results: ClassVar[list] = [("addFailure", AssertionError)]
+
+    def test_something(self):
+        self.calls.append("test")
+        self.expectThat(object(), Is(object()))
+
+
+class _XTestIntegration(NeedsTwistedTestCase):
+    # These attributes are set dynamically in test generation
+    test_factory: Any = None
+    runner: Any = None
+
+    def assertResultsMatch(self, test, result):
+        events = list(result._events)
+        self.assertEqual(("startTest", test), events.pop(0))
+        for expected_result in test.expected_results:
+            result = events.pop(0)
+            if len(expected_result) == 1:
+                self.assertEqual((expected_result[0], test), result)
             else:
-                test.run(result)
-            self.assertEqual(test.calls, self.test_factory.expected_calls)
-            self.assertResultsMatch(test, result)
+                self.assertEqual((expected_result[0], test), result[:2])
+                error_type = expected_result[1]
+                self.assertIn(error_type.__name__, str(result[2]))
+        self.assertEqual([("stopTest", test)], events)
+
+    def test_runner(self):
+        result = ExtendedTestResult()
+        test = self.test_factory("test_something", runTest=self.runner)
+        if self.test_factory is _XBaseExceptionRaised:
+            self.assertRaises(SystemExit, test.run, result)
+        else:
+            test.run(result)
+        self.assertEqual(test.calls, self.test_factory.expected_calls)
+        self.assertResultsMatch(test, result)
 
 
-def make_integration_tests():
-    from unittest import TestSuite
+class TestRunTestIntegration(NeedsTwistedTestCase):
+    """Integration tests for different runner and test case combinations."""
 
-    from testtools import clone_test_with_new_id
+    # These attributes are provided by testscenarios
+    runner: Any
+    test_factory: Any
 
-    runners = [
-        ("RunTest", RunTest),
-        ("SynchronousDeferredRunTest", SynchronousDeferredRunTest),
-        ("AsynchronousDeferredRunTest", AsynchronousDeferredRunTest),
-    ]
+    scenarios = multiply_scenarios(
+        [  # Runner scenarios
+            ("RunTest", {"runner": RunTest}),
+            ("SynchronousDeferredRunTest", {"runner": SynchronousDeferredRunTest}),
+            ("AsynchronousDeferredRunTest", {"runner": AsynchronousDeferredRunTest}),
+        ],
+        [  # Test case scenarios
+            ("BaseExceptionRaised", {"test_factory": _XBaseExceptionRaised}),
+            ("ErrorInSetup", {"test_factory": _XErrorInSetup}),
+            ("ErrorInTest", {"test_factory": _XErrorInTest}),
+            ("ErrorInTearDown", {"test_factory": _XErrorInTearDown}),
+            ("FailureInTest", {"test_factory": _XFailureInTest}),
+            ("ErrorInCleanup", {"test_factory": _XErrorInCleanup}),
+            ("ExpectThatFailure", {"test_factory": _XExpectThatFailure}),
+        ],
+    )
 
-    tests = [
-        X.BaseExceptionRaised,
-        X.ErrorInSetup,
-        X.ErrorInTest,
-        X.ErrorInTearDown,
-        X.FailureInTest,
-        X.ErrorInCleanup,
-        X.ExpectThatFailure,
-    ]
-    base_test = X.TestIntegration("test_runner")
-    integration_tests = []
-    for runner_name, runner in runners:
-        for test in tests:
-            new_test = clone_test_with_new_id(
-                base_test,
-                f"{base_test.id()}({runner_name}, {test.__name__})",
-            )
-            new_test.test_factory = test
-            new_test.runner = runner
-            integration_tests.append(new_test)
-    return TestSuite(integration_tests)
+    def assertResultsMatch(self, test, result):
+        events = list(result._events)
+        self.assertEqual(("startTest", test), events.pop(0))
+        for expected_result in test.expected_results:
+            result = events.pop(0)
+            if len(expected_result) == 1:
+                self.assertEqual((expected_result[0], test), result)
+            else:
+                self.assertEqual((expected_result[0], test), result[:2])
+                error_type = expected_result[1]
+                self.assertIn(error_type.__name__, str(result[2]))
+        self.assertEqual([("stopTest", test)], events)
+
+    def test_runner(self):
+        """Test that each runner handles each test case scenario correctly."""
+        result = ExtendedTestResult()
+        test = self.test_factory("test_something", runTest=self.runner)
+        if self.test_factory is _XBaseExceptionRaised:
+            self.assertRaises(SystemExit, test.run, result)
+        else:
+            test.run(result)
+        self.assertEqual(test.calls, self.test_factory.expected_calls)
+        self.assertResultsMatch(test, result)
 
 
 class TestSynchronousDeferredRunTest(NeedsTwistedTestCase):
@@ -1142,5 +1165,6 @@ def test_suite():
 
 
 def load_tests(loader, tests, pattern):
-    tests.addTest(make_integration_tests())
-    return tests
+    from testscenarios import load_tests_apply_scenarios
+
+    return load_tests_apply_scenarios(loader, tests, pattern)

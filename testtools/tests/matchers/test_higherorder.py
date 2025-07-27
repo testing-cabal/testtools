@@ -81,6 +81,7 @@ class TestAnyMatch(TestCase, TestMatchersInterface):
     ]
 
 
+# Module-level function to avoid PyPy compilation issues with staticmethod
 def parity(x):
     return x % 2
 
