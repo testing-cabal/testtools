@@ -12,15 +12,21 @@ from unittest import TestSuite
 import testtools
 from testtools import TestCase, run, skipUnless
 from testtools.compat import _b
-from testtools.helpers import try_import
 from testtools.matchers import (
     Contains,
     DocTestMatches,
     MatchesRegex,
 )
 
-fixtures = try_import("fixtures")
-testresources = try_import("testresources")
+try:
+    import fixtures
+except ImportError:
+    fixtures = None
+
+try:
+    import testresources
+except ImportError:
+    testresources = None
 
 
 if fixtures:

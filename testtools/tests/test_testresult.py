@@ -54,7 +54,6 @@ from testtools.content import (
     text_content,
 )
 from testtools.content_type import UTF8_TEXT, ContentType
-from testtools.helpers import try_import
 from testtools.matchers import (
     AllMatch,
     Contains,
@@ -86,7 +85,10 @@ from testtools.tests.helpers import (
     run_with_stack_hidden,
 )
 
-testresources = try_import("testresources")
+try:
+    import testresources
+except ImportError:
+    testresources = None
 
 
 def _utcfromtimestamp(t):

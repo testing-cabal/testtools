@@ -6,7 +6,6 @@ import os
 import signal
 
 from testtools import skipIf
-from testtools.helpers import try_import
 from testtools.matchers import (
     Equals,
     Is,
@@ -16,10 +15,20 @@ from testtools.matchers import (
 
 from ._helpers import NeedsTwistedTestCase
 
-_spinner = try_import("testtools.twistedsupport._spinner")
+try:
+    from testtools.twistedsupport import _spinner
+except ImportError:
+    _spinner = None
 
-defer = try_import("twisted.internet.defer")
-Failure = try_import("twisted.python.failure.Failure")
+try:
+    from twisted.internet import defer
+except ImportError:
+    defer = None
+
+try:
+    from twisted.python.failure import Failure
+except ImportError:
+    Failure = None
 
 
 class TestNotReentrant(NeedsTwistedTestCase):
