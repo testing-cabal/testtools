@@ -11,7 +11,6 @@ from testtools import (
     TestResult,
     skipIf,
 )
-from testtools.helpers import try_import
 from testtools.matchers import (
     AfterPreprocessing,
     Contains,
@@ -33,24 +32,44 @@ from testtools.tests.helpers import (
 
 from ._helpers import NeedsTwistedTestCase
 
-DebugTwisted = try_import("testtools.twistedsupport._deferreddebug.DebugTwisted")
+try:
+    from testtools.twistedsupport._deferreddebug import DebugTwisted
+except ImportError:
+    DebugTwisted = None
 
-assert_fails_with = try_import("testtools.twistedsupport.assert_fails_with")
-AsynchronousDeferredRunTest = try_import(
-    "testtools.twistedsupport.AsynchronousDeferredRunTest"
-)
-flush_logged_errors = try_import("testtools.twistedsupport.flush_logged_errors")
-SynchronousDeferredRunTest = try_import(
-    "testtools.twistedsupport.SynchronousDeferredRunTest"
-)
+try:
+    from testtools.twistedsupport import (
+        AsynchronousDeferredRunTest,
+        SynchronousDeferredRunTest,
+        assert_fails_with,
+        flush_logged_errors,
+    )
+except ImportError:
+    assert_fails_with = None
+    AsynchronousDeferredRunTest = None
+    flush_logged_errors = None
+    SynchronousDeferredRunTest = None
 
-defer = try_import("twisted.internet.defer")
-failure = try_import("twisted.python.failure")
-log = try_import("twisted.python.log")
-DelayedCall = try_import("twisted.internet.base.DelayedCall")
-_get_global_publisher_and_observers = try_import(
-    "testtools.twistedsupport._runtest._get_global_publisher_and_observers"
-)
+try:
+    from twisted.internet import defer
+except ImportError:
+    defer = None
+
+try:
+    from twisted.python import failure, log
+except ImportError:
+    failure = None
+    log = None
+
+try:
+    from twisted.internet.base import DelayedCall
+except ImportError:
+    DelayedCall = None
+
+try:
+    from testtools.twistedsupport._runtest import _get_global_publisher_and_observers
+except ImportError:
+    _get_global_publisher_and_observers = None
 
 
 class X:

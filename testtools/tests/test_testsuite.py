@@ -14,13 +14,15 @@ from testtools import (
     TestCase,
     iterate_tests,
 )
-from testtools.helpers import try_import
 from testtools.matchers import DocTestMatches, Equals
 from testtools.testresult.doubles import StreamResult as LoggingStream
 from testtools.tests.helpers import LoggingResult
 from testtools.testsuite import FixtureSuite, sorted_tests
 
-FunctionFixture = try_import("fixtures.FunctionFixture")
+try:
+    from fixtures import FunctionFixture
+except ImportError:
+    FunctionFixture = None
 
 
 class Sample(TestCase):

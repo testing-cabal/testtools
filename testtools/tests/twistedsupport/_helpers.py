@@ -5,9 +5,11 @@ __all__ = [
 ]
 
 from testtools import TestCase
-from testtools.helpers import try_import
 
-defer = try_import("twisted.internet.defer")
+try:
+    from twisted.internet import defer
+except ImportError:
+    defer = None
 
 
 class NeedsTwistedTestCase(TestCase):

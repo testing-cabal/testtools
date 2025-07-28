@@ -26,7 +26,6 @@ from unittest.case import SkipTest
 
 from testtools import content
 from testtools.compat import reraise
-from testtools.helpers import try_import
 from testtools.matchers import (
     Annotate,
     Contains,
@@ -166,7 +165,10 @@ def gather_details(source_dict, target_dict):
 # Circular import: fixtures imports gather_details from here, we import
 # fixtures, leading to gather_details not being available and fixtures being
 # unable to import it.
-fixtures = try_import("fixtures")
+try:
+    import fixtures
+except ImportError:
+    fixtures = None
 
 
 class UseFixtureProtocol(Protocol):
