@@ -235,9 +235,9 @@ def StacktraceContent(prefix_content="", postfix_content=""):
 
 def json_content(json_data):
     """Create a JSON Content object from JSON-encodeable data."""
-    data = json.dumps(json_data)
+    json_str = json.dumps(json_data)
     # The json module perversely returns native str not bytes
-    data = data.encode("utf8")
+    data = json_str.encode("utf8")
     return Content(JSON, lambda: [data])
 
 
