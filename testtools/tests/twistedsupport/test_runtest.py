@@ -817,7 +817,7 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
 
     def test_restore_observers(self):
         # We restore the original observers.
-        publisher, observers = _get_global_publisher_and_observers()
+        _publisher, observers = _get_global_publisher_and_observers()
 
         class LogSomething(TestCase):
             def test_something(self):
@@ -831,7 +831,7 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
 
     def test_restore_observers_after_timeout(self):
         # We restore the original observers even if the test times out.
-        publisher, observers = _get_global_publisher_and_observers()
+        _publisher, observers = _get_global_publisher_and_observers()
 
         class LogSomething(TestCase):
             def test_something(self):
