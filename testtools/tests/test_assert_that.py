@@ -115,7 +115,7 @@ class AssertThatTests:
                     break
             error = "".join(lines[i:])
         # We aren't interested in how the exception type is formatted.
-        exc_class, error = error.split(": ", 1)
+        _exc_class, error = error.split(": ", 1)
         return error
 
     def test_assertThat_verbose_unicode(self):

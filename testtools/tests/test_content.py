@@ -246,7 +246,7 @@ class TestStackLinesContent(TestCase):
         self.assertEqual(expected, actual)
 
     def test___init___sets_content_type(self):
-        stack_lines, expected = self._get_stack_line_and_expected_output()
+        stack_lines, _expected = self._get_stack_line_and_expected_output()
         content = StackLinesContent(stack_lines)
         expected_content_type = ContentType(
             "text", "x-traceback", {"language": "python", "charset": "utf8"}

@@ -2574,7 +2574,7 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
         # of the text types in the details dict.
         if not expected:
             expected = outcome
-        details, err_str = self.get_details_and_string()
+        details, _err_str = self.get_details_and_string()
         getattr(self.converter, outcome)(self, details=details)
         err = self.converter._details_to_exc_info(details)
         self.assertEqual([(expected, self, err)], self.result._events)
@@ -3079,7 +3079,7 @@ class TestNonAsciiResults(TestCase):
 
     def test_syntax_error_line_iso_8859_1(self):
         """Syntax error on a latin-1 line shows the line decoded"""
-        text, raw = self._get_sample_text("iso-8859-1")
+        text, _raw = self._get_sample_text("iso-8859-1")
         textoutput = self._setup_external_case("import bad")
         self._write_module(
             "bad", "iso-8859-1", f"# coding: iso-8859-1\n! = 0 # {text}\n"
@@ -3095,7 +3095,7 @@ class TestNonAsciiResults(TestCase):
 
     def test_syntax_error_line_iso_8859_5(self):
         """Syntax error on a iso-8859-5 line shows the line decoded"""
-        text, raw = self._get_sample_text("iso-8859-5")
+        text, _raw = self._get_sample_text("iso-8859-5")
         textoutput = self._setup_external_case("import bad")
         self._write_module(
             "bad", "iso-8859-5", f"# coding: iso-8859-5\n% = 0 # {text}\n"
@@ -3118,7 +3118,7 @@ class TestNonAsciiResults(TestCase):
 
     def test_syntax_error_line_euc_jp(self):
         """Syntax error on a euc_jp line shows the line decoded"""
-        text, raw = self._get_sample_text("euc_jp")
+        text, _raw = self._get_sample_text("euc_jp")
         textoutput = self._setup_external_case("import bad")
         self._write_module("bad", "euc_jp", f"# coding: euc_jp\n$ = 0 # {text}\n")
         textoutput = self._run_external_case()
@@ -3139,7 +3139,7 @@ class TestNonAsciiResults(TestCase):
 
     def test_syntax_error_line_utf_8(self):
         """Syntax error on a utf-8 line shows the line decoded"""
-        text, raw = self._get_sample_text("utf-8")
+        text, _raw = self._get_sample_text("utf-8")
         textoutput = self._setup_external_case("import bad")
         self._write_module("bad", "utf-8", f"\ufeff^ = 0 # {text}\n")
         textoutput = self._run_external_case()
