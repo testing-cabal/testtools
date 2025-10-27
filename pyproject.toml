@@ -34,7 +34,7 @@ Homepage = "https://github.com/testing-cabal/testtools"
 [project.optional-dependencies]
 test = ["testscenarios", "testresources"]
 twisted = ["Twisted", "fixtures"]
-dev = ["ruff==0.13.2"]
+dev = ["ruff==0.14.2"]
 
 [tool.hatch.version]
 source = "vcs"
