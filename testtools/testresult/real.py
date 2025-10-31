@@ -221,7 +221,6 @@ class TestResult(unittest.TestResult):
         self.unexpectedSuccesses = []
         self.failfast = failfast
         # -- End:   As per python 2.7 --
-        # -- Python 3.5
         self.tb_locals = tb_locals
         # -- Python 3.12
         self.collectedDurations = []

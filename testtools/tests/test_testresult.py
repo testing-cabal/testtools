@@ -3053,11 +3053,9 @@ class TestNonAsciiResults(TestCase):
         """Syntax errors should still have fancy special-case formatting"""
         if platform.python_implementation() == "PyPy":
             spaces = "         "
-        elif sys.version_info >= (3, 10):
-            spaces = "        "
         else:
-            spaces = "          "
-        marker = "^^^" if sys.version_info >= (3, 10) else "^"
+            spaces = "        "
+        marker = "^^^"
         textoutput = self._test_external_case("exec ('f(a, b c)')")
         self.assertIn(
             self._as_output(
@@ -3143,7 +3141,7 @@ class TestNonAsciiResults(TestCase):
         textoutput = self._setup_external_case("import bad")
         self._write_module("bad", "utf-8", f"\ufeff^ = 0 # {text}\n")
         textoutput = self._run_external_case()
-        # Python 3.9 no longer prints the '\ufeff'
+        # Python no longer prints the '\ufeff'
         textoutput = textoutput.replace("\ufeff", "")
         self.assertThat(
             textoutput,

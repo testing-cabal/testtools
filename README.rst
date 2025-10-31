@@ -34,7 +34,7 @@ under the same license as Python, see LICENSE for details.
 Supported platforms
 -------------------
 
-* Python 3.9+ or PyPy3
+* Python 3.10+ or PyPy3
 
 If you would like to use testtools for earlier Pythons, consult the compatibility docs:
 
