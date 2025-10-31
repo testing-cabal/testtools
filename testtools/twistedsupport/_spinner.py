@@ -17,7 +17,7 @@ __all__ = [
 ]
 
 import signal
-from typing import ClassVar, Union
+from typing import ClassVar
 
 from fixtures import Fixture
 from twisted.internet import defer
@@ -159,7 +159,7 @@ class Spinner:
     # the ideal, and it actually works for many cases.
     _OBLIGATORY_REACTOR_ITERATIONS = 0
 
-    _failure: Union[Failure, object]
+    _failure: Failure | object
 
     def __init__(self, reactor, debug=False):
         """Construct a Spinner.
