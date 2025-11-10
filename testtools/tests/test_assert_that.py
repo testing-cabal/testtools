@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from doctest import ELLIPSIS
-from typing import Any, Callable
+from typing import Any
 
 from testtools import (
     TestCase,
