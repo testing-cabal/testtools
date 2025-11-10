@@ -28,6 +28,7 @@ __all__ = [
 
 import io
 import sys
+from typing import Any
 
 from fixtures import CompoundFixture, Fixture
 from twisted.internet import defer
@@ -47,11 +48,11 @@ from ._spinner import (
 try:
     from twisted.logger import globalLogPublisher
 except ImportError:
-    globalLogPublisher = None
+    globalLogPublisher = None  # type: ignore[assignment]
 from twisted.python import log
 
 try:
-    from twisted.trial.unittest import _LogObserver
+    from twisted.trial.unittest import _LogObserver  # type: ignore[attr-defined]
 except ImportError:
     from twisted.trial._synctest import _LogObserver
 
@@ -305,7 +306,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         return AsynchronousDeferredRunTestFactory()
 
     @defer.inlineCallbacks
-    def _run_cleanups(self):
+    def _run_cleanups(self, result=None):
         """Run the cleanups on the test case.
 
         We expect that the cleanups on the test case can also return
@@ -336,7 +337,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         call addSuccess on the result, because there's reactor clean up that
         we needs to be done afterwards.
         """
-        fails = []
+        fails: list[Any] = []
 
         def fail_if_exception_caught(exception_caught):
             if self.exception_caught == exception_caught:

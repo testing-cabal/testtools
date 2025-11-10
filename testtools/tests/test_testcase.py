@@ -7,6 +7,7 @@ import sys
 import unittest
 from doctest import ELLIPSIS
 from pprint import pformat
+from typing import Any
 
 from testtools import (
     DecorateTestCaseResult,
@@ -129,7 +130,7 @@ class TestPlaceHolder(TestCase):
     def test_runs_as_success(self):
         # When run, a PlaceHolder test records a success.
         test = self.makePlaceHolder()
-        log = []
+        log: list[tuple[str, ...]] = []
         test.run(LoggingResult(log))
         self.assertEqual(
             [
@@ -178,9 +179,9 @@ class TestPlaceHolder(TestCase):
     def test_call_is_run(self):
         # A PlaceHolder can be called, in which case it behaves like run.
         test = self.makePlaceHolder()
-        run_log = []
+        run_log: list[tuple[str, ...]] = []
         test.run(LoggingResult(run_log))
-        call_log = []
+        call_log: list[tuple[str, ...]] = []
         test(LoggingResult(call_log))
         self.assertEqual(run_log, call_log)
 
@@ -274,9 +275,9 @@ class TestErrorHolder(TestCase):
     def test_call_is_run(self):
         # A PlaceHolder can be called, in which case it behaves like run.
         test = self.makePlaceHolder()
-        run_log = []
+        run_log: list[tuple[str, ...]] = []
         test.run(LoggingResult(run_log))
-        call_log = []
+        call_log: list[tuple[str, ...]] = []
         test(LoggingResult(call_log))
         self.assertEqual(run_log, call_log)
 
@@ -676,7 +677,7 @@ class TestAssertions(TestCase):
         self.assertThat("foo", Matcher())
 
     def test_assertThat_mismatch_raises_description(self):
-        calls = []
+        calls: list[tuple[str, ...]] = []
 
         class Mismatch:
             def __init__(self, thing):
@@ -895,7 +896,7 @@ class TestAddCleanup(TestCase):
     def test_cleanup_run_after_tearDown(self):
         # Cleanup functions added with 'addCleanup' are called after tearDown
         # runs.
-        log = []
+        log: list[str] = []
         test = make_test_case(
             self.getUniqueString(),
             set_up=lambda _: log.append("setUp"),
@@ -910,7 +911,7 @@ class TestAddCleanup(TestCase):
         # Cleanup functions added with 'addCleanup' are called even if setUp
         # fails. Note that tearDown has a different behavior: it is only
         # called when setUp succeeds.
-        log = []
+        log: list[str] = []
 
         def broken_set_up(ignored):
             log.append("brokenSetUp")
@@ -938,7 +939,7 @@ class TestAddCleanup(TestCase):
         #
         # When this happens, we generally want to clean up the second resource
         # before the first one, since the second depends on the first.
-        log = []
+        log: list[str] = []
         test = make_test_case(
             self.getUniqueString(),
             set_up=lambda _: log.append("setUp"),
@@ -956,7 +957,7 @@ class TestAddCleanup(TestCase):
 
     def test_tearDown_runs_on_cleanup_failure(self):
         # tearDown runs even if a cleanup function fails.
-        log = []
+        log: list[str] = []
         test = make_test_case(
             self.getUniqueString(),
             set_up=lambda _: log.append("setUp"),
@@ -969,7 +970,7 @@ class TestAddCleanup(TestCase):
 
     def test_cleanups_continue_running_after_error(self):
         # All cleanups are always run, even if one or two of them fail.
-        log = []
+        log: list[str] = []
         test = make_test_case(
             self.getUniqueString(),
             set_up=lambda _: log.append("setUp"),
@@ -990,7 +991,7 @@ class TestAddCleanup(TestCase):
         # If a cleanup raises an error, we want to record it and fail the the
         # test, even though we go on to run other cleanups.
         test = make_test_case(self.getUniqueString(), cleanups=[lambda _: 1 / 0])
-        log = []
+        log: list[tuple[str, ...]] = []
         test.run(ExtendedTestResult(log))
         self.assertThat(
             log,
@@ -1036,7 +1037,7 @@ class TestAddCleanup(TestCase):
             raise MultipleExceptions(exc_info1, exc_info2)
 
         test = make_test_case(self.getUniqueString(), cleanups=[raise_many])
-        log = []
+        log: list[tuple[str, ...]] = []
         test.run(ExtendedTestResult(log))
         self.assertThat(
             log,
@@ -1077,7 +1078,7 @@ class TestAddCleanup(TestCase):
                 lambda _: 1 / 0,
             ],
         )
-        log = []
+        log: list[tuple[str, ...]] = []
         test.run(ExtendedTestResult(log))
         self.assertThat(
             log,
@@ -1120,7 +1121,7 @@ class TestAddCleanup(TestCase):
                 lambda _: 1 / 0,
             ],
         )
-        log = []
+        log: list[tuple[str, ...]] = []
         test.run(ExtendedTestResult(log))
         self.assertThat(
             log,
@@ -1441,7 +1442,7 @@ class TestDetailsProvided(TestWithDetails):
         # No traceback is included if the skip exception is changed and a skip
         # is raised.
         class Case(TestCase):
-            skipException = ValueError
+            skipException = ValueError  # type: ignore[assignment]
 
             def test(this):
                 this.addDetail("foo", self.get_content())
@@ -1652,6 +1653,11 @@ class TestRunTwiceNondeterministic(TestCase):
 
     scenarios = nondeterministic_sample_cases_scenarios
 
+    # These are provided by scenarios
+    case: Any
+    expected_first_result: Any
+    expected_second_result: Any
+
     def test_runTwice(self):
         test = self.case
         first_result = ExtendedTestResult()
@@ -1682,7 +1688,7 @@ class TestSkipping(TestCase):
     def test_skip_without_reason_works(self):
         class Test(TestCase):
             def test(self):
-                raise self.skipException()
+                raise self.skipException()  # type: ignore[call-arg]
 
         case = Test("test")
         result = ExtendedTestResult()
@@ -1699,7 +1705,7 @@ class TestSkipping(TestCase):
             def test_that_passes(self):
                 pass
 
-        calls = []
+        calls: list[tuple[str, ...]] = []
         result = LoggingResult(calls)
         test = TestThatRaisesInSetUp("test_that_passes")
         test.run(result)
@@ -1718,7 +1724,7 @@ class TestSkipping(TestCase):
             def test_that_raises_skipException(self):
                 self.skipTest("skipping this test")
 
-        events = []
+        events: list[tuple[str, ...]] = []
         result = Python3TestResult(events)
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
@@ -1734,12 +1740,12 @@ class TestSkipping(TestCase):
 
     def test_different_skipException_in_test_method_calls_result_addSkip(self):
         class SkippingTest(TestCase):
-            skipException = ValueError
+            skipException = ValueError  # type: ignore[assignment]
 
             def test_that_raises_skipException(self):
                 self.skipTest("skipping this test")
 
-        events = []
+        events: list[tuple[str, ...]] = []
         result = Python3TestResult(events)
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
@@ -1762,7 +1768,7 @@ class TestSkipping(TestCase):
             def test_that_raises_skipException(self):
                 pass
 
-        events = []
+        events: list[tuple[str, ...]] = []
         result = Python3TestResult(events)
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
@@ -1773,7 +1779,7 @@ class TestSkipping(TestCase):
             def test_that_raises_skipException(self):
                 raise self.skipException("skipping this test")
 
-        events = []
+        events: list[tuple[str, ...]] = []
         result = Python3TestResult(events)
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
@@ -1785,7 +1791,7 @@ class TestSkipping(TestCase):
             def test_that_is_decorated_with_skip(self):
                 self.fail()
 
-        events = []
+        events: list[tuple[str, ...]] = []
         result = Python3TestResult(events)
         test = SkippingTest("test_that_is_decorated_with_skip")
         test.run(result)
@@ -1797,7 +1803,7 @@ class TestSkipping(TestCase):
             def test_that_is_decorated_with_skipIf(self):
                 self.fail()
 
-        events = []
+        events: list[tuple[str, ...]] = []
         result = Python3TestResult(events)
         test = SkippingTest("test_that_is_decorated_with_skipIf")
         test.run(result)
@@ -1809,7 +1815,7 @@ class TestSkipping(TestCase):
             def test_that_is_decorated_with_skipUnless(self):
                 self.fail()
 
-        events = []
+        events: list[tuple[str, ...]] = []
         result = Python3TestResult(events)
         test = SkippingTest("test_that_is_decorated_with_skipUnless")
         test.run(result)
@@ -1825,13 +1831,13 @@ class TestSkipping(TestCase):
         class NotSkippingTest(TestCase):
             test_no_skip = skipIf(False, "skipping this test")(shared)
 
-        events = []
+        events: list[tuple[str, ...]] = []
         result = Python3TestResult(events)
         test = SkippingTest("test_skip")
         test.run(result)
         self.assertEqual("addSkip", events[1][0])
 
-        events2 = []
+        events2: list[tuple[str, ...]] = []
         result2 = Python3TestResult(events2)
         test2 = NotSkippingTest("test_no_skip")
         test2.run(result2)
@@ -1843,7 +1849,7 @@ class TestSkipping(TestCase):
             def test_that_is_decorated_with_skip(self):
                 self.fail()
 
-        events = []
+        events: list[tuple[str, ...]] = []
         result = Python3TestResult(events)
         try:
             test = SkippingTest("test_that_is_decorated_with_skip")
@@ -1858,7 +1864,7 @@ class TestSkipping(TestCase):
             def test_that_is_decorated_with_skipIf(self):
                 self.fail()
 
-        events = []
+        events: list[tuple[str, ...]] = []
         result = Python3TestResult(events)
         try:
             test = SkippingTest("test_that_is_decorated_with_skipIf")
@@ -1873,7 +1879,7 @@ class TestSkipping(TestCase):
             def test_that_is_decorated_with_skipUnless(self):
                 self.fail()
 
-        events = []
+        events: list[tuple[str, ...]] = []
         result = Python3TestResult(events)
         try:
             test = SkippingTest("test_that_is_decorated_with_skipUnless")
@@ -1911,10 +1917,10 @@ class TestSkipping(TestCase):
                 self.fail()
 
         try:
-            test = SkippingTestCase("test_skipped")
+            test_case = SkippingTestCase("test_skipped")
         except unittest.SkipTest:
             self.fail("SkipTest raised")
-        self.check_test_does_not_run_setup(test, reason)
+        self.check_test_does_not_run_setup(test_case, reason)
 
     def check_test_does_not_run_setup(self, test, reason):
         result = test.run()
@@ -1955,7 +1961,7 @@ class TestOnException(TestCase):
     run_test_with = FullStackRunTest
 
     def test_default_works(self):
-        events = []
+        events: list[bool] = []
 
         class Case(TestCase):
             def method(self):
@@ -1967,7 +1973,7 @@ class TestOnException(TestCase):
         self.assertThat(events, Equals([True]))
 
     def test_added_handler_works(self):
-        events = []
+        events: list[tuple[str, ...]] = []
 
         class Case(TestCase):
             def method(self):
@@ -1979,7 +1985,7 @@ class TestOnException(TestCase):
         self.assertThat(events, Equals([an_exc_info]))
 
     def test_handler_that_raises_is_not_caught(self):
-        events = []
+        events: list[tuple[str, ...]] = []
 
         class Case(TestCase):
             def method(self):
@@ -2006,7 +2012,7 @@ class TestPatchSupport(TestCase):
 
         :return: Whatever ``test_body`` returns.
         """
-        log = []
+        log: list[tuple[str, ...]] = []
 
         def wrapper(case):
             log.append(test_body(case))
@@ -2063,7 +2069,7 @@ class TestPatchSupport(TestCase):
         # TestCase.patch can be used to patch a non-existent attribute.
         def test_body(case):
             case.patch(self, "doesntexist", "patched")
-            return self.doesntexist
+            return self.doesntexist  # type: ignore[attr-defined]
 
         result = self.run_test(test_body)
         self.assertThat(result, Equals("patched"))
@@ -2073,7 +2079,7 @@ class TestPatchSupport(TestCase):
         # the test run, the attribute is then removed from the object.
         def test_body(case):
             case.patch(self, "doesntexist", "patched")
-            return self.doesntexist
+            return self.doesntexist  # type: ignore[attr-defined]
 
         self.run_test(test_body)
         marker = object()
@@ -2279,13 +2285,13 @@ class TestDecorateTestCaseResult(TestCase):
 
     def test_other_attribute(self):
         orig = PlaceHolder("foo")
-        orig.thing = "fred"
+        orig.thing = "fred"  # type: ignore[attr-defined]
         case = DecorateTestCaseResult(orig, self.make_result)
-        self.assertEqual("fred", case.thing)
+        self.assertEqual("fred", case.thing)  # type: ignore[attr-defined]
         self.assertRaises(AttributeError, getattr, case, "other")
-        case.other = "barbara"
-        self.assertEqual("barbara", orig.other)
-        del case.thing
+        case.other = "barbara"  # type: ignore[attr-defined]
+        self.assertEqual("barbara", orig.other)  # type: ignore[attr-defined]
+        del case.thing  # type: ignore[attr-defined]
         self.assertRaises(AttributeError, getattr, orig, "thing")
 
 

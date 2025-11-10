@@ -11,20 +11,24 @@ from testtools.matchers import (
 from ._helpers import NeedsTwistedTestCase
 
 try:
-    from testtools.twistedsupport._deferred import DeferredNotFired, extract_result
+    from testtools.twistedsupport._deferred import DeferredNotFired
 except ImportError:
-    DeferredNotFired = None
-    extract_result = None
+    DeferredNotFired = None  # type: ignore[misc,assignment]
+
+try:
+    from testtools.twistedsupport._deferred import extract_result
+except ImportError:
+    extract_result = None  # type: ignore[assignment]
 
 try:
     from twisted.internet import defer
 except ImportError:
-    defer = None
+    defer = None  # type: ignore[assignment]
 
 try:
     from twisted.python.failure import Failure
 except ImportError:
-    Failure = None
+    Failure = None  # type: ignore[misc,assignment]
 
 
 class TestExtractResult(NeedsTwistedTestCase):

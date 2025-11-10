@@ -50,15 +50,15 @@ class TestMatchesStructure(TestCase, TestMatchersInterface):
             self.x = x
             self.y = y
 
-    matches_matcher = MatchesStructure(x=Equals(1), y=Equals(2))
-    matches_matches: ClassVar[list] = [SimpleClass(1, 2)]
-    matches_mismatches: ClassVar[list] = [
+    matches_matcher: ClassVar = MatchesStructure(x=Equals(1), y=Equals(2))
+    matches_matches: ClassVar = [SimpleClass(1, 2)]
+    matches_mismatches: ClassVar = [
         SimpleClass(2, 2),
         SimpleClass(1, 1),
         SimpleClass(3, 3),
     ]
 
-    str_examples: ClassVar[list] = [
+    str_examples: ClassVar = [
         ("MatchesStructure(x=Equals(1))", MatchesStructure(x=Equals(1))),
         ("MatchesStructure(y=Equals(2))", MatchesStructure(y=Equals(2))),
         (
@@ -67,7 +67,7 @@ class TestMatchesStructure(TestCase, TestMatchersInterface):
         ),
     ]
 
-    describe_examples: ClassVar[list] = [
+    describe_examples: ClassVar = [
         (
             """\
 Differences: [
@@ -214,19 +214,19 @@ class TestMatchesSetwise(TestCase):
 
 
 class TestContainsAllInterface(TestCase, TestMatchersInterface):
-    matches_matcher = ContainsAll(["foo", "bar"])
-    matches_matches: ClassVar[list] = [
+    matches_matcher: ClassVar = ContainsAll(["foo", "bar"])
+    matches_matches: ClassVar = [
         ["foo", "bar"],
         ["foo", "z", "bar"],
         ["bar", "foo"],
     ]
-    matches_mismatches: ClassVar[list] = [["f", "g"], ["foo", "baz"], []]
+    matches_mismatches: ClassVar = [["f", "g"], ["foo", "baz"], []]
 
-    str_examples: ClassVar[list] = [
+    str_examples: ClassVar = [
         ("MatchesAll(Contains('foo'), Contains('bar'))", ContainsAll(["foo", "bar"])),
     ]
 
-    describe_examples: ClassVar[list] = [
+    describe_examples: ClassVar = [
         (
             """Differences: [
 'baz' not in 'foo'
