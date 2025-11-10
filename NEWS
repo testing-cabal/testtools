@@ -3,16 +3,6 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
-NEXT
-~~~~
-
-Changes
--------
-
-* Drop support for Python 3.9. (Jelmer Vernooĳ)
-
-* Add support for Python 3.13 and 3.14. (Jelmer Vernooĳ)
-
 2.8.0
 ~~~~~
 
@@ -20,6 +10,10 @@ Changes
 -------
 
 * Drop support for Python 3.8. (Stephen Finucane)
+
+* Drop support for Python 3.9. (Jelmer Vernooĳ)
+
+* Add support for Python 3.13 and 3.14. (Jelmer Vernooĳ)
 
 Improvements
 ------------
