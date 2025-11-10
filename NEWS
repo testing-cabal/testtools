@@ -3,6 +3,15 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
+2.8.1
+~~~~~
+
+Changes
+-------
+
+ * Re-add accidentally removed methods on StreamToExtendedDecorator.
+   (Jelmer Vernooĳ)
+
 2.8.0
 ~~~~~
 

@@ -673,6 +673,139 @@ class TestStreamToExtendedDecoratorContract(TestCase, TestStreamResultContract):
         return StreamToExtendedDecorator(ExtendedTestResult())
 
 
+class TestStreamToExtendedDecoratorMethods(TestCase):
+    """Test that StreamToExtendedDecorator has all required TestResult methods.
+
+    This test class was added to address a bug where StreamToExtendedDecorator
+    was missing the wasSuccessful() method, causing subunit2junitxml to fail
+    with AttributeError in version 1.4.5.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.base_result = ExtendedTestResult()
+        self.decorator = StreamToExtendedDecorator(self.base_result)
+
+    def test_has_wasSuccessful_method(self):
+        """StreamToExtendedDecorator should have wasSuccessful() method."""
+        self.assertTrue(hasattr(self.decorator, "wasSuccessful"))
+        self.assertTrue(callable(self.decorator.wasSuccessful))
+
+    def test_wasSuccessful_returns_boolean(self):
+        """wasSuccessful() should return a boolean value."""
+        result = self.decorator.wasSuccessful()
+        self.assertIsInstance(result, bool)
+
+    def test_wasSuccessful_delegates_to_decorated(self):
+        """wasSuccessful() should delegate to the decorated result."""
+        # Initially should be successful
+        self.assertTrue(self.decorator.wasSuccessful())
+
+    def test_wasSuccessful_true_after_success(self):
+        """wasSuccessful() should return True after a test success."""
+        self.decorator.startTestRun()
+        self.decorator.status(test_id="test1", test_status="inprogress")
+        self.decorator.status(test_id="test1", test_status="success")
+        self.decorator.stopTestRun()
+
+        self.assertTrue(self.decorator.wasSuccessful())
+
+    def test_wasSuccessful_false_after_failure(self):
+        """wasSuccessful() should return False after a test failure."""
+        self.decorator.startTestRun()
+        self.decorator.status(test_id="test_fail", test_status="inprogress")
+        self.decorator.status(test_id="test_fail", test_status="fail")
+        self.decorator.stopTestRun()
+
+        self.assertFalse(self.decorator.wasSuccessful())
+
+    def test_has_shouldStop_property(self):
+        """StreamToExtendedDecorator should have shouldStop property."""
+        self.assertTrue(hasattr(self.decorator, "shouldStop"))
+
+    def test_shouldStop_returns_boolean(self):
+        """shouldStop property should return a boolean value."""
+        result = self.decorator.shouldStop
+        self.assertIsInstance(result, bool)
+
+    def test_shouldStop_initially_false(self):
+        """shouldStop should initially be False."""
+        self.assertFalse(self.decorator.shouldStop)
+
+    def test_has_stop_method(self):
+        """StreamToExtendedDecorator should have stop() method."""
+        self.assertTrue(hasattr(self.decorator, "stop"))
+        self.assertTrue(callable(self.decorator.stop))
+
+    def test_stop_sets_shouldStop(self):
+        """stop() method should set shouldStop to True."""
+        self.assertFalse(self.decorator.shouldStop)
+        self.decorator.stop()
+        self.assertTrue(self.decorator.shouldStop)
+
+    def test_has_testsRun_property(self):
+        """StreamToExtendedDecorator should have testsRun property."""
+        self.assertTrue(hasattr(self.decorator, "testsRun"))
+
+    def test_testsRun_returns_integer(self):
+        """testsRun property should return an integer."""
+        result = self.decorator.testsRun
+        self.assertIsInstance(result, int)
+
+    def test_testsRun_initially_zero(self):
+        """testsRun should initially be 0."""
+        self.assertEqual(0, self.decorator.testsRun)
+
+    def test_testsRun_increments_after_test(self):
+        """testsRun should increment after a test runs."""
+        self.decorator.startTestRun()
+        self.decorator.status(test_id="test1", test_status="inprogress")
+        self.decorator.status(test_id="test1", test_status="success")
+        self.decorator.stopTestRun()
+
+        self.assertEqual(1, self.decorator.testsRun)
+
+    def test_subunit2junitxml_compatibility(self):
+        """Test the exact pattern used by subunit2junitxml that was failing.
+
+        This reproduces the bug reported in subunit 1.4.5 where
+        StreamToExtendedDecorator was missing wasSuccessful() method.
+        """
+        # This simulates what subunit2junitxml does
+        result = ExtendedTestResult()
+        decorated = StreamToExtendedDecorator(result)
+
+        # Should not raise AttributeError
+        success = decorated.wasSuccessful()
+        self.assertIsInstance(success, bool)
+        self.assertTrue(success)  # No tests run yet, so should be successful
+
+    def test_result_attributes_accessible_after_test_run(self):
+        """Test that result attributes are accessible after running tests."""
+        self.decorator.startTestRun()
+
+        # Run a successful test
+        self.decorator.status(test_id="test.success", test_status="inprogress")
+        self.decorator.status(test_id="test.success", test_status="success")
+
+        # Run a failed test
+        self.decorator.status(test_id="test.failure", test_status="inprogress")
+        self.decorator.status(
+            test_id="test.failure",
+            test_status="fail",
+            file_name="traceback",
+            file_bytes=b"Test failed",
+            eof=True,
+        )
+
+        self.decorator.stopTestRun()
+
+        # Test key query methods - these should work without AttributeError
+        self.assertFalse(self.decorator.wasSuccessful())
+        self.assertEqual(2, self.decorator.testsRun)
+        self.assertFalse(self.decorator.shouldStop)
+
+
 class TestStreamToQueueContract(TestCase, TestStreamResultContract):
     def _make_result(self):
         queue = Queue()
