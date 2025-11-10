@@ -73,12 +73,14 @@ class TestToolsTestRunner:
     ):
         """Create a TestToolsTestRunner.
 
-        :param verbosity: Ignored.
+        :param verbosity: Verbosity level. 0 for quiet, 1 for normal (dots, default),
+            2 for verbose (test names).
         :param failfast: Stop running tests at the first failure.
         :param buffer: Ignored.
         :param stdout: Stream to use for stdout.
         :param tb_locals: If True include local variables in tracebacks.
         """
+        self.verbosity = verbosity if verbosity is not None else 1
         self.failfast = failfast
         if stdout is None:
             stdout = sys.stdout
@@ -102,6 +104,7 @@ class TestToolsTestRunner:
             unicode_output_stream(self.stdout),
             failfast=self.failfast,
             tb_locals=self.tb_locals,
+            verbosity=self.verbosity,
         )
         result.startTestRun()
         try:
