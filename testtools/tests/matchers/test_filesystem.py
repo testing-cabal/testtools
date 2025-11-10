@@ -4,7 +4,8 @@ import os
 import shutil
 import tarfile
 import tempfile
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from testtools import TestCase
 from testtools.matchers import (

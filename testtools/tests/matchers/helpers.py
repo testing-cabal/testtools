@@ -1,6 +1,7 @@
 # Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
 
-from typing import Any, Callable, ClassVar, Protocol, runtime_checkable
+from collections.abc import Callable
+from typing import Any, ClassVar, Protocol, runtime_checkable
 
 
 @runtime_checkable

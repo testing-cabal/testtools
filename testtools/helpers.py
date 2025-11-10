@@ -1,6 +1,7 @@
 # Copyright (c) 2010-2012 testtools developers. See LICENSE for details.
 
-from typing import Any, Callable, TypeVar
+from collections.abc import Callable
+from typing import Any, TypeVar
 
 T = TypeVar("T")
 K = TypeVar("K")

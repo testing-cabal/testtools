@@ -4,14 +4,14 @@ __all__ = [
     "NeedsTwistedTestCase",
 ]
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from testtools import TestCase
 
 if TYPE_CHECKING:
     from types import ModuleType
 
-    defer: Optional[ModuleType]
+    defer: ModuleType | None
 else:
     try:
         from twisted.internet import defer

@@ -17,8 +17,9 @@ __all__ = [
 
 import operator
 import re
+from collections.abc import Callable
 from pprint import pformat
-from typing import Any, Callable
+from typing import Any
 
 from ..compat import (
     text_repr,

@@ -28,7 +28,7 @@ import math
 import sys
 import unittest
 from operator import methodcaller
-from typing import ClassVar, Union
+from typing import ClassVar
 
 from testtools.compat import _b
 from testtools.content import (
@@ -1743,7 +1743,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
         # Deal with mismatched base class constructors.
         TestControl.__init__(self)
         self._started = False
-        self._tags: Union[TagContext, None] = None
+        self._tags: TagContext | None = None
 
     def _get_failfast(self):
         return len(self.targets) == 2

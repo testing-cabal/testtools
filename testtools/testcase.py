@@ -20,7 +20,7 @@ import functools
 import itertools
 import sys
 import unittest
-from typing import Any, Protocol, TypeVar, Union
+from typing import Any, Protocol, TypeVar
 from unittest.case import SkipTest
 
 from testtools import content
@@ -1117,7 +1117,7 @@ class ExpectedException:
             return False
         if self.value_re:
             exception_matcher = MatchesException(self.exc_type, self.value_re)
-            matcher: Union[Matcher, Annotate]
+            matcher: Matcher | Annotate
             if self.msg:
                 matcher = Annotate(self.msg, exception_matcher)
             else:
