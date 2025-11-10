@@ -24,3 +24,4 @@ ChangeLog
 testtools/_version.py
 man/testtools.1
 man
+.mypy_cache/
