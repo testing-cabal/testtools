@@ -438,7 +438,7 @@ class TestHasLength(TestCase, TestMatchersInterface):
         ("HasLength(2)", HasLength(2)),
     ]
 
-    describe_examples: ClassVar = [
+    describe_examples: ClassVar[list] = [
         ("len([]) != 1", [], HasLength(1)),
     ]
 
