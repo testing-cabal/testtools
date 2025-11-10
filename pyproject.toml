@@ -49,6 +49,10 @@ version = {version!r}
 __version__ = {version_tuple!r}
 """
 
+[tool.hatch.build.targets.wheel]
+# testtools is not zip safe due to dynamic imports and resource loading
+only-include = ["testtools"]
+
 [tool.mypy]
 warn_redundant_casts = true
 warn_unused_configs = true
