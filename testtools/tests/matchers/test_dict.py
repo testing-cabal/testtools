@@ -33,7 +33,7 @@ class TestMatchesAllDictInterface(TestCase, TestMatchersInterface):
 
 class TestKeysEqualEmpty(TestCase, TestMatchersInterface):
     matches_matcher: ClassVar = KeysEqual()
-    matches_matches: ClassVar = [
+    matches_matches: ClassVar[list] = [
         {},
     ]
     matches_mismatches: ClassVar = [
@@ -70,7 +70,7 @@ class TestKeysEqualWithList(TestCase, TestMatchersInterface):
         ("KeysEqual('foo', 'bar')", KeysEqual("foo", "bar")),
     ]
 
-    describe_examples: ClassVar = []
+    describe_examples: ClassVar[list] = []
 
     def test_description(self):
         matchee = {"foo": 0, "bar": 1, "baz": 2}
@@ -99,8 +99,8 @@ class TestSubDictOf(TestCase, TestMatchersInterface):
         {"foo": "bar", "cat": "dog"},
     ]
 
-    str_examples: ClassVar = []
-    describe_examples: ClassVar = []
+    str_examples: ClassVar[list] = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestMatchesDict(TestCase, TestMatchersInterface):

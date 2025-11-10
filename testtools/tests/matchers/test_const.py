@@ -12,17 +12,17 @@ class TestAlwaysInterface(TestMatchersInterface, TestCase):
 
     matches_matcher: ClassVar = Always()
     matches_matches: ClassVar = [42, object(), "hi mom"]
-    matches_mismatches: ClassVar = []
+    matches_mismatches: ClassVar[list] = []
 
     str_examples: ClassVar = [("Always()", Always())]
-    describe_examples: ClassVar = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestNeverInterface(TestMatchersInterface, TestCase):
     """:py:func:`~testtools.matchers.Never` never matches."""
 
     matches_matcher: ClassVar = Never()
-    matches_matches: ClassVar = []
+    matches_matches: ClassVar[list] = []
     matches_mismatches: ClassVar = [42, object(), "hi mom"]
 
     str_examples: ClassVar = [("Never()", Never())]

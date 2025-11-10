@@ -120,9 +120,9 @@ class TestRaisesInterface(TestCase, TestMatchersInterface):
 
     # Tricky to get function objects to render constantly, and the interfaces
     # helper uses assertEqual rather than (for instance) DocTestMatches.
-    str_examples: ClassVar = []
+    str_examples: ClassVar[list] = []
 
-    describe_examples: ClassVar = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestRaisesExceptionMatcherInterface(TestCase, TestMatchersInterface):
@@ -143,9 +143,9 @@ class TestRaisesExceptionMatcherInterface(TestCase, TestMatchersInterface):
 
     # Tricky to get function objects to render constantly, and the interfaces
     # helper uses assertEqual rather than (for instance) DocTestMatches.
-    str_examples: ClassVar = []
+    str_examples: ClassVar[list] = []
 
-    describe_examples: ClassVar = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestRaisesBaseTypes(TestCase):

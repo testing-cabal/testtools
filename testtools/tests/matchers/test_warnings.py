@@ -40,8 +40,8 @@ class TestWarningMessageCategoryTypeInterface(TestCase, TestMatchersInterface):
     matches_matches: ClassVar = [warning_foo]
     matches_mismatches: ClassVar = [warning_bar, warning_base]
 
-    str_examples: ClassVar = []
-    describe_examples: ClassVar = []
+    str_examples: ClassVar[list] = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestWarningMessageMessageInterface(TestCase, TestMatchersInterface):
@@ -58,8 +58,8 @@ class TestWarningMessageMessageInterface(TestCase, TestMatchersInterface):
     matches_matches: ClassVar = [warning_foo]
     matches_mismatches: ClassVar = [warning_bar]
 
-    str_examples: ClassVar = []
-    describe_examples: ClassVar = []
+    str_examples: ClassVar[list] = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestWarningMessageFilenameInterface(TestCase, TestMatchersInterface):
@@ -76,8 +76,8 @@ class TestWarningMessageFilenameInterface(TestCase, TestMatchersInterface):
     matches_matches: ClassVar = [warning_foo]
     matches_mismatches: ClassVar = [warning_bar]
 
-    str_examples: ClassVar = []
-    describe_examples: ClassVar = []
+    str_examples: ClassVar[list] = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestWarningMessageLineNumberInterface(TestCase, TestMatchersInterface):
@@ -94,8 +94,8 @@ class TestWarningMessageLineNumberInterface(TestCase, TestMatchersInterface):
     matches_matches: ClassVar = [warning_foo]
     matches_mismatches: ClassVar = [warning_bar]
 
-    str_examples: ClassVar = []
-    describe_examples: ClassVar = []
+    str_examples: ClassVar[list] = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestWarningMessageLineInterface(TestCase, TestMatchersInterface):
@@ -112,8 +112,8 @@ class TestWarningMessageLineInterface(TestCase, TestMatchersInterface):
     matches_matches: ClassVar = [warning_foo]
     matches_mismatches: ClassVar = [warning_bar]
 
-    str_examples: ClassVar = []
-    describe_examples: ClassVar = []
+    str_examples: ClassVar[list] = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestWarningsInterface(TestCase, TestMatchersInterface):
@@ -133,9 +133,9 @@ class TestWarningsInterface(TestCase, TestMatchersInterface):
 
     # Tricky to get function objects to render constantly, and the interfaces
     # helper uses assertEqual rather than (for instance) DocTestMatches.
-    str_examples: ClassVar = []
+    str_examples: ClassVar[list] = []
 
-    describe_examples: ClassVar = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestWarningsMatcherInterface(TestCase, TestMatchersInterface):
@@ -161,8 +161,8 @@ class TestWarningsMatcherInterface(TestCase, TestMatchersInterface):
     matches_matches: ClassVar = [old_func]
     matches_mismatches: ClassVar = [lambda: None, older_func]
 
-    str_examples: ClassVar = []
-    describe_examples: ClassVar = []
+    str_examples: ClassVar[list] = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestWarningsMatcherNoWarningsInterface(TestCase, TestMatchersInterface):
@@ -185,8 +185,8 @@ class TestWarningsMatcherNoWarningsInterface(TestCase, TestMatchersInterface):
     matches_matches: ClassVar = [nowarning_func]
     matches_mismatches: ClassVar = [warning_func]
 
-    str_examples: ClassVar = []
-    describe_examples: ClassVar = []
+    str_examples: ClassVar[list] = []
+    describe_examples: ClassVar[list] = []
 
 
 class TestWarningMessage(TestCase):
