@@ -27,6 +27,11 @@ Changes
 Improvements
 ------------
 
+* Implemented verbosity support for the test runner. The ``-v`` (``--verbose``)
+  flag is now functional and properly controls output verbosity. Verbosity
+  levels: 0 (quiet), 1 (dots, default), 2 (test names). This applies to both
+  normal test runs and discovery mode. (LP: #872906)
+
 * Add support for Python 3.12's ``addDuration`` method and ``collectedDurations``
   attribute in ``TestResult`` classes. (Jelmer Vernooĳ, #2045171)
 

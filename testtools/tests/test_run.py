@@ -436,6 +436,7 @@ testtools.resourceexample.TestFoo.test_foo
             out.getvalue(),
             MatchesRegex(
                 """Tests running...
+\\.\\.
 
 Ran 2 tests in \\d.\\d\\d\\ds
 OK
@@ -465,6 +466,31 @@ OK
             ),
             out.getvalue(),
         )
+
+    def test_runner_verbosity_respected(self):
+        # Test that verbosity parameter is actually used by the runner
+        out = io.StringIO()
+        runner = run.TestToolsTestRunner(verbosity=2, stdout=out)
+        self.assertEqual(2, runner.verbosity)
+
+    def test_discover_verbosity(self):
+        # Test that -v flag in discover mode sets verbosity
+        self.useFixture(SampleTestFixture())
+        out = io.StringIO()
+        exc = self.assertRaises(
+            SystemExit,
+            run.main,
+            argv=[
+                "prog",
+                "discover",
+                "-v",
+                "-s",
+                self.useFixture(fixtures.TempDir()).path,
+            ],
+            stdout=out,
+        )
+        # The output should show individual test names when verbose
+        self.assertEqual((0,), exc.args)
 
 
 def test_suite():

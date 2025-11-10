@@ -1186,12 +1186,21 @@ class MultiTestResult(TestResult):
 class TextTestResult(TestResult):
     """A TestResult which outputs activity to a text stream."""
 
-    def __init__(self, stream, failfast=False, tb_locals=False):
-        """Construct a TextTestResult writing to stream."""
+    def __init__(self, stream, failfast=False, tb_locals=False, verbosity=1):
+        """Construct a TextTestResult writing to stream.
+
+        :param stream: A file-like object to write results to.
+        :param failfast: Stop after the first failure.
+        :param tb_locals: If True include local variables in tracebacks.
+        :param verbosity: Verbosity level. 0 for quiet, 1 for normal (dots, default),
+            2 for verbose (test names).
+        """
         super().__init__(failfast=failfast, tb_locals=tb_locals)
         self.stream = stream
         self.sep1 = "=" * 70 + "\n"
         self.sep2 = "-" * 70 + "\n"
+        self.verbosity = verbosity
+        self._progress_printed = False
 
     def _delta_to_float(self, a_timedelta, precision):
         # This calls ceiling to ensure that the most pessimistic view of time
@@ -1218,6 +1227,67 @@ class TextTestResult(TestResult):
             self.stream.write(self.sep2)
             self.stream.write(output)
 
+    def startTest(self, test):
+        super().startTest(test)
+        if self.verbosity >= 2:
+            self.stream.write(f"{test.id()} ... ")
+            self.stream.flush()
+
+    def addSuccess(self, test, details=None):
+        super().addSuccess(test, details=details)
+        if self.verbosity == 1:
+            self.stream.write(".")
+            self.stream.flush()
+            self._progress_printed = True
+        elif self.verbosity >= 2:
+            self.stream.write("ok\n")
+            self.stream.flush()
+
+    def addError(self, test, err=None, details=None):
+        super().addError(test, err=err, details=details)
+        if self.verbosity == 1:
+            self.stream.write("E")
+            self.stream.flush()
+        elif self.verbosity >= 2:
+            self.stream.write("ERROR\n")
+            self.stream.flush()
+
+    def addFailure(self, test, err=None, details=None):
+        super().addFailure(test, err=err, details=details)
+        if self.verbosity == 1:
+            self.stream.write("F")
+            self.stream.flush()
+        elif self.verbosity >= 2:
+            self.stream.write("FAIL\n")
+            self.stream.flush()
+
+    def addSkip(self, test, reason=None, details=None):
+        super().addSkip(test, reason=reason, details=details)
+        if self.verbosity == 1:
+            self.stream.write("s")
+            self.stream.flush()
+        elif self.verbosity >= 2:
+            self.stream.write(f"skipped {reason!r}\n")
+            self.stream.flush()
+
+    def addExpectedFailure(self, test, err=None, details=None):
+        super().addExpectedFailure(test, err=err, details=details)
+        if self.verbosity == 1:
+            self.stream.write("x")
+            self.stream.flush()
+        elif self.verbosity >= 2:
+            self.stream.write("expected failure\n")
+            self.stream.flush()
+
+    def addUnexpectedSuccess(self, test, details=None):
+        super().addUnexpectedSuccess(test, details=details)
+        if self.verbosity == 1:
+            self.stream.write("u")
+            self.stream.flush()
+        elif self.verbosity >= 2:
+            self.stream.write("unexpected success\n")
+            self.stream.flush()
+
     def startTestRun(self):
         super().startTestRun()
         self.__start = self._now()
@@ -1235,8 +1305,14 @@ class TextTestResult(TestResult):
             self.stream.write(
                 f"{self.sep1}UNEXPECTED SUCCESS: {test.id()}\n{self.sep2}"
             )
+        # Add newline(s) before summary
+        # If we printed progress indicators (dots), add extra newline
+        if self._progress_printed:
+            self.stream.write("\n\n")
+        else:
+            self.stream.write("\n")
         self.stream.write(
-            f"\nRan {self.testsRun} test{plural} in "
+            f"Ran {self.testsRun} test{plural} in "
             f"{self._delta_to_float(stop - self.__start, 3):.3f}s\n"
         )
         if self.wasSuccessful():
