@@ -4,4 +4,5 @@ include MANIFEST.in
 include NEWS
 include README.rst
 include .gitignore
+recursive-include doc *.rst *.py
 prune doc/_build
