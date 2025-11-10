@@ -1879,6 +1879,36 @@ class StreamToExtendedDecorator(StreamResult):
         case = test_record.to_test_case()
         case.run(self.decorated)
 
+    def wasSuccessful(self):
+        """Return whether this result was successful.
+
+        Delegates to the decorated result object.
+        """
+        return self.decorated.wasSuccessful()
+
+    @property
+    def shouldStop(self):
+        """Return whether the test run should stop.
+
+        Delegates to the decorated result object.
+        """
+        return self.decorated.shouldStop
+
+    def stop(self):
+        """Indicate that the test run should stop.
+
+        Delegates to the decorated result object.
+        """
+        return self.decorated.stop()
+
+    @property
+    def testsRun(self):
+        """Return the number of tests run.
+
+        Delegates to the decorated result object.
+        """
+        return self.decorated.testsRun
+
 
 class StreamToQueue(StreamResult):
     """A StreamResult which enqueues events as a dict to a queue.Queue.
