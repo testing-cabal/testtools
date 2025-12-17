@@ -63,7 +63,6 @@ check_untyped_defs = true
 
 [[tool.mypy.overrides]]
 module = [
-    "fixtures.*",
     "testresources.*",
     "testscenarios.*",
 ]
