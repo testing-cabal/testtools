@@ -20,7 +20,7 @@ import functools
 import itertools
 import sys
 import unittest
-from typing import Any, Protocol, TypeVar
+from typing import Any, Protocol, TypeVar, cast
 from unittest.case import SkipTest
 
 from testtools import content
@@ -971,11 +971,11 @@ class WithAttributes:
     _get_test_method: Any  # Provided by the class we're mixed with
 
     def id(self) -> str:
-        orig = super().id()  # type: ignore[misc]
+        orig = cast(str, super().id())  # type: ignore[misc]
         # Depends on testtools.TestCase._get_test_method, be nice to support
         # plain unittest.
         fn = self._get_test_method()
-        attributes = getattr(fn, "__testtools_attrs", None)
+        attributes = cast(str, getattr(fn, "__testtools_attrs", None))
         if not attributes:
             return orig
         return orig + "[" + ",".join(sorted(attributes)) + "]"

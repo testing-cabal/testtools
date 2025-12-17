@@ -132,7 +132,7 @@ class _SuperDictOf(Matcher):
         return _SubDictOf(super_dict, self.format_value).match(self.sub_dict)
 
 
-def _format_matcher_dict(matchers):
+def _format_matcher_dict(matchers: dict[str, Matcher]) -> str:
     return "{{{}}}".format(
         ", ".join(sorted(f"{k!r}: {v}" for k, v in matchers.items()))
     )
@@ -180,7 +180,7 @@ class MatchesDict(_CombinedMatcher):
         "Differences": _MatchCommonKeys,
     }
 
-    def format_expected(self, expected) -> str:
+    def format_expected(self, expected: dict[str, Matcher]) -> str:
         return _format_matcher_dict(expected)
 
 
@@ -204,7 +204,7 @@ class ContainsDict(_CombinedMatcher):
         "Differences": _MatchCommonKeys,
     }
 
-    def format_expected(self, expected):
+    def format_expected(self, expected: dict[str, Matcher]) -> str:
         return _format_matcher_dict(expected)
 
 
@@ -228,7 +228,7 @@ class ContainedByDict(_CombinedMatcher):
         "Differences": _MatchCommonKeys,
     }
 
-    def format_expected(self, expected):
+    def format_expected(self, expected: dict[str, Matcher]) -> str:
         return _format_matcher_dict(expected)
 
 

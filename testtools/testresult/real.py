@@ -237,7 +237,7 @@ class TestResult(unittest.TestResult):
 
     def stopTest(self, test):
         # NOTE: In Python 3.12.1 skipped tests may not call startTest()
-        if self._tags is not None:
+        if self._tags is not None and self._tags.parent is not None:
             self._tags = self._tags.parent
         super().stopTest(test)
 
@@ -1701,7 +1701,7 @@ class ExtendedToOriginalDecorator:
 
     def stopTest(self, test):
         # NOTE: In Python 3.12.1 skipped tests may not call startTest()
-        if self._tags is not None:
+        if self._tags is not None and self._tags.parent is not None:
             self._tags = self._tags.parent
         return self.decorated.stopTest(test)
 
