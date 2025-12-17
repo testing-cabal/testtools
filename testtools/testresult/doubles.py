@@ -134,7 +134,9 @@ class ExtendedTestResult(Python3TestResult):
         self._tags = TagContext(self._tags)
 
     def stopTest(self, test):
-        self._tags = self._tags.parent
+        # NOTE: In Python 3.12.1 skipped tests may not call startTest()
+        if self._tags is not None and self._tags.parent is not None:
+            self._tags = self._tags.parent
         super().stopTest(test)
 
     @property
@@ -241,7 +243,7 @@ class StreamResult(LoggingBase):
 
 # Convenience for easier access to status fields
 _StatusEvent = namedtuple(
-    "_Event",
+    "_StatusEvent",
     [
         "name",
         "test_id",

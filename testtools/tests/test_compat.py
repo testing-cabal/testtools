@@ -25,6 +25,7 @@ class _FakeOutputStream:
 
     def __init__(self):
         self.writelog = []
+        self.encoding = None  # Optional encoding attribute
 
     def write(self, obj):
         self.writelog.append(obj)

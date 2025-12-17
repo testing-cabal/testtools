@@ -2,6 +2,8 @@
 
 """Tests for the RunTest single test execution logic."""
 
+from typing import Any
+
 from testtools import (
     ExtendedToOriginalDecorator,
     RunTest,
@@ -57,7 +59,12 @@ class TestRunTest(TestCase):
 
     def test_run_no_result_manages_new_result(self):
         log = []
-        run = RunTest(self.make_case(), lambda x: log.append(x) or x)
+
+        def capture_and_return(x):
+            log.append(x)
+            return x
+
+        run = RunTest(self.make_case(), capture_and_return)
         result = run.run()
         self.assertIsInstance(result.decorated, TestResult)
 
@@ -65,7 +72,7 @@ class TestRunTest(TestCase):
         case = self.make_case()
         log = []
         run = RunTest(case, lambda x: x)
-        run._run_core = lambda: log.append("foo")
+        run._run_core = lambda: log.append("foo")  # type: ignore[method-assign]
         run.run()
         self.assertEqual(["foo"], log)
 
@@ -121,7 +128,7 @@ class TestRunTest(TestCase):
         def raises():
             raise e
 
-        log = []
+        log: list[Any] = []
         run = RunTest(case, [(Exception, None)])
         run.result = ExtendedTestResult()
         status = run._run_user(raises)
@@ -250,7 +257,7 @@ class TestRunTest(TestCase):
             raise Exception("foo")
 
         run = RunTest(case, lambda x: x)
-        run._run_core = inner
+        run._run_core = inner  # type: ignore[method-assign]
         self.assertThat(
             lambda: run.run(result), Raises(MatchesException(Exception("foo")))
         )

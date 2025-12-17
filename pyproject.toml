@@ -35,7 +35,10 @@ Homepage = "https://github.com/testing-cabal/testtools"
 [project.optional-dependencies]
 test = ["testscenarios", "testresources"]
 twisted = ["Twisted", "fixtures"]
-dev = ["ruff==0.14.9"]
+dev = [
+    "ruff==0.14.9",
+    "mypy>=1.0.0",
+]
 
 [tool.hatch.version]
 source = "vcs"
@@ -54,17 +57,46 @@ __version__ = {version_tuple!r}
 only-include = ["testtools"]
 
 [tool.mypy]
-warn_redundant_casts = true
-warn_unused_configs = true
-check_untyped_defs = true
+python_version = "3.10"
+show_column_numbers = true
+show_error_context = true
+strict = true
+# this is here temporarily due to the rapid changes in typing across
+# dependencies
+warn_unused_ignores = false
+# FIXME(stephenfin): We should remove this
+implicit_reexport = true
+exclude = 'doc'
 
 [[tool.mypy.overrides]]
 module = [
-    "fixtures.*",
     "testresources.*",
     "testscenarios.*",
 ]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = [
+    # FIXME(stephenfin): We would like to remove all modules from this list
+    # except testtools.tests (we're not sadists)
+    "testtools.assertions",
+    "testtools.compat",
+    "testtools.content",
+    "testtools.content_type",
+    "testtools.matchers.*",
+    "testtools.monkey",
+    "testtools.run",
+    "testtools.runtest",
+    "testtools.testcase",
+    "testtools.testresult.*",
+    "testtools.testsuite",
+    "testtools.twistedsupport.*",
+    "testtools.tests.*",
+]
+disallow_untyped_calls = false
+disallow_untyped_defs = false
+disallow_subclassing_any = false
+disallow_any_generics = false
 
 [tool.ruff.lint]
 select = [
@@ -76,8 +108,7 @@ select = [
     "RSE",
     "RUF",
 ]
-ignore = [
-]
+ignore = []
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

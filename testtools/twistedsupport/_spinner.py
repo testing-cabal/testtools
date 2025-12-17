@@ -290,7 +290,7 @@ class Spinner:
             it's an error, then raise that.
         """
         if self._debug:
-            debug_settings = DebugTwisted(True)
+            debug_settings: Fixture = DebugTwisted(True)
         else:
             debug_settings = Fixture()
 

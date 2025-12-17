@@ -6,7 +6,7 @@
 class TagContext:
     """A tag context."""
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: "TagContext | None" = None) -> None:
         """Create a new TagContext.
 
         :param parent: If provided, uses this as the parent context.  Any tags
@@ -18,11 +18,11 @@ class TagContext:
         if parent:
             self._tags.update(parent.get_current_tags())
 
-    def get_current_tags(self):
+    def get_current_tags(self) -> set[str]:
         """Return any current tags."""
         return set(self._tags)
 
-    def change_tags(self, new_tags, gone_tags):
+    def change_tags(self, new_tags: set[str], gone_tags: set[str]) -> set[str]:
         """Change the tags on this context.
 
         :param new_tags: A set of tags to add to this context.

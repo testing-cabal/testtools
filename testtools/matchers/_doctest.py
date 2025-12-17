@@ -39,8 +39,8 @@ class _NonManglingOutputChecker(doctest.OutputChecker):
     if getattr(doctest, "_encoding", None) is not None:
         from types import FunctionType as __F
 
-        __f = doctest.OutputChecker.output_difference.im_func
-        __g = dict(__f.func_globals)
+        __f = doctest.OutputChecker.output_difference.__func__  # type: ignore[attr-defined]
+        __g = dict(__f.__globals__)
 
         def _indent(s, indent=4, _pattern=re.compile("^(?!$)", re.MULTILINE)):
             """Prepend non-empty lines in ``s`` with ``indent`` number of spaces"""

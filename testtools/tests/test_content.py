@@ -4,6 +4,7 @@ import io
 import os
 import tempfile
 import unittest
+from typing import Any
 
 from testtools import TestCase
 from testtools.compat import (
@@ -192,7 +193,7 @@ class TestContent(TestCase):
         self.assertRaises(TypeError, text_content, data)
 
     def test_text_content_raises_TypeError_when_passed_non_text(self):
-        bad_values = (None, list(), dict(), 42, 1.23)
+        bad_values: tuple[Any, ...] = (None, list(), dict(), 42, 1.23)
         for value in bad_values:
             self.assertThat(
                 lambda: text_content(value),
@@ -266,7 +267,7 @@ class TestTracebackContent(TestCase):
         )
         self.assertEqual(content_type, content.content_type)
         result = unittest.TestResult()
-        expected = result._exc_info_to_string(an_exc_info, self)
+        expected = result._exc_info_to_string(an_exc_info, self)  # type: ignore[attr-defined]
         self.assertEqual(expected, "".join(list(content.iter_text())))
 
 

@@ -12,10 +12,14 @@ import os.path
 import sys
 import unittest
 from functools import partial
+from typing import Any
 
 from testtools import TextTestResult
 from testtools.compat import unicode_output_stream
 from testtools.testsuite import filter_by_ids, iterate_tests, sorted_tests
+
+# unittest.TestProgram has these methods but mypy's stubs don't include them
+# We'll just use unittest.TestProgram directly and ignore the type errors
 
 defaultTestLoader = unittest.defaultTestLoader
 defaultTestLoaderCls = unittest.TestLoader
@@ -134,6 +138,7 @@ class TestProgram(unittest.TestProgram):
     verbosity = 1
     failfast = catchbreak = buffer = progName = None
     _discovery_parser = None
+    test: Any  # Set by parent class
 
     def __init__(
         self,
@@ -213,7 +218,7 @@ class TestProgram(unittest.TestProgram):
         del self.testLoader.errors[:]
 
     def _getParentArgParser(self):
-        parser = super()._getParentArgParser()
+        parser = super()._getParentArgParser()  # type: ignore[misc]
         # XXX: Local edit (see http://bugs.python.org/issue22860)
         parser.add_argument(
             "-l",
@@ -233,7 +238,7 @@ class TestProgram(unittest.TestProgram):
         return parser
 
     def _do_discovery(self, argv, Loader=None):
-        super()._do_discovery(argv, Loader=Loader)
+        super()._do_discovery(argv, Loader=Loader)  # type: ignore[misc]
         # XXX: Local edit (see http://bugs.python.org/issue22860)
         self.test = sorted_tests(self.test)
 

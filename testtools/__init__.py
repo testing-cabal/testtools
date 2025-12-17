@@ -41,12 +41,10 @@ __all__ = [
     "skip",
     "skipIf",
     "skipUnless",
-    "try_import",
     "unique_text_generator",
     "version",
 ]
 
-from testtools.helpers import try_import
 from testtools.matchers._impl import Matcher  # noqa: F401
 from testtools.runtest import (
     MultipleExceptions,
@@ -96,7 +94,7 @@ from testtools.testsuite import (
 )
 
 
-def __get_git_version():
+def __get_git_version() -> str | None:
     import os
     import subprocess
 
@@ -137,9 +135,10 @@ try:
     from ._version import __version__, version
 except ModuleNotFoundError:
     # package is not installed
-    if version := __get_git_version():
+    if v := __get_git_version():
+        version = v
         # we're in a git repo
-        __version__ = tuple([int(v) if v.isdigit() else v for v in version.split(".")])
+        __version__ = tuple([int(x) if x.isdigit() else x for x in version.split(".")])
     else:
         # we're working with a tarball or similar
         version = "0.0.0"

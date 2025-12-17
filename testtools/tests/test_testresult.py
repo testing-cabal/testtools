@@ -15,6 +15,7 @@ import tempfile
 import threading
 from itertools import chain, combinations
 from queue import Queue
+from typing import Any
 from unittest import TestSuite
 
 from testtools import (
@@ -148,6 +149,11 @@ def make_exception_info(exceptionFactory, *args, **kwargs):
 class TestControlContract:
     """Stopping test runs."""
 
+    # These are provided by the class that uses this mixin
+    makeResult: Any
+    assertFalse: Any
+    assertTrue: Any
+
     def test_initially_not_shouldStop(self):
         # A result is not set to stop initially.
         result = self.makeResult()
@@ -161,6 +167,13 @@ class TestControlContract:
 
 
 class Python3Contract(TestControlContract):
+    # Inherit requirements from TestControlContract
+    # These are provided by the class that uses this mixin
+    makeResult: Any
+    assertTrue: Any
+    assertFalse: Any
+    assertEqual: Any
+
     def test_fresh_result_is_successful(self):
         # A result is considered successful before any tests are run.
         result = self.makeResult()
@@ -258,6 +271,10 @@ class TagsContract(Python3Contract):
 
     See the subunit docs for guidelines on how this is supposed to work.
     """
+
+    # Inherit requirements from Python3Contract
+    # These are provided by the class that uses this mixin
+    assertEqual: Any
 
     def test_no_tags_by_default(self):
         # Results initially have no tags.
@@ -559,6 +576,9 @@ class TestStreamToExtendedContract(TestCase, DetailsContract):
 
 
 class TestStreamResultContract:
+    # These are provided by the class that uses this mixin
+    addCleanup: Any
+
     def _make_result(self):
         raise NotImplementedError(self._make_result)
 
@@ -808,7 +828,7 @@ class TestStreamToExtendedDecoratorMethods(TestCase):
 
 class TestStreamToQueueContract(TestCase, TestStreamResultContract):
     def _make_result(self):
-        queue = Queue()
+        queue: Queue[Any] = Queue()
         return StreamToQueue(queue, "foo")
 
 
@@ -1065,7 +1085,7 @@ class TestStreamTagger(TestCase):
 
 class TestStreamToDict(TestCase):
     def test_hung_test(self):
-        tests = []
+        tests: list[dict[str, Any]] = []
         result = StreamToDict(tests.append)
         result.startTestRun()
         result.status("foo", "inprogress")
@@ -1085,7 +1105,7 @@ class TestStreamToDict(TestCase):
         )
 
     def test_all_terminal_states_reported(self):
-        tests = []
+        tests: list[dict[str, Any]] = []
         result = StreamToDict(tests.append)
         result.startTestRun()
         result.status("success", "success")
@@ -1103,7 +1123,7 @@ class TestStreamToDict(TestCase):
         self.assertThat(tests, HasLength(6))
 
     def test_files_reported(self):
-        tests = []
+        tests: list[dict[str, Any]] = []
         result = StreamToDict(tests.append)
         result.startTestRun()
         result.status(
@@ -1135,7 +1155,7 @@ class TestStreamToDict(TestCase):
     def test_bad_mime(self):
         # Testtools was making bad mime types, this tests that the specific
         # corruption is catered for.
-        tests = []
+        tests: list[dict[str, Any]] = []
         result = StreamToDict(tests.append)
         result.startTestRun()
         result.status(
@@ -1155,7 +1175,7 @@ class TestStreamToDict(TestCase):
         )
 
     def test_timestamps(self):
-        tests = []
+        tests: list[dict[str, Any]] = []
         result = StreamToDict(tests.append)
         result.startTestRun()
         result.status(test_id="foo", test_status="inprogress", timestamp="A")
@@ -1167,7 +1187,7 @@ class TestStreamToDict(TestCase):
         self.assertEqual(["C", None], tests[1]["timestamps"])
 
     def test_files_skipped(self):
-        tests = []
+        tests: list[dict[str, Any]] = []
         result = StreamToDict(tests.append)
         result.startTestRun()
         result.status(
@@ -1610,9 +1630,9 @@ class TestTestResult(TestCase):
 
         now = datetime.datetime.now(utc)
         stubdatetime = Module()
-        stubdatetime.datetime = Module()
-        stubdatetime.datetime.now = lambda tz: now
-        testresult.real.datetime = stubdatetime
+        stubdatetime.datetime = Module()  # type: ignore[attr-defined]
+        stubdatetime.datetime.now = lambda tz: now  # type: ignore[attr-defined]
+        testresult.real.datetime = stubdatetime  # type: ignore[assignment]
         # Calling _now() looks up the time.
         self.assertEqual(now, result._now())
         then = now + datetime.timedelta(0, 1)
@@ -2062,7 +2082,7 @@ class TestThreadSafeForwardingResult(TestCase):
     """Tests for `TestThreadSafeForwardingResult`."""
 
     def make_results(self, n):
-        events = []
+        events: list[tuple[str, ...]] = []
         target = LoggingResult(events)
         semaphore = threading.Semaphore(1)
         return [ThreadsafeForwardingResult(target, semaphore) for i in range(n)], events
@@ -2334,7 +2354,7 @@ class TestMergeTags(TestCase):
         # If an incoming "gone" tag isn't currently tagged one way or the
         # other, add it to the "gone" tags.
         current_tags = {"present"}, {"missing"}
-        changing_tags = set(), {"going"}
+        changing_tags: tuple[set[str], set[str]] = set(), {"going"}
         expected = {"present"}, {"missing", "going"}
         self.assertEqual(expected, _merge_tags(current_tags, changing_tags))
 
@@ -2342,13 +2362,13 @@ class TestMergeTags(TestCase):
         # If one of the incoming "gone" tags is one of the existing "new"
         # tags, then it overrides the "new" tag, leaving it marked as "gone".
         current_tags = {"present", "going"}, {"missing"}
-        changing_tags = set(), {"going"}
+        changing_tags: tuple[set[str], set[str]] = set(), {"going"}
         expected = {"present"}, {"missing", "going"}
         self.assertEqual(expected, _merge_tags(current_tags, changing_tags))
 
     def test_merge_unseen_new_tag(self):
         current_tags = {"present"}, {"missing"}
-        changing_tags = {"coming"}, set()
+        changing_tags: tuple[set[str], set[str]] = {"coming"}, set()
         expected = {"coming", "present"}, {"missing"}
         self.assertEqual(expected, _merge_tags(current_tags, changing_tags))
 
@@ -2356,7 +2376,7 @@ class TestMergeTags(TestCase):
         # If one of the incoming "new" tags is currently marked as "gone",
         # then it overrides the "gone" tag, leaving it marked as "new".
         current_tags = {"present"}, {"coming", "missing"}
-        changing_tags = {"coming"}, set()
+        changing_tags: tuple[set[str], set[str]] = {"coming"}, set()
         expected = {"coming", "present"}, {"missing"}
         self.assertEqual(expected, _merge_tags(current_tags, changing_tags))
 
@@ -2584,7 +2604,7 @@ class TestStreamResultRouter(TestCase):
 
 class TestStreamToQueue(TestCase):
     def make_result(self):
-        queue = Queue()
+        queue: Queue[Any] = Queue()
         return queue, StreamToQueue(queue, "foo")
 
     def test_status(self):
@@ -2988,7 +3008,7 @@ class TestExtendedToOriginalResultOtherAttributes(
 
             bar = 1
 
-        self.result = OtherExtendedResult()
+        self.result = OtherExtendedResult()  # type: ignore[assignment]
         self.make_converter()
         self.assertEqual(1, self.converter.bar)
         self.assertEqual(2, self.converter.foo())
@@ -3406,7 +3426,7 @@ class TestByTestResultTests(TestCase):
         self.log = []
         self.result = TestByTestResult(self.on_test)
         now = iter(range(5))
-        self.result._now = lambda: next(now)
+        self.result._now = lambda: next(now)  # type: ignore[method-assign]
 
     def assertCalled(self, **kwargs):
         defaults = {
