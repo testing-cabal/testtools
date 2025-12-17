@@ -6,6 +6,11 @@ Changes and improvements to testtools_, grouped by release.
 2.8.1
 ~~~~~
 
+Improvements
+------------
+
+* Add ``Nearly`` matcher for approximate numerical comparisons. (#222)
+
 Changes
 -------
 

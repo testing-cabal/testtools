@@ -10,6 +10,7 @@ __all__ = [
     "IsInstance",
     "LessThan",
     "MatchesRegex",
+    "Nearly",
     "NotEquals",
     "SameMembers",
     "StartsWith",
@@ -146,6 +147,65 @@ class GreaterThan(_BinaryComparison):
 
     comparator = operator.gt
     mismatch_string = "<="
+
+
+class _NotNearlyEqual(Mismatch):
+    """Mismatch for Nearly matcher."""
+
+    def __init__(self, actual, expected, delta):
+        self.actual = actual
+        self.expected = expected
+        self.delta = delta
+
+    def describe(self):
+        try:
+            diff = abs(self.actual - self.expected)
+            return (
+                f"{self.actual!r} is not nearly equal to {self.expected!r}: "
+                f"difference {diff!r} exceeds tolerance {self.delta!r}"
+            )
+        except (TypeError, AttributeError):
+            return (
+                f"{self.actual!r} is not nearly equal to {self.expected!r} "
+                f"within {self.delta!r}"
+            )
+
+
+class Nearly(Matcher):
+    """Matches if a value is nearly equal to the expected value.
+
+    This matcher is useful for comparing floating point values where exact
+    equality cannot be relied upon due to precision limitations.
+
+    The matcher checks if the absolute difference between the actual and
+    expected values is less than or equal to a specified tolerance (delta).
+
+    This works for any type that supports subtraction and absolute value
+    operations (e.g., integers, floats, Decimal, etc.).
+    """
+
+    def __init__(self, expected, delta=0.001):
+        """Create a Nearly matcher.
+
+        :param expected: The expected value to compare against.
+        :param delta: The maximum allowed absolute difference (tolerance).
+            Default is 0.001.
+        """
+        self.expected = expected
+        self.delta = delta
+
+    def __str__(self):
+        return f"Nearly({self.expected!r}, delta={self.delta!r})"
+
+    def match(self, actual):
+        try:
+            diff = abs(actual - self.expected)
+            if diff <= self.delta:
+                return None
+        except (TypeError, AttributeError):
+            # Can't compute difference - definitely not nearly equal
+            pass
+        return _NotNearlyEqual(actual, self.expected, self.delta)
 
 
 class SameMembers(Matcher):

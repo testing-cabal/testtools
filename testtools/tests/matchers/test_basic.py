@@ -20,10 +20,12 @@ from testtools.matchers._basic import (
     IsInstance,
     LessThan,
     MatchesRegex,
+    Nearly,
     NotEquals,
     SameMembers,
     StartsWith,
     _BinaryMismatch,
+    _NotNearlyEqual,
 )
 from testtools.tests.helpers import FullStackRunTest
 from testtools.tests.matchers.helpers import TestMatchersInterface
@@ -441,6 +443,115 @@ class TestHasLength(TestCase, TestMatchersInterface):
     describe_examples: ClassVar[list] = [
         ("len([]) != 1", [], HasLength(1)),
     ]
+
+
+class TestNearlyInterface(TestCase, TestMatchersInterface):
+    matches_matcher: ClassVar = Nearly(4.0, delta=0.5)
+    matches_matches: ClassVar = [4.0, 4.5, 3.5, 4.25, 3.75]
+    matches_mismatches: ClassVar = [4.51, 3.49, 5.0, 2.0, "not a number"]
+
+    str_examples: ClassVar = [
+        ("Nearly(4.0, delta=0.5)", Nearly(4.0, delta=0.5)),
+        ("Nearly(1.5, delta=0.001)", Nearly(1.5, delta=0.001)),
+        ("Nearly(10, delta=1)", Nearly(10, delta=1)),
+    ]
+
+    describe_examples: ClassVar = [
+        (
+            "5.0 is not nearly equal to 4.0: difference 1.0 exceeds tolerance 0.5",
+            5.0,
+            Nearly(4.0, delta=0.5),
+        ),
+        (
+            "3.0 is not nearly equal to 4.0: difference 1.0 exceeds tolerance 0.5",
+            3.0,
+            Nearly(4.0, delta=0.5),
+        ),
+    ]
+
+
+class TestNearlyMismatch(TestCase):
+    """Tests for the _NotNearlyEqual mismatch class."""
+
+    def test_describe_with_numeric_values(self):
+        """Test describe() with valid numeric values."""
+        mismatch = _NotNearlyEqual(5.0, 4.0, 0.5)
+        self.assertEqual(
+            "5.0 is not nearly equal to 4.0: difference 1.0 exceeds tolerance 0.5",
+            mismatch.describe(),
+        )
+
+    def test_describe_with_non_numeric_values(self):
+        """Test describe() when subtraction is not supported."""
+        mismatch = _NotNearlyEqual("string", 4.0, 0.5)
+        self.assertEqual(
+            "'string' is not nearly equal to 4.0 within 0.5", mismatch.describe()
+        )
+
+
+class TestNearlyBehavior(TestCase):
+    """Additional tests for Nearly matcher behavior."""
+
+    def test_integers_match(self):
+        """Test that Nearly works with integers."""
+        matcher = Nearly(10, delta=2)
+        self.assertIsNone(matcher.match(11))
+        self.assertIsNone(matcher.match(9))
+        self.assertIsNone(matcher.match(10))
+
+    def test_integers_mismatch(self):
+        """Test that Nearly correctly fails with integers."""
+        matcher = Nearly(10, delta=2)
+        mismatch = matcher.match(13)
+        self.assertIsNotNone(mismatch)
+        self.assertIn("13", mismatch.describe())
+
+    def test_exact_boundary_matches(self):
+        """Test that values at exactly the boundary match."""
+        matcher = Nearly(1.0, delta=0.25)
+        # Exactly at the boundary should match (<=)
+        self.assertIsNone(matcher.match(1.25))
+        self.assertIsNone(matcher.match(0.75))
+
+    def test_just_outside_boundary_mismatches(self):
+        """Test that values just outside the boundary don't match."""
+        matcher = Nearly(1.0, delta=0.1)
+        # Just outside the boundary should not match
+        self.assertIsNotNone(matcher.match(1.10001))
+        self.assertIsNotNone(matcher.match(0.89999))
+
+    def test_negative_numbers(self):
+        """Test that Nearly works with negative numbers."""
+        matcher = Nearly(-5.0, delta=1.0)
+        self.assertIsNone(matcher.match(-4.5))
+        self.assertIsNone(matcher.match(-5.5))
+        self.assertIsNotNone(matcher.match(-3.5))
+
+    def test_zero_delta(self):
+        """Test Nearly with zero delta (exact match required)."""
+        matcher = Nearly(1.0, delta=0.0)
+        self.assertIsNone(matcher.match(1.0))
+        self.assertIsNotNone(matcher.match(1.0001))
+
+    def test_default_delta(self):
+        """Test that default delta is 0.001."""
+        matcher = Nearly(1.0)
+        self.assertEqual(0.001, matcher.delta)
+        self.assertIsNone(matcher.match(1.0005))
+        self.assertIsNotNone(matcher.match(1.002))
+
+    def test_non_numeric_type_mismatch(self):
+        """Test that non-numeric types result in a mismatch."""
+        matcher = Nearly(1.0, delta=0.1)
+        mismatch = matcher.match("string")
+        self.assertIsNotNone(mismatch)
+        self.assertIn("string", mismatch.describe())
+
+    def test_none_type_mismatch(self):
+        """Test that None results in a mismatch."""
+        matcher = Nearly(1.0, delta=0.1)
+        mismatch = matcher.match(None)
+        self.assertIsNotNone(mismatch)
 
 
 def test_suite():
