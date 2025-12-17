@@ -1,9 +1,45 @@
+---
 name: Test
 
 on: [push, pull_request]
 
 jobs:
-  build:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-lint-${{ hashFiles('**/setup.py') }}
+          restore-keys: |
+            ${{ runner.os }}-lint-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip wheel
+          python -m pip install sphinx
+          python -m pip install ".[test,twisted,dev]"
+
+      - name: Ruff
+        run: |
+          python -m ruff check .
+          python -m ruff format --check .
+
+      - name: Type Check
+        run: |
+          python -m mypy testtools
+
+  test:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -24,9 +60,7 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.cache/pip
-          key:
-            ${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('**/setup.py')
-            }}
+          key: ${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('**/setup.py') }}
           restore-keys: |
             ${{ matrix.os }}-${{ matrix.python-version }}-
 
@@ -36,28 +70,42 @@ jobs:
           python -m pip install sphinx
           python -m pip install ".[test,twisted,dev]"
 
-      - name: Ruff
-        run: |
-          python -m ruff check .
-
-      - name: Format
-        run: |
-          python -m ruff format --check .
-
-      - name: Type Check
-        run: |
-          python -m mypy testtools
-
-      - name: Tests
+      - name: Run tests
         run: |
           python -W once -m testtools.run testtools.tests.test_suite
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-docs-${{ hashFiles('**/setup.py') }}
+          restore-keys: |
+            ${{ runner.os }}-docs-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip wheel
+          python -m pip install sphinx
+          python -m pip install ".[test,twisted,dev]"
 
       - name: Docs
         run: |
           make clean-sphinx docs
 
   success:
-    needs: build
+    needs: ["lint", "test", "docs"]
     runs-on: ubuntu-latest
     name: test successful
     steps:
