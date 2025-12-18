@@ -74,6 +74,14 @@ class _BinaryMismatch(Mismatch):
         self._reference_on_right = reference_on_right
 
     def describe(self):
+        # Special handling for set comparisons
+        if (
+            self._mismatch_string == "!="
+            and isinstance(self._reference, set)
+            and isinstance(self._actual, set)
+        ):
+            return self._describe_set_difference()
+
         actual = repr(self._actual)
         reference = repr(self._reference)
         if len(actual) + len(reference) > 70:
@@ -88,6 +96,27 @@ class _BinaryMismatch(Mismatch):
             else:
                 left, right = reference, actual
             return f"{left} {self._mismatch_string} {right}"
+
+    def _describe_set_difference(self):
+        """Describe the difference between two sets in a readable format."""
+        reference_only = sorted(
+            self._reference - self._actual, key=lambda x: (type(x).__name__, x)
+        )
+        actual_only = sorted(
+            self._actual - self._reference, key=lambda x: (type(x).__name__, x)
+        )
+
+        lines = ["!=:"]
+        if reference_only:
+            lines.append(
+                f"Items in expected but not in actual:\n{_format(reference_only)}"
+            )
+        if actual_only:
+            lines.append(
+                f"Items in actual but not in expected:\n{_format(actual_only)}"
+            )
+
+        return "\n".join(lines)
 
 
 class Equals(_BinaryComparison):
