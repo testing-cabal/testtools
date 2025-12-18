@@ -3,6 +3,14 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
+2.8.2
+~~~~~
+
+Changes
+-------
+
+Fully migrate away from Launchpad to GitHub.
+
 2.8.1
 ~~~~~
 

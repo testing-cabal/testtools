@@ -24,7 +24,6 @@ release:
 	hatchling build
 	twine upload dist/testtools-$(shell hatchling version)-*
 	gpg -a --detach-sign dist/testtools-$(shell hatchling version).tar.gz
-	$(PYTHON) scripts/_lp_release.py
 
 snapshot: prerelease
 	hatchling build
