@@ -1422,7 +1422,7 @@ The solution is to use ``Nullary`` instead::
 Here, ``repr(nullary)`` will be the same as ``repr(f)``.
 
 
-.. _testrepository: https://launchpad.net/testrepository
+.. _testrepository: https://github.com/testing-cabal/testrepository
 .. _Trial: http://twistedmatrix.com/documents/current/core/howto/testing.html
 .. _nose: http://somethingaboutorange.com/mrl/projects/nose/
 .. _zope.testrunner: http://pypi.python.org/pypi/zope.testrunner/

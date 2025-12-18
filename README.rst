@@ -51,23 +51,16 @@ If you would like to use our Twisted support, then you will need the
 ``testtools[twisted]`` extra.
 
 If you want to use ``fixtures`` then you can either install fixtures (e.g. from
-https://launchpad.net/python-fixtures or https://pypi.python.org/pypi/fixtures)
+https://github.com/testing-cabalfixtures or https://pypi.python.org/pypi/fixtures)
 or alternatively just make sure your fixture objects obey the same protocol.
 
 
 Bug reports and patches
 -----------------------
 
-Please report bugs using Launchpad at <https://bugs.launchpad.net/testtools>.
+Please report bugs using GitHub at <https://github.com/testing-cabal/testtools>.
 Patches should be submitted as GitHub pull requests, or mailed to the authors.
 See ``doc/hacking.rst`` for more details.
-
-There's no mailing list for this project yet, however the testing-in-python
-mailing list may be a useful resource:
-
-* Address: testing-in-python@lists.idyll.org
-* Subscription link: http://lists.idyll.org/listinfo/testing-in-python
-
 
 History
 -------

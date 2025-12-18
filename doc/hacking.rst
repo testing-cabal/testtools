@@ -5,7 +5,7 @@ Contributing to testtools
 Bugs and patches
 ----------------
 
-`File bugs <https://bugs.launchpad.net/testtools/+filebug>` on Launchpad, and
+`File bugs <https://github.com/testing-cabal/testtools/issues/new>` on GitHub, and
 `send patches <https://github.com/testing-cabal/testtools/>` on GitHub.
 
 
@@ -79,12 +79,6 @@ clear explanation of what the change does and why you think the change is a
 good idea.  For crasher bugs, this is generally a no-brainer, but for UI bugs
 & API tweaks, the reason something is an improvement might not be obvious, so
 it's worth spelling out.
-
-If you are thinking of implementing a new feature, you might want to have that
-discussion on the [mailing list](testtools-dev@lists.launchpad.net) before the
-patch goes up for review.  This is not at all mandatory, but getting feedback
-early can help avoid dead ends.
-
 
 Documentation
 -------------
@@ -178,10 +172,6 @@ Membership in the testing-cabal org on GitHub as committer.
 
 Membership in the pypi testtools project as maintainer.
 
-Membership in the https://launchpad.net/~testtools-committers.
-
-No in-progress Critical bugs on the next_ milestone.
-
 Tasks
 +++++
 
@@ -190,14 +180,7 @@ Tasks
 #. Possibly write a blurb into NEWS.
 #. Commit the changes.
 #. Tag the release, ``git tag -s X.Y.Z -m "Releasing X.Y.Z"``
-#. Run 'make release', this:
-   #. Creates a source distribution and uploads to PyPI
-   #. Ensures all Fix Committed bugs are in the release milestone
-   #. Makes a release on Launchpad and uploads the tarball
-   #. Marks all the Fix Committed bugs as Fix Released
-   #. Creates a new milestone
-#. If a new series has been created (e.g. 0.10.0), make the series on Launchpad.
-#. Push trunk to GitHub, ``git push --tags origin master``
+#. Push master to GitHub, ``git push --tags origin master``
 
 .. _PEP 8: http://www.python.org/dev/peps/pep-0008/
 .. _unittest: http://docs.python.org/library/unittest.html
@@ -205,4 +188,3 @@ Tasks
 .. _Sphinx: http://sphinx.pocoo.org/
 .. _restructuredtext: http://docutils.sourceforge.net/rst.html
 .. _testing-cabal: https://github.com/organizations/testing-cabal/
-.. _next: https://launchpad.net/testtools/+milestone/next
