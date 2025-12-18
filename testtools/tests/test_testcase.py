@@ -863,6 +863,44 @@ class TestAssertions(TestCase):
         )
         self.assertFails(expected_error, self.assertEqual, a, b, message)
 
+    def test_assertEqual_set_difference(self):
+        a = {1, 2, 3, 4}
+        b = {2, 3, 5, 6}
+        expected_error = "\n".join(
+            [
+                "!=:",
+                "Items in expected but not in actual:",
+                "[1, 4]",
+                "Items in actual but not in expected:",
+                "[5, 6]",
+            ]
+        )
+        self.assertFails(expected_error, self.assertEqual, a, b)
+
+    def test_assertEqual_set_missing_items_only(self):
+        a = {1, 2, 3, 4}
+        b = {2, 3}
+        expected_error = "\n".join(
+            [
+                "!=:",
+                "Items in expected but not in actual:",
+                "[1, 4]",
+            ]
+        )
+        self.assertFails(expected_error, self.assertEqual, a, b)
+
+    def test_assertEqual_set_extra_items_only(self):
+        a = {1, 2}
+        b = {1, 2, 3, 4}
+        expected_error = "\n".join(
+            [
+                "!=:",
+                "Items in actual but not in expected:",
+                "[3, 4]",
+            ]
+        )
+        self.assertFails(expected_error, self.assertEqual, a, b)
+
     def test_assertIsNone(self):
         self.assertIsNone(None)
 
