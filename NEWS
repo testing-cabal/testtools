@@ -9,13 +9,19 @@ Changes and improvements to testtools_, grouped by release.
 Improvements
 ------------
 
-* Add ``Nearly`` matcher for approximate numerical comparisons. (#222)
+* Add ``Nearly`` matcher for approximate numerical comparisons.
+  (Jelmer Vernooĳ, #222)
+
+* Improve handling of sets in ``assertEquals``.
+  (Jelmer Vernooĳ, #108)
 
 Changes
 -------
 
  * Re-add accidentally removed methods on StreamToExtendedDecorator.
    (Jelmer Vernooĳ)
+
+ * Add typing. (Jelmer Vernooĳ, Stephen Finucane)
 
 2.8.0
 ~~~~~
