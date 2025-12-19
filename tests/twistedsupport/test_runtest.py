@@ -1121,6 +1121,84 @@ class TestCaptureTwistedLogs(NeedsTwistedTestCase):
         )
 
 
+class TestAsyncSetUpTearDownValidation(NeedsTwistedTestCase):
+    """Tests for async setUp/tearDown validation with Deferreds.
+
+    This tests the fix for GitHub issue #547.
+    """
+
+    def test_async_setup_with_deferred_upcall(self):
+        # setUp that calls parent asynchronously via Deferred callback
+        # should work correctly with AsynchronousDeferredRunTest.
+        from twisted.internet import reactor
+
+        class AsyncSetUpTest(TestCase):
+            run_tests_with = AsynchronousDeferredRunTest
+
+            def setUp(self):
+                d = defer.Deferred()
+                d.addCallback(lambda ignored: super(AsyncSetUpTest, self).setUp())
+                reactor.callLater(0.0, d.callback, None)
+                return d
+
+            def test_something(self):
+                pass
+
+        test = AsyncSetUpTest("test_something")
+        result = TestResult()
+        test.run(result)
+        # The test should pass - the async setUp should be validated correctly
+        self.assertTrue(result.wasSuccessful())
+
+    def test_async_teardown_with_deferred_upcall(self):
+        # tearDown that calls parent asynchronously via Deferred callback
+        # should work correctly with AsynchronousDeferredRunTest.
+        from twisted.internet import reactor
+
+        class AsyncTearDownTest(TestCase):
+            run_tests_with = AsynchronousDeferredRunTest
+
+            def tearDown(self):
+                d = defer.Deferred()
+                d.addCallback(lambda ignored: super(AsyncTearDownTest, self).tearDown())
+                reactor.callLater(0.0, d.callback, None)
+                return d
+
+            def test_something(self):
+                pass
+
+        test = AsyncTearDownTest("test_something")
+        result = TestResult()
+        test.run(result)
+        # The test should pass - the async tearDown should be validated correctly
+        self.assertTrue(result.wasSuccessful())
+
+    def test_async_setup_missing_upcall_fails(self):
+        # setUp that returns a Deferred but doesn't call parent should fail.
+        from twisted.internet import reactor
+
+        class BadAsyncSetUpTest(TestCase):
+            run_tests_with = AsynchronousDeferredRunTest
+
+            def setUp(self):
+                # Returns a Deferred but doesn't call super().setUp()
+                d = defer.Deferred()
+                reactor.callLater(0.0, d.callback, None)
+                return d
+
+            def test_something(self):
+                pass
+
+        test = BadAsyncSetUpTest("test_something")
+        result = TestResult()
+        test.run(result)
+        # The test should fail with a validation error
+        self.assertFalse(result.wasSuccessful())
+        self.assertEqual(len(result.errors), 1)
+        error_text = str(result.errors[0][1])
+        self.assertIn("TestCase.setUp was not called", error_text)
+
+
 def test_suite():
     from unittest import TestLoader
 
