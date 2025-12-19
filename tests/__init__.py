@@ -8,7 +8,7 @@ import testscenarios
 
 
 def test_suite():
-    from testtools.tests import (
+    from . import (
         matchers,
         test_assert_that,
         test_compat,

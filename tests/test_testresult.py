@@ -79,7 +79,8 @@ from testtools.testresult.real import (
     _merge_tags,
     utc,
 )
-from testtools.tests.helpers import (
+
+from .helpers import (
     FullStackRunTest,
     LoggingResult,
     an_exc_info,
@@ -1219,7 +1220,7 @@ class TestExtendedToStreamDecorator(TestCase):
                 ("startTestRun",),
                 (
                     "status",
-                    "testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_explicit_time",
+                    "tests.test_testresult.TestExtendedToStreamDecorator.test_explicit_time",
                     "inprogress",
                     None,
                     True,
@@ -1232,7 +1233,7 @@ class TestExtendedToStreamDecorator(TestCase):
                 ),
                 (
                     "status",
-                    "testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_explicit_time",
+                    "tests.test_testresult.TestExtendedToStreamDecorator.test_explicit_time",
                     "success",
                     set(),
                     True,
@@ -1271,7 +1272,7 @@ class TestExtendedToStreamDecorator(TestCase):
                 ("startTestRun",),
                 (
                     "status",
-                    "testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_empty_detail_status_correct",
+                    "tests.test_testresult.TestExtendedToStreamDecorator.test_empty_detail_status_correct",
                     "inprogress",
                     None,
                     True,
@@ -1284,7 +1285,7 @@ class TestExtendedToStreamDecorator(TestCase):
                 ),
                 (
                     "status",
-                    "testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_empty_detail_status_correct",
+                    "tests.test_testresult.TestExtendedToStreamDecorator.test_empty_detail_status_correct",
                     None,
                     None,
                     True,
@@ -1297,7 +1298,7 @@ class TestExtendedToStreamDecorator(TestCase):
                 ),
                 (
                     "status",
-                    "testtools.tests.test_testresult.TestExtendedToStreamDecorator.test_empty_detail_status_correct",
+                    "tests.test_testresult.TestExtendedToStreamDecorator.test_empty_detail_status_correct",
                     "fail",
                     set(),
                     True,
@@ -1528,7 +1529,7 @@ class TestStreamSummary(TestCase):
             file_name="traceback",
             file_bytes=_b(
                 """Traceback (most recent call last):
-  File "testtools/tests/test_testresult.py", line 607, in test_stopTestRun
+  File "tests/test_testresult.py", line 607, in test_stopTestRun
       AllMatch(Equals([('startTestRun',), ('stopTestRun',)])))
 testtools.matchers._impl.MismatchError: Differences: [
 [('startTestRun',), ('stopTestRun',)] != []
@@ -1545,7 +1546,7 @@ testtools.matchers._impl.MismatchError: Differences: [
         """some log.txt: {{{1234 log message}}}
 
 Traceback (most recent call last):
-  File "testtools/tests/test_testresult.py", line 607, in test_stopTestRun
+  File "tests/test_testresult.py", line 607, in test_stopTestRun
       AllMatch(Equals([('startTestRun',), ('stopTestRun',)])))
 testtools.matchers._impl.MismatchError: Differences: [
 [('startTestRun',), ('stopTestRun',)] != []
@@ -2056,21 +2057,21 @@ class TestTextTestResult(TestCase):
             self.getvalue(),
             DocTestMatches(
                 """...======================================================================
-ERROR: testtools.tests.test_testresult.Test.error
+ERROR: tests.test_testresult.Test.error
 ----------------------------------------------------------------------
 Traceback (most recent call last):
   File "...testtools...tests...test_testresult.py", line ..., in error
     1 / 0
 ZeroDivisionError:... divi... by zero...
 ======================================================================
-FAIL: testtools.tests.test_testresult.Test.failed
+FAIL: tests.test_testresult.Test.failed
 ----------------------------------------------------------------------
 Traceback (most recent call last):
   File "...testtools...tests...test_testresult.py", line ..., in failed
     self.fail("yo!")
 AssertionError: yo!
 ======================================================================
-UNEXPECTED SUCCESS: testtools.tests.test_testresult.Test.succeeded
+UNEXPECTED SUCCESS: tests.test_testresult.Test.succeeded
 ----------------------------------------------------------------------
 ...""",
                 doctest.ELLIPSIS | doctest.REPORT_NDIFF,

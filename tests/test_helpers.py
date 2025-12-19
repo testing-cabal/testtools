@@ -1,7 +1,8 @@
 # Copyright (c) 2010-2012 testtools developers. See LICENSE for details.
 
 from testtools import TestCase
-from testtools.tests.helpers import (
+
+from .helpers import (
     FullStackRunTest,
     hide_testtools_stack,
     is_stack_hidden,

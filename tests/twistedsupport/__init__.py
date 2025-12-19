@@ -4,7 +4,7 @@ from unittest import TestSuite
 
 
 def test_suite():
-    from testtools.tests.twistedsupport import (
+    from . import (
         test_deferred,
         test_matchers,
         test_runtest,

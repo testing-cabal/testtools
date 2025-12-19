@@ -13,8 +13,9 @@ from testtools.matchers import (
     MatchesStructure,
 )
 from testtools.matchers._warnings import IsDeprecated, WarningMessage, Warnings
-from testtools.tests.helpers import FullStackRunTest
-from testtools.tests.matchers.helpers import TestMatchersInterface
+
+from ..helpers import FullStackRunTest
+from ..matchers.helpers import TestMatchersInterface
 
 
 def make_warning(warning_type, message):

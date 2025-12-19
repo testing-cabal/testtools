@@ -32,7 +32,8 @@ from testtools.matchers import (
     Raises,
     raises,
 )
-from testtools.tests.helpers import an_exc_info
+
+from .helpers import an_exc_info
 
 raises_value_error = Raises(MatchesException(ValueError))
 

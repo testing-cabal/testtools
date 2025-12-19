@@ -13,7 +13,8 @@ from testtools import (
 )
 from testtools.matchers import HasLength, Is, MatchesException, Raises
 from testtools.testresult.doubles import ExtendedTestResult
-from testtools.tests.helpers import FullStackRunTest
+
+from .helpers import FullStackRunTest
 
 
 class TestRunTest(TestCase):

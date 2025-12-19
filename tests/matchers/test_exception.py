@@ -13,8 +13,9 @@ from testtools.matchers._exception import (
     Raises,
     raises,
 )
-from testtools.tests.helpers import FullStackRunTest
-from testtools.tests.matchers.helpers import TestMatchersInterface
+
+from ..helpers import FullStackRunTest
+from ..matchers.helpers import TestMatchersInterface
 
 
 def make_error(type, *args, **kwargs):
