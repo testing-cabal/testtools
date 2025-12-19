@@ -17,6 +17,11 @@ Improvements
 * Support binary contents in ``FileContains`` matcher.
   (Jelmer Vernooĳ, #538)
 
+* Allow stream=None to be passed to various TestResult
+  classes that now support verbosity; fixes a regression
+from 2.8.0.
+  (Jelmer Vernooĳ)
+
 2.8.1
 ~~~~~
 
