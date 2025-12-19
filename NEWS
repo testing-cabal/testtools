@@ -11,6 +11,12 @@ Changes
 
 Fully migrate away from Launchpad to GitHub.
 
+Improvements
+------------
+
+* Support binary contents in ``FileContains`` matcher.
+  (Jelmer Vernooĳ, #538)
+
 2.8.1
 ~~~~~
 

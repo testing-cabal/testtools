@@ -94,7 +94,7 @@ class DirContains(Matcher):
 class FileContains(Matcher):
     """Matches if the given file has the specified contents."""
 
-    def __init__(self, contents=None, matcher=None):
+    def __init__(self, contents=None, matcher=None, encoding=None):
         """Construct a ``FileContains`` matcher.
 
         Can be used in a basic mode where the file contents are compared for
@@ -103,9 +103,14 @@ class FileContains(Matcher):
         matched against an arbitrary matcher (by passing ``matcher`` instead).
 
         :param contents: If specified, match the contents of the file with
-            these contents.
+            these contents. If bytes, the file will be opened in binary mode.
+            If str, the file will be opened in text mode using the specified
+            encoding (or the default encoding if not specified).
         :param matcher: If specified, match the contents of the file against
             this matcher.
+        :param encoding: Optional text encoding to use when opening the file
+            in text mode. Only used when contents is a str (or when using a
+            matcher for text content). Defaults to the system default encoding.
         """
         if contents == matcher is None:
             raise AssertionError("Must provide one of `contents` or `matcher`.")
@@ -115,19 +120,23 @@ class FileContains(Matcher):
             )
         if matcher is None:
             self.matcher = Equals(contents)
+            self._binary_mode = isinstance(contents, bytes)
         else:
             self.matcher = matcher
+            self._binary_mode = False
+        self.encoding = encoding
 
     def match(self, path):
         mismatch = PathExists().match(path)
         if mismatch is not None:
             return mismatch
-        f = open(path)
-        try:
-            actual_contents = f.read()
-            return self.matcher.match(actual_contents)
-        finally:
-            f.close()
+        if self._binary_mode:
+            with open(path, "rb") as f:
+                actual_contents: bytes | str = f.read()
+        else:
+            with open(path, encoding=self.encoding) as f:
+                actual_contents = f.read()
+        return self.matcher.match(actual_contents)
 
     def __str__(self):
         return f"File at path exists and contains {self.matcher}"
