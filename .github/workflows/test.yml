@@ -72,7 +72,7 @@ jobs:
 
       - name: Run tests
         run: |
-          python -W once -m testtools.run testtools.tests.test_suite
+          python -W once -m testtools.run tests.test_suite
 
   docs:
     runs-on: ubuntu-latest

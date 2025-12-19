@@ -19,7 +19,8 @@ from testtools.matchers._impl import (
     MismatchDecorator,
     MismatchError,
 )
-from testtools.tests.helpers import FullStackRunTest
+
+from ..helpers import FullStackRunTest
 
 # Silence pyflakes.
 Matcher

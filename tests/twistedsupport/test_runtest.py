@@ -25,11 +25,11 @@ from testtools.matchers import (
 )
 from testtools.runtest import RunTest
 from testtools.testresult.doubles import ExtendedTestResult
-from testtools.tests.helpers import (
+
+from ..helpers import (
     AsText,
     MatchesEvents,
 )
-
 from ._helpers import NeedsTwistedTestCase
 
 try:

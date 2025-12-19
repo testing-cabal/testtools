@@ -16,8 +16,9 @@ from testtools import (
 )
 from testtools.matchers import DocTestMatches, Equals
 from testtools.testresult.doubles import StreamResult as LoggingStream
-from testtools.tests.helpers import LoggingResult
 from testtools.testsuite import FixtureSuite, sorted_tests
+
+from .helpers import LoggingResult
 
 try:
     from fixtures import FunctionFixture
@@ -127,7 +128,7 @@ class TestConcurrentStreamTestSuiteRun(TestCase):
             {
                 (
                     "status",
-                    "testtools.tests.test_testsuite.Sample.test_method1",
+                    "tests.test_testsuite.Sample.test_method1",
                     "inprogress",
                     None,
                     True,
@@ -140,7 +141,7 @@ class TestConcurrentStreamTestSuiteRun(TestCase):
                 ),
                 (
                     "status",
-                    "testtools.tests.test_testsuite.Sample.test_method1",
+                    "tests.test_testsuite.Sample.test_method1",
                     "success",
                     frozenset(),
                     True,
@@ -153,7 +154,7 @@ class TestConcurrentStreamTestSuiteRun(TestCase):
                 ),
                 (
                     "status",
-                    "testtools.tests.test_testsuite.Sample.test_method2",
+                    "tests.test_testsuite.Sample.test_method2",
                     "inprogress",
                     None,
                     True,
@@ -166,7 +167,7 @@ class TestConcurrentStreamTestSuiteRun(TestCase):
                 ),
                 (
                     "status",
-                    "testtools.tests.test_testsuite.Sample.test_method2",
+                    "tests.test_testsuite.Sample.test_method2",
                     "success",
                     frozenset(),
                     True,

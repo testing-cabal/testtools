@@ -5,7 +5,7 @@
 Run some tests with the testtools extended API.
 
 For instance, to run the testtools test suite.
- $ python -m testtools.run testtools.tests.test_suite
+ $ python -m testtools.run tests.test_suite
 """
 
 import os.path

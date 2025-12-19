@@ -4,7 +4,7 @@ PYTHON=python3
 SOURCES=$(shell find testtools -name "*.py")
 
 check:
-	PYTHONPATH=$(PWD) $(PYTHON) -m testtools.run testtools.tests.test_suite
+	PYTHONPATH=$(PWD) $(PYTHON) -m testtools.run tests.test_suite
 
 TAGS: ${SOURCES}
 	ctags -e -R testtools/

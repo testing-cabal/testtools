@@ -47,7 +47,8 @@ from testtools.testresult.doubles import (
     ExtendedTestResult,
     Python3TestResult,
 )
-from testtools.tests.helpers import (
+
+from .helpers import (
     AsText,
     FullStackRunTest,
     LoggingResult,
@@ -55,7 +56,7 @@ from testtools.tests.helpers import (
     an_exc_info,
     raise_,
 )
-from testtools.tests.samplecases import (
+from .samplecases import (
     deterministic_sample_cases_scenarios,
     make_case_for_behavior_scenario,
     make_test_case,
@@ -1602,7 +1603,7 @@ class TestSetupTearDown(TestCase):
         self.assertThat(
             result.errors[0][1],
             DocTestMatches(
-                "...ValueError...File...testtools/tests/test_testcase.py...", ELLIPSIS
+                "...ValueError...File...tests/test_testcase.py...", ELLIPSIS
             ),
         )
 
@@ -1620,7 +1621,7 @@ class TestSetupTearDown(TestCase):
         self.assertThat(
             result.errors[0][1],
             DocTestMatches(
-                "...ValueError...File...testtools/tests/test_testcase.py...", ELLIPSIS
+                "...ValueError...File...tests/test_testcase.py...", ELLIPSIS
             ),
         )
 
@@ -1635,7 +1636,7 @@ class TestSetupTearDown(TestCase):
         self.assertThat(
             result.errors[0][1],
             DocTestMatches(
-                "...ValueError...File...testtools/tests/test_testcase.py...", ELLIPSIS
+                "...ValueError...File...tests/test_testcase.py...", ELLIPSIS
             ),
         )
 
@@ -1653,7 +1654,7 @@ class TestSetupTearDown(TestCase):
         self.assertThat(
             result.errors[0][1],
             DocTestMatches(
-                "...ValueError...File...testtools/tests/test_testcase.py...", ELLIPSIS
+                "...ValueError...File...tests/test_testcase.py...", ELLIPSIS
             ),
         )
 
@@ -2219,20 +2220,16 @@ class TestAttributes(TestCase):
     def test_simple_attr(self):
         # Adding an attr to a test changes its id().
         case = Attributes("simple")
-        self.assertEqual(
-            "testtools.tests.test_testcase.Attributes.simple[foo]", case.id()
-        )
+        self.assertEqual("tests.test_testcase.Attributes.simple[foo]", case.id())
 
     def test_multiple_attributes(self):
         case = Attributes("many")
-        self.assertEqual(
-            "testtools.tests.test_testcase.Attributes.many[bar,foo,quux]", case.id()
-        )
+        self.assertEqual("tests.test_testcase.Attributes.many[bar,foo,quux]", case.id())
 
     def test_multiple_attr_decorators(self):
         case = Attributes("decorated")
         self.assertEqual(
-            "testtools.tests.test_testcase.Attributes.decorated[bar,foo,quux]",
+            "tests.test_testcase.Attributes.decorated[bar,foo,quux]",
             case.id(),
         )
 

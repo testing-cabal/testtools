@@ -103,7 +103,7 @@ Users of testtools should never import a submodule in order to use a stable
 API.  Unstable APIs like ``testtools.matchers`` and
 ``testtools.deferredruntest`` should be exported as submodules.
 
-Tests belong in ``testtools/tests/``.
+Tests belong in ``tests/``.
 
 
 Committing to trunk

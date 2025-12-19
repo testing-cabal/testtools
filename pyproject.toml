@@ -78,7 +78,7 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = [
     # FIXME(stephenfin): We would like to remove all modules from this list
-    # except testtools.tests (we're not sadists)
+    # except tests (we're not sadists)
     "testtools.assertions",
     "testtools.compat",
     "testtools.content",
@@ -91,7 +91,7 @@ module = [
     "testtools.testresult.*",
     "testtools.testsuite",
     "testtools.twistedsupport.*",
-    "testtools.tests.*",
+    "tests.*",
 ]
 disallow_untyped_calls = false
 disallow_untyped_defs = false

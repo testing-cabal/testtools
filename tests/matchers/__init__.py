@@ -5,7 +5,7 @@ from unittest import TestSuite
 
 
 def test_suite():
-    from testtools.tests.matchers import (
+    from ..matchers import (
         test_basic,
         test_const,
         test_datastructures,

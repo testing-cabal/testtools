@@ -4,7 +4,8 @@ from typing import ClassVar
 
 from testtools import TestCase
 from testtools.matchers import Always, Never
-from testtools.tests.matchers.helpers import TestMatchersInterface
+
+from ..matchers.helpers import TestMatchersInterface
 
 
 class TestAlwaysInterface(TestMatchersInterface, TestCase):
