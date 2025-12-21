@@ -694,13 +694,32 @@ class TestCase(unittest.TestCase):
             ValueError is raised.
         """
         ret = self.setUp()
-        if not self.__setup_called:
-            raise ValueError(
-                f"In File: {sys.modules[self.__class__.__module__].__file__}\n"
-                "TestCase.setUp was not called. Have you upcalled all the "
-                "way up the hierarchy from your setUp? e.g. Call "
-                f"super({self.__class__.__name__}, self).setUp() from your setUp()."
-            )
+
+        # Check if the return value is a Deferred (duck-typing to avoid hard dependency)
+        if hasattr(ret, "addBoth") and callable(getattr(ret, "addBoth")):
+            # Deferred-like object: validate asynchronously after it resolves
+            def _validate_setup_called(result):
+                if not self.__setup_called:
+                    raise ValueError(
+                        f"In File: {sys.modules[self.__class__.__module__].__file__}\n"
+                        "TestCase.setUp was not called. Have you upcalled all the "
+                        "way up the hierarchy from your setUp? e.g. Call "
+                        f"super({self.__class__.__name__}, self).setUp() "
+                        "from your setUp()."
+                    )
+                return result
+
+            ret.addBoth(_validate_setup_called)
+        else:
+            # Synchronous: validate immediately
+            if not self.__setup_called:
+                raise ValueError(
+                    f"In File: {sys.modules[self.__class__.__module__].__file__}\n"
+                    "TestCase.setUp was not called. Have you upcalled all the "
+                    "way up the hierarchy from your setUp? e.g. Call "
+                    f"super({self.__class__.__name__}, self).setUp() "
+                    "from your setUp()."
+                )
         return ret
 
     def _run_teardown(self, result):
@@ -711,14 +730,32 @@ class TestCase(unittest.TestCase):
             ValueError is raised.
         """
         ret = self.tearDown()
-        if not self.__teardown_called:
-            raise ValueError(
-                f"In File: {sys.modules[self.__class__.__module__].__file__}\n"
-                "TestCase.tearDown was not called. Have you upcalled all the "
-                "way up the hierarchy from your tearDown? e.g. Call "
-                f"super({self.__class__.__name__}, self).tearDown() "
-                "from your tearDown()."
-            )
+
+        # Check if the return value is a Deferred (duck-typing to avoid hard dependency)
+        if hasattr(ret, "addBoth") and callable(getattr(ret, "addBoth")):
+            # Deferred-like object: validate asynchronously after it resolves
+            def _validate_teardown_called(result):
+                if not self.__teardown_called:
+                    raise ValueError(
+                        f"In File: {sys.modules[self.__class__.__module__].__file__}\n"
+                        "TestCase.tearDown was not called. Have you upcalled all the "
+                        "way up the hierarchy from your tearDown? e.g. Call "
+                        f"super({self.__class__.__name__}, self).tearDown() "
+                        "from your tearDown()."
+                    )
+                return result
+
+            ret.addBoth(_validate_teardown_called)
+        else:
+            # Synchronous: validate immediately
+            if not self.__teardown_called:
+                raise ValueError(
+                    f"In File: {sys.modules[self.__class__.__module__].__file__}\n"
+                    "TestCase.tearDown was not called. Have you upcalled all the "
+                    "way up the hierarchy from your tearDown? e.g. Call "
+                    f"super({self.__class__.__name__}, self).tearDown() "
+                    "from your tearDown()."
+                )
         return ret
 
     def _get_test_method(self):
