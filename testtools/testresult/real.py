@@ -1244,6 +1244,8 @@ class TextTestResult(TestResult):
         )
 
     def _show_list(self, label, error_list):
+        if self.stream is None:
+            return
         for test, output in error_list:
             self.stream.write(self.sep1)
             self.stream.write(f"{label}: {test.id()}\n")
@@ -1252,69 +1254,76 @@ class TextTestResult(TestResult):
 
     def startTest(self, test):
         super().startTest(test)
-        if self.verbosity >= 2:
+        if self.stream is not None and self.verbosity >= 2:
             self.stream.write(f"{test.id()} ... ")
             self.stream.flush()
 
     def addSuccess(self, test, details=None):
         super().addSuccess(test, details=details)
-        if self.verbosity == 1:
-            self.stream.write(".")
-            self.stream.flush()
-            self._progress_printed = True
-        elif self.verbosity >= 2:
-            self.stream.write("ok\n")
-            self.stream.flush()
+        if self.stream is not None:
+            if self.verbosity == 1:
+                self.stream.write(".")
+                self.stream.flush()
+                self._progress_printed = True
+            elif self.verbosity >= 2:
+                self.stream.write("ok\n")
+                self.stream.flush()
 
     def addError(self, test, err=None, details=None):
         super().addError(test, err=err, details=details)
-        if self.verbosity == 1:
-            self.stream.write("E")
-            self.stream.flush()
-        elif self.verbosity >= 2:
-            self.stream.write("ERROR\n")
-            self.stream.flush()
+        if self.stream is not None:
+            if self.verbosity == 1:
+                self.stream.write("E")
+                self.stream.flush()
+            elif self.verbosity >= 2:
+                self.stream.write("ERROR\n")
+                self.stream.flush()
 
     def addFailure(self, test, err=None, details=None):
         super().addFailure(test, err=err, details=details)
-        if self.verbosity == 1:
-            self.stream.write("F")
-            self.stream.flush()
-        elif self.verbosity >= 2:
-            self.stream.write("FAIL\n")
-            self.stream.flush()
+        if self.stream is not None:
+            if self.verbosity == 1:
+                self.stream.write("F")
+                self.stream.flush()
+            elif self.verbosity >= 2:
+                self.stream.write("FAIL\n")
+                self.stream.flush()
 
     def addSkip(self, test, reason=None, details=None):
         super().addSkip(test, reason=reason, details=details)
-        if self.verbosity == 1:
-            self.stream.write("s")
-            self.stream.flush()
-        elif self.verbosity >= 2:
-            self.stream.write(f"skipped {reason!r}\n")
-            self.stream.flush()
+        if self.stream is not None:
+            if self.verbosity == 1:
+                self.stream.write("s")
+                self.stream.flush()
+            elif self.verbosity >= 2:
+                self.stream.write(f"skipped {reason!r}\n")
+                self.stream.flush()
 
     def addExpectedFailure(self, test, err=None, details=None):
         super().addExpectedFailure(test, err=err, details=details)
-        if self.verbosity == 1:
-            self.stream.write("x")
-            self.stream.flush()
-        elif self.verbosity >= 2:
-            self.stream.write("expected failure\n")
-            self.stream.flush()
+        if self.stream is not None:
+            if self.verbosity == 1:
+                self.stream.write("x")
+                self.stream.flush()
+            elif self.verbosity >= 2:
+                self.stream.write("expected failure\n")
+                self.stream.flush()
 
     def addUnexpectedSuccess(self, test, details=None):
         super().addUnexpectedSuccess(test, details=details)
-        if self.verbosity == 1:
-            self.stream.write("u")
-            self.stream.flush()
-        elif self.verbosity >= 2:
-            self.stream.write("unexpected success\n")
-            self.stream.flush()
+        if self.stream is not None:
+            if self.verbosity == 1:
+                self.stream.write("u")
+                self.stream.flush()
+            elif self.verbosity >= 2:
+                self.stream.write("unexpected success\n")
+                self.stream.flush()
 
     def startTestRun(self):
         super().startTestRun()
         self.__start = self._now()
-        self.stream.write("Tests running...\n")
+        if self.stream is not None:
+            self.stream.write("Tests running...\n")
 
     def stopTestRun(self):
         if self.testsRun != 1:
@@ -1324,31 +1333,33 @@ class TextTestResult(TestResult):
         stop = self._now()
         self._show_list("ERROR", self.errors)
         self._show_list("FAIL", self.failures)
-        for test in self.unexpectedSuccesses:
+        if self.stream is not None:
+            for test in self.unexpectedSuccesses:
+                self.stream.write(
+                    f"{self.sep1}UNEXPECTED SUCCESS: {test.id()}\n{self.sep2}"
+                )
+            # Add newline(s) before summary
+            # If we printed progress indicators (dots), add extra newline
+            if self._progress_printed:
+                self.stream.write("\n\n")
+            else:
+                self.stream.write("\n")
             self.stream.write(
-                f"{self.sep1}UNEXPECTED SUCCESS: {test.id()}\n{self.sep2}"
+                f"Ran {self.testsRun} test{plural} in "
+                f"{self._delta_to_float(stop - self.__start, 3):.3f}s\n"
             )
-        # Add newline(s) before summary
-        # If we printed progress indicators (dots), add extra newline
-        if self._progress_printed:
-            self.stream.write("\n\n")
-        else:
-            self.stream.write("\n")
-        self.stream.write(
-            f"Ran {self.testsRun} test{plural} in "
-            f"{self._delta_to_float(stop - self.__start, 3):.3f}s\n"
-        )
-        if self.wasSuccessful():
-            self.stream.write("OK\n")
-        else:
-            self.stream.write("FAILED (")
-            details = []
-            failure_count = sum(
-                len(x) for x in (self.failures, self.errors, self.unexpectedSuccesses)
-            )
-            details.append(f"failures={failure_count}")
-            self.stream.write(", ".join(details))
-            self.stream.write(")\n")
+            if self.wasSuccessful():
+                self.stream.write("OK\n")
+            else:
+                self.stream.write("FAILED (")
+                details = []
+                failure_count = sum(
+                    len(x)
+                    for x in (self.failures, self.errors, self.unexpectedSuccesses)
+                )
+                details.append(f"failures={failure_count}")
+                self.stream.write(", ".join(details))
+                self.stream.write(")\n")
         super().stopTestRun()
 
 

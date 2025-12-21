@@ -2078,6 +2078,65 @@ UNEXPECTED SUCCESS: tests.test_testresult.Test.succeeded
             ),
         )
 
+    def test_none_stream_is_accepted(self):
+        """TextTestResult should accept None as stream for backward compatibility."""
+        result = TextTestResult(None)
+        test = make_test()
+        # Should not raise AttributeError
+        result.startTestRun()
+        result.startTest(test)
+        result.addSuccess(test)
+        result.stopTest(test)
+        result.stopTestRun()
+
+    def test_none_stream_with_failure(self):
+        """TextTestResult with None stream should handle failures."""
+        result = TextTestResult(None)
+        test = make_failing_test()
+        # Should not raise AttributeError
+        test.run(result)
+        self.assertEqual(1, len(result.failures))
+
+    def test_verbosity_zero_produces_no_output(self):
+        """TextTestResult with verbosity=0 should produce no per-test output."""
+        stream = io.StringIO()
+        result = TextTestResult(stream, verbosity=0)
+        test = make_test()
+        result.startTestRun()
+        result.startTest(test)
+        result.addSuccess(test)
+        result.stopTest(test)
+        # Get output up to stopTestRun (which still outputs summary)
+        output_before_stop = stream.getvalue()
+        # Should only have "Tests running...\n" from startTestRun
+        self.assertEqual("Tests running...\n", output_before_stop)
+
+    def test_verbosity_zero_allows_subclass_control(self):
+        """Subclasses can use verbosity=0 to control their own output."""
+
+        class CustomResult(TextTestResult):
+            def __init__(self, stream):
+                super().__init__(stream, verbosity=0)
+
+            def addSuccess(self, test, details=None):
+                super().addSuccess(test, details)
+                self.stream.write("CUSTOM_SUCCESS_MARKER\n")
+
+        stream = io.StringIO()
+        result = CustomResult(stream)
+        test = make_test()
+        result.startTestRun()
+        result.startTest(test)
+        result.addSuccess(test)
+        result.stopTest(test)
+        output = stream.getvalue()
+        # Should have custom output but not parent's dot or "ok"
+        self.assertIn("CUSTOM_SUCCESS_MARKER\n", output)
+        self.assertNotIn("ok\n", output)
+        # Count dots - "Tests running..." has 3 dots, should not have a 4th
+        # from the success indicator
+        self.assertEqual(output.count("."), 3)
+
 
 class TestThreadSafeForwardingResult(TestCase):
     """Tests for `TestThreadSafeForwardingResult`."""

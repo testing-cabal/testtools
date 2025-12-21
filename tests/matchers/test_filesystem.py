@@ -175,6 +175,41 @@ class TestFileContains(TestCase, PathHelpers):
             Equals(mismatch.describe()),
         )
 
+    def test_binary_content(self):
+        tempdir = self.mkdtemp()
+        filename = os.path.join(tempdir, "binary_file")
+        binary_data = b"\x00\x01\x02\x03\xff\xfe"
+        with open(filename, "wb") as f:
+            f.write(binary_data)
+        self.assertThat(filename, FileContains(binary_data))
+
+    def test_binary_content_mismatch(self):
+        tempdir = self.mkdtemp()
+        filename = os.path.join(tempdir, "binary_file")
+        with open(filename, "wb") as f:
+            f.write(b"\x00\x01\x02")
+        mismatch = FileContains(b"\xff\xfe\xfd").match(filename)
+        self.assertThat(
+            Equals(b"\xff\xfe\xfd").match(b"\x00\x01\x02").describe(),
+            Equals(mismatch.describe()),
+        )
+
+    def test_text_with_encoding(self):
+        tempdir = self.mkdtemp()
+        filename = os.path.join(tempdir, "utf8_file")
+        text_data = "Hello 世界!"
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(text_data)
+        self.assertThat(filename, FileContains(text_data, encoding="utf-8"))
+
+    def test_text_default_encoding(self):
+        tempdir = self.mkdtemp()
+        filename = os.path.join(tempdir, "text_file")
+        text_data = "Hello World!"
+        with open(filename, "w") as f:
+            f.write(text_data)
+        self.assertThat(filename, FileContains(text_data))
+
 
 class TestTarballContains(TestCase, PathHelpers):
     def test_match(self):
