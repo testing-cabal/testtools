@@ -17,7 +17,78 @@ __all__ = [
     "MismatchError",
 ]
 
-from testtools.compat import text_repr
+import unicodedata
+
+
+def _slow_escape(text):
+    """Escape unicode ``text`` leaving printable characters unmodified
+
+    The behaviour emulates the Python 3 implementation of repr, see
+    unicode_repr in unicodeobject.c and isprintable definition.
+
+    Because this iterates over the input a codepoint at a time, it's slow, and
+    does not handle astral characters correctly on Python builds with 16 bit
+    rather than 32 bit unicode type.
+    """
+    output = []
+    for c in text:
+        o = ord(c)
+        if o < 256:
+            if o < 32 or 126 < o < 161:
+                output.append(c.encode("unicode-escape"))
+            elif o == 92:
+                # Separate due to bug in unicode-escape codec in Python 2.4
+                output.append("\\\\")
+            else:
+                output.append(c)
+        else:
+            # To get correct behaviour would need to pair up surrogates here
+            if unicodedata.category(c)[0] in "CZ":
+                output.append(c.encode("unicode-escape"))
+            else:
+                output.append(c)
+    return "".join(output)
+
+
+def text_repr(text, multiline=None):
+    """Rich repr for ``text`` returning unicode, triple quoted if ``multiline``."""
+    nl = (isinstance(text, bytes) and bytes((0xA,))) or "\n"
+    if multiline is None:
+        multiline = nl in text
+    if not multiline:
+        # Use normal repr for single line of unicode
+        return repr(text)
+    prefix = repr(text[:0])[:-2]
+    if multiline:
+        # To escape multiline strings, split and process each line in turn,
+        # making sure that quotes are not escaped.
+        offset = len(prefix) + 1
+        lines = []
+        for line in text.split(nl):
+            r = repr(line)
+            q = r[-1]
+            lines.append(r[offset:-1].replace("\\" + q, q))
+        # Combine the escaped lines and append two of the closing quotes,
+        # then iterate over the result to escape triple quotes correctly.
+        _semi_done = "\n".join(lines) + "''"
+        p = 0
+        while True:
+            p = _semi_done.find("'''", p)
+            if p == -1:
+                break
+            _semi_done = "\\".join([_semi_done[:p], _semi_done[p:]])
+            p += 2
+        return "".join([prefix, "'''\\\n", _semi_done, "'"])
+    escaped_text = _slow_escape(text)
+    # Determine which quote character to use and if one gets prefixed with a
+    # backslash following the same logic Python uses for repr() on strings
+    quote = "'"
+    if "'" in text:
+        if '"' in text:
+            escaped_text = escaped_text.replace("'", "\\'")
+        else:
+            quote = '"'
+    return "".join([prefix, quote, escaped_text, quote])
 
 
 class Matcher:

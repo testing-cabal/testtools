@@ -26,11 +26,12 @@ import datetime
 import email.message
 import math
 import sys
+import threading
 import unittest
 from operator import methodcaller
-from typing import ClassVar
+from queue import Queue
+from typing import ClassVar, TypeAlias
 
-from testtools.compat import _b
 from testtools.content import (
     Content,
     TracebackContent,
@@ -38,6 +39,9 @@ from testtools.content import (
 )
 from testtools.content_type import ContentType
 from testtools.tags import TagContext
+
+# Type for event dicts that go into the queue
+EventDict: TypeAlias = "dict[str, str | bytes | bool | None | StreamResult]"
 
 # circular import
 # from testtools.testcase import PlaceHolder
@@ -375,17 +379,17 @@ class StreamResult:
 
     def status(
         self,
-        test_id=None,
-        test_status=None,
-        test_tags=None,
-        runnable=True,
-        file_name=None,
-        file_bytes=None,
-        eof=False,
-        mime_type=None,
-        route_code=None,
-        timestamp=None,
-    ):
+        test_id: str | None = None,
+        test_status: str | None = None,
+        test_tags: set[str] | None = None,
+        runnable: bool = True,
+        file_name: str | None = None,
+        file_bytes: bytes | None = None,
+        eof: bool = False,
+        mime_type: str | None = None,
+        route_code: str | None = None,
+        timestamp: datetime.datetime | None = None,
+    ) -> None:
         """Inform the result about a test status.
 
         :param test_id: The test whose status is being reported. None to
@@ -762,7 +766,7 @@ class _TestRecord:
                 ["details", file_name], Content(content_type, lambda: content_bytes)
             )
 
-        case.details[file_name].iter_bytes().append(file_bytes)
+        case.details[file_name]._get_bytes().append(file_bytes)
         return case
 
     def to_test_case(self):
@@ -1112,7 +1116,7 @@ class TestControl:
         super().__init__()
         self.shouldStop = False
 
-    def stop(self):
+    def stop(self) -> None:
         """Indicate that tests should stop running."""
         self.shouldStop = True
 
@@ -1389,7 +1393,9 @@ class ThreadsafeForwardingResult(TestResult):
     opportunity for bugs around global state in the target.
     """
 
-    def __init__(self, target, semaphore):
+    def __init__(
+        self, target: unittest.TestResult, semaphore: threading.Semaphore
+    ) -> None:
         """Create a ThreadsafeForwardingResult forwarding to target.
 
         :param target: A ``TestResult``.
@@ -1749,7 +1755,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
     any StreamResult.
     """
 
-    def __init__(self, decorated):
+    def __init__(self, decorated: StreamResult) -> None:
         super().__init__([decorated])
         # Deal with mismatched base class constructors.
         TestControl.__init__(self)
@@ -1810,7 +1816,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
                         )
                     file_bytes = next_bytes
                 if file_bytes is None:
-                    file_bytes = _b("")
+                    file_bytes = b""
                 self.status(
                     file_name=name,
                     file_bytes=file_bytes,
@@ -2078,7 +2084,7 @@ class StreamToQueue(StreamResult):
     is the result that invoked ``startTestRun``.
     """
 
-    def __init__(self, queue, routing_code):
+    def __init__(self, queue: Queue[EventDict], routing_code: str | None) -> None:
         """Create a StreamToQueue forwarding to target.
 
         :param queue: A ``queue.Queue`` to receive events.
@@ -2123,10 +2129,12 @@ class StreamToQueue(StreamResult):
     def stopTestRun(self):
         self.queue.put(dict(event="stopTestRun", result=self))
 
-    def route_code(self, route_code):
+    def route_code(self, route_code: str | None) -> str | None:
         """Adjust route_code on the way through."""
         if route_code is None:
             return self.routing_code
+        if self.routing_code is None:
+            return route_code
         return self.routing_code + "/" + route_code
 
 
@@ -2304,7 +2312,7 @@ class TimestampingStreamResult(CopyStreamResult):
     This is convenient for ensuring events are timestamped.
     """
 
-    def __init__(self, target):
+    def __init__(self, target: StreamResult) -> None:
         super().__init__([target])
 
     def status(self, *args, **kwargs):

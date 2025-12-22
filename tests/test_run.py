@@ -11,7 +11,6 @@ from unittest import TestSuite
 
 import testtools
 from testtools import TestCase, run, skipUnless
-from testtools.compat import _b
 from testtools.matchers import (
     Contains,
     DocTestMatches,
@@ -40,8 +39,7 @@ if fixtures:
             :param broken: If True, the sample file will not be importable.
             """
             if not broken:
-                init_contents = _b(
-                    """\
+                init_contents = b"""\
 from testtools import TestCase
 
 class TestFoo(TestCase):
@@ -53,7 +51,6 @@ def test_suite():
     from unittest import TestLoader
     return TestLoader().loadTestsFromName(__name__)
 """
-                )
             else:
                 init_contents = b"class not in\n"
             self.package = fixtures.PythonPackage(
@@ -80,8 +77,7 @@ if fixtures and testresources:
                 [
                     (
                         "__init__.py",
-                        _b(
-                            """
+                        b"""
 from fixtures import Fixture
 from testresources import (
     FixtureResource,
@@ -112,8 +108,7 @@ class TestFoo(TestCase, ResourcedTestCase):
 def test_suite():
     from unittest import TestLoader
     return OptimisingTestSuite(TestLoader().loadTestsFromName(__name__))
-"""
-                        ),
+""",
                     )
                 ],
             )
@@ -137,8 +132,7 @@ if fixtures:
                 [
                     (
                         "__init__.py",
-                        _b(
-                            """
+                        b"""
 from testtools import TestCase, clone_test_with_new_id
 
 class TestExample(TestCase):
@@ -148,8 +142,7 @@ class TestExample(TestCase):
 def load_tests(loader, tests, pattern):
     tests.addTest(clone_test_with_new_id(tests._tests[1]._tests[0], "fred"))
     return tests
-"""
-                        ),
+""",
                     )
                 ],
             )
@@ -288,12 +281,10 @@ SyntaxError: invalid syntax
         f = open(tempname, "wb")
         try:
             f.write(
-                _b(
-                    """
+                b"""
 testtools.runexample.TestFoo.test_bar
 testtools.runexample.missingtest
 """
-                )
             )
         finally:
             f.close()
@@ -328,12 +319,10 @@ testtools.runexample.missingtest
         f = open(tempname, "wb")
         try:
             f.write(
-                _b(
-                    """
+                b"""
 testtools.runexample.TestFoo.test_bar
 testtools.runexample.missingtest
 """
-                )
             )
         finally:
             f.close()
@@ -368,12 +357,10 @@ testtools.runexample.missingtest
         f = open(tempname, "wb")
         try:
             f.write(
-                _b(
-                    """
+                b"""
 testtools.resourceexample.TestFoo.test_bar
 testtools.resourceexample.TestFoo.test_foo
 """
-                )
             )
         finally:
             f.close()

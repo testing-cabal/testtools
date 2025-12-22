@@ -12,7 +12,9 @@ class ContentType:
         content type.
     """
 
-    def __init__(self, primary_type, sub_type, parameters=None):
+    def __init__(
+        self, primary_type: str, sub_type: str, parameters: dict[str, str] | None = None
+    ) -> None:
         """Create a ContentType."""
         if None in (primary_type, sub_type):
             raise ValueError(f"None not permitted in {primary_type!r}, {sub_type!r}")
@@ -20,12 +22,12 @@ class ContentType:
         self.subtype = sub_type
         self.parameters = parameters or {}
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if type(other) is not ContentType:
             return False
         return self.__dict__ == other.__dict__
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self.parameters:
             params = "; "
             params += "; ".join(

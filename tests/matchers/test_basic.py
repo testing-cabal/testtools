@@ -4,10 +4,7 @@ import re
 from typing import ClassVar
 
 from testtools import TestCase
-from testtools.compat import (
-    _b,
-    text_repr,
-)
+from testtools.compat import text_repr
 from testtools.matchers._basic import (
     Contains,
     DoesNotEndWith,
@@ -36,7 +33,7 @@ class Test_BinaryMismatch(TestCase):
     """Mismatches from binary comparisons need useful describe output"""
 
     _long_string = "This is a longish multiline non-ascii string\n\xa7"
-    _long_b = _b(_long_string)
+    _long_b = _long_string.encode("utf-8")
     _long_u = _long_string
 
     class CustomRepr:
@@ -52,12 +49,12 @@ class Test_BinaryMismatch(TestCase):
         self.assertEqual(mismatch.describe(), f"{o1!r} !~ {o2!r}")
 
     def test_short_mixed_strings(self):
-        b, u = _b("\xa7"), "\xa7"
+        b, u = b"\xa7", "\xa7"
         mismatch = _BinaryMismatch(b, "!~", u)
         self.assertEqual(mismatch.describe(), f"{b!r} !~ {u!r}")
 
     def test_long_bytes(self):
-        one_line_b = self._long_b.replace(_b("\n"), _b(" "))
+        one_line_b = self._long_b.replace(b"\n", b" ")
         mismatch = _BinaryMismatch(one_line_b, "!~", self._long_b)
         self.assertEqual(
             mismatch.describe(),
@@ -249,8 +246,8 @@ class DoesNotStartWithTests(TestCase):
         )
 
     def test_describe_non_ascii_bytes(self):
-        string = _b("A\xa7")
-        suffix = _b("B\xa7")
+        string = b"A\xa7"
+        suffix = b"B\xa7"
         mismatch = DoesNotStartWith(string, suffix)
         self.assertEqual(
             f"{string!r} does not start with {suffix!r}.", mismatch.describe()
@@ -265,7 +262,7 @@ class StartsWithTests(TestCase):
         self.assertEqual("StartsWith('bar')", str(matcher))
 
     def test_str_with_bytes(self):
-        b = _b("\xa7")
+        b = b"\xa7"
         matcher = StartsWith(b)
         self.assertEqual(f"StartsWith({b!r})", str(matcher))
 
@@ -310,8 +307,8 @@ class DoesNotEndWithTests(TestCase):
         )
 
     def test_describe_non_ascii_bytes(self):
-        string = _b("A\xa7")
-        suffix = _b("B\xa7")
+        string = b"A\xa7"
+        suffix = b"B\xa7"
         mismatch = DoesNotEndWith(string, suffix)
         self.assertEqual(
             f"{string!r} does not end with {suffix!r}.", mismatch.describe()
@@ -326,7 +323,7 @@ class EndsWithTests(TestCase):
         self.assertEqual("EndsWith('bar')", str(matcher))
 
     def test_str_with_bytes(self):
-        b = _b("\xa7")
+        b = b"\xa7"
         matcher = EndsWith(b)
         self.assertEqual(f"EndsWith({b!r})", str(matcher))
 
@@ -416,7 +413,7 @@ class TestMatchesRegex(TestCase, TestMatchersInterface):
         ("MatchesRegex('a|b')", MatchesRegex("a|b")),
         ("MatchesRegex('a|b', re.M)", MatchesRegex("a|b", re.M)),
         ("MatchesRegex('a|b', re.I|re.M)", MatchesRegex("a|b", re.I | re.M)),
-        ("MatchesRegex({!r})".format(_b("\xa7")), MatchesRegex(_b("\xa7"))),
+        ("MatchesRegex({!r})".format(b"\xa7"), MatchesRegex(b"\xa7")),
         ("MatchesRegex({!r})".format("\xa7"), MatchesRegex("\xa7")),
     ]
 
@@ -424,9 +421,9 @@ class TestMatchesRegex(TestCase, TestMatchersInterface):
         ("'c' does not match /a|b/", "c", MatchesRegex("a|b")),
         ("'c' does not match /a\\d/", "c", MatchesRegex(r"a\d")),
         (
-            "{!r} does not match /\\s+\\xa7/".format(_b("c")),
-            _b("c"),
-            MatchesRegex(_b("\\s+\xa7")),
+            "{!r} does not match /\\s+\\xa7/".format(b"c"),
+            b"c",
+            MatchesRegex(b"\\s+\xa7"),
         ),
         ("{!r} does not match /\\s+\\xa7/".format("c"), "c", MatchesRegex("\\s+\xa7")),
     ]
