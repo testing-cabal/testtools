@@ -76,11 +76,6 @@ module = [
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "fixtures.*"
-ignore_missing_imports = true
-follow_imports = "skip"
-
-[[tool.mypy.overrides]]
 module = [
     # FIXME(stephenfin): We would like to remove all modules from this list
     # except tests (we're not sadists)
