@@ -4,9 +4,6 @@ import doctest
 from typing import ClassVar
 
 from testtools import TestCase
-from testtools.compat import (
-    _b,
-)
 from testtools.matchers._doctest import DocTestMatches
 
 from ..helpers import FullStackRunTest
@@ -75,7 +72,7 @@ class TestDocTestMatchesSpecific(TestCase):
         permits arbitrary binary inputs. This is a slightly bogus thing to do,
         and under Python 3 using bytes objects will reasonably raise an error.
         """
-        header = _b("\x89PNG\r\n\x1a\n...")
+        header = b"\x89PNG\r\n\x1a\n..."
         self.assertRaises(TypeError, DocTestMatches, header, doctest.ELLIPSIS)
 
 

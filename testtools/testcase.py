@@ -24,7 +24,6 @@ from typing import Any, Protocol, TypeVar, cast
 from unittest.case import SkipTest
 
 from testtools import content
-from testtools.compat import reraise
 from testtools.matchers import (
     Annotate,
     Contains,
@@ -478,7 +477,7 @@ class TestCase(unittest.TestCase):
         class ReRaiseOtherTypes:
             def match(self, matchee):
                 if not issubclass(matchee[0], expected_exception):
-                    reraise(*matchee)
+                    raise matchee[1].with_traceback(matchee[2])
 
         class CaptureMatchee:
             def match(self, matchee):
@@ -813,7 +812,9 @@ class TestCase(unittest.TestCase):
             else:
                 # Gather_details worked, so raise the exception setUp
                 # encountered.
-                reraise(*exc_info)
+                if exc_info[1] is not None:
+                    raise exc_info[1].with_traceback(exc_info[2])
+                raise
         else:
             self.addCleanup(fixture.cleanUp)
             self.addCleanup(gather_details, fixture.getDetails(), self.getDetails())
@@ -907,24 +908,26 @@ class PlaceHolder:
     def id(self):
         return self._test_id
 
-    def _result(self, result):
+    def _result(
+        self, result: unittest.TestResult | None
+    ) -> TestResult | ExtendedToOriginalDecorator:
         if result is None:
             return TestResult()
         else:
             return ExtendedToOriginalDecorator(result)
 
-    def run(self, result=None):
-        result = self._result(result)
+    def run(self, result: unittest.TestResult | None = None) -> None:
+        result_obj: TestResult | ExtendedToOriginalDecorator = self._result(result)
         if self._timestamps[0] is not None:
-            result.time(self._timestamps[0])
-        result.tags(self._tags, set())
-        result.startTest(self)
+            result_obj.time(self._timestamps[0])
+        result_obj.tags(self._tags, set())
+        result_obj.startTest(self)
         if self._timestamps[1] is not None:
-            result.time(self._timestamps[1])
-        outcome = getattr(result, self._outcome)
+            result_obj.time(self._timestamps[1])
+        outcome = getattr(result_obj, self._outcome)
         outcome(self, details=self._details)
-        result.stopTest(self)
-        result.tags(set(), self._tags)
+        result_obj.stopTest(self)
+        result_obj.tags(set(), self._tags)
 
     def shortDescription(self):
         if self._short_description is None:
@@ -933,7 +936,12 @@ class PlaceHolder:
             return self._short_description
 
 
-def ErrorHolder(test_id, error, short_description=None, details=None):
+def ErrorHolder(
+    test_id: str,
+    error: tuple,
+    short_description: str | None = None,
+    details: dict | None = None,
+) -> PlaceHolder:
     """Construct an `ErrorHolder`.
 
     :param test_id: The id of the test.

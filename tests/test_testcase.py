@@ -22,9 +22,6 @@ from testtools import (
     skipUnless,
     testcase,
 )
-from testtools.compat import (
-    _b,
-)
 from testtools.content import (
     TracebackContent,
     text_content,
@@ -1240,7 +1237,7 @@ class TestWithDetails(TestCase):
         self.assertEqual(expected[-1], result._events[-1])
 
     def get_content(self):
-        return content.Content(content.ContentType("text", "foo"), lambda: [_b("foo")])
+        return content.Content(content.ContentType("text", "foo"), lambda: [b"foo"])
 
 
 class TestExpectedFailure(TestWithDetails):
@@ -1435,12 +1432,12 @@ class TestCloneTestWithNewId(TestCase):
 
         class Test(TestCase):
             def test_foo(self):
-                self.addDetail("foo", content.Content("text/plain", lambda: "foo"))
+                self.addDetail("foo", content.Content("text/plain", lambda: [b"foo"]))
 
         orig_test = Test("test_foo")
         cloned_test = clone_test_with_new_id(orig_test, self.getUniqueString())
         orig_test.run(unittest.TestResult())
-        self.assertEqual("foo", orig_test.getDetails()["foo"].iter_bytes())
+        self.assertEqual(b"foo", b"".join(orig_test.getDetails()["foo"].iter_bytes()))
         self.assertEqual(None, cloned_test.getDetails().get("foo"))
 
 

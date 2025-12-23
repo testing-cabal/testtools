@@ -5,12 +5,9 @@
 import ast
 import io
 import sys
-import traceback
 
 import testtools
 from testtools.compat import (
-    _b,
-    reraise,
     text_repr,
     unicode_output_stream,
 )
@@ -45,28 +42,28 @@ class TestUnicodeOutputStream(testtools.TestCase):
         """A stream with no encoding attribute gets ascii/replace strings"""
         sout = _FakeOutputStream()
         unicode_output_stream(sout).write(self.uni)
-        self.assertEqual([_b("pa???n")], sout.writelog)
+        self.assertEqual([b"pa???n"], sout.writelog)
 
     def test_encoding_as_none_becomes_ascii(self):
         """A stream with encoding value of None gets ascii/replace strings"""
         sout = _FakeOutputStream()
         sout.encoding = None
         unicode_output_stream(sout).write(self.uni)
-        self.assertEqual([_b("pa???n")], sout.writelog)
+        self.assertEqual([b"pa???n"], sout.writelog)
 
     def test_bogus_encoding_becomes_ascii(self):
         """A stream with a bogus encoding gets ascii/replace strings"""
         sout = _FakeOutputStream()
         sout.encoding = "bogus"
         unicode_output_stream(sout).write(self.uni)
-        self.assertEqual([_b("pa???n")], sout.writelog)
+        self.assertEqual([b"pa???n"], sout.writelog)
 
     def test_partial_encoding_replace(self):
         """A string which can be partly encoded correctly should be"""
         sout = _FakeOutputStream()
         sout.encoding = "iso-8859-7"
         unicode_output_stream(sout).write(self.uni)
-        self.assertEqual([_b("pa?\xe8?n")], sout.writelog)
+        self.assertEqual([b"pa?\xe8?n"], sout.writelog)
 
     def test_stringio(self):
         """A StringIO object should maybe get an ascii native str type"""
@@ -126,11 +123,11 @@ class TestTextRepr(testtools.TestCase):
 
     # Bytes with the high bit set should always be escaped
     bytes_examples = (
-        (_b("\x80"), "'\\x80'", "'''\\\n\\x80'''"),
-        (_b("\xa0"), "'\\xa0'", "'''\\\n\\xa0'''"),
-        (_b("\xc0"), "'\\xc0'", "'''\\\n\\xc0'''"),
-        (_b("\xff"), "'\\xff'", "'''\\\n\\xff'''"),
-        (_b("\xc2\xa7"), "'\\xc2\\xa7'", "'''\\\n\\xc2\\xa7'''"),
+        (b"\x80", "'\\x80'", "'''\\\n\\x80'''"),
+        (b"\xa0", "'\\xa0'", "'''\\\n\\xa0'''"),
+        (b"\xc0", "'\\xc0'", "'''\\\n\\xc0'''"),
+        (b"\xff", "'\\xff'", "'''\\\n\\xff'''"),
+        (b"\xc2\xa7", "'\\xc2\\xa7'", "'''\\\n\\xc2\\xa7'''"),
     )
 
     # Unicode doesn't escape printable characters as per the Python 3 model
@@ -153,12 +150,12 @@ class TestTextRepr(testtools.TestCase):
         # Unprintable general categories not fully tested: Cc, Cf, Co, Cn, Zs
     )
 
-    b_prefix = repr(_b(""))[:-2]
+    b_prefix = repr(b"")[:-2]
     u_prefix = repr("")[:-2]
 
     def test_ascii_examples_oneline_bytes(self):
         for s, expected, _ in self.ascii_examples:
-            b = _b(s)
+            b = s.encode("utf-8")
             actual = text_repr(b, multiline=False)
             # Add self.assertIsInstance check?
             self.assertEqual(actual, self.b_prefix + expected)
@@ -173,7 +170,7 @@ class TestTextRepr(testtools.TestCase):
 
     def test_ascii_examples_multiline_bytes(self):
         for s, _, expected in self.ascii_examples:
-            b = _b(s)
+            b = s.encode("utf-8")
             actual = text_repr(b, multiline=True)
             self.assertEqual(actual, self.b_prefix + expected)
             self.assertEqual(ast.literal_eval(actual), b)
@@ -187,7 +184,7 @@ class TestTextRepr(testtools.TestCase):
     def test_ascii_examples_defaultline_bytes(self):
         for s, one, multi in self.ascii_examples:
             expected = ("\n" in s and multi) or one
-            self.assertEqual(text_repr(_b(s)), self.b_prefix + expected)
+            self.assertEqual(text_repr(s.encode("utf-8")), self.b_prefix + expected)
 
     def test_ascii_examples_defaultline_unicode(self):
         for s, one, multi in self.ascii_examples:
@@ -217,43 +214,6 @@ class TestTextRepr(testtools.TestCase):
             actual = text_repr(u, multiline=True)
             self.assertEqual(actual, self.u_prefix + expected)
             self.assertEqual(ast.literal_eval(actual), u)
-
-
-class TestReraise(testtools.TestCase):
-    """Tests for trivial reraise wrapper needed for Python 2/3 changes"""
-
-    def test_exc_info(self):
-        """After reraise exc_info matches plus some extra traceback"""
-        try:
-            raise ValueError("Bad value")
-        except ValueError:
-            _exc_info = sys.exc_info()
-        try:
-            reraise(*_exc_info)
-        except ValueError:
-            _new_exc_info = sys.exc_info()
-        self.assertIs(_exc_info[0], _new_exc_info[0])
-        self.assertIs(_exc_info[1], _new_exc_info[1])
-        expected_tb = traceback.extract_tb(_exc_info[2])
-        self.assertEqual(
-            expected_tb, traceback.extract_tb(_new_exc_info[2])[-len(expected_tb) :]
-        )
-
-    def test_custom_exception_no_args(self):
-        """Reraising does not require args attribute to contain params"""
-
-        class CustomException(Exception):
-            """Exception that expects and sets attrs but not args"""
-
-            def __init__(self, value):
-                Exception.__init__(self)
-                self.value = value
-
-        try:
-            raise CustomException("Some value")
-        except CustomException:
-            _exc_info = sys.exc_info()
-        self.assertRaises(CustomException, reraise, *_exc_info)
 
 
 def test_suite():

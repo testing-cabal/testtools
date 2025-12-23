@@ -14,28 +14,68 @@ import sys
 import threading
 import unittest
 from collections import Counter
+from collections.abc import Callable, Container, Generator, Iterable
 from pprint import pformat
 from queue import Queue
-from typing import Any
+from typing import Any, Protocol, TypeAlias, TypeVar, runtime_checkable
 
 import testtools
 
+_T = TypeVar("_T")
 
-def iterate_tests(test_suite_or_case):
+# Type alias for objects that can be test suites or test cases
+TestSuiteOrCase: TypeAlias = unittest.TestSuite | unittest.TestCase
+
+
+class _Fixture(Protocol):
+    """Protocol for fixture objects."""
+
+    def setUp(self) -> None: ...
+    def cleanUp(self) -> None: ...
+
+
+class _Stoppable(Protocol):
+    """Protocol for result objects that can be stopped."""
+
+    def stop(self) -> None: ...
+
+
+class _StreamResultLike(_Stoppable, Protocol):
+    """Protocol for stream result objects with test run lifecycle."""
+
+    def startTestRun(self) -> None: ...
+    def stopTestRun(self) -> None: ...
+
+
+@runtime_checkable
+class _Sortable(Protocol):
+    """Protocol for test suites that can be sorted."""
+
+    def sort_tests(self) -> None: ...
+
+
+def iterate_tests(
+    test_suite_or_case: TestSuiteOrCase,
+) -> Generator[unittest.TestCase, None, None]:
     """Iterate through all of the test cases in 'test_suite_or_case'."""
-    try:
-        suite = iter(test_suite_or_case)
-    except TypeError:
-        yield test_suite_or_case
-    else:
-        for test in suite:
+    if isinstance(test_suite_or_case, unittest.TestSuite):
+        # It's a suite, iterate through it
+        for test in test_suite_or_case:
             yield from iterate_tests(test)
+    else:
+        # It's a test case (could be unittest.TestCase or duck-typed)
+        yield test_suite_or_case
 
 
 class ConcurrentTestSuite(unittest.TestSuite):
     """A TestSuite whose run() calls out to a concurrency strategy."""
 
-    def __init__(self, suite, make_tests, wrap_result=None):
+    def __init__(
+        self,
+        suite: unittest.TestSuite,
+        make_tests: Callable[[unittest.TestSuite], Iterable[unittest.TestCase]],
+        wrap_result: Callable[[Any, int], unittest.TestResult] | None = None,
+    ) -> None:
         """Create a ConcurrentTestSuite to execute suite.
 
         :param suite: A suite to run concurrently.
@@ -54,7 +94,9 @@ class ConcurrentTestSuite(unittest.TestSuite):
         self.make_tests = make_tests
         self._custom_wrap_result = wrap_result
 
-    def _wrap_result(self, thread_safe_result, thread_number):
+    def _wrap_result(
+        self, thread_safe_result: unittest.TestResult, thread_number: int
+    ) -> unittest.TestResult:
         """Wrap a thread-safe result before sending it test results.
 
         You can either override this in a subclass or pass your own
@@ -64,7 +106,9 @@ class ConcurrentTestSuite(unittest.TestSuite):
             return self._custom_wrap_result(thread_safe_result, thread_number)
         return thread_safe_result
 
-    def run(self, result, debug=False):
+    def run(
+        self, result: unittest.TestResult, debug: bool = False
+    ) -> unittest.TestResult:
         """Run the tests concurrently.
 
         This calls out to the provided make_tests helper, and then serialises
@@ -84,7 +128,8 @@ class ConcurrentTestSuite(unittest.TestSuite):
             semaphore = threading.Semaphore(1)
             for i, test in enumerate(tests):
                 process_result = self._wrap_result(
-                    testtools.ThreadsafeForwardingResult(result, semaphore), i
+                    testtools.ThreadsafeForwardingResult(result, semaphore),
+                    i,  # type: ignore[no-untyped-call]
                 )
                 reader_thread = threading.Thread(
                     target=self._run_test, args=(test, process_result, queue)
@@ -99,8 +144,14 @@ class ConcurrentTestSuite(unittest.TestSuite):
             for thread, process_result in threads.values():
                 process_result.stop()
             raise
+        return result
 
-    def _run_test(self, test, process_result, queue):
+    def _run_test(
+        self,
+        test: unittest.TestCase,
+        process_result: unittest.TestResult,
+        queue: Queue[unittest.TestCase],
+    ) -> None:
         try:
             try:
                 test.run(process_result)
@@ -115,7 +166,9 @@ class ConcurrentTestSuite(unittest.TestSuite):
 class ConcurrentStreamTestSuite:
     """A TestSuite whose run() parallelises."""
 
-    def __init__(self, make_tests):
+    def __init__(
+        self, make_tests: Callable[[], Iterable[tuple[TestSuiteOrCase, str | None]]]
+    ) -> None:
         """Create a ConcurrentTestSuite to execute tests returned by make_tests.
 
         :param make_tests: A helper function that should return some number
@@ -128,7 +181,7 @@ class ConcurrentStreamTestSuite:
         super().__init__()
         self.make_tests = make_tests
 
-    def run(self, result, debug=False):
+    def run(self, result: testtools.StreamResult, debug: bool = False) -> None:
         """Run the tests concurrently.
 
         This calls out to the provided make_tests helper to determine the
@@ -182,7 +235,12 @@ class ConcurrentStreamTestSuite:
                 process_result.stop()
             raise
 
-    def _run_test(self, test, process_result, route_code):
+    def _run_test(
+        self,
+        test: TestSuiteOrCase,
+        process_result: unittest.TestResult,
+        route_code: str | None,
+    ) -> None:
         process_result.startTestRun()
         try:
             try:
@@ -198,48 +256,55 @@ class ConcurrentStreamTestSuite:
 
 
 class FixtureSuite(unittest.TestSuite):
-    def __init__(self, fixture, tests):
+    def __init__(self, fixture: _Fixture, tests: Iterable[unittest.TestCase]) -> None:
         super().__init__(tests)
         self._fixture = fixture
 
-    def run(self, result, debug=False):
+    def run(
+        self, result: unittest.TestResult, debug: bool = False
+    ) -> unittest.TestResult:
         self._fixture.setUp()
         try:
-            super().run(result, debug)
+            return super().run(result, debug)
         finally:
             self._fixture.cleanUp()
 
-    def sort_tests(self):
-        self._tests = sorted_tests(self, True)
+    def sort_tests(self) -> None:
+        sorted_suite = sorted_tests(self, True)
+        self._tests[:] = sorted_suite._tests
 
 
-def _flatten_tests(suite_or_case, unpack_outer=False):
-    try:
-        tests = iter(suite_or_case)
-    except TypeError:
-        # Not iterable, assume it's a test case.
+def _flatten_tests(
+    suite_or_case: TestSuiteOrCase, unpack_outer: bool = False
+) -> list[tuple[str | None, TestSuiteOrCase]]:
+    if isinstance(suite_or_case, unittest.TestCase):
+        # Not iterable, it's a test case.
         return [(suite_or_case.id(), suite_or_case)]
+
+    # It's a suite, try to iterate
     if type(suite_or_case) in (unittest.TestSuite,) or unpack_outer:
         # Plain old test suite (or any others we may add).
-        result = []
-        for test in tests:
-            # Recurse to flatten.
+        result: list[tuple[str | None, TestSuiteOrCase]] = []
+        for test in suite_or_case:
+            # Recurse to flatten - test is TestSuiteOrCase from the suite
             result.extend(_flatten_tests(test))
         return result
     else:
         # Find any old actual test and grab its id.
-        suite_id = None
-        tests = iterate_tests(suite_or_case)
-        for test in tests:
+        suite_id: str | None = None
+        tests_iter = iterate_tests(suite_or_case)
+        for test in tests_iter:
             suite_id = test.id()
             break
         # If it has a sort_tests method, call that.
-        if hasattr(suite_or_case, "sort_tests"):
+        if isinstance(suite_or_case, _Sortable):
             suite_or_case.sort_tests()
         return [(suite_id, suite_or_case)]
 
 
-def filter_by_ids(suite_or_case, test_ids):
+def filter_by_ids(
+    suite_or_case: _T, test_ids: Container[str]
+) -> _T | unittest.TestSuite:
     """Remove tests from suite_or_case where their id is not in test_ids.
 
     :param suite_or_case: A test suite or test case.
@@ -282,7 +347,7 @@ def filter_by_ids(suite_or_case, test_ids):
     """
     # Compatible objects
     if hasattr(suite_or_case, "filter_by_ids"):
-        return suite_or_case.filter_by_ids(test_ids)
+        return suite_or_case.filter_by_ids(test_ids)  # type: ignore[no-any-return]
     # TestCase objects.
     if hasattr(suite_or_case, "id"):
         if suite_or_case.id() in test_ids:
@@ -291,15 +356,17 @@ def filter_by_ids(suite_or_case, test_ids):
             return unittest.TestSuite()
     # Standard TestSuites or derived classes [assumed to be mutable].
     if isinstance(suite_or_case, unittest.TestSuite):
-        filtered = []
+        filtered: list[TestSuiteOrCase] = []
         for item in suite_or_case:
             filtered.append(filter_by_ids(item, test_ids))
-        suite_or_case._tests[:] = filtered
+        suite_or_case._tests[:] = filtered  # type: ignore[assignment]
     # Everything else:
     return suite_or_case
 
 
-def sorted_tests(suite_or_case, unpack_outer=False):
+def sorted_tests(
+    suite_or_case: TestSuiteOrCase, unpack_outer: bool = False
+) -> unittest.TestSuite:
     """Sort suite_or_case while preserving non-vanilla TestSuites."""
     # Duplicate test id can induce TypeError in Python 3.3.
     # Detect the duplicate test ids, raise exception when found.

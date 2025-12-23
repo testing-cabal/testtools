@@ -44,10 +44,6 @@ from testtools import (
     TimestampingStreamResult,
     testresult,
 )
-from testtools.compat import (
-    _b,
-    _get_exception_encoding,
-)
 from testtools.content import (
     Content,
     TracebackContent,
@@ -605,8 +601,8 @@ class TestStreamResultContract:
         )
         param_dicts = self._power_set(inputs)
         for kwargs in param_dicts:
-            result.status(file_name="foo", file_bytes=_b(""), **kwargs)
-            result.status(file_name="foo", file_bytes=_b("bar"), **kwargs)
+            result.status(file_name="foo", file_bytes=b"", **kwargs)
+            result.status(file_name="foo", file_bytes=b"bar", **kwargs)
 
     def test_test_status(self):
         # Tests non-file attachment parameter combinations.
@@ -1129,14 +1125,14 @@ class TestStreamToDict(TestCase):
         result.startTestRun()
         result.status(
             file_name="some log.txt",
-            file_bytes=_b("1234 log message"),
+            file_bytes=b"1234 log message",
             eof=True,
             mime_type="text/plain; charset=utf8",
             test_id="foo.bar",
         )
         result.status(
             file_name="another file",
-            file_bytes=_b("""Traceback..."""),
+            file_bytes=b"""Traceback...""",
             test_id="foo.bar",
         )
         result.stopTestRun()
@@ -1147,7 +1143,7 @@ class TestStreamToDict(TestCase):
         details = test["details"]
         self.assertEqual("1234 log message", details["some log.txt"].as_text())
         self.assertEqual(
-            _b("Traceback..."), _b("").join(details["another file"].iter_bytes())
+            b"Traceback...", b"".join(details["another file"].iter_bytes())
         )
         self.assertEqual(
             "application/octet-stream", repr(details["another file"].content_type)
@@ -1290,7 +1286,7 @@ class TestExtendedToStreamDecorator(TestCase):
                     None,
                     True,
                     "foo",
-                    _b(""),
+                    b"",
                     True,
                     'text/plain; charset="utf8"',
                     None,
@@ -1507,7 +1503,7 @@ class TestStreamSummary(TestCase):
         result.startTestRun()
         result.status(
             file_name="reason",
-            file_bytes=_b("Missing dependency"),
+            file_bytes=b"Missing dependency",
             eof=True,
             mime_type="text/plain; charset=utf8",
             test_id="foo.bar",
@@ -1520,23 +1516,21 @@ class TestStreamSummary(TestCase):
     def _report_files(self, result):
         result.status(
             file_name="some log.txt",
-            file_bytes=_b("1234 log message"),
+            file_bytes=b"1234 log message",
             eof=True,
             mime_type="text/plain; charset=utf8",
             test_id="foo.bar",
         )
         result.status(
             file_name="traceback",
-            file_bytes=_b(
-                """Traceback (most recent call last):
+            file_bytes=b"""Traceback (most recent call last):
   File "tests/test_testresult.py", line 607, in test_stopTestRun
       AllMatch(Equals([('startTestRun',), ('stopTestRun',)])))
 testtools.matchers._impl.MismatchError: Differences: [
 [('startTestRun',), ('stopTestRun',)] != []
 [('startTestRun',), ('stopTestRun',)] != []
 ]
-"""
-            ),
+""",
             eof=True,
             mime_type="text/plain; charset=utf8",
             test_id="foo.bar",
@@ -2675,7 +2669,7 @@ class TestStreamToQueue(TestCase):
             self.assertEqual({"quux"}, event_dict["test_tags"])
             self.assertEqual(False, event_dict["runnable"])
             self.assertEqual("file", event_dict["file_name"])
-            self.assertEqual(_b("content"), event_dict["file_bytes"])
+            self.assertEqual(b"content", event_dict["file_bytes"])
             self.assertEqual(True, event_dict["eof"])
             self.assertEqual("quux", event_dict["mime_type"])
             self.assertEqual("test", event_dict["test_id"])
@@ -2689,7 +2683,7 @@ class TestStreamToQueue(TestCase):
             test_tags={"quux"},
             runnable=False,
             file_name="file",
-            file_bytes=_b("content"),
+            file_bytes=b"content",
             eof=True,
             mime_type="quux",
             route_code=None,
@@ -2703,7 +2697,7 @@ class TestStreamToQueue(TestCase):
             test_tags={"quux"},
             runnable=False,
             file_name="file",
-            file_bytes=_b("content"),
+            file_bytes=b"content",
             eof=True,
             mime_type="quux",
             route_code="bar",
@@ -2750,13 +2744,13 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
         """Get a details dict and expected string."""
 
         def text1():
-            return [_b("1\n2\n")]
+            return [b"1\n2\n"]
 
         def text2():
-            return [_b("3\n4\n")]
+            return [b"3\n4\n"]
 
         def bin1():
-            return [_b("5\n")]
+            return [b"5\n"]
 
         details = {
             "text 1": Content(ContentType("text", "plain"), text1),
@@ -2999,7 +2993,7 @@ class TestExtendedToOriginalAddSkip(TestExtendedToOriginalResultDecoratorBase):
     def test_outcome_Extended_py3_reason(self):
         self.make_result()
         self.check_outcome_details_to_arg(
-            self.outcome, "foo", {"reason": Content(UTF8_TEXT, lambda: [_b("foo")])}
+            self.outcome, "foo", {"reason": Content(UTF8_TEXT, lambda: [b"foo"])}
         )
 
     def test_outcome_Extended_pyextended(self):
@@ -3167,13 +3161,13 @@ class TestNonAsciiResults(TestCase):
 
     def test_non_ascii_failure_string(self):
         """Assertion contents can be non-ascii and should get decoded"""
-        text, raw = self._get_sample_text(_get_exception_encoding())
+        text, raw = self._get_sample_text("utf-8")
         textoutput = self._test_external_case(f"self.fail({raw!a})")
         self.assertIn(self._as_output(text), textoutput)
 
     def test_non_ascii_failure_string_via_exec(self):
         """Assertion via exec can be non-ascii and still gets decoded"""
-        text, raw = self._get_sample_text(_get_exception_encoding())
+        text, raw = self._get_sample_text("utf-8")
         textoutput = self._test_external_case(testline=f'exec ("self.fail({raw!a})")')
         self.assertIn(self._as_output(text), textoutput)
 

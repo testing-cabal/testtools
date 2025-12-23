@@ -7,7 +7,6 @@ from testtools import (
     content,
     content_type,
 )
-from testtools.compat import _b
 from testtools.matchers import (
     Contains,
     Equals,
@@ -70,7 +69,7 @@ class TestFixtureSupport(TestCase):
             def setUp(self):
                 fixtures.Fixture.setUp(self)
                 self.addCleanup(delattr, self, "content")
-                self.content = [_b("content available until cleanUp")]
+                self.content = [b"content available until cleanUp"]
                 self.addDetail(
                     "content", content.Content(content_type.UTF8_TEXT, self.get_content)
                 )
@@ -86,7 +85,7 @@ class TestFixtureSupport(TestCase):
                 # Add a colliding detail (both should show up)
                 self.addDetail(
                     "content",
-                    content.Content(content_type.UTF8_TEXT, lambda: [_b("foo")]),
+                    content.Content(content_type.UTF8_TEXT, lambda: [b"foo"]),
                 )
 
         result = ExtendedTestResult()

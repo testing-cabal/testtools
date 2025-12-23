@@ -7,9 +7,6 @@ import unittest
 from typing import Any
 
 from testtools import TestCase
-from testtools.compat import (
-    _b,
-)
 from testtools.content import (
     JSON,
     Content,
@@ -58,15 +55,15 @@ class TestContent(TestCase):
         content_type = ContentType("foo", "bar")
 
         def one_chunk():
-            return [_b("bytes")]
+            return [b"bytes"]
 
         def two_chunk():
-            return [_b("by"), _b("tes")]
+            return [b"by", b"tes"]
 
         content1 = Content(content_type, one_chunk)
         content2 = Content(content_type, one_chunk)
         content3 = Content(content_type, two_chunk)
-        content4 = Content(content_type, lambda: [_b("by"), _b("te")])
+        content4 = Content(content_type, lambda: [b"by", b"te"])
         content5 = Content(ContentType("f", "b"), two_chunk)
         self.assertEqual(content1, content2)
         self.assertEqual(content1, content3)
@@ -76,7 +73,7 @@ class TestContent(TestCase):
     def test___repr__(self):
         content = Content(
             ContentType("application", "octet-stream"),
-            lambda: [_b("\x00bin"), _b("ary\xff")],
+            lambda: [b"\x00bin", b"ary\xff"],
         )
         self.assertIn("\\x00binary\\xff", repr(content))
 
@@ -105,12 +102,12 @@ class TestContent(TestCase):
     def test_from_file(self):
         fd, path = tempfile.mkstemp()
         self.addCleanup(os.remove, path)
-        os.write(fd, _b("some data"))
+        os.write(fd, b"some data")
         os.close(fd)
         content = content_from_file(path, UTF8_TEXT, chunk_size=2)
         self.assertThat(
             list(content.iter_bytes()),
-            Equals([_b("so"), _b("me"), _b(" d"), _b("at"), _b("a")]),
+            Equals([b"so", b"me", b" d", b"at", b"a"]),
         )
 
     def test_from_nonexistent_file(self):
@@ -125,7 +122,7 @@ class TestContent(TestCase):
 
     def test_from_file_eager_loading(self):
         fd, path = tempfile.mkstemp()
-        os.write(fd, _b("some data"))
+        os.write(fd, b"some data")
         os.close(fd)
         content = content_from_file(path, UTF8_TEXT, buffer_now=True)
         os.remove(path)
@@ -133,21 +130,21 @@ class TestContent(TestCase):
 
     def test_from_file_with_simple_seek(self):
         f = tempfile.NamedTemporaryFile()
-        f.write(_b("some data"))
+        f.write(b"some data")
         f.flush()
         self.addCleanup(f.close)
         content = content_from_file(f.name, UTF8_TEXT, chunk_size=50, seek_offset=5)
-        self.assertThat(list(content.iter_bytes()), Equals([_b("data")]))
+        self.assertThat(list(content.iter_bytes()), Equals([b"data"]))
 
     def test_from_file_with_whence_seek(self):
         f = tempfile.NamedTemporaryFile()
-        f.write(_b("some data"))
+        f.write(b"some data")
         f.flush()
         self.addCleanup(f.close)
         content = content_from_file(
             f.name, UTF8_TEXT, chunk_size=50, seek_offset=-4, seek_whence=2
         )
-        self.assertThat(list(content.iter_bytes()), Equals([_b("data")]))
+        self.assertThat(list(content.iter_bytes()), Equals([b"data"]))
 
     def test_from_stream(self):
         data = io.StringIO("some data")
@@ -165,24 +162,24 @@ class TestContent(TestCase):
         fd, path = tempfile.mkstemp()
         self.addCleanup(os.remove, path)
         self.addCleanup(os.close, fd)
-        os.write(fd, _b("some data"))
+        os.write(fd, b"some data")
         stream = open(path, "rb")
         self.addCleanup(stream.close)
         content = content_from_stream(stream, UTF8_TEXT, buffer_now=True)
-        os.write(fd, _b("more data"))
+        os.write(fd, b"more data")
         self.assertThat("".join(content.iter_text()), Equals("some data"))
 
     def test_from_stream_with_simple_seek(self):
-        data = io.BytesIO(_b("some data"))
+        data = io.BytesIO(b"some data")
         content = content_from_stream(data, UTF8_TEXT, chunk_size=50, seek_offset=5)
-        self.assertThat(list(content.iter_bytes()), Equals([_b("data")]))
+        self.assertThat(list(content.iter_bytes()), Equals([b"data"]))
 
     def test_from_stream_with_whence_seek(self):
-        data = io.BytesIO(_b("some data"))
+        data = io.BytesIO(b"some data")
         content = content_from_stream(
             data, UTF8_TEXT, chunk_size=50, seek_offset=-4, seek_whence=2
         )
-        self.assertThat(list(content.iter_bytes()), Equals([_b("data")]))
+        self.assertThat(list(content.iter_bytes()), Equals([b"data"]))
 
     def test_from_text(self):
         data = "some data"
@@ -190,7 +187,7 @@ class TestContent(TestCase):
         self.assertEqual(expected, text_content(data))
 
     def test_text_content_raises_TypeError_when_passed_bytes(self):
-        data = _b("Some Bytes")
+        data = b"Some Bytes"
         self.assertRaises(TypeError, text_content, data)
 
     def test_text_content_raises_TypeError_when_passed_non_text(self):
@@ -208,7 +205,7 @@ class TestContent(TestCase):
 
     def test_json_content(self):
         data = {"foo": "bar"}
-        expected = Content(JSON, lambda: [_b('{"foo": "bar"}')])
+        expected = Content(JSON, lambda: [b'{"foo": "bar"}'])
         self.assertEqual(expected, json_content(data))
 
 
@@ -302,7 +299,7 @@ class TestAttachFile(TestCase):
         #                always close the fd. There must be a better way.
         fd, path = tempfile.mkstemp()
         self.addCleanup(os.remove, path)
-        os.write(fd, _b(data))
+        os.write(fd, data.encode("utf-8"))
         os.close(fd)
         return path
 

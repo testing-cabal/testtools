@@ -1,47 +1,19 @@
 # Copyright (c) 2008-2015 testtools developers. See LICENSE for details.
 
-"""Compatibility support for python 2 and 3."""
+"""Compatibility support - kept for backwards compatibility."""
 
 __all__ = [
     "BytesIO",
     "StringIO",
-    "_b",
-    "advance_iterator",
-    "reraise",
+    "text_repr",
     "unicode_output_stream",
 ]
 
 import codecs
 import io
-import locale
-import os
 import sys
-import types
 import unicodedata
 from io import BytesIO, StringIO  # for backwards-compat
-from typing import Any, NoReturn
-
-
-def reraise(
-    exc_class: type[BaseException],
-    exc_obj: BaseException,
-    exc_tb: types.TracebackType,
-    _marker: Any = object(),
-) -> NoReturn:
-    """Re-raise an exception received from sys.exc_info() or similar."""
-    raise exc_obj.with_traceback(exc_tb)
-
-
-def _u(s):
-    return s
-
-
-def _b(s):
-    """A byte literal."""
-    return s.encode("latin-1")
-
-
-advance_iterator = next
 
 
 def _slow_escape(text):
@@ -149,15 +121,3 @@ def unicode_output_stream(stream):
     except AttributeError:
         pass
     return writer(stream, "replace")
-
-
-def _get_exception_encoding():
-    """Return the encoding we expect messages from the OS to be encoded in"""
-    if os.name == "nt":
-        # GZ 2010-05-24: Really want the codepage number instead, the error
-        #                handling of standard codecs is more deterministic
-        return "mbcs"
-    # GZ 2010-05-23: We need this call to be after initialisation, but there's
-    #                no benefit in asking more than once as it's a global
-    #                setting that can change after the message is formatted.
-    return locale.getlocale(locale.LC_MESSAGES)[1] or "ascii"
