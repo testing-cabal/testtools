@@ -27,10 +27,23 @@ import email.message
 import math
 import sys
 import threading
+import types
 import unittest
+from collections.abc import Callable, Iterable, Sequence
 from operator import methodcaller
 from queue import Queue
-from typing import ClassVar, TypeAlias
+from typing import (
+    TYPE_CHECKING,
+    ClassVar,
+    Protocol,
+    TextIO,
+    TypeAlias,
+    TypedDict,
+    TypeVar,
+)
+
+if TYPE_CHECKING:
+    from testtools.testcase import PlaceHolder
 
 from testtools.content import (
     Content,
@@ -40,12 +53,68 @@ from testtools.content import (
 from testtools.content_type import ContentType
 from testtools.tags import TagContext
 
-# Type for event dicts that go into the queue
-EventDict: TypeAlias = "dict[str, str | bytes | bool | None | StreamResult]"
 
-# circular import
-# from testtools.testcase import PlaceHolder
-PlaceHolder = None
+class _OnTestCallback(Protocol):
+    """Protocol for the on_test callback in TestByTestResult."""
+
+    def __call__(
+        self,
+        *,
+        test: unittest.TestCase,
+        status: str | None,
+        start_time: datetime.datetime,
+        stop_time: datetime.datetime | None,
+        tags: set[str],
+        details: "DetailsDict | None",
+    ) -> None: ...
+
+
+# Type for event dicts that go into the queue
+class _StartStopEventDict(TypedDict):
+    event: str  # "startTestRun" or "stopTestRun"
+    result: "StreamResult"
+
+
+class _StatusEventDict(TypedDict, total=False):
+    event: str  # "status"
+    test_id: str | None
+    test_status: str | None
+    test_tags: set[str] | None
+    runnable: bool
+    file_name: str | None
+    file_bytes: bytes | None
+    eof: bool
+    mime_type: str | None
+    route_code: str | None
+    timestamp: datetime.datetime | None
+
+
+EventDict: TypeAlias = _StartStopEventDict | _StatusEventDict
+
+# Type for exc_info tuples from sys.exc_info()
+ExcInfo: TypeAlias = tuple[
+    type[BaseException], BaseException, types.TracebackType | None
+]
+
+# Type for details dict (mapping from names to Content objects)
+DetailsDict: TypeAlias = dict[str, Content]
+
+
+# Type for test dict with test information
+class TestDict(TypedDict):
+    id: str
+    tags: set[str]
+    details: DetailsDict
+    status: str
+    timestamps: list[datetime.datetime | None]
+
+
+# Protocol for test resources with an id() method
+class TestResourceProtocol(Protocol):
+    def id(self) -> str: ...
+
+
+# PlaceHolder is imported at runtime in to_test_case() to avoid circular import
 
 # From http://docs.python.org/library/datetime.html
 _ZERO = datetime.timedelta(0)
@@ -54,13 +123,13 @@ _ZERO = datetime.timedelta(0)
 class UTC(datetime.tzinfo):
     """UTC"""
 
-    def utcoffset(self, dt):
+    def utcoffset(self, dt: datetime.datetime | None) -> datetime.timedelta:
         return _ZERO
 
-    def tzname(self, dt):
+    def tzname(self, dt: datetime.datetime | None) -> str:
         return "UTC"
 
-    def dst(self, dt):
+    def dst(self, dt: datetime.datetime | None) -> datetime.timedelta:
         return _ZERO
 
 
@@ -84,7 +153,7 @@ class TestResult(unittest.TestResult):
     :ivar skip_reasons: A dict of skip-reasons -> list of tests. See addSkip.
     """
 
-    def __init__(self, failfast=False, tb_locals=False):
+    def __init__(self, failfast: bool = False, tb_locals: bool = False) -> None:
         # startTestRun resets all attributes, and older clients don't know to
         # call startTestRun, so it is called once here.
         # Because subclasses may reasonably not expect this, we call the
@@ -93,7 +162,12 @@ class TestResult(unittest.TestResult):
         self.tb_locals = tb_locals
         TestResult.startTestRun(self)
 
-    def addExpectedFailure(self, test, err=None, details=None):
+    def addExpectedFailure(
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | tuple[None, None, None] = (None, None, None),
+        details: DetailsDict | None = None,
+    ) -> None:
         """Called when a test has failed in an expected manner.
 
         Like with addSuccess and addError, testStopped should still be called.
@@ -107,29 +181,50 @@ class TestResult(unittest.TestResult):
             (test, self._err_details_to_string(test, err, details))
         )
 
-    def addError(self, test, err=None, details=None):
+    def addError(  # type: ignore[override]
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
         """Called when an error has occurred. 'err' is a tuple of values as
         returned by sys.exc_info().
 
         :param details: Alternative way to supply details about the outcome.
             see the class docstring for more information.
+
+        Note: This extends unittest.TestResult by making err optional and
+            adding details parameter.
         """
-        self.errors.append((test, self._err_details_to_string(test, err, details)))
+        self.errors.append((test, self._err_details_to_string(test, err, details)))  # type: ignore[arg-type]
         if self.failfast:
             self.stop()
 
-    def addFailure(self, test, err=None, details=None):
+    def addFailure(  # type: ignore[override]
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
         """Called when an error has occurred. 'err' is a tuple of values as
         returned by sys.exc_info().
 
         :param details: Alternative way to supply details about the outcome.
             see the class docstring for more information.
+
+        Note: This extends unittest.TestResult by making err optional and
+            adding details parameter.
         """
-        self.failures.append((test, self._err_details_to_string(test, err, details)))
+        self.failures.append((test, self._err_details_to_string(test, err, details)))  # type: ignore[arg-type]
         if self.failfast:
             self.stop()
 
-    def addSkip(self, test, reason=None, details=None):
+    def addSkip(
+        self,
+        test: unittest.TestCase,
+        reason: str | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
         """Called when a test has been skipped rather than running.
 
         Like with addSuccess and addError, testStopped should still be called.
@@ -146,24 +241,29 @@ class TestResult(unittest.TestResult):
         :return: None
         """
         if reason is None:
-            reason = details.get("reason")
-            if reason is None:
+            assert details is not None
+            reason_content = details.get("reason")
+            if reason_content is None:
                 reason = "No reason given"
             else:
-                reason = reason.as_text()
+                reason = reason_content.as_text()
         skip_list = self.skip_reasons.setdefault(reason, [])
         skip_list.append(test)
 
-    def addSuccess(self, test, details=None):
+    def addSuccess(
+        self, test: unittest.TestCase, details: DetailsDict | None = None
+    ) -> None:
         """Called when a test succeeded."""
 
-    def addUnexpectedSuccess(self, test, details=None):
+    def addUnexpectedSuccess(
+        self, test: unittest.TestCase, details: DetailsDict | None = None
+    ) -> None:
         """Called when a test was expected to fail, but succeed."""
         self.unexpectedSuccesses.append(test)
         if self.failfast:
             self.stop()
 
-    def addDuration(self, test, duration):
+    def addDuration(self, test: unittest.TestCase, duration: float) -> None:
         """Called to add a test duration.
 
         :param test: The test that completed.
@@ -171,7 +271,7 @@ class TestResult(unittest.TestResult):
         """
         self.collectedDurations.append((test, duration))
 
-    def wasSuccessful(self):
+    def wasSuccessful(self) -> bool:
         """Has this result been successful so far?
 
         If there have been any errors, failures or unexpected successes,
@@ -183,18 +283,24 @@ class TestResult(unittest.TestResult):
         """
         return not (self.errors or self.failures or self.unexpectedSuccesses)
 
-    def _err_details_to_string(self, test, err=None, details=None):
+    def _err_details_to_string(
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | tuple[None, None, None] = (None, None, None),
+        details: DetailsDict | None = None,
+    ) -> str:
         """Convert an error in exc_info form or a contents dict to a string."""
-        if err is not None:
+        if err != (None, None, None) and err is not None:
             return TracebackContent(err, test, capture_locals=self.tb_locals).as_text()
+        assert details is not None
         return _details_to_str(details, special="traceback")
 
-    def _exc_info_to_unicode(self, err, test):
+    def _exc_info_to_unicode(self, err: ExcInfo, test: unittest.TestCase) -> str:
         # Deprecated.  Only present because subunit upcalls to it.  See
         # <https://bugs.launchpad.net/testtools/+bug/929063>.
         return TracebackContent(err, test).as_text()
 
-    def _now(self):
+    def _now(self) -> datetime.datetime:
         """Return the current 'test time'.
 
         If the time() method has not been called, this is equivalent to
@@ -206,7 +312,7 @@ class TestResult(unittest.TestResult):
         else:
             return self.__now
 
-    def startTestRun(self):
+    def startTestRun(self) -> None:
         """Called before a test run starts.
 
         New in Python 2.7. The testtools version resets the result to a
@@ -217,40 +323,40 @@ class TestResult(unittest.TestResult):
         failfast = self.failfast
         tb_locals = self.tb_locals
         super().__init__()
-        self.skip_reasons = {}
-        self.__now = None
+        self.skip_reasons: dict[str, list[unittest.TestCase]] = {}
+        self.__now: datetime.datetime | None = None
         self._tags = TagContext()
         # -- Start: As per python 2.7 --
-        self.expectedFailures = []
-        self.unexpectedSuccesses = []
+        self.expectedFailures: list[tuple[unittest.TestCase, str]] = []
+        self.unexpectedSuccesses: list[unittest.TestCase] = []
         self.failfast = failfast
         # -- End:   As per python 2.7 --
         self.tb_locals = tb_locals
         # -- Python 3.12
-        self.collectedDurations = []
+        self.collectedDurations: list[tuple[unittest.TestCase, float]] = []
 
-    def stopTestRun(self):
+    def stopTestRun(self) -> None:
         """Called after a test run completes
 
         New in python 2.7
         """
 
-    def startTest(self, test):
+    def startTest(self, test: unittest.TestCase) -> None:
         super().startTest(test)
         self._tags = TagContext(self._tags)
 
-    def stopTest(self, test):
+    def stopTest(self, test: unittest.TestCase) -> None:
         # NOTE: In Python 3.12.1 skipped tests may not call startTest()
         if self._tags is not None and self._tags.parent is not None:
             self._tags = self._tags.parent
         super().stopTest(test)
 
     @property
-    def current_tags(self):
+    def current_tags(self) -> set[str]:
         """The currently set tags."""
         return self._tags.get_current_tags()
 
-    def tags(self, new_tags, gone_tags):
+    def tags(self, new_tags: Iterable[str], gone_tags: Iterable[str]) -> None:
         """Add and remove tags from the test.
 
         :param new_tags: A set of tags to be added to the stream.
@@ -258,7 +364,7 @@ class TestResult(unittest.TestResult):
         """
         self._tags.change_tags(new_tags, gone_tags)
 
-    def time(self, a_datetime):
+    def time(self, a_datetime: datetime.datetime | None) -> None:
         """Provide a timestamp to represent the current time.
 
         This is useful when test activity is time delayed, or happening
@@ -273,7 +379,7 @@ class TestResult(unittest.TestResult):
         """
         self.__now = a_datetime
 
-    def done(self):
+    def done(self) -> None:
         """Called when the test runner is done.
 
         deprecated in favour of stopTestRun.
@@ -362,14 +468,14 @@ class StreamResult:
     as a base class regardless of intent.
     """
 
-    def startTestRun(self):
+    def startTestRun(self) -> None:
         """Start a test run.
 
         This will prepare the test result to process results (which might imply
         connecting to a database or remote machine).
         """
 
-    def stopTestRun(self):
+    def stopTestRun(self) -> None:
         """Stop a test run.
 
         This informs the result that no more test updates will be received. At
@@ -449,7 +555,10 @@ class StreamResult:
         """
 
 
-def _strict_map(function, *sequences):
+_T = TypeVar("_T")
+
+
+def _strict_map(function: Callable[..., _T], *sequences: Sequence[object]) -> list[_T]:
     return list(map(function, *sequences))
 
 
@@ -461,21 +570,59 @@ class CopyStreamResult(StreamResult):
     For TestResult the equivalent class was ``MultiTestResult``.
     """
 
-    def __init__(self, targets):
+    def __init__(self, targets: list[StreamResult]) -> None:
         super().__init__()
         self.targets = targets
 
-    def startTestRun(self):
+    def startTestRun(self) -> None:
         super().startTestRun()
         _strict_map(methodcaller("startTestRun"), self.targets)
 
-    def stopTestRun(self):
+    def stopTestRun(self) -> None:
         super().stopTestRun()
         _strict_map(methodcaller("stopTestRun"), self.targets)
 
-    def status(self, *args, **kwargs):
-        super().status(*args, **kwargs)
-        _strict_map(methodcaller("status", *args, **kwargs), self.targets)
+    def status(
+        self,
+        test_id: str | None = None,
+        test_status: str | None = None,
+        test_tags: set[str] | None = None,
+        runnable: bool = True,
+        file_name: str | None = None,
+        file_bytes: bytes | None = None,
+        eof: bool = False,
+        mime_type: str | None = None,
+        route_code: str | None = None,
+        timestamp: datetime.datetime | None = None,
+    ) -> None:
+        super().status(
+            test_id=test_id,
+            test_status=test_status,
+            test_tags=test_tags,
+            runnable=runnable,
+            file_name=file_name,
+            file_bytes=file_bytes,
+            eof=eof,
+            mime_type=mime_type,
+            route_code=route_code,
+            timestamp=timestamp,
+        )
+        _strict_map(
+            methodcaller(
+                "status",
+                test_id=test_id,
+                test_status=test_status,
+                test_tags=test_tags,
+                runnable=runnable,
+                file_name=file_name,
+                file_bytes=file_bytes,
+                eof=eof,
+                mime_type=mime_type,
+                route_code=route_code,
+                timestamp=timestamp,
+            ),
+            self.targets,
+        )
 
 
 class StreamFailFast(StreamResult):
@@ -487,22 +634,22 @@ class StreamFailFast(StreamResult):
            pass
     """
 
-    def __init__(self, on_error):
+    def __init__(self, on_error: Callable[[], None]) -> None:
         self.on_error = on_error
 
     def status(
         self,
-        test_id=None,
-        test_status=None,
-        test_tags=None,
-        runnable=True,
-        file_name=None,
-        file_bytes=None,
-        eof=False,
-        mime_type=None,
-        route_code=None,
-        timestamp=None,
-    ):
+        test_id: str | None = None,
+        test_status: str | None = None,
+        test_tags: set[str] | None = None,
+        runnable: bool = True,
+        file_name: str | None = None,
+        file_bytes: bytes | None = None,
+        eof: bool = False,
+        mime_type: str | None = None,
+        route_code: str | None = None,
+        timestamp: datetime.datetime | None = None,
+    ) -> None:
         if test_status in ("uxsuccess", "fail"):
             self.on_error()
 
@@ -538,9 +685,11 @@ class StreamResultRouter(StreamResult):
     the behaviour is undefined. Only a single route is chosen for any event.
     """
 
-    _policies: ClassVar[dict] = {}
+    _policies: ClassVar[dict[str, Callable[..., None]]] = {}
 
-    def __init__(self, fallback=None, do_start_stop_run=True):
+    def __init__(
+        self, fallback: StreamResult | None = None, do_start_stop_run: bool = True
+    ) -> None:
         """Construct a StreamResultRouter with optional fallback.
 
         :param fallback: A StreamResult to forward events to when no route
@@ -549,21 +698,21 @@ class StreamResultRouter(StreamResult):
             stopTestRun onto the fallback.
         """
         self.fallback = fallback
-        self._route_code_prefixes = {}
-        self._test_ids = {}
+        self._route_code_prefixes: dict[str, tuple[StreamResult, bool]] = {}
+        self._test_ids: dict[str | None, StreamResult] = {}
         # Records sinks that should have do_start_stop_run called on them.
-        self._sinks = []
+        self._sinks: list[StreamResult] = []
         if do_start_stop_run and fallback:
             self._sinks.append(fallback)
         self._in_run = False
 
-    def startTestRun(self):
+    def startTestRun(self) -> None:
         super().startTestRun()
         for sink in self._sinks:
             sink.startTestRun()
         self._in_run = True
 
-    def stopTestRun(self):
+    def stopTestRun(self) -> None:
         super().stopTestRun()
         for sink in self._sinks:
             sink.stopTestRun()
@@ -571,22 +720,23 @@ class StreamResultRouter(StreamResult):
 
     def status(
         self,
-        test_id=None,
-        test_status=None,
-        test_tags=None,
-        runnable=True,
-        file_name=None,
-        file_bytes=None,
-        eof=False,
-        mime_type=None,
-        route_code=None,
-        timestamp=None,
-    ):
+        test_id: str | None = None,
+        test_status: str | None = None,
+        test_tags: set[str] | None = None,
+        runnable: bool = True,
+        file_name: str | None = None,
+        file_bytes: bytes | None = None,
+        eof: bool = False,
+        mime_type: str | None = None,
+        route_code: str | None = None,
+        timestamp: datetime.datetime | None = None,
+    ) -> None:
         # route_code and test_id are already available as parameters
+        target: StreamResult | None
         if route_code is not None:
             prefix = route_code.split("/")[0]
         else:
-            prefix = route_code
+            prefix = None
         if prefix in self._route_code_prefixes:
             target, consume_route = self._route_code_prefixes[prefix]
             if route_code is not None and consume_route:
@@ -598,6 +748,10 @@ class StreamResultRouter(StreamResult):
             target = self._test_ids[test_id]
         else:
             target = self.fallback
+        if target is None:
+            raise Exception(
+                f"No route found for test_id={test_id!r}, route_code={route_code!r}"
+            )
         target.status(
             test_id=test_id,
             test_status=test_status,
@@ -611,7 +765,13 @@ class StreamResultRouter(StreamResult):
             timestamp=timestamp,
         )
 
-    def add_rule(self, sink, policy, do_start_stop_run=False, **policy_args):
+    def add_rule(
+        self,
+        sink: StreamResult,
+        policy: str,
+        do_start_stop_run: bool = False,
+        **policy_args: object,
+    ) -> None:
         """Add a rule to route events to sink when they match a given policy.
 
         :param sink: A StreamResult to receive events.
@@ -640,14 +800,16 @@ class StreamResultRouter(StreamResult):
         if self._in_run:
             sink.startTestRun()
 
-    def _map_route_code_prefix(self, sink, route_prefix, consume_route=False):
+    def _map_route_code_prefix(
+        self, sink: StreamResult, route_prefix: str, consume_route: bool = False
+    ) -> None:
         if "/" in route_prefix:
             raise TypeError(f"{route_prefix!r} is more than one route step long")
         self._route_code_prefixes[route_prefix] = (sink, consume_route)
 
     _policies["route_code_prefix"] = _map_route_code_prefix
 
-    def _map_test_id(self, sink, test_id):
+    def _map_test_id(self, sink: StreamResult, test_id: str | None) -> None:
         self._test_ids[test_id] = sink
 
     _policies["test_id"] = _map_test_id
@@ -656,7 +818,12 @@ class StreamResultRouter(StreamResult):
 class StreamTagger(CopyStreamResult):
     """Adds or discards tags from StreamResult events."""
 
-    def __init__(self, targets, add=None, discard=None):
+    def __init__(
+        self,
+        targets: list[StreamResult],
+        add: set[str] | None = None,
+        discard: set[str] | None = None,
+    ) -> None:
         """Create a StreamTagger.
 
         :param targets: A list of targets to forward events onto.
@@ -668,18 +835,47 @@ class StreamTagger(CopyStreamResult):
         self.add = frozenset(add or ())
         self.discard = frozenset(discard or ())
 
-    def status(self, *args, **kwargs):
-        test_tags = kwargs.get("test_tags") or set()
-        test_tags.update(self.add)
-        test_tags.difference_update(self.discard)
-        kwargs["test_tags"] = test_tags or None
-        super().status(*args, **kwargs)
+    def status(
+        self,
+        test_id: str | None = None,
+        test_status: str | None = None,
+        test_tags: set[str] | None = None,
+        runnable: bool = True,
+        file_name: str | None = None,
+        file_bytes: bytes | None = None,
+        eof: bool = False,
+        mime_type: str | None = None,
+        route_code: str | None = None,
+        timestamp: datetime.datetime | None = None,
+    ) -> None:
+        tags = test_tags or set()
+        tags.update(self.add)
+        tags.difference_update(self.discard)
+        super().status(
+            test_id=test_id,
+            test_status=test_status,
+            test_tags=tags or None,
+            runnable=runnable,
+            file_name=file_name,
+            file_bytes=file_bytes,
+            eof=eof,
+            mime_type=mime_type,
+            route_code=route_code,
+            timestamp=timestamp,
+        )
 
 
 class _TestRecord:
     """Representation of a test."""
 
-    def __init__(self, id, tags, details, status, timestamps):
+    def __init__(
+        self,
+        id: str,
+        tags: set[str],
+        details: dict[str, Content],
+        status: str,
+        timestamps: tuple[datetime.datetime | None, datetime.datetime | None],
+    ) -> None:
         # The test id.
         self.id = id
 
@@ -698,7 +894,7 @@ class _TestRecord:
         self.timestamps = timestamps
 
     @classmethod
-    def create(cls, test_id, timestamp):
+    def create(cls, test_id: str, timestamp: datetime.datetime | None) -> "_TestRecord":
         return cls(
             id=test_id,
             tags=set(),
@@ -707,18 +903,40 @@ class _TestRecord:
             timestamps=(timestamp, None),
         )
 
-    def set(self, *args, **kwargs):
-        if args:
-            setattr(self, args[0], args[1])
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+    def set(
+        self,
+        attr_name: str | None = None,
+        attr_value: (
+            str
+            | set[str]
+            | dict[str, Content]
+            | tuple[datetime.datetime | None, datetime.datetime | None]
+            | None
+        ) = None,
+        *,
+        timestamps: tuple[datetime.datetime | None, datetime.datetime | None]
+        | None = None,
+        status: str | None = None,
+        tags: set[str] | None = None,
+        details: dict[str, Content] | None = None,
+    ) -> "_TestRecord":
+        if attr_name is not None:
+            setattr(self, attr_name, attr_value)
+        if timestamps is not None:
+            self.timestamps = timestamps
+        if status is not None:
+            self.status = status
+        if tags is not None:
+            self.tags = tags
+        if details is not None:
+            self.details = details
         return self
 
-    def transform(self, data, value):
+    def transform(self, data: list[str], value: Content) -> "_TestRecord":
         getattr(self, data[0])[data[1]] = value
         return self
 
-    def to_dict(self):
+    def to_dict(self) -> TestDict:
         """Convert record into a "test dict".
 
         A "test dict" is a concept used in other parts of the code-base. It
@@ -743,7 +961,7 @@ class _TestRecord:
             "timestamps": list(self.timestamps),
         }
 
-    def got_timestamp(self, timestamp):
+    def got_timestamp(self, timestamp: datetime.datetime | None) -> "_TestRecord":
         """Called when we receive a timestamp.
 
         This will always update the second element of the 'timestamps' tuple.
@@ -751,7 +969,9 @@ class _TestRecord:
         """
         return self.set(timestamps=(self.timestamps[0], timestamp))
 
-    def got_file(self, file_name, file_bytes, mime_type=None):
+    def got_file(
+        self, file_name: str, file_bytes: bytes, mime_type: str | None = None
+    ) -> "_TestRecord":
         """Called when we receive file information.
 
         ``mime_type`` is only used when this is the first time we've seen data
@@ -766,30 +986,31 @@ class _TestRecord:
                 ["details", file_name], Content(content_type, lambda: content_bytes)
             )
 
-        case.details[file_name]._get_bytes().append(file_bytes)
+        # _get_bytes() returns the list we created in the lambda above
+        bytes_list = case.details[file_name]._get_bytes()
+        assert isinstance(bytes_list, list)
+        bytes_list.append(file_bytes)
         return case
 
-    def to_test_case(self):
+    def to_test_case(self) -> "PlaceHolder":
         """Convert into a TestCase object.
 
         :return: A PlaceHolder test object.
         """
         # Circular import.
-        global PlaceHolder
-        if PlaceHolder is None:
-            from testtools.testcase import PlaceHolder
+        from testtools.testcase import PlaceHolder
+
         outcome = _status_map[self.status]
-        assert PlaceHolder is not None
         return PlaceHolder(
             self.id,
             outcome=outcome,
             details=self.details,
-            tags=self.tags,
+            tags=frozenset(self.tags),
             timestamps=self.timestamps,
         )
 
 
-def _make_content_type(mime_type=None):
+def _make_content_type(mime_type: str | None = None) -> ContentType:
     """Return ContentType for a given mime type.
 
     testtools was emitting a bad encoding, and this works around it.
@@ -852,7 +1073,7 @@ class _StreamToTestRecord(StreamResult):
     Only the most recent tags observed in the stream are reported.
     """
 
-    def __init__(self, on_test):
+    def __init__(self, on_test: Callable[[_TestRecord], None]) -> None:
         """Create a _StreamToTestRecord calling on_test on test completions.
 
         :param on_test: A callback that accepts one parameter:
@@ -861,23 +1082,23 @@ class _StreamToTestRecord(StreamResult):
         super().__init__()
         self.on_test = on_test
 
-    def startTestRun(self):
+    def startTestRun(self) -> None:
         super().startTestRun()
-        self._inprogress = {}
+        self._inprogress: dict[tuple[str, str | None], _TestRecord] = {}
 
     def status(
         self,
-        test_id=None,
-        test_status=None,
-        test_tags=None,
-        runnable=True,
-        file_name=None,
-        file_bytes=None,
-        eof=False,
-        mime_type=None,
-        route_code=None,
-        timestamp=None,
-    ):
+        test_id: str | None = None,
+        test_status: str | None = None,
+        test_tags: set[str] | None = None,
+        runnable: bool = True,
+        file_name: str | None = None,
+        file_bytes: bytes | None = None,
+        eof: bool = False,
+        mime_type: str | None = None,
+        route_code: str | None = None,
+        timestamp: datetime.datetime | None = None,
+    ) -> None:
         super().status(
             test_id,
             test_status,
@@ -912,14 +1133,14 @@ class _StreamToTestRecord(StreamResult):
 
     def _update_case(
         self,
-        case,
-        test_status=None,
-        test_tags=None,
-        file_name=None,
-        file_bytes=None,
-        mime_type=None,
-        timestamp=None,
-    ):
+        case: _TestRecord,
+        test_status: str | None = None,
+        test_tags: set[str] | None = None,
+        file_name: str | None = None,
+        file_bytes: bytes | None = None,
+        mime_type: str | None = None,
+        timestamp: datetime.datetime | None = None,
+    ) -> _TestRecord:
         if test_status is not None:
             case = case.set(status=test_status)
 
@@ -933,15 +1154,20 @@ class _StreamToTestRecord(StreamResult):
 
         return case
 
-    def stopTestRun(self):
+    def stopTestRun(self) -> None:
         super().stopTestRun()
         while self._inprogress:
             case = self._inprogress.popitem()[1]
             self.on_test(case.got_timestamp(None))
 
-    def _ensure_key(self, test_id, route_code, timestamp):
+    def _ensure_key(
+        self,
+        test_id: str | None,
+        route_code: str | None,
+        timestamp: datetime.datetime | None,
+    ) -> tuple[str, str | None] | None:
         if test_id is None:
-            return
+            return None
         key = (test_id, route_code)
         if key not in self._inprogress:
             self._inprogress[key] = _TestRecord.create(test_id, timestamp)
@@ -976,7 +1202,7 @@ class StreamToDict(StreamResult):
     # XXX: Alternative simplification is to extract a StreamAdapter base
     # class, and have this inherit from that.
 
-    def __init__(self, on_test):
+    def __init__(self, on_test: Callable[[TestDict], None]) -> None:
         """Create a _StreamToTestRecord calling on_test on test completions.
 
         :param on_test: A callback that accepts one parameter:
@@ -989,34 +1215,73 @@ class StreamToDict(StreamResult):
         # the boilerplate by subclassing _StreamToTestRecord.
         self.on_test = on_test
 
-    def _handle_test(self, test_record):
+    def _handle_test(self, test_record: _TestRecord) -> None:
         self.on_test(test_record.to_dict())
 
-    def startTestRun(self):
+    def startTestRun(self) -> None:
         super().startTestRun()
         self._hook.startTestRun()
 
-    def status(self, *args, **kwargs):
-        super().status(*args, **kwargs)
-        self._hook.status(*args, **kwargs)
+    def status(
+        self,
+        test_id: str | None = None,
+        test_status: str | None = None,
+        test_tags: set[str] | None = None,
+        runnable: bool = True,
+        file_name: str | None = None,
+        file_bytes: bytes | None = None,
+        eof: bool = False,
+        mime_type: str | None = None,
+        route_code: str | None = None,
+        timestamp: datetime.datetime | None = None,
+    ) -> None:
+        super().status(
+            test_id=test_id,
+            test_status=test_status,
+            test_tags=test_tags,
+            runnable=runnable,
+            file_name=file_name,
+            file_bytes=file_bytes,
+            eof=eof,
+            mime_type=mime_type,
+            route_code=route_code,
+            timestamp=timestamp,
+        )
+        self._hook.status(
+            test_id=test_id,
+            test_status=test_status,
+            test_tags=test_tags,
+            runnable=runnable,
+            file_name=file_name,
+            file_bytes=file_bytes,
+            eof=eof,
+            mime_type=mime_type,
+            route_code=route_code,
+            timestamp=timestamp,
+        )
 
-    def stopTestRun(self):
+    def stopTestRun(self) -> None:
         super().stopTestRun()
         self._hook.stopTestRun()
 
 
-def test_dict_to_case(test_dict):
+def test_dict_to_case(test_dict: TestDict) -> "PlaceHolder":
     """Convert a test dict into a TestCase object.
 
     :param test_dict: A test dict as generated by StreamToDict.
     :return: A PlaceHolder test object.
     """
+    ts_list = test_dict["timestamps"]
+    timestamps: tuple[datetime.datetime | None, datetime.datetime | None] = (
+        ts_list[0] if len(ts_list) > 0 else None,
+        ts_list[1] if len(ts_list) > 1 else None,
+    )
     return _TestRecord(
         id=test_dict["id"],
         tags=test_dict["tags"],
         details=test_dict["details"],
         status=test_dict["status"],
-        timestamps=tuple(test_dict["timestamps"]),
+        timestamps=timestamps,
     ).to_test_case()
 
 
@@ -1028,10 +1293,10 @@ class StreamSummary(StreamResult):
     runner.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._hook = _StreamToTestRecord(self._gather_test)
-        self._handle_status = {
+        self._handle_status: dict[str, Callable[[_TestRecord], None]] = {
             "success": self._success,
             "skip": self._skip,
             "exists": self._exists,
@@ -1042,25 +1307,59 @@ class StreamSummary(StreamResult):
             "inprogress": self._incomplete,
         }
 
-    def startTestRun(self):
+    def startTestRun(self) -> None:
         super().startTestRun()
-        self.failures = []
-        self.errors = []
-        self.testsRun = 0
-        self.skipped = []
-        self.expectedFailures = []
-        self.unexpectedSuccesses = []
+        self.failures: list[tuple[PlaceHolder, str]] = []
+        self.errors: list[tuple[PlaceHolder, str]] = []
+        self.testsRun: int = 0
+        self.skipped: list[tuple[PlaceHolder, str]] = []
+        self.expectedFailures: list[tuple[PlaceHolder, str]] = []
+        self.unexpectedSuccesses: list[PlaceHolder] = []
         self._hook.startTestRun()
 
-    def status(self, *args, **kwargs):
-        super().status(*args, **kwargs)
-        self._hook.status(*args, **kwargs)
+    def status(
+        self,
+        test_id: str | None = None,
+        test_status: str | None = None,
+        test_tags: set[str] | None = None,
+        runnable: bool = True,
+        file_name: str | None = None,
+        file_bytes: bytes | None = None,
+        eof: bool = False,
+        mime_type: str | None = None,
+        route_code: str | None = None,
+        timestamp: datetime.datetime | None = None,
+    ) -> None:
+        super().status(
+            test_id=test_id,
+            test_status=test_status,
+            test_tags=test_tags,
+            runnable=runnable,
+            file_name=file_name,
+            file_bytes=file_bytes,
+            eof=eof,
+            mime_type=mime_type,
+            route_code=route_code,
+            timestamp=timestamp,
+        )
+        self._hook.status(
+            test_id=test_id,
+            test_status=test_status,
+            test_tags=test_tags,
+            runnable=runnable,
+            file_name=file_name,
+            file_bytes=file_bytes,
+            eof=eof,
+            mime_type=mime_type,
+            route_code=route_code,
+            timestamp=timestamp,
+        )
 
-    def stopTestRun(self):
+    def stopTestRun(self) -> None:
         super().stopTestRun()
         self._hook.stopTestRun()
 
-    def wasSuccessful(self):
+    def wasSuccessful(self) -> bool:
         """Return False if any failure has occurred.
 
         Note that incomplete tests can only be detected when stopTestRun is
@@ -1068,38 +1367,41 @@ class StreamSummary(StreamResult):
         """
         return not self.failures and not self.errors
 
-    def _gather_test(self, test_record):
+    def _gather_test(self, test_record: _TestRecord) -> None:
         if test_record.status == "exists":
             return
         self.testsRun += 1
-        case = test_record.to_test_case()
-        self._handle_status[test_record.status](case)
+        self._handle_status[test_record.status](test_record)
 
-    def _incomplete(self, case):
-        self.errors.append((case, "Test did not complete"))
+    def _incomplete(self, test_record: _TestRecord) -> None:
+        self.errors.append((test_record.to_test_case(), "Test did not complete"))
 
-    def _success(self, case):
+    def _success(self, test_record: _TestRecord) -> None:
         pass
 
-    def _skip(self, case):
+    def _skip(self, test_record: _TestRecord) -> None:
+        case = test_record.to_test_case()
         if "reason" not in case._details:
             reason = "Unknown"
         else:
             reason = case._details["reason"].as_text()
         self.skipped.append((case, reason))
 
-    def _exists(self, case):
+    def _exists(self, test_record: _TestRecord) -> None:
         pass
 
-    def _fail(self, case):
+    def _fail(self, test_record: _TestRecord) -> None:
+        case = test_record.to_test_case()
         message = _details_to_str(case._details, special="traceback")
         self.errors.append((case, message))
 
-    def _xfail(self, case):
+    def _xfail(self, test_record: _TestRecord) -> None:
+        case = test_record.to_test_case()
         message = _details_to_str(case._details, special="traceback")
         self.expectedFailures.append((case, message))
 
-    def _uxsuccess(self, case):
+    def _uxsuccess(self, test_record: _TestRecord) -> None:
+        case = test_record.to_test_case()
         case._outcome = "addUnexpectedSuccess"
         self.unexpectedSuccesses.append(case)
 
@@ -1112,9 +1414,9 @@ class TestControl:
         each test and if set stop dispatching any new tests and return.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.shouldStop = False
+        self.shouldStop: bool = False
 
     def stop(self) -> None:
         """Indicate that tests should stop running."""
@@ -1124,85 +1426,111 @@ class TestControl:
 class MultiTestResult(TestResult):
     """A test result that dispatches to many test results."""
 
-    def __init__(self, *results):
+    def __init__(self, *results: TestResult) -> None:
         # Setup _results first, as the base class __init__ assigns to failfast.
         self._results = list(map(ExtendedToOriginalDecorator, results))
         super().__init__()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<{} ({})>".format(
             self.__class__.__name__, ", ".join(map(repr, self._results))
         )
 
-    def _dispatch(self, message, *args, **kwargs):
+    def _dispatch(
+        self, message: str, *args: object, **kwargs: object
+    ) -> tuple[object, ...]:
         return tuple(
             getattr(result, message)(*args, **kwargs) for result in self._results
         )
 
-    def _get_failfast(self):
+    def _get_failfast(self) -> bool:
         return getattr(self._results[0], "failfast", False)
 
-    def _set_failfast(self, value):
+    def _set_failfast(self, value: bool) -> None:
         self._dispatch("__setattr__", "failfast", value)
 
     failfast = property(_get_failfast, _set_failfast)
 
-    def _get_shouldStop(self):
+    def _get_shouldStop(self) -> bool:
         return any(self._dispatch("__getattr__", "shouldStop"))
 
-    def _set_shouldStop(self, value):
+    def _set_shouldStop(self, value: bool) -> None:
         # Called because we subclass TestResult. Probably should not do that.
         pass
 
     shouldStop = property(_get_shouldStop, _set_shouldStop)
 
-    def startTest(self, test):
+    def startTest(self, test: unittest.TestCase) -> None:
         super().startTest(test)
-        return self._dispatch("startTest", test)
+        self._dispatch("startTest", test)
 
-    def stop(self):
-        return self._dispatch("stop")
+    def stop(self) -> None:
+        self._dispatch("stop")
 
-    def stopTest(self, test):
+    def stopTest(self, test: unittest.TestCase) -> None:
         super().stopTest(test)
-        return self._dispatch("stopTest", test)
+        self._dispatch("stopTest", test)
 
-    def addError(self, test, error=None, details=None):
-        return self._dispatch("addError", test, error, details=details)
+    def addError(  # type: ignore[override]
+        self,
+        test: unittest.TestCase,
+        error: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
+        self._dispatch("addError", test, error, details=details)
 
-    def addExpectedFailure(self, test, err=None, details=None):
-        return self._dispatch("addExpectedFailure", test, err, details=details)
+    def addExpectedFailure(  # type: ignore[override]
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
+        self._dispatch("addExpectedFailure", test, err, details=details)
 
-    def addFailure(self, test, err=None, details=None):
-        return self._dispatch("addFailure", test, err, details=details)
+    def addFailure(  # type: ignore[override]
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
+        self._dispatch("addFailure", test, err, details=details)
 
-    def addSkip(self, test, reason=None, details=None):
-        return self._dispatch("addSkip", test, reason, details=details)
+    def addSkip(
+        self,
+        test: unittest.TestCase,
+        reason: str | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
+        self._dispatch("addSkip", test, reason, details=details)
 
-    def addSuccess(self, test, details=None):
-        return self._dispatch("addSuccess", test, details=details)
+    def addSuccess(
+        self, test: unittest.TestCase, details: DetailsDict | None = None
+    ) -> None:
+        self._dispatch("addSuccess", test, details=details)
 
-    def addUnexpectedSuccess(self, test, details=None):
-        return self._dispatch("addUnexpectedSuccess", test, details=details)
+    def addUnexpectedSuccess(
+        self, test: unittest.TestCase, details: DetailsDict | None = None
+    ) -> None:
+        self._dispatch("addUnexpectedSuccess", test, details=details)
 
-    def startTestRun(self):
+    def startTestRun(self) -> None:
         super().startTestRun()
-        return self._dispatch("startTestRun")
+        self._dispatch("startTestRun")
 
-    def stopTestRun(self):
+    def stopTestRun(self) -> tuple[object, ...]:  # type: ignore[override]
         return self._dispatch("stopTestRun")
 
-    def tags(self, new_tags, gone_tags):
+    def tags(self, new_tags: Iterable[str], gone_tags: Iterable[str]) -> None:
         super().tags(new_tags, gone_tags)
-        return self._dispatch("tags", new_tags, gone_tags)
+        self._dispatch("tags", new_tags, gone_tags)
 
-    def time(self, a_datetime):
-        return self._dispatch("time", a_datetime)
+    def time(self, a_datetime: datetime.datetime | None) -> None:
+        self._dispatch("time", a_datetime)
 
-    def done(self):
-        return self._dispatch("done")
+    def done(self) -> None:
+        self._dispatch("done")
 
-    def wasSuccessful(self):
+    def wasSuccessful(self) -> bool:
         """Was this result successful?
 
         Only returns True if every constituent result was successful.
@@ -1213,7 +1541,13 @@ class MultiTestResult(TestResult):
 class TextTestResult(TestResult):
     """A TestResult which outputs activity to a text stream."""
 
-    def __init__(self, stream, failfast=False, tb_locals=False, verbosity=1):
+    def __init__(
+        self,
+        stream: TextIO | None,
+        failfast: bool = False,
+        tb_locals: bool = False,
+        verbosity: int = 1,
+    ) -> None:
         """Construct a TextTestResult writing to stream.
 
         :param stream: A file-like object to write results to.
@@ -1229,25 +1563,23 @@ class TextTestResult(TestResult):
         self.verbosity = verbosity
         self._progress_printed = False
 
-    def _delta_to_float(self, a_timedelta, precision):
+    def _delta_to_float(self, a_timedelta: datetime.timedelta, precision: int) -> float:
         # This calls ceiling to ensure that the most pessimistic view of time
         # taken is shown (rather than leaving it to the Python %f operator
         # to decide whether to round/floor/ceiling. This was added when we
         # had pyp3 test failures that suggest a floor was happening.
         shift = 10**precision
-        return (
-            math.ceil(
-                (
-                    a_timedelta.days * 86400.0
-                    + a_timedelta.seconds
-                    + a_timedelta.microseconds / 1000000.0
-                )
-                * shift
-            )
-            / shift
+        total_seconds = (
+            a_timedelta.days * 86400.0
+            + a_timedelta.seconds
+            + a_timedelta.microseconds / 1000000.0
         )
+        result: float = math.ceil(total_seconds * shift) / shift
+        return result
 
-    def _show_list(self, label, error_list):
+    def _show_list(
+        self, label: str, error_list: list[tuple[unittest.TestCase, str]]
+    ) -> None:
         if self.stream is None:
             return
         for test, output in error_list:
@@ -1256,13 +1588,15 @@ class TextTestResult(TestResult):
             self.stream.write(self.sep2)
             self.stream.write(output)
 
-    def startTest(self, test):
+    def startTest(self, test: unittest.TestCase) -> None:
         super().startTest(test)
         if self.stream is not None and self.verbosity >= 2:
             self.stream.write(f"{test.id()} ... ")
             self.stream.flush()
 
-    def addSuccess(self, test, details=None):
+    def addSuccess(
+        self, test: unittest.TestCase, details: DetailsDict | None = None
+    ) -> None:
         super().addSuccess(test, details=details)
         if self.stream is not None:
             if self.verbosity == 1:
@@ -1273,7 +1607,17 @@ class TextTestResult(TestResult):
                 self.stream.write("ok\n")
                 self.stream.flush()
 
-    def addError(self, test, err=None, details=None):
+    def addError(  # type: ignore[override]
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
+        """Called when an error has occurred.
+
+        Note: This extends unittest.TestResult by making err optional and
+            adding details parameter.
+        """
         super().addError(test, err=err, details=details)
         if self.stream is not None:
             if self.verbosity == 1:
@@ -1283,7 +1627,17 @@ class TextTestResult(TestResult):
                 self.stream.write("ERROR\n")
                 self.stream.flush()
 
-    def addFailure(self, test, err=None, details=None):
+    def addFailure(  # type: ignore[override]
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
+        """Called when a failure has occurred.
+
+        Note: This extends unittest.TestResult by making err optional and
+            adding details parameter.
+        """
         super().addFailure(test, err=err, details=details)
         if self.stream is not None:
             if self.verbosity == 1:
@@ -1293,7 +1647,12 @@ class TextTestResult(TestResult):
                 self.stream.write("FAIL\n")
                 self.stream.flush()
 
-    def addSkip(self, test, reason=None, details=None):
+    def addSkip(
+        self,
+        test: unittest.TestCase,
+        reason: str | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
         super().addSkip(test, reason=reason, details=details)
         if self.stream is not None:
             if self.verbosity == 1:
@@ -1303,8 +1662,18 @@ class TextTestResult(TestResult):
                 self.stream.write(f"skipped {reason!r}\n")
                 self.stream.flush()
 
-    def addExpectedFailure(self, test, err=None, details=None):
-        super().addExpectedFailure(test, err=err, details=details)
+    def addExpectedFailure(  # type: ignore[override]
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
+        """Called when an expected failure has occurred.
+
+        Note: This extends unittest.TestResult by making err optional and
+            adding details parameter.
+        """
+        super().addExpectedFailure(test, err=err, details=details)  # type: ignore[arg-type]
         if self.stream is not None:
             if self.verbosity == 1:
                 self.stream.write("x")
@@ -1313,7 +1682,9 @@ class TextTestResult(TestResult):
                 self.stream.write("expected failure\n")
                 self.stream.flush()
 
-    def addUnexpectedSuccess(self, test, details=None):
+    def addUnexpectedSuccess(
+        self, test: unittest.TestCase, details: DetailsDict | None = None
+    ) -> None:
         super().addUnexpectedSuccess(test, details=details)
         if self.stream is not None:
             if self.verbosity == 1:
@@ -1323,13 +1694,13 @@ class TextTestResult(TestResult):
                 self.stream.write("unexpected success\n")
                 self.stream.flush()
 
-    def startTestRun(self):
+    def startTestRun(self) -> None:
         super().startTestRun()
         self.__start = self._now()
         if self.stream is not None:
             self.stream.write("Tests running...\n")
 
-    def stopTestRun(self):
+    def stopTestRun(self) -> None:
         if self.testsRun != 1:
             plural = "s"
         else:
@@ -1404,17 +1775,23 @@ class ThreadsafeForwardingResult(TestResult):
         TestResult.__init__(self)
         self.result = ExtendedToOriginalDecorator(target)
         self.semaphore = semaphore
-        self._test_start = None
-        self._global_tags: tuple[set, set] = set(), set()
-        self._test_tags: tuple[set, set] = set(), set()
+        self._test_start: datetime.datetime | None = None
+        self._global_tags: tuple[set[str], set[str]] = set(), set()
+        self._test_tags: tuple[set[str], set[str]] = set(), set()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} {self.result!r}>"
 
-    def _any_tags(self, tags):
+    def _any_tags(self, tags: tuple[set[str], set[str]]) -> bool:
         return bool(tags[0] or tags[1])
 
-    def _add_result_with_semaphore(self, method, test, *args, **kwargs):
+    def _add_result_with_semaphore(
+        self,
+        method: Callable[..., None],
+        test: unittest.TestCase,
+        *args: object,
+        **kwargs: object,
+    ) -> None:
         now = self._now()
         self.semaphore.acquire()
         try:
@@ -1434,38 +1811,77 @@ class ThreadsafeForwardingResult(TestResult):
             self.semaphore.release()
         self._test_start = None
 
-    def addError(self, test, err=None, details=None):
+    def addError(  # type: ignore[override]
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
+        """Called when an error has occurred.
+
+        Note: This extends unittest.TestResult by making err optional and
+            adding details parameter.
+        """
         self._add_result_with_semaphore(
             self.result.addError, test, err, details=details
         )
 
-    def addExpectedFailure(self, test, err=None, details=None):
+    def addExpectedFailure(  # type: ignore[override]
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
+        """Called when an expected failure has occurred.
+
+        Note: This extends unittest.TestResult by making err optional and
+            adding details parameter.
+        """
         self._add_result_with_semaphore(
             self.result.addExpectedFailure, test, err, details=details
         )
 
-    def addFailure(self, test, err=None, details=None):
+    def addFailure(  # type: ignore[override]
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
+        """Called when a failure has occurred.
+
+        Note: This extends unittest.TestResult by making err optional and
+            adding details parameter.
+        """
         self._add_result_with_semaphore(
             self.result.addFailure, test, err, details=details
         )
 
-    def addSkip(self, test, reason=None, details=None):
+    def addSkip(
+        self,
+        test: unittest.TestCase,
+        reason: str | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
         self._add_result_with_semaphore(
             self.result.addSkip, test, reason, details=details
         )
 
-    def addSuccess(self, test, details=None):
+    def addSuccess(
+        self, test: unittest.TestCase, details: DetailsDict | None = None
+    ) -> None:
         self._add_result_with_semaphore(self.result.addSuccess, test, details=details)
 
-    def addUnexpectedSuccess(self, test, details=None):
+    def addUnexpectedSuccess(
+        self, test: unittest.TestCase, details: DetailsDict | None = None
+    ) -> None:
         self._add_result_with_semaphore(
             self.result.addUnexpectedSuccess, test, details=details
         )
 
-    def progress(self, offset, whence):
+    def progress(self, offset: int, whence: int) -> None:
         pass
 
-    def startTestRun(self):
+    def startTestRun(self) -> None:
         super().startTestRun()
         self.semaphore.acquire()
         try:
@@ -1473,57 +1889,65 @@ class ThreadsafeForwardingResult(TestResult):
         finally:
             self.semaphore.release()
 
-    def _get_shouldStop(self):
+    def _get_shouldStop(self) -> bool:
         self.semaphore.acquire()
         try:
-            return self.result.shouldStop
+            result = self.result.shouldStop
+            assert isinstance(result, bool)
+            return result
         finally:
             self.semaphore.release()
 
-    def _set_shouldStop(self, value):
+    def _set_shouldStop(self, value: bool) -> None:
         # Another case where we should not subclass TestResult
         pass
 
     shouldStop = property(_get_shouldStop, _set_shouldStop)
 
-    def stop(self):
+    def stop(self) -> None:
         self.semaphore.acquire()
         try:
             self.result.stop()
         finally:
             self.semaphore.release()
 
-    def stopTestRun(self):
+    def stopTestRun(self) -> None:
         self.semaphore.acquire()
         try:
             self.result.stopTestRun()
         finally:
             self.semaphore.release()
 
-    def done(self):
+    def done(self) -> None:
         self.semaphore.acquire()
         try:
             self.result.done()
         finally:
             self.semaphore.release()
 
-    def startTest(self, test):
+    def startTest(self, test: unittest.TestCase) -> None:
         self._test_start = self._now()
         super().startTest(test)
 
-    def wasSuccessful(self):
+    def wasSuccessful(self) -> bool:
         return self.result.wasSuccessful()
 
-    def tags(self, new_tags, gone_tags):
+    def tags(self, new_tags: Iterable[str], gone_tags: Iterable[str]) -> None:
         """See `TestResult`."""
         super().tags(new_tags, gone_tags)
         if self._test_start is not None:
-            self._test_tags = _merge_tags(self._test_tags, (new_tags, gone_tags))
+            self._test_tags = _merge_tags(
+                self._test_tags, (set(new_tags), set(gone_tags))
+            )
         else:
-            self._global_tags = _merge_tags(self._global_tags, (new_tags, gone_tags))
+            self._global_tags = _merge_tags(
+                self._global_tags, (set(new_tags), set(gone_tags))
+            )
 
 
-def _merge_tags(existing, changed):
+def _merge_tags(
+    existing: tuple[set[str], set[str]], changed: tuple[set[str], set[str]]
+) -> tuple[set[str], set[str]]:
     new_tags, gone_tags = changed
     result_new = set(existing[0])
     result_gone = set(existing[1])
@@ -1544,105 +1968,144 @@ class ExtendedToOriginalDecorator:
     does not support the newer style of calling.
     """
 
-    def __init__(self, decorated):
-        self.decorated = decorated
+    def __init__(self, decorated: unittest.TestResult) -> None:
+        self.decorated: unittest.TestResult | TestResult = decorated
         self._tags = TagContext()
         # Only used for old TestResults that do not have failfast.
         self._failfast = False
         # Used for old TestResults that do not have stop.
         self._shouldStop = False
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} {self.decorated!r}>"
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> object:
         return getattr(self.decorated, name)
 
-    def addError(self, test, err=None, details=None):
+    def addError(
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
         try:
             self._check_args(err, details)
             if details is not None:
                 try:
-                    return self.decorated.addError(test, details=details)
+                    self.decorated.addError(test, details=details)  # type: ignore[call-arg]
                 except TypeError:
                     # have to convert
                     err = self._details_to_exc_info(details)
-            return self.decorated.addError(test, err)
+                else:
+                    return
+            self.decorated.addError(test, err)  # type: ignore[arg-type]
         finally:
             if self.failfast:
                 self.stop()
 
-    def addExpectedFailure(self, test, err=None, details=None):
+    def addExpectedFailure(
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
         self._check_args(err, details)
         addExpectedFailure = getattr(self.decorated, "addExpectedFailure", None)
         if addExpectedFailure is None:
-            return self.addSuccess(test)
+            self.addSuccess(test)
+            return
         if details is not None:
             try:
-                return addExpectedFailure(test, details=details)
+                addExpectedFailure(test, details=details)
             except TypeError:
                 # have to convert
                 err = self._details_to_exc_info(details)
-        return addExpectedFailure(test, err)
+            else:
+                return
+        addExpectedFailure(test, err)
 
-    def addFailure(self, test, err=None, details=None):
+    def addFailure(
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
         try:
             self._check_args(err, details)
             if details is not None:
                 try:
-                    return self.decorated.addFailure(test, details=details)
+                    self.decorated.addFailure(test, details=details)  # type: ignore[call-arg]
                 except TypeError:
                     # have to convert
                     err = self._details_to_exc_info(details)
-            return self.decorated.addFailure(test, err)
+                else:
+                    return
+            self.decorated.addFailure(test, err)  # type: ignore[arg-type]
         finally:
             if self.failfast:
                 self.stop()
 
-    def addSkip(self, test, reason=None, details=None):
+    def addSkip(
+        self,
+        test: unittest.TestCase,
+        reason: str | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
         self._check_args(reason, details)
         addSkip = getattr(self.decorated, "addSkip", None)
         if addSkip is None:
-            return self.decorated.addSuccess(test)
+            self.decorated.addSuccess(test)
+            return
         if details is not None:
             try:
-                return addSkip(test, details=details)
+                addSkip(test, details=details)
             except TypeError:
                 # extract the reason if it's available
                 try:
                     reason = details["reason"].as_text()
                 except KeyError:
                     reason = _details_to_str(details)
-        return addSkip(test, reason)
+            else:
+                return
+        addSkip(test, reason)
 
-    def addUnexpectedSuccess(self, test, details=None):
+    def addUnexpectedSuccess(
+        self, test: unittest.TestCase, details: DetailsDict | None = None
+    ) -> None:
         try:
             outcome = getattr(self.decorated, "addUnexpectedSuccess", None)
             if outcome is None:
                 try:
                     test.fail("")
                 except test.failureException:
-                    return self.addFailure(test, sys.exc_info())
+                    self.addFailure(test, sys.exc_info())  # type: ignore[arg-type]
+                    return
             else:
                 if details is not None:
                     try:
-                        return outcome(test, details=details)
+                        outcome(test, details=details)
                     except TypeError:
                         pass
-                return outcome(test)
+                    else:
+                        return
+                outcome(test)
         finally:
             if self.failfast:
                 self.stop()
 
-    def addSuccess(self, test, details=None):
+    def addSuccess(
+        self, test: unittest.TestCase, details: DetailsDict | None = None
+    ) -> None:
         if details is not None:
             try:
-                return self.decorated.addSuccess(test, details=details)
+                self.decorated.addSuccess(test, details=details)  # type: ignore[call-arg]
             except TypeError:
                 pass
-        return self.decorated.addSuccess(test)
+            else:
+                return
+        self.decorated.addSuccess(test)
 
-    def _check_args(self, err, details):
+    def _check_args(self, err: object, details: object) -> None:
         param_count = 0
         if err is not None:
             param_count += 1
@@ -1653,7 +2116,7 @@ class ExtendedToOriginalDecorator:
                 f"Must pass only one of err '{err}' and details '{details}"
             )
 
-    def _details_to_exc_info(self, details):
+    def _details_to_exc_info(self, details: DetailsDict) -> ExcInfo:
         """Convert a details dict to an exc_info tuple."""
         return (
             _StringException,
@@ -1662,19 +2125,19 @@ class ExtendedToOriginalDecorator:
         )
 
     @property
-    def current_tags(self):
+    def current_tags(self) -> set[str]:
         return getattr(self.decorated, "current_tags", self._tags.get_current_tags())
 
-    def done(self):
+    def done(self) -> None:
         try:
-            return self.decorated.done()
+            self.decorated.done()  # type: ignore[union-attr]
         except AttributeError:
-            return
+            pass
 
-    def _get_failfast(self):
+    def _get_failfast(self) -> bool:
         return getattr(self.decorated, "failfast", self._failfast)
 
-    def _set_failfast(self, value):
+    def _set_failfast(self, value: bool) -> None:
         if hasattr(self.decorated, "failfast"):
             self.decorated.failfast = value
         else:
@@ -1682,16 +2145,16 @@ class ExtendedToOriginalDecorator:
 
     failfast = property(_get_failfast, _set_failfast)
 
-    def progress(self, offset, whence):
+    def progress(self, offset: int, whence: int) -> None:
         method = getattr(self.decorated, "progress", None)
         if method is None:
             return
-        return method(offset, whence)
+        method(offset, whence)
 
-    def _get_shouldStop(self):
+    def _get_shouldStop(self) -> bool:
         return getattr(self.decorated, "shouldStop", self._shouldStop)
 
-    def _set_shouldStop(self, value):
+    def _set_shouldStop(self, value: bool) -> None:
         if hasattr(self.decorated, "shouldStop"):
             self.decorated.shouldStop = value
         else:
@@ -1699,49 +2162,50 @@ class ExtendedToOriginalDecorator:
 
     shouldStop = property(_get_shouldStop, _set_shouldStop)
 
-    def startTest(self, test):
+    def startTest(self, test: unittest.TestCase) -> None:
         self._tags = TagContext(self._tags)
-        return self.decorated.startTest(test)
+        self.decorated.startTest(test)
 
-    def startTestRun(self):
+    def startTestRun(self) -> None:
         self._tags = TagContext()
         try:
-            return self.decorated.startTestRun()
+            self.decorated.startTestRun()
         except AttributeError:
-            return
+            pass
 
-    def stop(self):
+    def stop(self) -> None:
         method = getattr(self.decorated, "stop", None)
         if method:
-            return method()
-        self.shouldStop = True
+            method()
+        else:
+            self.shouldStop = True
 
-    def stopTest(self, test):
+    def stopTest(self, test: unittest.TestCase) -> None:
         # NOTE: In Python 3.12.1 skipped tests may not call startTest()
         if self._tags is not None and self._tags.parent is not None:
             self._tags = self._tags.parent
-        return self.decorated.stopTest(test)
+        self.decorated.stopTest(test)
 
-    def stopTestRun(self):
+    def stopTestRun(self) -> object:  # type: ignore[override]
         try:
             return self.decorated.stopTestRun()
         except AttributeError:
-            return
+            return None
 
-    def tags(self, new_tags, gone_tags):
+    def tags(self, new_tags: Iterable[str], gone_tags: Iterable[str]) -> None:
         method = getattr(self.decorated, "tags", None)
         if method is not None:
-            return method(new_tags, gone_tags)
+            method(new_tags, gone_tags)
         else:
             self._tags.change_tags(new_tags, gone_tags)
 
-    def time(self, a_datetime):
+    def time(self, a_datetime: datetime.datetime | None) -> None:
         method = getattr(self.decorated, "time", None)
         if method is None:
             return
-        return method(a_datetime)
+        method(a_datetime)
 
-    def wasSuccessful(self):
+    def wasSuccessful(self) -> bool:
         return self.decorated.wasSuccessful()
 
 
@@ -1761,11 +2225,12 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
         TestControl.__init__(self)
         self._started = False
         self._tags: TagContext | None = None
+        self.__now: datetime.datetime | None = None
 
-    def _get_failfast(self):
+    def _get_failfast(self) -> bool:
         return len(self.targets) == 2
 
-    def _set_failfast(self, value):
+    def _set_failfast(self, value: bool) -> None:
         if value:
             if len(self.targets) == 2:
                 return
@@ -1775,24 +2240,36 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
 
     failfast = property(_get_failfast, _set_failfast)
 
-    def startTest(self, test):
+    def startTest(self, test: unittest.TestCase) -> None:
         if not self._started:
             self.startTestRun()
         self.status(test_id=test.id(), test_status="inprogress", timestamp=self._now())
         self._tags = TagContext(self._tags)
 
-    def stopTest(self, test):
+    def stopTest(self, test: unittest.TestCase) -> None:
         # NOTE: In Python 3.12.1 skipped tests may not call startTest()
         if self._tags is not None:
             self._tags = self._tags.parent
 
-    def addError(self, test, err=None, details=None):
+    def addError(
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
         self._check_args(err, details)
         self._convert(test, err, details, "fail")
 
     addFailure = addError
 
-    def _convert(self, test, err, details, status, reason=None):
+    def _convert(
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None,
+        details: DetailsDict | None,
+        status: str,
+        reason: str | None = None,
+    ) -> None:
         if not self._started:
             self.startTestRun()
         test_id = test.id()
@@ -1841,20 +2318,34 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
             timestamp=now,
         )
 
-    def addExpectedFailure(self, test, err=None, details=None):
+    def addExpectedFailure(
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
         self._check_args(err, details)
         self._convert(test, err, details, "xfail")
 
-    def addSkip(self, test, reason=None, details=None):
+    def addSkip(
+        self,
+        test: unittest.TestCase,
+        reason: str | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
         self._convert(test, None, details, "skip", reason)
 
-    def addUnexpectedSuccess(self, test, details=None):
+    def addUnexpectedSuccess(
+        self, test: unittest.TestCase, details: DetailsDict | None = None
+    ) -> None:
         self._convert(test, None, details, "uxsuccess")
 
-    def addSuccess(self, test, details=None):
+    def addSuccess(
+        self, test: unittest.TestCase, details: DetailsDict | None = None
+    ) -> None:
         self._convert(test, None, details, "success")
 
-    def _check_args(self, err, details):
+    def _check_args(self, err: ExcInfo | None, details: DetailsDict | None) -> None:
         param_count = 0
         if err is not None:
             param_count += 1
@@ -1865,7 +2356,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
                 f"Must pass only one of err '{err}' and details '{details}"
             )
 
-    def startTestRun(self):
+    def startTestRun(self) -> None:
         super().startTestRun()
         self._tags = TagContext()
         self.shouldStop = False
@@ -1873,13 +2364,13 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
         self._started = True
 
     @property
-    def current_tags(self):
+    def current_tags(self) -> set[str]:
         """The currently set tags."""
         if self._tags is None:
             return set()
         return self._tags.get_current_tags()
 
-    def tags(self, new_tags, gone_tags):
+    def tags(self, new_tags: Iterable[str], gone_tags: Iterable[str]) -> None:
         """Add and remove tags from the test.
 
         :param new_tags: A set of tags to be added to the stream.
@@ -1888,7 +2379,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
         if self._tags is not None:
             self._tags.change_tags(new_tags, gone_tags)
 
-    def _now(self):
+    def _now(self) -> datetime.datetime:
         """Return the current 'test time'.
 
         If the time() method has not been called, this is equivalent to
@@ -1900,10 +2391,10 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
         else:
             return self.__now
 
-    def time(self, a_datetime):
+    def time(self, a_datetime: datetime.datetime) -> None:
         self.__now = a_datetime
 
-    def wasSuccessful(self):
+    def wasSuccessful(self) -> bool:
         if not self._started:
             self.startTestRun()
         return super().wasSuccessful()
@@ -1926,19 +2417,21 @@ class ResourcedToStreamDecorator(ExtendedToStreamDecorator):
     The runnable flag will be set to False.
     """
 
-    def startMakeResource(self, resource):
+    def startMakeResource(self, resource: TestResourceProtocol) -> None:
         self._convertResourceLifecycle(resource, "make", "start")
 
-    def stopMakeResource(self, resource):
+    def stopMakeResource(self, resource: TestResourceProtocol) -> None:
         self._convertResourceLifecycle(resource, "make", "stop")
 
-    def startCleanResource(self, resource):
+    def startCleanResource(self, resource: TestResourceProtocol) -> None:
         self._convertResourceLifecycle(resource, "clean", "start")
 
-    def stopCleanResource(self, resource):
+    def stopCleanResource(self, resource: TestResourceProtocol) -> None:
         self._convertResourceLifecycle(resource, "clean", "stop")
 
-    def _convertResourceLifecycle(self, resource, method, phase):
+    def _convertResourceLifecycle(
+        self, resource: TestResourceProtocol, method: str, phase: str
+    ) -> None:
         """Convert a resource lifecycle report to a stream event."""
         # If the resource implements the TestResourceManager.id() API, let's
         # use it, otherwise fallback to the class name.
@@ -1976,7 +2469,7 @@ class StreamToExtendedDecorator(StreamResult):
     'testtools.extradata' flushed at the end of the run.
     """
 
-    def __init__(self, decorated):
+    def __init__(self, decorated: unittest.TestResult) -> None:
         # ExtendedToOriginalDecorator takes care of thunking details back to
         # exceptions/reasons etc.
         self.decorated = ExtendedToOriginalDecorator(decorated)
@@ -1985,17 +2478,17 @@ class StreamToExtendedDecorator(StreamResult):
 
     def status(
         self,
-        test_id=None,
-        test_status=None,
-        test_tags=None,
-        runnable=True,
-        file_name=None,
-        file_bytes=None,
-        eof=False,
-        mime_type=None,
-        route_code=None,
-        timestamp=None,
-    ):
+        test_id: str | None = None,
+        test_status: str | None = None,
+        test_tags: set[str] | None = None,
+        runnable: bool = True,
+        file_name: str | None = None,
+        file_bytes: bytes | None = None,
+        eof: bool = False,
+        mime_type: str | None = None,
+        route_code: str | None = None,
+        timestamp: datetime.datetime | None = None,
+    ) -> None:
         if test_status == "exists":
             return
         self.hook.status(
@@ -2011,19 +2504,19 @@ class StreamToExtendedDecorator(StreamResult):
             timestamp=timestamp,
         )
 
-    def startTestRun(self):
+    def startTestRun(self) -> None:
         self.decorated.startTestRun()
         self.hook.startTestRun()
 
-    def stopTestRun(self):
+    def stopTestRun(self) -> None:
         self.hook.stopTestRun()
         self.decorated.stopTestRun()
 
-    def _handle_tests(self, test_record):
+    def _handle_tests(self, test_record: _TestRecord) -> None:
         case = test_record.to_test_case()
-        case.run(self.decorated)
+        case.run(self.decorated)  # type: ignore[arg-type]
 
-    def wasSuccessful(self):
+    def wasSuccessful(self) -> bool:
         """Return whether this result was successful.
 
         Delegates to the decorated result object.
@@ -2031,27 +2524,31 @@ class StreamToExtendedDecorator(StreamResult):
         return self.decorated.wasSuccessful()
 
     @property
-    def shouldStop(self):
+    def shouldStop(self) -> bool:
         """Return whether the test run should stop.
 
         Delegates to the decorated result object.
         """
-        return self.decorated.shouldStop
+        result = self.decorated.shouldStop
+        assert isinstance(result, bool)
+        return result
 
-    def stop(self):
+    def stop(self) -> None:
         """Indicate that the test run should stop.
 
         Delegates to the decorated result object.
         """
-        return self.decorated.stop()
+        self.decorated.stop()
 
     @property
-    def testsRun(self):
+    def testsRun(self) -> int:
         """Return the number of tests run.
 
         Delegates to the decorated result object.
         """
-        return self.decorated.testsRun
+        result = self.decorated.testsRun
+        assert isinstance(result, int)
+        return result
 
 
 class StreamToQueue(StreamResult):
@@ -2094,22 +2591,22 @@ class StreamToQueue(StreamResult):
         self.queue = queue
         self.routing_code = routing_code
 
-    def startTestRun(self):
+    def startTestRun(self) -> None:
         self.queue.put(dict(event="startTestRun", result=self))
 
     def status(
         self,
-        test_id=None,
-        test_status=None,
-        test_tags=None,
-        runnable=True,
-        file_name=None,
-        file_bytes=None,
-        eof=False,
-        mime_type=None,
-        route_code=None,
-        timestamp=None,
-    ):
+        test_id: str | None = None,
+        test_status: str | None = None,
+        test_tags: set[str] | None = None,
+        runnable: bool = True,
+        file_name: str | None = None,
+        file_bytes: bytes | None = None,
+        eof: bool = False,
+        mime_type: str | None = None,
+        route_code: str | None = None,
+        timestamp: datetime.datetime | None = None,
+    ) -> None:
         self.queue.put(
             dict(
                 event="status",
@@ -2126,7 +2623,7 @@ class StreamToQueue(StreamResult):
             )
         )
 
-    def stopTestRun(self):
+    def stopTestRun(self) -> None:
         self.queue.put(dict(event="stopTestRun", result=self))
 
     def route_code(self, route_code: str | None) -> str | None:
@@ -2145,85 +2642,116 @@ class TestResultDecorator:
     gain basic forwarding functionality.
     """
 
-    def __init__(self, decorated):
+    def __init__(self, decorated: "TestResult") -> None:
         """Create a TestResultDecorator forwarding to decorated."""
         self.decorated = decorated
 
-    def startTest(self, test):
-        return self.decorated.startTest(test)
+    def startTest(self, test: unittest.TestCase) -> None:
+        self.decorated.startTest(test)
 
-    def startTestRun(self):
-        return self.decorated.startTestRun()
+    def startTestRun(self) -> None:
+        self.decorated.startTestRun()
 
-    def stopTest(self, test):
-        return self.decorated.stopTest(test)
+    def stopTest(self, test: unittest.TestCase) -> None:
+        self.decorated.stopTest(test)
 
-    def stopTestRun(self):
-        return self.decorated.stopTestRun()
+    def stopTestRun(self) -> None:
+        self.decorated.stopTestRun()
 
-    def addError(self, test, err=None, details=None):
-        return self.decorated.addError(test, err, details=details)
+    def addError(
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
+        self.decorated.addError(test, err, details=details)
 
-    def addFailure(self, test, err=None, details=None):
-        return self.decorated.addFailure(test, err, details=details)
+    def addFailure(
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
+        self.decorated.addFailure(test, err, details=details)
 
-    def addSuccess(self, test, details=None):
-        return self.decorated.addSuccess(test, details=details)
+    def addSuccess(
+        self, test: unittest.TestCase, details: DetailsDict | None = None
+    ) -> None:
+        self.decorated.addSuccess(test, details=details)
 
-    def addSkip(self, test, reason=None, details=None):
-        return self.decorated.addSkip(test, reason, details=details)
+    def addSkip(
+        self,
+        test: unittest.TestCase,
+        reason: str | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
+        self.decorated.addSkip(test, reason, details=details)
 
-    def addExpectedFailure(self, test, err=None, details=None):
-        return self.decorated.addExpectedFailure(test, err, details=details)
+    def addExpectedFailure(
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
+        self.decorated.addExpectedFailure(test, err, details=details)  # type: ignore[arg-type]
 
-    def addUnexpectedSuccess(self, test, details=None):
-        return self.decorated.addUnexpectedSuccess(test, details=details)
+    def addUnexpectedSuccess(
+        self, test: unittest.TestCase, details: DetailsDict | None = None
+    ) -> None:
+        self.decorated.addUnexpectedSuccess(test, details=details)
 
-    def addDuration(self, test, duration):
-        return self.decorated.addDuration(test, duration)
+    def addDuration(self, test: unittest.TestCase, duration: float) -> None:
+        self.decorated.addDuration(test, duration)
 
-    def progress(self, offset, whence):
-        return self.decorated.progress(offset, whence)
+    def progress(self, offset: int, whence: int) -> None:
+        self.decorated.progress(offset, whence)  # type: ignore[attr-defined]
 
-    def wasSuccessful(self):
+    def wasSuccessful(self) -> bool:
         return self.decorated.wasSuccessful()
 
     @property
-    def current_tags(self):
-        return self.decorated.current_tags
+    def current_tags(self) -> set[str]:
+        result = self.decorated.current_tags
+        assert isinstance(result, set)
+        return result
 
     @property
-    def shouldStop(self):
+    def shouldStop(self) -> bool:
         return self.decorated.shouldStop
 
-    def stop(self):
-        return self.decorated.stop()
+    def stop(self) -> None:
+        self.decorated.stop()
 
     @property
-    def testsRun(self):
+    def testsRun(self) -> int:
         return self.decorated.testsRun
 
-    def tags(self, new_tags, gone_tags):
-        return self.decorated.tags(new_tags, gone_tags)
+    def tags(self, new_tags: Iterable[str], gone_tags: Iterable[str]) -> None:
+        self.decorated.tags(new_tags, gone_tags)
 
-    def time(self, a_datetime):
-        return self.decorated.time(a_datetime)
+    def time(self, a_datetime: datetime.datetime) -> None:
+        self.decorated.time(a_datetime)
 
 
 class Tagger(TestResultDecorator):
     """Tag each test individually."""
 
-    def __init__(self, decorated, new_tags, gone_tags):
+    def __init__(
+        self,
+        decorated: unittest.TestResult,
+        new_tags: set[str],
+        gone_tags: set[str],
+    ) -> None:
         """Wrap 'decorated' such that each test is tagged.
 
         :param new_tags: Tags to be added for each test.
         :param gone_tags: Tags to be removed for each test.
         """
-        super().__init__(decorated)
+        super().__init__(decorated)  # type: ignore[arg-type]
         self._new_tags = set(new_tags)
         self._gone_tags = set(gone_tags)
 
-    def startTest(self, test):
+    def startTest(self, test: unittest.TestCase) -> None:
         super().startTest(test)
         self.tags(self._new_tags, self._gone_tags)
 
@@ -2231,7 +2759,10 @@ class Tagger(TestResultDecorator):
 class TestByTestResult(TestResult):
     """Call something every time a test completes."""
 
-    def __init__(self, on_test):
+    def __init__(
+        self,
+        on_test: _OnTestCallback,
+    ) -> None:
         """Construct a ``TestByTestResult``.
 
         :param on_test: A callable that take a test case, a status (one of
@@ -2243,16 +2774,16 @@ class TestByTestResult(TestResult):
         super().__init__()
         self._on_test = on_test
 
-    def startTest(self, test):
+    def startTest(self, test: unittest.TestCase) -> None:
         super().startTest(test)
         self._start_time = self._now()
         # There's no supported (i.e. tested) behaviour that relies on these
         # being set, but it makes me more comfortable all the same. -- jml
-        self._status = None
-        self._details = None
-        self._stop_time = None
+        self._status: str | None = None
+        self._details: DetailsDict | None = None
+        self._stop_time: datetime.datetime | None = None
 
-    def stopTest(self, test):
+    def stopTest(self, test: unittest.TestCase) -> None:
         self._stop_time = self._now()
         tags = set(self.current_tags)
         super().stopTest(test)
@@ -2265,42 +2796,88 @@ class TestByTestResult(TestResult):
             details=self._details,
         )
 
-    def _err_to_details(self, test, err, details):
+    def _err_to_details(
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None,
+        details: DetailsDict | None,
+    ) -> DetailsDict:
         if details:
             return details
+        assert err is not None, "Either err or details must be provided"
         return {"traceback": TracebackContent(err, test, capture_locals=self.tb_locals)}
 
-    def addSuccess(self, test, details=None):
+    def addSuccess(
+        self, test: unittest.TestCase, details: DetailsDict | None = None
+    ) -> None:
         super().addSuccess(test)
         self._status = "success"
         self._details = details
 
-    def addFailure(self, test, err=None, details=None):
+    def addFailure(  # type: ignore[override]
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
+        """Called when a failure has occurred.
+
+        Note: This extends unittest.TestResult by making err optional and
+            adding details parameter.
+        """
         super().addFailure(test, err, details)
         self._status = "failure"
         self._details = self._err_to_details(test, err, details)
 
-    def addError(self, test, err=None, details=None):
+    def addError(  # type: ignore[override]
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
+        """Called when an error has occurred.
+
+        Note: This extends unittest.TestResult by making err optional and
+            adding details parameter.
+        """
         super().addError(test, err, details)
         self._status = "error"
         self._details = self._err_to_details(test, err, details)
 
-    def addSkip(self, test, reason=None, details=None):
+    def addSkip(
+        self,
+        test: unittest.TestCase,
+        reason: str | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
         super().addSkip(test, reason, details)
         self._status = "skip"
         if details is None:
+            assert reason is not None, "Either reason or details must be provided"
             details = {"reason": text_content(reason)}
         elif reason:
             # XXX: What if details already has 'reason' key?
             details["reason"] = text_content(reason)
         self._details = details
 
-    def addExpectedFailure(self, test, err=None, details=None):
-        super().addExpectedFailure(test, err, details)
+    def addExpectedFailure(  # type: ignore[override]
+        self,
+        test: unittest.TestCase,
+        err: ExcInfo | None = None,
+        details: DetailsDict | None = None,
+    ) -> None:
+        """Called when an expected failure has occurred.
+
+        Note: This extends unittest.TestResult by making err optional and
+            adding details parameter.
+        """
+        super().addExpectedFailure(test, err, details)  # type: ignore[arg-type]
         self._status = "xfail"
         self._details = self._err_to_details(test, err, details)
 
-    def addUnexpectedSuccess(self, test, details=None):
+    def addUnexpectedSuccess(
+        self, test: unittest.TestCase, details: DetailsDict | None = None
+    ) -> None:
         super().addUnexpectedSuccess(test, details)
         self._status = "success"
         self._details = details
@@ -2315,33 +2892,54 @@ class TimestampingStreamResult(CopyStreamResult):
     def __init__(self, target: StreamResult) -> None:
         super().__init__([target])
 
-    def status(self, *args, **kwargs):
-        timestamp = kwargs.pop("timestamp", None)
+    def status(
+        self,
+        test_id: str | None = None,
+        test_status: str | None = None,
+        test_tags: set[str] | None = None,
+        runnable: bool = True,
+        file_name: str | None = None,
+        file_bytes: bytes | None = None,
+        eof: bool = False,
+        mime_type: str | None = None,
+        route_code: str | None = None,
+        timestamp: datetime.datetime | None = None,
+    ) -> None:
         if timestamp is None:
             timestamp = datetime.datetime.now(utc)
-        super().status(*args, timestamp=timestamp, **kwargs)
+        super().status(
+            test_id=test_id,
+            test_status=test_status,
+            test_tags=test_tags,
+            runnable=runnable,
+            file_name=file_name,
+            file_bytes=file_bytes,
+            eof=eof,
+            mime_type=mime_type,
+            route_code=route_code,
+            timestamp=timestamp,
+        )
 
 
 class _StringException(Exception):
     """An exception made from an arbitrary string."""
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return id(self)
 
-    def __eq__(self, other):
-        try:
-            return self.args == other.args
-        except AttributeError:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, BaseException):
             return False
+        return self.args == other.args
 
 
-def _format_text_attachment(name, text):
+def _format_text_attachment(name: str, text: str) -> str:
     if "\n" in text:
         return f"{name}: {{{{{{\n{text}\n}}}}}}\n"
     return f"{name}: {{{{{{{text}}}}}}}"
 
 
-def _details_to_str(details, special=None):
+def _details_to_str(details: DetailsDict, special: str | None = None) -> str:
     """Convert a details dict to a string.
 
     :param details: A dictionary mapping short names to ``Content`` objects.

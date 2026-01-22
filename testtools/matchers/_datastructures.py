@@ -2,13 +2,18 @@
 
 """Matchers that operate with knowledge of Python data structures."""
 
+from collections.abc import Sequence
+from typing import Generic, TypeVar
+
 from ..helpers import map_values
 from ._higherorder import (
     Annotate,
     MatchesAll,
     MismatchesAll,
 )
-from ._impl import Mismatch
+from ._impl import Matcher, Mismatch
+
+T = TypeVar("T")
 
 __all__ = [
     "ContainsAll",
@@ -30,7 +35,7 @@ def ContainsAll(items):
     return MatchesAll(*map(Contains, items), first_only=False)
 
 
-class MatchesListwise:
+class MatchesListwise(Matcher["Sequence[T]"], Generic[T]):
     """Matches if each matcher matches the corresponding value.
 
     More easily explained by example than in words:
@@ -48,7 +53,9 @@ class MatchesListwise:
     3 != 1
     """
 
-    def __init__(self, matchers, first_only=False):
+    def __init__(
+        self, matchers: "Sequence[Matcher[T]]", first_only: bool = False
+    ) -> None:
         """Construct a MatchesListwise matcher.
 
         :param matchers: A list of matcher that the matched values must match.
@@ -58,7 +65,7 @@ class MatchesListwise:
         self.matchers = matchers
         self.first_only = first_only
 
-    def match(self, values):
+    def match(self, values: "Sequence[T]") -> Mismatch | None:
         from ._basic import HasLength
 
         mismatches = []
@@ -75,6 +82,7 @@ class MatchesListwise:
                 mismatches.append(mismatch)
         if mismatches:
             return MismatchesAll(mismatches)
+        return None
 
 
 class MatchesStructure:

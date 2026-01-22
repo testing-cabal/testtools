@@ -9,7 +9,7 @@ __all__ = [
 
 import sys
 
-from testtools.testresult import ExtendedToOriginalDecorator
+from testtools.testresult import ExtendedToOriginalDecorator, TestResult
 
 
 class MultipleExceptions(Exception):
@@ -65,7 +65,7 @@ class RunTest:
         self._exceptions = []
         self.last_resort = last_resort or (lambda case, result, exc: None)
 
-    def run(self, result=None):
+    def run(self, result: "TestResult | None" = None) -> TestResult:
         """Run self.case reporting activity to result.
 
         :param result: Optional testtools.TestResult to report activity to.
@@ -82,7 +82,7 @@ class RunTest:
             if result is None:
                 actual_result.stopTestRun()
 
-    def _run_one(self, result):
+    def _run_one(self, result: "TestResult") -> "TestResult":
         """Run one test reporting to result.
 
         :param result: A testtools.TestResult to report activity to.
@@ -91,9 +91,9 @@ class RunTest:
             confidence by client code.
         :return: The result object the test was run against.
         """
-        return self._run_prepared_result(ExtendedToOriginalDecorator(result))
+        return self._run_prepared_result(ExtendedToOriginalDecorator(result))  # type: ignore[arg-type]
 
-    def _run_prepared_result(self, result):
+    def _run_prepared_result(self, result: "TestResult") -> "TestResult":
         """Run one test reporting to result.
 
         :param result: A testtools.TestResult to report activity to.

@@ -85,8 +85,6 @@ module = [
     "testtools.monkey",
     "testtools.run",
     "testtools.runtest",
-    "testtools.testcase",
-    "testtools.testresult.*",
     "testtools.twistedsupport.*",
     "tests.*",
 ]

@@ -2,6 +2,8 @@
 
 """Helpers for monkey-patching Python code."""
 
+from collections.abc import Callable
+
 __all__ = [
     "MonkeyPatcher",
     "patch",
@@ -80,7 +82,7 @@ class MonkeyPatcher:
             self.restore()
 
 
-def patch(obj, attribute, value):
+def patch(obj: object, attribute: str, value: object) -> Callable[[], None]:
     """Set 'obj.attribute' to 'value' and return a callable to restore 'obj'.
 
     If 'attribute' is not set on 'obj' already, then the returned callable

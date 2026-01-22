@@ -21,6 +21,8 @@ class MatcherTestProtocol(Protocol):
 class TestMatchersInterface:
     """Mixin class that provides test methods for matcher interfaces."""
 
+    __test__ = False  # Tell pytest not to collect this as a test class
+
     def test_matches_match(self: MatcherTestProtocol) -> None:
         matcher = self.matches_matcher
         matches = self.matches_matches

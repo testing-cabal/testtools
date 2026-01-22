@@ -2,6 +2,8 @@
 
 """Tag support."""
 
+from collections.abc import Iterable
+
 
 class TagContext:
     """A tag context."""
@@ -22,7 +24,9 @@ class TagContext:
         """Return any current tags."""
         return set(self._tags)
 
-    def change_tags(self, new_tags: set[str], gone_tags: set[str]) -> set[str]:
+    def change_tags(
+        self, new_tags: Iterable[str], gone_tags: Iterable[str]
+    ) -> set[str]:
         """Change the tags on this context.
 
         :param new_tags: A set of tags to add to this context.
