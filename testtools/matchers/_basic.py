@@ -135,7 +135,7 @@ class _BinaryMismatch(Mismatch, Generic[T]):
         return "\n".join(lines)
 
 
-class Equals(_BinaryComparison):
+class Equals(_BinaryComparison[T]):
     """Matches if the items are equal."""
 
     comparator = operator.eq
@@ -165,7 +165,7 @@ class _FlippedEquals(Matcher[T]):
         return _BinaryMismatch(other, "!=", self._expected, False)
 
 
-class NotEquals(_BinaryComparison):
+class NotEquals(_BinaryComparison[T]):
     """Matches if the items are not equal.
 
     In most cases, this is equivalent to ``Not(Equals(foo))``. The difference
@@ -176,38 +176,38 @@ class NotEquals(_BinaryComparison):
     mismatch_string = "=="
 
 
-class Is(_BinaryComparison):
+class Is(_BinaryComparison[T]):
     """Matches if the items are identical."""
 
     comparator = operator.is_
     mismatch_string = "is not"
 
 
-class LessThan(_BinaryComparison):
+class LessThan(_BinaryComparison[T]):
     """Matches if the item is less than the matchers reference object."""
 
     comparator = operator.lt
     mismatch_string = ">="
 
 
-class GreaterThan(_BinaryComparison):
+class GreaterThan(_BinaryComparison[T]):
     """Matches if the item is greater than the matchers reference object."""
 
     comparator = operator.gt
     mismatch_string = "<="
 
 
-class _NotNearlyEqual(Mismatch):
+class _NotNearlyEqual(Mismatch, Generic[T]):
     """Mismatch for Nearly matcher."""
 
-    def __init__(self, actual, expected, delta):
+    def __init__(self, actual: T, expected: T, delta: Any) -> None:
         self.actual = actual
         self.expected = expected
         self.delta = delta
 
-    def describe(self):
+    def describe(self) -> str:
         try:
-            diff = abs(self.actual - self.expected)
+            diff = abs(self.actual - self.expected)  # type: ignore[operator]
             return (
                 f"{self.actual!r} is not nearly equal to {self.expected!r}: "
                 f"difference {diff!r} exceeds tolerance {self.delta!r}"
@@ -219,7 +219,7 @@ class _NotNearlyEqual(Mismatch):
             )
 
 
-class Nearly(Matcher):
+class Nearly(Matcher[T]):
     """Matches if a value is nearly equal to the expected value.
 
     This matcher is useful for comparing floating point values where exact
@@ -232,7 +232,7 @@ class Nearly(Matcher):
     operations (e.g., integers, floats, Decimal, etc.).
     """
 
-    def __init__(self, expected, delta=0.001):
+    def __init__(self, expected: T, delta: Any = 0.001) -> None:
         """Create a Nearly matcher.
 
         :param expected: The expected value to compare against.
@@ -242,12 +242,12 @@ class Nearly(Matcher):
         self.expected = expected
         self.delta = delta
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Nearly({self.expected!r}, delta={self.delta!r})"
 
-    def match(self, actual):
+    def match(self, actual: T) -> Mismatch | None:
         try:
-            diff = abs(actual - self.expected)
+            diff = abs(actual - self.expected)  # type: ignore[operator]
             if diff <= self.delta:
                 return None
         except (TypeError, AttributeError):
@@ -256,25 +256,25 @@ class Nearly(Matcher):
         return _NotNearlyEqual(actual, self.expected, self.delta)
 
 
-class SameMembers(Matcher):
+class SameMembers(Matcher[list[T]]):
     """Matches if two iterators have the same members.
 
     This is not the same as set equivalence.  The two iterators must be of the
     same length and have the same repetitions.
     """
 
-    def __init__(self, expected):
+    def __init__(self, expected: list[T]) -> None:
         super().__init__()
         self.expected = expected
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.__class__.__name__}({self.expected!r})"
 
-    def match(self, observed):
+    def match(self, observed: list[T]) -> Mismatch | None:
         expected_only = list_subtract(self.expected, observed)
         observed_only = list_subtract(observed, self.expected)
         if expected_only == observed_only == []:
-            return
+            return None
         return PostfixedMismatch(
             (
                 f"\nmissing:    {_format(expected_only)}\n"
@@ -285,7 +285,7 @@ class SameMembers(Matcher):
 
 
 class DoesNotStartWith(Mismatch):
-    def __init__(self, matchee, expected):
+    def __init__(self, matchee: str | bytes, expected: str | bytes) -> None:
         """Create a DoesNotStartWith Mismatch.
 
         :param matchee: the string that did not match.
@@ -294,33 +294,33 @@ class DoesNotStartWith(Mismatch):
         self.matchee = matchee
         self.expected = expected
 
-    def describe(self):
+    def describe(self) -> str:
         return (
             f"{text_repr(self.matchee)} does not start with {text_repr(self.expected)}."
         )
 
 
-class StartsWith(Matcher):
+class StartsWith(Matcher[str | bytes]):
     """Checks whether one string starts with another."""
 
-    def __init__(self, expected):
+    def __init__(self, expected: str | bytes) -> None:
         """Create a StartsWith Matcher.
 
         :param expected: the string that matchees should start with.
         """
         self.expected = expected
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"StartsWith({self.expected!r})"
 
-    def match(self, matchee):
-        if not matchee.startswith(self.expected):
+    def match(self, matchee: str | bytes) -> Mismatch | None:
+        if not matchee.startswith(self.expected):  # type: ignore[arg-type]
             return DoesNotStartWith(matchee, self.expected)
         return None
 
 
 class DoesNotEndWith(Mismatch):
-    def __init__(self, matchee, expected):
+    def __init__(self, matchee: str | bytes, expected: str | bytes) -> None:
         """Create a DoesNotEndWith Mismatch.
 
         :param matchee: the string that did not match.
@@ -329,27 +329,27 @@ class DoesNotEndWith(Mismatch):
         self.matchee = matchee
         self.expected = expected
 
-    def describe(self):
+    def describe(self) -> str:
         return (
             f"{text_repr(self.matchee)} does not end with {text_repr(self.expected)}."
         )
 
 
-class EndsWith(Matcher):
+class EndsWith(Matcher[str | bytes]):
     """Checks whether one string ends with another."""
 
-    def __init__(self, expected):
+    def __init__(self, expected: str | bytes) -> None:
         """Create a EndsWith Matcher.
 
         :param expected: the string that matchees should end with.
         """
         self.expected = expected
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"EndsWith({self.expected!r})"
 
-    def match(self, matchee):
-        if not matchee.endswith(self.expected):
+    def match(self, matchee: str | bytes) -> Mismatch | None:
+        if not matchee.endswith(self.expected):  # type: ignore[arg-type]
             return DoesNotEndWith(matchee, self.expected)
         return None
 
@@ -459,7 +459,7 @@ class MatchesRegex(Matcher[str]):
         return None
 
 
-def has_len(x, y):
+def has_len(x: Any, y: int) -> bool:
     return len(x) == y
 
 

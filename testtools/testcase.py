@@ -123,10 +123,13 @@ def run_test_with(test_runner: type[RunTest], **kwargs: object) -> Callable[[_F]
         # make the runner.
         def _run_test_with(
             case: "TestCase",
-            handlers: list[tuple[type[BaseException], Callable[[BaseException], None]]]
-            | None = None,
-            last_resort: tuple[type[BaseException], Callable[[BaseException], None]]
-            | None = None,
+            handlers: (
+                "list[tuple[type[BaseException], "
+                "Callable[[TestCase, TestResult, BaseException], None]]] | None"
+            ) = None,
+            last_resort: (
+                "Callable[[TestCase, TestResult, BaseException], None] | None"
+            ) = None,
         ) -> RunTest:
             try:
                 return test_runner(
@@ -135,7 +138,7 @@ def run_test_with(test_runner: type[RunTest], **kwargs: object) -> Callable[[_F]
             except TypeError:
                 # Backwards compat: if we can't call the constructor
                 # with last_resort, try without that.
-                return test_runner(case, handlers=handlers, **kwargs)
+                return test_runner(case, handlers=handlers, **kwargs)  # type: ignore[arg-type]
 
         function._run_test_with = _run_test_with  # type: ignore[attr-defined]
         return function
@@ -448,7 +451,7 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message describing the error.
         """
-        matcher = Is(None)
+        matcher: Matcher[object] = Is(None)
         self.assertThat(observed, matcher, message)
 
     def assertIsNotNone(self, observed: object, message: str = "") -> None:
@@ -457,7 +460,7 @@ class TestCase(unittest.TestCase):
         :param observed: The observed value.
         :param message: An optional message describing the error.
         """
-        matcher = Not(Is(None))
+        matcher: Matcher[object] = Not(Is(None))
         self.assertThat(observed, matcher, message)
 
     def assertIs(self, expected: object, observed: object, message: str = "") -> None:

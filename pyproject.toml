@@ -79,12 +79,6 @@ ignore_missing_imports = true
 module = [
     # FIXME(stephenfin): We would like to remove all modules from this list
     # except tests (we're not sadists)
-    "testtools.assertions",
-    "testtools.compat",
-    "testtools.matchers.*",
-    "testtools.monkey",
-    "testtools.run",
-    "testtools.runtest",
     "testtools.twistedsupport.*",
     "tests.*",
 ]
