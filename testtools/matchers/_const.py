@@ -5,20 +5,21 @@ __all__ = [
     "Never",
 ]
 
-from ._impl import Mismatch
+
+from ._impl import Matcher, Mismatch
 
 
-class _Always:
+class _Always(Matcher[object]):
     """Always matches."""
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "Always()"
 
-    def match(self, value):
+    def match(self, value: object) -> None:
         return None
 
 
-def Always():
+def Always() -> _Always:
     """Always match.
 
     That is::
@@ -32,17 +33,17 @@ def Always():
     return _Always()
 
 
-class _Never:
+class _Never(Matcher[object]):
     """Never matches."""
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "Never()"
 
-    def match(self, value):
+    def match(self, value: object) -> Mismatch:
         return Mismatch(f"Inevitable mismatch on {value!r}")
 
 
-def Never():
+def Never() -> _Never:
     """Never match.
 
     That is::

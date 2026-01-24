@@ -6,8 +6,18 @@ __all__ = [
 
 import doctest
 import re
+from typing import Any
 
 from ._impl import Mismatch
+
+
+def _indent(
+    s: str,
+    indent: int = 4,
+    _pattern: re.Pattern[str] = re.compile("^(?!$)", re.MULTILINE),
+) -> str:
+    """Prepend non-empty lines in ``s`` with ``indent`` number of spaces"""
+    return _pattern.sub(indent * " ", s)
 
 
 class _NonManglingOutputChecker(doctest.OutputChecker):
@@ -31,7 +41,7 @@ class _NonManglingOutputChecker(doctest.OutputChecker):
     is sufficient to revert this.
     """
 
-    def _toAscii(self, s):
+    def _toAscii(self, s: str) -> str:
         """Return ``s`` unchanged rather than mangling it to ascii"""
         return s
 
@@ -41,20 +51,15 @@ class _NonManglingOutputChecker(doctest.OutputChecker):
 
         __f = doctest.OutputChecker.output_difference.__func__  # type: ignore[attr-defined]
         __g = dict(__f.__globals__)
-
-        def _indent(s, indent=4, _pattern=re.compile("^(?!$)", re.MULTILINE)):
-            """Prepend non-empty lines in ``s`` with ``indent`` number of spaces"""
-            return _pattern.sub(indent * " ", s)
-
         __g["_indent"] = _indent
-        output_difference = __F(__f.func_code, __g, "output_difference")
-        del __F, __f, __g, _indent
+        output_difference: Any = __F(__f.func_code, __g, "output_difference")
+        del __F, __f, __g
 
 
 class DocTestMatches:
     """See if a string matches a doctest example."""
 
-    def __init__(self, example, flags=0):
+    def __init__(self, example: str, flags: int = 0) -> None:
         """Create a DocTestMatches to match example.
 
         :param example: The example to match e.g. 'foo bar baz'
@@ -67,35 +72,36 @@ class DocTestMatches:
         self.flags = flags
         self._checker = _NonManglingOutputChecker()
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.flags:
             flagstr = f", flags={self.flags}"
         else:
             flagstr = ""
         return f"DocTestMatches({self.want!r}{flagstr})"
 
-    def _with_nl(self, actual):
+    def _with_nl(self, actual: str) -> str:
         result = self.want.__class__(actual)
         if not result.endswith("\n"):
             result += "\n"
         return result
 
-    def match(self, actual):
+    def match(self, actual: str) -> "DocTestMismatch | None":
         with_nl = self._with_nl(actual)
         if self._checker.check_output(self.want, with_nl, self.flags):
             return None
         return DocTestMismatch(self, with_nl)
 
-    def _describe_difference(self, with_nl):
-        return self._checker.output_difference(self, with_nl, self.flags)
+    def _describe_difference(self, with_nl: str) -> str:
+        result: str = self._checker.output_difference(self, with_nl, self.flags)
+        return result
 
 
 class DocTestMismatch(Mismatch):
     """Mismatch object for DocTestMatches."""
 
-    def __init__(self, matcher, with_nl):
+    def __init__(self, matcher: DocTestMatches, with_nl: str) -> None:
         self.matcher = matcher
         self.with_nl = with_nl
 
-    def describe(self):
+    def describe(self) -> str:
         return self.matcher._describe_difference(self.with_nl)

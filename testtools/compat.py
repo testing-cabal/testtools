@@ -14,9 +14,10 @@ import io
 import sys
 import unicodedata
 from io import BytesIO, StringIO  # for backwards-compat
+from typing import IO
 
 
-def _slow_escape(text):
+def _slow_escape(text: str) -> str:
     """Escape unicode ``text`` leaving printable characters unmodified
 
     The behaviour emulates the Python 3 implementation of repr, see
@@ -26,7 +27,7 @@ def _slow_escape(text):
     does not handle astral characters correctly on Python builds with 16 bit
     rather than 32 bit unicode type.
     """
-    output = []
+    output: list[str | bytes] = []
     for c in text:
         o = ord(c)
         if o < 256:
@@ -43,14 +44,14 @@ def _slow_escape(text):
                 output.append(c.encode("unicode-escape"))
             else:
                 output.append(c)
-    return "".join(output)
+    return "".join(output)  # type: ignore[arg-type]
 
 
-def text_repr(text, multiline=None):
+def text_repr(text: str | bytes, multiline: bool | None = None) -> str:
     """Rich repr for ``text`` returning unicode, triple quoted if ``multiline``."""
     nl = (isinstance(text, bytes) and bytes((0xA,))) or "\n"
     if multiline is None:
-        multiline = nl in text
+        multiline = nl in text  # type: ignore[operator]
     if not multiline:
         # Use normal repr for single line of unicode
         return repr(text)
@@ -60,7 +61,7 @@ def text_repr(text, multiline=None):
         # making sure that quotes are not escaped.
         offset = len(prefix) + 1
         lines = []
-        for line in text.split(nl):
+        for line in text.split(nl):  # type: ignore[arg-type]
             r = repr(line)
             q = r[-1]
             lines.append(r[offset:-1].replace("\\" + q, q))
@@ -87,7 +88,7 @@ def text_repr(text, multiline=None):
     return "".join([prefix, quote, escaped_text, quote])
 
 
-def unicode_output_stream(stream):
+def unicode_output_stream(stream: IO[str]) -> IO[str]:
     """Get wrapper for given stream that writes any unicode without exception
 
     Characters that can't be coerced to the encoding of the stream, or 'ascii'
@@ -103,21 +104,21 @@ def unicode_output_stream(stream):
         # attribute).
         return stream
     try:
-        writer = codecs.getwriter(stream.encoding or "")
+        writer = codecs.getwriter(stream.encoding or "")  # type: ignore[attr-defined]
     except (AttributeError, LookupError):
-        return codecs.getwriter("ascii")(stream, "replace")
+        return codecs.getwriter("ascii")(stream, "replace")  # type: ignore[arg-type, return-value]
     if writer.__module__.rsplit(".", 1)[1].startswith("utf"):
         # The current stream has a unicode encoding so no error handler is needed
         return stream
     # Python 3 doesn't seem to make this easy, handle a common case
     try:
-        return stream.__class__(
-            stream.buffer,
-            stream.encoding,
+        return stream.__class__(  # type: ignore[call-arg, return-value]
+            stream.buffer,  # type: ignore[attr-defined]
+            stream.encoding,  # type: ignore[attr-defined]
             "replace",
-            stream.newlines,
-            stream.line_buffering,
+            stream.newlines,  # type: ignore[attr-defined]
+            stream.line_buffering,  # type: ignore[attr-defined]
         )
     except AttributeError:
         pass
-    return writer(stream, "replace")
+    return writer(stream, "replace")  # type: ignore[arg-type, return-value]

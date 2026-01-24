@@ -315,7 +315,7 @@ class MatchesPredicate(Matcher[T], Generic[T]):
 
 def MatchesPredicateWithParams(
     predicate: "Callable[..., bool]", message: str, name: str | None = None
-) -> "Callable[..., _MatchesPredicateWithParams]":
+) -> "Callable[..., _MatchesPredicateWithParams[object]]":
     """Match if a given parameterised function returns True.
 
     It is reasonably common to want to make a very simple matcher based on a
@@ -341,7 +341,9 @@ def MatchesPredicateWithParams(
     :param name: Optional replacement name for the matcher.
     """
 
-    def construct_matcher(*args: Any, **kwargs: Any) -> _MatchesPredicateWithParams:
+    def construct_matcher(
+        *args: Any, **kwargs: Any
+    ) -> _MatchesPredicateWithParams[object]:
         return _MatchesPredicateWithParams(predicate, message, name, *args, **kwargs)
 
     return construct_matcher

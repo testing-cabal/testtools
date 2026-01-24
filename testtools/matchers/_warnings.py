@@ -3,6 +3,8 @@
 __all__ = ["IsDeprecated", "WarningMessage", "Warnings"]
 
 import warnings
+from collections.abc import Callable
+from typing import Any
 
 from ._basic import Is
 from ._const import Always
@@ -11,10 +13,16 @@ from ._higherorder import (
     AfterPreprocessing,
     Annotate,
 )
-from ._impl import Mismatch
+from ._impl import Matcher, Mismatch
 
 
-def WarningMessage(category_type, message=None, filename=None, lineno=None, line=None):
+def WarningMessage(
+    category_type: type[Warning],
+    message: "Matcher[Any] | None" = None,
+    filename: "Matcher[Any] | None" = None,
+    lineno: "Matcher[Any] | None" = None,
+    line: "Matcher[Any] | None" = None,
+) -> "MatchesStructure[warnings.WarningMessage]":
     r"""Create a matcher that will match `warnings.WarningMessage`\s.
 
     For example, to match captured `DeprecationWarning`s with a message about
@@ -38,10 +46,10 @@ def WarningMessage(category_type, message=None, filename=None, lineno=None, line
         warning's line of source code.
     """
     category_matcher = Is(category_type)
-    message_matcher = message or Always()
-    filename_matcher = filename or Always()
-    lineno_matcher = lineno or Always()
-    line_matcher = line or Always()
+    message_matcher: Matcher[Any] = message or Always()
+    filename_matcher: Matcher[Any] = filename or Always()
+    lineno_matcher: Matcher[Any] = lineno or Always()
+    line_matcher: Matcher[Any] = line or Always()
     return MatchesStructure(
         category=Annotate("Warning's category type does not match", category_matcher),
         message=Annotate(
@@ -56,7 +64,7 @@ def WarningMessage(category_type, message=None, filename=None, lineno=None, line
 class Warnings:
     """Match if the matchee produces warnings."""
 
-    def __init__(self, warnings_matcher=None):
+    def __init__(self, warnings_matcher: "Matcher[Any] | None" = None) -> None:
         """Create a Warnings matcher.
 
         :param warnings_matcher: Optional validator for the warnings emitted by
@@ -65,7 +73,7 @@ class Warnings:
         """
         self.warnings_matcher = warnings_matcher
 
-    def match(self, matchee):
+    def match(self, matchee: Callable[[], Any]) -> Mismatch | None:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
             # Handle staticmethod objects by extracting the underlying function
@@ -76,12 +84,13 @@ class Warnings:
                 return self.warnings_matcher.match(w)
             elif not w:
                 return Mismatch("Expected at least one warning, got none")
+        return None
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Warnings({self.warnings_matcher!s})"
 
 
-def IsDeprecated(message):
+def IsDeprecated(message: "Matcher[Any]") -> Warnings:
     """Make a matcher that checks that a callable produces exactly one
     `DeprecationWarning`.
 

@@ -2,13 +2,20 @@
 
 """Assertion helpers."""
 
+from typing import TypeVar
+
 from testtools.matchers import (
     Annotate,
+    Matcher,
     MismatchError,
 )
 
+T = TypeVar("T")
 
-def assert_that(matchee, matcher, message="", verbose=False):
+
+def assert_that(
+    matchee: T, matcher: Matcher[T], message: str = "", verbose: bool = False
+) -> None:
     """Assert that matchee is matched by matcher.
 
     This should only be used when you need to use a function based

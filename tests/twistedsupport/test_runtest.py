@@ -1133,7 +1133,8 @@ class TestAsyncSetUpTearDownValidation(NeedsTwistedTestCase):
         from twisted.internet import reactor
 
         class AsyncSetUpTest(TestCase):
-            run_tests_with = AsynchronousDeferredRunTest
+            # Use a longer timeout to avoid spurious failures on slower environments
+            run_tests_with = AsynchronousDeferredRunTest.make_factory(timeout=1.0)
 
             def setUp(self):
                 d = defer.Deferred()
@@ -1156,7 +1157,8 @@ class TestAsyncSetUpTearDownValidation(NeedsTwistedTestCase):
         from twisted.internet import reactor
 
         class AsyncTearDownTest(TestCase):
-            run_tests_with = AsynchronousDeferredRunTest
+            # Use a longer timeout to avoid spurious failures on slower environments
+            run_tests_with = AsynchronousDeferredRunTest.make_factory(timeout=1.0)
 
             def tearDown(self):
                 d = defer.Deferred()
@@ -1178,7 +1180,8 @@ class TestAsyncSetUpTearDownValidation(NeedsTwistedTestCase):
         from twisted.internet import reactor
 
         class BadAsyncSetUpTest(TestCase):
-            run_tests_with = AsynchronousDeferredRunTest
+            # Use a longer timeout to avoid spurious failures on slower environments
+            run_tests_with = AsynchronousDeferredRunTest.make_factory(timeout=1.0)
 
             def setUp(self):
                 # Returns a Deferred but doesn't call super().setUp()
