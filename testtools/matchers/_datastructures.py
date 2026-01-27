@@ -2,13 +2,18 @@
 
 """Matchers that operate with knowledge of Python data structures."""
 
+from collections.abc import Iterable, Sequence
+from typing import Any, Generic, TypeVar
+
 from ..helpers import map_values
 from ._higherorder import (
     Annotate,
     MatchesAll,
     MismatchesAll,
 )
-from ._impl import Mismatch
+from ._impl import Matcher, Mismatch
+
+T = TypeVar("T")
 
 __all__ = [
     "ContainsAll",
@@ -18,7 +23,7 @@ __all__ = [
 ]
 
 
-def ContainsAll(items):
+def ContainsAll(items: Iterable[T]) -> "MatchesAll[Iterable[T]]":
     """Make a matcher that checks whether a list of things is contained
     in another thing.
 
@@ -30,7 +35,7 @@ def ContainsAll(items):
     return MatchesAll(*map(Contains, items), first_only=False)
 
 
-class MatchesListwise:
+class MatchesListwise(Matcher["Sequence[T]"], Generic[T]):
     """Matches if each matcher matches the corresponding value.
 
     More easily explained by example than in words:
@@ -48,7 +53,9 @@ class MatchesListwise:
     3 != 1
     """
 
-    def __init__(self, matchers, first_only=False):
+    def __init__(
+        self, matchers: "Sequence[Matcher[T]]", first_only: bool = False
+    ) -> None:
         """Construct a MatchesListwise matcher.
 
         :param matchers: A list of matcher that the matched values must match.
@@ -58,7 +65,7 @@ class MatchesListwise:
         self.matchers = matchers
         self.first_only = first_only
 
-    def match(self, values):
+    def match(self, values: "Sequence[T]") -> Mismatch | None:
         from ._basic import HasLength
 
         mismatches = []
@@ -75,9 +82,10 @@ class MatchesListwise:
                 mismatches.append(mismatch)
         if mismatches:
             return MismatchesAll(mismatches)
+        return None
 
 
-class MatchesStructure:
+class MatchesStructure(Matcher[T], Generic[T]):
     """Matcher that matches an object structurally.
 
     'Structurally' here means that attributes of the object being matched are
@@ -94,7 +102,7 @@ class MatchesStructure:
     the matcher, rather than just using `Equals`.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: "Matcher[Any]") -> None:
         """Construct a `MatchesStructure`.
 
         :param kwargs: A mapping of attributes to matchers.
@@ -102,7 +110,7 @@ class MatchesStructure:
         self.kws = kwargs
 
     @classmethod
-    def byEquality(cls, **kwargs):
+    def byEquality(cls, **kwargs: Any) -> "MatchesStructure[Any]":
         """Matches an object where the attributes equal the keyword values.
 
         Similar to the constructor, except that the matcher is assumed to be
@@ -113,7 +121,9 @@ class MatchesStructure:
         return cls.byMatcher(Equals, **kwargs)
 
     @classmethod
-    def byMatcher(cls, matcher, **kwargs):
+    def byMatcher(
+        cls, matcher: type["Matcher[Any]"], **kwargs: Any
+    ) -> "MatchesStructure[Any]":
         """Matches an object where the attributes match the keyword values.
 
         Similar to the constructor, except that the provided matcher is used
@@ -122,15 +132,15 @@ class MatchesStructure:
         return cls(**map_values(matcher, kwargs))
 
     @classmethod
-    def fromExample(cls, example, *attributes):
+    def fromExample(cls, example: T, *attributes: str) -> "MatchesStructure[T]":
         from ._basic import Equals
 
-        kwargs = {}
+        kwargs: dict[str, Matcher[Any]] = {}
         for attr in attributes:
             kwargs[attr] = Equals(getattr(example, attr))
         return cls(**kwargs)
 
-    def update(self, **kws):
+    def update(self, **kws: "Matcher[Any] | None") -> "MatchesStructure[T]":
         new_kws = self.kws.copy()
         for attr, matcher in kws.items():
             if matcher is None:
@@ -139,22 +149,22 @@ class MatchesStructure:
                 new_kws[attr] = matcher
         return type(self)(**new_kws)
 
-    def __str__(self):
+    def __str__(self) -> str:
         kws = []
         for attr, matcher in sorted(self.kws.items()):
             kws.append(f"{attr}={matcher}")
         return "{}({})".format(self.__class__.__name__, ", ".join(kws))
 
-    def match(self, value):
-        matchers = []
-        values = []
+    def match(self, value: T) -> Mismatch | None:
+        matchers: list[Matcher[Any]] = []
+        values: list[Any] = []
         for attr, matcher in sorted(self.kws.items()):
             matchers.append(Annotate(attr, matcher))
             values.append(getattr(value, attr))
         return MatchesListwise(matchers).match(values)
 
 
-class MatchesSetwise:
+class MatchesSetwise(Matcher[Iterable[T]], Generic[T]):
     """Matches if all the matchers match elements of the value being matched.
 
     That is, each element in the 'observed' set must match exactly one matcher
@@ -164,10 +174,15 @@ class MatchesSetwise:
     matchings does not matter.
     """
 
-    def __init__(self, *matchers):
+    def __init__(self, *matchers: "Matcher[T]") -> None:
         self.matchers = matchers
 
-    def match(self, observed):
+    def __str__(self) -> str:
+        return "{}({})".format(
+            self.__class__.__name__, ", ".join(map(str, self.matchers))
+        )
+
+    def match(self, observed: Iterable[T]) -> Mismatch | None:
         remaining_matchers = set(self.matchers)
         not_matched = []
         for value in observed:
@@ -229,3 +244,4 @@ class MatchesSetwise:
                 return Annotate(
                     msg, MatchesListwise(remaining_matchers_list[:common_length])
                 ).match(not_matched[:common_length])
+        return None

@@ -388,7 +388,9 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         try:
             raise e
         except e.__class__:
-            self._got_user_exception(sys.exc_info())
+            exc_info = sys.exc_info()
+            assert exc_info[0] is not None and exc_info[1] is not None
+            self._got_user_exception(exc_info)
 
     def _blocking_run_deferred(self, spinner):
         try:
@@ -396,7 +398,9 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         except NoResultError:
             # We didn't get a result at all!  This could be for any number of
             # reasons, but most likely someone hit Ctrl-C during the test.
-            self._got_user_exception(sys.exc_info())
+            exc_info = sys.exc_info()
+            assert exc_info[0] is not None and exc_info[1] is not None
+            self._got_user_exception(exc_info)
             self.result.stop()
             return False, []
         except TimeoutError:
@@ -419,7 +423,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
         # XXX: Blatting over the namespace of the test case isn't a nice thing
         # to do. Find a better way of communicating between runtest and test
         # case.
-        self.case.reactor = self._reactor
+        setattr(self.case, "reactor", self._reactor)
         spinner = self._make_spinner()
 
         # We can't just install these as fixtures on self.case, because we

@@ -16,13 +16,20 @@ __all__ = [
 ]
 
 import copy
+import datetime
 import functools
 import itertools
 import sys
+import types
 import unittest
+from collections.abc import Callable, Iterator
 from typing import Any, Protocol, TypeVar, cast
 from unittest.case import SkipTest
 
+T = TypeVar("T")
+U = TypeVar("U")
+
+# ruff: noqa: E402 - TypeVars must be defined before importing testtools modules
 from testtools import content
 from testtools.matchers import (
     Annotate,
@@ -43,6 +50,8 @@ from testtools.runtest import (
     RunTest,
 )
 from testtools.testresult import (
+    DetailsDict,
+    ExcInfo,
     ExtendedToOriginalDecorator,
     TestResult,
 )
@@ -64,22 +73,26 @@ class _ExpectedFailure(Exception):
     """
 
 
+# TypeVar for decorators
+_F = TypeVar("_F", bound=Callable[..., object])
+
+
 # Copied from unittest before python 3.4 release. Used to maintain
 # compatibility with unittest sub-test feature. Users should not use this
 # directly.
-def _expectedFailure(func):
+def _expectedFailure(func: _F) -> _F:
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: object, **kwargs: object) -> None:
         try:
             func(*args, **kwargs)
         except Exception:
             raise _ExpectedFailure(sys.exc_info())
         raise _UnexpectedSuccess
 
-    return wrapper
+    return cast(_F, wrapper)
 
 
-def run_test_with(test_runner, **kwargs):
+def run_test_with(test_runner: type[RunTest], **kwargs: object) -> Callable[[_F], _F]:
     """Decorate a test as using a specific ``RunTest``.
 
     e.g.::
@@ -105,10 +118,19 @@ def run_test_with(test_runner, **kwargs):
         runner.
     """
 
-    def decorator(function):
+    def decorator(function: _F) -> _F:
         # Set an attribute on 'function' which will inform TestCase how to
         # make the runner.
-        def _run_test_with(case, handlers=None, last_resort=None):
+        def _run_test_with(
+            case: "TestCase",
+            handlers: (
+                "list[tuple[type[BaseException], "
+                "Callable[[TestCase, TestResult, BaseException], None]]] | None"
+            ) = None,
+            last_resort: (
+                "Callable[[TestCase, TestResult, BaseException], None] | None"
+            ) = None,
+        ) -> RunTest:
             try:
                 return test_runner(
                     case, handlers=handlers, last_resort=last_resort, **kwargs
@@ -116,15 +138,15 @@ def run_test_with(test_runner, **kwargs):
             except TypeError:
                 # Backwards compat: if we can't call the constructor
                 # with last_resort, try without that.
-                return test_runner(case, handlers=handlers, **kwargs)
+                return test_runner(case, handlers=handlers, **kwargs)  # type: ignore[arg-type]
 
-        function._run_test_with = _run_test_with
+        function._run_test_with = _run_test_with  # type: ignore[attr-defined]
         return function
 
     return decorator
 
 
-def _copy_content(content_object):
+def _copy_content(content_object: content.Content) -> content.Content:
     """Make a copy of the given content object.
 
     The content within ``content_object`` is iterated and saved. This is
@@ -137,13 +159,13 @@ def _copy_content(content_object):
     """
     content_bytes = list(content_object.iter_bytes())
 
-    def content_callback():
+    def content_callback() -> list[bytes]:
         return content_bytes
 
     return content.Content(content_object.content_type, content_callback)
 
 
-def gather_details(source_dict, target_dict):
+def gather_details(source_dict: DetailsDict, target_dict: DetailsDict) -> None:
     """Merge the details from ``source_dict`` into ``target_dict``.
 
     ``gather_details`` evaluates all details in ``source_dict``. Do not use it
@@ -171,15 +193,15 @@ except ImportError:
 
 
 class UseFixtureProtocol(Protocol):
-    def setUp(self) -> Any: ...
-    def cleanUp(self) -> Any: ...
-    def getDetails(self) -> dict: ...
+    def setUp(self) -> None: ...
+    def cleanUp(self) -> None: ...
+    def getDetails(self) -> DetailsDict: ...
 
 
 UseFixtureT = TypeVar("UseFixtureT", bound=UseFixtureProtocol)
 
 
-def _mods(i, mod):
+def _mods(i: int, mod: int) -> Iterator[int]:
     (q, r) = divmod(i, mod)
     while True:
         yield r
@@ -188,14 +210,14 @@ def _mods(i, mod):
         (q, r) = divmod(q, mod)
 
 
-def _unique_text(base_cp, cp_range, index):
+def _unique_text(base_cp: int, cp_range: int, index: int) -> str:
     s = ""
     for m in _mods(index, cp_range):
         s += chr(base_cp + m)
     return s
 
 
-def unique_text_generator(prefix):
+def unique_text_generator(prefix: str) -> Iterator[str]:
     """Generates unique text values.
 
     Generates text values that are unique. Use this when you need arbitrary
@@ -234,7 +256,7 @@ class TestCase(unittest.TestCase):
 
     run_tests_with = RunTest
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: object, **kwargs: object) -> None:
         """Construct a TestCase.
 
         :param testMethod: The name of the method to run.
@@ -244,19 +266,26 @@ class TestCase(unittest.TestCase):
             ``TestCase.run_tests_with`` if given.
         """
         runTest = kwargs.pop("runTest", None)
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)  # type: ignore[arg-type]
         self._reset()
         test_method = self._get_test_method()
         if runTest is None:
             runTest = getattr(test_method, "_run_test_with", self.run_tests_with)
-        self.__RunTest = runTest
+        self.__RunTest: type[RunTest] | Callable[..., RunTest] = cast(
+            "type[RunTest] | Callable[..., RunTest]", runTest
+        )
         if getattr(test_method, "__unittest_expecting_failure__", False):
             setattr(self, self._testMethodName, _expectedFailure(test_method))
         # Used internally for onException processing - used to gather extra
         # data from exceptions.
-        self.__exception_handlers = []
+        self.__exception_handlers: list[Callable[[ExcInfo], None]] = []
         # Passed to RunTest to map exceptions to result actions
-        self.exception_handlers = [
+        self.exception_handlers: list[
+            tuple[
+                type[BaseException],
+                Callable[[TestCase, TestResult, BaseException], None],
+            ]
+        ] = [
             (self.skipException, self._report_skip),
             (self.failureException, self._report_failure),
             (_ExpectedFailure, self._report_expected_failure),
@@ -264,20 +293,22 @@ class TestCase(unittest.TestCase):
             (Exception, self._report_error),
         ]
 
-    def _reset(self):
+    def _reset(self) -> None:
         """Reset the test case as if it had never been run."""
-        self._cleanups = []
-        self._unique_id_gen = itertools.count(1)
+        self._cleanups: list[
+            tuple[Callable[..., object], tuple[object, ...], dict[str, object]]
+        ] = []
+        self._unique_id_gen: Iterator[int] = itertools.count(1)
         # Generators to ensure unique traceback ids.  Maps traceback label to
         # iterators.
-        self._traceback_id_gens = {}
-        self.__setup_called = False
-        self.__teardown_called = False
+        self._traceback_id_gens: dict[str, Iterator[int]] = {}
+        self.__setup_called: bool = False
+        self.__teardown_called: bool = False
         # __details is lazy-initialized so that a constructed-but-not-run
         # TestCase is safe to use with clone_test_with_new_id.
-        self.__details = None
+        self.__details: DetailsDict | None = None
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         eq = getattr(unittest.TestCase, "__eq__", None)
         if eq is not None:
             eq_ = unittest.TestCase.__eq__(self, other)
@@ -289,11 +320,11 @@ class TestCase(unittest.TestCase):
     # https://docs.python.org/3/reference/datamodel.html#object.__hash__
     __hash__ = unittest.TestCase.__hash__
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         # We add id to the repr because it makes testing testtools easier.
         return f"<{self.id()} id=0x{id(self):0x}>"
 
-    def addDetail(self, name, content_object):
+    def addDetail(self, name: str, content_object: content.Content) -> None:
         """Add a detail to be reported with this test's outcome.
 
         For more details see pydoc testtools.TestResult.
@@ -306,7 +337,7 @@ class TestCase(unittest.TestCase):
             self.__details = {}
         self.__details[name] = content_object
 
-    def getDetails(self):
+    def getDetails(self) -> DetailsDict:
         """Get the details dict that will be reported with this test's outcome.
 
         For more details see pydoc testtools.TestResult.
@@ -315,7 +346,7 @@ class TestCase(unittest.TestCase):
             self.__details = {}
         return self.__details
 
-    def patch(self, obj, attribute, value):
+    def patch(self, obj: object, attribute: str, value: object) -> None:
         """Monkey-patch 'obj.attribute' to 'value' while the test is running.
 
         If 'obj' has no attribute, then the monkey-patch will still go ahead,
@@ -328,10 +359,10 @@ class TestCase(unittest.TestCase):
         """
         self.addCleanup(patch(obj, attribute, value))
 
-    def shortDescription(self):
+    def shortDescription(self) -> str:
         return self.id()
 
-    def skipTest(self, reason):
+    def skipTest(self, reason: str) -> None:  # type: ignore[override]
         """Cause this test to be skipped.
 
         This raises self.skipException(reason). skipException is raised
@@ -344,14 +375,24 @@ class TestCase(unittest.TestCase):
         """
         raise self.skipException(reason)
 
-    def _formatTypes(self, classOrIterable):
+    def _formatTypes(
+        self,
+        classOrIterable: type[object] | tuple[type[object], ...] | list[type[object]],
+    ) -> str:
         """Format a class or a bunch of classes for display in an error."""
-        className = getattr(classOrIterable, "__name__", None)
-        if className is None:
+        if isinstance(classOrIterable, (tuple, list)):
             className = ", ".join(klass.__name__ for klass in classOrIterable)
+        else:
+            className = classOrIterable.__name__
         return className
 
-    def addCleanup(self, function, /, *arguments, **keywordArguments):
+    def addCleanup(
+        self,
+        function: Callable[..., object],
+        /,
+        *arguments: object,
+        **keywordArguments: object,
+    ) -> None:
         """Add a cleanup function to be called after tearDown.
 
         Functions added with addCleanup will be called in reverse order of
@@ -366,7 +407,7 @@ class TestCase(unittest.TestCase):
         """
         self._cleanups.append((function, arguments, keywordArguments))
 
-    def addOnException(self, handler):
+    def addOnException(self, handler: "Callable[[ExcInfo], None]") -> None:
         """Add a handler to be called when an exception occurs in test code.
 
         This handler cannot affect what result methods are called, and is
@@ -385,10 +426,12 @@ class TestCase(unittest.TestCase):
         """
         self.__exception_handlers.append(handler)
 
-    def _add_reason(self, reason):
+    def _add_reason(self, reason: str) -> None:
         self.addDetail("reason", content.text_content(reason))
 
-    def assertEqual(self, expected, observed, message=""):
+    def assertEqual(
+        self, expected: object, observed: object, message: str = ""
+    ) -> None:
         """Assert that 'expected' is equal to 'observed'.
 
         :param expected: The expected value.
@@ -398,29 +441,29 @@ class TestCase(unittest.TestCase):
         matcher = _FlippedEquals(expected)
         self.assertThat(observed, matcher, message)
 
-    def assertIn(self, needle, haystack, message=""):
+    def assertIn(self, needle: object, haystack: object, message: str = "") -> None:
         """Assert that needle is in haystack."""
         self.assertThat(haystack, Contains(needle), message)
 
-    def assertIsNone(self, observed, message=""):
+    def assertIsNone(self, observed: object, message: str = "") -> None:
         """Assert that 'observed' is equal to None.
 
         :param observed: The observed value.
         :param message: An optional message describing the error.
         """
-        matcher = Is(None)
+        matcher: Matcher[object] = Is(None)
         self.assertThat(observed, matcher, message)
 
-    def assertIsNotNone(self, observed, message=""):
+    def assertIsNotNone(self, observed: object, message: str = "") -> None:
         """Assert that 'observed' is not equal to None.
 
         :param observed: The observed value.
         :param message: An optional message describing the error.
         """
-        matcher = Not(Is(None))
+        matcher: Matcher[object] = Not(Is(None))
         self.assertThat(observed, matcher, message)
 
-    def assertIs(self, expected, observed, message=""):
+    def assertIs(self, expected: object, observed: object, message: str = "") -> None:
         """Assert that 'expected' is 'observed'.
 
         :param expected: The expected value.
@@ -430,24 +473,37 @@ class TestCase(unittest.TestCase):
         matcher = Is(expected)
         self.assertThat(observed, matcher, message)
 
-    def assertIsNot(self, expected, observed, message=""):
+    def assertIsNot(
+        self, expected: object, observed: object, message: str = ""
+    ) -> None:
         """Assert that 'expected' is not 'observed'."""
         matcher = Not(Is(expected))
         self.assertThat(observed, matcher, message)
 
-    def assertNotIn(self, needle, haystack, message=""):
+    def assertNotIn(self, needle: U, haystack: T, message: str = "") -> None:
         """Assert that needle is not in haystack."""
-        matcher = Not(Contains(needle))
+        matcher: Not[T] = Not(Contains(needle))
         self.assertThat(haystack, matcher, message)
 
-    def assertIsInstance(self, obj, klass, msg=None):
+    def assertIsInstance(  # type: ignore[override]
+        self,
+        obj: object,
+        klass: type[object] | tuple[type[object], ...],
+        msg: str | None = None,
+    ) -> None:
         if isinstance(klass, tuple):
             matcher = IsInstance(*klass)
         else:
             matcher = IsInstance(klass)
-        self.assertThat(obj, matcher, msg)
+        self.assertThat(obj, matcher, msg or "")
 
-    def assertRaises(self, expected_exception, callable=None, *args, **kwargs):
+    def assertRaises(  # type: ignore[override]
+        self,
+        expected_exception: type[BaseException],
+        callable: Callable[..., object] | None = None,
+        *args: object,
+        **kwargs: object,
+    ) -> "_AssertRaisesContext | BaseException":
         """Fail unless an exception of class expected_exception is thrown
         by callable when invoked with arguments args and keyword
         arguments kwargs. If a different type of exception is
@@ -472,16 +528,40 @@ class TestCase(unittest.TestCase):
         """
         # If callable is None, we're being used as a context manager
         if callable is None:
-            return _AssertRaisesContext(expected_exception, self, msg=kwargs.get("msg"))
+            msg_value = kwargs.get("msg")
+            msg_str: str | None = msg_value if isinstance(msg_value, str) else None
+            return _AssertRaisesContext(expected_exception, self, msg=msg_str)
 
-        class ReRaiseOtherTypes:
-            def match(self, matchee):
+        class ReRaiseOtherTypes(
+            Matcher[
+                tuple[type[BaseException], BaseException, types.TracebackType | None]
+            ]
+        ):
+            def match(
+                self,
+                matchee: tuple[
+                    type[BaseException], BaseException, types.TracebackType | None
+                ],
+            ) -> None:
                 if not issubclass(matchee[0], expected_exception):
                     raise matchee[1].with_traceback(matchee[2])
+                return None
 
-        class CaptureMatchee:
-            def match(self, matchee):
+        class CaptureMatchee(
+            Matcher[
+                tuple[type[BaseException], BaseException, types.TracebackType | None]
+            ]
+        ):
+            matchee: BaseException
+
+            def match(
+                self,
+                matchee: tuple[
+                    type[BaseException], BaseException, types.TracebackType | None
+                ],
+            ) -> None:
                 self.matchee = matchee[1]
+                return None
 
         capture = CaptureMatchee()
         matcher = Raises(
@@ -489,11 +569,17 @@ class TestCase(unittest.TestCase):
                 ReRaiseOtherTypes(), MatchesException(expected_exception), capture
             )
         )
-        our_callable = Nullary(callable, *args, **kwargs)
+        our_callable: Callable[[], object] = Nullary(callable, *args, **kwargs)
         self.assertThat(our_callable, matcher)
         return capture.matchee
 
-    def assertThat(self, matchee, matcher, message="", verbose=False):
+    def assertThat(
+        self,
+        matchee: T,
+        matcher: "Matcher[T]",
+        message: str = "",
+        verbose: bool = False,
+    ) -> None:
         """Assert that matchee is matched by matcher.
 
         :param matchee: An object to match with matcher.
@@ -504,7 +590,7 @@ class TestCase(unittest.TestCase):
         if mismatch_error is not None:
             raise mismatch_error
 
-    def addDetailUniqueName(self, name, content_object):
+    def addDetailUniqueName(self, name: str, content_object: content.Content) -> None:
         """Add a detail to the test, but ensure it's name is unique.
 
         This method checks whether ``name`` conflicts with a detail that has
@@ -525,7 +611,13 @@ class TestCase(unittest.TestCase):
             suffix += 1
         self.addDetail(full_name, content_object)
 
-    def expectThat(self, matchee, matcher, message="", verbose=False):
+    def expectThat(
+        self,
+        matchee: object,
+        matcher: "Matcher[object]",
+        message: str = "",
+        verbose: bool = False,
+    ) -> None:
         """Check that matchee is matched by matcher, but delay the assertion failure.
 
         This method behaves similarly to ``assertThat``, except that a failed
@@ -549,19 +641,27 @@ class TestCase(unittest.TestCase):
             )
             self.force_failure = True
 
-    def _matchHelper(self, matchee, matcher, message, verbose):
+    def _matchHelper(
+        self, matchee: T, matcher: "Matcher[T]", message: str, verbose: bool
+    ) -> "MismatchError[T] | None":
         matcher = Annotate.if_message(message, matcher)
         mismatch = matcher.match(matchee)
         if not mismatch:
-            return
+            return None
         for name, value in mismatch.get_details().items():
             self.addDetailUniqueName(name, value)
         return MismatchError(matchee, matcher, mismatch, verbose)
 
-    def defaultTestResult(self):
+    def defaultTestResult(self) -> TestResult:
         return TestResult()
 
-    def expectFailure(self, reason, predicate, *args, **kwargs):
+    def expectFailure(
+        self,
+        reason: str,
+        predicate: Callable[..., object],
+        *args: object,
+        **kwargs: object,
+    ) -> None:
         """Check that a test fails in a particular way.
 
         If the test fails in the expected way, a KnownFailure is caused. If it
@@ -593,7 +693,7 @@ class TestCase(unittest.TestCase):
         else:
             raise _UnexpectedSuccess(reason)
 
-    def getUniqueInteger(self):
+    def getUniqueInteger(self) -> int:
         """Get an integer unique to this test.
 
         Returns an integer that is guaranteed to be unique to this instance.
@@ -602,7 +702,7 @@ class TestCase(unittest.TestCase):
         """
         return next(self._unique_id_gen)
 
-    def getUniqueString(self, prefix=None):
+    def getUniqueString(self, prefix: str | None = None) -> str:
         """Get a string unique to this test.
 
         Returns a string that is guaranteed to be unique to this instance. Use
@@ -617,7 +717,7 @@ class TestCase(unittest.TestCase):
             prefix = self.id()
         return f"{prefix}-{self.getUniqueInteger()}"
 
-    def onException(self, exc_info, tb_label="traceback"):
+    def onException(self, exc_info: ExcInfo, tb_label: str = "traceback") -> None:
         """Called when an exception propagates from test code.
 
         :seealso addOnException:
@@ -632,19 +732,23 @@ class TestCase(unittest.TestCase):
             handler(exc_info)
 
     @staticmethod
-    def _report_error(self, result, err):
+    def _report_error(self: "TestCase", result: TestResult, err: BaseException) -> None:
         result.addError(self, details=self.getDetails())
 
     @staticmethod
-    def _report_expected_failure(self, result, err):
+    def _report_expected_failure(
+        self: "TestCase", result: TestResult, err: BaseException
+    ) -> None:
         result.addExpectedFailure(self, details=self.getDetails())
 
     @staticmethod
-    def _report_failure(self, result, err):
+    def _report_failure(
+        self: "TestCase", result: TestResult, err: BaseException
+    ) -> None:
         result.addFailure(self, details=self.getDetails())
 
     @staticmethod
-    def _report_skip(self, result, err):
+    def _report_skip(self: "TestCase", result: TestResult, err: BaseException) -> None:
         if err.args:
             reason = err.args[0]
         else:
@@ -652,7 +756,9 @@ class TestCase(unittest.TestCase):
         self._add_reason(reason)
         result.addSkip(self, details=self.getDetails())
 
-    def _report_traceback(self, exc_info, tb_label="traceback"):
+    def _report_traceback(
+        self, exc_info: "ExcInfo | tuple[None, None, None]", tb_label: str = "traceback"
+    ) -> None:
         id_gen = self._traceback_id_gens.setdefault(tb_label, itertools.count(0))
         while True:
             tb_id = next(id_gen)
@@ -670,10 +776,12 @@ class TestCase(unittest.TestCase):
         )
 
     @staticmethod
-    def _report_unexpected_success(self, result, err):
+    def _report_unexpected_success(
+        self: "TestCase", result: TestResult, err: BaseException
+    ) -> None:
         result.addUnexpectedSuccess(self, details=self.getDetails())
 
-    def run(self, result=None):
+    def run(self, result: TestResult | None = None) -> TestResult:  # type: ignore[override]
         self._reset()
         try:
             run_test = self.__RunTest(
@@ -685,19 +793,19 @@ class TestCase(unittest.TestCase):
             run_test = self.__RunTest(self, self.exception_handlers)
         return run_test.run(result)
 
-    def _run_setup(self, result):
+    def _run_setup(self, result: TestResult) -> object:
         """Run the setUp function for this test.
 
         :param result: A testtools.TestResult to report activity to.
         :raises ValueError: If the base class setUp is not called, a
             ValueError is raised.
         """
-        ret = self.setUp()
+        ret = self.setUp()  # type: ignore[func-returns-value]
 
         # Check if the return value is a Deferred (duck-typing to avoid hard dependency)
         if hasattr(ret, "addBoth") and callable(getattr(ret, "addBoth")):
             # Deferred-like object: validate asynchronously after it resolves
-            def _validate_setup_called(result):
+            def _validate_setup_called(result: object) -> object:
                 if not self.__setup_called:
                     raise ValueError(
                         f"In File: {sys.modules[self.__class__.__module__].__file__}\n"
@@ -721,19 +829,19 @@ class TestCase(unittest.TestCase):
                 )
         return ret
 
-    def _run_teardown(self, result):
+    def _run_teardown(self, result: TestResult) -> object:
         """Run the tearDown function for this test.
 
         :param result: A testtools.TestResult to report activity to.
         :raises ValueError: If the base class tearDown is not called, a
             ValueError is raised.
         """
-        ret = self.tearDown()
+        ret = self.tearDown()  # type: ignore[func-returns-value]
 
         # Check if the return value is a Deferred (duck-typing to avoid hard dependency)
         if hasattr(ret, "addBoth") and callable(getattr(ret, "addBoth")):
             # Deferred-like object: validate asynchronously after it resolves
-            def _validate_teardown_called(result):
+            def _validate_teardown_called(result: object) -> object:
                 if not self.__teardown_called:
                     raise ValueError(
                         f"In File: {sys.modules[self.__class__.__module__].__file__}\n"
@@ -757,10 +865,10 @@ class TestCase(unittest.TestCase):
                 )
         return ret
 
-    def _get_test_method(self):
+    def _get_test_method(self) -> Callable[[], object]:
         method_name = getattr(self, "_testMethodName")
         try:
-            m = getattr(self, method_name)
+            m: Callable[[], object] = getattr(self, method_name)
         except AttributeError:
             if method_name != "runTest":
                 # We allow instantiation with no explicit method name
@@ -768,10 +876,12 @@ class TestCase(unittest.TestCase):
                 raise ValueError(
                     f"no such test method in {self.__class__}: {method_name}"
                 )
+            # If runTest doesn't exist, return a no-op callable
+            return lambda: None
         else:
             return m
 
-    def _run_test_method(self, result):
+    def _run_test_method(self, result: TestResult) -> object:
         """Run the test method for this test.
 
         :param result: A testtools.TestResult to report activity to.
@@ -820,7 +930,7 @@ class TestCase(unittest.TestCase):
             self.addCleanup(gather_details, fixture.getDetails(), self.getDetails())
             return fixture
 
-    def setUp(self):
+    def setUp(self) -> None:
         super().setUp()
         if self.__setup_called:
             raise ValueError(
@@ -831,7 +941,7 @@ class TestCase(unittest.TestCase):
             )
         self.__setup_called = True
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         super().tearDown()
         if self.__teardown_called:
             raise ValueError(
@@ -843,25 +953,28 @@ class TestCase(unittest.TestCase):
         self.__teardown_called = True
 
 
-class PlaceHolder:
+class PlaceHolder(unittest.TestCase):
     """A placeholder test.
 
     `PlaceHolder` implements much of the same interface as TestCase and is
     particularly suitable for being added to TestResults.
     """
 
-    failureException = None
+    failureException = None  # type: ignore[assignment]
 
     def __init__(
         self,
-        test_id,
-        short_description=None,
-        details=None,
-        outcome="addSuccess",
-        error=None,
-        tags=None,
-        timestamps=(None, None),
-    ):
+        test_id: str,
+        short_description: str | None = None,
+        details: DetailsDict | None = None,
+        outcome: str = "addSuccess",
+        error: "ExcInfo | tuple[None, None, None] | None" = None,
+        tags: frozenset[str] | None = None,
+        timestamps: "tuple[datetime.datetime | None, datetime.datetime | None]" = (
+            None,
+            None,
+        ),
+    ) -> None:
         """Construct a `PlaceHolder`.
 
         :param test_id: The id of the placeholder test.
@@ -882,11 +995,13 @@ class PlaceHolder:
         tags = tags or frozenset()
         self._tags = frozenset(tags)
         self._timestamps = timestamps
+        # Required for unittest.TestCase compatibility
+        self._testMethodName = "run"
 
-    def __call__(self, result=None):
+    def __call__(self, result: unittest.TestResult | None = None) -> None:
         return self.run(result=result)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         internal = [self._outcome, self._test_id, self._details]
         if self._short_description is not None:
             internal.append(self._short_description)
@@ -896,16 +1011,16 @@ class PlaceHolder:
             ", ".join(map(repr, internal)),
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.id()
 
-    def countTestCases(self):
+    def countTestCases(self) -> int:
         return 1
 
-    def debug(self):
+    def debug(self) -> None:
         pass
 
-    def id(self):
+    def id(self) -> str:
         return self._test_id
 
     def _result(
@@ -929,7 +1044,7 @@ class PlaceHolder:
         result_obj.stopTest(self)
         result_obj.tags(set(), self._tags)
 
-    def shortDescription(self):
+    def shortDescription(self) -> str:
         if self._short_description is None:
             return self.id()
         else:
@@ -938,9 +1053,9 @@ class PlaceHolder:
 
 def ErrorHolder(
     test_id: str,
-    error: tuple,
+    error: "ExcInfo | tuple[None, None, None]",
     short_description: str | None = None,
-    details: dict | None = None,
+    details: "DetailsDict | None" = None,
 ) -> PlaceHolder:
     """Construct an `ErrorHolder`.
 
@@ -960,7 +1075,9 @@ def ErrorHolder(
     )
 
 
-def _clone_test_id_callback(test, callback):
+def _clone_test_id_callback(
+    test: unittest.TestCase, callback: Callable[[], str]
+) -> unittest.TestCase:
     """Copy a `TestCase`, and make it call callback for its id().
 
     This is only expected to be used on tests that have been constructed but
@@ -971,11 +1088,11 @@ def _clone_test_id_callback(test, callback):
     :return: A copy.copy of the test with id=callback.
     """
     newTest = copy.copy(test)
-    newTest.id = callback
+    newTest.id = callback  # type: ignore[method-assign]
     return newTest
 
 
-def clone_test_with_new_id(test, new_id):
+def clone_test_with_new_id(test: unittest.TestCase, new_id: str) -> unittest.TestCase:
     """Copy a `TestCase`, and give the copied test a new id.
 
     This is only expected to be used on tests that have been constructed but
@@ -984,7 +1101,7 @@ def clone_test_with_new_id(test, new_id):
     return _clone_test_id_callback(test, lambda: new_id)
 
 
-def attr(*args):
+def attr(*args: str) -> Callable[[_F], _F]:
     """Decorator for adding attributes to WithAttributes.
 
     :param args: The name of attributes to add.
@@ -992,10 +1109,10 @@ def attr(*args):
         alter its id to enumerate the added attributes.
     """
 
-    def decorate(fn):
+    def decorate(fn: _F) -> _F:
         if not hasattr(fn, "__testtools_attrs"):
-            fn.__testtools_attrs = set()
-        fn.__testtools_attrs.update(args)
+            fn.__testtools_attrs = set()  # type: ignore[attr-defined]
+        fn.__testtools_attrs.update(args)  # type: ignore[attr-defined]
         return fn
 
     return decorate
@@ -1029,7 +1146,7 @@ class WithAttributes:
 class_types = (type,)
 
 
-def skip(reason):
+def skip(reason: str) -> Callable[[_F], _F]:
     """A decorator to skip unit tests.
 
     This is just syntactic sugar so users don't have to change any of their
@@ -1037,43 +1154,43 @@ def skip(reason):
     @unittest.skip decorator.
     """
 
-    def decorator(test_item):
+    def decorator(test_item: _F) -> _F:
         if not isinstance(test_item, class_types):
 
             @functools.wraps(test_item)
-            def skip_wrapper(*args, **kwargs):
+            def skip_wrapper(*args: object, **kwargs: object) -> None:
                 raise TestCase.skipException(reason)
 
-            test_item = skip_wrapper
+            test_item = cast(_F, skip_wrapper)
 
         # This attribute signals to RunTest._run_core that the entire test
         # must be skipped - including setUp and tearDown. This makes us
         # compatible with testtools.skip* functions, which set the same
         # attributes.
-        test_item.__unittest_skip__ = True
-        test_item.__unittest_skip_why__ = reason
+        test_item.__unittest_skip__ = True  # type: ignore[attr-defined]
+        test_item.__unittest_skip_why__ = reason  # type: ignore[attr-defined]
         return test_item
 
     return decorator
 
 
-def skipIf(condition, reason):
+def skipIf(condition: bool, reason: str) -> Callable[[_F], _F]:
     """A decorator to skip a test if the condition is true."""
     if condition:
         return skip(reason)
 
-    def _id(obj):
+    def _id(obj: _F) -> _F:
         return obj
 
     return _id
 
 
-def skipUnless(condition, reason):
+def skipUnless(condition: bool, reason: str) -> Callable[[_F], _F]:
     """A decorator to skip a test unless the condition is true."""
     if not condition:
         return skip(reason)
 
-    def _id(obj):
+    def _id(obj: _F) -> _F:
         return obj
 
     return _id
@@ -1085,7 +1202,9 @@ class _AssertRaisesContext:
     This provides compatibility with unittest's assertRaises context manager.
     """
 
-    def __init__(self, expected, test_case, msg=None):
+    def __init__(
+        self, expected: type[BaseException], test_case: TestCase, msg: str | None = None
+    ) -> None:
         """Construct an `_AssertRaisesContext`.
 
         :param expected: The type of exception to expect.
@@ -1095,12 +1214,17 @@ class _AssertRaisesContext:
         self.expected = expected
         self.test_case = test_case
         self.msg = msg
-        self.exception = None
+        self.exception: BaseException | None = None
 
-    def __enter__(self):
+    def __enter__(self) -> "_AssertRaisesContext":
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: types.TracebackType | None,
+    ) -> bool:
         if exc_type is None:
             try:
                 if isinstance(self.expected, tuple):
@@ -1137,7 +1261,12 @@ class ExpectedException:
     exception is raised, an AssertionError will be raised.
     """
 
-    def __init__(self, exc_type, value_re=None, msg=None):
+    def __init__(
+        self,
+        exc_type: type[BaseException],
+        value_re: str | None = None,
+        msg: str | None = None,
+    ) -> None:
         """Construct an `ExpectedException`.
 
         :param exc_type: The type of exception to expect.
@@ -1149,10 +1278,15 @@ class ExpectedException:
         self.value_re = value_re
         self.msg = msg
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         pass
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: types.TracebackType | None,
+    ) -> bool:
         if exc_type is None:
             error_msg = f"{self.exc_type.__name__} not raised."
             if self.msg:
@@ -1162,12 +1296,16 @@ class ExpectedException:
             return False
         if self.value_re:
             exception_matcher = MatchesException(self.exc_type, self.value_re)
-            matcher: Matcher | Annotate
+            matcher: Matcher[ExcInfo]
             if self.msg:
                 matcher = Annotate(self.msg, exception_matcher)
             else:
                 matcher = exception_matcher
-            mismatch = matcher.match((exc_type, exc_value, traceback))
+            # Type narrow: we know exc_type is not None from check above,
+            # and exc_value must not be None for real exceptions
+            assert exc_value is not None, "Exception value should not be None"
+            exc_info_tuple: ExcInfo = (exc_type, exc_value, traceback)
+            mismatch = matcher.match(exc_info_tuple)
             if mismatch:
                 raise AssertionError(mismatch.describe())
         return True
@@ -1180,22 +1318,30 @@ class Nullary:
     preserves the ``repr()`` of ``f``.
     """
 
-    def __init__(self, callable_object, *args, **kwargs):
+    def __init__(
+        self, callable_object: Callable[..., object], *args: object, **kwargs: object
+    ) -> None:
         self._callable_object = callable_object
         self._args = args
         self._kwargs = kwargs
 
-    def __call__(self):
+    def __call__(self) -> object:
         return self._callable_object(*self._args, **self._kwargs)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return repr(self._callable_object)
 
 
 class DecorateTestCaseResult:
     """Decorate a TestCase and permit customisation of the result for runs."""
 
-    def __init__(self, case, callout, before_run=None, after_run=None):
+    def __init__(
+        self,
+        case: unittest.TestCase,
+        callout: Callable[[TestResult | None], TestResult],
+        before_run: Callable[[TestResult], None] | None = None,
+        after_run: Callable[[TestResult], None] | None = None,
+    ) -> None:
         """Construct a DecorateTestCaseResult.
 
         :param case: The case to decorate.
@@ -1212,7 +1358,9 @@ class DecorateTestCaseResult:
         self.before_run = before_run
         self.after_run = after_run
 
-    def _run(self, result, run_method):
+    def _run(
+        self, result: TestResult | None, run_method: Callable[[TestResult], object]
+    ) -> object:
         result = self.callout(result)
         if self.before_run:
             self.before_run(result)
@@ -1222,19 +1370,19 @@ class DecorateTestCaseResult:
             if self.after_run:
                 self.after_run(result)
 
-    def run(self, result=None):
-        self._run(result, self.decorated.run)
+    def run(self, result: TestResult | None = None) -> object:
+        return self._run(result, self.decorated.run)
 
-    def __call__(self, result=None):
-        self._run(result, self.decorated)
+    def __call__(self, result: TestResult | None = None) -> object:
+        return self._run(result, self.decorated)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> object:
         return getattr(self.decorated, name)
 
-    def __delattr__(self, name):
+    def __delattr__(self, name: str) -> None:
         delattr(self.decorated, name)
 
-    def __setattr__(self, name, value):
+    def __setattr__(self, name: str, value: object) -> None:
         if name in ("decorated", "callout", "before_run", "after_run"):
             self.__dict__[name] = value
             return

@@ -4,6 +4,8 @@
 
 __all__ = [
     "CopyStreamResult",
+    "DetailsDict",
+    "ExcInfo",
     "ExtendedToOriginalDecorator",
     "ExtendedToStreamDecorator",
     "MultiTestResult",
@@ -28,6 +30,8 @@ __all__ = [
 
 from testtools.testresult.real import (
     CopyStreamResult,
+    DetailsDict,
+    ExcInfo,
     ExtendedToOriginalDecorator,
     ExtendedToStreamDecorator,
     MultiTestResult,

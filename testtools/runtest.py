@@ -8,8 +8,17 @@ __all__ = [
 ]
 
 import sys
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Any
 
-from testtools.testresult import ExtendedToOriginalDecorator
+from testtools.testresult import (
+    ExcInfo,
+    ExtendedToOriginalDecorator,
+    TestResult,
+)
+
+if TYPE_CHECKING:
+    from testtools.testcase import TestCase
 
 
 class MultipleExceptions(Exception):
@@ -47,7 +56,17 @@ class RunTest:
         reporting of error/failure/skip etc.
     """
 
-    def __init__(self, case, handlers=None, last_resort=None):
+    def __init__(
+        self,
+        case: "TestCase",
+        handlers: (
+            "list[tuple[type[BaseException], "
+            "Callable[[TestCase, TestResult, BaseException], None]]] | None"
+        ) = None,
+        last_resort: (
+            "Callable[[TestCase, TestResult, BaseException], None] | None"
+        ) = None,
+    ) -> None:
         """Create a RunTest to run a case.
 
         :param case: A testtools.TestCase test case object.
@@ -61,11 +80,11 @@ class RunTest:
         """
         self.case = case
         self.handlers = handlers or []
-        self.exception_caught = object()
-        self._exceptions = []
+        self.exception_caught: object = object()
+        self._exceptions: list[BaseException] = []
         self.last_resort = last_resort or (lambda case, result, exc: None)
 
-    def run(self, result=None):
+    def run(self, result: "TestResult | None" = None) -> TestResult:
         """Run self.case reporting activity to result.
 
         :param result: Optional testtools.TestResult to report activity to.
@@ -82,7 +101,7 @@ class RunTest:
             if result is None:
                 actual_result.stopTestRun()
 
-    def _run_one(self, result):
+    def _run_one(self, result: "TestResult") -> "TestResult":
         """Run one test reporting to result.
 
         :param result: A testtools.TestResult to report activity to.
@@ -91,9 +110,9 @@ class RunTest:
             confidence by client code.
         :return: The result object the test was run against.
         """
-        return self._run_prepared_result(ExtendedToOriginalDecorator(result))
+        return self._run_prepared_result(ExtendedToOriginalDecorator(result))  # type: ignore[arg-type]
 
-    def _run_prepared_result(self, result):
+    def _run_prepared_result(self, result: "TestResult") -> "TestResult":
         """Run one test reporting to result.
 
         :param result: A testtools.TestResult to report activity to.
@@ -103,7 +122,9 @@ class RunTest:
         self.result = result
         try:
             self._exceptions = []
-            self.case.__testtools_tb_locals__ = getattr(result, "tb_locals", False)
+            self.case.__testtools_tb_locals__ = getattr(  # type: ignore[attr-defined]
+                result, "tb_locals", False
+            )
             self._run_core()
             if self._exceptions:
                 # One or more caught exceptions, now trigger the test's
@@ -120,7 +141,7 @@ class RunTest:
             result.stopTest(self.case)
         return result
 
-    def _run_core(self):
+    def _run_core(self) -> None:
         """Run the user supplied test code."""
         test_method = self.case._get_test_method()
         skip_case = getattr(self.case, "__unittest_skip__", False)
@@ -168,7 +189,7 @@ class RunTest:
                             self.case, details=self.case.getDetails()
                         )
 
-    def _run_cleanups(self, result):
+    def _run_cleanups(self, result: "TestResult") -> object | None:
         """Run the cleanups that have been added with addCleanup.
 
         See the docstring for addCleanup for more information.
@@ -184,8 +205,9 @@ class RunTest:
                 failing = True
         if failing:
             return self.exception_caught
+        return None
 
-    def _run_user(self, fn, *args, **kwargs):
+    def _run_user(self, fn: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
         """Run a user supplied function.
 
         Exceptions are processed by `_got_user_exception`.
@@ -196,9 +218,13 @@ class RunTest:
         try:
             return fn(*args, **kwargs)
         except BaseException:
-            return self._got_user_exception(sys.exc_info())
+            # Inside except block, exc_info() is guaranteed to have non-None values
+            exc_info = sys.exc_info()
+            return self._got_user_exception(exc_info)  # type: ignore[arg-type]
 
-    def _got_user_exception(self, exc_info, tb_label="traceback"):
+    def _got_user_exception(
+        self, exc_info: ExcInfo, tb_label: str = "traceback"
+    ) -> object:
         """Called when user code raises an exception.
 
         If 'exc_info' is a `MultipleExceptions`, then we recurse into it
@@ -226,7 +252,7 @@ class RunTest:
         return self.exception_caught
 
 
-def _raise_force_fail_error():
+def _raise_force_fail_error() -> None:
     raise AssertionError("Forced Test Failure")
 
 

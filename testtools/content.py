@@ -197,7 +197,8 @@ class TracebackContent(Content):
 
     def __init__(
         self,
-        err: tuple[type[BaseException], BaseException, types.TracebackType | None],
+        err: tuple[type[BaseException], BaseException, types.TracebackType | None]
+        | tuple[None, None, None],
         test: _TestCase | None,
         capture_locals: bool = False,
     ) -> None:
@@ -211,6 +212,9 @@ class TracebackContent(Content):
             raise ValueError("err may not be None")
 
         exctype, value, tb = err
+        # Ensure we have a real exception, not the (None, None, None) variant
+        assert exctype is not None, "exctype must not be None"
+        assert value is not None, "value must not be None"
         # Skip test runner traceback levels
         if StackLinesContent.HIDE_INTERNAL_STACK:
             while tb and "__unittest" in tb.tb_frame.f_globals:

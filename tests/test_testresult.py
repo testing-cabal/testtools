@@ -146,6 +146,8 @@ def make_exception_info(exceptionFactory, *args, **kwargs):
 class TestControlContract:
     """Stopping test runs."""
 
+    __test__ = False  # Tell pytest not to collect this as a test class
+
     # These are provided by the class that uses this mixin
     makeResult: Any
     assertFalse: Any
@@ -573,6 +575,8 @@ class TestStreamToExtendedContract(TestCase, DetailsContract):
 
 
 class TestStreamResultContract:
+    __test__ = False  # Tell pytest not to collect this as a test class
+
     # These are provided by the class that uses this mixin
     addCleanup: Any
 

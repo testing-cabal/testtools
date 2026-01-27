@@ -18,9 +18,15 @@ __all__ = [
 ]
 
 import unicodedata
+from typing import TYPE_CHECKING, Generic, TypeVar
+
+if TYPE_CHECKING:
+    from testtools.testresult import DetailsDict
+
+T = TypeVar("T")
 
 
-def _slow_escape(text):
+def _slow_escape(text: str) -> str:
     """Escape unicode ``text`` leaving printable characters unmodified
 
     The behaviour emulates the Python 3 implementation of repr, see
@@ -30,7 +36,7 @@ def _slow_escape(text):
     does not handle astral characters correctly on Python builds with 16 bit
     rather than 32 bit unicode type.
     """
-    output = []
+    output: list[str | bytes] = []
     for c in text:
         o = ord(c)
         if o < 256:
@@ -47,14 +53,14 @@ def _slow_escape(text):
                 output.append(c.encode("unicode-escape"))
             else:
                 output.append(c)
-    return "".join(output)
+    return "".join(output)  # type: ignore[arg-type]
 
 
-def text_repr(text, multiline=None):
+def text_repr(text: str | bytes, multiline: bool | None = None) -> str:
     """Rich repr for ``text`` returning unicode, triple quoted if ``multiline``."""
     nl = (isinstance(text, bytes) and bytes((0xA,))) or "\n"
     if multiline is None:
-        multiline = nl in text
+        multiline = nl in text  # type: ignore[operator]
     if not multiline:
         # Use normal repr for single line of unicode
         return repr(text)
@@ -64,7 +70,7 @@ def text_repr(text, multiline=None):
         # making sure that quotes are not escaped.
         offset = len(prefix) + 1
         lines = []
-        for line in text.split(nl):
+        for line in text.split(nl):  # type: ignore[arg-type]
             r = repr(line)
             q = r[-1]
             lines.append(r[offset:-1].replace("\\" + q, q))
@@ -91,7 +97,7 @@ def text_repr(text, multiline=None):
     return "".join([prefix, quote, escaped_text, quote])
 
 
-class Matcher:
+class Matcher(Generic[T]):
     """A pattern matcher.
 
     A Matcher must implement match and __str__ to be used by
@@ -105,11 +111,11 @@ class Matcher:
     a Java transcription.
     """
 
-    def match(self, something):
+    def match(self, something: T) -> "Mismatch | None":
         """Return None if this matcher matches something, a Mismatch otherwise."""
         raise NotImplementedError(self.match)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Get a sensible human representation of the matcher.
 
         This should include the parameters given to the matcher and any
@@ -121,7 +127,9 @@ class Matcher:
 class Mismatch:
     """An object describing a mismatch detected by a Matcher."""
 
-    def __init__(self, description=None, details=None):
+    def __init__(
+        self, description: str | None = None, details: "DetailsDict | None" = None
+    ) -> None:
         """Construct a `Mismatch`.
 
         :param description: A description to use.  If not provided,
@@ -135,7 +143,7 @@ class Mismatch:
             details = {}
         self._details = details
 
-    def describe(self):
+    def describe(self) -> str:
         """Describe the mismatch.
 
         This should be either a human-readable string or castable to a string.
@@ -147,7 +155,7 @@ class Mismatch:
         except AttributeError:
             raise NotImplementedError(self.describe)
 
-    def get_details(self):
+    def get_details(self) -> "DetailsDict":
         """Get extra details about the mismatch.
 
         This allows the mismatch to provide extra information beyond the basic
@@ -165,14 +173,14 @@ class Mismatch:
         """
         return getattr(self, "_details", {})
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<testtools.matchers.Mismatch object at {id(self):x} "
             f"attributes={self.__dict__!r}>"
         )
 
 
-class MismatchError(AssertionError):
+class MismatchError(AssertionError, Generic[T]):
     """Raised when a mismatch occurs."""
 
     # This class exists to work around
@@ -180,14 +188,16 @@ class MismatchError(AssertionError):
     # guaranteed way of getting a readable exception, no matter what crazy
     # characters are in the matchee, matcher or mismatch.
 
-    def __init__(self, matchee, matcher, mismatch, verbose=False):
+    def __init__(
+        self, matchee: T, matcher: Matcher[T], mismatch: Mismatch, verbose: bool = False
+    ) -> None:
         super().__init__()
         self.matchee = matchee
         self.matcher = matcher
         self.mismatch = mismatch
         self.verbose = verbose
 
-    def __str__(self):
+    def __str__(self) -> str:
         difference = self.mismatch.describe()
         if self.verbose:
             # GZ 2011-08-24: Smelly API? Better to take any object and special
@@ -204,7 +214,7 @@ class MismatchError(AssertionError):
             return difference
 
 
-class MismatchDecorator:
+class MismatchDecorator(Mismatch):
     """Decorate a ``Mismatch``.
 
     Forwards all messages to the original mismatch object.  Probably the best
@@ -212,20 +222,20 @@ class MismatchDecorator:
     custom decoration logic.
     """
 
-    def __init__(self, original):
+    def __init__(self, original: Mismatch) -> None:
         """Construct a `MismatchDecorator`.
 
         :param original: A `Mismatch` object to decorate.
         """
         self.original = original
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<testtools.matchers.MismatchDecorator({self.original!r})>"
 
-    def describe(self):
+    def describe(self) -> str:
         return self.original.describe()
 
-    def get_details(self):
+    def get_details(self) -> "DetailsDict":
         return self.original.get_details()
 
 

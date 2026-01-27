@@ -2,6 +2,9 @@
 
 """Helpers for monkey-patching Python code."""
 
+from collections.abc import Callable
+from typing import Any
+
 __all__ = [
     "MonkeyPatcher",
     "patch",
@@ -19,7 +22,7 @@ class MonkeyPatcher:
     # object before we patched it.
     _NO_SUCH_ATTRIBUTE = object()
 
-    def __init__(self, *patches):
+    def __init__(self, *patches: tuple[object, str, object]) -> None:
         """Construct a `MonkeyPatcher`.
 
         :param patches: The patches to apply, each should be (obj, name,
@@ -27,14 +30,14 @@ class MonkeyPatcher:
             `add_patch`.
         """
         # List of patches to apply in (obj, name, value).
-        self._patches_to_apply = []
+        self._patches_to_apply: list[tuple[object, str, object]] = []
         # List of the original values for things that have been patched.
         # (obj, name, value) format.
-        self._originals = []
+        self._originals: list[tuple[object, str, object]] = []
         for patch in patches:
             self.add_patch(*patch)
 
-    def add_patch(self, obj, name, value):
+    def add_patch(self, obj: object, name: str, value: object) -> None:
         """Add a patch to overwrite 'name' on 'obj' with 'value'.
 
         The attribute C{name} on C{obj} will be assigned to C{value} when
@@ -44,7 +47,7 @@ class MonkeyPatcher:
         """
         self._patches_to_apply.append((obj, name, value))
 
-    def patch(self):
+    def patch(self) -> None:
         """Apply all of the patches that have been specified with `add_patch`.
 
         Reverse this operation using L{restore}.
@@ -54,7 +57,7 @@ class MonkeyPatcher:
             self._originals.append((obj, name, original_value))
             setattr(obj, name, value)
 
-    def restore(self):
+    def restore(self) -> None:
         """Restore all original values to any patched objects.
 
         If the patched attribute did not exist on an object before it was
@@ -68,7 +71,7 @@ class MonkeyPatcher:
             else:
                 setattr(obj, name, value)
 
-    def run_with_patches(self, f, *args, **kw):
+    def run_with_patches(self, f: Callable[..., Any], *args: Any, **kw: Any) -> Any:
         """Run 'f' with the given args and kwargs with all patches applied.
 
         Restores all objects to their original state when finished.
@@ -80,7 +83,7 @@ class MonkeyPatcher:
             self.restore()
 
 
-def patch(obj, attribute, value):
+def patch(obj: object, attribute: str, value: object) -> Callable[[], None]:
     """Set 'obj.attribute' to 'value' and return a callable to restore 'obj'.
 
     If 'attribute' is not set on 'obj' already, then the returned callable
