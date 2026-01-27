@@ -25,6 +25,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Software Development :: Testing",
+    "Typing :: Typed",
 ]
 dynamic = ["version"]
 requires-python = ">=3.10"
