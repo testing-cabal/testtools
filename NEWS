@@ -3,6 +3,24 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
+2.8.3
+~~~~~
+
+Changes
+-------
+
+* Add 'Typing :: Typed' classifier to package metadata.
+  (Jelmer Vernooĳ)
+
+Improvements
+------------
+
+* Add comprehensive type annotations to assertions, compat, run, and other modules.
+  (Jelmer Vernooĳ, Stephen Finucane)
+
+* Support async setUp/tearDown validation with Deferreds.
+  (Jelmer Vernooĳ)
+
 2.8.2
 ~~~~~
 
