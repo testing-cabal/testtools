@@ -822,7 +822,7 @@ class TestCase(unittest.TestCase):
                     )
                 return result
 
-            setup_result.addBoth(_validate_setup_called)
+            setup_result = setup_result.addBoth(_validate_setup_called)
         else:
             # Synchronous: validate immediately
             if not self.__setup_called:
@@ -864,7 +864,7 @@ class TestCase(unittest.TestCase):
                     )
                 return result
 
-            teardown_result.addBoth(_validate_teardown_called)
+            teardown_result = teardown_result.addBoth(_validate_teardown_called)
         else:
             # Synchronous: validate immediately
             if not self.__teardown_called:
