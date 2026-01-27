@@ -800,16 +800,10 @@ class TestCase(unittest.TestCase):
         :raises ValueError: If the base class setUp is not called, a
             ValueError is raised.
         """
-        # setUp() normally returns None, but async test frameworks may
-        # return Deferred-like objects
-        setup_result: object = self.setUp()  # type: ignore[func-returns-value]
+        ret = self.setUp()  # type: ignore[func-returns-value]
 
         # Check if the return value is a Deferred (duck-typing to avoid hard dependency)
-        if (
-            setup_result is not None
-            and hasattr(setup_result, "addBoth")
-            and callable(getattr(setup_result, "addBoth"))
-        ):
+        if hasattr(ret, "addBoth") and callable(getattr(ret, "addBoth")):
             # Deferred-like object: validate asynchronously after it resolves
             def _validate_setup_called(result: object) -> object:
                 if not self.__setup_called:
@@ -822,7 +816,7 @@ class TestCase(unittest.TestCase):
                     )
                 return result
 
-            setup_result = setup_result.addBoth(_validate_setup_called)
+            ret.addBoth(_validate_setup_called)
         else:
             # Synchronous: validate immediately
             if not self.__setup_called:
@@ -833,7 +827,7 @@ class TestCase(unittest.TestCase):
                     f"super({self.__class__.__name__}, self).setUp() "
                     "from your setUp()."
                 )
-        return setup_result
+        return ret
 
     def _run_teardown(self, result: TestResult) -> object:
         """Run the tearDown function for this test.
@@ -842,16 +836,10 @@ class TestCase(unittest.TestCase):
         :raises ValueError: If the base class tearDown is not called, a
             ValueError is raised.
         """
-        # tearDown() normally returns None, but async test frameworks
-        # may return Deferred-like objects
-        teardown_result: object = self.tearDown()  # type: ignore[func-returns-value]
+        ret = self.tearDown()  # type: ignore[func-returns-value]
 
         # Check if the return value is a Deferred (duck-typing to avoid hard dependency)
-        if (
-            teardown_result is not None
-            and hasattr(teardown_result, "addBoth")
-            and callable(getattr(teardown_result, "addBoth"))
-        ):
+        if hasattr(ret, "addBoth") and callable(getattr(ret, "addBoth")):
             # Deferred-like object: validate asynchronously after it resolves
             def _validate_teardown_called(result: object) -> object:
                 if not self.__teardown_called:
@@ -864,7 +852,7 @@ class TestCase(unittest.TestCase):
                     )
                 return result
 
-            teardown_result = teardown_result.addBoth(_validate_teardown_called)
+            ret.addBoth(_validate_teardown_called)
         else:
             # Synchronous: validate immediately
             if not self.__teardown_called:
@@ -875,7 +863,7 @@ class TestCase(unittest.TestCase):
                     f"super({self.__class__.__name__}, self).tearDown() "
                     "from your tearDown()."
                 )
-        return teardown_result
+        return ret
 
     def _get_test_method(self) -> Callable[[], object]:
         method_name = getattr(self, "_testMethodName")
