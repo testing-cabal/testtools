@@ -1148,26 +1148,25 @@ class TestAsyncSetUpTearDownValidation(NeedsTwistedTestCase):
         result = TestResult()
         test.run(result)
         # The test should pass - the async setUp should be validated correctly
-        # Debug: print all result details
-        print(f"\n{'='*70}")
-        print(f"Errors: {len(result.errors)}")
-        print(f"Failures: {len(result.failures)}")
-        print(f"Unexpected successes: {len(getattr(result, 'unexpectedSuccesses', []))}")
-        print(f"Was successful: {result.wasSuccessful()}")
+        # Build detailed error message for debugging
+        msg_parts = [
+            f"Errors: {len(result.errors)}",
+            f"Failures: {len(result.failures)}",
+            f"Unexpected successes: {len(getattr(result, 'unexpectedSuccesses', []))}",
+        ]
         if result.errors:
-            print("\nERRORS:")
+            msg_parts.append("ERRORS:")
             for test_case, error_text in result.errors:
-                print(f"  {test_case}: {error_text}")
+                msg_parts.append(f"  {test_case}: {error_text[:200]}")
         if result.failures:
-            print("\nFAILURES:")
+            msg_parts.append("FAILURES:")
             for test_case, failure_text in result.failures:
-                print(f"  {test_case}: {failure_text}")
+                msg_parts.append(f"  {test_case}: {failure_text[:200]}")
         if hasattr(result, 'unexpectedSuccesses') and result.unexpectedSuccesses:
-            print("\nUNEXPECTED SUCCESSES:")
+            msg_parts.append("UNEXPECTED SUCCESSES:")
             for test_case in result.unexpectedSuccesses:
-                print(f"  {test_case}")
-        print(f"{'='*70}\n")
-        self.assertTrue(result.wasSuccessful())
+                msg_parts.append(f"  {test_case}")
+        self.assertTrue(result.wasSuccessful(), "\n".join(msg_parts))
 
     def test_async_teardown_with_deferred_upcall(self):
         # tearDown that calls parent asynchronously via Deferred callback
