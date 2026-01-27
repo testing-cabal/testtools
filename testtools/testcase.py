@@ -23,7 +23,7 @@ import sys
 import types
 import unittest
 from collections.abc import Callable, Iterator
-from typing import Any, Protocol, TypeVar, cast
+from typing import Protocol, TypeVar, cast
 from unittest.case import SkipTest
 
 T = TypeVar("T")
@@ -271,9 +271,9 @@ class TestCase(unittest.TestCase):
         test_method = self._get_test_method()
         if runTest is None:
             runTest = getattr(test_method, "_run_test_with", self.run_tests_with)
-        self.__RunTest: type[RunTest] | Callable[..., RunTest] = cast(
-            "type[RunTest] | Callable[..., RunTest]", runTest
-        )
+        # runTest should be a RunTest class or factory function
+        assert callable(runTest), f"runTest must be callable, got {type(runTest)}"
+        self.__RunTest: type[RunTest] | Callable[..., RunTest] = runTest
         if getattr(test_method, "__unittest_expecting_failure__", False):
             setattr(self, self._testMethodName, _expectedFailure(test_method))
         # Used internally for onException processing - used to gather extra
@@ -1130,16 +1130,23 @@ class WithAttributes:
     testtools.testcase.MyTest/test_bar[foo]
     """
 
-    _get_test_method: Any  # Provided by the class we're mixed with
+    # Provided by the class we're mixed with
+    _get_test_method: Callable[[], Callable[[], object]]
 
     def id(self) -> str:
-        orig = cast(str, super().id())  # type: ignore[misc]
+        orig = super().id()  # type: ignore[misc]
+        assert isinstance(orig, str), (
+            f"Expected str from super().id(), got {type(orig)}"
+        )
         # Depends on testtools.TestCase._get_test_method, be nice to support
         # plain unittest.
         fn = self._get_test_method()
-        attributes = cast(str, getattr(fn, "__testtools_attrs", None))
+        attributes = getattr(fn, "__testtools_attrs", None)
         if not attributes:
             return orig
+        assert isinstance(attributes, set), (
+            f"Expected set for __testtools_attrs, got {type(attributes)}"
+        )
         return orig + "[" + ",".join(sorted(attributes)) + "]"
 
 
