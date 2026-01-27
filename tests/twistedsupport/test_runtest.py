@@ -1148,6 +1148,19 @@ class TestAsyncSetUpTearDownValidation(NeedsTwistedTestCase):
         result = TestResult()
         test.run(result)
         # The test should pass - the async setUp should be validated correctly
+        if not result.wasSuccessful():
+            # Print detailed error information for CI debugging
+            import sys
+            print("\n" + "="*70, file=sys.stderr)
+            print("TEST FAILED ON", sys.version, file=sys.stderr)
+            print("="*70, file=sys.stderr)
+            for error_case, error_text in result.errors:
+                print(f"\nERROR in {error_case}:", file=sys.stderr)
+                print(error_text, file=sys.stderr)
+            for fail_case, fail_text in result.failures:
+                print(f"\nFAILURE in {fail_case}:", file=sys.stderr)
+                print(fail_text, file=sys.stderr)
+            print("="*70 + "\n", file=sys.stderr)
         self.assertTrue(result.wasSuccessful())
 
     def test_async_teardown_with_deferred_upcall(self):
