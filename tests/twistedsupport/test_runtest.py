@@ -1148,25 +1148,18 @@ class TestAsyncSetUpTearDownValidation(NeedsTwistedTestCase):
         result = TestResult()
         test.run(result)
         # The test should pass - the async setUp should be validated correctly
-        # Build detailed error message for debugging
-        msg_parts = [
-            f"Errors: {len(result.errors)}",
-            f"Failures: {len(result.failures)}",
-            f"Unexpected successes: {len(getattr(result, 'unexpectedSuccesses', []))}",
-        ]
-        if result.errors:
-            msg_parts.append("ERRORS:")
-            for test_case, error_text in result.errors:
-                msg_parts.append(f"  {test_case}: {error_text[:200]}")
-        if result.failures:
-            msg_parts.append("FAILURES:")
-            for test_case, failure_text in result.failures:
-                msg_parts.append(f"  {test_case}: {failure_text[:200]}")
-        if hasattr(result, 'unexpectedSuccesses') and result.unexpectedSuccesses:
-            msg_parts.append("UNEXPECTED SUCCESSES:")
-            for test_case in result.unexpectedSuccesses:
-                msg_parts.append(f"  {test_case}")
-        self.assertTrue(result.wasSuccessful(), "\n".join(msg_parts))
+        if not result.wasSuccessful():
+            # Print full error for Python 3.12 debugging
+            if result.errors:
+                test_case, error_text = result.errors[0]
+                self.fail(f"Test had error:\n{error_text}")
+            elif result.failures:
+                test_case, failure_text = result.failures[0]
+                self.fail(f"Test had failure:\n{failure_text}")
+            else:
+                self.fail(f"Test was not successful but no errors/failures found. "
+                         f"Unexpected successes: {len(getattr(result, 'unexpectedSuccesses', []))}")
+        self.assertTrue(result.wasSuccessful())
 
     def test_async_teardown_with_deferred_upcall(self):
         # tearDown that calls parent asynchronously via Deferred callback
