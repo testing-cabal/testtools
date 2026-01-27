@@ -1148,19 +1148,25 @@ class TestAsyncSetUpTearDownValidation(NeedsTwistedTestCase):
         result = TestResult()
         test.run(result)
         # The test should pass - the async setUp should be validated correctly
-        if not result.wasSuccessful():
-            # Print detailed error information for CI debugging
-            import sys
-            print("\n" + "="*70, file=sys.stderr)
-            print("TEST FAILED ON", sys.version, file=sys.stderr)
-            print("="*70, file=sys.stderr)
-            for error_case, error_text in result.errors:
-                print(f"\nERROR in {error_case}:", file=sys.stderr)
-                print(error_text, file=sys.stderr)
-            for fail_case, fail_text in result.failures:
-                print(f"\nFAILURE in {fail_case}:", file=sys.stderr)
-                print(fail_text, file=sys.stderr)
-            print("="*70 + "\n", file=sys.stderr)
+        # Debug: print all result details
+        print(f"\n{'='*70}")
+        print(f"Errors: {len(result.errors)}")
+        print(f"Failures: {len(result.failures)}")
+        print(f"Unexpected successes: {len(getattr(result, 'unexpectedSuccesses', []))}")
+        print(f"Was successful: {result.wasSuccessful()}")
+        if result.errors:
+            print("\nERRORS:")
+            for test_case, error_text in result.errors:
+                print(f"  {test_case}: {error_text}")
+        if result.failures:
+            print("\nFAILURES:")
+            for test_case, failure_text in result.failures:
+                print(f"  {test_case}: {failure_text}")
+        if hasattr(result, 'unexpectedSuccesses') and result.unexpectedSuccesses:
+            print("\nUNEXPECTED SUCCESSES:")
+            for test_case in result.unexpectedSuccesses:
+                print(f"  {test_case}")
+        print(f"{'='*70}\n")
         self.assertTrue(result.wasSuccessful())
 
     def test_async_teardown_with_deferred_upcall(self):
