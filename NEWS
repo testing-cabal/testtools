@@ -3,6 +3,17 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
+NEXT
+~~~~
+
+Improvements
+------------
+
+* Make ``extract_result()`` and ``DeferredNotFired`` public APIs in
+  ``testtools.twistedsupport``. These utilities are useful for extracting
+  results from synchronous Deferreds in tests.
+  (Jelmer Vernooĳ, #546)
+
 2.8.3
 ~~~~~
 

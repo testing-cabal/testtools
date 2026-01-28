@@ -7,8 +7,11 @@ __all__ = [
     "AsynchronousDeferredRunTest",
     "AsynchronousDeferredRunTestForBrokenTwisted",
     "CaptureTwistedLogs",
+    # Deferred utilities
+    "DeferredNotFired",
     "SynchronousDeferredRunTest",
     "assert_fails_with",
+    "extract_result",
     "failed",
     "flush_logged_errors",
     "has_no_result",
@@ -16,6 +19,10 @@ __all__ = [
     "succeeded",
 ]
 
+from ._deferred import (
+    DeferredNotFired,
+    extract_result,
+)
 from ._matchers import (
     failed,
     has_no_result,
