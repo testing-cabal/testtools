@@ -38,6 +38,20 @@ See also `Testing Deferreds without the reactor`_ and the `Deferred howto`_.
    :noindex:
 
 
+Extracting results from Deferreds
+----------------------------------
+
+When testing code that returns synchronous
+:py:class:`~twisted.internet.defer.Deferred`\s for compatibility reasons, you
+may want to extract the result directly instead of using matchers.
+
+.. autofunction:: testtools.twistedsupport.extract_result
+   :noindex:
+
+.. autoexception:: testtools.twistedsupport.DeferredNotFired
+   :noindex:
+
+
 Running tests in the reactor
 ----------------------------
 
