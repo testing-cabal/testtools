@@ -307,6 +307,9 @@ class TestCase(unittest.TestCase):
         # __details is lazy-initialized so that a constructed-but-not-run
         # TestCase is safe to use with clone_test_with_new_id.
         self.__details: DetailsDict | None = None
+        # force_failure is set by expectThat() on mismatch; must be
+        # cleared so re-runs of the same test can succeed.
+        self.force_failure: bool | None = None
 
     def __eq__(self, other: object) -> bool:
         eq = getattr(unittest.TestCase, "__eq__", None)

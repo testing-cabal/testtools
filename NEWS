@@ -8,6 +8,9 @@ NEXT
 
 Improvements
 ------------
+* Clear ``force_failure`` in ``_reset()`` so that re-running a test
+  after an ``expectThat`` failure can succeed if successful conditions are met again.
+  (OumarCamara, #563)
 
 * Make ``extract_result()`` and ``DeferredNotFired`` public APIs in
   ``testtools.twistedsupport``. These utilities are useful for extracting
