@@ -5,6 +5,9 @@ name: Publish to PyPI
   push:
     branches:
       - 'master'
+    tags:
+      - '2.*'
+
   workflow_dispatch:
 
 permissions:
