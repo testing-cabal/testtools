@@ -37,7 +37,7 @@ Homepage = "https://github.com/testing-cabal/testtools"
 test = ["testscenarios", "testresources"]
 twisted = ["Twisted", "fixtures"]
 dev = [
-    "ruff==0.15.2",
+    "ruff==0.15.4",
     "mypy>=1.0.0",
     "typing-extensions;python_version<'3.11'",
 ]
