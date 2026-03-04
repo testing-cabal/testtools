@@ -495,7 +495,7 @@ class TestCase(unittest.TestCase):
 
     def assertRaises(  # type: ignore[override]
         self,
-        expected_exception: type[BaseException],
+        expected_exception: type[BaseException] | tuple[type[BaseException]],
         callable: Callable[..., object] | None = None,
         *args: object,
         **kwargs: object,
@@ -1206,7 +1206,10 @@ class _AssertRaisesContext:
     """
 
     def __init__(
-        self, expected: type[BaseException], test_case: TestCase, msg: str | None = None
+        self,
+        expected: type[BaseException] | tuple[type[BaseException]],
+        test_case: TestCase,
+        msg: str | None = None,
     ) -> None:
         """Construct an `_AssertRaisesContext`.
 
