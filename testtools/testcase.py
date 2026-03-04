@@ -23,7 +23,7 @@ import sys
 import types
 import unittest
 from collections.abc import Callable, Iterator
-from typing import TypeVar, cast
+from typing import TYPE_CHECKING, TypeVar, cast
 from unittest.case import SkipTest
 
 T = TypeVar("T")
@@ -55,6 +55,12 @@ from testtools.testresult import (
     ExtendedToOriginalDecorator,
     TestResult,
 )
+
+if TYPE_CHECKING:
+    if sys.version_info >= (3, 11):
+        from typing import Self
+    else:
+        from typing_extensions import Self
 
 # Circular import: fixtures imports gather_details from here, we import
 # fixtures, leading to gather_details not being available and fixtures being
@@ -1222,7 +1228,7 @@ class _AssertRaisesContext:
         self.msg = msg
         self.exception: BaseException | None = None
 
-    def __enter__(self) -> "_AssertRaisesContext":
+    def __enter__(self) -> "Self":
         return self
 
     def __exit__(
