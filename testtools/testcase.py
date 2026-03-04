@@ -23,7 +23,7 @@ import sys
 import types
 import unittest
 from collections.abc import Callable, Iterator
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TYPE_CHECKING, TypeVar, cast, overload
 from unittest.case import SkipTest
 
 T = TypeVar("T")
@@ -498,6 +498,24 @@ class TestCase(unittest.TestCase):
         else:
             matcher = IsInstance(klass)
         self.assertThat(obj, matcher, msg or "")
+
+    @overload  # type: ignore[override]
+    def assertRaises(
+        self,
+        expected_exception: type[BaseException] | tuple[type[BaseException]],
+        callable: Callable[..., object],
+        *args: object,
+        **kwargs: object,
+    ) -> BaseException: ...
+
+    @overload  # type: ignore[override]
+    def assertRaises(
+        self,
+        expected_exception: type[BaseException] | tuple[type[BaseException]],
+        callable: None = ...,
+        *args: object,
+        **kwargs: object,
+    ) -> "_AssertRaisesContext": ...
 
     def assertRaises(  # type: ignore[override]
         self,
