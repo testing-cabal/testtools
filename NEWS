@@ -3,6 +3,27 @@ testtools NEWS
 
 Changes and improvements to testtools_, grouped by release.
 
+NEXT
+~~~~
+
+2.8.6
+~~~~~
+
+Improvements
+------------
+* Improve the type annotations for ``testtools.testcase.TestCase.assertRaises``.
+  This method will now be typed correctly when called as a method or as a
+  context manager.
+  (Stephen Finucane, #577, #578)
+
+2.8.5
+~~~~~
+
+Improvements
+------------
+* Fix the type annotations for ``testtools.testcase.TestCase.useFixture``
+  (Stephen Finucane, #574)
+
 2.8.4
 ~~~~~
 
@@ -70,8 +91,7 @@ Improvements
   (Jelmer Vernooĳ, #538)
 
 * Allow stream=None to be passed to various TestResult
-  classes that now support verbosity; fixes a regression
-from 2.8.0.
+  classes that now support verbosity; fixes a regression from 2.8.0.
   (Jelmer Vernooĳ)
 
 2.8.1
