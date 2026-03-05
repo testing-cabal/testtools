@@ -125,6 +125,7 @@ class SuccessResultTests(NeedsTwistedTestCase):
         deferred = defer.succeed(result)
         matcher = Is(None)  # Something that doesn't match `result`.
         mismatch = matcher.match(result)
+        assert mismatch is not None
         self.assertThat(
             self.match(matcher, deferred),
             mismatches(Equals(mismatch.describe()), Equals(mismatch.get_details())),
@@ -186,6 +187,7 @@ class FailureResultTests(NeedsTwistedTestCase):
         deferred = defer.fail(fail)
         matcher = Is(None)  # Something that doesn't match `fail`.
         mismatch = matcher.match(fail)
+        assert mismatch is not None
         self.assertThat(
             self.match(matcher, deferred),
             mismatches(Equals(mismatch.describe()), Equals(mismatch.get_details())),

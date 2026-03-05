@@ -714,21 +714,28 @@ class TestAssertions(TestCase):
     def test_assertThat_output(self):
         matchee = "foo"
         matcher = Equals("bar")
-        expected = matcher.match(matchee).describe()
-        self.assertFails(expected, self.assertThat, matchee, matcher)
+        mismatch = matcher.match(matchee)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
+        self.assertFails(mismatch.describe(), self.assertThat, matchee, matcher)
 
     def test_assertThat_message_is_annotated(self):
         matchee = "foo"
         matcher = Equals("bar")
-        expected = Annotate("woo", matcher).match(matchee).describe()
-        self.assertFails(expected, self.assertThat, matchee, matcher, "woo")
+        mismatch = Annotate("woo", matcher).match(matchee)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
+        self.assertFails(mismatch.describe(), self.assertThat, matchee, matcher, "woo")
 
     def test_assertThat_verbose_output(self):
         matchee = "foo"
         matcher = Equals("bar")
+        mismatch = matcher.match(matchee)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         expected = (
             f"Match failed. Matchee: {matchee!r}\nMatcher: {matcher}\n"
-            f"Difference: {matcher.match(matchee).describe()}\n"
+            f"Difference: {mismatch.describe()}\n"
         )
         self.assertFails(expected, self.assertThat, matchee, matcher, verbose=True)
 
@@ -809,10 +816,12 @@ class TestAssertions(TestCase):
         # unicode strings, we can still provide a meaningful error.
         matchee = "\xa7"
         matcher = Equals("a")
+        mismatch = matcher.match(matchee)
+        assert mismatch is not None
         expected = "Match failed. Matchee: {}\nMatcher: {}\nDifference: {}\n\n".format(
             repr(matchee).replace("\\xa7", matchee),
             matcher,
-            matcher.match(matchee).describe(),
+            mismatch.describe(),
         )
         e = self.assertRaises(
             self.failureException, self.assertThat, matchee, matcher, verbose=True

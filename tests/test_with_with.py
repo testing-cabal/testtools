@@ -43,7 +43,9 @@ class TestExpectedException(TestCase):
                 raise value_error
         except AssertionError:
             e = sys.exc_info()[1]
-            self.assertEqual(matcher.match(value_error).describe(), str(e))
+            mismatch = matcher.match(value_error)
+            assert mismatch is not None
+            self.assertEqual(mismatch.describe(), str(e))
         else:
             self.fail("AssertionError not raised.")
 

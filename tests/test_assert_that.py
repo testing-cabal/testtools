@@ -85,21 +85,27 @@ class AssertThatTests:
     def test_assertThat_output(self):
         matchee = "foo"
         matcher = Equals("bar")
-        expected = matcher.match(matchee).describe()
+        mismatch = matcher.match(matchee)
+        assert mismatch is not None
+        expected = mismatch.describe()
         self.assertFails(expected, self.assert_that_callable, matchee, matcher)
 
     def test_assertThat_message_is_annotated(self):
         matchee = "foo"
         matcher = Equals("bar")
-        expected = Annotate("woo", matcher).match(matchee).describe()
+        mismatch = Annotate("woo", matcher).match(matchee)
+        assert mismatch is not None
+        expected = mismatch.describe()
         self.assertFails(expected, self.assert_that_callable, matchee, matcher, "woo")
 
     def test_assertThat_verbose_output(self):
         matchee = "foo"
         matcher = Equals("bar")
+        mismatch = matcher.match(matchee)
+        assert mismatch is not None
         expected = (
             f"Match failed. Matchee: {matchee!r}\nMatcher: {matcher}\n"
-            f"Difference: {matcher.match(matchee).describe()}\n"
+            f"Difference: {mismatch.describe()}\n"
         )
         self.assertFails(
             expected, self.assert_that_callable, matchee, matcher, verbose=True
@@ -134,10 +140,12 @@ class AssertThatTests:
         # unicode strings, we can still provide a meaningful error.
         matchee = "\xa7"
         matcher = Equals("a")
+        mismatch = matcher.match(matchee)
+        assert mismatch is not None
         expected = "Match failed. Matchee: {}\nMatcher: {}\nDifference: {}\n\n".format(
             repr(matchee).replace("\\xa7", matchee),
             matcher,
-            matcher.match(matchee).describe(),
+            mismatch.describe(),
         )
         e = self.assertRaises(
             self.failureException,

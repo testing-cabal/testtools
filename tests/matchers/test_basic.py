@@ -274,7 +274,7 @@ class StartsWithTests(TestCase):
 
     def test_match(self):
         matcher = StartsWith("bar")
-        self.assertIs(None, matcher.match("barf"))
+        self.assertIsNone(matcher.match("barf"))
 
     def test_mismatch_returns_does_not_start_with(self):
         matcher = StartsWith("bar")
@@ -283,11 +283,15 @@ class StartsWithTests(TestCase):
     def test_mismatch_sets_matchee(self):
         matcher = StartsWith("bar")
         mismatch = matcher.match("foo")
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         self.assertEqual("foo", mismatch.matchee)
 
     def test_mismatch_sets_expected(self):
         matcher = StartsWith("bar")
         mismatch = matcher.match("foo")
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         self.assertEqual("bar", mismatch.expected)
 
 
@@ -344,11 +348,15 @@ class EndsWithTests(TestCase):
     def test_mismatch_sets_matchee(self):
         matcher = EndsWith("bar")
         mismatch = matcher.match("foo")
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         self.assertEqual("foo", mismatch.matchee)
 
     def test_mismatch_sets_expected(self):
         matcher = EndsWith("bar")
         mismatch = matcher.match("foo")
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         self.assertEqual("bar", mismatch.expected)
 
 
@@ -503,6 +511,7 @@ class TestNearlyBehavior(TestCase):
         matcher = Nearly(10, delta=2)
         mismatch = matcher.match(13)
         self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         self.assertIn("13", mismatch.describe())
 
     def test_exact_boundary_matches(self):
@@ -544,6 +553,7 @@ class TestNearlyBehavior(TestCase):
         matcher = Nearly(1.0, delta=0.1)
         mismatch = matcher.match("string")
         self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         self.assertIn("string", mismatch.describe())
 
     def test_none_type_mismatch(self):

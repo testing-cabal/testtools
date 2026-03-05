@@ -66,6 +66,7 @@ from testtools.testresult.doubles import (
     ExtendedTestResult,
     Python3TestResult,
     TwistedTestResult,
+    _StatusEvent,
 )
 from testtools.testresult.doubles import (
     StreamResult as LoggingStreamResult,
@@ -1353,17 +1354,23 @@ class TestExtendedToStreamDecorator(TestCase):
 
         # Should have: startTestRun, inprogress, traceback attachment, fail, stopTestRun
         self.assertEqual(events[0], ("startTestRun",))
-        self.assertEqual(events[1].test_id, test_id)
-        self.assertEqual(events[1].test_status, "inprogress")
+        event1 = events[1]
+        assert isinstance(event1, _StatusEvent)
+        self.assertEqual(event1.test_id, test_id)
+        self.assertEqual(event1.test_status, "inprogress")
 
         # The traceback attachment for the subtest
-        self.assertEqual(events[2].test_id, test_id)
-        self.assertEqual(events[2].file_name, "traceback (i=1)")
-        self.assertIn(b"AssertionError: subtest failed", events[2].file_bytes)
+        event2 = events[2]
+        assert isinstance(event2, _StatusEvent)
+        self.assertEqual(event2.test_id, test_id)
+        self.assertEqual(event2.file_name, "traceback (i=1)")
+        self.assertIn(b"AssertionError: subtest failed", event2.file_bytes)
 
         # The final fail status
-        self.assertEqual(events[3].test_id, test_id)
-        self.assertEqual(events[3].test_status, "fail")
+        event3 = events[3]
+        assert isinstance(event3, _StatusEvent)
+        self.assertEqual(event3.test_id, test_id)
+        self.assertEqual(event3.test_status, "fail")
 
         self.assertEqual(events[4], ("stopTestRun",))
 
@@ -1402,10 +1409,14 @@ class TestExtendedToStreamDecorator(TestCase):
         # Should have: startTestRun, inprogress, success, stopTestRun
         # No subtest-specific events since it passed
         self.assertEqual(events[0], ("startTestRun",))
-        self.assertEqual(events[1].test_id, test_id)
-        self.assertEqual(events[1].test_status, "inprogress")
-        self.assertEqual(events[2].test_id, test_id)
-        self.assertEqual(events[2].test_status, "success")
+        event1 = events[1]
+        assert isinstance(event1, _StatusEvent)
+        self.assertEqual(event1.test_id, test_id)
+        self.assertEqual(event1.test_status, "inprogress")
+        event2 = events[2]
+        assert isinstance(event2, _StatusEvent)
+        self.assertEqual(event2.test_id, test_id)
+        self.assertEqual(event2.test_status, "success")
         self.assertEqual(events[3], ("stopTestRun",))
 
     def test_multiple_subtest_failures(self):
@@ -1444,16 +1455,24 @@ class TestExtendedToStreamDecorator(TestCase):
 
         # Should have: startTestRun, inprogress, 2x traceback, fail, stopTestRun
         self.assertEqual(events[0], ("startTestRun",))
-        self.assertEqual(events[1].test_status, "inprogress")
+        event1 = events[1]
+        assert isinstance(event1, _StatusEvent)
+        self.assertEqual(event1.test_status, "inprogress")
 
         # Two traceback attachments
-        self.assertEqual(events[2].file_name, "traceback (i=1)")
-        self.assertIn(b"subtest 1 failed", events[2].file_bytes)
-        self.assertEqual(events[3].file_name, "traceback (i=2)")
-        self.assertIn(b"subtest 2 failed", events[3].file_bytes)
+        event2 = events[2]
+        assert isinstance(event2, _StatusEvent)
+        self.assertEqual(event2.file_name, "traceback (i=1)")
+        self.assertIn(b"subtest 1 failed", event2.file_bytes)
+        event3 = events[3]
+        assert isinstance(event3, _StatusEvent)
+        self.assertEqual(event3.file_name, "traceback (i=2)")
+        self.assertIn(b"subtest 2 failed", event3.file_bytes)
 
         # Final fail status
-        self.assertEqual(events[4].test_status, "fail")
+        event4 = events[4]
+        assert isinstance(event4, _StatusEvent)
+        self.assertEqual(event4.test_status, "fail")
         self.assertEqual(events[5], ("stopTestRun",))
 
 
@@ -1472,6 +1491,7 @@ class TestResourcedToStreamDecorator(TestCase):
         resource = testresources.TestResourceManager()
         result.startMakeResource(resource)
         [_, event] = log._events
+        assert isinstance(event, _StatusEvent)
         self.assertEqual("testresources.TestResourceManager.make", event.test_id)
         self.assertEqual("inprogress", event.test_status)
         self.assertFalse(event.runnable)
@@ -1484,7 +1504,9 @@ class TestResourcedToStreamDecorator(TestCase):
         resource.id = lambda: "nice.resource"
         result.startTestRun()
         result.startMakeResource(resource)
-        self.assertEqual("nice.resource.make", log._events[1].test_id)
+        [_, event] = log._events
+        assert isinstance(event, _StatusEvent)
+        self.assertEqual("nice.resource.make", event.test_id)
 
     def test_stopMakeResource(self):
         log = LoggingStreamResult()
@@ -1493,6 +1515,7 @@ class TestResourcedToStreamDecorator(TestCase):
         result.startTestRun()
         result.stopMakeResource(resource)
         [_, event] = log._events
+        assert isinstance(event, _StatusEvent)
         self.assertEqual("testresources.TestResourceManager.make", event.test_id)
         self.assertEqual("success", event.test_status)
 
@@ -1503,6 +1526,7 @@ class TestResourcedToStreamDecorator(TestCase):
         result.startTestRun()
         result.startCleanResource(resource)
         [_, event] = log._events
+        assert isinstance(event, _StatusEvent)
         self.assertEqual("testresources.TestResourceManager.clean", event.test_id)
         self.assertEqual("inprogress", event.test_status)
 
@@ -1513,6 +1537,7 @@ class TestResourcedToStreamDecorator(TestCase):
         result.startTestRun()
         result.stopCleanResource(resource)
         [_, event] = log._events
+        assert isinstance(event, _StatusEvent)
         self.assertEqual("testresources.TestResourceManager.clean", event.test_id)
         self.assertEqual("success", event.test_status)
 

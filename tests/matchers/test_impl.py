@@ -47,12 +47,17 @@ class TestMismatchError(TestCase):
         # MismatchError is an AssertionError, so that most of the time, it
         # looks like a test failure, rather than an error.
         def raise_mismatch_error():
-            raise MismatchError(2, Equals(3), Equals(3).match(2))
+            mismatch = Equals(3).match(2)
+            self.assertIsNotNone(mismatch)
+            assert mismatch is not None
+            raise MismatchError(2, Equals(3), mismatch)
 
         self.assertRaises(AssertionError, raise_mismatch_error)
 
     def test_default_description_is_mismatch(self):
         mismatch = Equals(3).match(2)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         e = MismatchError(2, Equals(3), mismatch)
         self.assertEqual(mismatch.describe(), str(e))
 
@@ -60,17 +65,21 @@ class TestMismatchError(TestCase):
         matchee = "\xa7"
         matcher = Equals("a")
         mismatch = matcher.match(matchee)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         e = MismatchError(matchee, matcher, mismatch)
         self.assertEqual(mismatch.describe(), str(e))
 
     def test_verbose_description(self):
         matchee = 2
         matcher = Equals(3)
-        mismatch = matcher.match(2)
+        mismatch = matcher.match(matchee)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         e = MismatchError(matchee, matcher, mismatch, True)
         expected = (
             f"Match failed. Matchee: {matchee!r}\nMatcher: {matcher}\n"
-            f"Difference: {matcher.match(matchee).describe()}\n"
+            f"Difference: {mismatch.describe()}\n"
         )
         self.assertEqual(expected, str(e))
 
@@ -80,6 +89,8 @@ class TestMismatchError(TestCase):
         matchee = "\xa7"
         matcher = Equals("a")
         mismatch = matcher.match(matchee)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         expected = (
             f"Match failed. Matchee: {text_repr(matchee)}\nMatcher: {matcher}\n"
             f"Difference: {mismatch.describe()}\n"
