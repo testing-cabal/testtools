@@ -23,7 +23,7 @@ import sys
 import types
 import unittest
 from collections.abc import Callable, Iterator
-from typing import TYPE_CHECKING, TypeVar, cast, overload
+from typing import TYPE_CHECKING, ParamSpec, TypeVar, cast, overload
 from unittest.case import SkipTest
 
 T = TypeVar("T")
@@ -88,6 +88,8 @@ class _ExpectedFailure(Exception):
 
 
 # TypeVar for decorators
+_P = ParamSpec("_P")
+_R = TypeVar("_R")
 _F = TypeVar("_F", bound=Callable[..., object])
 
 
@@ -390,10 +392,10 @@ class TestCase(unittest.TestCase):
 
     def addCleanup(
         self,
-        function: Callable[..., object],
+        function: Callable[_P, _R],
         /,
-        *arguments: object,
-        **keywordArguments: object,
+        *args: _P.args,
+        **kwargs: _P.kwargs,
     ) -> None:
         """Add a cleanup function to be called after tearDown.
 
@@ -407,7 +409,7 @@ class TestCase(unittest.TestCase):
         Cleanup functions are always called before a test finishes running,
         even if setUp is aborted by an exception.
         """
-        self._cleanups.append((function, arguments, keywordArguments))
+        self._cleanups.append((function, args, kwargs))
 
     def addOnException(self, handler: "Callable[[ExcInfo], None]") -> None:
         """Add a handler to be called when an exception occurs in test code.
@@ -503,9 +505,9 @@ class TestCase(unittest.TestCase):
     def assertRaises(
         self,
         expected_exception: type[BaseException] | tuple[type[BaseException]],
-        callable: Callable[..., object],
-        *args: object,
-        **kwargs: object,
+        callable: Callable[_P, _R],
+        *args: _P.args,
+        **kwargs: _P.kwargs,
     ) -> BaseException: ...
 
     @overload  # type: ignore[override]
@@ -513,16 +515,14 @@ class TestCase(unittest.TestCase):
         self,
         expected_exception: type[BaseException] | tuple[type[BaseException]],
         callable: None = ...,
-        *args: object,
-        **kwargs: object,
     ) -> "_AssertRaisesContext": ...
 
     def assertRaises(  # type: ignore[override]
         self,
         expected_exception: type[BaseException] | tuple[type[BaseException]],
-        callable: Callable[..., object] | None = None,
-        *args: object,
-        **kwargs: object,
+        callable: Callable[_P, _R] | None = None,
+        *args: _P.args,
+        **kwargs: _P.kwargs,
     ) -> "_AssertRaisesContext | BaseException":
         """Fail unless an exception of class expected_exception is thrown
         by callable when invoked with arguments args and keyword
@@ -678,9 +678,9 @@ class TestCase(unittest.TestCase):
     def expectFailure(
         self,
         reason: str,
-        predicate: Callable[..., object],
-        *args: object,
-        **kwargs: object,
+        predicate: Callable[_P, _R],
+        *args: _P.args,
+        **kwargs: _P.kwargs,
     ) -> None:
         """Check that a test fails in a particular way.
 
@@ -1349,7 +1349,10 @@ class Nullary:
     """
 
     def __init__(
-        self, callable_object: Callable[..., object], *args: object, **kwargs: object
+        self,
+        callable_object: Callable[_P, _R],
+        *args: _P.args,
+        **kwargs: _P.kwargs,
     ) -> None:
         self._callable_object = callable_object
         self._args = args
