@@ -23,7 +23,7 @@ import sys
 import types
 import unittest
 from collections.abc import Callable, Iterator
-from typing import TYPE_CHECKING, ParamSpec, TypeVar, cast, overload
+from typing import TYPE_CHECKING, NoReturn, ParamSpec, TypeVar, cast, overload
 from unittest.case import SkipTest
 
 T = TypeVar("T")
@@ -366,7 +366,7 @@ class TestCase(unittest.TestCase):
     def shortDescription(self) -> str:
         return self.id()
 
-    def skipTest(self, reason: str) -> None:  # type: ignore[override]
+    def skipTest(self, reason: str) -> NoReturn:
         """Cause this test to be skipped.
 
         This raises self.skipException(reason). skipException is raised
