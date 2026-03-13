@@ -51,7 +51,7 @@ If you would like to use our Twisted support, then you will need the
 ``testtools[twisted]`` extra.
 
 If you want to use ``fixtures`` then you can either install fixtures (e.g. from
-https://github.com/testing-cabalfixtures or https://pypi.python.org/pypi/fixtures)
+https://github.com/testing-cabal/fixtures or https://pypi.python.org/pypi/fixtures)
 or alternatively just make sure your fixture objects obey the same protocol.
 
 
