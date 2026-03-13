@@ -387,6 +387,23 @@ class TestFixtureSuite(TestCase):
         self.assertRaises(ValueError, suite.sort_tests)
 
 
+class TestIterateTests(TestCase):
+    def test_iterate_suite(self):
+        a = PlaceHolder("a")
+        b = PlaceHolder("b")
+        suite = unittest.TestSuite([a, b])  # type: ignore[list-item]
+        self.assertEqual([a, b], list(iterate_tests(suite)))
+
+    def test_iterate_single_test(self):
+        a = PlaceHolder("a")
+        self.assertEqual([a], list(iterate_tests(a)))
+
+    def test_iterate_list(self):
+        a = PlaceHolder("a")
+        b = PlaceHolder("b")
+        self.assertEqual([a, b], list(iterate_tests([a, b])))
+
+
 class TestSortedTests(TestCase):
     def test_sorts_custom_suites(self):
         a = PlaceHolder("a")

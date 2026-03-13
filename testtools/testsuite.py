@@ -58,13 +58,13 @@ def iterate_tests(
     test_suite_or_case: TestSuiteOrCase,
 ) -> Generator[unittest.TestCase, None, None]:
     """Iterate through all of the test cases in 'test_suite_or_case'."""
-    if isinstance(test_suite_or_case, unittest.TestSuite):
-        # It's a suite, iterate through it
+    if isinstance(test_suite_or_case, Iterable) and not isinstance(
+        test_suite_or_case, unittest.TestCase
+    ):
         for test in test_suite_or_case:
             yield from iterate_tests(test)
     else:
-        # It's a test case (could be unittest.TestCase or duck-typed)
-        yield test_suite_or_case
+        yield test_suite_or_case  # type: ignore[misc]
 
 
 class ConcurrentTestSuite(unittest.TestSuite):
