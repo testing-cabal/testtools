@@ -23,7 +23,7 @@ import sys
 import types
 import unittest
 from collections.abc import Callable, Iterator
-from typing import TYPE_CHECKING, NoReturn, ParamSpec, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Generic, NoReturn, ParamSpec, TypeVar, cast, overload
 from unittest.case import SkipTest
 
 T = TypeVar("T")
@@ -1341,7 +1341,7 @@ class ExpectedException:
         return True
 
 
-class Nullary:
+class Nullary(Generic[_R]):
     """Turn a callable into a nullary callable.
 
     The advantage of this over ``lambda: f(*args, **kwargs)`` is that it
@@ -1358,7 +1358,7 @@ class Nullary:
         self._args = args
         self._kwargs = kwargs
 
-    def __call__(self) -> object:
+    def __call__(self) -> _R:
         return self._callable_object(*self._args, **self._kwargs)
 
     def __repr__(self) -> str:
