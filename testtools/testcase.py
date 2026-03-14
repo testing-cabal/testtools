@@ -1185,7 +1185,7 @@ def skip(reason: str) -> Callable[[_F], _F]:
         if not isinstance(test_item, class_types):
 
             @functools.wraps(test_item)
-            def skip_wrapper(*args: object, **kwargs: object) -> None:
+            def skip_wrapper(*args: object, **kwargs: object) -> NoReturn:
                 raise TestCase.skipException(reason)
 
             test_item = cast(_F, skip_wrapper)
