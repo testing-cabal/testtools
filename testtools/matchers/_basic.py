@@ -18,7 +18,7 @@ __all__ = [
 
 import operator
 import re
-from collections.abc import Callable
+from collections.abc import Callable, Sized
 from pprint import pformat
 from typing import Any, Generic, TypeVar
 
@@ -459,7 +459,7 @@ class MatchesRegex(Matcher[str]):
         return None
 
 
-def has_len(x: Any, y: int) -> bool:
+def has_len(x: Sized, y: int) -> bool:
     return len(x) == y
 
 
