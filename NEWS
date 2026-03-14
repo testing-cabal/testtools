@@ -6,6 +6,21 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+2.8.7
+~~~~~
+
+Improvements
+------------
+* Fix an issue with ``iterate_tests``, which was recently changes to insist
+  on accepting an instance of ``unittest.TestSuite``, breaking some users.
+  (Jelmer Vernooĳ, #584)
+
+* Improve the type annotations for ``testtools.testcase.TestCase.skipTest``
+  (Stephen Finucane, #585)
+
+* Correct a URL in the README
+  (Steve Kowalik, #582)
+
 2.8.6
 ~~~~~
 
