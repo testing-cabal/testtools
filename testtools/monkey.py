@@ -3,7 +3,10 @@
 """Helpers for monkey-patching Python code."""
 
 from collections.abc import Callable
-from typing import Any
+from typing import ParamSpec, TypeVar
+
+_P = ParamSpec("_P")
+_R = TypeVar("_R")
 
 __all__ = [
     "MonkeyPatcher",
@@ -71,7 +74,9 @@ class MonkeyPatcher:
             else:
                 setattr(obj, name, value)
 
-    def run_with_patches(self, f: Callable[..., Any], *args: Any, **kw: Any) -> Any:
+    def run_with_patches(
+        self, f: Callable[_P, _R], *args: _P.args, **kw: _P.kwargs
+    ) -> _R:
         """Run 'f' with the given args and kwargs with all patches applied.
 
         Restores all objects to their original state when finished.
