@@ -9,6 +9,7 @@ from testtools import (
 from testtools.compat import (
     text_repr,
 )
+from testtools.content import text_content
 from testtools.matchers import (
     Equals,
     MatchesException,
@@ -30,9 +31,10 @@ class TestMismatch(TestCase):
     run_tests_with = FullStackRunTest
 
     def test_constructor_arguments(self):
-        mismatch = Mismatch("some description", {"detail": "things"})
+        detail = text_content("things")
+        mismatch = Mismatch("some description", {"detail": detail})
         self.assertEqual("some description", mismatch.describe())
-        self.assertEqual({"detail": "things"}, mismatch.get_details())
+        self.assertEqual({"detail": detail}, mismatch.get_details())
 
     def test_constructor_no_arguments(self):
         mismatch = Mismatch()
@@ -103,17 +105,17 @@ class TestMismatchDecorator(TestCase):
     run_tests_with = FullStackRunTest
 
     def test_forwards_description(self):
-        x = Mismatch("description", {"foo": "bar"})
+        x = Mismatch("description", {"foo": text_content("bar")})
         decorated = MismatchDecorator(x)
         self.assertEqual(x.describe(), decorated.describe())
 
     def test_forwards_details(self):
-        x = Mismatch("description", {"foo": "bar"})
+        x = Mismatch("description", {"foo": text_content("bar")})
         decorated = MismatchDecorator(x)
         self.assertEqual(x.get_details(), decorated.get_details())
 
     def test_repr(self):
-        x = Mismatch("description", {"foo": "bar"})
+        x = Mismatch("description", {"foo": text_content("bar")})
         decorated = MismatchDecorator(x)
         self.assertEqual(
             f"<testtools.matchers.MismatchDecorator({x!r})>", repr(decorated)

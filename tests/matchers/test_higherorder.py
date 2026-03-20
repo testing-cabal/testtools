@@ -3,6 +3,7 @@
 from typing import ClassVar
 
 from testtools import TestCase
+from testtools.content import text_content
 from testtools.matchers import (
     DocTestMatches,
     Equals,
@@ -192,7 +193,7 @@ class TestAnnotate(TestCase, TestMatchersInterface):
         matcher = Equals(1)
         expected = Annotate("foo", matcher)
         annotated = Annotate.if_message("foo", matcher)
-        self.assertThat(
+        self.assertThat(  # type: ignore[misc]
             annotated, MatchesStructure.fromExample(expected, "annotation", "matcher")
         )
 
@@ -201,7 +202,7 @@ class TestAnnotatedMismatch(TestCase):
     run_tests_with = FullStackRunTest
 
     def test_forwards_details(self):
-        x = Mismatch("description", {"foo": "bar"})
+        x = Mismatch("description", {"foo": text_content("bar")})
         annotated = AnnotatedMismatch("annotation", x)
         self.assertEqual(x.get_details(), annotated.get_details())
 
