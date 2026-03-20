@@ -21,17 +21,15 @@ from typing import Any, Protocol, TypeAlias, TypeVar, runtime_checkable
 
 import testtools
 
+try:
+    import fixtures
+except ImportError:
+    fixtures = None  # type: ignore
+
 _T = TypeVar("_T")
 
 # Type alias for objects that can be test suites or test cases
 TestSuiteOrCase: TypeAlias = unittest.TestSuite | unittest.TestCase
-
-
-class _Fixture(Protocol):
-    """Protocol for fixture objects."""
-
-    def setUp(self) -> None: ...
-    def cleanUp(self) -> None: ...
 
 
 class _Stoppable(Protocol):
@@ -256,7 +254,9 @@ class ConcurrentStreamTestSuite:
 
 
 class FixtureSuite(unittest.TestSuite):
-    def __init__(self, fixture: _Fixture, tests: Iterable[unittest.TestCase]) -> None:
+    def __init__(
+        self, fixture: "fixtures.Fixture", tests: Iterable[unittest.TestCase]
+    ) -> None:
         super().__init__(tests)
         self._fixture = fixture
 
