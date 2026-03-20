@@ -12,9 +12,10 @@ from testtools.matchers import Equals, MatchesException, Raises
 class TestContentType(TestCase):
     def test___init___None_errors(self):
         raises_value_error = Raises(MatchesException(ValueError))
-        self.assertThat(lambda: ContentType(None, None), raises_value_error)
-        self.assertThat(lambda: ContentType(None, "traceback"), raises_value_error)
-        self.assertThat(lambda: ContentType("text", None), raises_value_error)
+        # intentionally passing invalid values to test runtime behavior
+        self.assertThat(lambda: ContentType(None, None), raises_value_error)  # type: ignore[arg-type]
+        self.assertThat(lambda: ContentType(None, "traceback"), raises_value_error)  # type: ignore[arg-type]
+        self.assertThat(lambda: ContentType("text", None), raises_value_error)  # type: ignore[arg-type]
 
     def test___init___sets_ivars(self):
         content_type = ContentType("foo", "bar")
