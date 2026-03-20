@@ -23,7 +23,16 @@ import sys
 import types
 import unittest
 from collections.abc import Callable, Iterator
-from typing import TYPE_CHECKING, Generic, NoReturn, ParamSpec, TypeVar, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Generic,
+    NoReturn,
+    ParamSpec,
+    TypeVar,
+    cast,
+    overload,
+)
 from unittest.case import SkipTest
 
 T = TypeVar("T")
@@ -562,7 +571,16 @@ class TestCase(unittest.TestCase):
     @overload  # type: ignore[override]
     def assertRaises(
         self,
-        expected_exception: type[BaseException] | tuple[type[BaseException]],
+        expected_exception: type[_E],
+        callable: Callable[_P, _R],
+        *args: _P.args,
+        **kwargs: _P.kwargs,
+    ) -> _E: ...
+
+    @overload
+    def assertRaises(
+        self,
+        expected_exception: tuple[type[BaseException], ...],
         callable: Callable[_P, _R],
         *args: _P.args,
         **kwargs: _P.kwargs,
@@ -596,13 +614,13 @@ class TestCase(unittest.TestCase):
         callable: None = ...,
     ) -> _AssertRaisesContext[BaseException]: ...
 
-    def assertRaises(  # type: ignore[misc]
+    def assertRaises(
         self,
-        expected_exception: type[BaseException] | tuple[type[BaseException], ...],
+        expected_exception: type[_E] | tuple[type[BaseException], ...],
         callable: Callable[_P, _R] | None = None,
         *args: _P.args,
         **kwargs: _P.kwargs,
-    ) -> _AssertRaisesContext[BaseException] | BaseException:
+    ) -> _AssertRaisesContext[Any] | BaseException:
         """Fail unless an exception of class expected_exception is thrown
         by callable when invoked with arguments args and keyword
         arguments kwargs. If a different type of exception is
@@ -670,6 +688,7 @@ class TestCase(unittest.TestCase):
         )
         our_callable: Callable[[], object] = Nullary(callable, *args, **kwargs)
         self.assertThat(our_callable, matcher)
+        # we know that we have the right exception type now
         return capture.matchee
 
     def assertThat(
