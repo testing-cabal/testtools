@@ -937,7 +937,9 @@ the ``Mismatch`` knows how to describe a failure to match.
 
 Here's an example matcher::
 
-  class IsDivisibleBy(object):
+  from testtools.matchers import Matcher
+
+  class IsDivisibleBy(Matcher):
       """Match if a number is divisible by another number."""
       def __init__(self, divider):
           self.divider = divider

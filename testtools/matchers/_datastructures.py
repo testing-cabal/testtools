@@ -35,7 +35,7 @@ def ContainsAll(items: Iterable[T]) -> "MatchesAll[Iterable[T]]":
     return MatchesAll(*map(Contains, items), first_only=False)
 
 
-class MatchesListwise(Matcher["Sequence[T]"], Generic[T]):
+class MatchesListwise(Matcher[Sequence[T]], Generic[T]):
     """Matches if each matcher matches the corresponding value.
 
     More easily explained by example than in words:
@@ -54,7 +54,7 @@ class MatchesListwise(Matcher["Sequence[T]"], Generic[T]):
     """
 
     def __init__(
-        self, matchers: "Sequence[Matcher[T]]", first_only: bool = False
+        self, matchers: Sequence[Matcher[T]], first_only: bool = False
     ) -> None:
         """Construct a MatchesListwise matcher.
 
@@ -65,7 +65,7 @@ class MatchesListwise(Matcher["Sequence[T]"], Generic[T]):
         self.matchers = matchers
         self.first_only = first_only
 
-    def match(self, values: "Sequence[T]") -> Mismatch | None:
+    def match(self, values: Sequence[T]) -> Mismatch | None:
         from ._basic import HasLength
 
         mismatches = []

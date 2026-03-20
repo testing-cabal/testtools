@@ -16,6 +16,12 @@ from testtools.matchers import (
     DocTestMatches,
     Equals,
 )
+from testtools.matchers import (
+    Matcher as BaseMatcher,
+)
+from testtools.matchers import (
+    Mismatch as BaseMismatch,
+)
 
 
 class AssertThatTests:
@@ -36,8 +42,8 @@ class AssertThatTests:
         self.assert_that_callable(failure, DocTestMatches(message, ELLIPSIS))
 
     def test_assertThat_matches_clean(self):
-        class Matcher:
-            def match(self, foo):
+        class Matcher(BaseMatcher[str]):
+            def match(self, foo: str) -> None:
                 return None
 
         self.assert_that_callable("foo", Matcher())
@@ -45,23 +51,23 @@ class AssertThatTests:
     def test_assertThat_mismatch_raises_description(self):
         calls = []
 
-        class Mismatch:
-            def __init__(self, thing):
+        class Mismatch(BaseMismatch):
+            def __init__(self, thing: str) -> None:
                 self.thing = thing
 
-            def describe(self):
+            def describe(self) -> str:
                 calls.append(("describe_diff", self.thing))
                 return "object is not a thing"
 
             def get_details(self):
                 return {}
 
-        class Matcher:
-            def match(self, thing):
+        class Matcher(BaseMatcher[str]):
+            def match(self, thing: str) -> Mismatch | None:
                 calls.append(("match", thing))
                 return Mismatch(thing)
 
-            def __str__(self):
+            def __str__(self) -> str:
                 calls.append(("__str__", None))
                 return "a description"
 

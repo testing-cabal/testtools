@@ -129,7 +129,7 @@ class Raises(Matcher[Callable[[], object]]):
         """
         self.exception_matcher = exception_matcher
 
-    def match(self, matchee: "Callable[[], object]") -> Mismatch | None:
+    def match(self, matchee: Callable[[], object]) -> Mismatch | None:
         try:
             # Handle staticmethod objects by extracting the underlying function
             actual_callable: Callable[[], object]

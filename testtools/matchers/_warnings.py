@@ -61,7 +61,7 @@ def WarningMessage(
     )
 
 
-class Warnings:
+class Warnings(Matcher[Callable[[], Any]]):
     """Match if the matchee produces warnings."""
 
     def __init__(self, warnings_matcher: "Matcher[Any] | None" = None) -> None:
