@@ -731,8 +731,8 @@ class TestCase(unittest.TestCase):
 
     def expectThat(
         self,
-        matchee: object,
-        matcher: "Matcher[object]",
+        matchee: T,
+        matcher: "Matcher[T]",
         message: str = "",
         verbose: bool = False,
     ) -> None:
@@ -746,7 +746,6 @@ class TestCase(unittest.TestCase):
         :param matchee: An object to match with matcher.
         :param matcher: An object meeting the testtools.Matcher protocol.
         :param message: If specified, show this message with any failed match.
-
         """
         mismatch_error = self._matchHelper(matchee, matcher, message, verbose)
 
