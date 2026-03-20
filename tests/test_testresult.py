@@ -861,7 +861,7 @@ class TestDoubleStreamResultEvents(TestCase):
         now = datetime.datetime.now(utc)
         result.status(
             file_name="foo",
-            file_bytes="bar",
+            file_bytes=b"bar",
             eof=True,
             mime_type="text/json",
             test_id="id",
@@ -878,7 +878,7 @@ class TestDoubleStreamResultEvents(TestCase):
                     None,
                     True,
                     "foo",
-                    "bar",
+                    b"bar",
                     True,
                     "text/json",
                     "abc",
@@ -1193,7 +1193,7 @@ class TestStreamToDict(TestCase):
         result.startTestRun()
         result.status(
             file_name="some log.txt",
-            file_bytes="",
+            file_bytes=b"",
             eof=True,
             mime_type="text/plain; charset=utf8",
             test_id="foo.bar",
