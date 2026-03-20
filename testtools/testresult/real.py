@@ -821,8 +821,8 @@ class StreamTagger(CopyStreamResult):
     def __init__(
         self,
         targets: list[StreamResult],
-        add: set[str] | None = None,
-        discard: set[str] | None = None,
+        add: Iterable[str] | None = None,
+        discard: Iterable[str] | None = None,
     ) -> None:
         """Create a StreamTagger.
 
