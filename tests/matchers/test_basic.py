@@ -551,7 +551,8 @@ class TestNearlyBehavior(TestCase):
     def test_non_numeric_type_mismatch(self):
         """Test that non-numeric types result in a mismatch."""
         matcher = Nearly(1.0, delta=0.1)
-        mismatch = matcher.match("string")
+        # intentional type mismatch
+        mismatch = matcher.match("string")  # type: ignore[arg-type]
         self.assertIsNotNone(mismatch)
         assert mismatch is not None
         self.assertIn("string", mismatch.describe())
@@ -559,7 +560,8 @@ class TestNearlyBehavior(TestCase):
     def test_none_type_mismatch(self):
         """Test that None results in a mismatch."""
         matcher = Nearly(1.0, delta=0.1)
-        mismatch = matcher.match(None)
+        # intentional type mismatch
+        mismatch = matcher.match(None)  # type: ignore[arg-type]
         self.assertIsNotNone(mismatch)
 
 

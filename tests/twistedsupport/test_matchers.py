@@ -124,7 +124,8 @@ class SuccessResultTests(NeedsTwistedTestCase):
         result = object()
         deferred = defer.succeed(result)
         matcher = Is(None)  # Something that doesn't match `result`.
-        mismatch = matcher.match(result)
+        # we are intentionally passing the wrong type here
+        mismatch = matcher.match(result)  # type: ignore[arg-type]
         assert mismatch is not None
         self.assertThat(
             self.match(matcher, deferred),
