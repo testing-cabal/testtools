@@ -65,6 +65,7 @@ from testtools.testresult import (
     DetailsDict,
     ExcInfo,
     ExtendedToOriginalDecorator,
+    OptExcInfo,
     TestResult,
 )
 
@@ -346,7 +347,7 @@ class TestCase(unittest.TestCase):
             setattr(self, self._testMethodName, _expectedFailure(test_method))
         # Used internally for onException processing - used to gather extra
         # data from exceptions.
-        self.__exception_handlers: list[Callable[[ExcInfo], None]] = []
+        self.__exception_handlers: list[Callable[[OptExcInfo], None]] = []
         # Passed to RunTest to map exceptions to result actions
         self.exception_handlers: list[
             tuple[
@@ -478,7 +479,7 @@ class TestCase(unittest.TestCase):
         """
         self._cleanups.append((function, args, kwargs))
 
-    def addOnException(self, handler: "Callable[[ExcInfo], None]") -> None:
+    def addOnException(self, handler: Callable[[OptExcInfo], None]) -> None:
         """Add a handler to be called when an exception occurs in test code.
 
         This handler cannot affect what result methods are called, and is
@@ -839,7 +840,7 @@ class TestCase(unittest.TestCase):
             prefix = self.id()
         return f"{prefix}-{self.getUniqueInteger()}"
 
-    def onException(self, exc_info: ExcInfo, tb_label: str = "traceback") -> None:
+    def onException(self, exc_info: OptExcInfo, tb_label: str = "traceback") -> None:
         """Called when an exception propagates from test code.
 
         :seealso addOnException:
@@ -879,7 +880,7 @@ class TestCase(unittest.TestCase):
         result.addSkip(self, details=self.getDetails())
 
     def _report_traceback(
-        self, exc_info: "ExcInfo | tuple[None, None, None]", tb_label: str = "traceback"
+        self, exc_info: OptExcInfo, tb_label: str = "traceback"
     ) -> None:
         id_gen = self._traceback_id_gens.setdefault(tb_label, itertools.count(0))
         while True:
@@ -1090,9 +1091,9 @@ class PlaceHolder(unittest.TestCase):
         short_description: str | None = None,
         details: DetailsDict | None = None,
         outcome: str = "addSuccess",
-        error: "ExcInfo | tuple[None, None, None] | None" = None,
+        error: OptExcInfo | None = None,
         tags: frozenset[str] | None = None,
-        timestamps: "tuple[datetime.datetime | None, datetime.datetime | None]" = (
+        timestamps: tuple[datetime.datetime | None, datetime.datetime | None] = (
             None,
             None,
         ),
@@ -1175,9 +1176,9 @@ class PlaceHolder(unittest.TestCase):
 
 def ErrorHolder(
     test_id: str,
-    error: "ExcInfo | tuple[None, None, None]",
+    error: OptExcInfo,
     short_description: str | None = None,
-    details: "DetailsDict | None" = None,
+    details: DetailsDict | None = None,
 ) -> PlaceHolder:
     """Construct an `ErrorHolder`.
 

@@ -7,18 +7,14 @@ __all__ = [
 ]
 
 import sys
-import types
 from collections.abc import Callable
-from typing import TypeAlias, TypeVar
+from typing import TypeVar
+
+from testtools.testresult import ExcInfo
 
 from ._basic import MatchesRegex
 from ._higherorder import AfterPreprocessing
 from ._impl import Matcher, Mismatch
-
-# Type for exc_info tuples
-ExcInfo: TypeAlias = tuple[
-    type[BaseException], BaseException, types.TracebackType | None
-]
 
 T = TypeVar("T", bound=BaseException)
 
