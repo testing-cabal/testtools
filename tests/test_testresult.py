@@ -3245,16 +3245,13 @@ class TestNonAsciiResults(TestCase):
     def _write_module(self, name, encoding, contents):
         """Create Python module on disk with contents in given encoding"""
         try:
-            # Need to pre-check that the coding is valid or codecs.open drops
-            # the file without closing it which breaks non-refcounted pythons
+            # Need to pre-check that the coding is valid or open drops the file
+            # without closing it which breaks non-refcounted pythons
             codecs.lookup(encoding)
         except LookupError:
             self.skipTest(f"Encoding unsupported by implementation: {encoding!r}")
-        f = codecs.open(os.path.join(self.dir, name + ".py"), "w", encoding)
-        try:
+        with open(os.path.join(self.dir, name + ".py"), "w", encoding=encoding) as f:
             f.write(contents)
-        finally:
-            f.close()
 
     def _test_external_case(self, testline, coding="ascii", modulelevel="", suffix=""):
         """Create and run a test case in a separate module"""
