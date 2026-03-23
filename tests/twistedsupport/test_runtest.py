@@ -80,7 +80,7 @@ class X:
 
     class Base(TestCase):
         def setUp(self):
-            super(X.Base, self).setUp()
+            super().setUp()
             self.calls = ["setUp"]
             self.addCleanup(self.calls.append, "clean-up")
 
@@ -89,7 +89,7 @@ class X:
 
         def tearDown(self):
             self.calls.append("tearDown")
-            super(X.Base, self).tearDown()
+            super().tearDown()
 
     class BaseExceptionRaised(Base):
         expected_calls: ClassVar[list] = ["setUp", "tearDown", "clean-up"]
@@ -103,7 +103,7 @@ class X:
         expected_results: ClassVar[list] = [("addError", RuntimeError)]
 
         def setUp(self):
-            super(X.ErrorInSetup, self).setUp()
+            super().setUp()
             raise RuntimeError("Error in setUp")
 
     class ErrorInTest(Base):
