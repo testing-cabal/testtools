@@ -188,7 +188,8 @@ class TestContent(TestCase):
 
     def test_text_content_raises_TypeError_when_passed_bytes(self):
         data = b"Some Bytes"
-        self.assertRaises(TypeError, text_content, data)
+        # we are intentionally passing an invalid type
+        self.assertRaises(TypeError, text_content, data)  # type: ignore[call-overload]
 
     def test_text_content_raises_TypeError_when_passed_non_text(self):
         bad_values: tuple[Any, ...] = (None, list(), dict(), 42, 1.23)
@@ -256,7 +257,11 @@ class TestStackLinesContent(TestCase):
 
 class TestTracebackContent(TestCase):
     def test___init___None_errors(self):
-        self.assertThat(lambda: TracebackContent(None, None), raises_value_error)
+        # we are intentionally passing an invalid type
+        self.assertThat(
+            lambda: TracebackContent(None, None),
+            raises_value_error,  # type: ignore[arg-type]
+        )
 
     def test___init___sets_ivars(self):
         content = TracebackContent(an_exc_info, self)

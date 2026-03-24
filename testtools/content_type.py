@@ -12,6 +12,10 @@ class ContentType:
         content type.
     """
 
+    type: str
+    subtype: str
+    parameters: dict[str, str]
+
     def __init__(
         self, primary_type: str, sub_type: str, parameters: dict[str, str] | None = None
     ) -> None:

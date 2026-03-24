@@ -16,6 +16,12 @@ from testtools.matchers import (
     DocTestMatches,
     Equals,
 )
+from testtools.matchers import (
+    Matcher as BaseMatcher,
+)
+from testtools.matchers import (
+    Mismatch as BaseMismatch,
+)
 
 
 class AssertThatTests:
@@ -36,8 +42,8 @@ class AssertThatTests:
         self.assert_that_callable(failure, DocTestMatches(message, ELLIPSIS))
 
     def test_assertThat_matches_clean(self):
-        class Matcher:
-            def match(self, foo):
+        class Matcher(BaseMatcher[str]):
+            def match(self, foo: str) -> None:
                 return None
 
         self.assert_that_callable("foo", Matcher())
@@ -45,23 +51,23 @@ class AssertThatTests:
     def test_assertThat_mismatch_raises_description(self):
         calls = []
 
-        class Mismatch:
-            def __init__(self, thing):
+        class Mismatch(BaseMismatch):
+            def __init__(self, thing: str) -> None:
                 self.thing = thing
 
-            def describe(self):
+            def describe(self) -> str:
                 calls.append(("describe_diff", self.thing))
                 return "object is not a thing"
 
             def get_details(self):
                 return {}
 
-        class Matcher:
-            def match(self, thing):
+        class Matcher(BaseMatcher[str]):
+            def match(self, thing: str) -> Mismatch | None:
                 calls.append(("match", thing))
                 return Mismatch(thing)
 
-            def __str__(self):
+            def __str__(self) -> str:
                 calls.append(("__str__", None))
                 return "a description"
 
@@ -85,21 +91,27 @@ class AssertThatTests:
     def test_assertThat_output(self):
         matchee = "foo"
         matcher = Equals("bar")
-        expected = matcher.match(matchee).describe()
+        mismatch = matcher.match(matchee)
+        assert mismatch is not None
+        expected = mismatch.describe()
         self.assertFails(expected, self.assert_that_callable, matchee, matcher)
 
     def test_assertThat_message_is_annotated(self):
         matchee = "foo"
         matcher = Equals("bar")
-        expected = Annotate("woo", matcher).match(matchee).describe()
+        mismatch = Annotate("woo", matcher).match(matchee)
+        assert mismatch is not None
+        expected = mismatch.describe()
         self.assertFails(expected, self.assert_that_callable, matchee, matcher, "woo")
 
     def test_assertThat_verbose_output(self):
         matchee = "foo"
         matcher = Equals("bar")
+        mismatch = matcher.match(matchee)
+        assert mismatch is not None
         expected = (
             f"Match failed. Matchee: {matchee!r}\nMatcher: {matcher}\n"
-            f"Difference: {matcher.match(matchee).describe()}\n"
+            f"Difference: {mismatch.describe()}\n"
         )
         self.assertFails(
             expected, self.assert_that_callable, matchee, matcher, verbose=True
@@ -134,10 +146,12 @@ class AssertThatTests:
         # unicode strings, we can still provide a meaningful error.
         matchee = "\xa7"
         matcher = Equals("a")
+        mismatch = matcher.match(matchee)
+        assert mismatch is not None
         expected = "Match failed. Matchee: {}\nMatcher: {}\nDifference: {}\n\n".format(
             repr(matchee).replace("\\xa7", matchee),
             matcher,
-            matcher.match(matchee).describe(),
+            mismatch.describe(),
         )
         e = self.assertRaises(
             self.failureException,

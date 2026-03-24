@@ -75,6 +75,8 @@ class TestKeysEqualWithList(TestCase, TestMatchersInterface):
     def test_description(self):
         matchee = {"foo": 0, "bar": 1, "baz": 2}
         mismatch = KeysEqual("foo", "bar").match(matchee)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         description = mismatch.describe()
         self.assertThat(
             description,

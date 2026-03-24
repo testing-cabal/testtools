@@ -8,7 +8,7 @@ import doctest
 import re
 from typing import Any
 
-from ._impl import Mismatch
+from ._impl import Matcher, Mismatch
 
 
 def _indent(
@@ -56,7 +56,7 @@ class _NonManglingOutputChecker(doctest.OutputChecker):
         del __F, __f, __g
 
 
-class DocTestMatches:
+class DocTestMatches(Matcher[str]):
     """See if a string matches a doctest example."""
 
     def __init__(self, example: str, flags: int = 0) -> None:

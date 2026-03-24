@@ -22,7 +22,7 @@ import itertools
 import sys
 import types
 import unittest
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Container, Iterable, Iterator
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -512,7 +512,12 @@ class TestCase(unittest.TestCase):
         matcher = _FlippedEquals(expected)
         self.assertThat(observed, matcher, message)
 
-    def assertIn(self, needle: object, haystack: object, message: str = "") -> None:
+    def assertIn(
+        self,
+        needle: object,
+        haystack: Iterable[Any] | Container[Any],
+        message: str = "",
+    ) -> None:
         """Assert that needle is in haystack."""
         self.assertThat(haystack, Contains(needle), message)
 
@@ -731,8 +736,8 @@ class TestCase(unittest.TestCase):
 
     def expectThat(
         self,
-        matchee: object,
-        matcher: "Matcher[object]",
+        matchee: T,
+        matcher: "Matcher[T]",
         message: str = "",
         verbose: bool = False,
     ) -> None:
@@ -746,7 +751,6 @@ class TestCase(unittest.TestCase):
         :param matchee: An object to match with matcher.
         :param matcher: An object meeting the testtools.Matcher protocol.
         :param message: If specified, show this message with any failed match.
-
         """
         mismatch_error = self._matchHelper(matchee, matcher, message, verbose)
 

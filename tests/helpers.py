@@ -13,6 +13,7 @@ from testtools.content import StackLinesContent
 from testtools.matchers import (
     AfterPreprocessing,
     Equals,
+    Matcher,
     MatchesDict,
     MatchesListwise,
 )
@@ -108,7 +109,7 @@ class FullStackRunTest(runtest.RunTest):
         return run_with_stack_hidden(False, super()._run_user, fn, *args, **kwargs)
 
 
-class MatchesEvents:
+class MatchesEvents(Matcher[list[tuple[str, ...]]]):
     """Match a list of test result events.
 
     Specify events as a data structure.  Ordinary Python objects within this

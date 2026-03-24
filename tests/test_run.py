@@ -442,7 +442,9 @@ OK
         # XXX: http://bugs.python.org/issue22811
         unittest.defaultTestLoader._top_level_dir = None  # type: ignore[attr-defined]
         self.assertEqual(
-            None, run.main(["prog", "discover", "-l", pkg.package.base], out)
+            None,
+            # we are intentionally testing that the call returns nothing
+            run.main(["prog", "discover", "-l", pkg.package.base], out),  # type: ignore[func-returns-value]
         )
         self.assertEqual(
             dedent(

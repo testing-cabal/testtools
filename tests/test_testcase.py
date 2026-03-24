@@ -35,6 +35,12 @@ from testtools.matchers import (
     MatchesException,
     Raises,
 )
+from testtools.matchers import (
+    Matcher as BaseMatcher,
+)
+from testtools.matchers import (
+    Mismatch as BaseMismatch,
+)
 from testtools.testcase import (
     Nullary,
     WithAttributes,
@@ -668,8 +674,8 @@ class TestAssertions(TestCase):
         )
 
     def test_assertThat_matches_clean(self):
-        class Matcher:
-            def match(self, foo):
+        class Matcher(BaseMatcher[str]):
+            def match(self, foo: str) -> None:
                 return None
 
         self.assertThat("foo", Matcher())
@@ -677,23 +683,23 @@ class TestAssertions(TestCase):
     def test_assertThat_mismatch_raises_description(self):
         calls: list[tuple[str, ...]] = []
 
-        class Mismatch:
-            def __init__(self, thing):
+        class Mismatch(BaseMismatch):
+            def __init__(self, thing: str) -> None:
                 self.thing = thing
 
-            def describe(self):
+            def describe(self) -> str:
                 calls.append(("describe_diff", self.thing))
                 return "object is not a thing"
 
             def get_details(self):
                 return {}
 
-        class Matcher:
-            def match(self, thing):
+        class Matcher(BaseMatcher[str]):
+            def match(self, thing: str) -> BaseMismatch | None:
                 calls.append(("match", thing))
                 return Mismatch(thing)
 
-            def __str__(self):
+            def __str__(self) -> str:
                 calls.append(("__str__",))
                 return "a description"
 
@@ -714,27 +720,34 @@ class TestAssertions(TestCase):
     def test_assertThat_output(self):
         matchee = "foo"
         matcher = Equals("bar")
-        expected = matcher.match(matchee).describe()
-        self.assertFails(expected, self.assertThat, matchee, matcher)
+        mismatch = matcher.match(matchee)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
+        self.assertFails(mismatch.describe(), self.assertThat, matchee, matcher)
 
     def test_assertThat_message_is_annotated(self):
         matchee = "foo"
         matcher = Equals("bar")
-        expected = Annotate("woo", matcher).match(matchee).describe()
-        self.assertFails(expected, self.assertThat, matchee, matcher, "woo")
+        mismatch = Annotate("woo", matcher).match(matchee)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
+        self.assertFails(mismatch.describe(), self.assertThat, matchee, matcher, "woo")
 
     def test_assertThat_verbose_output(self):
         matchee = "foo"
         matcher = Equals("bar")
+        mismatch = matcher.match(matchee)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         expected = (
             f"Match failed. Matchee: {matchee!r}\nMatcher: {matcher}\n"
-            f"Difference: {matcher.match(matchee).describe()}\n"
+            f"Difference: {mismatch.describe()}\n"
         )
         self.assertFails(expected, self.assertThat, matchee, matcher, verbose=True)
 
     def test_expectThat_matches_clean(self):
-        class Matcher:
-            def match(self, foo):
+        class Matcher(BaseMatcher[str]):
+            def match(self, thing: str) -> BaseMismatch | None:
                 return None
 
         self.expectThat("foo", Matcher())
@@ -809,10 +822,12 @@ class TestAssertions(TestCase):
         # unicode strings, we can still provide a meaningful error.
         matchee = "\xa7"
         matcher = Equals("a")
+        mismatch = matcher.match(matchee)
+        assert mismatch is not None
         expected = "Match failed. Matchee: {}\nMatcher: {}\nDifference: {}\n\n".format(
             repr(matchee).replace("\\xa7", matchee),
             matcher,
-            matcher.match(matchee).describe(),
+            mismatch.describe(),
         )
         e = self.assertRaises(
             self.failureException, self.assertThat, matchee, matcher, verbose=True
@@ -1504,18 +1519,18 @@ class TestDetailsProvided(TestWithDetails):
     def test_addDetails_from_Mismatch(self):
         content = self.get_content()
 
-        class Mismatch:
-            def describe(self):
+        class Mismatch(BaseMismatch):
+            def describe(self) -> str:
                 return "Mismatch"
 
             def get_details(self):
                 return {"foo": content}
 
-        class Matcher:
-            def match(self, thing):
+        class Matcher(BaseMatcher[str]):
+            def match(self, thing: str) -> BaseMismatch | None:
                 return Mismatch()
 
-            def __str__(self):
+            def __str__(self) -> str:
                 return "a description"
 
         class Case(TestCase):
@@ -1527,18 +1542,18 @@ class TestDetailsProvided(TestWithDetails):
     def test_multiple_addDetails_from_Mismatch(self):
         content = self.get_content()
 
-        class Mismatch:
-            def describe(self):
+        class Mismatch(BaseMismatch):
+            def describe(self) -> str:
                 return "Mismatch"
 
             def get_details(self):
                 return {"foo": content, "bar": content}
 
-        class Matcher:
-            def match(self, thing):
+        class Matcher(BaseMatcher[str]):
+            def match(self, thing: str) -> BaseMismatch | None:
                 return Mismatch()
 
-            def __str__(self):
+            def __str__(self) -> str:
                 return "a description"
 
         class Case(TestCase):
@@ -1552,18 +1567,18 @@ class TestDetailsProvided(TestWithDetails):
     def test_addDetails_with_same_name_as_key_from_get_details(self):
         content = self.get_content()
 
-        class Mismatch:
-            def describe(self):
+        class Mismatch(BaseMismatch):
+            def describe(self) -> str:
                 return "Mismatch"
 
             def get_details(self):
                 return {"foo": content}
 
-        class Matcher:
-            def match(self, thing):
+        class Matcher(BaseMatcher[str]):
+            def match(self, thing: str) -> BaseMismatch | None:
                 return Mismatch()
 
-            def __str__(self):
+            def __str__(self) -> str:
                 return "a description"
 
         class Case(TestCase):

@@ -9,6 +9,7 @@ from testtools import (
 from testtools.compat import (
     text_repr,
 )
+from testtools.content import text_content
 from testtools.matchers import (
     Equals,
     MatchesException,
@@ -30,9 +31,10 @@ class TestMismatch(TestCase):
     run_tests_with = FullStackRunTest
 
     def test_constructor_arguments(self):
-        mismatch = Mismatch("some description", {"detail": "things"})
+        detail = text_content("things")
+        mismatch = Mismatch("some description", {"detail": detail})
         self.assertEqual("some description", mismatch.describe())
-        self.assertEqual({"detail": "things"}, mismatch.get_details())
+        self.assertEqual({"detail": detail}, mismatch.get_details())
 
     def test_constructor_no_arguments(self):
         mismatch = Mismatch()
@@ -47,12 +49,17 @@ class TestMismatchError(TestCase):
         # MismatchError is an AssertionError, so that most of the time, it
         # looks like a test failure, rather than an error.
         def raise_mismatch_error():
-            raise MismatchError(2, Equals(3), Equals(3).match(2))
+            mismatch = Equals(3).match(2)
+            self.assertIsNotNone(mismatch)
+            assert mismatch is not None
+            raise MismatchError(2, Equals(3), mismatch)
 
         self.assertRaises(AssertionError, raise_mismatch_error)
 
     def test_default_description_is_mismatch(self):
         mismatch = Equals(3).match(2)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         e = MismatchError(2, Equals(3), mismatch)
         self.assertEqual(mismatch.describe(), str(e))
 
@@ -60,17 +67,21 @@ class TestMismatchError(TestCase):
         matchee = "\xa7"
         matcher = Equals("a")
         mismatch = matcher.match(matchee)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         e = MismatchError(matchee, matcher, mismatch)
         self.assertEqual(mismatch.describe(), str(e))
 
     def test_verbose_description(self):
         matchee = 2
         matcher = Equals(3)
-        mismatch = matcher.match(2)
+        mismatch = matcher.match(matchee)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         e = MismatchError(matchee, matcher, mismatch, True)
         expected = (
             f"Match failed. Matchee: {matchee!r}\nMatcher: {matcher}\n"
-            f"Difference: {matcher.match(matchee).describe()}\n"
+            f"Difference: {mismatch.describe()}\n"
         )
         self.assertEqual(expected, str(e))
 
@@ -80,6 +91,8 @@ class TestMismatchError(TestCase):
         matchee = "\xa7"
         matcher = Equals("a")
         mismatch = matcher.match(matchee)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         expected = (
             f"Match failed. Matchee: {text_repr(matchee)}\nMatcher: {matcher}\n"
             f"Difference: {mismatch.describe()}\n"
@@ -92,17 +105,17 @@ class TestMismatchDecorator(TestCase):
     run_tests_with = FullStackRunTest
 
     def test_forwards_description(self):
-        x = Mismatch("description", {"foo": "bar"})
+        x = Mismatch("description", {"foo": text_content("bar")})
         decorated = MismatchDecorator(x)
         self.assertEqual(x.describe(), decorated.describe())
 
     def test_forwards_details(self):
-        x = Mismatch("description", {"foo": "bar"})
+        x = Mismatch("description", {"foo": text_content("bar")})
         decorated = MismatchDecorator(x)
         self.assertEqual(x.get_details(), decorated.get_details())
 
     def test_repr(self):
-        x = Mismatch("description", {"foo": "bar"})
+        x = Mismatch("description", {"foo": text_content("bar")})
         decorated = MismatchDecorator(x)
         self.assertEqual(
             f"<testtools.matchers.MismatchDecorator({x!r})>", repr(decorated)

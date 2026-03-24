@@ -16,7 +16,7 @@ import os
 import tarfile
 from typing import Any
 
-from ._basic import Equals
+from ._basic import Equals, StringMismatch
 from ._higherorder import (
     MatchesAll,
     MatchesPredicate,
@@ -185,7 +185,7 @@ class SamePath(Matcher[str]):
         super().__init__()
         self.path = path
 
-    def match(self, other_path: str) -> Mismatch | None:
+    def match(self, other_path: str) -> StringMismatch | None:
         def f(x: str) -> str:
             return os.path.abspath(os.path.realpath(x))
 

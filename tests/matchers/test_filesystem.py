@@ -53,6 +53,8 @@ class TestPathExists(TestCase, PathHelpers):
     def test_not_exists(self):
         doesntexist = os.path.join(self.mkdtemp(), "doesntexist")
         mismatch = PathExists().match(doesntexist)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         self.assertThat(f"{doesntexist} does not exist.", Equals(mismatch.describe()))
 
 
@@ -63,15 +65,20 @@ class TestDirExists(TestCase, PathHelpers):
 
     def test_not_exists(self):
         doesntexist = os.path.join(self.mkdtemp(), "doesntexist")
-        mismatch = DirExists().match(doesntexist)
-        self.assertThat(
-            PathExists().match(doesntexist).describe(), Equals(mismatch.describe())
-        )
+        dir_mismatch = DirExists().match(doesntexist)
+        self.assertIsNotNone(dir_mismatch)
+        assert dir_mismatch is not None
+        path_mismatch = PathExists().match(doesntexist)
+        self.assertIsNotNone(path_mismatch)
+        assert path_mismatch is not None
+        self.assertThat(path_mismatch.describe(), Equals(dir_mismatch.describe()))
 
     def test_not_a_directory(self):
         filename = os.path.join(self.mkdtemp(), "foo")
         self.touch(filename)
         mismatch = DirExists().match(filename)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         self.assertThat(f"{filename} is not a directory.", Equals(mismatch.describe()))
 
 
@@ -84,14 +91,19 @@ class TestFileExists(TestCase, PathHelpers):
 
     def test_not_exists(self):
         doesntexist = os.path.join(self.mkdtemp(), "doesntexist")
-        mismatch = FileExists().match(doesntexist)
-        self.assertThat(
-            PathExists().match(doesntexist).describe(), Equals(mismatch.describe())
-        )
+        file_mismatch = FileExists().match(doesntexist)
+        self.assertIsNotNone(file_mismatch)
+        assert file_mismatch is not None
+        path_mismatch = PathExists().match(doesntexist)
+        self.assertIsNotNone(path_mismatch)
+        assert path_mismatch is not None
+        self.assertThat(path_mismatch.describe(), Equals(file_mismatch.describe()))
 
     def test_not_a_file(self):
         tempdir = self.mkdtemp()
         mismatch = FileExists().match(tempdir)
+        self.assertIsNotNone(mismatch)
+        assert mismatch is not None
         self.assertThat(f"{tempdir} is not a file.", Equals(mismatch.describe()))
 
 
@@ -102,10 +114,13 @@ class TestDirContains(TestCase, PathHelpers):
 
     def test_not_exists(self):
         doesntexist = os.path.join(self.mkdtemp(), "doesntexist")
-        mismatch = DirContains([]).match(doesntexist)
-        self.assertThat(
-            PathExists().match(doesntexist).describe(), Equals(mismatch.describe())
-        )
+        dir_mismatch = DirContains([]).match(doesntexist)
+        self.assertIsNotNone(dir_mismatch)
+        assert dir_mismatch is not None
+        path_mismatch = PathExists().match(doesntexist)
+        self.assertIsNotNone(path_mismatch)
+        assert path_mismatch is not None
+        self.assertThat(path_mismatch.describe(), Equals(dir_mismatch.describe()))
 
     def test_contains_files(self):
         tempdir = self.mkdtemp()
@@ -130,20 +145,25 @@ class TestDirContains(TestCase, PathHelpers):
     def test_does_not_contain_files(self):
         tempdir = self.mkdtemp()
         self.touch(os.path.join(tempdir, "foo"))
-        mismatch = DirContains(["bar", "foo"]).match(tempdir)
-        self.assertThat(
-            Equals(["bar", "foo"]).match(["foo"]).describe(),
-            Equals(mismatch.describe()),
-        )
+        mismatch_a = DirContains(["bar", "foo"]).match(tempdir)
+        self.assertIsNotNone(mismatch_a)
+        assert mismatch_a is not None
+        mismatch_b = Equals(["bar", "foo"]).match(["foo"])
+        self.assertIsNotNone(mismatch_b)
+        assert mismatch_b is not None
+        self.assertThat(mismatch_b.describe(), Equals(mismatch_a.describe()))
 
 
 class TestFileContains(TestCase, PathHelpers):
     def test_not_exists(self):
         doesntexist = os.path.join(self.mkdtemp(), "doesntexist")
-        mismatch = FileContains("").match(doesntexist)
-        self.assertThat(
-            PathExists().match(doesntexist).describe(), Equals(mismatch.describe())
-        )
+        file_mismatch = FileContains("").match(doesntexist)
+        self.assertIsNotNone(file_mismatch)
+        assert file_mismatch is not None
+        path_mismatch = PathExists().match(doesntexist)
+        self.assertIsNotNone(path_mismatch)
+        assert path_mismatch is not None
+        self.assertThat(path_mismatch.describe(), Equals(file_mismatch.describe()))
 
     def test_contains(self):
         tempdir = self.mkdtemp()
@@ -169,11 +189,13 @@ class TestFileContains(TestCase, PathHelpers):
         tempdir = self.mkdtemp()
         filename = os.path.join(tempdir, "foo")
         self.create_file(filename, "Goodbye Cruel World!")
-        mismatch = FileContains("Hello World!").match(filename)
-        self.assertThat(
-            Equals("Hello World!").match("Goodbye Cruel World!").describe(),
-            Equals(mismatch.describe()),
-        )
+        actual = FileContains("Hello World!").match(filename)
+        self.assertIsNotNone(actual)
+        assert actual is not None
+        expected = Equals("Hello World!").match("Goodbye Cruel World!")
+        self.assertIsNotNone(expected)
+        assert expected is not None
+        self.assertThat(expected.describe(), Equals(actual.describe()))
 
     def test_binary_content(self):
         tempdir = self.mkdtemp()
@@ -188,11 +210,13 @@ class TestFileContains(TestCase, PathHelpers):
         filename = os.path.join(tempdir, "binary_file")
         with open(filename, "wb") as f:
             f.write(b"\x00\x01\x02")
-        mismatch = FileContains(b"\xff\xfe\xfd").match(filename)
-        self.assertThat(
-            Equals(b"\xff\xfe\xfd").match(b"\x00\x01\x02").describe(),
-            Equals(mismatch.describe()),
-        )
+        actual = FileContains(b"\xff\xfe\xfd").match(filename)
+        self.assertIsNotNone(actual)
+        assert actual is not None
+        expected = Equals(b"\xff\xfe\xfd").match(b"\x00\x01\x02")
+        self.assertIsNotNone(expected)
+        assert expected is not None
+        self.assertThat(expected.describe(), Equals(actual.describe()))
 
     def test_text_with_encoding(self):
         tempdir = self.mkdtemp()
@@ -238,10 +262,13 @@ class TestTarballContains(TestCase, PathHelpers):
         tarball.add(in_temp_dir("a"), "a")
         tarball.add(in_temp_dir("b"), "b")
         tarball.close()
-        mismatch = TarballContains(["d", "c"]).match(in_temp_dir("foo.tar.gz"))
-        self.assertEqual(
-            mismatch.describe(), Equals(["c", "d"]).match(["a", "b"]).describe()
-        )
+        actual = TarballContains(["d", "c"]).match(in_temp_dir("foo.tar.gz"))
+        self.assertIsNotNone(actual)
+        assert actual is not None
+        expected = Equals(["c", "d"]).match(["a", "b"])
+        self.assertIsNotNone(expected)
+        assert expected is not None
+        self.assertEqual(actual.describe(), expected.describe())
 
 
 class TestSamePath(TestCase, PathHelpers):

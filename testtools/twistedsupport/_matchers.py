@@ -14,12 +14,14 @@ These matchers allow you to make assertions about when and how Deferreds fire,
 and about what values they fire with.
 """
 
-from testtools.matchers import Mismatch
+from typing import Any
+
+from testtools.matchers import Matcher, Mismatch
 
 from ._deferred import failure_content, on_deferred_result
 
 
-class _NoResult:
+class _NoResult(Matcher[Any]):
     """Matches a Deferred that has not yet fired."""
 
     @staticmethod
@@ -71,7 +73,7 @@ def has_no_result():
     return _NO_RESULT
 
 
-class _Succeeded:
+class _Succeeded(Matcher[Any]):
     """Matches a Deferred that has fired successfully."""
 
     def __init__(self, matcher):
@@ -127,7 +129,7 @@ def succeeded(matcher):
     return _Succeeded(matcher)
 
 
-class _Failed:
+class _Failed(Matcher[Any]):
     """Matches a Deferred that has failed."""
 
     def __init__(self, matcher):
