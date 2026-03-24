@@ -126,8 +126,7 @@ class ConcurrentTestSuite(unittest.TestSuite):
             semaphore = threading.Semaphore(1)
             for i, test in enumerate(tests):
                 process_result = self._wrap_result(
-                    testtools.ThreadsafeForwardingResult(result, semaphore),
-                    i,  # type: ignore[no-untyped-call]
+                    testtools.ThreadsafeForwardingResult(result, semaphore), i
                 )
                 reader_thread = threading.Thread(
                     target=self._run_test, args=(test, process_result, queue)

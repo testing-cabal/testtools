@@ -134,7 +134,7 @@ class Raises(Matcher[Callable[[], object]]):
             # Handle staticmethod objects by extracting the underlying function
             actual_callable: Callable[[], object]
             if isinstance(matchee, staticmethod):
-                actual_callable = matchee.__func__  # type: ignore[assignment]
+                actual_callable = matchee.__func__
             else:
                 actual_callable = matchee
             result = actual_callable()
@@ -146,7 +146,7 @@ class Raises(Matcher[Callable[[], object]]):
             # Type narrow to actual ExcInfo
             assert exc_info[0] is not None
             assert exc_info[1] is not None
-            typed_exc_info: ExcInfo = (exc_info[0], exc_info[1], exc_info[2])  # type: ignore[assignment]
+            typed_exc_info: ExcInfo = (exc_info[0], exc_info[1], exc_info[2])
 
             if self.exception_matcher:
                 mismatch = self.exception_matcher.match(typed_exc_info)

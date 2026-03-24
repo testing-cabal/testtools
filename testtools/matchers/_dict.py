@@ -78,8 +78,8 @@ def _dict_to_mismatch(
     result_mismatch: "Callable[[dict[K, Mismatch]], Mismatch]" = DictMismatches,
 ) -> Mismatch | None:
     if to_mismatch:
-        data = map_values(to_mismatch, data)  # type: ignore[arg-type,assignment]
-    mismatches = filter_values(bool, data)  # type: ignore[arg-type]
+        data = map_values(to_mismatch, data)  # type: ignore[arg-type]
+    mismatches = filter_values(bool, data)
     if mismatches:
         return result_mismatch(mismatches)  # type: ignore[arg-type]
     return None

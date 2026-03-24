@@ -2186,7 +2186,7 @@ class ExtendedToOriginalDecorator:
             self._tags = self._tags.parent
         self.decorated.stopTest(test)
 
-    def stopTestRun(self) -> object:  # type: ignore[override]
+    def stopTestRun(self) -> object:
         try:
             return self.decorated.stopTestRun()
         except AttributeError:
