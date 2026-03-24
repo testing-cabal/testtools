@@ -431,7 +431,7 @@ OK
             ),
         )
 
-    @skipUnless(fixtures, "fixtures not present")
+    @skipUnless(fixtures is not None, "fixtures not present")
     def test_issue_16662(self):
         # unittest's discover implementation didn't handle load_tests on
         # packages. That is fixed pending commit, but we want to offer it

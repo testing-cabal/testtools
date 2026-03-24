@@ -1,7 +1,7 @@
 # Copyright (c) 2008-2012 testtools developers. See LICENSE for details.
 
 import re
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from testtools import TestCase
 from testtools.compat import text_repr
@@ -24,6 +24,7 @@ from testtools.matchers._basic import (
     _BinaryMismatch,
     _NotNearlyEqual,
 )
+from testtools.matchers._impl import Matcher
 from testtools.matchers.test import TestMatchersInterface
 
 from ..helpers import FullStackRunTest
@@ -114,9 +115,9 @@ class Test_BinaryMismatch(TestCase):
 
 
 class TestEqualsInterface(TestCase, TestMatchersInterface):
-    matches_matcher: ClassVar = Equals(1)
-    matches_matches: ClassVar = [1]
-    matches_mismatches: ClassVar = [2]
+    matches_matcher: ClassVar[Matcher[Any]] = Equals(1)
+    matches_matches: ClassVar[list[Any]] = [1]
+    matches_mismatches: ClassVar[list[Any]] = [2]
 
     str_examples: ClassVar = [
         ("Equals(1)", Equals(1)),
@@ -138,9 +139,9 @@ class TestEqualsInterface(TestCase, TestMatchersInterface):
 
 
 class TestNotEqualsInterface(TestCase, TestMatchersInterface):
-    matches_matcher: ClassVar = NotEquals(1)
-    matches_matches: ClassVar = [2]
-    matches_mismatches: ClassVar = [1]
+    matches_matcher: ClassVar[Matcher[Any]] = NotEquals(1)
+    matches_matches: ClassVar[list[Any]] = [2]
+    matches_mismatches: ClassVar[list[Any]] = [1]
 
     str_examples: ClassVar = [
         ("NotEquals(1)", NotEquals(1)),
@@ -154,9 +155,9 @@ class TestIsInterface(TestCase, TestMatchersInterface):
     foo = object()
     bar = object()
 
-    matches_matcher: ClassVar = Is(foo)
-    matches_matches: ClassVar = [foo]
-    matches_mismatches: ClassVar = [bar, 1]
+    matches_matcher: ClassVar[Matcher[Any]] = Is(foo)
+    matches_matches: ClassVar[list[Any]] = [foo]
+    matches_mismatches: ClassVar[list[Any]] = [bar, 1]
 
     str_examples: ClassVar = [("Is(2)", Is(2))]
 
@@ -167,9 +168,9 @@ class TestIsInstanceInterface(TestCase, TestMatchersInterface):
     class Foo:
         pass
 
-    matches_matcher: ClassVar = IsInstance(Foo)
-    matches_matches: ClassVar = [Foo()]
-    matches_mismatches: ClassVar = [object(), 1, Foo]
+    matches_matcher: ClassVar[Matcher[Any]] = IsInstance(Foo)
+    matches_matches: ClassVar[list[Any]] = [Foo()]
+    matches_mismatches: ClassVar[list[Any]] = [object(), 1, Foo]
 
     str_examples: ClassVar = [
         ("IsInstance(str)", IsInstance(str)),
@@ -187,9 +188,9 @@ class TestIsInstanceInterface(TestCase, TestMatchersInterface):
 
 
 class TestLessThanInterface(TestCase, TestMatchersInterface):
-    matches_matcher: ClassVar = LessThan(4)
-    matches_matches: ClassVar = [-5, 3]
-    matches_mismatches: ClassVar = [4, 5, 5000]
+    matches_matcher: ClassVar[Matcher[Any]] = LessThan(4)
+    matches_matches: ClassVar[list[Any]] = [-5, 3]
+    matches_mismatches: ClassVar[list[Any]] = [4, 5, 5000]
 
     str_examples: ClassVar = [
         ("LessThan(12)", LessThan(12)),
@@ -202,9 +203,9 @@ class TestLessThanInterface(TestCase, TestMatchersInterface):
 
 
 class TestGreaterThanInterface(TestCase, TestMatchersInterface):
-    matches_matcher: ClassVar = GreaterThan(4)
-    matches_matches: ClassVar = [5, 8]
-    matches_mismatches: ClassVar = [-2, 0, 4]
+    matches_matcher: ClassVar[Matcher[Any]] = GreaterThan(4)
+    matches_matches: ClassVar[list[Any]] = [5, 8]
+    matches_mismatches: ClassVar[list[Any]] = [-2, 0, 4]
 
     str_examples: ClassVar = [
         ("GreaterThan(12)", GreaterThan(12)),
@@ -217,9 +218,9 @@ class TestGreaterThanInterface(TestCase, TestMatchersInterface):
 
 
 class TestContainsInterface(TestCase, TestMatchersInterface):
-    matches_matcher: ClassVar = Contains("foo")
-    matches_matches: ClassVar = ["foo", "afoo", "fooa"]
-    matches_mismatches: ClassVar = ["f", "fo", "oo", "faoo", "foao"]
+    matches_matcher: ClassVar[Matcher[Any]] = Contains("foo")
+    matches_matches: ClassVar[list[Any]] = ["foo", "afoo", "fooa"]
+    matches_mismatches: ClassVar[list[Any]] = ["f", "fo", "oo", "faoo", "foao"]
 
     str_examples: ClassVar = [
         ("Contains(1)", Contains(1)),
@@ -352,14 +353,14 @@ class EndsWithTests(TestCase):
 
 
 class TestSameMembers(TestCase, TestMatchersInterface):
-    matches_matcher: ClassVar = SameMembers([1, 1, 2, 3, {"foo": "bar"}])
-    matches_matches: ClassVar = [
+    matches_matcher: ClassVar[Matcher[Any]] = SameMembers([1, 1, 2, 3, {"foo": "bar"}])
+    matches_matches: ClassVar[list[Any]] = [
         [1, 1, 2, 3, {"foo": "bar"}],
         [3, {"foo": "bar"}, 1, 2, 1],
         [3, 2, 1, {"foo": "bar"}, 1],
         (2, {"foo": "bar"}, 3, 1, 1),
     ]
-    matches_mismatches: ClassVar = [
+    matches_mismatches: ClassVar[list[Any]] = [
         {1, 2, 3},
         [1, 1, 2, 3, 5],
         [1, 2, 3, {"foo": "bar"}],
@@ -405,9 +406,9 @@ class TestSameMembers(TestCase, TestMatchersInterface):
 
 
 class TestMatchesRegex(TestCase, TestMatchersInterface):
-    matches_matcher: ClassVar = MatchesRegex("a|b")
-    matches_matches: ClassVar = ["a", "b"]
-    matches_mismatches: ClassVar = ["c"]
+    matches_matcher: ClassVar[Matcher[Any]] = MatchesRegex("a|b")
+    matches_matches: ClassVar[list[Any]] = ["a", "b"]
+    matches_mismatches: ClassVar[list[Any]] = ["c"]
 
     str_examples: ClassVar = [
         ("MatchesRegex('a|b')", MatchesRegex("a|b")),
@@ -430,9 +431,9 @@ class TestMatchesRegex(TestCase, TestMatchersInterface):
 
 
 class TestHasLength(TestCase, TestMatchersInterface):
-    matches_matcher: ClassVar = HasLength(2)
-    matches_matches: ClassVar = [[1, 2]]
-    matches_mismatches: ClassVar = [[], [1], [3, 2, 1]]
+    matches_matcher: ClassVar[Matcher[Any]] = HasLength(2)
+    matches_matches: ClassVar[list[Any]] = [[1, 2]]
+    matches_mismatches: ClassVar[list[Any]] = [[], [1], [3, 2, 1]]
 
     str_examples: ClassVar = [
         ("HasLength(2)", HasLength(2)),
@@ -444,9 +445,9 @@ class TestHasLength(TestCase, TestMatchersInterface):
 
 
 class TestNearlyInterface(TestCase, TestMatchersInterface):
-    matches_matcher: ClassVar = Nearly(4.0, delta=0.5)
-    matches_matches: ClassVar = [4.0, 4.5, 3.5, 4.25, 3.75]
-    matches_mismatches: ClassVar = [4.51, 3.49, 5.0, 2.0, "not a number"]
+    matches_matcher: ClassVar[Matcher[Any]] = Nearly(4.0, delta=0.5)
+    matches_matches: ClassVar[list[Any]] = [4.0, 4.5, 3.5, 4.25, 3.75]
+    matches_mismatches: ClassVar[list[Any]] = [4.51, 3.49, 5.0, 2.0, "not a number"]
 
     str_examples: ClassVar = [
         ("Nearly(4.0, delta=0.5)", Nearly(4.0, delta=0.5)),

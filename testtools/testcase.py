@@ -23,7 +23,16 @@ import sys
 import types
 import unittest
 from collections.abc import Callable, Iterator
-from typing import TYPE_CHECKING, Generic, NoReturn, ParamSpec, TypeVar, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Generic,
+    NoReturn,
+    ParamSpec,
+    TypeVar,
+    cast,
+    overload,
+)
 from unittest.case import SkipTest
 
 T = TypeVar("T")
@@ -241,6 +250,61 @@ def unique_text_generator(prefix: str) -> Iterator[str]:
         unique_text = _unique_text(BASE_CP, CP_RANGE, index)
         yield f"{prefix}-{unique_text}"
         index = index + 1
+
+
+class _AssertRaisesContext(Generic[_E]):
+    """A context manager to handle expected exceptions for assertRaises.
+
+    This provides compatibility with unittest's assertRaises context manager.
+    """
+
+    def __init__(
+        self,
+        expected: type[_E] | tuple[type[BaseException], ...],
+        test_case: "TestCase",
+        msg: str | None = None,
+    ) -> None:
+        """Construct an `_AssertRaisesContext`.
+
+        :param expected: The type of exception to expect.
+        :param test_case: The TestCase instance using this context.
+        :param msg: An optional message explaining the failure.
+        """
+        self.expected = expected
+        self.test_case = test_case
+        self.msg = msg
+        self.exception: _E | None = None
+
+    def __enter__(self) -> "Self":
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: types.TracebackType | None,
+    ) -> bool:
+        if exc_type is None:
+            try:
+                if isinstance(self.expected, tuple):
+                    exc_name = "({})".format(
+                        ", ".join(e.__name__ for e in self.expected)
+                    )
+                else:
+                    exc_name = self.expected.__name__
+            except AttributeError:
+                exc_name = str(self.expected)
+            if self.msg:
+                error_msg = f"{exc_name} not raised : {self.msg}"
+            else:
+                error_msg = f"{exc_name} not raised"
+            raise self.test_case.failureException(error_msg)
+        if not issubclass(exc_type, self.expected):
+            # let unexpected exceptions pass through
+            return False
+        # store exception for later retrieval
+        self.exception = cast(_E, exc_value)
+        return True
 
 
 class TestCase(unittest.TestCase):
@@ -507,47 +571,56 @@ class TestCase(unittest.TestCase):
     @overload  # type: ignore[override]
     def assertRaises(
         self,
-        expected_exception: type[BaseException] | tuple[type[BaseException]],
+        expected_exception: type[_E],
+        callable: Callable[_P, _R],
+        *args: _P.args,
+        **kwargs: _P.kwargs,
+    ) -> _E: ...
+
+    @overload
+    def assertRaises(
+        self,
+        expected_exception: tuple[type[BaseException], ...],
         callable: Callable[_P, _R],
         *args: _P.args,
         **kwargs: _P.kwargs,
     ) -> BaseException: ...
 
-    @overload  # type: ignore[override]
+    @overload
     def assertRaises(
         self,
         expected_exception: type[_E],
         callable: None = ...,
-    ) -> "_AssertRaisesContext[_E]": ...
+    ) -> _AssertRaisesContext[_E]: ...
 
-    @overload  # type: ignore[override]
+    @overload
     def assertRaises(
         self,
         expected_exception: tuple[type[_E], type[_E2]],
         callable: None = ...,
-    ) -> "_AssertRaisesContext[_E | _E2]": ...
+    ) -> _AssertRaisesContext[_E | _E2]: ...
 
-    @overload  # type: ignore[override]
+    @overload
     def assertRaises(
         self,
         expected_exception: tuple[type[_E], type[_E2], type[_E3]],
         callable: None = ...,
-    ) -> "_AssertRaisesContext[_E | _E2 | _E3]": ...
+    ) -> _AssertRaisesContext[_E | _E2 | _E3]: ...
 
-    @overload  # type: ignore[override]
+    @overload
     def assertRaises(
         self,
         expected_exception: tuple[type[BaseException], ...],
         callable: None = ...,
-    ) -> "_AssertRaisesContext[BaseException]": ...
+    ) -> _AssertRaisesContext[BaseException]: ...
 
-    def assertRaises(  # type: ignore[override, misc]
+    def assertRaises(
         self,
-        expected_exception: type[BaseException] | tuple[type[BaseException], ...],
+        expected_exception: type[_E] | tuple[type[BaseException], ...],
         callable: Callable[_P, _R] | None = None,
         *args: _P.args,
         **kwargs: _P.kwargs,
-    ) -> "_AssertRaisesContext[BaseException] | BaseException":
+    ) -> _AssertRaisesContext[Any] | BaseException:
         """Fail unless an exception of class expected_exception is thrown
         by callable when invoked with arguments args and keyword
         arguments kwargs. If a different type of exception is
@@ -615,6 +688,7 @@ class TestCase(unittest.TestCase):
         )
         our_callable: Callable[[], object] = Nullary(callable, *args, **kwargs)
         self.assertThat(our_callable, matcher)
+        # we know that we have the right exception type now
         return capture.matchee
 
     def assertThat(
@@ -1245,61 +1319,6 @@ def skipUnless(condition: bool, reason: str) -> Callable[[_F], _F]:
         return obj
 
     return _id
-
-
-class _AssertRaisesContext(Generic[_E]):
-    """A context manager to handle expected exceptions for assertRaises.
-
-    This provides compatibility with unittest's assertRaises context manager.
-    """
-
-    def __init__(
-        self,
-        expected: type[_E] | tuple[type[BaseException], ...],
-        test_case: TestCase,
-        msg: str | None = None,
-    ) -> None:
-        """Construct an `_AssertRaisesContext`.
-
-        :param expected: The type of exception to expect.
-        :param test_case: The TestCase instance using this context.
-        :param msg: An optional message explaining the failure.
-        """
-        self.expected = expected
-        self.test_case = test_case
-        self.msg = msg
-        self.exception: _E | None = None
-
-    def __enter__(self) -> "Self":
-        return self
-
-    def __exit__(
-        self,
-        exc_type: type[BaseException] | None,
-        exc_value: BaseException | None,
-        traceback: types.TracebackType | None,
-    ) -> bool:
-        if exc_type is None:
-            try:
-                if isinstance(self.expected, tuple):
-                    exc_name = "({})".format(
-                        ", ".join(e.__name__ for e in self.expected)
-                    )
-                else:
-                    exc_name = self.expected.__name__
-            except AttributeError:
-                exc_name = str(self.expected)
-            if self.msg:
-                error_msg = f"{exc_name} not raised : {self.msg}"
-            else:
-                error_msg = f"{exc_name} not raised"
-            raise self.test_case.failureException(error_msg)
-        if not issubclass(exc_type, self.expected):
-            # let unexpected exceptions pass through
-            return False
-        # store exception for later retrieval
-        self.exception = cast(_E, exc_value)
-        return True
 
 
 class ExpectedException:

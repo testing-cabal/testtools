@@ -435,10 +435,7 @@ class AsynchronousDeferredRunTest(_DeferredRunTest):
                 self.case.addDetail(name, detail)
             with _ErrorObserver(_log_observer) as error_fixture:
                 successful, unhandled = self._blocking_run_deferred(spinner)
-            # FIXME(stephenfin): Something is off with the __enter__ method on
-            # Fixture: mypy is incorrectly identifying the type as Fixture
-            # instead of _ErrorObserver
-            for logged_error in error_fixture.flush_logged_errors():  # type: ignore
+            for logged_error in error_fixture.flush_logged_errors():
                 successful = False
                 self._got_user_failure(logged_error, tb_label="logged-error")
 

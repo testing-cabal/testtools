@@ -63,9 +63,7 @@ python_version = "3.10"
 show_column_numbers = true
 show_error_context = true
 strict = true
-# this is here temporarily due to the rapid changes in typing across
-# dependencies
-warn_unused_ignores = false
+warn_unused_ignores = true
 # FIXME(stephenfin): We should remove this
 implicit_reexport = true
 exclude = 'doc'
