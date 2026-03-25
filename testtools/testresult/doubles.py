@@ -8,6 +8,7 @@ from collections import namedtuple
 from collections.abc import Iterable
 from typing import Literal, TypeAlias
 
+from testtools._types import OptExcInfo
 from testtools.tags import TagContext
 
 __all__ = [
@@ -94,17 +95,13 @@ class Python3TestResult(LoggingBase):
         self.failfast = False
         self.collectedDurations: list[tuple[unittest.TestCase, float]] = []
 
-    def addError(
-        self, test: unittest.TestCase, err: tuple[type, Exception, object]
-    ) -> None:
+    def addError(self, test: unittest.TestCase, err: OptExcInfo) -> None:
         self._was_successful = False
         self._events.append(("addError", test, err))
         if self.failfast:
             self.stop()
 
-    def addFailure(
-        self, test: unittest.TestCase, err: tuple[type, Exception, object]
-    ) -> None:
+    def addFailure(self, test: unittest.TestCase, err: OptExcInfo) -> None:
         self._was_successful = False
         self._events.append(("addFailure", test, err))
         if self.failfast:
@@ -113,9 +110,7 @@ class Python3TestResult(LoggingBase):
     def addSuccess(self, test: unittest.TestCase) -> None:
         self._events.append(("addSuccess", test))
 
-    def addExpectedFailure(
-        self, test: unittest.TestCase, err: tuple[type, Exception, object]
-    ) -> None:
+    def addExpectedFailure(self, test: unittest.TestCase, err: OptExcInfo) -> None:
         self._events.append(("addExpectedFailure", test, err))
 
     def addSkip(self, test: unittest.TestCase, reason: str) -> None:
@@ -160,7 +155,7 @@ class ExtendedTestResult(Python3TestResult):
     def addError(
         self,
         test: unittest.TestCase,
-        err: tuple[type, Exception, object] | None = None,
+        err: OptExcInfo | None = None,
         details: dict[str, object] | None = None,
     ) -> None:
         self._was_successful = False
@@ -169,7 +164,7 @@ class ExtendedTestResult(Python3TestResult):
     def addFailure(
         self,
         test: unittest.TestCase,
-        err: tuple[type, Exception, object] | None = None,
+        err: OptExcInfo | None = None,
         details: dict[str, object] | None = None,
     ) -> None:
         self._was_successful = False
@@ -178,7 +173,7 @@ class ExtendedTestResult(Python3TestResult):
     def addExpectedFailure(
         self,
         test: unittest.TestCase,
-        err: tuple[type, Exception, object] | None = None,
+        err: OptExcInfo | None = None,
         details: dict[str, object] | None = None,
     ) -> None:
         self._events.append(("addExpectedFailure", test, err or details))

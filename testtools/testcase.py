@@ -43,6 +43,7 @@ _E3 = TypeVar("_E3", bound=BaseException)
 
 # ruff: noqa: E402 - TypeVars must be defined before importing testtools modules
 from testtools import content
+from testtools._types import ExcInfo, OptExcInfo
 from testtools.matchers import (
     Annotate,
     Contains,
@@ -63,9 +64,7 @@ from testtools.runtest import (
 )
 from testtools.testresult import (
     DetailsDict,
-    ExcInfo,
     ExtendedToOriginalDecorator,
-    OptExcInfo,
     TestResult,
 )
 
@@ -655,26 +654,16 @@ class TestCase(unittest.TestCase):
             msg_str: str | None = msg_value if isinstance(msg_value, str) else None
             return _AssertRaisesContext(expected_exception, self, msg=msg_str)
 
-        class ReRaiseOtherTypes(
-            Matcher[tuple[type[BaseException], BaseException, types.TracebackType]]
-        ):
-            def match(
-                self,
-                matchee: tuple[type[BaseException], BaseException, types.TracebackType],
-            ) -> None:
+        class ReRaiseOtherTypes(Matcher[ExcInfo]):
+            def match(self, matchee: ExcInfo) -> None:
                 if not issubclass(matchee[0], expected_exception):
                     raise matchee[1].with_traceback(matchee[2])
                 return None
 
-        class CaptureMatchee(
-            Matcher[tuple[type[BaseException], BaseException, types.TracebackType]]
-        ):
+        class CaptureMatchee(Matcher[ExcInfo]):
             matchee: BaseException
 
-            def match(
-                self,
-                matchee: tuple[type[BaseException], BaseException, types.TracebackType],
-            ) -> None:
+            def match(self, matchee: ExcInfo) -> None:
                 self.matchee = matchee[1]
                 return None
 

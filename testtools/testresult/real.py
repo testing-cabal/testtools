@@ -31,7 +31,6 @@ import unittest
 from collections.abc import Callable, Iterable, Sequence
 from operator import methodcaller
 from queue import Queue
-from types import TracebackType
 from typing import (
     TYPE_CHECKING,
     ClassVar,
@@ -46,6 +45,7 @@ from typing import (
 if TYPE_CHECKING:
     from testtools.testcase import PlaceHolder
 
+from testtools._types import ExcInfo, OptExcInfo
 from testtools.content import (
     Content,
     TracebackContent,
@@ -91,10 +91,6 @@ class _StatusEventDict(TypedDict, total=False):
 
 
 EventDict: TypeAlias = _StartStopEventDict | _StatusEventDict
-
-# Type for exc_info tuples from sys.exc_info()
-ExcInfo: TypeAlias = tuple[type[BaseException], BaseException, TracebackType]
-OptExcInfo: TypeAlias = ExcInfo | tuple[None, None, None]
 
 # Type for details dict (mapping from names to Content objects)
 DetailsDict: TypeAlias = dict[str, Content]

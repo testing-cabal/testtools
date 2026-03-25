@@ -10,7 +10,7 @@ import sys
 from collections.abc import Callable
 from typing import TypeVar
 
-from testtools.testresult import ExcInfo
+from testtools._types import ExcInfo
 
 from ._basic import MatchesRegex
 from ._higherorder import AfterPreprocessing
