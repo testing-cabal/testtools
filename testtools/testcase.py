@@ -596,6 +596,8 @@ class TestCase(unittest.TestCase):
         self,
         expected_exception: type[_E],
         callable: None = ...,
+        *,
+        msg: str | None = ...,
     ) -> _AssertRaisesContext[_E]: ...
 
     @overload
@@ -603,6 +605,8 @@ class TestCase(unittest.TestCase):
         self,
         expected_exception: tuple[type[_E], type[_E2]],
         callable: None = ...,
+        *,
+        msg: str | None = ...,
     ) -> _AssertRaisesContext[_E | _E2]: ...
 
     @overload
@@ -610,6 +614,8 @@ class TestCase(unittest.TestCase):
         self,
         expected_exception: tuple[type[_E], type[_E2], type[_E3]],
         callable: None = ...,
+        *,
+        msg: str | None = ...,
     ) -> _AssertRaisesContext[_E | _E2 | _E3]: ...
 
     @overload
@@ -617,14 +623,16 @@ class TestCase(unittest.TestCase):
         self,
         expected_exception: tuple[type[BaseException], ...],
         callable: None = ...,
+        *,
+        msg: str | None = ...,
     ) -> _AssertRaisesContext[BaseException]: ...
 
     def assertRaises(
         self,
         expected_exception: type[_E] | tuple[type[BaseException], ...],
         callable: Callable[_P, _R] | None = None,
-        *args: _P.args,
-        **kwargs: _P.kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> _AssertRaisesContext[Any] | BaseException:
         """Fail unless an exception of class expected_exception is thrown
         by callable when invoked with arguments args and keyword
