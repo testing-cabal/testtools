@@ -20,10 +20,23 @@ try:
 except ImportError:
     fixtures = None  # type: ignore
 
-try:
-    from fixtures.tests.helpers import LoggingFixture
-except ImportError:
-    LoggingFixture = None
+if fixtures:
+
+    class LoggingFixture(fixtures.Fixture):
+        def __init__(self, suffix: str = "", calls: list[str] | None = None) -> None:
+            super().__init__()
+            if calls is None:
+                calls = []
+            self.calls = calls
+            self.suffix = suffix
+
+        def setUp(self) -> None:
+            super().setUp()
+            self.calls.append("setUp" + self.suffix)
+            self.addCleanup(self.calls.append, "cleanUp" + self.suffix)
+
+        def reset(self) -> None:
+            self.calls.append("reset" + self.suffix)
 
 
 class TestFixtureSupport(TestCase):
