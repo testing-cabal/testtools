@@ -2,6 +2,8 @@
 
 import unittest
 
+import fixtures
+
 from testtools import (
     TestCase,
     content,
@@ -15,36 +17,25 @@ from testtools.testresult.doubles import (
     ExtendedTestResult,
 )
 
-try:
-    import fixtures
-except ImportError:
-    fixtures = None  # type: ignore
 
-if fixtures:
+class LoggingFixture(fixtures.Fixture):
+    def __init__(self, suffix: str = "", calls: list[str] | None = None) -> None:
+        super().__init__()
+        if calls is None:
+            calls = []
+        self.calls = calls
+        self.suffix = suffix
 
-    class LoggingFixture(fixtures.Fixture):
-        def __init__(self, suffix: str = "", calls: list[str] | None = None) -> None:
-            super().__init__()
-            if calls is None:
-                calls = []
-            self.calls = calls
-            self.suffix = suffix
+    def setUp(self) -> None:
+        super().setUp()
+        self.calls.append("setUp" + self.suffix)
+        self.addCleanup(self.calls.append, "cleanUp" + self.suffix)
 
-        def setUp(self) -> None:
-            super().setUp()
-            self.calls.append("setUp" + self.suffix)
-            self.addCleanup(self.calls.append, "cleanUp" + self.suffix)
-
-        def reset(self) -> None:
-            self.calls.append("reset" + self.suffix)
+    def reset(self) -> None:
+        self.calls.append("reset" + self.suffix)
 
 
 class TestFixtureSupport(TestCase):
-    def setUp(self):
-        super().setUp()
-        if fixtures is None or LoggingFixture is None:
-            self.skipTest("Need fixtures")
-
     def test_useFixture(self):
         fixture = LoggingFixture()
 
