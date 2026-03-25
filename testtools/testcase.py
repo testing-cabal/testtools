@@ -1331,7 +1331,7 @@ class ExpectedException:
     def __init__(
         self,
         exc_type: type[BaseException],
-        value_re: str | None = None,
+        value_re: str | Matcher[object] | None = None,
         msg: str | None = None,
     ) -> None:
         """Construct an `ExpectedException`.
