@@ -3654,7 +3654,7 @@ class TestByTestResultTests(TestCase):
         self.log = []
         self.result = TestByTestResult(self.on_test)
         now = iter(range(5))
-        self.result._now = lambda: next(now)  # type: ignore[method-assign]
+        self.result._now = lambda: next(now)  # type: ignore[method-assign,assignment,return-value]
 
     def assertCalled(self, **kwargs):
         defaults = {

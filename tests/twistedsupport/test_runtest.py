@@ -45,21 +45,21 @@ try:
         flush_logged_errors,
     )
 except ImportError:
-    assert_fails_with = None  # type: ignore[assignment,misc]
+    assert_fails_with = None  # type: ignore[assignment]
     AsynchronousDeferredRunTest = None  # type: ignore[assignment,misc]
-    flush_logged_errors = None  # type: ignore[assignment,misc]
+    flush_logged_errors = None  # type: ignore[assignment]
     SynchronousDeferredRunTest = None  # type: ignore[assignment,misc]
 
 try:
     from twisted.internet import defer
 except ImportError:
-    defer = None  # type: ignore[assignment,misc]
+    defer = None  # type: ignore[assignment]
 
 try:
     from twisted.python import failure, log
 except ImportError:
-    failure = None  # type: ignore[assignment,misc]
-    log = None  # type: ignore[assignment,misc]
+    failure = None  # type: ignore[assignment]
+    log = None  # type: ignore[assignment]
 
 try:
     from twisted.internet.base import DelayedCall
@@ -69,7 +69,7 @@ except ImportError:
 try:
     from testtools.twistedsupport._runtest import _get_global_publisher_and_observers
 except ImportError:
-    _get_global_publisher_and_observers = None  # type: ignore[assignment,misc]
+    _get_global_publisher_and_observers = None  # type: ignore[assignment]
 
 
 class X:
@@ -306,7 +306,7 @@ class TestAsynchronousDeferredRunTest(NeedsTwistedTestCase):
 
         def fire_deferred():
             self.assertThat(call_log, Equals(["setUp"]))
-            d.callback(marker)  # type: ignore[arg-type]
+            d.callback(marker)
 
         test = SomeCase("test_something")
         timeout = self.make_timeout()

@@ -23,7 +23,7 @@ except ImportError:
 try:
     from fixtures.tests.helpers import LoggingFixture
 except ImportError:
-    LoggingFixture = None  # type: ignore
+    LoggingFixture = None
 
 
 class TestFixtureSupport(TestCase):

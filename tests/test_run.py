@@ -25,7 +25,7 @@ except ImportError:
 try:
     import testresources
 except ImportError:
-    testresources = None  # type: ignore
+    testresources = None
 
 
 if fixtures:

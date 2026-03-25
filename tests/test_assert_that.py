@@ -74,7 +74,7 @@ class AssertThatTests:
         # Create a test class that inherits from the actual test class
         test_self = self
 
-        class Test(test_self.__class__):  # type: ignore[misc,name-defined]
+        class Test(test_self.__class__):
             def test(self):
                 test_self.assert_that_callable("foo", Matcher())
 
