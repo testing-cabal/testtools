@@ -656,32 +656,24 @@ class TestCase(unittest.TestCase):
             return _AssertRaisesContext(expected_exception, self, msg=msg_str)
 
         class ReRaiseOtherTypes(
-            Matcher[
-                tuple[type[BaseException], BaseException, types.TracebackType | None]
-            ]
+            Matcher[tuple[type[BaseException], BaseException, types.TracebackType]]
         ):
             def match(
                 self,
-                matchee: tuple[
-                    type[BaseException], BaseException, types.TracebackType | None
-                ],
+                matchee: tuple[type[BaseException], BaseException, types.TracebackType],
             ) -> None:
                 if not issubclass(matchee[0], expected_exception):
                     raise matchee[1].with_traceback(matchee[2])
                 return None
 
         class CaptureMatchee(
-            Matcher[
-                tuple[type[BaseException], BaseException, types.TracebackType | None]
-            ]
+            Matcher[tuple[type[BaseException], BaseException, types.TracebackType]]
         ):
             matchee: BaseException
 
             def match(
                 self,
-                matchee: tuple[
-                    type[BaseException], BaseException, types.TracebackType | None
-                ],
+                matchee: tuple[type[BaseException], BaseException, types.TracebackType],
             ) -> None:
                 self.matchee = matchee[1]
                 return None
@@ -1382,6 +1374,7 @@ class ExpectedException:
             # Type narrow: we know exc_type is not None from check above,
             # and exc_value must not be None for real exceptions
             assert exc_value is not None, "Exception value should not be None"
+            assert traceback is not None, "Traceback value should not be None"
             exc_info_tuple: ExcInfo = (exc_type, exc_value, traceback)
             mismatch = matcher.match(exc_info_tuple)
             if mismatch:

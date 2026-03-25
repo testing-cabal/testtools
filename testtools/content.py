@@ -197,7 +197,7 @@ class TracebackContent(Content):
 
     def __init__(
         self,
-        err: tuple[type[BaseException], BaseException, types.TracebackType | None]
+        err: tuple[type[BaseException], BaseException, types.TracebackType]
         | tuple[None, None, None],
         test: _TestCase | None,
         capture_locals: bool = False,

@@ -2954,8 +2954,14 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
             expected = outcome
         details, _err_str = self.get_details_and_string()
         getattr(self.converter, outcome)(self, details=details)
-        err = self.converter._details_to_exc_info(details)
-        self.assertEqual([(expected, self, err)], self.result._events)
+        expected_err = self.converter._details_to_exc_info(details)
+        self.assertEqual(1, len(self.result._events))
+        event_outcome, event_test, event_err = self.result._events[0]
+        self.assertEqual(expected, event_outcome)
+        self.assertEqual(self, event_test)
+        # Compare exc type and value; traceback objects differ between calls
+        self.assertEqual(expected_err[:2], event_err[:2])
+        self.assertIsNotNone(event_err[2])
 
     def check_outcome_details_to_nothing(self, outcome, expected=None):
         """Call an outcome with a details dict to be swallowed."""

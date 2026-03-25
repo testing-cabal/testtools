@@ -40,6 +40,7 @@ from typing import (
     TypeAlias,
     TypedDict,
     TypeVar,
+    cast,
 )
 
 if TYPE_CHECKING:
@@ -92,7 +93,7 @@ class _StatusEventDict(TypedDict, total=False):
 EventDict: TypeAlias = _StartStopEventDict | _StatusEventDict
 
 # Type for exc_info tuples from sys.exc_info()
-ExcInfo: TypeAlias = tuple[type[BaseException], BaseException, TracebackType | None]
+ExcInfo: TypeAlias = tuple[type[BaseException], BaseException, TracebackType]
 OptExcInfo: TypeAlias = ExcInfo | tuple[None, None, None]
 
 # Type for details dict (mapping from names to Content objects)
@@ -2117,11 +2118,11 @@ class ExtendedToOriginalDecorator:
 
     def _details_to_exc_info(self, details: DetailsDict) -> ExcInfo:
         """Convert a details dict to an exc_info tuple."""
-        return (
-            _StringException,
-            _StringException(_details_to_str(details, special="traceback")),
-            None,
-        )
+        try:
+            raise _StringException(_details_to_str(details, special="traceback"))
+        except _StringException:
+            # we know this won't be null
+            return cast(ExcInfo, sys.exc_info())
 
     @property
     def current_tags(self) -> set[str]:
@@ -2758,7 +2759,7 @@ class TestResultDecorator:
         subtest: unittest.TestCase,
         err: OptExcInfo | None,
     ) -> None:
-        self.decorated.addSubTest(test, subtest, err)  # type: ignore[arg-type]
+        self.decorated.addSubTest(test, subtest, err)
 
     def addDuration(self, test: unittest.TestCase, duration: float) -> None:
         self.decorated.addDuration(test, duration)
