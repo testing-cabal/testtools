@@ -267,22 +267,13 @@ class TestProgram(unittest.TestProgram):
 
         runner_factory: Callable[..., TestToolsTestRunner] = runner_or_factory
         try:
-            try:
-                testRunner = runner_factory(
-                    verbosity=self.verbosity,
-                    failfast=self.failfast,
-                    buffer=self.buffer,
-                    stdout=self.stdout,
-                    tb_locals=self.tb_locals,
-                )
-            except TypeError:
-                # didn't accept the tb_locals parameter
-                testRunner = runner_factory(
-                    verbosity=self.verbosity,
-                    failfast=self.failfast,
-                    buffer=self.buffer,
-                    stdout=self.stdout,
-                )
+            testRunner = runner_factory(
+                verbosity=self.verbosity,
+                failfast=self.failfast,
+                buffer=self.buffer,
+                stdout=self.stdout,
+                tb_locals=self.tb_locals,
+            )
         except TypeError:
             # didn't accept the verbosity, buffer, failfast or stdout arguments
             try:
