@@ -18,6 +18,8 @@ from queue import Queue
 from typing import Any
 from unittest import TestSuite
 
+import testresources
+
 from testtools import (
     CopyStreamResult,
     ExtendedToOriginalDecorator,
@@ -83,11 +85,6 @@ from .helpers import (
     an_exc_info,
     run_with_stack_hidden,
 )
-
-try:
-    import testresources
-except ImportError:
-    testresources = None
 
 
 def _utcfromtimestamp(t):
@@ -1477,11 +1474,6 @@ class TestExtendedToStreamDecorator(TestCase):
 
 
 class TestResourcedToStreamDecorator(TestCase):
-    def setUp(self):
-        super().setUp()
-        if testresources is None:
-            self.skipTest("Need testresources")
-
     def test_startMakeResource(self):
         log = LoggingStreamResult()
         result = ResourcedToStreamDecorator(log)
