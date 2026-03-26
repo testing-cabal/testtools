@@ -205,11 +205,8 @@ class TestProgram(unittest.TestProgram):
             # OptimisingTestSuite.add, but with a standard protocol).
             # This is needed because the load_tests hook allows arbitrary
             # suites, even if that is rarely used.
-            source = open(self.load_list, "rb")
-            try:
+            with open(self.load_list, "rb") as source:
                 lines = source.readlines()
-            finally:
-                source.close()
             test_ids = {line.strip().decode("utf-8") for line in lines}
             self.test = filter_by_ids(self.test, test_ids)
         if not self.listtests:
