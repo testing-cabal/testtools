@@ -134,6 +134,12 @@ def unicode_output_stream(stream: IO[str]) -> IO[str]:
     The wrapper only allows unicode to be written, not non-ascii bytestrings,
     which is a good thing to ensure sanity and sanitation.
     """
+    warnings.warn(
+        "This is not necessary in Python 3.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
     if sys.platform == "cli" or isinstance(stream, (io.TextIOWrapper, io.StringIO)):
         # Best to never encode before writing in IronPython, or if it is
         # already a TextIO [which in the io library has no encoding

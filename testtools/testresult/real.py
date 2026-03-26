@@ -32,10 +32,10 @@ from collections.abc import Callable, Iterable, Sequence
 from operator import methodcaller
 from queue import Queue
 from typing import (
+    IO,
     TYPE_CHECKING,
     ClassVar,
     Protocol,
-    TextIO,
     TypeAlias,
     TypedDict,
     TypeVar,
@@ -1539,7 +1539,7 @@ class TextTestResult(TestResult):
 
     def __init__(
         self,
-        stream: TextIO | None,
+        stream: IO[str] | None,
         failfast: bool = False,
         tb_locals: bool = False,
         verbosity: int = 1,
