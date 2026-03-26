@@ -18,7 +18,6 @@ from types import ModuleType
 from typing import IO, Any, TextIO
 
 from testtools import TextTestResult
-from testtools.compat import unicode_output_stream
 from testtools.testsuite import filter_by_ids, iterate_tests, sorted_tests
 
 defaultTestLoader = unittest.defaultTestLoader
@@ -118,9 +117,8 @@ class TestToolsTestRunner:
         self, test: unittest.TestSuite | unittest.TestCase
     ) -> unittest.TestResult | None:
         """Run the given test case or test suite."""
-        stream: TextIO = unicode_output_stream(self.stdout)  # type: ignore[assignment]
         result = TextTestResult(
-            stream,
+            self.stdout,
             failfast=self.failfast or False,
             tb_locals=self.tb_locals,
             verbosity=self.verbosity,
