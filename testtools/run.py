@@ -266,23 +266,13 @@ class TestProgram(unittest.TestProgram):
             return runner_or_factory
 
         runner_factory: Callable[..., TestToolsTestRunner] = runner_or_factory
-        try:
-            testRunner = runner_factory(
-                verbosity=self.verbosity,
-                failfast=self.failfast,
-                buffer=self.buffer,
-                stdout=self.stdout,
-                tb_locals=self.tb_locals,
-            )
-        except TypeError:
-            # didn't accept the verbosity, buffer, failfast or stdout arguments
-            try:
-                testRunner = runner_factory(
-                    verbosity=self.verbosity, failfast=self.failfast, buffer=self.buffer
-                )
-            except TypeError:
-                testRunner = runner_factory()
-        return testRunner
+        return runner_factory(
+            verbosity=self.verbosity,
+            failfast=self.failfast,
+            buffer=self.buffer,
+            stdout=self.stdout,
+            tb_locals=self.tb_locals,
+        )
 
 
 def main(argv: list[str], stdout: IO[str]) -> None:
