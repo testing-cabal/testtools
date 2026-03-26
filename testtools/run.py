@@ -15,11 +15,12 @@ from argparse import ArgumentParser
 from collections.abc import Callable
 from functools import partial
 from types import ModuleType
-from typing import IO, Any, TextIO
+from typing import IO, Any
 
 from testtools import TextTestResult
 from testtools.testsuite import filter_by_ids, iterate_tests, sorted_tests
 
+# TODO: Remove these aliases and constants in 3.0
 defaultTestLoader = unittest.defaultTestLoader
 defaultTestLoaderCls = unittest.TestLoader
 have_discover = True
@@ -143,24 +144,12 @@ class TestProgram(unittest.TestProgram):
     - Sorted test ordering after discovery
     """
 
-    # defaults for testing
-    module: ModuleType | None = None
-    verbosity: int = 1
-    failfast: bool | None = None
-    catchbreak: bool | None = None
-    buffer: bool | None = None
-    progName: str | None = None
-    _discovery_parser: ArgumentParser | None = None
-    test: Any  # Set by parent class
+    # https://github.com/python/typeshed/pull/15559
+    module: ModuleType | None = None  # narrower than parent's str | ModuleType | None
+    test: Any  # set by parent's createTests(), not in typeshed
     stdout: IO[str]
-    exit: bool
-    tb_locals: bool
-    defaultTest: str | None
     listtests: bool
     load_list: str | None
-    testRunner: Callable[..., TestToolsTestRunner] | TestToolsTestRunner | None
-    testLoader: unittest.TestLoader
-    result: unittest.TestResult
 
     def __init__(
         self,
