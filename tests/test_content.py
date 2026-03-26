@@ -260,7 +260,7 @@ class TestTracebackContent(TestCase):
         # we are intentionally passing an invalid type
         self.assertThat(
             lambda: TracebackContent(None, None),
-            raises_value_error,  # type: ignore[arg-type]
+            raises_value_error,
         )
 
     def test___init___sets_ivars(self):

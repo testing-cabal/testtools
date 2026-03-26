@@ -21,6 +21,7 @@ import types
 from collections.abc import Callable, Iterable, Iterator
 from typing import IO, Any, Protocol, TypeAlias, runtime_checkable
 
+from testtools._types import OptExcInfo
 from testtools.content_type import JSON, UTF8_TEXT, ContentType
 
 # Type for JSON-serializable data
@@ -197,8 +198,7 @@ class TracebackContent(Content):
 
     def __init__(
         self,
-        err: tuple[type[BaseException], BaseException, types.TracebackType | None]
-        | tuple[None, None, None],
+        err: OptExcInfo,
         test: _TestCase | None,
         capture_locals: bool = False,
     ) -> None:

@@ -11,8 +11,8 @@ import sys
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, NoReturn
 
+from testtools._types import ExcInfo
 from testtools.testresult import (
-    ExcInfo,
     ExtendedToOriginalDecorator,
     TestResult,
 )

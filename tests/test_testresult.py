@@ -2108,11 +2108,13 @@ class TestTextTestResult(TestCase):
         self.result = TextTestResult(io.StringIO())
 
     def getvalue(self):
+        assert isinstance(self.result.stream, io.StringIO)
         return self.result.stream.getvalue()
 
     def test__init_sets_stream(self):
-        result = TextTestResult("fp")
-        self.assertEqual("fp", result.stream)
+        stream = io.StringIO()
+        result = TextTestResult(stream)
+        self.assertEqual(stream, result.stream)
 
     def reset_output(self):
         self.result.stream = io.StringIO()
@@ -2285,6 +2287,7 @@ UNEXPECTED SUCCESS: tests.test_testresult.Test.succeeded
 
             def addSuccess(self, test, details=None):
                 super().addSuccess(test, details)
+                assert self.stream is not None
                 self.stream.write("CUSTOM_SUCCESS_MARKER\n")
 
         stream = io.StringIO()
@@ -2954,8 +2957,14 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
             expected = outcome
         details, _err_str = self.get_details_and_string()
         getattr(self.converter, outcome)(self, details=details)
-        err = self.converter._details_to_exc_info(details)
-        self.assertEqual([(expected, self, err)], self.result._events)
+        expected_err = self.converter._details_to_exc_info(details)
+        self.assertEqual(1, len(self.result._events))
+        event_outcome, event_test, event_err = self.result._events[0]
+        self.assertEqual(expected, event_outcome)
+        self.assertEqual(self, event_test)
+        # Compare exc type and value; traceback objects differ between calls
+        self.assertEqual(expected_err[:2], event_err[:2])
+        self.assertIsNotNone(event_err[2])
 
     def check_outcome_details_to_nothing(self, outcome, expected=None):
         """Call an outcome with a details dict to be swallowed."""
@@ -3556,7 +3565,7 @@ class TestDetailsToStr(TestCase):
 
     def test_binary_content(self):
         content = content_from_stream(
-            io.StringIO("foo"), content_type=ContentType("image", "jpeg")
+            io.BytesIO(b"foo"), content_type=ContentType("image", "jpeg")
         )
         string = _details_to_str({"attachment": content})
         self.assertThat(
@@ -3611,16 +3620,16 @@ Empty attachments:
         )
 
     def test_lots_of_different_attachments(self):
-        def jpg(x):
-            return content_from_stream(io.StringIO(x), ContentType("image", "jpeg"))
+        def jpg(x: bytes) -> Content:
+            return content_from_stream(io.BytesIO(x), ContentType("image", "jpeg"))
 
         attachments = {
             "attachment": text_content("foo"),
             "attachment-1": text_content("traceback"),
-            "attachment-2": jpg("pic1"),
+            "attachment-2": jpg(b"pic1"),
             "attachment-3": text_content("bar"),
             "attachment-4": text_content(""),
-            "attachment-5": jpg("pic2"),
+            "attachment-5": jpg(b"pic2"),
         }
         string = _details_to_str(attachments, special="attachment-1")
         self.assertThat(
@@ -3648,7 +3657,7 @@ class TestByTestResultTests(TestCase):
         self.log = []
         self.result = TestByTestResult(self.on_test)
         now = iter(range(5))
-        self.result._now = lambda: next(now)  # type: ignore[method-assign]
+        self.result._now = lambda: next(now)  # type: ignore[method-assign,assignment,return-value]
 
     def assertCalled(self, **kwargs):
         defaults = {

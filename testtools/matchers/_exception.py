@@ -7,18 +7,14 @@ __all__ = [
 ]
 
 import sys
-import types
 from collections.abc import Callable
-from typing import TypeAlias, TypeVar
+from typing import TypeVar
+
+from testtools._types import ExcInfo
 
 from ._basic import MatchesRegex
 from ._higherorder import AfterPreprocessing
 from ._impl import Matcher, Mismatch
-
-# Type for exc_info tuples
-ExcInfo: TypeAlias = tuple[
-    type[BaseException], BaseException, types.TracebackType | None
-]
 
 T = TypeVar("T", bound=BaseException)
 
@@ -38,10 +34,10 @@ class MatchesException(Matcher[ExcInfo]):
 
     def __init__(
         self,
-        exception: BaseException
-        | type[BaseException]
-        | tuple[type[BaseException], ...],
-        value_re: "str | Matcher[BaseException] | None" = None,
+        exception: (
+            BaseException | type[BaseException] | tuple[type[BaseException], ...]
+        ),
+        value_re: str | Matcher[object] | None = None,
     ) -> None:
         """Create a MatchesException that will match exc_info's for exception.
 
@@ -58,7 +54,7 @@ class MatchesException(Matcher[ExcInfo]):
         """
         Matcher.__init__(self)
         self.expected = exception
-        value_matcher: Matcher[BaseException] | None
+        value_matcher: Matcher[object] | None
         if isinstance(value_re, str):
             value_matcher = AfterPreprocessing(str, MatchesRegex(value_re), False)
         else:
@@ -118,7 +114,7 @@ class Raises(Matcher[Callable[[], object]]):
     Raises.match call unless they are explicitly matched.
     """
 
-    def __init__(self, exception_matcher: "Matcher[ExcInfo] | None" = None) -> None:
+    def __init__(self, exception_matcher: Matcher[ExcInfo] | None = None) -> None:
         """Create a Raises matcher.
 
         :param exception_matcher: Optional validator for the exception raised

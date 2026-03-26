@@ -391,7 +391,7 @@ class TestIterateTests(TestCase):
     def test_iterate_suite(self):
         a = PlaceHolder("a")
         b = PlaceHolder("b")
-        suite = unittest.TestSuite([a, b])  # type: ignore[list-item]
+        suite = unittest.TestSuite([a, b])
         self.assertEqual([a, b], list(iterate_tests(suite)))
 
     def test_iterate_single_test(self):
@@ -413,7 +413,7 @@ class TestSortedTests(TestCase):
             def sort_tests(self):
                 self._tests = sorted_tests(self, True)
 
-        input_suite = Subclass([b, a])  # type: ignore[list-item]
+        input_suite = Subclass([b, a])
         suite = sorted_tests(input_suite)
         self.assertEqual([a, b], list(iterate_tests(suite)))
         self.assertEqual([input_suite], list(iter(suite)))
@@ -425,7 +425,7 @@ class TestSortedTests(TestCase):
         class Subclass(unittest.TestSuite):
             pass
 
-        input_suite = Subclass([b, a])  # type: ignore[list-item]
+        input_suite = Subclass([b, a])
         suite = sorted_tests(input_suite)
         self.assertEqual([b, a], list(iterate_tests(suite)))
         self.assertEqual([input_suite], list(iter(suite)))
@@ -433,14 +433,14 @@ class TestSortedTests(TestCase):
     def test_sorts_simple_suites(self):
         a = PlaceHolder("a")
         b = PlaceHolder("b")
-        suite = sorted_tests(unittest.TestSuite([b, a]))  # type: ignore[list-item]
+        suite = sorted_tests(unittest.TestSuite([b, a]))
         self.assertEqual([a, b], list(iterate_tests(suite)))
 
     def test_duplicate_simple_suites(self):
         a = PlaceHolder("a")
         b = PlaceHolder("b")
         c = PlaceHolder("a")
-        self.assertRaises(ValueError, sorted_tests, unittest.TestSuite([a, b, c]))  # type: ignore[list-item]
+        self.assertRaises(ValueError, sorted_tests, unittest.TestSuite([a, b, c]))
 
     def test_multiple_duplicates(self):
         # If there are multiple duplicates on a test suite, we report on them
@@ -450,9 +450,7 @@ class TestSortedTests(TestCase):
         c = PlaceHolder("a")
         d = PlaceHolder("b")
         error = self.assertRaises(
-            ValueError,
-            sorted_tests,
-            unittest.TestSuite([a, b, c, d]),  # type: ignore[list-item]
+            ValueError, sorted_tests, unittest.TestSuite([a, b, c, d])
         )
         self.assertThat(
             str(error),

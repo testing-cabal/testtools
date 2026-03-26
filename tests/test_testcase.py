@@ -2334,11 +2334,11 @@ class TestDecorateTestCaseResult(TestCase):
         orig = PlaceHolder("foo")
         orig.thing = "fred"  # type: ignore[attr-defined]
         case = DecorateTestCaseResult(orig, self.make_result)
-        self.assertEqual("fred", case.thing)  # type: ignore[attr-defined]
+        self.assertEqual("fred", case.thing)
         self.assertRaises(AttributeError, getattr, case, "other")
-        case.other = "barbara"  # type: ignore[attr-defined]
+        case.other = "barbara"
         self.assertEqual("barbara", orig.other)  # type: ignore[attr-defined]
-        del case.thing  # type: ignore[attr-defined]
+        del case.thing
         self.assertRaises(AttributeError, getattr, orig, "thing")
 
 

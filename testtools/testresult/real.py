@@ -27,7 +27,6 @@ import email.message
 import math
 import sys
 import threading
-import types
 import unittest
 from collections.abc import Callable, Iterable, Sequence
 from operator import methodcaller
@@ -40,11 +39,13 @@ from typing import (
     TypeAlias,
     TypedDict,
     TypeVar,
+    cast,
 )
 
 if TYPE_CHECKING:
     from testtools.testcase import PlaceHolder
 
+from testtools._types import ExcInfo, OptExcInfo
 from testtools.content import (
     Content,
     TracebackContent,
@@ -90,11 +91,6 @@ class _StatusEventDict(TypedDict, total=False):
 
 
 EventDict: TypeAlias = _StartStopEventDict | _StatusEventDict
-
-# Type for exc_info tuples from sys.exc_info()
-ExcInfo: TypeAlias = tuple[
-    type[BaseException], BaseException, types.TracebackType | None
-]
 
 # Type for details dict (mapping from names to Content objects)
 DetailsDict: TypeAlias = dict[str, Content]
@@ -165,7 +161,7 @@ class TestResult(unittest.TestResult):
     def addExpectedFailure(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | tuple[None, None, None] = (None, None, None),
+        err: OptExcInfo = (None, None, None),
         details: DetailsDict | None = None,
     ) -> None:
         """Called when a test has failed in an expected manner.
@@ -181,10 +177,10 @@ class TestResult(unittest.TestResult):
             (test, self._err_details_to_string(test, err, details))
         )
 
-    def addError(  # type: ignore[override]
+    def addError(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         """Called when an error has occurred. 'err' is a tuple of values as
@@ -200,10 +196,10 @@ class TestResult(unittest.TestResult):
         if self.failfast:
             self.stop()
 
-    def addFailure(  # type: ignore[override]
+    def addFailure(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         """Called when an error has occurred. 'err' is a tuple of values as
@@ -286,7 +282,7 @@ class TestResult(unittest.TestResult):
     def _err_details_to_string(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | tuple[None, None, None] = (None, None, None),
+        err: OptExcInfo = (None, None, None),
         details: DetailsDict | None = None,
     ) -> str:
         """Convert an error in exc_info form or a contents dict to a string."""
@@ -821,8 +817,8 @@ class StreamTagger(CopyStreamResult):
     def __init__(
         self,
         targets: list[StreamResult],
-        add: set[str] | None = None,
-        discard: set[str] | None = None,
+        add: Iterable[str] | None = None,
+        discard: Iterable[str] | None = None,
     ) -> None:
         """Create a StreamTagger.
 
@@ -1471,26 +1467,26 @@ class MultiTestResult(TestResult):
         super().stopTest(test)
         self._dispatch("stopTest", test)
 
-    def addError(  # type: ignore[override]
+    def addError(
         self,
         test: unittest.TestCase,
-        error: ExcInfo | None = None,
+        error: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         self._dispatch("addError", test, error, details=details)
 
-    def addExpectedFailure(  # type: ignore[override]
+    def addExpectedFailure(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         self._dispatch("addExpectedFailure", test, err, details=details)
 
-    def addFailure(  # type: ignore[override]
+    def addFailure(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         self._dispatch("addFailure", test, err, details=details)
@@ -1607,10 +1603,10 @@ class TextTestResult(TestResult):
                 self.stream.write("ok\n")
                 self.stream.flush()
 
-    def addError(  # type: ignore[override]
+    def addError(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         """Called when an error has occurred.
@@ -1627,10 +1623,10 @@ class TextTestResult(TestResult):
                 self.stream.write("ERROR\n")
                 self.stream.flush()
 
-    def addFailure(  # type: ignore[override]
+    def addFailure(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         """Called when a failure has occurred.
@@ -1662,10 +1658,10 @@ class TextTestResult(TestResult):
                 self.stream.write(f"skipped {reason!r}\n")
                 self.stream.flush()
 
-    def addExpectedFailure(  # type: ignore[override]
+    def addExpectedFailure(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         """Called when an expected failure has occurred.
@@ -1811,10 +1807,10 @@ class ThreadsafeForwardingResult(TestResult):
             self.semaphore.release()
         self._test_start = None
 
-    def addError(  # type: ignore[override]
+    def addError(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         """Called when an error has occurred.
@@ -1826,10 +1822,10 @@ class ThreadsafeForwardingResult(TestResult):
             self.result.addError, test, err, details=details
         )
 
-    def addExpectedFailure(  # type: ignore[override]
+    def addExpectedFailure(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         """Called when an expected failure has occurred.
@@ -1841,10 +1837,10 @@ class ThreadsafeForwardingResult(TestResult):
             self.result.addExpectedFailure, test, err, details=details
         )
 
-    def addFailure(  # type: ignore[override]
+    def addFailure(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         """Called when a failure has occurred.
@@ -1985,7 +1981,7 @@ class ExtendedToOriginalDecorator:
     def addError(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         try:
@@ -2006,7 +2002,7 @@ class ExtendedToOriginalDecorator:
     def addExpectedFailure(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         self._check_args(err, details)
@@ -2027,7 +2023,7 @@ class ExtendedToOriginalDecorator:
     def addFailure(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         try:
@@ -2078,7 +2074,7 @@ class ExtendedToOriginalDecorator:
                 try:
                     test.fail("")
                 except test.failureException:
-                    self.addFailure(test, sys.exc_info())  # type: ignore[arg-type]
+                    self.addFailure(test, sys.exc_info())
                     return
             else:
                 if details is not None:
@@ -2118,11 +2114,11 @@ class ExtendedToOriginalDecorator:
 
     def _details_to_exc_info(self, details: DetailsDict) -> ExcInfo:
         """Convert a details dict to an exc_info tuple."""
-        return (
-            _StringException,
-            _StringException(_details_to_str(details, special="traceback")),
-            None,
-        )
+        try:
+            raise _StringException(_details_to_str(details, special="traceback"))
+        except _StringException:
+            # we know this won't be null
+            return cast(ExcInfo, sys.exc_info())
 
     @property
     def current_tags(self) -> set[str]:
@@ -2226,7 +2222,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
         self._started = False
         self._tags: TagContext | None = None
         self.__now: datetime.datetime | None = None
-        self._subtest_failures: list[tuple[unittest.TestCase, ExcInfo]] = []
+        self._subtest_failures: list[tuple[unittest.TestCase, OptExcInfo]] = []
 
     def _get_failfast(self) -> bool:
         return len(self.targets) == 2
@@ -2287,7 +2283,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
     def addError(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         self._check_args(err, details)
@@ -2298,7 +2294,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
     def _convert(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None,
+        err: OptExcInfo | None,
         details: DetailsDict | None,
         status: str,
         reason: str | None = None,
@@ -2354,7 +2350,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
     def addExpectedFailure(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         self._check_args(err, details)
@@ -2382,7 +2378,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
         self,
         test: unittest.TestCase,
         subtest: unittest.TestCase,
-        err: ExcInfo | None,
+        err: OptExcInfo | None,
     ) -> None:
         """Handle a subtest result.
 
@@ -2398,7 +2394,7 @@ class ExtendedToStreamDecorator(CopyStreamResult, StreamSummary, TestControl):
         if err is not None:
             self._subtest_failures.append((subtest, err))
 
-    def _check_args(self, err: ExcInfo | None, details: DetailsDict | None) -> None:
+    def _check_args(self, err: OptExcInfo | None, details: DetailsDict | None) -> None:
         param_count = 0
         if err is not None:
             param_count += 1
@@ -2714,7 +2710,7 @@ class TestResultDecorator:
     def addError(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         self.decorated.addError(test, err, details=details)
@@ -2722,7 +2718,7 @@ class TestResultDecorator:
     def addFailure(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         self.decorated.addFailure(test, err, details=details)
@@ -2743,7 +2739,7 @@ class TestResultDecorator:
     def addExpectedFailure(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         self.decorated.addExpectedFailure(test, err, details=details)  # type: ignore[arg-type]
@@ -2757,9 +2753,9 @@ class TestResultDecorator:
         self,
         test: unittest.TestCase,
         subtest: unittest.TestCase,
-        err: ExcInfo | None,
+        err: OptExcInfo | None,
     ) -> None:
-        self.decorated.addSubTest(test, subtest, err)  # type: ignore[arg-type]
+        self.decorated.addSubTest(test, subtest, err)
 
     def addDuration(self, test: unittest.TestCase, duration: float) -> None:
         self.decorated.addDuration(test, duration)
@@ -2860,7 +2856,7 @@ class TestByTestResult(TestResult):
     def _err_to_details(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None,
+        err: OptExcInfo | None,
         details: DetailsDict | None,
     ) -> DetailsDict:
         if details:
@@ -2875,10 +2871,10 @@ class TestByTestResult(TestResult):
         self._status = "success"
         self._details = details
 
-    def addFailure(  # type: ignore[override]
+    def addFailure(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         """Called when a failure has occurred.
@@ -2890,10 +2886,10 @@ class TestByTestResult(TestResult):
         self._status = "failure"
         self._details = self._err_to_details(test, err, details)
 
-    def addError(  # type: ignore[override]
+    def addError(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         """Called when an error has occurred.
@@ -2921,10 +2917,10 @@ class TestByTestResult(TestResult):
             details["reason"] = text_content(reason)
         self._details = details
 
-    def addExpectedFailure(  # type: ignore[override]
+    def addExpectedFailure(
         self,
         test: unittest.TestCase,
-        err: ExcInfo | None = None,
+        err: OptExcInfo | None = None,
         details: DetailsDict | None = None,
     ) -> None:
         """Called when an expected failure has occurred.
