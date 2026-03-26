@@ -13,7 +13,6 @@ import sys
 import unittest
 from argparse import ArgumentParser
 from collections.abc import Callable
-from functools import partial
 from types import ModuleType
 from typing import IO, Any
 
@@ -156,9 +155,9 @@ class TestProgram(unittest.TestProgram):
         module: str | ModuleType | None = __name__,
         defaultTest: str | None = None,
         argv: list[str] | None = None,
-        testRunner: Callable[..., TestToolsTestRunner]
-        | TestToolsTestRunner
-        | None = None,
+        testRunner: (
+            Callable[..., TestToolsTestRunner] | TestToolsTestRunner | None
+        ) = None,
         testLoader: unittest.TestLoader = defaultTestLoader,
         exit: bool = True,
         verbosity: int = 1,
@@ -299,9 +298,7 @@ class TestProgram(unittest.TestProgram):
 
 
 def main(argv: list[str], stdout: IO[str]) -> None:
-    TestProgram(
-        argv=argv, testRunner=partial(TestToolsTestRunner, stdout=stdout), stdout=stdout
-    )
+    TestProgram(argv=argv, stdout=stdout)
 
 
 if __name__ == "__main__":
