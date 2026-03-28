@@ -5,10 +5,12 @@ __all__ = [
     "EndsWith",
     "Equals",
     "GreaterThan",
+    "GreaterThanOrEqual",
     "HasLength",
     "Is",
     "IsInstance",
     "LessThan",
+    "LessThanOrEqual",
     "MatchesRegex",
     "Nearly",
     "NotEquals",
@@ -198,6 +200,20 @@ class GreaterThan(_BinaryComparison[T]):
 
     comparator = operator.gt
     mismatch_string = "<="
+
+
+class LessThanOrEqual(_BinaryComparison[T]):
+    """Matches if the item is less than or equal to the matchers reference object."""
+
+    comparator = operator.le
+    mismatch_string = ">"
+
+
+class GreaterThanOrEqual(_BinaryComparison[T]):
+    """Matches if the item is greater than or equal to the matchers reference object."""
+
+    comparator = operator.ge
+    mismatch_string = "<"
 
 
 class _NotNearlyEqual(Mismatch, Generic[T]):

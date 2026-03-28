@@ -12,10 +12,12 @@ from testtools.matchers._basic import (
     EndsWith,
     Equals,
     GreaterThan,
+    GreaterThanOrEqual,
     HasLength,
     Is,
     IsInstance,
     LessThan,
+    LessThanOrEqual,
     MatchesRegex,
     Nearly,
     NotEquals,
@@ -214,6 +216,36 @@ class TestGreaterThanInterface(TestCase, TestMatchersInterface):
     describe_examples: ClassVar = [
         ("4 <= 5", 4, GreaterThan(5)),
         ("4 <= 4", 4, GreaterThan(4)),
+    ]
+
+
+class TestLessThanOrEqualInterface(TestCase, TestMatchersInterface):
+    matches_matcher: ClassVar[Matcher[Any]] = LessThanOrEqual(4)
+    matches_matches: ClassVar[list[Any]] = [-5, 3, 4]
+    matches_mismatches: ClassVar[list[Any]] = [5, 5000]
+
+    str_examples: ClassVar = [
+        ("LessThanOrEqual(12)", LessThanOrEqual(12)),
+    ]
+
+    describe_examples: ClassVar = [
+        ("5 > 4", 5, LessThanOrEqual(4)),
+        ("6 > 4", 6, LessThanOrEqual(4)),
+    ]
+
+
+class TestGreaterThanOrEqualInterface(TestCase, TestMatchersInterface):
+    matches_matcher: ClassVar[Matcher[Any]] = GreaterThanOrEqual(4)
+    matches_matches: ClassVar[list[Any]] = [4, 5, 8]
+    matches_mismatches: ClassVar[list[Any]] = [-2, 0, 3]
+
+    str_examples: ClassVar = [
+        ("GreaterThanOrEqual(12)", GreaterThanOrEqual(12)),
+    ]
+
+    describe_examples: ClassVar = [
+        ("3 < 4", 3, GreaterThanOrEqual(4)),
+        ("2 < 4", 2, GreaterThanOrEqual(4)),
     ]
 
 
