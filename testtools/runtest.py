@@ -112,7 +112,7 @@ class RunTest:
         """
         return self._run_prepared_result(ExtendedToOriginalDecorator(result))  # type: ignore[arg-type]
 
-    def _run_prepared_result(self, result: "TestResult") -> "TestResult":
+    def _run_prepared_result(self, result: TestResult) -> TestResult:
         """Run one test reporting to result.
 
         :param result: A testtools.TestResult to report activity to.
@@ -189,7 +189,7 @@ class RunTest:
                             self.case, details=self.case.getDetails()
                         )
 
-    def _run_cleanups(self, result: "TestResult") -> object | None:
+    def _run_cleanups(self, result: TestResult) -> object | None:
         """Run the cleanups that have been added with addCleanup.
 
         See the docstring for addCleanup for more information.
