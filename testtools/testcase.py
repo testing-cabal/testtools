@@ -577,18 +577,18 @@ class TestCase(unittest.TestCase):
     def assertRaises(
         self,
         expected_exception: type[_E],
-        callable: Callable[_P, _R],
-        *args: _P.args,
-        **kwargs: _P.kwargs,
+        callable: Callable[..., Any],
+        *args: Any,
+        **kwargs: Any,
     ) -> _E: ...
 
     @overload
     def assertRaises(
         self,
         expected_exception: tuple[type[BaseException], ...],
-        callable: Callable[_P, _R],
-        *args: _P.args,
-        **kwargs: _P.kwargs,
+        callable: Callable[..., Any],
+        *args: Any,
+        **kwargs: Any,
     ) -> BaseException: ...
 
     @overload
