@@ -928,7 +928,7 @@ class TestCase(unittest.TestCase):
                     )
                 return result
 
-            ret.addBoth(_validate_setup_called)
+            ret.addBoth(_validate_setup_called)  # type: ignore[attr-defined]
         else:
             # Synchronous: validate immediately
             if not self.__setup_called:
@@ -964,7 +964,7 @@ class TestCase(unittest.TestCase):
                     )
                 return result
 
-            ret.addBoth(_validate_teardown_called)
+            ret.addBoth(_validate_teardown_called)  # type: ignore[attr-defined]
         else:
             # Synchronous: validate immediately
             if not self.__teardown_called:

@@ -62,7 +62,7 @@ def iterate_tests(
         for test in test_suite_or_case:
             yield from iterate_tests(test)
     else:
-        yield test_suite_or_case  # type: ignore[misc]
+        yield test_suite_or_case
 
 
 class ConcurrentTestSuite(unittest.TestSuite):
