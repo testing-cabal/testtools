@@ -6,6 +6,18 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+2.9.0
+~~~~~
+
+Improvements
+------------
+* Add ``LessThanOrEqual`` and ``GreaterThanOrEqual`` matchers.
+  (Julian Edwards, #594)
+
+* Improve type annotations throughout the codebase, including compatibility
+  fixes for mypy 1.20.0.
+  (Stephen Finucane, #587, #591, #592, #593, #600)
+
 2.8.7
 ~~~~~
 
