@@ -6,6 +6,8 @@ import doctest
 import unittest
 from pprint import pformat
 
+from fixtures import FunctionFixture
+
 from testtools import (
     ConcurrentStreamTestSuite,
     ConcurrentTestSuite,
@@ -19,11 +21,6 @@ from testtools.testresult.doubles import StreamResult as LoggingStream
 from testtools.testsuite import FixtureSuite, sorted_tests
 
 from .helpers import LoggingResult
-
-try:
-    from fixtures import FunctionFixture
-except ImportError:
-    FunctionFixture = None  # type: ignore
 
 
 class Sample(TestCase):
@@ -348,11 +345,6 @@ TypeError: ...run() takes ...1 ...argument...2...given...
 
 
 class TestFixtureSuite(TestCase):
-    def setUp(self):
-        super().setUp()
-        if FunctionFixture is None:
-            self.skipTest("Need fixtures")
-
     def test_fixture_suite(self):
         log: list[int | str] = []
 
