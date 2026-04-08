@@ -69,6 +69,10 @@ warn_unused_configs = false
 # FIXME(stephenfin): We should remove this
 implicit_reexport = true
 exclude = 'doc'
+files = [
+    "testtools",
+    "tests",
+]
 
 [[tool.mypy.overrides]]
 module = [
