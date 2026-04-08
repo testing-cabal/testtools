@@ -15,7 +15,7 @@ from testtools import (
     iterate_tests,
 )
 from testtools.matchers import DocTestMatches, Equals
-from testtools.testresult.doubles import StreamResult as LoggingStream
+from testtools.testresult.doubles import StreamResult
 from testtools.testsuite import FixtureSuite, sorted_tests
 
 from .helpers import LoggingResult
@@ -106,7 +106,7 @@ class TestConcurrentTestSuiteRun(TestCase):
 
 class TestConcurrentStreamTestSuiteRun(TestCase):
     def test_trivial(self):
-        result = LoggingStream()
+        result = StreamResult()
         test1 = Sample("test_method1")
         test2 = Sample("test_method2")
 
@@ -196,7 +196,7 @@ class TestConcurrentStreamTestSuiteRun(TestCase):
             def run(self):
                 pass
 
-        result = LoggingStream()
+        result = StreamResult()
 
         def cases():
             return [(BrokenTest(), "0")]
