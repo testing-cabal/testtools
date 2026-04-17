@@ -64,13 +64,13 @@ from testtools.matchers import (
 )
 from testtools.testresult.doubles import (
     ExtendedTestResult,
-    Python3TestResult,
     TwistedTestResult,
     _StatusEvent,
 )
 from testtools.testresult.doubles import (
     StreamResult as LoggingStreamResult,
 )
+from testtools.testresult.doubles import TestResult as LoggingTestResult
 from testtools.testresult.real import (
     _details_to_str,
     _merge_tags,
@@ -470,14 +470,14 @@ class TestExtendedTestResultContract(TestCase, StartTestRunContract):
         return ExtendedTestResult()
 
 
-class TestPython3TestResultContract(TestCase, Python3Contract):
+class TestLoggingTestResultContract(TestCase, Python3Contract):
     def makeResult(self):
-        return Python3TestResult()
+        return LoggingTestResult()
 
 
-class TestAdaptedPython3TestResultContract(TestCase, DetailsContract):
+class TestAdaptedLoggingTestResultContract(TestCase, DetailsContract):
     def makeResult(self):
-        return ExtendedToOriginalDecorator(Python3TestResult())
+        return ExtendedToOriginalDecorator(LoggingTestResult())
 
 
 class TestAdaptedTwistedTestResultContract(TestCase, DetailsContract):
@@ -497,12 +497,12 @@ class TestTestResultDecoratorContract(TestCase, StartTestRunContract):
         return TestResultDecorator(TestResult())
 
 
-class TestPython3TestResultDuration(TestCase):
-    """Tests for addDuration functionality in Python3TestResult."""
+class TestLoggingTestResultDuration(TestCase):
+    """Tests for addDuration functionality in LoggingTestResult."""
 
     def test_addDuration_logging(self):
-        # Python3TestResult should log addDuration calls
-        result = Python3TestResult()
+        # LoggingTestResult should log addDuration calls
+        result = LoggingTestResult()
         test = make_erroring_test()
 
         result.addDuration(test, 1.5)
@@ -510,8 +510,8 @@ class TestPython3TestResultDuration(TestCase):
         self.assertIn(expected_call, result._events)
 
     def test_addDuration_stores_in_collectedDurations(self):
-        # Python3TestResult should store durations in collectedDurations
-        result = Python3TestResult()
+        # LoggingTestResult should store durations in collectedDurations
+        result = LoggingTestResult()
         test = make_erroring_test()
 
         result.addDuration(test, 2.3)
@@ -2896,7 +2896,7 @@ class TestStreamToQueue(TestCase):
 
 class TestExtendedToOriginalResultDecoratorBase(TestCase):
     def make_result(self):
-        self.result = Python3TestResult()
+        self.result = LoggingTestResult()
         self.make_converter()
 
     def make_converter(self):

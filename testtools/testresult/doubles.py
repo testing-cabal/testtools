@@ -10,11 +10,13 @@ from typing import Literal, TypeAlias
 
 from testtools._types import OptExcInfo
 from testtools.tags import TagContext
+from testtools.testresult.real import StreamResult as BaseStreamResult
 
 __all__ = [
     "ExtendedTestResult",
-    "Python3TestResult",
+    "LogEvent",
     "StreamResult",
+    "TestResult",
     "TwistedTestResult",
 ]
 
@@ -84,39 +86,40 @@ class LoggingBase:
         self._events = event_log
 
 
-class Python3TestResult(LoggingBase):
+class TestResult(LoggingBase, unittest.TestResult):
     """A precisely python 3 like test result, that logs."""
 
     def __init__(self, event_log: list[LogEvent] | None = None) -> None:
-        super().__init__(event_log=event_log)
-        self.shouldStop = False
-        self._was_successful = True
-        self.testsRun = 0
-        self.failfast = False
+        LoggingBase.__init__(self, event_log=event_log)
+        unittest.TestResult.__init__(self)
         self.collectedDurations: list[tuple[unittest.TestCase, float]] = []
 
     def addError(self, test: unittest.TestCase, err: OptExcInfo) -> None:
-        self._was_successful = False
+        super().addError(test, err)
         self._events.append(("addError", test, err))
         if self.failfast:
             self.stop()
 
     def addFailure(self, test: unittest.TestCase, err: OptExcInfo) -> None:
-        self._was_successful = False
+        super().addFailure(test, err)
         self._events.append(("addFailure", test, err))
         if self.failfast:
             self.stop()
 
     def addSuccess(self, test: unittest.TestCase) -> None:
+        super().addSuccess(test)
         self._events.append(("addSuccess", test))
 
     def addExpectedFailure(self, test: unittest.TestCase, err: OptExcInfo) -> None:
+        super().addExpectedFailure(test, err)
         self._events.append(("addExpectedFailure", test, err))
 
     def addSkip(self, test: unittest.TestCase, reason: str) -> None:
+        super().addSkip(test, reason)
         self._events.append(("addSkip", test, reason))
 
     def addUnexpectedSuccess(self, test: unittest.TestCase) -> None:
+        super().addUnexpectedSuccess(test)
         self._events.append(("addUnexpectedSuccess", test))
         if self.failfast:
             self.stop()
@@ -125,31 +128,36 @@ class Python3TestResult(LoggingBase):
         self._events.append(("addDuration", test, duration))
         self.collectedDurations.append((test, duration))
 
+    def wasSuccessful(self) -> bool:
+        # Preserve the pre-3.12 contract: unexpected successes do not count
+        # as failures. Python 3.12 changed unittest.TestResult.wasSuccessful()
+        # to also check unexpectedSuccesses, but that is not part of the
+        # Python3 result contract this class documents.
+        return len(self.failures) == len(self.errors) == 0
+
     def startTest(self, test: unittest.TestCase) -> None:
+        super().startTest(test)
         self._events.append(("startTest", test))
-        self.testsRun += 1
 
     def startTestRun(self) -> None:
+        super().startTestRun()
         self._events.append(("startTestRun",))
 
-    def stop(self) -> None:
-        self.shouldStop = True
-
     def stopTest(self, test: unittest.TestCase) -> None:
+        super().stopTest(test)
         self._events.append(("stopTest", test))
 
     def stopTestRun(self) -> None:
+        super().stopTestRun()
         self._events.append(("stopTestRun",))
 
-    def wasSuccessful(self) -> bool:
-        return self._was_successful
 
-
-class ExtendedTestResult(Python3TestResult):
+class ExtendedTestResult(TestResult):
     """A test result like the proposed extended unittest result API."""
 
     def __init__(self, event_log: list[LogEvent] | None = None) -> None:
         super().__init__(event_log)
+        self._was_successful = True
         self._tags = TagContext()
 
     def addError(
@@ -239,14 +247,15 @@ class ExtendedTestResult(Python3TestResult):
         return self._was_successful
 
 
-class TwistedTestResult(LoggingBase):
+class TwistedTestResult(LoggingBase, unittest.TestResult):
     """Emulate the relevant bits of :py:class:`twisted.trial.itrial.IReporter`.
 
     Used to ensure that we can use ``trial`` as a test runner.
     """
 
     def __init__(self, event_log: list[LogEvent] | None = None) -> None:
-        super().__init__(event_log=event_log)
+        LoggingBase.__init__(self, event_log=event_log)
+        unittest.TestResult.__init__(self)
         self._was_successful = True
         self.testsRun = 0
 
@@ -288,7 +297,7 @@ class TwistedTestResult(LoggingBase):
         pass
 
 
-class StreamResult(LoggingBase):
+class StreamResult(LoggingBase, BaseStreamResult):
     """A StreamResult implementation for testing.
 
     All events are logged to _events.
