@@ -6,6 +6,15 @@ Changes and improvements to testtools_, grouped by release.
 NEXT
 ~~~~
 
+2.9.1
+~~~~~
+
+Improvements
+------------
+* Don't leak testtools-specific exception details into
+  ``unittest.TestResult`` error reports when using a stdlib ``TestResult``.
+  (Jelmer Vernooĳ, #607)
+
 2.9.0
 ~~~~~
 
