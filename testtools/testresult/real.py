@@ -39,7 +39,6 @@ from typing import (
     TypeAlias,
     TypedDict,
     TypeVar,
-    cast,
 )
 
 if TYPE_CHECKING:
@@ -2113,12 +2112,15 @@ class ExtendedToOriginalDecorator:
             )
 
     def _details_to_exc_info(self, details: DetailsDict) -> ExcInfo:
-        """Convert a details dict to an exc_info tuple."""
-        try:
-            raise _StringException(_details_to_str(details, special="traceback"))
-        except _StringException:
-            # we know this won't be null
-            return cast(ExcInfo, sys.exc_info())
+        """Convert a details dict to an exc_info tuple.
+
+        The returned tuple has ``tb=None`` on purpose: the exception is
+        synthesised here, not raised by user code, so attaching a live
+        traceback would leak testtools' own internals into the user-visible
+        error report emitted by e.g. ``unittest.TestResult._exc_info_to_string``.
+        """
+        exc = _StringException(_details_to_str(details, special="traceback"))
+        return (_StringException, exc, None)
 
     @property
     def current_tags(self) -> set[str]:
@@ -2755,7 +2757,7 @@ class TestResultDecorator:
         subtest: unittest.TestCase,
         err: OptExcInfo | None,
     ) -> None:
-        self.decorated.addSubTest(test, subtest, err)
+        self.decorated.addSubTest(test, subtest, err)  # type: ignore[arg-type]
 
     def addDuration(self, test: unittest.TestCase, duration: float) -> None:
         self.decorated.addDuration(test, duration)

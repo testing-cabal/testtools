@@ -16,7 +16,15 @@ import threading
 from itertools import chain, combinations
 from queue import Queue
 from typing import Any
-from unittest import TestSuite
+from unittest import (
+    TestCase as StdlibTestCase,
+)
+from unittest import (
+    TestResult as StdlibTestResult,
+)
+from unittest import (
+    TestSuite,
+)
 
 import testresources
 
@@ -2954,9 +2962,11 @@ class TestExtendedToOriginalResultDecoratorBase(TestCase):
         event_outcome, event_test, event_err = self.result._events[0]
         self.assertEqual(expected, event_outcome)
         self.assertEqual(self, event_test)
-        # Compare exc type and value; traceback objects differ between calls
+        # Compare exc type and value; traceback is always None because the
+        # exception is synthesised, not raised from user code — attaching a
+        # live traceback would leak testtools internals into error reports.
         self.assertEqual(expected_err[:2], event_err[:2])
-        self.assertIsNotNone(event_err[2])
+        self.assertIsNone(event_err[2])
 
     def check_outcome_details_to_nothing(self, outcome, expected=None):
         """Call an outcome with a details dict to be swallowed."""
@@ -3129,6 +3139,36 @@ class TestExtendedToOriginalAddError(TestExtendedToOriginalResultDecoratorBase):
 
 class TestExtendedToOriginalAddFailure(TestExtendedToOriginalAddError):
     outcome = "addFailure"
+
+
+class TestExtendedToOriginalDetailsStdlibReport(TestCase):
+    """Regression test: details converted to exc_info for a stdlib TestResult
+    must not cause testtools' own frames to appear in the error report.
+
+    Before the fix for the 2.9.0 regression, ``_details_to_exc_info`` returned
+    a live traceback pointing into ``testresult/real.py`` itself, which
+    ``unittest.TestResult._exc_info_to_string`` then formatted into the
+    user-visible string.
+    """
+
+    def _report_for(self, outcome, events_attr):
+        client = StdlibTestResult()
+        decorator = ExtendedToOriginalDecorator(client)
+        details = {"traceback": text_content("foo.c:53:ERROR invalid state\n")}
+        getattr(decorator, outcome)(StdlibTestCase("run"), details=details)
+        events = getattr(client, events_attr)
+        self.assertEqual(1, len(events))
+        return events[0][1]
+
+    def test_add_error(self):
+        report = self._report_for("addError", "errors")
+        self.assertNotIn("testresult/real.py", report)
+        self.assertNotIn("Traceback (most recent call last)", report)
+
+    def test_add_failure(self):
+        report = self._report_for("addFailure", "failures")
+        self.assertNotIn("testresult/real.py", report)
+        self.assertNotIn("Traceback (most recent call last)", report)
 
 
 class TestExtendedToOriginalAddExpectedFailure(TestExtendedToOriginalAddError):

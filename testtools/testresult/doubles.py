@@ -95,13 +95,13 @@ class TestResult(LoggingBase, unittest.TestResult):
         self.collectedDurations: list[tuple[unittest.TestCase, float]] = []
 
     def addError(self, test: unittest.TestCase, err: OptExcInfo) -> None:
-        super().addError(test, err)
+        super().addError(test, err)  # type: ignore[arg-type]
         self._events.append(("addError", test, err))
         if self.failfast:
             self.stop()
 
     def addFailure(self, test: unittest.TestCase, err: OptExcInfo) -> None:
-        super().addFailure(test, err)
+        super().addFailure(test, err)  # type: ignore[arg-type]
         self._events.append(("addFailure", test, err))
         if self.failfast:
             self.stop()
@@ -111,7 +111,7 @@ class TestResult(LoggingBase, unittest.TestResult):
         self._events.append(("addSuccess", test))
 
     def addExpectedFailure(self, test: unittest.TestCase, err: OptExcInfo) -> None:
-        super().addExpectedFailure(test, err)
+        super().addExpectedFailure(test, err)  # type: ignore[arg-type]
         self._events.append(("addExpectedFailure", test, err))
 
     def addSkip(self, test: unittest.TestCase, reason: str) -> None:
