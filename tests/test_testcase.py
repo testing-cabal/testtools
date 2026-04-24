@@ -48,7 +48,8 @@ from testtools.testcase import (
 )
 from testtools.testresult.doubles import (
     ExtendedTestResult,
-    Python3TestResult,
+    LogEvent,
+    TestResult,
 )
 
 from .helpers import (
@@ -1270,7 +1271,7 @@ class TestExpectedFailure(TestWithDetails):
 
     def test_raising__UnexpectedSuccess_py3(self):
         case = self.make_unexpected_case()
-        result = Python3TestResult()
+        result = TestResult()
         case.run(result)
         case = result._events[0][1]
         self.assertEqual(
@@ -1775,8 +1776,8 @@ class TestSkipping(TestCase):
             def test_that_raises_skipException(self):
                 self.skipTest("skipping this test")
 
-        events: list[tuple[str, ...]] = []
-        result = Python3TestResult(events)
+        events: list[LogEvent] = []
+        result = TestResult(events)
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
         case = result._events[0][1]
@@ -1796,8 +1797,8 @@ class TestSkipping(TestCase):
             def test_that_raises_skipException(self):
                 self.skipTest("skipping this test")
 
-        events: list[tuple[str, ...]] = []
-        result = Python3TestResult(events)
+        events: list[LogEvent] = []
+        result = TestResult(events)
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
         case = result._events[0][1]
@@ -1819,8 +1820,8 @@ class TestSkipping(TestCase):
             def test_that_raises_skipException(self):
                 pass
 
-        events: list[tuple[str, ...]] = []
-        result = Python3TestResult(events)
+        events: list[LogEvent] = []
+        result = TestResult(events)
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
         self.assertEqual("addSkip", events[1][0])
@@ -1830,8 +1831,8 @@ class TestSkipping(TestCase):
             def test_that_raises_skipException(self):
                 raise self.skipException("skipping this test")
 
-        events: list[tuple[str, ...]] = []
-        result = Python3TestResult(events)
+        events: list[LogEvent] = []
+        result = TestResult(events)
         test = SkippingTest("test_that_raises_skipException")
         test.run(result)
         self.assertEqual("addSkip", events[1][0])
@@ -1842,8 +1843,8 @@ class TestSkipping(TestCase):
             def test_that_is_decorated_with_skip(self):
                 self.fail()
 
-        events: list[tuple[str, ...]] = []
-        result = Python3TestResult(events)
+        events: list[LogEvent] = []
+        result = TestResult(events)
         test = SkippingTest("test_that_is_decorated_with_skip")
         test.run(result)
         self.assertEqual("addSkip", events[1][0])
@@ -1854,8 +1855,8 @@ class TestSkipping(TestCase):
             def test_that_is_decorated_with_skipIf(self):
                 self.fail()
 
-        events: list[tuple[str, ...]] = []
-        result = Python3TestResult(events)
+        events: list[LogEvent] = []
+        result = TestResult(events)
         test = SkippingTest("test_that_is_decorated_with_skipIf")
         test.run(result)
         self.assertEqual("addSkip", events[1][0])
@@ -1866,8 +1867,8 @@ class TestSkipping(TestCase):
             def test_that_is_decorated_with_skipUnless(self):
                 self.fail()
 
-        events: list[tuple[str, ...]] = []
-        result = Python3TestResult(events)
+        events: list[LogEvent] = []
+        result = TestResult(events)
         test = SkippingTest("test_that_is_decorated_with_skipUnless")
         test.run(result)
         self.assertEqual("addSkip", events[1][0])
@@ -1882,14 +1883,14 @@ class TestSkipping(TestCase):
         class NotSkippingTest(TestCase):
             test_no_skip = skipIf(False, "skipping this test")(shared)
 
-        events: list[tuple[str, ...]] = []
-        result = Python3TestResult(events)
+        events: list[LogEvent] = []
+        result = TestResult(events)
         test = SkippingTest("test_skip")
         test.run(result)
         self.assertEqual("addSkip", events[1][0])
 
-        events2: list[tuple[str, ...]] = []
-        result2 = Python3TestResult(events2)
+        events2: list[LogEvent] = []
+        result2 = TestResult(events2)
         test2 = NotSkippingTest("test_no_skip")
         test2.run(result2)
         self.assertEqual("addFailure", events2[1][0])
@@ -1900,8 +1901,8 @@ class TestSkipping(TestCase):
             def test_that_is_decorated_with_skip(self):
                 self.fail()
 
-        events: list[tuple[str, ...]] = []
-        result = Python3TestResult(events)
+        events: list[LogEvent] = []
+        result = TestResult(events)
         try:
             test = SkippingTest("test_that_is_decorated_with_skip")
         except unittest.SkipTest:
@@ -1915,8 +1916,8 @@ class TestSkipping(TestCase):
             def test_that_is_decorated_with_skipIf(self):
                 self.fail()
 
-        events: list[tuple[str, ...]] = []
-        result = Python3TestResult(events)
+        events: list[LogEvent] = []
+        result = TestResult(events)
         try:
             test = SkippingTest("test_that_is_decorated_with_skipIf")
         except unittest.SkipTest:
@@ -1930,8 +1931,8 @@ class TestSkipping(TestCase):
             def test_that_is_decorated_with_skipUnless(self):
                 self.fail()
 
-        events: list[tuple[str, ...]] = []
-        result = Python3TestResult(events)
+        events: list[LogEvent] = []
+        result = TestResult(events)
         try:
             test = SkippingTest("test_that_is_decorated_with_skipUnless")
         except unittest.SkipTest:
@@ -2024,7 +2025,7 @@ class TestOnException(TestCase):
         self.assertThat(events, Equals([True]))
 
     def test_added_handler_works(self):
-        events: list[tuple[str, ...]] = []
+        events: list[LogEvent] = []
 
         class Case(TestCase):
             def method(self):
@@ -2036,7 +2037,7 @@ class TestOnException(TestCase):
         self.assertThat(events, Equals([an_exc_info]))
 
     def test_handler_that_raises_is_not_caught(self):
-        events: list[tuple[str, ...]] = []
+        events: list[LogEvent] = []
 
         class Case(TestCase):
             def method(self):
