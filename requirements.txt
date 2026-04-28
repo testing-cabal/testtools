@@ -1,1 +1,1 @@
-fixtures>=2.0
+fixtures>=4.3.2
