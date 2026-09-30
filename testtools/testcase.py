@@ -1062,7 +1062,7 @@ class TestCase(unittest.TestCase):
             self, details=TestCase._report_details(self, details)
         )
 
-    def run(self, result: TestResult | None = None) -> TestResult:  # type: ignore[override]
+    def run(self, result: TestResult | None = None) -> TestResult | None:  # type: ignore[override]
         self._reset()
         try:
             run_test = self.__RunTest(
