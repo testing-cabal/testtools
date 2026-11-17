@@ -32,12 +32,12 @@ jobs:
 
       - name: Ruff
         run: |
-          python -m ruff check .
-          python -m ruff format --check .
+          python -m ruff check
+          python -m ruff format --check
 
       - name: Type Check
         run: |
-          python -m mypy testtools
+          python -m mypy
 
   test:
     runs-on: ubuntu-latest
